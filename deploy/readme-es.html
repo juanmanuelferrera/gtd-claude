@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ HyperFiler Pro - Documentación</title>
+    <meta name="description" content="Guía completa de HyperFiler Pro - el sistema digital GTD de 43 carpetas. Domina cada función y transforma tu productividad.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        .language-flag {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .language-flag:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            font-weight: 900;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            opacity: 0.95;
+            font-weight: 600;
+        }
+
+        .header .tagline {
+            font-size: 1.2em;
+            opacity: 0.85;
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* FAQ Dropdown Styles */
+        .faq-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .faq-question {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            cursor: pointer;
+            font-size: 1.3em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .faq-question:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            transform: translateY(-2px);
+        }
+
+        .faq-question .icon {
+            font-size: 1.5em;
+            margin-right: 15px;
+        }
+
+        .faq-question .toggle {
+            font-size: 1.5em;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-question.active .toggle {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+            background: white;
+        }
+
+        .faq-answer.active {
+            max-height: 3000px;
+            padding: 30px;
+        }
+
+        .faq-content {
+            color: #333;
+            font-size: 1.1em;
+            line-height: 1.7;
+        }
+
+        .faq-content h3 {
+            color: #667eea;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            font-weight: 700;
+        }
+
+        .faq-content h4 {
+            color: #5a67d8;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .faq-content ul, .faq-content ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+
+        .faq-content li {
+            margin-bottom: 8px;
+        }
+
+        .faq-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .faq-content th, .faq-content td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .faq-content th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .faq-content code {
+            background: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            color: #d63384;
+        }
+
+        .faq-content strong {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 30px;
+            text-align: center;
+            border-radius: 20px;
+            margin: 40px 0;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .cta-section p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #333;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5em;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .faq-question {
+                padding: 20px 20px;
+                font-size: 1.1em;
+            }
+            
+            .faq-answer.active {
+                padding: 20px;
+            }
+        }
+
+        /* Search functionality styles */
+        .search-highlight {
+            background: #ffeb3b;
+            color: #333;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .search-match {
+            animation: highlightPulse 1s ease-in-out;
+        }
+
+        @keyframes highlightPulse {
+            0% { background: transparent; }
+            50% { background: rgba(255, 235, 59, 0.3); }
+            100% { background: transparent; }
+        }
+
+        .faq-container.search-matched {
+            border-left: 4px solid #ffeb3b;
+            box-shadow: 0 0 15px rgba(255, 235, 59, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="language-switcher">
+            <a href="readme.html" class="language-flag" title="View in English">
+                🇺🇸 EN
+            </a>
+        </div>
+        <div class="header-content">
+            <h1><span>⚡</span> HyperFiler Pro <span>🚀</span></h1>
+            <p class="subtitle">Documentación</p>
+            <p class="tagline">Todo lo que necesitas para dominar el sistema HyperFiler</p>
+            
+            <!-- Search Box -->
+            <div style="margin-top: 30px; max-width: 500px; margin-left: auto; margin-right: auto;">
+                <div style="position: relative;">
+                    <input type="text" id="docSearch" placeholder="🔍 Buscar en la documentación..." 
+                           style="width: 100%; padding: 15px 50px 15px 20px; border: none; border-radius: 25px; 
+                                  font-size: 16px; background: rgba(255,255,255,0.9); box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                                  outline: none; transition: all 0.3s ease;"
+                           onkeyup="searchDocumentation(this.value)"
+                           onfocus="this.style.background='white'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.15)'"
+                           onblur="this.style.background='rgba(255,255,255,0.9)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)'">
+                    <button onclick="clearSearch()" 
+                            style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); 
+                                   background: none; border: none; font-size: 18px; cursor: pointer; color: #666;
+                                   opacity: 0; transition: opacity 0.3s ease;" 
+                            id="clearSearchBtn">✕</button>
+                </div>
+                <div id="searchResults" style="margin-top: 10px; font-size: 14px; color: rgba(255,255,255,0.8);"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- FAQ Item 1: What is HyperFiler Pro? -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">🎯</span>
+                    ¿Qué es HyperFiler Pro?
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <p>HyperFiler Pro es la primera implementación digital verdadera de la metodología Getting Things Done (GTD) de David Allen, combinada con el revolucionario sistema de 43 Carpetas de Merlin Mann. Transforma la gestión de tareas desde listas abrumadoras a una potencia de productividad libre de estrés y claridad mental.</p>
+                    
+                    <h3>🧠 Invisibilidad Estratégica</h3>
+                    <p>Las tareas desaparecen hasta exactamente cuando las necesitas. Tu mente se mantiene clara y enfocada en lo que importa ahora, sin desorden de preocupaciones futuras.</p>
+                    
+                    <h3>⚡ Superpoderes Digitales Añadidos</h3>
+                    <ul>
+                        <li><strong>Procesamiento de Lenguaje Natural:</strong> Escribe "Llamar a Juan mañana 2pm" - programación instantánea</li>
+                        <li><strong>Acceso Instantáneo:</strong> Añadir tareas en 2 segundos con atajos de teclado</li>
+                        <li><strong>Recurrencia Inteligente:</strong> Maneja automáticamente tareas repetitivas</li>
+                        <li><strong>Carpetas Ilimitadas:</strong> Crea tantas categorías como necesites</li>
+                        <li><strong>Sincronización Multi-dispositivo:</strong> Accede desde cualquier lugar (Pro)</li>
+                        <li><strong>Filtrado Inteligente:</strong> Busca y organiza sin esfuerzo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Item 2: 5-Minute Quick Start -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">🚀</span>
+                    ¿Cómo empezar en 5 minutos?
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <h3>Step 1: Natural Language Task Entry (30 seconds)</h3>
+                    <ul>
+                        <li>Press <code>Ctrl+N</code> anywhere in the app. Type naturally:</li>
+                        <li><code>"Call dentist tomorrow @personal"</code> - Auto-schedules for tomorrow</li>
+                        <li><code>"Team meeting Friday 2pm @work"</code> - Creates timed appointment</li>
+                        <li><code>"Review report next week"</code> - Schedules for next week</li>
+                        <li>Hit <code>Enter</code> - watch tasks auto-schedule and disappear until their time!</li>
+                    </ul>
+
+                    <h3>Step 2: Master the Three Views (1 minute)</h3>
+                    <ul>
+                        <li><strong>Today:</strong> Command center - only actionable items</li>
+                        <li><strong>Week:</strong> Planning mode - distribute your workload</li>
+                        <li><strong>Month:</strong> Strategic view - see the big picture</li>
+                        <li><strong>Magic:</strong> Future tasks stay invisible until needed</li>
+                    </ul>
+
+                    <h3>Step 3: Unlock Project Power (1 minute)</h3>
+                    <ul>
+                        <li>Add <code>@project-name</code> to any task</li>
+                        <li>Watch filter buttons appear automatically</li>
+                        <li>Click any @ filter to see related tasks across all time</li>
+                    </ul>
+
+                    <h3>Step 4: Flow State Workflow (1.5 minutes)</h3>
+                    <ul>
+                        <li><strong>Morning:</strong> Open Today view - crystal clear focus</li>
+                        <li><strong>Planning:</strong> Use Week/Month for strategic distribution</li>
+                        <li><strong>Execution:</strong> Live in Today view - zero distractions</li>
+                    </ul>
+
+                    <h3>Step 5: Keyboard Mastery (1 minute)</h3>
+                    <ul>
+                        <li>Learn: <code>Ctrl+Y</code> (Today), <code>Ctrl+W</code> (Week), <code>Ctrl+M</code> (Month)</li>
+                        <li>Navigate with arrow keys, edit with <code>Enter</code></li>
+                        <li>Use lightning-fast action buttons: delay 1 day, 1 week, 1 month, or delete</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Item 3: Complete Features Guide -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">✨</span>
+                    ¿Cuáles son todas las características?
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <h3>📊 Smart Views System</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>View</th>
+                                <th>Purpose</th>
+                                <th>When to Use</th>
+                                <th>Shortcut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Today</strong></td>
+                                <td>Execution Mode</td>
+                                <td>Daily work sessions, focused execution</td>
+                                <td><code>Ctrl+Y</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week</strong></td>
+                                <td>Planning Mode</td>
+                                <td>Weekly planning, workload distribution</td>
+                                <td><code>Ctrl+W</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Month</strong></td>
+                                <td>Strategic Mode</td>
+                                <td>Monthly reviews, long-term scheduling</td>
+                                <td><code>Ctrl+M</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>All Tasks</strong></td>
+                                <td>Database Mode</td>
+                                <td>Searching, bulk operations, reviews</td>
+                                <td><code>Ctrl+A</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>⚡ Instant Capture & Natural Language</h3>
+                    <ul>
+                        <li>Add tasks in under 2 seconds with <code>Ctrl+N</code></li>
+                        <li><strong>Natural language processing:</strong> "Call John next Tuesday" auto-schedules</li>
+                        <li><strong>Smart text entry:</strong> "Meeting with client tomorrow 3pm @work" creates perfectly scheduled task</li>
+                        <li><strong>Instant parsing:</strong> Just type naturally - dates, times, and projects extracted automatically</li>
+                        <li>Works from any view or dialog</li>
+                    </ul>
+
+                    <h3>🎯 Smart Scheduling & Time Blocks</h3>
+                    <ul>
+                        <li>Time blocks are automatically created by the system based on your task input</li>
+                        <li>A reddish mark indicates the current part of your day in your tasks</li>
+                        <li>Drag and drop to reschedule tasks visually with instant feedback</li>
+                        <li>Lightning-fast action buttons: delay 1 day, 1 week, 1 month, or delete</li>
+                        <li>Use relative dates: "tomorrow", "next week", "in 2 months"</li>
+                    </ul>
+
+                    <h3>🔄 Recurring Tasks</h3>
+                    <ul>
+                        <li>Set daily, weekly, monthly, or custom recurring patterns</li>
+                        <li>System handles all scheduling automatically</li>
+                        <li>Perfect for habits and routine maintenance</li>
+                    </ul>
+
+                    <h3>📝 Rich Text Support</h3>
+                    <ul>
+                        <li>Add notes, links, and context to any task</li>
+                        <li>Support for markdown formatting and emojis</li>
+                        <li>Unlimited task descriptions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Item 4: @ Project System -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">🏗️</span>
+                    ¿Cómo funciona el Sistema de Proyectos @?
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <p>The @ project system is HyperFiler Pro's secret weapon for zero-maintenance organization:</p>
+                    
+                    <h3>How It Works</h3>
+                    <ul>
+                        <li>Type <code>@project-name</code> anywhere in a task</li>
+                        <li>Filter buttons appear automatically</li>
+                        <li>Click any @ button to see all related tasks across all time periods</li>
+                        <li>No setup required, infinite scalability</li>
+                    </ul>
+
+                    <h3>Examples</h3>
+                    <h4>Personal Projects:</h4>
+                    <ul>
+                        <li>"Plan kitchen renovation @home-improvement"</li>
+                        <li>"Research vacation destinations @summer-trip"</li>
+                        <li>"Update resume @job-search"</li>
+                    </ul>
+
+                    <h4>Work Projects:</h4>
+                    <ul>
+                        <li>"Review Q4 budget @quarterly-planning"</li>
+                        <li>"Draft proposal for Johnson account @client-work"</li>
+                        <li>"Update team documentation @process-improvement"</li>
+                    </ul>
+
+                    <h4>Context Projects:</h4>
+                    <ul>
+                        <li>"Call dentist @phone-tasks"</li>
+                        <li>"Buy groceries @errands"</li>
+                        <li>"Review analytics @computer-work"</li>
+                    </ul>
+
+                    <h3>Advanced Techniques</h3>
+                    <ul>
+                        <li><strong>Multi-Project Tasks:</strong> "Prepare presentation @client-work @presentations @urgent"</li>
+                        <li><strong>Project Evolution:</strong> Start with @website-update, evolve to @website-redesign</li>
+                        <li><strong>Project Reviews:</strong> Click any @ filter for instant project status</li>
+                        <li><strong>Auto-Cleanup:</strong> Completed projects disappear automatically</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Item 5: Keyboard Shortcuts -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">⌨️</span>
+                    ¿Cuáles son los atajos de teclado?
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <p>HyperFiler Pro is designed for keyboard-first productivity. Master these shortcuts for 3-5x faster task management.</p>
+                    
+                    <h3>Essential Shortcuts</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Atajo</th>
+                                <th>Acción</th>
+                                <th>Contexto</th>
+                                <th>Consejo Pro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>Ctrl+N</code></td>
+                                <td>Añadir nueva tarea</td>
+                                <td>En cualquier lugar de la app</td>
+                                <td>Funciona incluso al editar otras tareas</td>
+                            </tr>
+                            <tr>
+                                <td><code>Ctrl+Y</code></td>
+                                <td>Vista Hoy</td>
+                                <td>Cualquier vista</td>
+                                <td>Tu modo principal de ejecución</td>
+                            </tr>
+                            <tr>
+                                <td><code>Ctrl+W</code></td>
+                                <td>Vista Semanal</td>
+                                <td>Cualquier vista</td>
+                                <td>Perfecto para planificación semanal</td>
+                            </tr>
+                            <tr>
+                                <td><code>Ctrl+M</code></td>
+                                <td>Vista Mensual</td>
+                                <td>Cualquier vista</td>
+                                <td>Planificación estratégica global</td>
+                            </tr>
+                            <tr>
+                                <td><code>←→</code></td>
+                                <td>Previous/Next day</td>
+                                <td>Day views</td>
+                                <td>Quick navigation through time</td>
+                            </tr>
+                            <tr>
+                                <td><code>↑↓</code></td>
+                                <td>Select tasks</td>
+                                <td>Any view</td>
+                                <td>Highlights task for keyboard actions</td>
+                            </tr>
+                            <tr>
+                                <td><code>Enter</code></td>
+                                <td>Edit/Save task</td>
+                                <td>Selected task</td>
+                                <td>Toggle between edit and view mode</td>
+                            </tr>
+                            <tr>
+                                <td><code>Space</code></td>
+                                <td>Delete selected task</td>
+                                <td>Selected task</td>
+                                <td>Shows deletion feedback</td>
+                            </tr>
+                            <tr>
+                                <td><code>Ctrl+S</code></td>
+                                <td>Search tasks</td>
+                                <td>Anywhere</td>
+                                <td>Instant search across all tasks</td>
+                            </tr>
+                            <tr>
+                                <td><code>Ctrl+Z</code></td>
+                                <td>Undo last action</td>
+                                <td>Anywhere</td>
+                                <td>10-step undo history</td>
+                            </tr>
+                            <tr>
+                                <td><code>Ctrl+E</code></td>
+                                <td>Export data</td>
+                                <td>Anywhere</td>
+                                <td>Backup and data portability</td>
+                            </tr>
+                            <tr>
+                                <td><code>Ctrl+B</code></td>
+                                <td>Crear respaldo manual</td>
+                                <td>En cualquier lugar</td>
+                                <td>Creación instantánea de respaldo</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Learning Path</h3>
+                    <ul>
+                        <li><strong>Week 1:</strong> Master <code>Ctrl+N</code>, arrow navigation, <code>Enter</code> to edit, and <code>Space</code> to delete</li>
+                        <li><strong>Week 2:</strong> Add view switching with <code>Ctrl+Y/W/M</code></li>
+                        <li><strong>Week 3:</strong> Explore search and undo with <code>Ctrl+S</code> and <code>Ctrl+Z</code></li>
+                        <li><strong>Month 1:</strong> You're now a keyboard productivity ninja!</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Item 6: Advanced Workflows -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">🎮</span>
+                    What are the advanced workflows?
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <h3>🏆 The Golden Rule</h3>
+                    <p><strong>If it takes less than 2 minutes, do it now. If it takes more than 2 minutes, put it in HyperFiler Pro with a specific date.</strong></p>
+                    
+                    <h3>🎯 Project Management</h3>
+                    <ul>
+                        <li><strong>Principle:</strong> Break projects into specific, actionable tasks</li>
+                        <li><strong>Rule:</strong> Each task should be completable in one focused session</li>
+                        <li><strong>Magic:</strong> Use <code>@project-name</code> for instant filtering</li>
+                    </ul>
+
+                    <h3>🔄 Habit Building</h3>
+                    <ul>
+                        <li><strong>Start Small:</strong> Use recurring tasks for habit formation</li>
+                        <li><strong>Progressive:</strong> Increase complexity gradually over time</li>
+                        <li><strong>Contexts:</strong> Link habits to specific times or locations</li>
+                    </ul>
+
+                    <h3>📅 Meeting & Calendar Integration</h3>
+                    <ul>
+                        <li><strong>Events:</strong> Use red "Events" button for appointments</li>
+                        <li><strong>Preparation:</strong> Add prep tasks 1-2 days before meetings</li>
+                        <li><strong>Follow-up:</strong> Capture action items immediately after meetings</li>
+                    </ul>
+
+                    <h3>🧠 Cognitive Load Management</h3>
+                    <h4>🌅 Morning Ritual</h4>
+                    <p>Open Today view first thing. See only what's actionable right now. Your mind stays clear and focused on execution.</p>
+
+                    <h4>📋 Weekly Planning</h4>
+                    <p>Every Sunday, review the upcoming week. Distribute workload across days. Use drag-and-drop for visual scheduling.</p>
+
+                    <h4>🎯 Monthly Strategy</h4>
+                    <p>First day of each month, review long-term commitments. File future tasks into appropriate dates. Maintain strategic perspective.</p>
+
+                    <h4>🔄 Continuous Capture</h4>
+                    <p>Never let thoughts escape. Instant capture with <code>Ctrl+N</code> means your mind stays clear throughout the day.</p>
+
+                    <h3>💡 Pro-Level Techniques</h3>
+                    <h4>⚡ Speed Batching</h4>
+                    <p>Group similar tasks on the same day: "All phone calls Mondays", "All errands Saturdays"</p>
+
+                    <h4>🕐 Time Blocking</h4>
+                    <p>Add specific times to tasks: "Review budget - Tuesday 2-3pm @office"</p>
+
+                    <h4>🎯 Energy Management</h4>
+                    <p>Schedule demanding tasks for peak energy hours, routine tasks for low-energy times</p>
+
+                    <h4>🔍 Context Switching</h4>
+                    <p>Filter by <code>@home</code>, <code>@work</code>, <code>@computer</code>, <code>@phone</code> to match available tools and locations</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Item 7: Free vs Pro Comparison -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">🆚</span>
+                    What's the difference between Free and Pro?
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Free Version</th>
+                                <th>Pro Version</th>
+                                <th>Use Case</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Task Limit</strong></td>
+                                <td>Unlimited</td>
+                                <td>Unlimited</td>
+                                <td>Both versions support infinite tasks</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Core Views</strong></td>
+                                <td>Today, Week, Month</td>
+                                <td>All views + Advanced</td>
+                                <td>Free: Essential planning; Pro: Full system</td>
+                            </tr>
+                            <tr>
+                                <td><strong>@ Project System</strong></td>
+                                <td>Full support</td>
+                                <td>Enhanced filtering</td>
+                                <td>Free: Basic projects; Pro: Advanced organization</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Keyboard Shortcuts</strong></td>
+                                <td>All shortcuts</td>
+                                <td>All shortcuts + Custom</td>
+                                <td>Free: Standard workflow; Pro: Personalized</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Data Storage</strong></td>
+                                <td>Local browser</td>
+                                <td>Cloud sync</td>
+                                <td>Free: Single device; Pro: Multi-device</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Backup & Export</strong></td>
+                                <td>Manual export + Manual backups</td>
+                                <td>Advanced backup system + Cloud sync</td>
+                                <td>Free: Basic protection; Pro: Comprehensive safety</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Support</strong></td>
+                                <td>Community support</td>
+                                <td>Priority support</td>
+                                <td>Free: Help available; Pro: Immediate assistance</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Who Should Upgrade?</h3>
+                    <ul>
+                        <li><strong>Stay Free If:</strong> You use one device, have simple recurring needs, and manual backup is sufficient</li>
+                        <li><strong>Upgrade to Pro If:</strong> You work across multiple devices, need advanced recurring patterns, want automatic backup, or require priority support</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Item 8: Subscription Management -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">💳</span>
+                    How easy is subscription management?
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <h3>✨ Hassle-Free Subscription Management</h3>
+                    <p>We believe managing your subscription should be as simple as using the app itself. <strong>No complex forms, no phone calls, no hassle.</strong></p>
+                    
+                    <h4>🚀 Super Simple Sign-Up</h4>
+                    <ul>
+                        <li><strong>Email Required for Stripe:</strong> Your email is needed for Stripe payment processing (industry standard)</li>
+                        <li><strong>No Account Creation:</strong> Skip the tedious signup forms and password requirements</li>
+                        <li><strong>Instant Access:</strong> Start using Pro features immediately after payment</li>
+                        <li><strong>Secure Payment:</strong> All transactions processed through industry-standard Stripe</li>
+                    </ul>
+
+                    <h4>🔄 Automatic Welcome & Management</h4>
+                    <ul>
+                        <li><strong>Automatic Welcome Email:</strong> Stripe automatically sends you a welcome email with all details</li>
+                        <li><strong>Direct Stripe Link:</strong> Your personal subscription management link included in welcome email</li>
+                        <li><strong>One-Click Changes:</strong> Update payment methods, pause, or cancel directly through Stripe</li>
+                        <li><strong>No Extra Logins:</strong> Access your subscription settings directly from the Stripe link</li>
+                    </ul>
+
+                    <h4>❌ Cancel Anytime (Really!)</h4>
+                    <ul>
+                        <li><strong>No Questions Asked:</strong> Cancel instantly without explanation or retention calls</li>
+                        <li><strong>Keep Your Data:</strong> Export everything before canceling - your productivity stays with you</li>
+                        <li><strong>No Hidden Fees:</strong> What you see is what you pay, no surprise charges</li>
+                        <li><strong>Reactivate Easily:</strong> Come back anytime with the same simple email process</li>
+                    </ul>
+
+                    <h4>🛡️ Your Privacy Matters</h4>
+                    <ul>
+                        <li><strong>Minimal Data Collection:</strong> We only store what's necessary for your subscription</li>
+                        <li><strong>No Spam:</strong> Only essential billing and product updates</li>
+                        <li><strong>Secure Storage:</strong> All payment data handled by Stripe, not stored on our servers</li>
+                        <li><strong>GDPR Compliant:</strong> Request data deletion anytime</li>
+                    </ul>
+
+                    <p style="background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid #28a745; margin-top: 20px;">
+                        <strong>💡 Bottom Line:</strong> Everything is handled automatically through Stripe's system. You provide your email for payment processing, Stripe sends you a welcome email with your personal management link, and that's it - completely streamlined and secure.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Item 9: Troubleshooting & Support -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">🔧</span>
+                    How do I get help and troubleshoot issues?
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <h3>💾 Sistema Avanzado de Respaldos</h3>
+                    
+                    <h4>📦 Múltiples Métodos de Creación de Respaldos</h4>
+                    <ul>
+                        <li><strong>Panel de Configuración:</strong> Botón manual "Crear Respaldo" para respaldos bajo demanda</li>
+                        <li><strong>Botón de Respaldo Rápido:</strong> Icono 💾 junto al engranaje de configuración para acceso instantáneo</li>
+                        <li><strong>Atajo de Teclado:</strong> <code>Ctrl+B</code> crea respaldo manual con notificación de éxito</li>
+                        <li><strong>Respaldos Automáticos:</strong> Respaldos automatizados configurables diarios, semanales y mensuales</li>
+                    </ul>
+                    
+                    <h4>⚙️ Configuración Flexible de Respaldos Automáticos</h4>
+                    <p>Elige exactamente qué respaldos automáticos quieres:</p>
+                    <ul>
+                        <li><strong>📅 Respaldos Diarios:</strong> Protección diaria automática a las 2 AM</li>
+                        <li><strong>📊 Respaldos Semanales:</strong> Instantáneas semanales para seguridad a largo plazo</li>
+                        <li><strong>📆 Respaldos Mensuales:</strong> Archivos mensuales para historial extendido</li>
+                        <li><strong>Combinaciones Personalizadas:</strong> Habilita cualquier combinación (solo diario, diario + semanal, los tres, etc.)</li>
+                    </ul>
+                    
+                    <h4>🔄 Restauración Mejorada de Respaldos</h4>
+                    <ul>
+                        <li><strong>Interfaz Unificada de Restauración:</strong> Todos los tipos de respaldo (manual, diario, semanal, mensual) en una vista organizada</li>
+                        <li><strong>Tarjetas Visuales de Respaldo:</strong> Tarjetas codificadas por color con iconos distintos para cada tipo de respaldo</li>
+                        <li><strong>Información Detallada:</strong> Cada respaldo muestra fecha, conteo de tareas, conteo de papelera y tamaño del archivo JSON</li>
+                        <li><strong>Gestión Inteligente de Respaldos:</strong> Rotación automática mantiene hasta 5 respaldos manuales</li>
+                        <li><strong>Restauración Instantánea:</strong> Haz clic en cualquier tarjeta de respaldo para restaurar con diálogo de confirmación</li>
+                    </ul>
+                    
+                    <h4>📊 Tipos y Características de Respaldos</h4>
+                    <div class="table-container">
+                        <table class="feature-table">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Icono</th>
+                                    <th>Creación</th>
+                                    <th>Almacenamiento</th>
+                                    <th>Caso de Uso</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Manual</strong></td>
+                                    <td>📦</td>
+                                    <td>Bajo demanda vía botón/atajo</td>
+                                    <td>Hasta 5 con rotación</td>
+                                    <td>Antes de cambios importantes, experimentos</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Diario</strong></td>
+                                    <td>📅</td>
+                                    <td>Automático a las 2 AM</td>
+                                    <td>Continuo</td>
+                                    <td>Protección diaria del trabajo</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Semanal</strong></td>
+                                    <td>📊</td>
+                                    <td>Automático semanal</td>
+                                    <td>Largo plazo</td>
+                                    <td>Instantáneas semanales</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Mensual</strong></td>
+                                    <td>📆</td>
+                                    <td>Automático mensual</td>
+                                    <td>Archivo</td>
+                                    <td>Historial extendido</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h4>📁 Traditional Export Options (Free & Pro)</h4>
+                    <ul>
+                        <li><strong>JSON Export:</strong> Complete backup of all your data in structured JSON format</li>
+                        <li><strong>TXT Export:</strong> Use <code>Ctrl+E</code> to download a copy of all your data in a readable TXT file</li>
+                        <li><strong>Full Data Backup:</strong> Both formats contain all tasks, projects, notes, and settings</li>
+                        <li><strong>Easy Recovery:</strong> Import any JSON backup file to restore your complete workspace</li>
+                    </ul>
+                    
+                    <h4>☁️ Cloud Sync (Pro Only)</h4>
+                    <ul>
+                        <li><strong>Real-time Sync:</strong> Automatic JSON backups saved to secure cloud storage</li>
+                        <li><strong>Version History:</strong> Multiple backup versions maintained automatically</li>
+                        <li><strong>Cross-Device Recovery:</strong> Access your backed-up data from any device</li>
+                        <li><strong>Local Download:</strong> Download any automatic backup as JSON anytime</li>
+                    </ul>
+
+                    <h3>🔄 Sync Issues (Pro)</h3>
+                    <ul>
+                        <li><strong>Check:</strong> Internet connection and browser storage</li>
+                        <li><strong>Force Sync:</strong> Refresh page to trigger manual sync</li>
+                        <li><strong>Conflicts:</strong> Most recent change wins, no data loss</li>
+                    </ul>
+
+                    <h3>📱 Mobile Experience</h3>
+                    <ul>
+                        <li><strong>Browser:</strong> Works in any mobile browser with local app speed performance</li>
+                        <li><strong>Performance:</strong> Although online, everything feels instant like a native desktop application</li>
+                        <li><strong>Shortcuts:</strong> Most keyboard shortcuts work with external keyboards</li>
+                        <li><strong>Touch:</strong> Tap, swipe, and touch optimized interface</li>
+                    </ul>
+
+                    <h3>⚡ Performance Tips</h3>
+                    <ul>
+                        <li><strong>Large Lists:</strong> Use search and filters for navigation</li>
+                        <li><strong>Slow Loading:</strong> Clear browser cache, restart browser</li>
+                        <li><strong>Memory:</strong> Close unused tabs, refresh periodically</li>
+                    </ul>
+
+                    <h3>Getting Help</h3>
+                    <h4>📧 Email Support</h4>
+                    <ul>
+                        <li>Send questions to: <strong>support@hyperfiler.pro</strong></li>
+                        <li>Pro users get priority response within 24 hours</li>
+                        <li>Free users typically receive response within 48-72 hours</li>
+                    </ul>
+
+                    <h4>⌨️ In-App Help</h4>
+                    <ul>
+                        <li>Press <code>Ctrl+I</code> in the app for instant shortcut reference</li>
+                        <li>Tooltips and hints throughout the interface</li>
+                        <li>Context-sensitive help in each view</li>
+                    </ul>
+
+                    <h4>💳 Subscription Management</h4>
+                    <ul>
+                        <li><strong>No signup required!</strong> Two simple workflows:</li>
+                        <li><strong>Promo codes:</strong> Enter email + coupon → Welcome email with login details and subscription management link</li>
+                        <li><strong>Direct payment:</strong> Enter email + card details in secure Stripe system → Welcome email with same information</li>
+                        <li>All subscription management happens through your personal Stripe link sent via email</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="cta-section">
+            <h2>Domina HyperFiler Pro Hoy</h2>
+            <p>Has aprendido el sistema completo. Ahora es momento de transformar tu productividad y lograr la claridad que viene con la organización perfecta.</p>
+            
+            <div style="margin: 30px 0;">
+                <a href="/frontend/upgrade-compare.html" class="btn btn-secondary">💎 Comparar Gratis vs Pro</a>
+                <button id="readme-checkout-btn" class="btn" style="background: linear-gradient(45deg, #28a745, #20c997); color: white; border: none; cursor: pointer;">💳 Comenzar</button>
+            </div>
+            
+            <p style="margin-top: 20px; opacity: 0.8;">
+                ✨ No requiere registro • 🔄 Actualiza/degrada en cualquier momento • 💾 Tus datos siempre te pertenecen
+            </p>
+        </div>
+
+        <!-- Security Section -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">🔒</span>
+                    Security Overview for Users
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <p>Our system is designed with a comprehensive, multi-layered security strategy to protect your data and ensure a safe, reliable experience. These improvements address all vital security concerns while following industry-standard best practices.</p>
+                    
+                    <h3>🔑 Key Security Aspects:</h3>
+                    
+                    <p><strong>Strong Authentication:</strong> Your sessions are securely managed, and only you can access your account.</p>
+                    
+                    <p><strong>Data Protection:</strong> Information is carefully validated and kept safe throughout the system, protecting both input and storage.</p>
+                    
+                    <p><strong>Abuse Prevention:</strong> We proactively monitor and regulate requests to prevent automated attacks, account abuse, and ensure fair use for everyone.</p>
+                    
+                    <p><strong>Privacy Assurance:</strong> User data is tightly isolated so no one but you can access your information.</p>
+                    
+                    <p><strong>Browser & Network Security:</strong> The system employs advanced controls to guard against threats from both within the application and over the internet.</p>
+                    
+                    <p><strong>Continuous Verification:</strong> Security policies and access checks are in place at every critical point to maintain the integrity, confidentiality, and availability of your data.</p>
+                    
+                    <p><strong>Up-to-Date Safeguards:</strong> Our backend and frontend are regularly updated and verified for compliance with the latest security standards.</p>
+                    
+                    <div style="background: rgba(102, 126, 234, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #667eea;">
+                        <p><strong>🛡️ Continuous Protection:</strong> We constantly monitor and evolve our protections to stay ahead of new threats, so you can use our services with confidence.</p>
+                        
+                        <p style="margin-bottom: 0;"><strong>📋 Compliance Documentation:</strong> If you or your organization need compliance documentation or more detailed, non-sensitive security information, please contact our support team directly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleFAQ(element) {
+            const answer = element.nextElementSibling;
+            const toggle = element.querySelector('.toggle');
+            
+            // Close all other FAQ items
+            const allQuestions = document.querySelectorAll('.faq-question');
+            const allAnswers = document.querySelectorAll('.faq-answer');
+            
+            allQuestions.forEach(q => {
+                if (q !== element) {
+                    q.classList.remove('active');
+                    q.querySelector('.toggle').textContent = '▼';
+                }
+            });
+            
+            allAnswers.forEach(a => {
+                if (a !== answer) {
+                    a.classList.remove('active');
+                }
+            });
+            
+            // Toggle current item
+            element.classList.toggle('active');
+            answer.classList.toggle('active');
+            
+            if (element.classList.contains('active')) {
+                toggle.textContent = '▲';
+            } else {
+                toggle.textContent = '▼';
+            }
+        }
+
+        // Optional: Auto-open first FAQ on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstFAQ = document.querySelector('.faq-question');
+            if (firstFAQ) {
+                toggleFAQ(firstFAQ);
+            }
+        });
+
+        // Stripe Checkout functionality
+        const API_BASE = window.location.hostname.includes('localhost')
+            ? 'http://localhost:8787'
+            : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
+
+        const readmeCheckoutBtn = document.getElementById('readme-checkout-btn');
+        if (readmeCheckoutBtn) {
+            readmeCheckoutBtn.addEventListener('click', async () => {
+                readmeCheckoutBtn.disabled = true;
+                                    readmeCheckoutBtn.textContent = '⏳ Procesando...';
+
+                try {
+                    // Get customer email if available
+                    const customerEmail = localStorage.getItem('currentUser') 
+                        ? JSON.parse(localStorage.getItem('currentUser')).user?.email 
+                        : null;
+
+                    // Prepare request body
+                    const requestBody = { mode: 'subscription' };
+                    
+                    // Only add email if it's valid
+                    if (customerEmail && customerEmail.trim() && customerEmail.includes('@')) {
+                        requestBody.email = customerEmail.trim();
+                    }
+
+                    const response = await fetch(`${API_BASE}/payments/create-checkout-session`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(requestBody)
+                    });
+
+                    const data = await response.json();
+
+                    if (data.id && data.url) {
+                        // Redirect to Stripe checkout
+                        window.location.href = data.url;
+                    } else {
+                        throw new Error(data.error || 'Failed to create checkout session');
+                    }
+                } catch (error) {
+                    console.error('Checkout error:', error);
+                    alert('Lo sentimos, hubo un error procesando tu solicitud. Por favor intenta de nuevo o contacta soporte.');
+                    
+                    // Reset button
+                    readmeCheckoutBtn.disabled = false;
+                    readmeCheckoutBtn.textContent = '💳 Comenzar';
+                }
+            });
+        }
+
+        // Search functionality
+        let searchTimeout;
+        function searchDocumentation(query) {
+            const clearBtn = document.getElementById('clearSearchBtn');
+            const resultsDiv = document.getElementById('searchResults');
+            
+            // Show/hide clear button
+            if (query.trim().length > 0) {
+                clearBtn.style.opacity = '1';
+            } else {
+                clearBtn.style.opacity = '0';
+            }
+            
+            // Debounce search
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => performSearch(query), 300);
+        }
+
+        function performSearch(query) {
+            const resultsDiv = document.getElementById('searchResults');
+            
+            if (!query || query.trim().length < 2) {
+                clearSearchHighlights();
+                resultsDiv.innerHTML = '';
+                return;
+            }
+
+            const searchTerms = query.toLowerCase().trim().split(/\s+/);
+            const faqContainers = document.querySelectorAll('.faq-container');
+            let matchCount = 0;
+            let results = [];
+
+            // Clear previous highlights
+            clearSearchHighlights();
+
+            faqContainers.forEach((container, index) => {
+                const question = container.querySelector('.faq-question');
+                const answer = container.querySelector('.faq-answer .faq-content');
+                
+                const questionText = question.textContent.toLowerCase();
+                const answerText = answer.textContent.toLowerCase();
+                const allText = questionText + ' ' + answerText;
+
+                // Check if any search term matches
+                const hasMatch = searchTerms.some(term => allText.includes(term));
+                
+                if (hasMatch) {
+                    matchCount++;
+                    
+                    // Add visual indicator
+                    container.classList.add('search-matched');
+                    
+                    // Highlight text in question and answer
+                    highlightText(question, searchTerms);
+                    highlightText(answer, searchTerms);
+                    
+                    // Expand FAQ if it has matches
+                    const answerElement = container.querySelector('.faq-answer');
+                    if (!answerElement.classList.contains('active')) {
+                        question.click();
+                    }
+
+                    // Add to results
+                    const questionTitle = question.textContent.replace(/▼|▲/g, '').trim();
+                    results.push({
+                        title: questionTitle,
+                        element: container
+                    });
+                }
+            });
+
+            // Update results display
+            if (matchCount > 0) {
+                resultsDiv.innerHTML = `Found ${matchCount} section${matchCount > 1 ? 's' : ''} matching "${query}"`;
+            } else {
+                resultsDiv.innerHTML = `No results found for "${query}"`;
+            }
+        }
+
+        function highlightText(element, searchTerms) {
+            const walker = document.createTreeWalker(
+                element,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+
+            const textNodes = [];
+            let node;
+            while (node = walker.nextNode()) {
+                textNodes.push(node);
+            }
+
+            textNodes.forEach(textNode => {
+                let content = textNode.textContent;
+                let hasHighlight = false;
+
+                searchTerms.forEach(term => {
+                    if (term.length >= 2) {
+                        const regex = new RegExp(`(${escapeRegex(term)})`, 'gi');
+                        if (regex.test(content)) {
+                            content = content.replace(regex, '<span class="search-highlight">$1</span>');
+                            hasHighlight = true;
+                        }
+                    }
+                });
+
+                if (hasHighlight) {
+                    const span = document.createElement('span');
+                    span.innerHTML = content;
+                    textNode.parentNode.replaceChild(span, textNode);
+                }
+            });
+        }
+
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function clearSearchHighlights() {
+            // Remove highlight spans
+            const highlights = document.querySelectorAll('.search-highlight');
+            highlights.forEach(highlight => {
+                const parent = highlight.parentNode;
+                parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+                parent.normalize();
+            });
+
+            // Remove search indicators
+            const matchedContainers = document.querySelectorAll('.faq-container.search-matched');
+            matchedContainers.forEach(container => {
+                container.classList.remove('search-matched');
+            });
+        }
+
+        function clearSearch() {
+            const searchInput = document.getElementById('docSearch');
+            const resultsDiv = document.getElementById('searchResults');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            
+            searchInput.value = '';
+            resultsDiv.innerHTML = '';
+            clearBtn.style.opacity = '0';
+            clearSearchHighlights();
+            
+            // Close all expanded FAQs
+            const openAnswers = document.querySelectorAll('.faq-answer.active');
+            openAnswers.forEach(answer => {
+                const question = answer.previousElementSibling;
+                question.click();
+            });
+        }
+
+        // Add keyboard shortcut for search
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('docSearch').focus();
+            }
+            if (e.key === 'Escape') {
+                clearSearch();
+            }
+        });
+    </script>
+</body>
+</html>

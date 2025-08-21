@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ HyperFiler Pro</title>
+    <meta name="description" content="Guía completa de HyperFiler Pro - el sistema digital GTD de 43 carpetas. Domina cada función y transforma tu productividad.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        .language-flag {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .language-flag:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            font-weight: 900;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            opacity: 0.95;
+            font-weight: 600;
+        }
+
+        .header .tagline {
+            font-size: 1.2em;
+            opacity: 0.85;
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* FAQ Dropdown Styles */
+        .faq-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .faq-question {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            cursor: pointer;
+            font-size: 1.3em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .faq-question:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            transform: translateY(-2px);
+        }
+
+        .faq-question .icon {
+            font-size: 1.5em;
+            margin-right: 15px;
+        }
+
+        .faq-question .toggle {
+            font-size: 1.5em;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-question.active .toggle {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+            background: white;
+        }
+
+        .faq-answer.active {
+            max-height: 3000px;
+            padding: 30px;
+        }
+
+        .faq-content {
+            color: #333;
+            font-size: 1.1em;
+            line-height: 1.7;
+        }
+
+        .faq-content h3 {
+            color: #667eea;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            font-weight: 700;
+        }
+
+        .faq-content h4 {
+            color: #5a67d8;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .faq-content ul, .faq-content ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+
+        .faq-content li {
+            margin-bottom: 8px;
+        }
+
+        .faq-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .faq-content th, .faq-content td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .faq-content th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .faq-content tr:hover {
+            background: #f1f3f4;
+        }
+
+        .faq-content code {
+            background: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        /* Search Styles */
+        .search-highlight {
+            background: #ffeb3b;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .search-match {
+            animation: highlightPulse 1s ease-in-out;
+        }
+
+        @keyframes highlightPulse {
+            0% { background: transparent; }
+            50% { background: rgba(255, 235, 59, 0.3); }
+            100% { background: transparent; }
+        }
+
+        .faq-container.search-matched {
+            border-left: 4px solid #ffeb3b;
+            box-shadow: 0 0 15px rgba(255, 235, 59, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="language-switcher">
+            <a href="readme.html" class="language-flag" title="View in English">
+                🇺🇸 EN
+            </a>
+        </div>
+        <div class="header-content">
+            <h1><span>⚡</span> HyperFiler Pro <span>🚀</span></h1>
+            <p class="subtitle">Documentación</p>
+            <p class="tagline">Todo lo que necesitas para dominar el sistema HyperFiler</p>
+            
+            <!-- Search Box -->
+            <div style="margin-top: 30px; max-width: 500px; margin-left: auto; margin-right: auto;">
+                <div style="position: relative;">
+                    <input type="text" id="docSearch" placeholder="🔍 Buscar en la documentación..." 
+                           style="width: 100%; padding: 15px 50px 15px 20px; border: none; border-radius: 25px; 
+                                  font-size: 16px; background: rgba(255,255,255,0.9); box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                                  outline: none; transition: all 0.3s ease;"
+                           onkeyup="searchDocumentation(this.value)"
+                           onfocus="this.style.background='white'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.15)'"
+                           onblur="this.style.background='rgba(255,255,255,0.9)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)'">
+                    <button onclick="clearSearch()" 
+                            style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); 
+                                   background: none; border: none; font-size: 18px; cursor: pointer; color: #666;
+                                   opacity: 0; transition: opacity 0.3s ease;" 
+                            id="clearSearchBtn">✕</button>
+                </div>
+                <div id="searchResults" style="margin-top: 10px; font-size: 14px; color: rgba(255,255,255,0.8);"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- What is HyperFiler Pro? -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">🎯</span>
+                    ¿Qué es HyperFiler Pro?
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <p>HyperFiler Pro es la primera implementación digital verdadera de la metodología Getting Things Done (GTD) de David Allen, combinada con el revolucionario sistema de 43 Carpetas de Merlin Mann. Transforma la gestión de tareas desde listas abrumadoras a una potencia de productividad libre de estrés y claridad mental.</p>
+                    
+                    <h3>🧠 Invisibilidad Estratégica</h3>
+                    <p>Las tareas desaparecen hasta exactamente cuando las necesitas. Tu mente se mantiene clara y enfocada en lo que importa ahora, no desordenada con preocupaciones futuras.</p>
+                    
+                    <h3>⚡ Superpoderes Digitales</h3>
+                    <ul>
+                        <li><strong>Procesamiento de Lenguaje Natural:</strong> Escribe "Llamar a Juan mañana 2pm" - programación instantánea</li>
+                        <li><strong>Acceso Instantáneo:</strong> Añadir tareas en 2 segundos con atajos de teclado</li>
+                        <li><strong>Recurrencia Inteligente:</strong> Maneja automáticamente tareas repetitivas</li>
+                        <li><strong>Sincronización Multi-dispositivo:</strong> Sincronización en tiempo real en todos los dispositivos</li>
+                        <li><strong>Filtrado Inteligente:</strong> Busca y organiza sin esfuerzo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Start Guide -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">🚀</span>
+                    Guía de Inicio Rápido (5 minutos)
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <h3>Paso 1: Entrada de Tareas con Lenguaje Natural</h3>
+                    <ul>
+                        <li>Presiona <code>Ctrl+N</code> en cualquier lugar de la app</li>
+                        <li>Escribe naturalmente: <code>"Llamar al dentista mañana @personal"</code></li>
+                        <li>Presiona <code>Enter</code> - la tarea se programa automáticamente y desaparece hasta que se necesite</li>
+                    </ul>
+
+                    <h3>Paso 2: Dominar las Tres Vistas</h3>
+                    <ul>
+                        <li><strong>Hoy:</strong> Centro de mando - solo elementos accionables</li>
+                        <li><strong>Semana:</strong> Modo planificación - distribuye tu carga de trabajo</li>
+                        <li><strong>Mes:</strong> Vista estratégica - ve el panorama general</li>
+                    </ul>
+
+                    <h3>Paso 3: Desbloquear el Poder de los Proyectos</h3>
+                    <ul>
+                        <li>Añade <code>@nombre-proyecto</code> a cualquier tarea</li>
+                        <li>Los botones de filtro aparecen automáticamente</li>
+                        <li>Haz clic en cualquier filtro @ para ver tareas relacionadas en todo el tiempo</li>
+                    </ul>
+
+                    <h3>Paso 4: Dominio del Teclado</h3>
+                    <ul>
+                        <li><code>Ctrl+T</code> (Hoy), <code>Ctrl+W</code> (Semana), <code>Ctrl+M</code> (Mes)</li>
+                        <li>Navega con las teclas de flecha, edita con <code>Enter</code></li>
+                        <li>Usa botones de acción súper rápidos: retrasar 1 día, 1 semana, 1 mes, o eliminar</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Core Features -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">✨</span>
+                    Características Principales
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <h3>📊 Sistema de Vistas Inteligentes</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Vista</th>
+                                <th>Propósito</th>
+                                <th>Atajo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Hoy</strong></td>
+                                <td>Modo Ejecución - sesiones de trabajo enfocadas</td>
+                                <td><code>Ctrl+T</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Semana</strong></td>
+                                <td>Modo Planificación - distribución de carga de trabajo</td>
+                                <td><code>Ctrl+W</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Mes</strong></td>
+                                <td>Modo Estratégico - planificación a largo plazo</td>
+                                <td><code>Ctrl+M</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Todas las Tareas</strong></td>
+                                <td>Modo Base de Datos - búsqueda y operaciones masivas</td>
+                                <td><code>Ctrl+A</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>⚡ Captura Instantánea y Lenguaje Natural</h3>
+                    <ul>
+                        <li>Añade tareas en menos de 2 segundos con <code>Ctrl+N</code></li>
+                        <li>Procesamiento de lenguaje natural: "Llamar a Juan el próximo martes" se programa automáticamente</li>
+                        <li>Entrada de texto inteligente: "Reunión con cliente mañana 3pm @trabajo" crea una tarea perfectamente programada</li>
+                        <li>Arrastra y suelta para reprogramar tareas visualmente</li>
+                        <li>Botones de acción súper rápidos: retrasar 1 día, 1 semana, 1 mes, o eliminar</li>
+                    </ul>
+
+                    <h3>🔄 Tareas Recurrentes y Texto Enriquecido</h3>
+                    <ul>
+                        <li>Establece patrones de recurrencia diarios, semanales, mensuales o personalizados</li>
+                        <li>Añade notas, enlaces y contexto a cualquier tarea</li>
+                        <li>Soporte para formato markdown y emojis</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- @ Project System -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">🏗️</span>
+                    Sistema de Proyectos @
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <p>El sistema de proyectos @ es el arma secreta de HyperFiler Pro para organización sin mantenimiento:</p>
+                    
+                    <h3>Cómo Funciona</h3>
+                    <ul>
+                        <li>Escribe <code>@nombre-proyecto</code> en cualquier parte de una tarea</li>
+                        <li>Los botones de filtro aparecen automáticamente</li>
+                        <li>Haz clic en cualquier botón @ para ver todas las tareas relacionadas en todos los períodos de tiempo</li>
+                        <li>No requiere configuración, escalabilidad infinita</li>
+                    </ul>
+
+                    <h3>Ejemplos</h3>
+                    <ul>
+                        <li><strong>Personal:</strong> "Planificar renovación de cocina @mejoras-casa"</li>
+                        <li><strong>Trabajo:</strong> "Redactar propuesta para cuenta Johnson @trabajo-cliente"</li>
+                        <li><strong>Contexto:</strong> "Llamar al dentista @tareas-telefono", "Comprar comestibles @recados"</li>
+                    </ul>
+
+                    <h3>Técnicas Avanzadas</h3>
+                    <ul>
+                        <li><strong>Tareas Multi-Proyecto:</strong> "Preparar presentación @trabajo-cliente @presentaciones @urgente"</li>
+                        <li><strong>Evolución de Proyectos:</strong> Comienza con @actualización-website, evoluciona a @rediseño-website</li>
+                        <li><strong>Limpieza Automática:</strong> Los proyectos completados desaparecen automáticamente</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Keyboard Shortcuts -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">⌨️</span>
+                    Atajos de Teclado
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <p>Domina estos atajos para gestión de tareas 3-5 veces más rápida:</p>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Atajo</th>
+                                <th>Acción</th>
+                                <th>Consejo Pro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>Ctrl+N</code></td>
+                                <td>Añadir nueva tarea</td>
+                                <td>Funciona incluso al editar otras tareas</td>
+                            </tr>
+                            <tr>
+                                <td><code>Ctrl+T</code></td>
+                                <td>Vista Hoy</td>
+                                <td>Tu modo principal de ejecución</td>
+                            </tr>
+                            <tr>
+                                <td><code>Ctrl+W</code></td>
+                                <td>Vista Semana</td>
+                                <td>Perfecto para planificación semanal</td>
+                            </tr>
+                            <tr>
+                                <td><code>Ctrl+M</code></td>
+                                <td>Vista Mes</td>
+                                <td>Planificación estratégica global</td>
+                            </tr>
+                            <tr>
+                                <td><code>←→</code></td>
+                                <td>Día Anterior/Siguiente</td>
+                                <td>Navegación rápida por el tiempo</td>
+                            </tr>
+                            <tr>
+                                <td><code>↑↓</code></td>
+                                <td>Seleccionar tareas</td>
+                                <td>Resalta tarea para acciones de teclado</td>
+                            </tr>
+                            <tr>
+                                <td><code>Enter</code></td>
+                                <td>Editar/Guardar tarea</td>
+                                <td>Alterna entre modo edición y vista</td>
+                            </tr>
+                            <tr>
+                                <td><code>Espacio</code></td>
+                                <td>Seleccionar para acciones masivas</td>
+                                <td>Muestra retroalimentación de selección</td>
+                            </tr>
+                            <tr>
+                                <td><code>Ctrl+S</code></td>
+                                <td>Buscar tareas</td>
+                                <td>Búsqueda instantánea en todas las tareas</td>
+                            </tr>
+                            <tr>
+                                <td><code>Ctrl+Z</code></td>
+                                <td>Deshacer última acción</td>
+                                <td>Historial de 10 pasos para deshacer</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trial & Payment System -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">🎉</span>
+                    Sistema de Prueba y Pago
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <h3>🎉 Prueba Gratuita de 60 Días</h3>
+                    <p>Comienza tu viaje con HyperFiler Pro con una <strong>prueba gratuita de 60 días completamente gratis</strong>. No se requiere tarjeta de crédito, sin compromisos - solo pura potencia de productividad al alcance de tu mano.</p>
+                    
+                    <h3>💳 Pago Único Simple</h3>
+                    <p>Después de tu prueba de 60 días, tienes dos opciones:</p>
+                    
+                    <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 25px; border-radius: 10px; margin: 20px 0;">
+                        <h4 style="margin: 0 0 15px 0;">🎉 ¡Continúa Usando Gratis para Siempre!</h4>
+                        <p style="margin: 0; opacity: 0.9;">Así es - puedes seguir usando HyperFiler Pro completamente gratis para siempre. Todos tus datos, todas tus tareas, todos tus proyectos permanecen accesibles. Sin limitaciones, sin restricciones.</p>
+                    </div>
+                    
+                    <h4>💎 O actualiza a Pro por €49.98:</h4>
+                    <ul>
+                        <li><strong>Pago Único:</strong> Paga €49.98 una vez, usa para siempre - sin suscripciones</li>
+                        <li><strong>Acceso de Por Vida:</strong> Nunca pagues de nuevo, nunca te preocupes por renovaciones</li>
+                        <li><strong>Apoyar el Desarrollo:</strong> Ayuda a mantener HyperFiler Pro increíble</li>
+                        <li><strong>Soporte Prioritario:</strong> Obtén ayuda en 24 horas</li>
+                    </ul>
+                    
+                    <h3>📧 Registro Solo con Email</h3>
+                    <ul>
+                        <li><strong>Solo Tu Email:</strong> No se requiere contraseña - generamos una para ti</li>
+                        <li><strong>Acceso Instantáneo:</strong> Comienza a usar la app inmediatamente</li>
+                        <li><strong>Email de Bienvenida:</strong> Recibe tus credenciales de acceso por email</li>
+                        <li><strong>Seguro y Simple:</strong> Seguridad estándar de la industria con cero complejidad</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Support & Troubleshooting -->
+        <div class="faq-container">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div>
+                    <span class="icon">🔧</span>
+                    Soporte y Solución de Problemas
+                </div>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-content">
+                    <h3>📧 Soporte por Email</h3>
+                    <ul>
+                        <li>Envía preguntas a: <strong>support@hyperfiler.pro</strong></li>
+                        <li>Típicamente respondemos en 24-48 horas</li>
+                        <li><strong>Usuarios Pro</strong> obtienen respuesta prioritaria en 24 horas</li>
+                    </ul>
+
+                    <h3>💾 Respaldo y Exportación</h3>
+                    <ul>
+                        <li><strong>Respaldo Manual:</strong> <code>Ctrl+B</code> crea respaldo instantáneo</li>
+                        <li><strong>Respaldos Automáticos:</strong> Configurables diarios, semanales, mensuales</li>
+                        <li><strong>Formatos de Exportación:</strong> JSON, CSV y texto plano</li>
+                        <li><strong>Sincronización en la Nube:</strong> Sincronización en tiempo real en todos los dispositivos</li>
+                    </ul>
+
+                    <h3>🔍 Problemas Comunes</h3>
+                    <ul>
+                        <li><strong>Las tareas no aparecen:</strong> Verifica las vistas Hoy/Semana/Mes</li>
+                        <li><strong>Problemas de sincronización:</strong> Actualiza la página o verifica la conexión a internet</li>
+                        <li><strong>Atajos de teclado:</strong> Asegúrate de que ninguna otra app esté usando los mismos atajos</li>
+                        <li><strong>Pérdida de datos:</strong> Usa <code>Ctrl+B</code> para crear respaldo, verifica los respaldos automáticos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleFAQ(element) {
+            const answer = element.nextElementSibling;
+            const isActive = answer.classList.contains('active');
+            
+            // Close all other FAQs
+            document.querySelectorAll('.faq-answer.active').forEach(item => {
+                if (item !== answer) {
+                    item.classList.remove('active');
+                    item.previousElementSibling.classList.remove('active');
+                }
+            });
+            
+            // Toggle current FAQ
+            answer.classList.toggle('active');
+            element.classList.toggle('active');
+        }
+
+        // Search functionality
+        function searchDocumentation(query) {
+            const searchInput = document.getElementById('docSearch');
+            const resultsDiv = document.getElementById('searchResults');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            
+            if (query.length < 2) {
+                clearSearch();
+                return;
+            }
+            
+            clearSearchHighlights();
+            
+            const searchTerms = query.toLowerCase().split(' ').filter(term => term.length >= 2);
+            const faqContainers = document.querySelectorAll('.faq-container');
+            let matchCount = 0;
+            
+            faqContainers.forEach(container => {
+                const question = container.querySelector('.faq-question').textContent.toLowerCase();
+                const answer = container.querySelector('.faq-content').textContent.toLowerCase();
+                const hasMatch = searchTerms.some(term => 
+                    question.includes(term) || answer.includes(term)
+                );
+                
+                if (hasMatch) {
+                    container.classList.add('search-matched');
+                    matchCount++;
+                    
+                    // Highlight matching text
+                    const contentElement = container.querySelector('.faq-content');
+                    highlightText(contentElement, searchTerms);
+                    
+                    // Auto-expand matching FAQs
+                    const answerElement = container.querySelector('.faq-answer');
+                    if (!answerElement.classList.contains('active')) {
+                        container.querySelector('.faq-question').click();
+                    }
+                }
+            });
+            
+            resultsDiv.innerHTML = matchCount > 0 ? 
+                `Se encontraron ${matchCount} sección${matchCount > 1 ? 'es' : ''} que coinciden` : 
+                'No se encontraron coincidencias';
+            
+            clearBtn.style.opacity = '1';
+        }
+
+        function highlightText(element, searchTerms) {
+            const walker = document.createTreeWalker(
+                element,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+
+            const textNodes = [];
+            let node;
+            while (node = walker.nextNode()) {
+                textNodes.push(node);
+            }
+
+            textNodes.forEach(textNode => {
+                let content = textNode.textContent;
+                let hasHighlight = false;
+
+                searchTerms.forEach(term => {
+                    if (term.length >= 2) {
+                        const regex = new RegExp(`(${escapeRegex(term)})`, 'gi');
+                        if (regex.test(content)) {
+                            content = content.replace(regex, '<span class="search-highlight">$1</span>');
+                            hasHighlight = true;
+                        }
+                    }
+                });
+
+                if (hasHighlight) {
+                    const span = document.createElement('span');
+                    span.innerHTML = content;
+                    textNode.parentNode.replaceChild(span, textNode);
+                }
+            });
+        }
+
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function clearSearchHighlights() {
+            // Remove highlight spans
+            const highlights = document.querySelectorAll('.search-highlight');
+            highlights.forEach(highlight => {
+                const parent = highlight.parentNode;
+                parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+                parent.normalize();
+            });
+
+            // Remove search indicators
+            const matchedContainers = document.querySelectorAll('.faq-container.search-matched');
+            matchedContainers.forEach(container => {
+                container.classList.remove('search-matched');
+            });
+        }
+
+        function clearSearch() {
+            const searchInput = document.getElementById('docSearch');
+            const resultsDiv = document.getElementById('searchResults');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            
+            searchInput.value = '';
+            resultsDiv.innerHTML = '';
+            clearBtn.style.opacity = '0';
+            clearSearchHighlights();
+            
+            // Close all expanded FAQs
+            const openAnswers = document.querySelectorAll('.faq-answer.active');
+            openAnswers.forEach(answer => {
+                const question = answer.previousElementSibling;
+                question.click();
+            });
+        }
+
+        // Add keyboard shortcut for search
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('docSearch').focus();
+            }
+            if (e.key === 'Escape') {
+                clearSearch();
+            }
+        });
+    </script>
+    
+    <!-- Gentle Purchase Call-to-Action Footer -->
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; padding: 40px 20px; margin-top: 40px;">
+        <div style="max-width: 600px; margin: 0 auto;">
+            <h3 style="margin: 0 0 15px 0; font-size: 1.5em; color: white;">✨ ¿Listo para Poseer HyperFiler Pro?</h3>
+            <p style="margin: 0 0 25px 0; opacity: 0.9; font-size: 1.1em; line-height: 1.6;">Has aprendido sobre todas las características poderosas. Experiméntalas con acceso de prueba ilimitado, luego compra tu licencia profesional cuando estés listo.</p>
+            <div style="margin-bottom: 20px;">
+                <a href="https://hyperfiler.pro/register.html" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; text-decoration: none; border-radius: 25px; font-weight: 600; margin: 0 10px; border: 1px solid rgba(255,255,255,0.3); transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'">🚀 Comenzar Prueba</a>
+                <a href="https://hyperfiler.pro/upgrade-compare.html" style="background: linear-gradient(45deg, #FFD700, #FFA500); color: #333; padding: 12px 24px; text-decoration: none; border-radius: 25px; font-weight: 600; margin: 0 10px; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">💳 Comprar Licencia</a>
+            </div>
+                            <p style="margin: 0; font-size: 0.9em; opacity: 0.7;">Software de productividad profesional • €49.98 pago único</p>
+        </div>
+    </div>
+</body>
+</html> 

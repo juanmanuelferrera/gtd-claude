@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to HyperFiler Pro!</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .content {
+            padding: 40px;
+        }
+        .credentials {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .secondary-button {
+            background: #28a745;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .highlight {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ Welcome to HyperFiler Pro! 🚀</h1>
+            <p>Your productivity powerhouse is ready</p>
+        </div>
+        
+        <div class="content">
+            <h2>🎉 Your Account is Ready!</h2>
+            <p>Congratulations! Your HyperFiler Pro account has been created and activated. You now have access to unlimited tasks, cloud sync, and all premium features.</p>
+            
+            <div class="credentials">
+                <h3>🔐 Your Login Credentials</h3>
+                <p><strong>Email:</strong> {{USER_EMAIL}}</p>
+                <p><strong>Password:</strong> <code>{{RANDOM_PASSWORD}}</code></p>
+                <p><em>You can change this password after logging in.</em></p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{LOGIN_URL}}" class="button">🚀 Start Using HyperFiler Pro</a>
+                <br>
+                <a href="{{README_URL}}" class="button secondary-button">📚 Complete User Guide</a>
+            </div>
+            
+            <div class="highlight">
+                <h3>🎯 What You Get with Pro:</h3>
+                <ul>
+                    <li>✅ Unlimited tasks and folders</li>
+                    <li>✅ Cloud sync across all devices</li>
+                    <li>✅ Advanced analytics & reports</li>
+                    <li>✅ Priority support & early access</li>
+                    <li>✅ Automatic backups & recovery</li>
+                    <li>✅ Team collaboration features</li>
+                </ul>
+            </div>
+            
+            <h3>📱 Download Your Pro App</h3>
+            <p>Your HyperFiler Pro application is attached to this email as <strong>hyperfiler-pro.html</strong>. Simply download and open it in your browser to get started!</p>
+            
+            <h3>🚀 Quick Start Tips</h3>
+            <ol>
+                <li>Open your HyperFiler Pro app</li>
+                <li>Use <code>Ctrl+N</code> to create your first task</li>
+                <li>Try the Week view with <code>Ctrl+W</code></li>
+                <li>Use arrow keys to navigate like a pro</li>
+                <li>Press <code>Ctrl+I</code> for all shortcuts</li>
+            </ol>
+            
+            <p>Need help? Reply to this email and we'll get you sorted out quickly!</p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>HyperFiler Pro</strong> - 43 Folders methodology, digitally supercharged</p>
+            <p style="font-size: 0.8em;"><a href="{{MANAGE_SUBSCRIPTION_URL}}" style="color: #667eea;">Manage Subscription</a></p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ⚡ HyperFiler Pro 🚀</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+        }
+
+        .header h1 span:first-child {
+            margin-right: 6px;
+        }
+
+        .header h1 span:last-child {
+            margin-left: 12px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .form-section {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .login-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            margin: 0 10px;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+
+        .modal-header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-footer {
+            padding: 0 30px 30px 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .close:hover {
+            opacity: 1;
+        }
+
+        .modal-button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-button.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal-button.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .modal-button.secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #e9ecef;
+        }
+
+        .modal-button.secondary:hover {
+            background: #e9ecef;
+        }
+
+        .modal-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .form-section {
+                padding: 30px 20px;
+            }
+            
+            /* Fix iOS zoom bounce on input focus */
+            .form-group input {
+                font-size: 16px !important;
+            }
+            
+            /* Fix modal input zoom bounce */
+            #modal-email {
+                font-size: 16px !important;
+            }
+
+            .modal-content {
+                margin: 5% auto;
+                width: 95%;
+            }
+
+            .modal-body, .modal-footer {
+                padding: 20px;
+            }
+
+            .modal-footer {
+                padding-top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><span>⚡</span> HyperFiler Pro <span>🚀</span></h1>
+            <p>Sign in to your account</p>
+        </div>
+
+        <!-- Login Form -->
+        <div class="form-section">
+            <div id="success-message" class="status-message success"></div>
+            <div id="error-message" class="status-message error"></div>
+            <div id="info-message" class="status-message info"></div>
+            
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">Signing in...</p>
+            </div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required 
+                        placeholder="Enter your email"
+                        autocomplete="email"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <button type="submit" id="login-button" class="login-button">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="links">
+                <a href="#" id="forgot-password-link">Forgot Password?</a>
+                <a href="register.html">Start Trial</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <h2>🔐 Reset Password</h2>
+                <p>Enter your email to receive a new password</p>
+            </div>
+            <div class="modal-body">
+                <div id="modal-success-message" class="status-message success"></div>
+                <div id="modal-error-message" class="status-message error"></div>
+                <div id="modal-loading" class="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 10px;">Sending reset email...</p>
+                </div>
+                <div class="form-group">
+                    <label for="modal-email">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="modal-email" 
+                        name="modal-email" 
+                        required 
+                        placeholder="Enter your email address"
+                        autocomplete="email"
+                    >
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-button secondary" id="modal-cancel">Cancel</button>
+                <button type="button" class="modal-button primary" id="modal-reset">Reset Password</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = window.location.hostname.includes('localhost') 
+            ? 'http://localhost:8787' 
+            : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
+
+        // DOM elements
+        const loginForm = document.getElementById('login-form');
+        const loginButton = document.getElementById('login-button');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const successMessage = document.getElementById('success-message');
+        const errorMessage = document.getElementById('error-message');
+        const infoMessage = document.getElementById('info-message');
+        const loading = document.getElementById('loading');
+
+        // Modal elements
+        const modal = document.getElementById('forgot-password-modal');
+        const modalEmailInput = document.getElementById('modal-email');
+        const modalCancelButton = document.getElementById('modal-cancel');
+        const modalResetButton = document.getElementById('modal-reset');
+        const modalCloseButton = document.querySelector('.close');
+        const modalSuccessMessage = document.getElementById('modal-success-message');
+        const modalErrorMessage = document.getElementById('modal-error-message');
+        const modalLoading = document.getElementById('modal-loading');
+
+        // Utility functions
+        function showLoading() {
+            loading.style.display = 'block';
+            loginButton.disabled = true;
+            hideAllMessages();
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+            loginButton.disabled = false;
+        }
+
+        function showMessage(element, message) {
+            hideAllMessages();
+            hideLoading();
+            element.textContent = message;
+            element.style.display = 'block';
+        }
+
+        function hideAllMessages() {
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            infoMessage.style.display = 'none';
+        }
+
+        // Modal utility functions
+        function showModal() {
+            modal.style.display = 'block';
+            modalEmailInput.focus();
+            hideAllModalMessages();
+        }
+
+        function hideModal() {
+            modal.style.display = 'none';
+            modalEmailInput.value = '';
+            hideAllModalMessages();
+        }
+
+        function showModalLoading() {
+            modalLoading.style.display = 'block';
+            modalResetButton.disabled = true;
+            hideAllModalMessages();
+        }
+
+        function hideModalLoading() {
+            modalLoading.style.display = 'none';
+            modalResetButton.disabled = false;
+        }
+
+        function showModalMessage(element, message) {
+            hideAllModalMessages();
+            hideModalLoading();
+            element.textContent = message;
+            element.style.display = 'block';
+        }
+
+        function hideAllModalMessages() {
+            modalSuccessMessage.style.display = 'none';
+            modalErrorMessage.style.display = 'none';
+        }
+
+        // Check URL parameters for messages
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('registered') === 'true') {
+            showMessage(successMessage, '✅ Account created successfully! Please sign in.');
+        } else if (urlParams.get('reset') === 'true') {
+            showMessage(infoMessage, '🔐 Password reset sent! Check your email for the new password.');
+        }
+
+        // Handle login form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showMessage(errorMessage, 'Please enter both email and password.');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                console.log('🔐 Attempting login to:', `${API_BASE}/auth/login`);
+                console.log('📧 Email:', email);
+                console.log('🔑 Password length:', password.length);
+                
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                console.log('📡 Response status:', response.status);
+                console.log('📡 Response headers:', [...response.headers.entries()]);
+
+                const result = await response.json();
+                console.log('📦 Response body:', result);
+
+                if (response.ok && result.user) {
+                    // SECURITY: Store token as fallback for cross-domain compatibility
+                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                    console.log('🔍 Device detection:', { 
+                        userAgent: navigator.userAgent, 
+                        isMobile: isMobile,
+                        screenWidth: window.innerWidth 
+                    });
+                    
+                    if (result.token) {
+                        // ALWAYS store in localStorage for persistence (mobile and desktop)
+                        localStorage.setItem('authToken', result.token);
+                        localStorage.setItem('authTokenExpiry', Date.now() + (90 * 24 * 60 * 60 * 1000)); // 3 months
+                        localStorage.setItem('userEmail', result.user.email);
+                        localStorage.setItem('userId', result.user.id);
+                        console.log('💾 Stored persistent login data in localStorage for 3 months');
+                        
+                        // Also store in sessionStorage as backup
+                        sessionStorage.setItem('authToken', result.token);
+                        sessionStorage.setItem('userEmail', result.user.email);
+                        sessionStorage.setItem('userId', result.user.id);
+                    }
+
+                    showMessage(successMessage, '✅ Login successful! Redirecting...');
+
+                    // SECURITY: Wait a bit longer to ensure cookie is properly set
+                    setTimeout(() => {
+                        // Redirect to the correct main app file
+                        window.location.href = '/hyperfiler-pro.html';
+                    }, 1000);
+
+                } else {
+                    console.error('Login failed:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        result: result
+                    });
+                    showMessage(errorMessage, result.message || result.error || 'Login failed. Please try again.');
+                }
+
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage(errorMessage, 'Network error. Please check your connection and try again.');
+            }
+        });
+
+        // Handle forgot password link click
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showModal();
+        });
+
+        // Handle modal close events
+        modalCloseButton.addEventListener('click', hideModal);
+        modalCancelButton.addEventListener('click', hideModal);
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                hideModal();
+            }
+        });
+
+        // Handle modal reset password
+        modalResetButton.addEventListener('click', async () => {
+            const email = modalEmailInput.value.trim();
+            
+            if (!email) {
+                showModalMessage(modalErrorMessage, 'Please enter your email address.');
+                modalEmailInput.focus();
+                return;
+            }
+
+            showModalLoading();
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/forgot-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showModalMessage(modalSuccessMessage, result.message);
+                    
+                    // Show temporary password in development
+                    if (result.tempPassword) {
+                        setTimeout(() => {
+                            showModalMessage(modalSuccessMessage, `New password: ${result.tempPassword}`);
+                        }, 2000);
+                    }
+
+                    // Auto-close modal after success
+                    setTimeout(() => {
+                        hideModal();
+                        showMessage(successMessage, 'Password reset email sent! Check your email.');
+                    }, 3000);
+
+                } else {
+                    // Handle 404 (no account found) and other errors
+                    if (response.status === 404) {
+                        showModalMessage(modalErrorMessage, result.error || 'No account found with that email address.');
+                    } else {
+                        showModalMessage(modalErrorMessage, result.error || 'Failed to send password reset.');
+                    }
+                }
+
+            } catch (error) {
+                console.error('Forgot password error:', error);
+                showModalMessage(modalErrorMessage, 'Network error. Please try again.');
+            }
+        });
+
+        // Handle Enter key in modal email input
+        modalEmailInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                modalResetButton.click();
+            }
+        });
+
+        // Check if user is already logged in - validate token first
+        function getStoredToken() {
+            // ALWAYS check localStorage first (for persistent login)
+            const token = localStorage.getItem('authToken');
+            const expiry = localStorage.getItem('authTokenExpiry');
+            
+            console.log('🔍 Checking stored tokens:', {
+                hasLocalStorageToken: !!token,
+                hasExpiry: !!expiry,
+                expiryDate: expiry ? new Date(parseInt(expiry)).toLocaleString() : 'none',
+                isExpired: expiry ? Date.now() >= parseInt(expiry) : 'no expiry',
+                hasSessionToken: !!sessionStorage.getItem('authToken')
+            });
+            
+            if (token && expiry) {
+                if (Date.now() < parseInt(expiry)) {
+                    console.log('💾 Valid persistent token found in localStorage');
+                    return { token, storage: 'localStorage' };
+                } else {
+                    console.log('⏰ Token expired, clearing localStorage...');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('authTokenExpiry');
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('userId');
+                    return null;
+                }
+            }
+            
+            // Fallback to sessionStorage
+            const sessionToken = sessionStorage.getItem('authToken');
+            if (sessionToken) {
+                console.log('📂 Fallback: Token found in sessionStorage');
+                return { token: sessionToken, storage: 'sessionStorage' };
+            }
+            
+            console.log('❌ No valid token found in either storage');
+            return null;
+        }
+        
+        const tokenData = getStoredToken();
+        if (tokenData) {
+            console.log('Existing token found, validating...');
+            
+            fetch(`${API_BASE}/auth/me`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${tokenData.token}`,
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    showMessage(infoMessage, 'You are already logged in. Redirecting...');
+                    setTimeout(() => {
+                        window.location.href = '/hyperfiler-pro.html';
+                    }, 500);
+                } else {
+                    console.log('Stored token is invalid, clearing...');
+                    if (tokenData.storage === 'localStorage') {
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('authTokenExpiry');
+                        localStorage.removeItem('userEmail');
+                        localStorage.removeItem('userId');
+                    } else {
+                        sessionStorage.removeItem('authToken');
+                        sessionStorage.removeItem('userEmail');
+                        sessionStorage.removeItem('userId');
+                    }
+                }
+            }).catch(error => {
+                console.log('Token validation failed, clearing:', error);
+                if (tokenData.storage === 'localStorage') {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('authTokenExpiry');
+                    localStorage.removeItem('userEmail');  
+                    localStorage.removeItem('userId');
+                } else {
+                    sessionStorage.removeItem('authToken');
+                    sessionStorage.removeItem('userEmail');  
+                    sessionStorage.removeItem('userId');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

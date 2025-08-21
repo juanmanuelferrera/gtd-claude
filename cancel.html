@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancel Subscription - ⚡ HyperFiler Pro 🚀</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #1877f2;
+            margin-bottom: 30px;
+        }
+        .cancel-form {
+            margin: 30px 0;
+        }
+        .form-group {
+            margin: 20px 0;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #c82333;
+        }
+        .btn.secondary {
+            background: #6c757d;
+        }
+        .btn.secondary:hover {
+            background: #545b62;
+        }
+        .reasons {
+            text-align: left;
+            margin: 20px 0;
+        }
+        .reasons label {
+            font-weight: normal;
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .reasons input[type="radio"] {
+            width: auto;
+            margin-right: 10px;
+        }
+        .feedback {
+            margin: 20px 0;
+        }
+        .feedback textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        .status {
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            display: none;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .retention-offer {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        .retention-offer h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ HyperFiler Pro Access</h1>
+        
+        <div class="cancel-form">
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" placeholder="Enter your email to check Pro access" required>
+            </div>
+            
+            <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #155724; margin-bottom: 15px;">🎉 You Have Lifetime Pro Access!</h3>
+                <p style="color: #155724; margin: 0;">Your one-time payment of €49.98 gives you permanent access to all Pro features. No subscriptions, no monthly charges!</p>
+            </div>
+            
+            <div class="feedback">
+                <label for="feedback-text"><strong>Any feedback? (Optional)</strong></label>
+                <textarea id="feedback-text" placeholder="Help us improve HyperFiler..."></textarea>
+            </div>
+            
+            <button class="btn secondary" onclick="window.close()">Close Window</button>
+        </div>
+        
+        <div class="status" id="status"></div>
+        
+        <p style="color: #666; font-size: 14px; margin-top: 30px;">
+                            <strong>Lifetime Access:</strong> Your one-time €49.98 payment gives you permanent Pro features. 
+            No recurring charges, no expiration date.
+        </p>
+    </div>
+
+    <script>
+        const cancelBtn = document.getElementById('cancel-btn');
+        const emailInput = document.getElementById('email');
+        const status = document.getElementById('status');
+        const retentionOffer = document.getElementById('retention-offer');
+        const acceptOfferBtn = document.getElementById('accept-offer');
+        const declineOfferBtn = document.getElementById('decline-offer');
+        
+        let showedRetentionOffer = false;
+        
+        cancelBtn.addEventListener('click', async () => {
+            const email = emailInput.value.trim();
+            
+            if (!email) {
+                showStatus('error', 'Please enter your email address');
+                return;
+            }
+            
+            // Show retention offer first time
+            if (!showedRetentionOffer) {
+                retentionOffer.style.display = 'block';
+                cancelBtn.textContent = 'I Still Want to Cancel';
+                showedRetentionOffer = true;
+                return;
+            }
+            
+            // Actually cancel
+            await processCancellation();
+        });
+        
+        acceptOfferBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/apply-discount', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: emailInput.value,
+                        discount: '50_percent_3_months'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('success', '🎉 Discount applied! You\'ll pay just $1/month for the next 3 months.');
+                    setTimeout(() => window.close(), 3000);
+                } else {
+                    showStatus('error', 'Error applying discount. Please contact support.');
+                }
+            } catch (error) {
+                showStatus('error', 'Error applying discount. Please contact support.');
+            }
+        });
+        
+        declineOfferBtn.addEventListener('click', () => {
+            processCancellation();
+        });
+        
+        async function processCancellation() {
+            try {
+                cancelBtn.disabled = true;
+                cancelBtn.textContent = 'Processing...';
+                
+                const response = await fetch('/cancel-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: emailInput.value,
+                        reason: document.querySelector('input[name="reason"]:checked')?.value,
+                        feedback: document.getElementById('feedback-text').value
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('success', '✅ Subscription canceled successfully. You\'ll have access until ' + result.periodEnd);
+                } else {
+                    showStatus('error', result.error || 'Error canceling subscription');
+                }
+                
+            } catch (error) {
+                showStatus('error', 'Error processing cancellation. Please contact support.');
+            } finally {
+                cancelBtn.disabled = false;
+                cancelBtn.textContent = 'Cancel My Subscription';
+            }
+        }
+        
+        function showStatus(type, message) {
+            status.className = `status ${type}`;
+            status.textContent = message;
+            status.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

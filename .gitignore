@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+
+# Wrangler development files (for Pages deployment)
+.wrangler/
+wrangler.toml
+src/
+migrations/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Development files
+server.log
+test-*.js
+payment-server*.js
+
+# Build artifacts
+*.zip
+dist/
+build/
+
+# Database files
+*.sqlite
+*.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Claude Code files
+.claude/
+deploy/admin.html.backup
+deploy/admin.html.insecure_backup
+
+# User data and backup files - NEVER commit these!
+jsons/
+*.json
+*backup*.json
+auto-backup*.json
+gtd-tasks-backup*.json
+/jsons
