@@ -12989,40 +12989,100 @@
 
         // Render current view
         function renderCurrentView() {
-            // Force set hasLoadedOnce to prevent loading state issues
+            // MOBILE FIX: Force set hasLoadedOnce to prevent loading state issues
             window.hasLoadedOnce = true;
             
-            // Temporarily disable loading state to fix broken app
-            // if (tasks.length === 0 && !window.hasLoadedOnce) {
-            //     showLoadingState();
-            //     return;
-            // }
+            // MOBILE FIX: Debug rendering state
+            console.log('🔄 renderCurrentView called');
+            console.log('📊 Tasks count:', tasks.length);
+            console.log('📱 Current view:', currentView);
+            console.log('🎯 View container exists:', document.getElementById(getContainerIdForView(currentView)) ? 'YES' : 'NO');
             
-            if (currentView === 'today') {
-                renderTodayView();
-                // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
-            } else if (currentView === 'week') {
-                renderWeekView();
-                highlightCurrentDay();
-                // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
-            } else if (currentView === 'calendar') {
-                renderCalendar();
-                highlightCurrentDay();
-                // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
-            } else if (currentView === 'repeat') {
-                renderRepeatView();
-            } else if (currentView === 'undo') {
-                renderUndoView();
-            } else if (currentView === 'stats') {
-                renderStats();
-            } else if (currentView === 'search') {
-                performSearch(); // Refresh search results
-            } else {
-                renderTasks(currentView);
+            // MOBILE FIX: Force clear any loading states
+            const loadingElements = document.querySelectorAll('.loading, .spinner');
+            loadingElements.forEach(el => el.remove());
+            
+            // MOBILE FIX: Ensure tasks array is valid
+            if (!Array.isArray(tasks)) {
+                console.error('❌ Tasks is not an array:', typeof tasks);
+                const storedTasks = localStorage.getItem('gtdTasks');
+                if (storedTasks) {
+                    try {
+                        tasks = JSON.parse(storedTasks);
+                        console.log('✅ Restored tasks from localStorage:', tasks.length);
+                    } catch (e) {
+                        console.error('❌ Failed to parse stored tasks:', e);
+                        tasks = [];
+                    }
+                } else {
+                    tasks = [];
+                }
             }
+            
+            // MOBILE FIX: Force render based on current view
+            try {
+                if (currentView === 'today') {
+                    console.log('📱 Rendering today view...');
+                    renderTodayView();
+                    // Restore persistent highlighting after render
+                    if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                        PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                    }
+                } else if (currentView === 'week') {
+                    console.log('📱 Rendering week view...');
+                    renderWeekView();
+                    highlightCurrentDay();
+                    if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                        PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                    }
+                } else if (currentView === 'calendar') {
+                    console.log('📱 Rendering calendar view...');
+                    renderCalendar();
+                    highlightCurrentDay();
+                    if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                        PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                    }
+                } else if (currentView === 'repeat') {
+                    console.log('📱 Rendering repeat view...');
+                    renderRepeatView();
+                } else if (currentView === 'undo') {
+                    console.log('📱 Rendering undo view...');
+                    renderUndoView();
+                } else if (currentView === 'stats') {
+                    console.log('📱 Rendering stats view...');
+                    renderStats();
+                } else if (currentView === 'search') {
+                    console.log('📱 Rendering search view...');
+                    performSearch(); // Refresh search results
+                } else {
+                    console.log('📱 Rendering generic view:', currentView);
+                    renderTasks(currentView);
+                }
+                console.log('✅ renderCurrentView completed successfully');
+            } catch (renderError) {
+                console.error('❌ renderCurrentView failed:', renderError);
+                // Fallback: try rendering today view
+                console.log('🔄 Fallback: attempting today view');
+                try {
+                    renderTodayView();
+                } catch (fallbackError) {
+                    console.error('❌ Fallback render also failed:', fallbackError);
+                }
+            }
+        }
+        
+        // MOBILE FIX: Helper function to get container ID for view
+        function getContainerIdForView(view) {
+            const viewContainers = {
+                'today': 'todaySchedule',
+                'week': 'weekContainer', 
+                'calendar': 'calendarContainer',
+                'repeat': 'repeatTasksList',
+                'undo': 'undoContainer',
+                'stats': 'statsContainer',
+                'search': 'searchResults'
+            };
+            return viewContainers[view] || 'todaySchedule';
         }
 
         // Render repeat tasks view
