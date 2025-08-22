@@ -9322,88 +9322,13 @@
             }
         }
 
-        // Upload all tasks to server (Simple Sync pattern)
+        // ULTRA-SIMPLE: No uploads, server is source of truth
         window.uploadAllTasks = async function uploadAllTasks() {
-                    // Simple sync system - reliable and proven
-            // User session check completed
+            console.log('🚫 UPLOAD DISABLED: Server is source of truth - downloading instead');
             
-            // Try to get token from localStorage as fallback
-            const fallbackToken = localStorage.getItem('authToken');
-            // Fallback token check completed
-            
-            // CRITICAL STALE BROWSER PROTECTION: Prevent uploads from old tabs
-            const lastSyncTime = localStorage.getItem('lastSyncTime');
-            const currentTime = Date.now();
-            const timeSinceLastSync = currentTime - (lastSyncTime ? parseInt(lastSyncTime) : 0);
-            
-            // ADJUSTED: Increased to 2 hours to allow for normal work sessions
-            // Previous 3-minute limit was causing data loss
-            if (timeSinceLastSync > 7200000) { // 2 hours instead of 3 minutes
-                console.warn('⚠️ WARNING: Long time since last sync detected');
-                console.warn('⏰ Last sync was', Math.floor(timeSinceLastSync / 1000), 'seconds ago');
-                // Don't block - just warn and continue with sync
-                // This prevents data loss from legitimate work sessions
-            }
-            
-            if (!window.currentUser?.user?.id) {
-                console.log('⚠️ No user ID available for upload');
-                // User structure validated
-                return;
-            }
-            
-            const authToken = window.currentUser?.token || fallbackToken;
-            if (!authToken) {
-                console.log('⚠️ No auth token available for upload (neither in currentUser nor localStorage)');
-                            // Token validation completed
-                return;
-            }
-            
-            console.log('✅ Using auth token from:', window.currentUser?.token ? 'currentUser' : 'localStorage');
-            
-            try {
-                console.log('📤 Uploading', tasks.length, 'tasks to server...');
-                
-                const tasksToUpload = tasks.map(cleanTaskForStorage);
-                            // Task upload preparation completed
-                
-                const requestBody = {
-                    tasks: tasksToUpload,
-                    userId: window.currentUser.user.id
-                };
-                            // Request body prepared
-                
-                const response = await fetch(`${API_BASE}/tasks`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify(requestBody)
-                });
-                
-                if (!response.ok) {
-                    console.log('❌ Upload failed with status:', response.status);
-                    console.log('❌ Response headers:', [...response.headers.entries()]);
-                    
-                    // Try to get error details from response
-                    try {
-                        const errorText = await response.text();
-                        console.log('❌ Error response body:', errorText);
-                    } catch (e) {
-                        console.log('❌ Could not read error response');
-                    }
-                    
-                    throw new Error(`Upload failed: ${response.status}`);
-                }
-                
-                console.log('✅ Tasks uploaded successfully');
-                showSyncStatus('Synced', 'success');
-                
-            } catch (error) {
-                console.error('❌ Upload error:', error);
-                showSyncStatus('Sync failed', 'error');
-                throw error;
-            }
+            // Instead of uploading, download latest from server
+            await downloadAllTasks();
+            return true; // Return success to prevent errors
         };
         
         // Generate unique device ID for conflict resolution
@@ -9628,24 +9553,16 @@
             }
         }
 
-        // Download all tasks from server (Lists pattern implementation)
+        // ULTRA-SIMPLE DOWNLOAD: Server is source of truth, always replace local
         async function downloadAllTasks() {
             if (!window.currentUser?.user?.id) {
                 console.log('⚠️ No user ID available for download');
                 return;
             }
             
-            // MANDATORY REFRESH: Override protection for stale browser
-            if (window.forceMandatoryRefresh) {
-                console.warn('🚨 MANDATORY REFRESH: Forcing download despite protection flags');
-                console.warn('🛡️ This overrides normal protection to prevent database conflicts');
-            } else {
-                // 🔒 Download protection - skip if just modified tasks
-                if (window.justModifiedTasks) {
-                    console.log('📥 Skipping download - just modified tasks');
-                    return;
-                }
-            }
+            console.log('📥 SIMPLE SYNC: Downloading tasks from server (source of truth)');
+            
+            // NO PROTECTION FLAGS - always download from server
             
             // Get auth token with fallback
             const authToken = window.currentUser?.token || localStorage.getItem('authToken');
@@ -9673,57 +9590,11 @@
                 
                 console.log('📥 Downloaded', serverTasks.length, 'tasks from server');
                 
-                // MANDATORY REFRESH: Direct replacement with server data (no conflict detection)
-                if (window.forceMandatoryRefresh || window.staleBrowserMode) {
-                    console.log('🚨 MANDATORY REFRESH: Directly replacing with server data (no conflict detection)');
-                    tasks = serverTasks; // Direct replacement - no merging or conflict detection
-                } else {
-                    // 📋 TRIPLE-LAYER PROTECTION: Smart conflict detection and resolution for normal syncs
-                    if (window.TripleProtection && tasks.length > 0) {
-                        // console.log('📋 Layer 3: Checking for conflicts during sync...');
-                        let conflictsDetected = 0;
-                        let conflictsResolved = 0;
-                        
-                        // Check each server task against local tasks for conflicts
-                        for (const serverTask of serverTasks) {
-                            const localTask = tasks.find(t => t.id === serverTask.id);
-                            if (localTask) {
-                                const conflict = await window.TripleProtection.conflicts.detectConflict(
-                                    serverTask.id, localTask, serverTask
-                                );
-                                
-                                if (conflict) {
-                                    conflictsDetected++;
-                                    // console.log(`📋 Layer 3: Conflict detected for task "${localTask.title}"`);
-                                    
-                                    // Attempt automatic resolution
-                                    const resolved = await window.TripleProtection.conflicts.resolveConflict(conflict, 'auto');
-                                    if (resolved) {
-                                        conflictsResolved++;
-                                        // Update server task list with resolved version
-                                        const serverTaskIndex = serverTasks.findIndex(t => t.id === serverTask.id);
-                                        if (serverTaskIndex >= 0) {
-                                            serverTasks[serverTaskIndex] = resolved;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        
-                        if (conflictsDetected > 0) {
-                            // console.log(`📋 Layer 3: Smart resolution complete: ${conflictsResolved}/${conflictsDetected} conflicts resolved`);
-                            
-                            // Show notification to user - DISABLED to reduce UI noise
-                            // showInlineNotification(
-                            //     `🔧 Smart Conflict Resolution: ${conflictsResolved}/${conflictsDetected} conflicts automatically resolved`, 
-                            //     conflictsResolved === conflictsDetected ? 'success' : 'warning'
-                            // );
-                        }
-                    }
-                    
-                    // Use resolved server tasks for normal sync
-                    tasks = serverTasks;
-                }
+                // ULTRA-SIMPLE: Server is always right, replace everything local
+                console.log('🔄 SIMPLE SYNC: Server is source of truth - replacing local data');
+                tasks = serverTasks; // Direct replacement - no complex logic
+                
+                console.log('✅ Local tasks replaced with server data:', tasks.length);
                 
                 // Save to localStorage
                 localStorage.setItem('gtdTasks', JSON.stringify(tasks));
