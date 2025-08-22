@@ -5948,6 +5948,17 @@
             try {
                 const cleanedTasks = tasks.map(task => cleanTaskForStorage(task));
                 localStorage.setItem('gtdTasks', JSON.stringify(cleanedTasks));
+                
+                // CRITICAL: Auto-upload after save to prevent data loss
+                // This ensures desktop changes are immediately synced
+                if (window.currentUser?.user?.id) {
+                    setTimeout(() => {
+                        console.log('📤 Auto-uploading after save...');
+                        uploadAllTasks().catch(err => {
+                            console.warn('Auto-upload failed:', err);
+                        });
+                    }, 500); // Small delay to batch multiple saves
+                }
             } catch (error) {
                 console.error('Error saving tasks to localStorage:', error);
                 // Fallback: try to save with replacer to handle circular references
@@ -8800,11 +8811,22 @@
             
             // IMMEDIATE SYNC: Download tasks and lists on startup (using smart sync)
             console.log('📥 Starting immediate smart download on sync init...');
-            smartDownloadTasks().catch(error => {
-                console.warn('📥 Initial smart download failed:', error);
-            });
-            downloadAllLists().catch(error => {
-                console.warn('📥 Initial lists download failed:', error);
+            
+            // CRITICAL: Always download on startup to ensure we have latest data
+            // This prevents the "blank mobile" issue
+            Promise.all([
+                smartDownloadTasks().catch(error => {
+                    console.error('📥 Initial smart download failed:', error);
+                    // Fallback to full download if smart download fails
+                    return downloadAllTasks();
+                }),
+                downloadAllLists().catch(error => {
+                    console.warn('📥 Initial lists download failed:', error);
+                })
+            ]).then(() => {
+                console.log('✅ Initial sync completed successfully');
+            }).catch(error => {
+                console.error('❌ Initial sync had errors:', error);
             });
             
             // IMMEDIATE SYNC PATTERN (Like Lists) - Use focus/visibility events instead of polling
@@ -9314,11 +9336,13 @@
             const currentTime = Date.now();
             const timeSinceLastSync = currentTime - (lastSyncTime ? parseInt(lastSyncTime) : 0);
             
-            if (timeSinceLastSync > 180000) { // 3 minutes
-                console.error('🚨 BLOCKED: Upload attempt from stale browser detected');
-                console.error('🛡️ Preventing potential database overwrite from old tab');
-                console.error('⏰ Last sync was', Math.floor(timeSinceLastSync / 1000), 'seconds ago');
-                throw new Error('Upload blocked - browser data is stale. Please refresh the page.');
+            // ADJUSTED: Increased to 2 hours to allow for normal work sessions
+            // Previous 3-minute limit was causing data loss
+            if (timeSinceLastSync > 7200000) { // 2 hours instead of 3 minutes
+                console.warn('⚠️ WARNING: Long time since last sync detected');
+                console.warn('⏰ Last sync was', Math.floor(timeSinceLastSync / 1000), 'seconds ago');
+                // Don't block - just warn and continue with sync
+                // This prevents data loss from legitimate work sessions
             }
             
             if (!window.currentUser?.user?.id) {
