@@ -193,9 +193,9 @@ export default {
     console.log('🌐 CORS DEBUG: Request origin:', requestOrigin, 'Allowed:', isAllowedOrigin);
     console.log('🌐 CORS DEBUG: Full allowedOrigins list:', allowedOrigins);
     
-    // CORS headers - allow all origins for now to fix the issue
+    // CORS headers - properly configured for authentication
     const corsHeaders = {
-      'Access-Control-Allow-Origin': '*', // Allow all origins temporarily
+      'Access-Control-Allow-Origin': isAllowedOrigin ? requestOrigin : 'https://hyperfiler.pro',
       'Access-Control-Allow-Credentials': 'true',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, Cookie, X-Requested-With',
