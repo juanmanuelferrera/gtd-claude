@@ -8486,8 +8486,8 @@
                     
                 } catch (refreshError) {
                     console.error('❌ CRITICAL: Failed to refresh stale browser data:', refreshError);
-                    // Show error to user but don't block initialization completely
-                    alert('⚠️ Failed to refresh browser data. Please refresh the page manually to ensure you have the latest information.');
+                    // Don't show alert - let normal sync process handle it
+                    console.log('🔄 Will rely on normal sync process to refresh data');
                 }
                 
             } catch (error) {
@@ -8725,8 +8725,8 @@
                     console.log('✅ STALE BROWSER: Successfully refreshed all data after authentication');
                 } catch (refreshError) {
                     console.error('❌ CRITICAL: Failed to refresh stale browser data:', refreshError);
-                    // Show error to user but don't block initialization completely
-                    alert('⚠️ Failed to refresh browser data. Please refresh the page manually to ensure you have the latest information.');
+                    // Don't show alert - let normal sync process handle it
+                    console.log('🔄 Will rely on normal sync process to refresh data');
                 }
             }
             
