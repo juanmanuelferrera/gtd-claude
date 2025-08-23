@@ -3796,7 +3796,7 @@
                         <div style="margin-bottom: 10px;">
                             <strong>Plan:</strong> <span style="color: #007bff;">HyperFiler Pro</span>
                         </div>
-                        <button class="btn btn-secondary" onclick="window.location.href='frontend/login.html'" style="padding: 8px 16px; background: #dc3545; border-color: #dc3545; color: white; margin-top: 10px;">🚪 Logout</button>
+                        <button class="btn btn-secondary" onclick="window.location.href='login.html'" style="padding: 8px 16px; background: #dc3545; border-color: #dc3545; color: white; margin-top: 10px;">🚪 Logout</button>
                     </div>
                 </div>
             </div>
@@ -7212,7 +7212,7 @@
                     title: '❌ Session Expired',
                     message: 'Your session has expired. Please log in again.',
                     action: 'Login',
-                    url: 'frontend/login.html'
+                    url: 'login.html'
                 },
                 subscription: {
                     title: '💳 Subscription Required',
@@ -7230,7 +7230,7 @@
                     title: '⚠️ Authentication Error',
                     message: 'Unable to verify your account. Please try again.',
                     action: 'Login',
-                    url: 'frontend/login.html'
+                    url: 'login.html'
                 }
             };
 
@@ -7497,7 +7497,7 @@
             
             // SECURITY: Clear all authentication data
             clearAuthData();
-            window.location.href = 'frontend/login.html';
+            window.location.href = 'login.html';
         }
 
         // Show soft reminders (Reaper-style)
