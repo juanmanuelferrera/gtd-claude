@@ -8431,6 +8431,70 @@
             document.getElementById('editTaskTime').value = ''; // Empty = "No specific time"
         }
 
+        // Perform stale browser refresh when authentication is ready
+        async function performStaleRefresh() {
+            try {
+                console.warn('🚨 STALE BROWSER DETECTED - FORCING IMMEDIATE DATABASE REFRESH');
+                
+                // Show friendly sync banner
+                const body = document.body;
+                const warningBanner = document.createElement('div');
+                warningBanner.id = 'stale-browser-warning';
+                warningBanner.innerHTML = `
+                    <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; 
+                                background: rgba(59, 130, 246, 0.95); color: white; 
+                                border-radius: 8px; padding: 12px 20px;
+                                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                                font-size: 14px; font-weight: 500;
+                                display: flex; align-items: center; gap: 10px;
+                                backdrop-filter: blur(8px);">
+                        <div style="width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, 0.3); 
+                                    border-top: 2px solid white; border-radius: 50%; 
+                                    animation: spin 1s linear infinite;"></div>
+                        <span>Syncing...</span>
+                    </div>
+                    <style>
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                    </style>
+                `;
+                body.appendChild(warningBanner);
+                
+                // Set flags
+                window.forceMandatoryRefresh = true;
+                window.staleBrowserMode = true;
+                
+                // Force download with authentication ready
+                console.log('🚨 STALE BROWSER MODE: Forcing immediate database download after authentication');
+                try {
+                    // Force download all data immediately
+                    await downloadAllTasks();
+                    await downloadAllLists();
+                    await downloadAllTemplates();
+                    console.log('✅ STALE BROWSER: Successfully refreshed all data after authentication');
+                    
+                    // Remove banner and reset flags
+                    const banner = document.getElementById('stale-browser-warning');
+                    if (banner) {
+                        banner.remove();
+                    }
+                    window.forceMandatoryRefresh = false;
+                    window.staleBrowserMode = false;
+                    window.needsStaleRefresh = false;
+                    
+                } catch (refreshError) {
+                    console.error('❌ CRITICAL: Failed to refresh stale browser data:', refreshError);
+                    // Show error to user but don't block initialization completely
+                    alert('⚠️ Failed to refresh browser data. Please refresh the page manually to ensure you have the latest information.');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error during stale refresh:', error);
+            }
+        }
+
         // Initialize the app
         // Prevent multiple initialization attempts
         let initializationInProgress = false;
@@ -8488,8 +8552,18 @@
                     stalenessThreshold: 180000 // 3 minutes
                 });
                 
-                // If no sync in 3 minutes, this browser has stale data - MANDATORY refresh
+                // If no sync in 3 minutes, this browser has stale data - DEFER check until auth is ready
                 if (timeSinceLastSync > 180000) { // 3 minutes (reduced from 5 minutes)
+                    console.warn('🚨 STALE BROWSER DETECTED - Will refresh after authentication is confirmed');
+                    window.needsStaleRefresh = true; // Flag to trigger refresh after auth
+                    
+                    // Continue with authentication first, then handle stale refresh
+                } else {
+                    window.needsStaleRefresh = false;
+                }
+                
+                // Original stale browser logic moved to after authentication
+                if (false && timeSinceLastSync > 180000) { // Temporarily disabled here
                     console.warn('🚨 STALE BROWSER DETECTED - FORCING IMMEDIATE DATABASE REFRESH');
                     
                     // Show friendly sync banner
@@ -8811,6 +8885,12 @@
                     
                     if (hasUserId && hasToken) {
                         console.log('✅ Authentication ready - initializing sync');
+                        
+                        // 🚨 Check if stale browser refresh is needed (deferred from earlier)
+                        if (window.needsStaleRefresh) {
+                            console.warn('🚨 PERFORMING DEFERRED STALE BROWSER REFRESH');
+                            await performStaleRefresh();
+                        }
                         
                         // 🔒 Initialize Triple-Layer Protection System
                         if (window.TripleProtection) {
