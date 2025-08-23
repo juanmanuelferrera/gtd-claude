@@ -23353,6 +23353,12 @@
             const modalContent = modal ? modal.querySelector('.modal-content') : null;
             
             if (modal && modalContent) {
+                // Set default positioning first
+                modalContent.style.position = 'fixed';
+                modalContent.style.left = '50%';
+                modalContent.style.top = '20vh';
+                modalContent.style.transform = 'translateX(-50%)';
+                modalContent.style.margin = '0';
                 // Find first selected task element (try multiple selectors)
                 const firstSelectedTask = document.querySelector('.task-card-selectable.selected') || 
                                          document.querySelector('.task-card.selected') || 
@@ -23380,11 +23386,12 @@
                     
                     const top = Math.max(20, taskRect.top);
                     
+                    // Override default positioning with task-specific position
                     modalContent.style.position = 'fixed';
                     modalContent.style.left = left + 'px';
                     modalContent.style.top = top + 'px';
-                    modalContent.style.margin = '0';
                     modalContent.style.transform = 'none';
+                    modalContent.style.margin = '0';
                     
                     console.log('🎯 Modal positioned at:', { left, top });
                 } else {
@@ -23449,12 +23456,16 @@
                 for (const taskId of selectedTasks) {
                     const task = tasks.find(t => String(t.id) === String(taskId));
                     if (task) {
+                        console.log(`⏰ DEBUG: Found task to update:`, task.title, 'Current time:', task.dueTime);
+                        
                         // Update task time
                         task.dueTime = selectedTime || null;
                         task.updatedAt = new Date().toISOString();
                         updatedCount++;
                         
                         console.log(`⏰ Updated task ${taskId} time to: ${selectedTime || 'No specific time'}`);
+                    } else {
+                        console.warn(`⏰ WARNING: Task not found for ID: ${taskId}`);
                     }
                 }
                 
@@ -23462,6 +23473,10 @@
                 selectedTasks.clear();
                 closeBulkTimeModal();
                 updateSelectionUI();
+                
+                // Save to localStorage immediately
+                saveTasksToLocalStorage();
+                console.log('💾 Tasks saved to localStorage after bulk time update');
                 
                 // Update UI immediately
                 sortTasks();
@@ -29958,7 +29973,7 @@
     
     <!-- Bulk Time Selection Modal -->
     <div id="bulkTimeModal" class="modal" onclick="closeBulkTimeModal(event)" style="z-index: 1200;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 400px; margin: 20vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 400px; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; position: relative;">
