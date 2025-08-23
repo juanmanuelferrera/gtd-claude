@@ -23313,6 +23313,10 @@
                 return;
             }
             
+            // Store selected tasks to prevent them being cleared during modal operations
+            window.bulkTimeSelectedTasks = new Set([...selectedTasks]);
+            console.log('🎯 Preserved selected tasks:', Array.from(window.bulkTimeSelectedTasks));
+            
             // Update task count
             const countElement = document.getElementById('bulkTimeTaskCount');
             if (countElement) {
@@ -23445,22 +23449,26 @@
             
             console.log('🎯 Time select element:', timeSelect);
             console.log('🎯 Selected time value:', selectedTime);
-            console.log('🎯 Selected tasks size:', selectedTasks.size);
-            console.log('🎯 Selected tasks:', Array.from(selectedTasks));
+            console.log('🎯 Current selectedTasks size:', selectedTasks.size);
+            console.log('🎯 Preserved bulkTimeSelectedTasks size:', window.bulkTimeSelectedTasks?.size || 0);
             
-            if (selectedTasks.size === 0) {
-                console.warn('🎯 No tasks selected, closing modal');
+            // Use preserved tasks if current selection is empty
+            const tasksToUpdate = selectedTasks.size > 0 ? selectedTasks : (window.bulkTimeSelectedTasks || new Set());
+            console.log('🎯 Tasks to update:', Array.from(tasksToUpdate));
+            
+            if (tasksToUpdate.size === 0) {
+                console.warn('🎯 No tasks to update, closing modal');
                 closeBulkTimeModal();
                 return;
             }
             
-            console.log(`⏰ Applying time "${selectedTime}" to ${selectedTasks.size} selected tasks`);
+            console.log(`⏰ Applying time "${selectedTime}" to ${tasksToUpdate.size} selected tasks`);
             
             try {
                 let updatedCount = 0;
                 
                 // Update each selected task
-                for (const taskId of selectedTasks) {
+                for (const taskId of tasksToUpdate) {
                     const task = tasks.find(t => String(t.id) === String(taskId));
                     if (task) {
                         console.log(`⏰ DEBUG: Found task to update:`, task.title, 'Current time:', task.dueTime);
@@ -23476,8 +23484,9 @@
                     }
                 }
                 
-                // Clear selection and close modal
+                // Clear selections and close modal
                 selectedTasks.clear();
+                window.bulkTimeSelectedTasks = null; // Clean up preserved tasks
                 closeBulkTimeModal();
                 updateSelectionUI();
                 
