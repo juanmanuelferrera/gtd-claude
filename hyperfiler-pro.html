@@ -7,11 +7,36 @@
     
     <!-- BLOCK PAGES.DEV ACCESS: Redirect users to official domain -->
     <script>
-        // Immediate redirect if user accessed via pages.dev
+        // Check if redirect is needed, but allow auth to initialize first
         if (window.location.hostname.includes('.pages.dev') || window.location.hostname.includes('hyperfiler.pages.dev')) {
-            console.log('🚫 Redirecting from pages.dev to official domain');
-            const newUrl = 'https://hyperfiler.pro' + window.location.pathname + window.location.search + window.location.hash;
-            window.location.replace(newUrl);
+            console.log('🚫 Pages.dev detected - will redirect after auth check');
+            
+            // Wait for DOM and potential auth initialization
+            document.addEventListener('DOMContentLoaded', function() {
+                // Small delay to allow authentication to initialize
+                setTimeout(() => {
+                    console.log('🚫 Redirecting from pages.dev to official domain');
+                    const newUrl = 'https://hyperfiler.pro' + window.location.pathname + window.location.search + window.location.hash;
+                    
+                    // Preserve any authentication tokens before redirect
+                    const authToken = localStorage.getItem('authToken');
+                    const authExpiry = localStorage.getItem('authTokenExpiry');
+                    const currentUser = localStorage.getItem('currentUser');
+                    
+                    if (authToken && authExpiry && currentUser) {
+                        console.log('💾 Preserving authentication during redirect');
+                        // Store in sessionStorage as backup
+                        sessionStorage.setItem('redirectAuth', JSON.stringify({
+                            authToken,
+                            authExpiry,
+                            currentUser,
+                            redirectTime: Date.now()
+                        }));
+                    }
+                    
+                    window.location.replace(newUrl);
+                }, 100); // 100ms delay to allow initialization
+            });
         }
     </script>
     <!-- Fallback for users with JavaScript disabled -->
@@ -8417,6 +8442,38 @@
             }
             
             initializationInProgress = true;
+            
+            // ======= AUTHENTICATION RESTORATION AFTER REDIRECT =======
+            // Restore authentication if this page was reached via redirect from pages.dev
+            try {
+                const redirectAuth = sessionStorage.getItem('redirectAuth');
+                if (redirectAuth) {
+                    console.log('🔄 Restoring authentication after redirect');
+                    const authData = JSON.parse(redirectAuth);
+                    
+                    // Only restore if redirect was recent (within 10 seconds)
+                    if (Date.now() - authData.redirectTime < 10000) {
+                        localStorage.setItem('authToken', authData.authToken);
+                        localStorage.setItem('authTokenExpiry', authData.authExpiry);
+                        localStorage.setItem('currentUser', authData.currentUser);
+                        
+                        // Parse and set global currentUser
+                        try {
+                            window.currentUser = JSON.parse(authData.currentUser);
+                            console.log('✅ Authentication restored successfully');
+                        } catch (e) {
+                            console.warn('⚠️ Failed to parse restored currentUser data:', e);
+                        }
+                    } else {
+                        console.log('⏰ Redirect auth data too old, ignoring');
+                    }
+                    
+                    // Clean up sessionStorage
+                    sessionStorage.removeItem('redirectAuth');
+                }
+            } catch (error) {
+                console.warn('⚠️ Error restoring authentication after redirect:', error);
+            }
             
             // ======= CRITICAL STALE BROWSER PROTECTION =======
             // This MUST run before any data operations to prevent database overwrites
