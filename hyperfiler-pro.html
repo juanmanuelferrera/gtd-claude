@@ -23177,7 +23177,7 @@
                 
                 // Backup original tasks for rollback
                 for (const taskId of selectedTasks) {
-                    const task = tasks.find(t => t.id == taskId);
+                    const task = tasks.find(t => String(t.id) === String(taskId));
                     if (task) {
                         originalTasks.push({
                             id: task.id,
@@ -23188,7 +23188,7 @@
                 
                 // Process each selected task (OPTIMISTIC UPDATE)
                 for (const taskId of selectedTasks) {
-                    const task = tasks.find(t => t.id == taskId);
+                    const task = tasks.find(t => String(t.id) === String(taskId));
                     if (task) {
                         // Calculate new date
                         const currentDate = task.dueDate ? new Date(task.dueDate + 'T00:00:00') : new Date();
@@ -23353,12 +23353,16 @@
             const modalContent = modal ? modal.querySelector('.modal-content') : null;
             
             if (modal && modalContent) {
-                // Find first selected task element
-                const firstSelectedTask = document.querySelector('.task-card-selectable.selected');
+                // Find first selected task element (try multiple selectors)
+                const firstSelectedTask = document.querySelector('.task-card-selectable.selected') || 
+                                         document.querySelector('.task-card.selected') || 
+                                         document.querySelector('.selected[data-task-id]') ||
+                                         document.querySelector('[data-task-id].selected');
                 
                 if (firstSelectedTask) {
-                    console.log('🎯 Positioning modal near first selected task');
+                    console.log('🎯 Positioning modal near first selected task:', firstSelectedTask.className);
                     const taskRect = firstSelectedTask.getBoundingClientRect();
+                    console.log('🎯 Task position:', taskRect);
                     
                     // Position modal near the task (to the right if space, otherwise left)
                     const modalWidth = 400; // Modal max-width
@@ -23385,6 +23389,8 @@
                     console.log('🎯 Modal positioned at:', { left, top });
                 } else {
                     console.log('🎯 No selected task found, using default positioning');
+                    console.log('🎯 Available selected elements:', document.querySelectorAll('.selected').length);
+                    console.log('🎯 Available task elements:', document.querySelectorAll('[data-task-id]').length);
                     // Reset to default centered positioning
                     modalContent.style.position = 'static';
                     modalContent.style.left = 'auto';
@@ -23441,7 +23447,7 @@
                 
                 // Update each selected task
                 for (const taskId of selectedTasks) {
-                    const task = tasks.find(t => t.id == taskId);
+                    const task = tasks.find(t => String(t.id) === String(taskId));
                     if (task) {
                         // Update task time
                         task.dueTime = selectedTime || null;
