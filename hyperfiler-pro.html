@@ -7156,26 +7156,15 @@
                     console.error('❌ Authentication failed after retries:', lastError);
                     lastAuthenticationState = false;
                     
-                    // BYPASS: Skip /auth/me validation if we have a valid login token
+                    // Check if we have stored credentials, but DON'T bypass - redirect to login instead
                     const storedToken = localStorage.getItem('authToken');
                     const storedUserId = localStorage.getItem('userId');
                     const storedEmail = localStorage.getItem('userEmail');
                     
                     if (storedToken && storedUserId && storedEmail) {
-                        console.log('🔄 Bypassing /auth/me validation, using stored session');
-                        window.currentUser = {
-                            user: { id: storedUserId, email: storedEmail },
-                            token: storedToken,
-                            subscription: { plan_name: 'pro' }
-                        };
-                        
-                        // Show user info in the UI
-                        showUserInfo(window.currentUser);
-                        
-                        // Simple sync system - no complex initialization needed
-                        
-                        lastAuthenticationState = true;
-                        return true;
+                        console.log('❌ Found stored credentials but /auth/me failed - tokens are likely expired');
+                        console.log('🔍 Clearing expired credentials and redirecting to login');
+                        clearAuthData();
                     }
                     
                     // If no valid session, clear auth data and show login form
