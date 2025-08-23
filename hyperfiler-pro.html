@@ -29641,12 +29641,12 @@
                             window.selectedTasks = new Set();
                         }
                         
-                        // Add or remove from selection
+                        // Add or remove from selection (use string IDs for consistency)
                         if (selectedTaskElement.classList.contains('selected')) {
-                            selectedTasks.add(parseInt(taskId));
+                            selectedTasks.add(String(taskId));
                             console.log('Task selected for batch operations:', taskId);
                         } else {
-                            selectedTasks.delete(parseInt(taskId));
+                            selectedTasks.delete(String(taskId));
                             console.log('Task deselected from batch operations:', taskId);
                         }
                         
