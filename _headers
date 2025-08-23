@@ -1,3 +1,10 @@
+# BLOCK PAGES.DEV ACCESS: Redirect and prevent indexing
+https://*.pages.dev/*
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+  X-Frame-Options: DENY
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# OFFICIAL DOMAIN: Standard security headers
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff

@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚡ HyperFiler Pro 🚀 - v2.0.6</title>
+    
+    <!-- BLOCK PAGES.DEV ACCESS: Redirect users to official domain -->
+    <script>
+        // Immediate redirect if user accessed via pages.dev
+        if (window.location.hostname.includes('.pages.dev') || window.location.hostname.includes('hyperfiler.pages.dev')) {
+            console.log('🚫 Redirecting from pages.dev to official domain');
+            const newUrl = 'https://hyperfiler.pro' + window.location.pathname + window.location.search + window.location.hash;
+            window.location.replace(newUrl);
+        }
+    </script>
+    <!-- Fallback for users with JavaScript disabled -->
+    <noscript>
+        <script>
+            if (location.hostname.includes('pages.dev')) {
+                location.href = 'https://hyperfiler.pro' + location.pathname + location.search;
+            }
+        </script>
+        <meta http-equiv="refresh" content="0;url=https://hyperfiler.pro">
+    </noscript>
     <style>
         * {
             margin: 0;
