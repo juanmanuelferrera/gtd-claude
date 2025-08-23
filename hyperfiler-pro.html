@@ -5815,16 +5815,21 @@
             
             return headers;
         }
-
+        
+        // Helper function for authenticated fetch requests with proper CORS credentials
         function authenticatedFetch(url, options = {}) {
-            return fetch(url, {
-                ...options,
+            const defaultOptions = {
+                credentials: 'include', // Always include cookies for cross-domain auth
+                mode: 'cors',
                 headers: {
                     ...getAuthHeaders(),
-                    ...options.headers
+                    ...(options.headers || {})
                 }
-            });
+            };
+            
+            return fetch(url, { ...defaultOptions, ...options });
         }
+
 
         // Debug verification
 
