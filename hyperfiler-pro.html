@@ -23353,12 +23353,12 @@
             const modalContent = modal ? modal.querySelector('.modal-content') : null;
             
             if (modal && modalContent) {
-                // Set default positioning first
-                modalContent.style.position = 'fixed';
-                modalContent.style.left = '50%';
-                modalContent.style.top = '20vh';
-                modalContent.style.transform = 'translateX(-50%)';
-                modalContent.style.margin = '0';
+                // Set default positioning first (with !important to override CSS)
+                modalContent.style.setProperty('position', 'fixed', 'important');
+                modalContent.style.setProperty('left', '50%', 'important');
+                modalContent.style.setProperty('top', '20vh', 'important');
+                modalContent.style.setProperty('transform', 'translateX(-50%)', 'important');
+                modalContent.style.setProperty('margin', '0', 'important');
                 // Find first selected task element (try multiple selectors)
                 const firstSelectedTask = document.querySelector('.task-card-selectable.selected') || 
                                          document.querySelector('.task-card.selected') || 
@@ -23387,11 +23387,11 @@
                     const top = Math.max(20, taskRect.top);
                     
                     // Override default positioning with task-specific position
-                    modalContent.style.position = 'fixed';
-                    modalContent.style.left = left + 'px';
-                    modalContent.style.top = top + 'px';
-                    modalContent.style.transform = 'none';
-                    modalContent.style.margin = '0';
+                    modalContent.style.setProperty('position', 'fixed', 'important');
+                    modalContent.style.setProperty('left', left + 'px', 'important');
+                    modalContent.style.setProperty('top', top + 'px', 'important');
+                    modalContent.style.setProperty('transform', 'none', 'important');
+                    modalContent.style.setProperty('margin', '0', 'important');
                     
                     console.log('🎯 Modal positioned at:', { left, top });
                 } else {
@@ -23424,11 +23424,11 @@
                 
                 // Reset positioning for next time
                 if (modalContent) {
-                    modalContent.style.position = 'static';
-                    modalContent.style.left = 'auto';
-                    modalContent.style.top = 'auto';
-                    modalContent.style.margin = '20vh auto';
-                    modalContent.style.transform = '';
+                    modalContent.style.removeProperty('position');
+                    modalContent.style.removeProperty('left');
+                    modalContent.style.removeProperty('top');
+                    modalContent.style.removeProperty('margin');
+                    modalContent.style.removeProperty('transform');
                 }
             }
         }
@@ -23439,10 +23439,17 @@
         window.applyBulkTime = applyBulkTime;
         
         function applyBulkTime() {
+            console.log('🎯 applyBulkTime function called');
             const timeSelect = document.getElementById('bulkTimeSelect');
             const selectedTime = timeSelect ? timeSelect.value : '';
             
+            console.log('🎯 Time select element:', timeSelect);
+            console.log('🎯 Selected time value:', selectedTime);
+            console.log('🎯 Selected tasks size:', selectedTasks.size);
+            console.log('🎯 Selected tasks:', Array.from(selectedTasks));
+            
             if (selectedTasks.size === 0) {
+                console.warn('🎯 No tasks selected, closing modal');
                 closeBulkTimeModal();
                 return;
             }
