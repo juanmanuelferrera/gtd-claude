@@ -23358,11 +23358,15 @@
             
             if (modal && modalContent) {
                 // Set default positioning first (with !important to override CSS)
+                // Position at 40% from top instead of 20vh for better centering
+                const defaultTop = window.innerHeight * 0.4;
                 modalContent.style.setProperty('position', 'fixed', 'important');
                 modalContent.style.setProperty('left', '50%', 'important');
-                modalContent.style.setProperty('top', '20vh', 'important');
+                modalContent.style.setProperty('top', defaultTop + 'px', 'important');
                 modalContent.style.setProperty('transform', 'translateX(-50%)', 'important');
                 modalContent.style.setProperty('margin', '0', 'important');
+                
+                console.log('🎯 Default positioning: top =', defaultTop);
                 // Find first selected task element (try multiple selectors)
                 const firstSelectedTask = document.querySelector('.task-card-selectable.selected') || 
                                          document.querySelector('.task-card.selected') || 
@@ -23388,7 +23392,15 @@
                     // Ensure modal doesn't go off screen
                     left = Math.max(20, Math.min(left, window.innerWidth - modalWidth - 20));
                     
-                    const top = Math.max(20, taskRect.top);
+                    // Position modal in the center-bottom area of viewport, not at task position
+                    const modalHeight = 300; // Approximate modal height
+                    const viewportHeight = window.innerHeight;
+                    const centerY = viewportHeight * 0.4; // 40% down from top (more centered but lower)
+                    
+                    // Use center positioning, but ensure it's visible
+                    const top = Math.max(50, Math.min(centerY, viewportHeight - modalHeight - 50));
+                    
+                    console.log('🎯 Viewport height:', viewportHeight, 'Calculated top:', top);
                     
                     // Override default positioning with task-specific position
                     modalContent.style.setProperty('position', 'fixed', 'important');
