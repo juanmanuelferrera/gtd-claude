@@ -23082,19 +23082,30 @@
         }
 
         async function deleteSelectedTasks() {
-            if (selectedTasks.size === 0) {
-                // No tasks selected for deletion
+            // Preserve selected tasks before any operations that might clear them
+            window.bulkDeleteSelectedTasks = new Set([...selectedTasks]);
+            console.log('🎯 Preserved selected tasks for deletion:', Array.from(window.bulkDeleteSelectedTasks));
+            
+            // Use preserved tasks if current selection is empty, fallback to current selection
+            const tasksToDeleteFrom = selectedTasks.size > 0 ? selectedTasks : (window.bulkDeleteSelectedTasks || new Set());
+            
+            if (tasksToDeleteFrom.size === 0) {
+                alert('❌ No tasks selected for deletion.');
                 return;
             }
             
             // Delete operation initiated
             
-            const confirmed = confirm(`Are you sure you want to delete ${selectedTasks.size} selected task(s)?`);
-            if (!confirmed) return;
+            const confirmed = confirm(`Are you sure you want to delete ${tasksToDeleteFrom.size} selected task(s)?`);
+            if (!confirmed) {
+                // Clean up preserved tasks if user cancels
+                window.bulkDeleteSelectedTasks = null;
+                return;
+            }
             
             try {
                 // Convert selected task IDs to strings/numbers consistently
-                const selectedTaskIds = Array.from(selectedTasks).map(id => 
+                const selectedTaskIds = Array.from(tasksToDeleteFrom).map(id => 
                     typeof id === 'string' ? id : String(id)
                 );
                 
@@ -23146,6 +23157,7 @@
                 
                 // Clear selection and update UI
                 selectedTasks.clear();
+                window.bulkDeleteSelectedTasks = null; // Clean up preserved tasks
                 updateSelectionUI();
                 
                 // Refresh the view
@@ -23156,27 +23168,36 @@
             } catch (error) {
                 console.error('❌ Error deleting selected tasks:', error);
                 alert('❌ Error deleting some tasks. Please try again.');
+                // Clean up preserved tasks on error
+                window.bulkDeleteSelectedTasks = null;
             }
         }
 
         function delaySelectedTasks(days) {
-            if (selectedTasks.size === 0) {
+            // Preserve selected tasks before any operations that might clear them
+            window.bulkDelaySelectedTasks = new Set([...selectedTasks]);
+            console.log('🎯 Preserved selected tasks for delay:', Array.from(window.bulkDelaySelectedTasks));
+            
+            // Use preserved tasks if current selection is empty, fallback to current selection
+            const tasksToDelayFrom = selectedTasks.size > 0 ? selectedTasks : (window.bulkDelaySelectedTasks || new Set());
+            
+            if (tasksToDelayFrom.size === 0) {
                 console.log('🔍 DEBUG: No tasks selected for delay');
                 return;
             }
             
-            console.log('📅 OPTIMISTIC: Delaying', selectedTasks.size, 'selected tasks by', days, 'days');
+            console.log('📅 OPTIMISTIC: Delaying', tasksToDelayFrom.size, 'selected tasks by', days, 'days');
             
             // Store original state for potential rollback
             const originalTasks = [];
-            const affectedTaskIds = Array.from(selectedTasks);
+            const affectedTaskIds = Array.from(tasksToDelayFrom);
             
             try {
                 let delayedCount = 0;
                 const delayLabel = days === 1 ? '+1D' : days === 7 ? '+1W' : days === 30 ? '+1M' : `+${days}D`;
                 
                 // Backup original tasks for rollback
-                for (const taskId of selectedTasks) {
+                for (const taskId of tasksToDelayFrom) {
                     const task = tasks.find(t => String(t.id) === String(taskId));
                     if (task) {
                         originalTasks.push({
@@ -23187,7 +23208,7 @@
                 }
                 
                 // Process each selected task (OPTIMISTIC UPDATE)
-                for (const taskId of selectedTasks) {
+                for (const taskId of tasksToDelayFrom) {
                     const task = tasks.find(t => String(t.id) === String(taskId));
                     if (task) {
                         // Calculate new date
@@ -23206,6 +23227,7 @@
                 
                 // Immediate UI update (optimistic feedback)
                 selectedTasks.clear();
+                window.bulkDelaySelectedTasks = null; // Clean up preserved tasks
                 updateSelectionUI();
                 renderCurrentView();
                 
@@ -23250,6 +23272,9 @@
             } catch (error) {
                 console.error('❌ OPTIMISTIC ERROR: Error delaying selected tasks:', error);
                 showOptimisticFeedback('❌ Error rescheduling tasks', 'error');
+                
+                // Clean up preserved tasks on error
+                window.bulkDelaySelectedTasks = null;
                 
                 // Restore UI if immediate operation failed
                 renderCurrentView();
@@ -23352,75 +23377,38 @@
                 });
             }
             
-            // Position modal near first selected task
+            // Position modal near first selected task (same level as floating buttons)
             const modal = document.getElementById('bulkTimeModal');
             const modalContent = modal ? modal.querySelector('.modal-content') : null;
             
             if (modal && modalContent) {
-                // Set default positioning first (with !important to override CSS)
-                // Position at 40% from top instead of 20vh for better centering
-                const defaultTop = window.innerHeight * 0.4;
-                modalContent.style.setProperty('position', 'fixed', 'important');
-                modalContent.style.setProperty('left', '50%', 'important');
-                modalContent.style.setProperty('top', defaultTop + 'px', 'important');
-                modalContent.style.setProperty('transform', 'translateX(-50%)', 'important');
-                modalContent.style.setProperty('margin', '0', 'important');
-                
-                console.log('🎯 Default positioning: top =', defaultTop);
-                // Find first selected task element (try multiple selectors)
-                const firstSelectedTask = document.querySelector('.task-card-selectable.selected') || 
-                                         document.querySelector('.task-card.selected') || 
-                                         document.querySelector('.selected[data-task-id]') ||
-                                         document.querySelector('[data-task-id].selected');
+                // Find the first selected task to position modal at same level
+                const firstSelectedTask = document.querySelector('.task-card-selectable.selected');
                 
                 if (firstSelectedTask) {
-                    console.log('🎯 Positioning modal near first selected task:', firstSelectedTask.className);
+                    console.log('🎯 Positioning modal near first selected task at same level as floating buttons');
                     const taskRect = firstSelectedTask.getBoundingClientRect();
                     console.log('🎯 Task position:', taskRect);
                     
-                    // Position modal near the task (to the right if space, otherwise left)
-                    const modalWidth = 400; // Modal max-width
-                    const spaceOnRight = window.innerWidth - taskRect.right;
-                    const spaceOnLeft = taskRect.left;
+                    // Position modal at the same vertical level as the task (like floating buttons)
+                    const modalTop = taskRect.top + window.scrollY;
+                    const modalLeft = Math.max(50, Math.min(taskRect.right + 20, window.innerWidth - 420)); // 420px = modal width + margin
                     
-                    let left = taskRect.right + 20; // 20px margin
-                    if (spaceOnRight < modalWidth + 40) {
-                        // Not enough space on right, position on left
-                        left = Math.max(20, taskRect.left - modalWidth - 20);
-                    }
-                    
-                    // Ensure modal doesn't go off screen
-                    left = Math.max(20, Math.min(left, window.innerWidth - modalWidth - 20));
-                    
-                    // Position modal in the center-bottom area of viewport, not at task position
-                    const modalHeight = 300; // Approximate modal height
-                    const viewportHeight = window.innerHeight;
-                    const centerY = viewportHeight * 0.4; // 40% down from top (more centered but lower)
-                    
-                    // Use center positioning, but ensure it's visible
-                    const top = Math.max(50, Math.min(centerY, viewportHeight - modalHeight - 50));
-                    
-                    console.log('🎯 Viewport height:', viewportHeight, 'Calculated top:', top);
-                    
-                    // Override default positioning with task-specific position
-                    modalContent.style.setProperty('position', 'fixed', 'important');
-                    modalContent.style.setProperty('left', left + 'px', 'important');
-                    modalContent.style.setProperty('top', top + 'px', 'important');
+                    modalContent.style.setProperty('position', 'absolute', 'important');
+                    modalContent.style.setProperty('left', modalLeft + 'px', 'important');
+                    modalContent.style.setProperty('top', modalTop + 'px', 'important');
                     modalContent.style.setProperty('transform', 'none', 'important');
-                    modalContent.style.setProperty('margin', '0', 'important');
                     
-                    console.log('🎯 Modal positioned at:', { left, top });
+                    console.log('🎯 Modal positioned at:', { left: modalLeft, top: modalTop });
                 } else {
-                    console.log('🎯 No selected task found, using default positioning');
-                    console.log('🎯 Available selected elements:', document.querySelectorAll('.selected').length);
-                    console.log('🎯 Available task elements:', document.querySelectorAll('[data-task-id]').length);
-                    // Reset to default centered positioning
-                    modalContent.style.position = 'static';
-                    modalContent.style.left = 'auto';
-                    modalContent.style.top = 'auto';
-                    modalContent.style.margin = '20vh auto';
-                    modalContent.style.transform = '';
+                    // Fallback to center positioning if no selected task found
+                    const defaultTop = window.innerHeight * 0.4;
+                    modalContent.style.setProperty('position', 'fixed', 'important');
+                    modalContent.style.setProperty('left', '50%', 'important');
+                    modalContent.style.setProperty('top', defaultTop + 'px', 'important');
+                    modalContent.style.setProperty('transform', 'translateX(-50%)', 'important');
                 }
+                modalContent.style.setProperty('margin', '0', 'important');
                 
                 modal.style.display = 'block';
                 console.log('🎯 Modal displayed');
