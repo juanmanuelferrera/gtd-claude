@@ -387,7 +387,7 @@
 
             <div class="links">
                 <a href="#" id="forgot-password-link">Forgot Password?</a>
-                <a href="register.html">Start Trial</a>
+                <a href="../register.html">Start Trial</a>
             </div>
         </div>
     </div>
@@ -584,7 +584,7 @@
                     setTimeout(() => {
                         // Redirect to the correct main app file
                         window.location.href = '/hyperfiler-pro.html';
-                    }, 1000);
+                    }, 2500);
 
                 } else {
                     console.error('Login failed:', {
@@ -733,7 +733,7 @@
                     showMessage(infoMessage, 'You are already logged in. Redirecting...');
                     setTimeout(() => {
                         window.location.href = '/hyperfiler-pro.html';
-                    }, 500);
+                    }, 1000);
                 } else {
                     console.log('Stored token is invalid, clearing...');
                     if (tokenData.storage === 'localStorage') {

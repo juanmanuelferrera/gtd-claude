@@ -931,51 +931,6 @@
 
         // Initialize the app
         const taskManager = new TaskManager();
-        
-        // Make taskManager globally available for sync system
-        window.taskManager = taskManager;
-    </script>
-    
-    <!-- v2.0.7 Enhanced Sync System -->
-    <script src="SYNC_V2.0.7.js"></script>
-    <script>
-        // Initialize enhanced sync when user is authenticated
-        function initializeSyncV207() {
-            if (window.SyncV207 && window.currentUser?.user?.id) {
-                console.log('🚀 Initializing Sync v2.0.7 for authenticated user');
-                
-                // Set API base if not already set
-                if (typeof API_BASE === 'undefined') {
-                    window.API_BASE = 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
-                }
-                
-                // Initialize the new sync system
-                window.SyncV207.initialize();
-                
-                console.log('✅ Sync v2.0.7 initialized successfully');
-                console.log('📊 Device ID:', window.SyncV207.getDeviceId());
-                console.log('📊 Session ID:', window.SyncV207.getSessionId());
-            } else {
-                console.log('⏭️ Sync v2.0.7: Waiting for user authentication');
-            }
-        }
-        
-        // Try to initialize immediately if user is already logged in
-        initializeSyncV207();
-        
-        // Also initialize when user logs in (if there's a login event)
-        document.addEventListener('userLoggedIn', initializeSyncV207);
-        
-        // Fallback: check periodically for authentication
-        const syncInitInterval = setInterval(() => {
-            if (window.currentUser?.user?.id && window.SyncV207) {
-                initializeSyncV207();
-                clearInterval(syncInitInterval);
-            }
-        }, 1000);
-        
-        // Clear interval after 30 seconds to avoid indefinite checking
-        setTimeout(() => clearInterval(syncInitInterval), 30000);
     </script>
 </body>
 </html>
