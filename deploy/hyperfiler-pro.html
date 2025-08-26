@@ -9696,8 +9696,8 @@
                 console.log('🚨 MANDATORY REFRESH: Forcing lists download despite protection flags');
             } else {
                 // 🔒 BACKUP RESTORE PROTECTION - highest priority
-                if (window.justRestoredBackup || window.skipNextDownload) {
-                    console.log('🔒 Skipping lists download - backup restore in progress');
+                if (window.justRestoredBackup || window.skipNextDownload || window.backupRestoreInProgress) {
+                    console.log('🔒 BLOCKED: Lists download skipped - backup restore in progress');
                     return;
                 }
                 
@@ -9815,8 +9815,8 @@
                 console.log('🚨 MANDATORY REFRESH: Forcing templates download despite protection flags');
             } else {
                 // 🔒 BACKUP RESTORE PROTECTION - highest priority
-                if (window.justRestoredBackup || window.skipNextDownload) {
-                    console.log('🔒 Skipping templates download - backup restore in progress');
+                if (window.justRestoredBackup || window.skipNextDownload || window.backupRestoreInProgress) {
+                    console.log('🔒 BLOCKED: Templates download skipped - backup restore in progress');
                     return;
                 }
                 
@@ -9874,8 +9874,8 @@
                 console.warn('🛡️ This overrides normal protection to prevent database conflicts');
             } else {
                 // 🔒 BACKUP RESTORE PROTECTION - highest priority
-                if (window.justRestoredBackup || window.skipNextDownload) {
-                    console.log('🔒 Skipping download - backup restore in progress');
+                if (window.justRestoredBackup || window.skipNextDownload || window.backupRestoreInProgress) {
+                    console.log('🔒 BLOCKED: Download skipped - backup restore in progress');
                     return;
                 }
                 
@@ -10292,8 +10292,8 @@
             // Skip if protection flags are set (unless mandatory refresh)
             if (!window.forceMandatoryRefresh && !window.staleBrowserMode) {
                 // 🔒 BACKUP RESTORE PROTECTION - highest priority
-                if (window.justRestoredBackup || window.skipNextDownload) {
-                    console.log('🔒 Skipping smart download - backup restore in progress');
+                if (window.justRestoredBackup || window.skipNextDownload || window.backupRestoreInProgress) {
+                    console.log('🔒 BLOCKED: Smart download skipped - backup restore in progress');
                     return;
                 }
                 
@@ -24193,13 +24193,16 @@
 
         function restoreFromBackupData(backupData) {
             try {
-                // CRITICAL: Set flags to prevent cloud sync from overriding restored data
+                // CRITICAL: Set MAXIMUM protection flags to prevent ANY cloud sync override
                 window.justModifiedTasks = true;
                 window.justModifiedLists = true;
+                window.justModifiedTemplates = true;
                 window.justRestoredBackup = true;
                 window.skipNextDownload = true;
+                window.backupRestoreInProgress = true; // Extra protection flag
+                window.forceMandatoryRefresh = false; // Disable mandatory refresh during restore
                 
-                console.log('🔒 Backup Restore: Setting protection flags to prevent cloud override');
+                console.log('🔒 BACKUP RESTORE: Setting MAXIMUM protection flags to prevent ANY cloud override');
                 
                 // Restore all data from backup
                 tasks = backupData.tasks || [];
@@ -24215,6 +24218,15 @@
                 
                 // Update last sync time to prevent immediate cloud download
                 localStorage.setItem('lastSyncTime', Date.now().toString());
+                
+                // IMMEDIATE UI refresh to show restored data before any async operations
+                renderCurrentView();
+                if (typeof updateTrashCounter === 'function') {
+                    updateTrashCounter();
+                }
+                
+                // Show immediate success message
+                showInlineNotification('✅ ' + translateText('Backup restored! Uploading to cloud...'), 'success');
                 
                 // Sync to server if available (upload restored data)
                 console.log('📤 Backup Restore: Uploading restored data to cloud...');
@@ -24233,14 +24245,17 @@
                 // Wait for uploads to complete before allowing downloads
                 Promise.all(uploadPromises).then(() => {
                     console.log('✅ Backup Restore: All data uploaded successfully');
+                    showInlineNotification('✅ ' + translateText('Backup fully restored and synced to cloud!'), 'success');
                     
                     // Keep protection for 30 seconds to ensure cloud has processed the upload
                     setTimeout(() => {
                         window.justModifiedTasks = false;
                         window.justModifiedLists = false;
+                        window.justModifiedTemplates = false;
                         window.justRestoredBackup = false;
                         window.skipNextDownload = false;
-                        console.log('🔓 Backup Restore: Protection flags removed, normal sync resumed');
+                        window.backupRestoreInProgress = false;
+                        console.log('🔓 Backup Restore: All protection flags removed, normal sync resumed');
                     }, 30000); // 30 seconds protection
                 }).catch(error => {
                     console.error('⚠️ Backup Restore: Upload failed, keeping protection flags', error);
@@ -24248,19 +24263,14 @@
                     setTimeout(() => {
                         window.justModifiedTasks = false;
                         window.justModifiedLists = false;
+                        window.justModifiedTemplates = false;
                         window.justRestoredBackup = false;
                         window.skipNextDownload = false;
+                        window.backupRestoreInProgress = false;
                     }, 60000); // 1 minute protection on error
                 });
                 
-                // Refresh UI
-                renderCurrentView();
-                if (typeof updateTrashCounter === 'function') {
-                    updateTrashCounter();
-                }
-                
-                // Show success message
-                showInlineNotification('✅ ' + translateText('Backup restored successfully! Cloud sync temporarily paused.'), 'success');
+                // Final success message will be shown after upload completes
                 
             } catch (error) {
                 console.error('Error restoring backup:', error);
@@ -24269,8 +24279,10 @@
                 // Reset protection flags on error
                 window.justModifiedTasks = false;
                 window.justModifiedLists = false;
+                window.justModifiedTemplates = false;
                 window.justRestoredBackup = false;
                 window.skipNextDownload = false;
+                window.backupRestoreInProgress = false;
             }
         }
 
