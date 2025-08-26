@@ -3,7 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v2.0.6</title>
+    <title>⚡ HyperFiler Pro 🚀 - v2.0.7</title>
+    
+    <!-- BLOCK PAGES.DEV ACCESS: Redirect users to official domain -->
+    <script>
+        // Check if redirect is needed, but allow auth to initialize first
+        if (window.location.hostname.includes('.pages.dev') || window.location.hostname.includes('hyperfiler.pages.dev')) {
+            console.log('🚫 Pages.dev detected - will redirect after auth check');
+            
+            // Wait for DOM and potential auth initialization
+            document.addEventListener('DOMContentLoaded', function() {
+                // Small delay to allow authentication to initialize
+                setTimeout(() => {
+                    console.log('🚫 Redirecting from pages.dev to official domain');
+                    const newUrl = 'https://hyperfiler.pro' + window.location.pathname + window.location.search + window.location.hash;
+                    
+                    // Preserve any authentication tokens before redirect
+                    const authToken = localStorage.getItem('authToken');
+                    const authExpiry = localStorage.getItem('authTokenExpiry');
+                    const currentUser = localStorage.getItem('currentUser');
+                    
+                    if (authToken && authExpiry && currentUser) {
+                        console.log('💾 Preserving authentication during redirect');
+                        // Store in sessionStorage as backup
+                        sessionStorage.setItem('redirectAuth', JSON.stringify({
+                            authToken,
+                            authExpiry,
+                            currentUser,
+                            redirectTime: Date.now()
+                        }));
+                    }
+                    
+                    window.location.replace(newUrl);
+                }, 100); // 100ms delay to allow initialization
+            });
+        }
+    </script>
+    <!-- Fallback for users with JavaScript disabled -->
+    <noscript>
+        <script>
+            if (location.hostname.includes('pages.dev')) {
+                location.href = 'https://hyperfiler.pro' + location.pathname + location.search;
+            }
+        </script>
+        <meta http-equiv="refresh" content="0;url=https://hyperfiler.pro">
+    </noscript>
     <style>
         * {
             margin: 0;
@@ -3796,7 +3840,7 @@
                         <div style="margin-bottom: 10px;">
                             <strong>Plan:</strong> <span style="color: #007bff;">HyperFiler Pro</span>
                         </div>
-                        <button class="btn btn-secondary" onclick="window.location.href='frontend/login.html'" style="padding: 8px 16px; background: #dc3545; border-color: #dc3545; color: white; margin-top: 10px;">🚪 Logout</button>
+                        <button class="btn btn-secondary" onclick="window.location.href='login.html'" style="padding: 8px 16px; background: #dc3545; border-color: #dc3545; color: white; margin-top: 10px;">🚪 Logout</button>
                     </div>
                 </div>
             </div>
@@ -5815,16 +5859,21 @@
             
             return headers;
         }
-
+        
+        // Helper function for authenticated fetch requests with proper CORS credentials
         function authenticatedFetch(url, options = {}) {
-            return fetch(url, {
-                ...options,
+            const defaultOptions = {
+                credentials: 'include', // Always include cookies for cross-domain auth
+                mode: 'cors',
                 headers: {
                     ...getAuthHeaders(),
-                    ...options.headers
+                    ...(options.headers || {})
                 }
-            });
+            };
+            
+            return fetch(url, { ...defaultOptions, ...options });
         }
+
 
         // Debug verification
 
@@ -7107,26 +7156,15 @@
                     console.error('❌ Authentication failed after retries:', lastError);
                     lastAuthenticationState = false;
                     
-                    // BYPASS: Skip /auth/me validation if we have a valid login token
+                    // Check if we have stored credentials, but DON'T bypass - redirect to login instead
                     const storedToken = localStorage.getItem('authToken');
                     const storedUserId = localStorage.getItem('userId');
                     const storedEmail = localStorage.getItem('userEmail');
                     
                     if (storedToken && storedUserId && storedEmail) {
-                        console.log('🔄 Bypassing /auth/me validation, using stored session');
-                        window.currentUser = {
-                            user: { id: storedUserId, email: storedEmail },
-                            token: storedToken,
-                            subscription: { plan_name: 'pro' }
-                        };
-                        
-                        // Show user info in the UI
-                        showUserInfo(window.currentUser);
-                        
-                        // Simple sync system - no complex initialization needed
-                        
-                        lastAuthenticationState = true;
-                        return true;
+                        console.log('❌ Found stored credentials but /auth/me failed - tokens are likely expired');
+                        console.log('🔍 Clearing expired credentials and redirecting to login');
+                        clearAuthData();
                     }
                     
                     // If no valid session, clear auth data and show login form
@@ -7155,16 +7193,89 @@
                 // Store user info for app use
                 window.currentUser = userInfo;
                 
+                // CRITICAL: Check for stale browser data before allowing sync
+                const lastSyncTime = localStorage.getItem('lastSyncTime');
+                const now = Date.now();
+                const oneHourAgo = now - (60 * 60 * 1000); // 1 hour
+                const oneDayAgo = now - (24 * 60 * 60 * 1000); // 24 hours
+                
+                // Detect stale browser session
+                if (!lastSyncTime || parseInt(lastSyncTime) < oneDayAgo) {
+                    console.warn('🚨 STALE BROWSER DETECTED: Last sync was more than 24 hours ago or never');
+                    console.warn('📥 Forcing download from cloud to prevent overwriting fresh data');
+                    
+                    // Set flags to prevent upload until download completes
+                    window.staleBrowserDetected = true;
+                    window.skipInitialUpload = true;
+                    window.justModifiedTasks = true; // Prevent auto-upload
+                    window.justModifiedLists = true; // Prevent auto-upload
+                    window.justModifiedTemplates = true; // Prevent auto-upload
+                    
+                    // Force immediate download from cloud
+                    setTimeout(async () => {
+                        try {
+                            console.log('📥 STALE BROWSER: Starting forced cloud download...');
+                            await downloadAllTasks();
+                            await downloadAllLists();
+                            await downloadAllTemplates();
+                            console.log('✅ STALE BROWSER: Successfully refreshed all data from cloud');
+                            
+                            // Update sync time
+                            localStorage.setItem('lastSyncTime', Date.now().toString());
+                            
+                            // Clear protection flags after successful download
+                            setTimeout(() => {
+                                window.staleBrowserDetected = false;
+                                window.skipInitialUpload = false;
+                                window.justModifiedTasks = false;
+                                window.justModifiedLists = false;
+                                window.justModifiedTemplates = false;
+                                console.log('🔓 STALE BROWSER: Protection flags removed, normal sync enabled');
+                            }, 5000); // 5 second protection after download
+                            
+                        } catch (error) {
+                            console.error('❌ STALE BROWSER: Failed to download fresh data:', error);
+                            // Keep protection flags on error
+                        }
+                    }, 100); // Quick delay to ensure UI is ready
+                    
+                } else if (parseInt(lastSyncTime) < oneHourAgo) {
+                    console.log('⚠️ POSSIBLY STALE: Last sync was more than 1 hour ago');
+                    console.log('📥 Downloading latest data before uploading...');
+                    
+                    // Less aggressive protection for moderately stale data
+                    window.justModifiedTasks = true;
+                    window.justModifiedLists = true;
+                    window.justModifiedTemplates = true;
+                    
+                    setTimeout(async () => {
+                        try {
+                            await downloadAllTasks();
+                            await downloadAllLists();
+                            await downloadAllTemplates();
+                            localStorage.setItem('lastSyncTime', Date.now().toString());
+                            
+                            setTimeout(() => {
+                                window.justModifiedTasks = false;
+                                window.justModifiedLists = false;
+                                window.justModifiedTemplates = false;
+                            }, 3000); // 3 second protection
+                        } catch (error) {
+                            console.warn('⚠️ Failed to refresh data:', error);
+                        }
+                    }, 100);
+                    
+                } else {
+                    console.log('✅ FRESH SESSION: Last sync was recent, normal sync enabled');
+                    // Update last sync time for fresh sessions
+                    localStorage.setItem('lastSyncTime', Date.now().toString());
+                }
+                
                 try {
                     showUserInfo(userInfo);
                 } catch (error) {
                     console.error('🚨 showUserInfo failed:', error);
                 }
-                
-                
-                // Force initial refresh from cloud (proven strategy)
-                setTimeout(async () => {
-                }, 50); // Quick UI ready check - reduced from 1000ms
                 
                 lastAuthenticationState = true;
                 return true;
@@ -7200,14 +7311,14 @@
                 login: {
                     title: '🔐 Login Required',
                     message: 'Please log in to access HyperFiler Pro.',
-                    action: 'Show Login Form',
-                    url: null
+                    action: 'Login',
+                    url: 'login.html'
                 },
                 invalid: {
                     title: '❌ Session Expired',
                     message: 'Your session has expired. Please log in again.',
                     action: 'Login',
-                    url: 'frontend/login.html'
+                    url: 'login.html'
                 },
                 subscription: {
                     title: '💳 Subscription Required',
@@ -7225,7 +7336,7 @@
                     title: '⚠️ Authentication Error',
                     message: 'Unable to verify your account. Please try again.',
                     action: 'Login',
-                    url: 'frontend/login.html'
+                    url: 'login.html'
                 }
             };
 
@@ -7492,7 +7603,7 @@
             
             // SECURITY: Clear all authentication data
             clearAuthData();
-            window.location.href = 'frontend/login.html';
+            window.location.href = 'login.html';
         }
 
         // Show soft reminders (Reaper-style)
@@ -8230,7 +8341,7 @@
             try {
                 // Sync tasks first to get latest data (only if properly authenticated)
                 if (window.currentUser?.user?.id && window.currentUser?.token && !window.justModifiedTasks) {
-                    uploadAllTasks();
+                    smartUploadTasks();
                 }
 
                 // Restore saved state if available
@@ -8382,6 +8493,70 @@
             document.getElementById('editTaskTime').value = ''; // Empty = "No specific time"
         }
 
+        // Perform stale browser refresh when authentication is ready
+        async function performStaleRefresh() {
+            try {
+                console.warn('🚨 STALE BROWSER DETECTED - FORCING IMMEDIATE DATABASE REFRESH');
+                
+                // Show friendly sync banner
+                const body = document.body;
+                const warningBanner = document.createElement('div');
+                warningBanner.id = 'stale-browser-warning';
+                warningBanner.innerHTML = `
+                    <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; 
+                                background: rgba(59, 130, 246, 0.95); color: white; 
+                                border-radius: 8px; padding: 12px 20px;
+                                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                                font-size: 14px; font-weight: 500;
+                                display: flex; align-items: center; gap: 10px;
+                                backdrop-filter: blur(8px);">
+                        <div style="width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, 0.3); 
+                                    border-top: 2px solid white; border-radius: 50%; 
+                                    animation: spin 1s linear infinite;"></div>
+                        <span>Syncing...</span>
+                    </div>
+                    <style>
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                    </style>
+                `;
+                body.appendChild(warningBanner);
+                
+                // Set flags
+                window.forceMandatoryRefresh = true;
+                window.staleBrowserMode = true;
+                
+                // Force download with authentication ready
+                console.log('🚨 STALE BROWSER MODE: Forcing immediate database download after authentication');
+                try {
+                    // Force download all data immediately
+                    await downloadAllTasks();
+                    await downloadAllLists();
+                    await downloadAllTemplates();
+                    console.log('✅ STALE BROWSER: Successfully refreshed all data after authentication');
+                    
+                    // Remove banner and reset flags
+                    const banner = document.getElementById('stale-browser-warning');
+                    if (banner) {
+                        banner.remove();
+                    }
+                    window.forceMandatoryRefresh = false;
+                    window.staleBrowserMode = false;
+                    window.needsStaleRefresh = false;
+                    
+                } catch (refreshError) {
+                    console.error('❌ CRITICAL: Failed to refresh stale browser data:', refreshError);
+                    // Don't show alert - let normal sync process handle it
+                    console.log('🔄 Will rely on normal sync process to refresh data');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error during stale refresh:', error);
+            }
+        }
+
         // Initialize the app
         // Prevent multiple initialization attempts
         let initializationInProgress = false;
@@ -8393,6 +8568,38 @@
             }
             
             initializationInProgress = true;
+            
+            // ======= AUTHENTICATION RESTORATION AFTER REDIRECT =======
+            // Restore authentication if this page was reached via redirect from pages.dev
+            try {
+                const redirectAuth = sessionStorage.getItem('redirectAuth');
+                if (redirectAuth) {
+                    console.log('🔄 Restoring authentication after redirect');
+                    const authData = JSON.parse(redirectAuth);
+                    
+                    // Only restore if redirect was recent (within 10 seconds)
+                    if (Date.now() - authData.redirectTime < 10000) {
+                        localStorage.setItem('authToken', authData.authToken);
+                        localStorage.setItem('authTokenExpiry', authData.authExpiry);
+                        localStorage.setItem('currentUser', authData.currentUser);
+                        
+                        // Parse and set global currentUser
+                        try {
+                            window.currentUser = JSON.parse(authData.currentUser);
+                            console.log('✅ Authentication restored successfully');
+                        } catch (e) {
+                            console.warn('⚠️ Failed to parse restored currentUser data:', e);
+                        }
+                    } else {
+                        console.log('⏰ Redirect auth data too old, ignoring');
+                    }
+                    
+                    // Clean up sessionStorage
+                    sessionStorage.removeItem('redirectAuth');
+                }
+            } catch (error) {
+                console.warn('⚠️ Error restoring authentication after redirect:', error);
+            }
             
             // ======= CRITICAL STALE BROWSER PROTECTION =======
             // This MUST run before any data operations to prevent database overwrites
@@ -8407,31 +8614,36 @@
                     stalenessThreshold: 180000 // 3 minutes
                 });
                 
-                // If no sync in 3 minutes, this browser has stale data - MANDATORY refresh
+                // If no sync in 3 minutes, this browser has stale data - DEFER check until auth is ready
                 if (timeSinceLastSync > 180000) { // 3 minutes (reduced from 5 minutes)
+                    console.warn('🚨 STALE BROWSER DETECTED - Will refresh after authentication is confirmed');
+                    window.needsStaleRefresh = true; // Flag to trigger refresh after auth
+                    
+                    // Continue with authentication first, then handle stale refresh
+                } else {
+                    window.needsStaleRefresh = false;
+                }
+                
+                // Original stale browser logic moved to after authentication
+                if (false && timeSinceLastSync > 180000) { // Temporarily disabled here
                     console.warn('🚨 STALE BROWSER DETECTED - FORCING IMMEDIATE DATABASE REFRESH');
                     
-                    // Show immediate visual warning with loading indicator
+                    // Show friendly sync banner
                     const body = document.body;
                     const warningBanner = document.createElement('div');
                     warningBanner.id = 'stale-browser-warning';
                     warningBanner.innerHTML = `
-                        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10000; 
-                                    background: rgba(255, 68, 68, 0.95); color: white; 
-                                    display: flex; flex-direction: column; align-items: center; justify-content: center;
-                                    font-weight: bold;">
-                            <div style="text-align: center; max-width: 500px; padding: 20px;">
-                                <div style="font-size: 24px; margin-bottom: 15px;">🚨 STALE BROWSER DETECTED</div>
-                                <div style="font-size: 16px; margin-bottom: 20px;">
-                                    This browser tab has outdated data. Reading current database to prevent conflicts...
-                                </div>
-                                <div style="border: 4px solid white; border-top: 4px solid transparent; 
-                                           border-radius: 50%; width: 40px; height: 40px; 
-                                           animation: spin 1s linear infinite; margin: 0 auto;"></div>
-                                <div style="margin-top: 15px; font-size: 14px; opacity: 0.9;">
-                                    Please wait - downloading fresh data from server...
-                                </div>
-                            </div>
+                        <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; 
+                                    background: rgba(59, 130, 246, 0.95); color: white; 
+                                    border-radius: 8px; padding: 12px 20px;
+                                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                                    font-size: 14px; font-weight: 500;
+                                    display: flex; align-items: center; gap: 10px;
+                                    backdrop-filter: blur(8px);">
+                            <div style="width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, 0.3); 
+                                        border-top: 2px solid white; border-radius: 50%; 
+                                        animation: spin 1s linear infinite;"></div>
+                            <span>Syncing...</span>
                         </div>
                         <style>
                         @keyframes spin {
@@ -8447,17 +8659,67 @@
                     console.log('🔒 Disabled all user interactions until refresh completes');
                     
                     // MANDATORY: Clear all potentially stale data
-                    console.log('🗑️ Clearing all stale local data');
+                    console.log('🗑️ COMPLETE CACHE CLEAR: Removing ALL local data for fresh download');
+                    
+                    // Clear all task-related data
                     tasks = [];
                     currentFilteredTasks = [];
+                    
+                    // Clear all localStorage data related to tasks, lists, templates
                     localStorage.removeItem('gtdTasks');
                     localStorage.removeItem('tasks_with_tombstones');
+                    localStorage.removeItem('listSections');
+                    localStorage.removeItem('customTemplates');
+                    localStorage.removeItem('dailyTemplates');
+                    localStorage.removeItem('weeklyTemplates');
+                    localStorage.removeItem('monthlyTemplates');
+                    
+                    // Clear any cached sync data
+                    localStorage.removeItem('lastSyncTime');
+                    localStorage.removeItem('hyperfiler-last-save');
+                    localStorage.removeItem('lastTaskUpload');
+                    localStorage.removeItem('lastListUpload');
+                    localStorage.removeItem('lastTemplateUpload');
+                    
+                    // Clear version history and protection data
+                    localStorage.removeItem('tripleProtection_versions');
+                    localStorage.removeItem('tripleProtection_conflicts');
+                    localStorage.removeItem('hyperfiler_undo_stack');
+                    
+                    // Clear any other app-specific cache
+                    const keysToRemove = [];
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key && (key.includes('hyperfiler') || key.includes('gtd') || key.includes('task'))) {
+                            keysToRemove.push(key);
+                        }
+                    }
+                    keysToRemove.forEach(key => localStorage.removeItem(key));
+                    
+                    // Clear global variables
+                    window.listSections = [];
+                    window.customTemplates = [];
+                    window.currentListFilteredSections = [];
+                    
+                    console.log('✅ COMPLETE CACHE CLEAR: All local data cleared, ready for fresh download');
                     
                     // Set flag to force immediate download
                     window.forceMandatoryRefresh = true;
                     window.staleBrowserMode = true;
                     
                     console.log('📥 MANDATORY: Will force fresh data download from server');
+                    
+                    // Add safety timeout to remove banner if download fails
+                    setTimeout(() => {
+                        const warningBanner = document.getElementById('stale-browser-warning');
+                        if (warningBanner) {
+                            console.warn('⚠️ SAFETY: Removing stale browser banner after timeout');
+                            warningBanner.remove();
+                            window.forceMandatoryRefresh = false;
+                            window.staleBrowserMode = false;
+                            document.body.style.pointerEvents = '';
+                        }
+                    }, 30000); // 30 second timeout
                 } else {
                     console.log('✅ Browser data is fresh - proceeding normally');
                 }
@@ -8525,8 +8787,8 @@
                     console.log('✅ STALE BROWSER: Successfully refreshed all data after authentication');
                 } catch (refreshError) {
                     console.error('❌ CRITICAL: Failed to refresh stale browser data:', refreshError);
-                    // Show error to user but don't block initialization completely
-                    alert('⚠️ Failed to refresh browser data. Please refresh the page manually to ensure you have the latest information.');
+                    // Don't show alert - let normal sync process handle it
+                    console.log('🔄 Will rely on normal sync process to refresh data');
                 }
             }
             
@@ -8686,6 +8948,12 @@
                     if (hasUserId && hasToken) {
                         console.log('✅ Authentication ready - initializing sync');
                         
+                        // 🚨 Check if stale browser refresh is needed (deferred from earlier)
+                        if (window.needsStaleRefresh) {
+                            console.warn('🚨 PERFORMING DEFERRED STALE BROWSER REFRESH');
+                            await performStaleRefresh();
+                        }
+                        
                         // 🔒 Initialize Triple-Layer Protection System
                         if (window.TripleProtection) {
                             await window.TripleProtection.init();
@@ -8753,13 +9021,29 @@
             
             console.log('🔄 Initializing simple sync system (Lists pattern)...');
             
-            // IMMEDIATE SYNC: Download tasks and lists on startup
-            console.log('📥 Starting immediate download on sync init...');
-            downloadAllTasks().catch(error => {
-                console.warn('📥 Initial tasks download failed:', error);
+            // Check for stale browser protection flags before sync
+            if (window.staleBrowserDetected || window.skipInitialUpload) {
+                console.log('🔒 STALE BROWSER: Sync initialization postponed until stale browser download completes');
+                // Schedule retry after stale browser handling completes
+                setTimeout(() => {
+                    if (!window.staleBrowserDetected && !window.skipInitialUpload) {
+                        console.log('🔓 STALE BROWSER: Retrying sync initialization');
+                        initializeSimpleSync();
+                    }
+                }, 7000); // 7 seconds after stale browser detection
+                return;
+            }
+            
+            // IMMEDIATE SYNC: Download tasks, lists, and templates on startup (using smart sync)
+            console.log('📥 Starting immediate smart download on sync init...');
+            smartDownloadTasks().catch(error => {
+                console.warn('📥 Initial smart download failed:', error);
             });
             downloadAllLists().catch(error => {
                 console.warn('📥 Initial lists download failed:', error);
+            });
+            downloadAllTemplates().catch(error => {
+                console.warn('📥 Initial templates download failed:', error);
             });
             
             // IMMEDIATE SYNC PATTERN (Like Lists) - Use focus/visibility events instead of polling
@@ -8770,13 +9054,16 @@
                 if (!document.hidden && window.currentUser && !window.justModifiedTasks) {
                     const now = Date.now();
                     if (now - lastVisibilitySync > 10000) { // 10 seconds minimum for testing
-                        console.log('📥 Visibility sync - downloading tasks and lists...');
+                        console.log('📥 Visibility sync - smart downloading tasks, lists, and templates...');
                         lastVisibilitySync = now;
-                        downloadAllTasks().catch(error => {
-                            console.warn('📥 Visibility tasks download failed:', error);
+                        smartDownloadTasks().catch(error => {
+                            console.warn('📥 Visibility smart download failed:', error);
                         });
                         downloadAllLists().catch(error => {
                             console.warn('📥 Visibility lists download failed:', error);
+                        });
+                        downloadAllTemplates().catch(error => {
+                            console.warn('📥 Visibility templates download failed:', error);
                         });
                     }
                 }
@@ -8788,10 +9075,10 @@
                 if (window.currentUser && !window.justModifiedTasks) {
                     const now = Date.now();
                     if (now - lastFocusRefresh > 10000) { // 10 seconds minimum for testing
-                        console.log('📥 Focus sync - downloading tasks and lists...');
+                        console.log('📥 Focus sync - smart downloading tasks and lists...');
                         lastFocusRefresh = now;
-                        downloadAllTasks().catch(error => {
-                            console.warn('📥 Focus tasks download failed:', error);
+                        smartDownloadTasks().catch(error => {
+                            console.warn('📥 Focus smart download failed:', error);
                         });
                         downloadAllLists().catch(error => {
                             console.warn('📥 Focus lists download failed:', error);
@@ -8805,12 +9092,15 @@
             // Optional: Backup periodic sync (less frequent than old polling)
             setInterval(() => {
                 if (!window.justModifiedTasks && navigator.onLine && window.currentUser) {
-                    console.log('📥 Backup periodic sync...');
-                    downloadAllTasks().catch(error => {
-                        console.warn('📥 Backup tasks sync failed:', error);
+                    console.log('📥 Backup periodic smart sync...');
+                    smartDownloadTasks().catch(error => {
+                        console.warn('📥 Backup smart sync failed:', error);
                     });
                     downloadAllLists().catch(error => {
                         console.warn('📥 Backup lists sync failed:', error);
+                    });
+                    downloadAllTemplates().catch(error => {
+                        console.warn('📥 Backup templates sync failed:', error);
                     });
                 }
             }, 60000); // 1 minute intervals instead of 10 seconds
@@ -9264,13 +9554,27 @@
             const fallbackToken = localStorage.getItem('authToken');
             // Fallback token check completed
             
-            // CRITICAL STALE BROWSER PROTECTION: Prevent uploads from old tabs
+            // CRITICAL STALE BROWSER PROTECTION: Multiple layers of protection
+            
+            // EXCEPTION: Allow uploads during backup restore (user intentionally restored data)
+            if (window.justRestoredBackup) {
+                console.log('✅ BACKUP RESTORE: Upload allowed - user explicitly restored this data');
+            } else {
+                // First check: Explicit stale browser flags
+                if (window.staleBrowserDetected || window.skipInitialUpload) {
+                    console.error('🚨 BLOCKED: Upload blocked - stale browser protection active');
+                    console.error('🛡️ Stale browser still downloading fresh data from cloud');
+                    return;
+                }
+            }
+            
+            // Second check: Time-based stale detection (legacy protection)
             const lastSyncTime = localStorage.getItem('lastSyncTime');
             const currentTime = Date.now();
             const timeSinceLastSync = currentTime - (lastSyncTime ? parseInt(lastSyncTime) : 0);
             
-            if (timeSinceLastSync > 180000) { // 3 minutes
-                console.error('🚨 BLOCKED: Upload attempt from stale browser detected');
+            if (timeSinceLastSync > 300000) { // 5 minutes (increased from 3 minutes)
+                console.error('🚨 BLOCKED: Upload attempt from stale browser detected (time-based)');
                 console.error('🛡️ Preventing potential database overwrite from old tab');
                 console.error('⏰ Last sync was', Math.floor(timeSinceLastSync / 1000), 'seconds ago');
                 throw new Error('Upload blocked - browser data is stale. Please refresh the page.');
@@ -9352,6 +9656,18 @@
             // Lists sync using simple pattern
             console.log('🔄 uploadAllLists called - using simple sync pattern');
             
+            // CRITICAL STALE BROWSER PROTECTION: Check flags first
+            // EXCEPTION: Allow uploads during backup restore (user intentionally restored data)
+            if (window.justRestoredBackup) {
+                console.log('✅ BACKUP RESTORE: Lists upload allowed - user explicitly restored this data');
+            } else {
+                if (window.staleBrowserDetected || window.skipInitialUpload) {
+                    console.error('🚨 BLOCKED: Lists upload blocked - stale browser protection active');
+                    console.error('🛡️ Stale browser still downloading fresh data from cloud');
+                    return;
+                }
+            }
+            
             if (!window.currentUser?.user?.id) {
                 console.log('⚠️ No user ID available for lists upload');
                 return;
@@ -9401,9 +9717,20 @@
         async function downloadAllLists() {
             if (!window.currentUser?.user?.id) return;
             
-            // Don't download if we just modified lists or tasks to prevent overwriting
-            if (window.justModifiedLists || window.justModifiedTasks) {
-                return;
+            // MANDATORY REFRESH: Override protection for stale browser
+            if (window.forceMandatoryRefresh || window.staleBrowserMode) {
+                console.log('🚨 MANDATORY REFRESH: Forcing lists download despite protection flags');
+            } else {
+                // 🔒 BACKUP RESTORE PROTECTION - highest priority
+                if (window.justRestoredBackup || window.skipNextDownload) {
+                    console.log('🔒 Skipping lists download - backup restore in progress');
+                    return;
+                }
+                
+                // Don't download if we just modified lists or tasks to prevent overwriting
+                if (window.justModifiedLists || window.justModifiedTasks) {
+                    return;
+                }
             }
             
             try {
@@ -9416,45 +9743,55 @@
                     const data = await response.json();
                     const serverListSections = data.listSections || [];
                     
-                    // PROVEN SAFETY: Prevent data loss when one side has empty data
-                    const localListCount = listSections.length;
-                    const serverListCount = serverListSections.length;
-                    
-                    // Only log if there's a significant difference or potential issue
-                    if (Math.abs(localListCount - serverListCount) > 2 || localListCount === 0 || serverListCount === 0) {
-                        console.log('📥 LISTS SAFETY CHECK: Local lists:', localListCount, 'Server lists:', serverListCount);
-                    }
-                    
-                    // Safety rule: If server is empty but local has lists, upload local to server instead
-                    if (serverListCount === 0 && localListCount > 0) {
-                        console.log('🛡️ LISTS SAFETY: Server is empty but local has lists - uploading local to server instead');
-                        await uploadAllLists();
-                        return;
-                    }
-                    
-                    // Safety rule: If local is empty but server has lists, it's safe to download
-                    if (localListCount === 0 && serverListCount > 0) {
-                        console.log('📥 LISTS SAFE DOWNLOAD: Local is empty, downloading from server');
+                    // MANDATORY REFRESH: Direct replacement with server data (skip all safety checks)
+                    if (window.forceMandatoryRefresh || window.staleBrowserMode) {
+                        console.log('🚨 MANDATORY REFRESH: Directly replacing lists with server data (no safety checks)');
                         listSections = serverListSections;
                         localStorage.setItem('gtd_list_sections', JSON.stringify(listSections));
                         if (currentView === 'lists') {
                             renderListsView();
                         }
-                        return;
-                    }
-                    
-                    // Normal sync: if both have data, compare and update if different
-                    if (JSON.stringify(serverListSections) !== JSON.stringify(listSections)) {
-                        // Additional safety: Check if server has significantly fewer lists (potential data loss)
-                        if (serverListCount < localListCount * 0.5 && localListCount > 2) {
-                            console.log('🛡️ LISTS SAFETY: Server has significantly fewer lists than local - skipping download to prevent data loss');
+                    } else {
+                        // PROVEN SAFETY: Prevent data loss when one side has empty data (normal sync only)
+                        const localListCount = listSections.length;
+                        const serverListCount = serverListSections.length;
+                        
+                        // Only log if there's a significant difference or potential issue
+                        if (Math.abs(localListCount - serverListCount) > 2 || localListCount === 0 || serverListCount === 0) {
+                            console.log('📥 LISTS SAFETY CHECK: Local lists:', localListCount, 'Server lists:', serverListCount);
+                        }
+                        
+                        // Safety rule: If server is empty but local has lists, upload local to server instead
+                        if (serverListCount === 0 && localListCount > 0) {
+                            console.log('🛡️ LISTS SAFETY: Server is empty but local has lists - uploading local to server instead');
+                            await uploadAllLists();
                             return;
                         }
                         
-                        listSections = serverListSections;
-                        localStorage.setItem('gtd_list_sections', JSON.stringify(listSections));
-                        if (currentView === 'lists') {
-                            renderListsView(); // Refresh UI if currently viewing lists
+                        // Safety rule: If local is empty but server has lists, it's safe to download
+                        if (localListCount === 0 && serverListCount > 0) {
+                            console.log('📥 LISTS SAFE DOWNLOAD: Local is empty, downloading from server');
+                            listSections = serverListSections;
+                            localStorage.setItem('gtd_list_sections', JSON.stringify(listSections));
+                            if (currentView === 'lists') {
+                                renderListsView();
+                            }
+                            return;
+                        }
+                        
+                        // Normal sync: if both have data, compare and update if different
+                        if (JSON.stringify(serverListSections) !== JSON.stringify(listSections)) {
+                            // Additional safety: Check if server has significantly fewer lists (potential data loss)
+                            if (serverListCount < localListCount * 0.5 && localListCount > 2) {
+                                console.log('🛡️ LISTS SAFETY: Server has significantly fewer lists than local - skipping download to prevent data loss');
+                                return;
+                            }
+                            
+                            listSections = serverListSections;
+                            localStorage.setItem('gtd_list_sections', JSON.stringify(listSections));
+                            if (currentView === 'lists') {
+                                renderListsView(); // Refresh UI if currently viewing lists
+                            }
                         }
                     }
                 } else {
@@ -9499,9 +9836,20 @@
         async function downloadAllTemplates() {
             if (!window.currentUser?.user?.id) return;
             
-            // Don't download if we just modified templates to prevent overwriting
-            if (window.justModifiedTemplates) {
-                return;
+            // MANDATORY REFRESH: Override protection for stale browser
+            if (window.forceMandatoryRefresh || window.staleBrowserMode) {
+                console.log('🚨 MANDATORY REFRESH: Forcing templates download despite protection flags');
+            } else {
+                // 🔒 BACKUP RESTORE PROTECTION - highest priority
+                if (window.justRestoredBackup || window.skipNextDownload) {
+                    console.log('🔒 Skipping templates download - backup restore in progress');
+                    return;
+                }
+                
+                // Don't download if we just modified templates to prevent overwriting
+                if (window.justModifiedTemplates) {
+                    return;
+                }
             }
             
             try {
@@ -9514,14 +9862,22 @@
                     const data = await response.json();
                     const serverTemplates = data.templates || [];
                     
-                    // Compare with current customTemplates variable
-                    const localTemplates = customTemplates || [];
-                    
-                    // Simple comparison: if different, replace everything
-                    if (JSON.stringify(serverTemplates) !== JSON.stringify(localTemplates)) {
+                    // MANDATORY REFRESH: Direct replacement with server data
+                    if (window.forceMandatoryRefresh || window.staleBrowserMode) {
+                        console.log('🚨 MANDATORY REFRESH: Directly replacing templates with server data');
                         customTemplates = serverTemplates; // Update the variable
                         localStorage.setItem('gtdTemplates', JSON.stringify(serverTemplates)); // Update localStorage
                         renderTemplateButtons(); // Always refresh template buttons when data changes
+                    } else {
+                        // Normal sync: Compare with current customTemplates variable
+                        const localTemplates = customTemplates || [];
+                        
+                        // Simple comparison: if different, replace everything
+                        if (JSON.stringify(serverTemplates) !== JSON.stringify(localTemplates)) {
+                            customTemplates = serverTemplates; // Update the variable
+                            localStorage.setItem('gtdTemplates', JSON.stringify(serverTemplates)); // Update localStorage
+                            renderTemplateButtons(); // Always refresh template buttons when data changes
+                        }
                     }
                 } else {
                     console.log('📥 TEMPLATES SYNC: Download failed:', response.status);
@@ -9543,6 +9899,12 @@
                 console.warn('🚨 MANDATORY REFRESH: Forcing download despite protection flags');
                 console.warn('🛡️ This overrides normal protection to prevent database conflicts');
             } else {
+                // 🔒 BACKUP RESTORE PROTECTION - highest priority
+                if (window.justRestoredBackup || window.skipNextDownload) {
+                    console.log('🔒 Skipping download - backup restore in progress');
+                    return;
+                }
+                
                 // 🔒 Download protection - skip if just modified tasks
                 if (window.justModifiedTasks) {
                     console.log('📥 Skipping download - just modified tasks');
@@ -9576,51 +9938,57 @@
                 
                 console.log('📥 Downloaded', serverTasks.length, 'tasks from server');
                 
-                // 📋 TRIPLE-LAYER PROTECTION: Smart conflict detection and resolution
-                if (window.TripleProtection && tasks.length > 0) {
-                    // console.log('📋 Layer 3: Checking for conflicts during sync...');
-                    let conflictsDetected = 0;
-                    let conflictsResolved = 0;
-                    
-                    // Check each server task against local tasks for conflicts
-                    for (const serverTask of serverTasks) {
-                        const localTask = tasks.find(t => t.id === serverTask.id);
-                        if (localTask) {
-                            const conflict = await window.TripleProtection.conflicts.detectConflict(
-                                serverTask.id, localTask, serverTask
-                            );
-                            
-                            if (conflict) {
-                                conflictsDetected++;
-                                // console.log(`📋 Layer 3: Conflict detected for task "${localTask.title}"`);
+                // MANDATORY REFRESH: Direct replacement with server data (no conflict detection)
+                if (window.forceMandatoryRefresh || window.staleBrowserMode) {
+                    console.log('🚨 MANDATORY REFRESH: Directly replacing with server data (no conflict detection)');
+                    tasks = serverTasks; // Direct replacement - no merging or conflict detection
+                } else {
+                    // 📋 TRIPLE-LAYER PROTECTION: Smart conflict detection and resolution for normal syncs
+                    if (window.TripleProtection && tasks.length > 0) {
+                        // console.log('📋 Layer 3: Checking for conflicts during sync...');
+                        let conflictsDetected = 0;
+                        let conflictsResolved = 0;
+                        
+                        // Check each server task against local tasks for conflicts
+                        for (const serverTask of serverTasks) {
+                            const localTask = tasks.find(t => t.id === serverTask.id);
+                            if (localTask) {
+                                const conflict = await window.TripleProtection.conflicts.detectConflict(
+                                    serverTask.id, localTask, serverTask
+                                );
                                 
-                                // Attempt automatic resolution
-                                const resolved = await window.TripleProtection.conflicts.resolveConflict(conflict, 'auto');
-                                if (resolved) {
-                                    conflictsResolved++;
-                                    // Update server task list with resolved version
-                                    const serverTaskIndex = serverTasks.findIndex(t => t.id === serverTask.id);
-                                    if (serverTaskIndex >= 0) {
-                                        serverTasks[serverTaskIndex] = resolved;
+                                if (conflict) {
+                                    conflictsDetected++;
+                                    // console.log(`📋 Layer 3: Conflict detected for task "${localTask.title}"`);
+                                    
+                                    // Attempt automatic resolution
+                                    const resolved = await window.TripleProtection.conflicts.resolveConflict(conflict, 'auto');
+                                    if (resolved) {
+                                        conflictsResolved++;
+                                        // Update server task list with resolved version
+                                        const serverTaskIndex = serverTasks.findIndex(t => t.id === serverTask.id);
+                                        if (serverTaskIndex >= 0) {
+                                            serverTasks[serverTaskIndex] = resolved;
+                                        }
                                     }
                                 }
                             }
                         }
+                        
+                        if (conflictsDetected > 0) {
+                            // console.log(`📋 Layer 3: Smart resolution complete: ${conflictsResolved}/${conflictsDetected} conflicts resolved`);
+                            
+                            // Show notification to user - DISABLED to reduce UI noise
+                            // showInlineNotification(
+                            //     `🔧 Smart Conflict Resolution: ${conflictsResolved}/${conflictsDetected} conflicts automatically resolved`, 
+                            //     conflictsResolved === conflictsDetected ? 'success' : 'warning'
+                            // );
+                        }
                     }
                     
-                    if (conflictsDetected > 0) {
-                        // console.log(`📋 Layer 3: Smart resolution complete: ${conflictsResolved}/${conflictsDetected} conflicts resolved`);
-                        
-                        // Show notification to user - DISABLED to reduce UI noise
-                        // showInlineNotification(
-                        //     `🔧 Smart Conflict Resolution: ${conflictsResolved}/${conflictsDetected} conflicts automatically resolved`, 
-                        //     conflictsResolved === conflictsDetected ? 'success' : 'warning'
-                        // );
-                    }
+                    // Use resolved server tasks for normal sync
+                    tasks = serverTasks;
                 }
-                
-                // Use resolved server tasks
-                tasks = serverTasks;
                 
                 // Save to localStorage
                 localStorage.setItem('gtdTasks', JSON.stringify(tasks));
@@ -9675,7 +10043,312 @@
                 
             } catch (error) {
                 console.error('❌ Download error:', error);
+                
+                // SAFETY: Remove stale browser banner if download fails
+                if (window.forceMandatoryRefresh || window.staleBrowserMode) {
+                    console.warn('⚠️ SAFETY: Removing stale browser banner due to download error');
+                    const warningBanner = document.getElementById('stale-browser-warning');
+                    if (warningBanner) {
+                        warningBanner.remove();
+                    }
+                    window.forceMandatoryRefresh = false;
+                    window.staleBrowserMode = false;
+                    document.body.style.pointerEvents = '';
+                }
+                
                 throw error;
+            }
+        }
+
+        // DELTA SYNC: Download only changes since last sync (90% bandwidth reduction)
+        async function downloadTaskChanges() {
+            if (!window.currentUser?.user?.id) {
+                console.log('⚠️ No user ID available for delta sync');
+                return null;
+            }
+
+            const authToken = window.currentUser?.token || localStorage.getItem('authToken');
+            if (!authToken) {
+                console.log('⚠️ No auth token available for delta sync');
+                return null;
+            }
+
+            const lastSyncTime = localStorage.getItem('lastSyncTime');
+            if (!lastSyncTime) {
+                console.log('📥 No last sync time - falling back to full sync');
+                return null; // Fall back to full sync
+            }
+
+            try {
+                console.log(`📥 DELTA SYNC: Getting changes since ${new Date(parseInt(lastSyncTime)).toISOString()}`);
+                
+                const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}/changes?since=${lastSyncTime}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    console.warn(`📥 DELTA SYNC failed (${response.status}) - falling back to full sync`);
+                    return null; // Fall back to full sync
+                }
+
+                const data = await response.json();
+                const changes = data.changes;
+
+                console.log(`📊 DELTA SYNC: ${changes.created.length} created, ${changes.updated.length} updated, ${changes.deleted.length} deleted`);
+
+                // Apply changes to local tasks array
+                applyTaskChanges(changes);
+
+                // Update last sync time
+                localStorage.setItem('lastSyncTime', Date.now().toString());
+
+                // Save updated tasks to localStorage
+                localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+
+                console.log('✅ DELTA SYNC completed successfully');
+                return changes;
+
+            } catch (error) {
+                console.warn('📥 DELTA SYNC error - falling back to full sync:', error);
+                return null; // Fall back to full sync
+            }
+        }
+
+        // Apply delta changes to local tasks array
+        function applyTaskChanges(changes) {
+            // Apply created tasks
+            for (const newTask of changes.created) {
+                const existingIndex = tasks.findIndex(t => t.id === newTask.id);
+                if (existingIndex === -1) {
+                    tasks.push(newTask);
+                    console.log(`📄 DELTA: Created task "${newTask.title}"`);
+                }
+            }
+
+            // Apply updated tasks
+            for (const updatedTask of changes.updated) {
+                const existingIndex = tasks.findIndex(t => t.id === updatedTask.id);
+                if (existingIndex >= 0) {
+                    tasks[existingIndex] = updatedTask;
+                    console.log(`📝 DELTA: Updated task "${updatedTask.title}"`);
+                } else {
+                    // Task doesn't exist locally, add it
+                    tasks.push(updatedTask);
+                    console.log(`📄 DELTA: Added missing task "${updatedTask.title}"`);
+                }
+            }
+
+            // Apply deleted tasks
+            for (const deletedTaskId of changes.deleted) {
+                const existingIndex = tasks.findIndex(t => t.id === deletedTaskId);
+                if (existingIndex >= 0) {
+                    const deletedTask = tasks[existingIndex];
+                    tasks.splice(existingIndex, 1);
+                    console.log(`🗑️ DELTA: Deleted task "${deletedTask.title}"`);
+                }
+            }
+
+            console.log(`📊 DELTA: Local tasks count now: ${tasks.length}`);
+        }
+
+        // DELTA SYNC: Upload only changed tasks (90% bandwidth reduction)
+        async function uploadTaskChanges(localChanges) {
+            if (!window.currentUser?.user?.id) {
+                console.log('⚠️ No user ID available for delta upload');
+                return false;
+            }
+
+            const authToken = window.currentUser?.token || localStorage.getItem('authToken');
+            if (!authToken) {
+                console.log('⚠️ No auth token available for delta upload');
+                return false;
+            }
+
+            try {
+                console.log(`📤 DELTA UPLOAD: Sending ${(localChanges.created || []).length} created, ${(localChanges.updated || []).length} updated, ${(localChanges.deleted || []).length} deleted`);
+
+                const response = await fetch(`${API_BASE}/tasks/delta`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        changes: localChanges
+                    })
+                });
+
+                if (!response.ok) {
+                    console.warn(`📤 DELTA UPLOAD failed (${response.status}) - falling back to full upload`);
+                    return false; // Fall back to full upload
+                }
+
+                const result = await response.json();
+                console.log(`✅ DELTA UPLOAD: Successfully processed ${result.processed} changes`);
+                
+                // Update last sync time
+                localStorage.setItem('lastSyncTime', Date.now().toString());
+                
+                return true;
+
+            } catch (error) {
+                console.warn('📤 DELTA UPLOAD error - falling back to full upload:', error);
+                return false; // Fall back to full upload
+            }
+        }
+
+        // Local change tracking for delta uploads
+        let localChanges = {
+            created: [],
+            updated: [],
+            deleted: []
+        };
+
+        // Track when a task is created locally
+        function trackTaskCreated(task) {
+            localChanges.created.push(task);
+            console.log(`📝 TRACKED: Created task "${task.title}"`);
+        }
+
+        // Track when a task is updated locally
+        function trackTaskUpdated(task) {
+            // Remove from created if it was just created (to avoid duplication)
+            const createdIndex = localChanges.created.findIndex(t => t.id === task.id);
+            if (createdIndex >= 0) {
+                localChanges.created[createdIndex] = task; // Update the created task
+            } else {
+                // Remove any previous update and add the latest version
+                const updatedIndex = localChanges.updated.findIndex(t => t.id === task.id);
+                if (updatedIndex >= 0) {
+                    localChanges.updated[updatedIndex] = task;
+                } else {
+                    localChanges.updated.push(task);
+                }
+            }
+            console.log(`📝 TRACKED: Updated task "${task.title}"`);
+        }
+
+        // Track when a task is deleted locally
+        function trackTaskDeleted(taskId) {
+            // Remove from created/updated if it exists
+            localChanges.created = localChanges.created.filter(t => t.id !== taskId);
+            localChanges.updated = localChanges.updated.filter(t => t.id !== taskId);
+            
+            // Add to deleted if not already there
+            if (!localChanges.deleted.includes(taskId)) {
+                localChanges.deleted.push(taskId);
+            }
+            console.log(`📝 TRACKED: Deleted task ${taskId}`);
+        }
+
+        // Clear local change tracking after successful sync
+        function clearLocalChanges() {
+            localChanges = {
+                created: [],
+                updated: [],
+                deleted: []
+            };
+            console.log('📝 CLEARED: Local change tracking reset');
+        }
+
+        // Smart upload function that uses delta sync when possible
+        async function smartUploadTasks() {
+            // Check if we have any local changes to upload
+            const hasChanges = localChanges.created.length > 0 || 
+                             localChanges.updated.length > 0 || 
+                             localChanges.deleted.length > 0;
+
+            if (!hasChanges) {
+                console.log('📤 No local changes to upload');
+                return true; // Nothing to upload is success
+            }
+
+            console.log(`📤 SMART UPLOAD: ${localChanges.created.length} created, ${localChanges.updated.length} updated, ${localChanges.deleted.length} deleted`);
+
+            // Try delta upload first
+            const deltaSuccess = await uploadTaskChanges(localChanges);
+            
+            if (deltaSuccess) {
+                // Delta upload succeeded, clear local changes
+                clearLocalChanges();
+                return true;
+            } else {
+                // Delta upload failed, fall back to full upload
+                console.log('📤 Falling back to full upload');
+                const fullUploadSuccess = await uploadAllTasks(); // Will call existing function
+                if (fullUploadSuccess) {
+                    clearLocalChanges(); // Clear tracking since full sync happened
+                }
+                return fullUploadSuccess;
+            }
+        }
+
+        // Debug function to check delta sync status
+        function debugDeltaSync() {
+            console.log('🔍 DELTA SYNC DEBUG INFO:');
+            console.log('📊 Local Changes:', {
+                created: localChanges.created.length,
+                updated: localChanges.updated.length,
+                deleted: localChanges.deleted.length,
+                details: localChanges
+            });
+            console.log('⏰ Last Sync Time:', localStorage.getItem('lastSyncTime'));
+            console.log('📱 Current Tasks Count:', tasks.length);
+            console.log('🏷️ Delta Sync Available:', typeof downloadTaskChanges === 'function');
+            
+            // Show in console for easy debugging
+            window.deltaDebug = {
+                localChanges,
+                lastSyncTime: localStorage.getItem('lastSyncTime'),
+                tasksCount: tasks.length,
+                canUseDeltaSync: !!localStorage.getItem('lastSyncTime')
+            };
+            
+            return window.deltaDebug;
+        }
+
+        // Expose debug function globally for console testing
+        window.debugDeltaSync = debugDeltaSync;
+
+        // Smart sync function that uses delta sync when possible
+        async function smartDownloadTasks() {
+            // Skip if protection flags are set (unless mandatory refresh)
+            if (!window.forceMandatoryRefresh && !window.staleBrowserMode) {
+                // 🔒 BACKUP RESTORE PROTECTION - highest priority
+                if (window.justRestoredBackup || window.skipNextDownload) {
+                    console.log('🔒 Skipping smart download - backup restore in progress');
+                    return;
+                }
+                
+                if (window.justModifiedTasks) {
+                    console.log('📥 Skipping smart download - just modified tasks');
+                    return;
+                }
+            }
+
+            // Always use full sync for mandatory refresh (stale browser)
+            if (window.forceMandatoryRefresh || window.staleBrowserMode) {
+                console.log('🚨 MANDATORY REFRESH: Using full sync');
+                await downloadAllTasks();
+                return;
+            }
+
+            // Try delta sync first
+            const changes = await downloadTaskChanges();
+            
+            if (changes === null) {
+                // Delta sync failed or not possible, fall back to full sync
+                console.log('📥 Falling back to full sync');
+                await downloadAllTasks();
+            } else {
+                // Delta sync succeeded, refresh UI
+                renderCurrentView();
+                
+                // Update sync timestamp
+                localStorage.setItem('lastSyncTime', Date.now().toString());
             }
         }
         
@@ -11585,6 +12258,9 @@
                         await window.TripleProtection.versions.track(taskData.id, cleanedTask, 'edit', 'Task updated');
                     }
                     
+                    // 📊 DELTA SYNC: Track update for efficient sync
+                    trackTaskUpdated(cleanedTask);
+                    
                     // Task updated successfully
                 } else {
                     tasks.push(cleanedTask);
@@ -11593,6 +12269,9 @@
                     if (window.TripleProtection) {
                         await window.TripleProtection.versions.track(taskData.id, cleanedTask, 'create', 'New task created');
                     }
+                    
+                    // 📊 DELTA SYNC: Track creation for efficient sync
+                    trackTaskCreated(cleanedTask);
                     
                     // Task created successfully
                 }
@@ -12571,7 +13250,7 @@
                 content.innerHTML = `
                     <div style="display: flex; justify-content: center; align-items: center; height: 200px; flex-direction: column; color: #666;">
                         <div style="font-size: 24px; margin-bottom: 10px;">⏳</div>
-                        <div>Loading your tasks...</div>
+                        <div>Syncing...</div>
                     </div>
                 `;
             } else {
@@ -17249,6 +17928,9 @@
                     // Remove task permanently from local array
                     tasks.splice(taskIndex, 1);
                     console.log('🗑️ Task permanently removed from local array:', taskId);
+                    
+                    // 📊 DELTA SYNC: Track deletion for efficient sync
+                    trackTaskDeleted(taskId);
                 } else {
                     console.error('🗑️ ERROR: Task not found in array:', taskId);
                     return;
@@ -22545,19 +23227,30 @@
         }
 
         async function deleteSelectedTasks() {
-            if (selectedTasks.size === 0) {
-                // No tasks selected for deletion
+            // Preserve selected tasks before any operations that might clear them
+            window.bulkDeleteSelectedTasks = new Set([...selectedTasks]);
+            console.log('🎯 Preserved selected tasks for deletion:', Array.from(window.bulkDeleteSelectedTasks));
+            
+            // Use preserved tasks if current selection is empty, fallback to current selection
+            const tasksToDeleteFrom = selectedTasks.size > 0 ? selectedTasks : (window.bulkDeleteSelectedTasks || new Set());
+            
+            if (tasksToDeleteFrom.size === 0) {
+                alert('❌ No tasks selected for deletion.');
                 return;
             }
             
             // Delete operation initiated
             
-            const confirmed = confirm(`Are you sure you want to delete ${selectedTasks.size} selected task(s)?`);
-            if (!confirmed) return;
+            const confirmed = confirm(`Are you sure you want to delete ${tasksToDeleteFrom.size} selected task(s)?`);
+            if (!confirmed) {
+                // Clean up preserved tasks if user cancels
+                window.bulkDeleteSelectedTasks = null;
+                return;
+            }
             
             try {
                 // Convert selected task IDs to strings/numbers consistently
-                const selectedTaskIds = Array.from(selectedTasks).map(id => 
+                const selectedTaskIds = Array.from(tasksToDeleteFrom).map(id => 
                     typeof id === 'string' ? id : String(id)
                 );
                 
@@ -22609,6 +23302,7 @@
                 
                 // Clear selection and update UI
                 selectedTasks.clear();
+                window.bulkDeleteSelectedTasks = null; // Clean up preserved tasks
                 updateSelectionUI();
                 
                 // Refresh the view
@@ -22619,28 +23313,37 @@
             } catch (error) {
                 console.error('❌ Error deleting selected tasks:', error);
                 alert('❌ Error deleting some tasks. Please try again.');
+                // Clean up preserved tasks on error
+                window.bulkDeleteSelectedTasks = null;
             }
         }
 
         function delaySelectedTasks(days) {
-            if (selectedTasks.size === 0) {
+            // Preserve selected tasks before any operations that might clear them
+            window.bulkDelaySelectedTasks = new Set([...selectedTasks]);
+            console.log('🎯 Preserved selected tasks for delay:', Array.from(window.bulkDelaySelectedTasks));
+            
+            // Use preserved tasks if current selection is empty, fallback to current selection
+            const tasksToDelayFrom = selectedTasks.size > 0 ? selectedTasks : (window.bulkDelaySelectedTasks || new Set());
+            
+            if (tasksToDelayFrom.size === 0) {
                 console.log('🔍 DEBUG: No tasks selected for delay');
                 return;
             }
             
-            console.log('📅 OPTIMISTIC: Delaying', selectedTasks.size, 'selected tasks by', days, 'days');
+            console.log('📅 OPTIMISTIC: Delaying', tasksToDelayFrom.size, 'selected tasks by', days, 'days');
             
             // Store original state for potential rollback
             const originalTasks = [];
-            const affectedTaskIds = Array.from(selectedTasks);
+            const affectedTaskIds = Array.from(tasksToDelayFrom);
             
             try {
                 let delayedCount = 0;
                 const delayLabel = days === 1 ? '+1D' : days === 7 ? '+1W' : days === 30 ? '+1M' : `+${days}D`;
                 
                 // Backup original tasks for rollback
-                for (const taskId of selectedTasks) {
-                    const task = tasks.find(t => t.id == taskId);
+                for (const taskId of tasksToDelayFrom) {
+                    const task = tasks.find(t => String(t.id) === String(taskId));
                     if (task) {
                         originalTasks.push({
                             id: task.id,
@@ -22650,8 +23353,8 @@
                 }
                 
                 // Process each selected task (OPTIMISTIC UPDATE)
-                for (const taskId of selectedTasks) {
-                    const task = tasks.find(t => t.id == taskId);
+                for (const taskId of tasksToDelayFrom) {
+                    const task = tasks.find(t => String(t.id) === String(taskId));
                     if (task) {
                         // Calculate new date
                         const currentDate = task.dueDate ? new Date(task.dueDate + 'T00:00:00') : new Date();
@@ -22669,6 +23372,7 @@
                 
                 // Immediate UI update (optimistic feedback)
                 selectedTasks.clear();
+                window.bulkDelaySelectedTasks = null; // Clean up preserved tasks
                 updateSelectionUI();
                 renderCurrentView();
                 
@@ -22713,6 +23417,9 @@
             } catch (error) {
                 console.error('❌ OPTIMISTIC ERROR: Error delaying selected tasks:', error);
                 showOptimisticFeedback('❌ Error rescheduling tasks', 'error');
+                
+                // Clean up preserved tasks on error
+                window.bulkDelaySelectedTasks = null;
                 
                 // Restore UI if immediate operation failed
                 renderCurrentView();
@@ -22776,6 +23483,10 @@
                 return;
             }
             
+            // Store selected tasks to prevent them being cleared during modal operations
+            window.bulkTimeSelectedTasks = new Set([...selectedTasks]);
+            console.log('🎯 Preserved selected tasks:', Array.from(window.bulkTimeSelectedTasks));
+            
             // Update task count
             const countElement = document.getElementById('bulkTimeTaskCount');
             if (countElement) {
@@ -22811,50 +23522,38 @@
                 });
             }
             
-            // Position modal near first selected task
+            // Position modal near first selected task (same level as floating buttons)
             const modal = document.getElementById('bulkTimeModal');
             const modalContent = modal ? modal.querySelector('.modal-content') : null;
             
             if (modal && modalContent) {
-                // Find first selected task element
+                // Find the first selected task to position modal at same level
                 const firstSelectedTask = document.querySelector('.task-card-selectable.selected');
                 
                 if (firstSelectedTask) {
-                    console.log('🎯 Positioning modal near first selected task');
+                    console.log('🎯 Positioning modal near first selected task at same level as floating buttons');
                     const taskRect = firstSelectedTask.getBoundingClientRect();
+                    console.log('🎯 Task position:', taskRect);
                     
-                    // Position modal near the task (to the right if space, otherwise left)
-                    const modalWidth = 400; // Modal max-width
-                    const spaceOnRight = window.innerWidth - taskRect.right;
-                    const spaceOnLeft = taskRect.left;
+                    // Position modal at the same vertical level as the task (like floating buttons)
+                    const modalTop = taskRect.top + window.scrollY;
+                    const modalLeft = Math.max(50, Math.min(taskRect.right + 20, window.innerWidth - 420)); // 420px = modal width + margin
                     
-                    let left = taskRect.right + 20; // 20px margin
-                    if (spaceOnRight < modalWidth + 40) {
-                        // Not enough space on right, position on left
-                        left = Math.max(20, taskRect.left - modalWidth - 20);
-                    }
+                    modalContent.style.setProperty('position', 'absolute', 'important');
+                    modalContent.style.setProperty('left', modalLeft + 'px', 'important');
+                    modalContent.style.setProperty('top', modalTop + 'px', 'important');
+                    modalContent.style.setProperty('transform', 'none', 'important');
                     
-                    // Ensure modal doesn't go off screen
-                    left = Math.max(20, Math.min(left, window.innerWidth - modalWidth - 20));
-                    
-                    const top = Math.max(20, taskRect.top);
-                    
-                    modalContent.style.position = 'fixed';
-                    modalContent.style.left = left + 'px';
-                    modalContent.style.top = top + 'px';
-                    modalContent.style.margin = '0';
-                    modalContent.style.transform = 'none';
-                    
-                    console.log('🎯 Modal positioned at:', { left, top });
+                    console.log('🎯 Modal positioned at:', { left: modalLeft, top: modalTop });
                 } else {
-                    console.log('🎯 No selected task found, using default positioning');
-                    // Reset to default centered positioning
-                    modalContent.style.position = 'static';
-                    modalContent.style.left = 'auto';
-                    modalContent.style.top = 'auto';
-                    modalContent.style.margin = '20vh auto';
-                    modalContent.style.transform = '';
+                    // Fallback to center positioning if no selected task found
+                    const defaultTop = window.innerHeight * 0.4;
+                    modalContent.style.setProperty('position', 'fixed', 'important');
+                    modalContent.style.setProperty('left', '50%', 'important');
+                    modalContent.style.setProperty('top', defaultTop + 'px', 'important');
+                    modalContent.style.setProperty('transform', 'translateX(-50%)', 'important');
                 }
+                modalContent.style.setProperty('margin', '0', 'important');
                 
                 modal.style.display = 'block';
                 console.log('🎯 Modal displayed');
@@ -22874,11 +23573,11 @@
                 
                 // Reset positioning for next time
                 if (modalContent) {
-                    modalContent.style.position = 'static';
-                    modalContent.style.left = 'auto';
-                    modalContent.style.top = 'auto';
-                    modalContent.style.margin = '20vh auto';
-                    modalContent.style.transform = '';
+                    modalContent.style.removeProperty('position');
+                    modalContent.style.removeProperty('left');
+                    modalContent.style.removeProperty('top');
+                    modalContent.style.removeProperty('margin');
+                    modalContent.style.removeProperty('transform');
                 }
             }
         }
@@ -22889,36 +23588,56 @@
         window.applyBulkTime = applyBulkTime;
         
         function applyBulkTime() {
+            console.log('🎯 applyBulkTime function called');
             const timeSelect = document.getElementById('bulkTimeSelect');
             const selectedTime = timeSelect ? timeSelect.value : '';
             
-            if (selectedTasks.size === 0) {
+            console.log('🎯 Time select element:', timeSelect);
+            console.log('🎯 Selected time value:', selectedTime);
+            console.log('🎯 Current selectedTasks size:', selectedTasks.size);
+            console.log('🎯 Preserved bulkTimeSelectedTasks size:', window.bulkTimeSelectedTasks?.size || 0);
+            
+            // Use preserved tasks if current selection is empty
+            const tasksToUpdate = selectedTasks.size > 0 ? selectedTasks : (window.bulkTimeSelectedTasks || new Set());
+            console.log('🎯 Tasks to update:', Array.from(tasksToUpdate));
+            
+            if (tasksToUpdate.size === 0) {
+                console.warn('🎯 No tasks to update, closing modal');
                 closeBulkTimeModal();
                 return;
             }
             
-            console.log(`⏰ Applying time "${selectedTime}" to ${selectedTasks.size} selected tasks`);
+            console.log(`⏰ Applying time "${selectedTime}" to ${tasksToUpdate.size} selected tasks`);
             
             try {
                 let updatedCount = 0;
                 
                 // Update each selected task
-                for (const taskId of selectedTasks) {
-                    const task = tasks.find(t => t.id == taskId);
+                for (const taskId of tasksToUpdate) {
+                    const task = tasks.find(t => String(t.id) === String(taskId));
                     if (task) {
+                        console.log(`⏰ DEBUG: Found task to update:`, task.title, 'Current time:', task.dueTime);
+                        
                         // Update task time
                         task.dueTime = selectedTime || null;
                         task.updatedAt = new Date().toISOString();
                         updatedCount++;
                         
                         console.log(`⏰ Updated task ${taskId} time to: ${selectedTime || 'No specific time'}`);
+                    } else {
+                        console.warn(`⏰ WARNING: Task not found for ID: ${taskId}`);
                     }
                 }
                 
-                // Clear selection and close modal
+                // Clear selections and close modal
                 selectedTasks.clear();
+                window.bulkTimeSelectedTasks = null; // Clean up preserved tasks
                 closeBulkTimeModal();
                 updateSelectionUI();
+                
+                // Save to localStorage immediately
+                saveTasksToLocalStorage();
+                console.log('💾 Tasks saved to localStorage after bulk time update');
                 
                 // Update UI immediately
                 sortTasks();
@@ -23500,6 +24219,14 @@
 
         function restoreFromBackupData(backupData) {
             try {
+                // CRITICAL: Set flags to prevent cloud sync from overriding restored data
+                window.justModifiedTasks = true;
+                window.justModifiedLists = true;
+                window.justRestoredBackup = true;
+                window.skipNextDownload = true;
+                
+                console.log('🔒 Backup Restore: Setting protection flags to prevent cloud override');
+                
                 // Restore all data from backup
                 tasks = backupData.tasks || [];
                 listSections = backupData.listSections || [];
@@ -23512,16 +24239,45 @@
                 localStorage.setItem('gtdTemplates', JSON.stringify(customTemplates));
                 localStorage.setItem('gtd_trash', JSON.stringify(trash));
                 
-                // Sync to server if available
+                // Update last sync time to prevent immediate cloud download
+                localStorage.setItem('lastSyncTime', Date.now().toString());
+                
+                // Sync to server if available (upload restored data)
+                console.log('📤 Backup Restore: Uploading restored data to cloud...');
+                const uploadPromises = [];
+                
                 if (typeof uploadAllTasks === 'function') {
-                    uploadAllTasks();
+                    uploadPromises.push(uploadAllTasks());
                 }
                 if (typeof uploadAllLists === 'function') {
-                    uploadAllLists();
+                    uploadPromises.push(uploadAllLists());
                 }
                 if (typeof uploadAllTemplates === 'function') {
-                    uploadAllTemplates();
+                    uploadPromises.push(uploadAllTemplates());
                 }
+                
+                // Wait for uploads to complete before allowing downloads
+                Promise.all(uploadPromises).then(() => {
+                    console.log('✅ Backup Restore: All data uploaded successfully');
+                    
+                    // Keep protection for 30 seconds to ensure cloud has processed the upload
+                    setTimeout(() => {
+                        window.justModifiedTasks = false;
+                        window.justModifiedLists = false;
+                        window.justRestoredBackup = false;
+                        window.skipNextDownload = false;
+                        console.log('🔓 Backup Restore: Protection flags removed, normal sync resumed');
+                    }, 30000); // 30 seconds protection
+                }).catch(error => {
+                    console.error('⚠️ Backup Restore: Upload failed, keeping protection flags', error);
+                    // Keep protection for longer if upload failed
+                    setTimeout(() => {
+                        window.justModifiedTasks = false;
+                        window.justModifiedLists = false;
+                        window.justRestoredBackup = false;
+                        window.skipNextDownload = false;
+                    }, 60000); // 1 minute protection on error
+                });
                 
                 // Refresh UI
                 renderCurrentView();
@@ -23530,11 +24286,17 @@
                 }
                 
                 // Show success message
-                showInlineNotification('✅ ' + translateText('Backup restored successfully!'), 'success');
+                showInlineNotification('✅ ' + translateText('Backup restored successfully! Cloud sync temporarily paused.'), 'success');
                 
             } catch (error) {
                 console.error('Error restoring backup:', error);
                 showInlineNotification('❌ ' + translateText('Error restoring backup: ') + error.message, 'error');
+                
+                // Reset protection flags on error
+                window.justModifiedTasks = false;
+                window.justModifiedLists = false;
+                window.justRestoredBackup = false;
+                window.skipNextDownload = false;
             }
         }
 
@@ -29104,12 +29866,12 @@
                             window.selectedTasks = new Set();
                         }
                         
-                        // Add or remove from selection
+                        // Add or remove from selection (use string IDs for consistency)
                         if (selectedTaskElement.classList.contains('selected')) {
-                            selectedTasks.add(parseInt(taskId));
+                            selectedTasks.add(String(taskId));
                             console.log('Task selected for batch operations:', taskId);
                         } else {
-                            selectedTasks.delete(parseInt(taskId));
+                            selectedTasks.delete(String(taskId));
                             console.log('Task deselected from batch operations:', taskId);
                         }
                         
@@ -29415,7 +30177,7 @@
     
     <!-- Bulk Time Selection Modal -->
     <div id="bulkTimeModal" class="modal" onclick="closeBulkTimeModal(event)" style="z-index: 1200;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 400px; margin: 20vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 400px; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; position: relative;">
