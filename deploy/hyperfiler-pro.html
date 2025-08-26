@@ -5,8 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚡ HyperFiler Pro 🚀 - v2.0.7</title>
     
-    <!-- BLOCK PAGES.DEV ACCESS: Redirect users to official domain (TEMPORARILY DISABLED FOR TESTING) -->
+    <!-- DEBUG: Early error catching -->
     <script>
+        console.log('🚀 HyperFiler Pro v2.0.7 - Starting initialization...');
+        window.addEventListener('error', function(e) {
+            console.error('❌ UNCAUGHT ERROR:', e.message, 'at line', e.lineno, 'column', e.colno);
+            console.error('Stack:', e.error?.stack);
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('❌ UNHANDLED PROMISE REJECTION:', e.reason);
+        });
+        
         // TEMPORARILY DISABLED - testing pages.dev deployment
         if (false && window.location.hostname.includes('.pages.dev')) {
             console.log('🚫 Pages.dev redirect temporarily disabled for testing');
@@ -7159,9 +7169,9 @@
                 
                 // CRITICAL: Check for stale browser data before allowing sync
                 const lastSyncTime = localStorage.getItem('lastSyncTime');
-                const now = Date.now();
-                const oneHourAgo = now - (60 * 60 * 1000); // 1 hour
-                const oneDayAgo = now - (24 * 60 * 60 * 1000); // 24 hours
+                const currentTime = Date.now();
+                const oneHourAgo = currentTime - (60 * 60 * 1000); // 1 hour
+                const oneDayAgo = currentTime - (24 * 60 * 60 * 1000); // 24 hours
                 
                 // Detect stale browser session
                 if (!lastSyncTime || parseInt(lastSyncTime) < oneDayAgo) {
@@ -7185,7 +7195,7 @@
                             console.log('✅ STALE BROWSER: Successfully refreshed all data from cloud');
                             
                             // Update sync time
-                            localStorage.setItem('lastSyncTime', Date.now().toString());
+                            localStorage.setItem('lastSyncTime', currentTime.toString());
                             
                             // Clear protection flags after successful download
                             setTimeout(() => {
@@ -7217,7 +7227,7 @@
                             await downloadAllTasks();
                             await downloadAllLists();
                             await downloadAllTemplates();
-                            localStorage.setItem('lastSyncTime', Date.now().toString());
+                            localStorage.setItem('lastSyncTime', currentTime.toString());
                             
                             setTimeout(() => {
                                 window.justModifiedTasks = false;
@@ -7232,7 +7242,7 @@
                 } else {
                     console.log('✅ FRESH SESSION: Last sync was recent, normal sync enabled');
                     // Update last sync time for fresh sessions
-                    localStorage.setItem('lastSyncTime', Date.now().toString());
+                    localStorage.setItem('lastSyncTime', currentTime.toString());
                 }
                 
                 try {
