@@ -25151,12 +25151,11 @@
             const noTimeSlot = [];
             
             todayTasks.forEach(task => {
-                // Normalize dueTime value: ensure consistent handling of empty time values and "00:00"
+                // Normalize dueTime value: ensure consistent handling of empty time values
                 const hasValidTime = task.dueTime && 
                                    task.dueTime !== '' && 
                                    task.dueTime !== null && 
-                                   task.dueTime !== undefined && 
-                                   task.dueTime !== '00:00';  // Treat "00:00" as untimed
+                                   task.dueTime !== undefined;
                 
                 if (hasValidTime) {
                     const timeKey = task.dueTime;
@@ -25165,7 +25164,7 @@
                     }
                     timeSlots[timeKey].push(task);
                 } else {
-                    // AUTO-CLASSIFY: Normalize and ensure task dueTime is consistently null for untimed tasks (including 00:00)
+                    // AUTO-CLASSIFY: Normalize and ensure task dueTime is consistently null for untimed tasks
                     task.dueTime = normalizeDueTime(task.dueTime);
                     noTimeSlot.push(task);
                 }
