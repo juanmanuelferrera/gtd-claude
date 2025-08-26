@@ -10946,6 +10946,11 @@
                     window.lastUploadTime = Date.now(); // Prevent immediate download
                     
                     // Download merged data back from server
+                    // Skip download if backup restore is in progress
+                    if (window.backupRestoreInProgress || window.justRestoredBackup || window.skipNextDownload) {
+                        console.log('🔒 UPLOAD SYNC: Skipped merged data download - backup restore in progress');
+                        return true;
+                    }
                     console.log('📥 Downloading merged data from server...');
                     try {
                         const downloadResponse = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
