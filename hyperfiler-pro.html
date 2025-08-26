@@ -5,49 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚡ HyperFiler Pro 🚀 - v2.0.7</title>
     
-    <!-- BLOCK PAGES.DEV ACCESS: Redirect users to official domain -->
+    <!-- BLOCK PAGES.DEV ACCESS: Redirect users to official domain (TEMPORARILY DISABLED FOR TESTING) -->
     <script>
-        // Check if redirect is needed, but allow auth to initialize first
-        if (window.location.hostname.includes('.pages.dev') || window.location.hostname.includes('hyperfiler.pages.dev')) {
-            console.log('🚫 Pages.dev detected - will redirect after auth check');
-            
-            // Wait for DOM and potential auth initialization
-            document.addEventListener('DOMContentLoaded', function() {
-                // Small delay to allow authentication to initialize
-                setTimeout(() => {
-                    console.log('🚫 Redirecting from pages.dev to official domain');
-                    const newUrl = 'https://hyperfiler.pro' + window.location.pathname + window.location.search + window.location.hash;
-                    
-                    // Preserve any authentication tokens before redirect
-                    const authToken = localStorage.getItem('authToken');
-                    const authExpiry = localStorage.getItem('authTokenExpiry');
-                    const currentUser = localStorage.getItem('currentUser');
-                    
-                    if (authToken && authExpiry && currentUser) {
-                        console.log('💾 Preserving authentication during redirect');
-                        // Store in sessionStorage as backup
-                        sessionStorage.setItem('redirectAuth', JSON.stringify({
-                            authToken,
-                            authExpiry,
-                            currentUser,
-                            redirectTime: Date.now()
-                        }));
-                    }
-                    
-                    window.location.replace(newUrl);
-                }, 100); // 100ms delay to allow initialization
-            });
+        // TEMPORARILY DISABLED - testing pages.dev deployment
+        if (false && window.location.hostname.includes('.pages.dev')) {
+            console.log('🚫 Pages.dev redirect temporarily disabled for testing');
         }
     </script>
-    <!-- Fallback for users with JavaScript disabled -->
-    <noscript>
-        <script>
-            if (location.hostname.includes('pages.dev')) {
-                location.href = 'https://hyperfiler.pro' + location.pathname + location.search;
-            }
-        </script>
-        <meta http-equiv="refresh" content="0;url=https://hyperfiler.pro">
-    </noscript>
     <style>
         * {
             margin: 0;
