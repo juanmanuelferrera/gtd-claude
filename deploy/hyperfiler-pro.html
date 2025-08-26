@@ -7188,6 +7188,15 @@
                     // Force immediate download from cloud
                     setTimeout(async () => {
                         try {
+                            // 🔒 CRITICAL: Check if backup restore is in progress
+                            if (window.backupRestoreInProgress || window.justRestoredBackup) {
+                                console.log('🔒 STALE BROWSER: Download cancelled - backup restore in progress');
+                                // Clear stale browser flags since restore is happening
+                                window.staleBrowserDetected = false;
+                                window.skipInitialUpload = false;
+                                return;
+                            }
+                            
                             console.log('📥 STALE BROWSER: Starting forced cloud download...');
                             await downloadAllTasks();
                             await downloadAllLists();
@@ -7224,6 +7233,12 @@
                     
                     setTimeout(async () => {
                         try {
+                            // 🔒 CRITICAL: Check if backup restore is in progress
+                            if (window.backupRestoreInProgress || window.justRestoredBackup) {
+                                console.log('🔒 MODERATE STALE: Download cancelled - backup restore in progress');
+                                return;
+                            }
+                            
                             await downloadAllTasks();
                             await downloadAllLists();
                             await downloadAllTemplates();
@@ -8470,6 +8485,13 @@
         // Perform stale browser refresh when authentication is ready
         async function performStaleRefresh() {
             try {
+                // 🔒 CRITICAL: Check if backup restore is in progress
+                if (window.backupRestoreInProgress || window.justRestoredBackup) {
+                    console.log('🔒 PERFORM STALE REFRESH: Cancelled - backup restore in progress');
+                    window.needsStaleRefresh = false; // Clear the flag
+                    return;
+                }
+                
                 console.warn('🚨 STALE BROWSER DETECTED - FORCING IMMEDIATE DATABASE REFRESH');
                 
                 // Show friendly sync banner
@@ -8924,8 +8946,14 @@
                         
                         // 🚨 Check if stale browser refresh is needed (deferred from earlier)
                         if (window.needsStaleRefresh) {
-                            console.warn('🚨 PERFORMING DEFERRED STALE BROWSER REFRESH');
-                            await performStaleRefresh();
+                            // 🔒 CRITICAL: Check if backup restore is in progress
+                            if (window.backupRestoreInProgress || window.justRestoredBackup) {
+                                console.log('🔒 DEFERRED STALE REFRESH: Cancelled - backup restore in progress');
+                                window.needsStaleRefresh = false; // Clear the flag
+                            } else {
+                                console.warn('🚨 PERFORMING DEFERRED STALE BROWSER REFRESH');
+                                await performStaleRefresh();
+                            }
                         }
                         
                         // 🔒 Initialize Triple-Layer Protection System
@@ -9047,6 +9075,12 @@
             let lastFocusRefresh = 0;
             window.addEventListener('focus', () => {
                 if (window.currentUser && !window.justModifiedTasks) {
+                    // 🔒 CRITICAL: Check if backup restore is in progress
+                    if (window.backupRestoreInProgress || window.justRestoredBackup || window.skipNextDownload) {
+                        console.log('🔒 FOCUS SYNC: Blocked - backup restore in progress');
+                        return;
+                    }
+                    
                     const now = Date.now();
                     if (now - lastFocusRefresh > 10000) { // 10 seconds minimum for testing
                         console.log('📥 Focus sync - smart downloading tasks and lists...');
