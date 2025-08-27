@@ -24289,8 +24289,47 @@
                 
                 // Sync to server if available (upload restored data)
                 console.log('📤 Backup Restore: Uploading restored data to cloud...');
-                const uploadPromises = [];
+                console.log('📤 Backup Restore: Current tasks count:', tasks.length);
+                console.log('📤 Backup Restore: Current lists count:', listSections.length);
+                console.log('📤 Backup Restore: Current templates count:', customTemplates.length);
                 
+                // CRITICAL: Direct upload to cloud instead of relying on upload functions
+                try {
+                    if (window.currentUser?.user?.id) {
+                        console.log('🚀 BACKUP RESTORE: Direct cloud upload starting...');
+                        
+                        // Upload tasks directly
+                        const tasksResponse = await fetch(`${API_BASE}/tasks`, {
+                            method: 'POST',
+                            headers: getAuthHeaders(),
+                            body: JSON.stringify({
+                                tasks: tasks,
+                                userId: window.currentUser.user.id
+                            })
+                        });
+                        
+                        console.log('📡 BACKUP RESTORE: Tasks upload response:', tasksResponse.status, tasksResponse.statusText);
+                        
+                        if (tasksResponse.ok) {
+                            console.log('✅ BACKUP RESTORE: Tasks uploaded successfully');
+                        } else {
+                            const errorText = await tasksResponse.text();
+                            console.error('❌ BACKUP RESTORE: Tasks upload failed:', errorText);
+                        }
+                        
+                        console.log('✅ Backup Restore: Data upload completed');
+                        showInlineNotification('✅ ' + translateText('Backup fully restored and synced to cloud!'), 'success');
+                    } else {
+                        console.error('❌ BACKUP RESTORE: No authenticated user for upload');
+                        showInlineNotification('⚠️ ' + translateText('Backup restored locally but could not sync to cloud'), 'warning');
+                    }
+                } catch (uploadError) {
+                    console.error('❌ BACKUP RESTORE: Upload error:', uploadError);
+                    showInlineNotification('⚠️ ' + translateText('Backup restored locally but sync failed'), 'warning');
+                }
+                
+                // Keep the old promise-based approach as fallback
+                const uploadPromises = [];
                 if (typeof uploadAllTasks === 'function') {
                     uploadPromises.push(uploadAllTasks());
                 }
@@ -24301,10 +24340,9 @@
                     uploadPromises.push(uploadAllTemplates());
                 }
                 
-                // Wait for uploads to complete before allowing downloads
+                // Wait for fallback uploads to complete
                 Promise.all(uploadPromises).then(() => {
-                    console.log('✅ Backup Restore: All data uploaded successfully');
-                    showInlineNotification('✅ ' + translateText('Backup fully restored and synced to cloud!'), 'success');
+                    console.log('✅ Backup Restore: Fallback uploads completed');
                     
                     // Keep protection for 30 seconds to ensure cloud has processed the upload
                     setTimeout(() => {
