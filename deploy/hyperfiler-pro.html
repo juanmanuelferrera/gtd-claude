@@ -10930,6 +10930,9 @@
         async function immediateSyncToCloud() {
             if (!window.currentUser) {
                 console.log('⏭️ No user authenticated - skipping sync');
+                console.log('🔍 DEBUG: window.currentUser is:', window.currentUser);
+                console.log('🔍 DEBUG: localStorage authToken:', !!localStorage.getItem('authToken'));
+                console.log('🔍 DEBUG: localStorage userEmail:', localStorage.getItem('userEmail'));
                 return false;
             }
             
@@ -11020,10 +11023,15 @@
         // Add uploadAllTasks wrapper for compatibility (defined after immediateSyncToCloud)
         window.uploadAllTasks = async function uploadAllTasks() {
             console.log('🔄 uploadAllTasks called - using simple sync');
+            console.log('🔄 uploadAllTasks: Current tasks count:', tasks.length);
+            console.log('🔄 uploadAllTasks: Auth check - currentUser exists:', !!window.currentUser);
+            
             // Use the existing sync functionality
             if (typeof immediateSyncToCloud === 'function') {
                 console.log('✅ Found immediateSyncToCloud function, calling it...');
-                await immediateSyncToCloud();
+                const result = await immediateSyncToCloud();
+                console.log('🔄 uploadAllTasks: immediateSyncToCloud result:', result);
+                return result;
             } else {
                 console.log('❌ immediateSyncToCloud function not found, using fallback sync method');
                 // Fallback: trigger any existing sync mechanisms
@@ -18634,6 +18642,8 @@
                 }
                 
                 // Save using standard pattern
+                console.log('🔄 DELETE: Calling saveTasksToServer for deleted task:', task.title);
+                console.log('🔄 DELETE: Current user auth state:', !!window.currentUser, 'User ID:', window.currentUser?.user?.id);
                 await saveTasksToServer();
                 
                 // Move to trash
@@ -23324,6 +23334,8 @@
                 // Save to localStorage and sync with workers
                 saveTasksToLocalStorage();
                 window.justModifiedTasks = true;
+                console.log('🔄 BULK DELETE: Calling uploadAllTasks for', deletedCount, 'deleted tasks');
+                console.log('🔄 BULK DELETE: Current user auth state:', !!window.currentUser, 'User ID:', window.currentUser?.user?.id);
                 await uploadAllTasks();
                 setTimeout(() => { window.justModifiedTasks = false; }, 5000);
                 
