@@ -24250,7 +24250,7 @@
             }
         }
 
-        function restoreFromBackupData(backupData) {
+        async function restoreFromBackupData(backupData) {
             try {
                 // CRITICAL: Set MAXIMUM protection flags to prevent ANY cloud sync override
                 window.justModifiedTasks = true;
