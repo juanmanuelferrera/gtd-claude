@@ -13126,7 +13126,14 @@
                     month: 'short', 
                     day: 'numeric' 
                 });
-                button.textContent = `${dateStr} at ${timeValue}`;
+                
+                // Format time to 12-hour format for better readability
+                const [hours, minutes] = timeValue.split(':');
+                const hour12 = parseInt(hours) === 0 ? 12 : parseInt(hours) > 12 ? parseInt(hours) - 12 : parseInt(hours);
+                const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+                const formattedTime = `${hour12}:${minutes} ${ampm}`;
+                
+                button.textContent = `${dateStr} at ${formattedTime}`;
             } else if (dateValue) {
                 const date = new Date(dateValue);
                 const dateStr = date.toLocaleDateString('en-US', { 
