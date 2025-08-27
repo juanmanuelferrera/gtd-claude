@@ -23947,7 +23947,8 @@
                 totalTasks: tasks ? tasks.length : 0,
                 totalListSections: typeof listSections !== 'undefined' ? listSections.length : 0,
                 totalTrashItems: typeof trash !== 'undefined' ? trash.length : 0,
-                backupReason: "quick-backup"
+                backupReason: "quick-backup",
+                forceCloudOverwrite: true // Special flag to ensure backup restore always overwrites cloud data
             };
             
             console.log('📦 Quick backup data size:', JSON.stringify(backupData).length, 'characters');
@@ -24030,7 +24031,8 @@
                     tasks: JSON.parse(JSON.stringify(tasks)),
                     listSections: JSON.parse(JSON.stringify(listSections || [])),
                     customTemplates: JSON.parse(JSON.stringify(customTemplates || [])),
-                    trash: JSON.parse(JSON.stringify(trash || []))
+                    trash: JSON.parse(JSON.stringify(trash || [])),
+                    forceCloudOverwrite: true // Special flag to ensure backup restore always overwrites cloud data
                 };
 
                 // Get existing automatic backups
@@ -24252,6 +24254,10 @@
 
         async function restoreFromBackupData(backupData) {
             try {
+                // Check for special backup flag
+                const isForceOverwriteBackup = backupData.forceCloudOverwrite === true;
+                console.log('🏁 BACKUP RESTORE: Force cloud overwrite flag detected:', isForceOverwriteBackup);
+                
                 // CRITICAL: Set MAXIMUM protection flags to prevent ANY cloud sync override
                 window.justModifiedTasks = true;
                 window.justModifiedLists = true;
@@ -24260,8 +24266,12 @@
                 window.skipNextDownload = true;
                 window.backupRestoreInProgress = true; // Extra protection flag
                 window.forceMandatoryRefresh = false; // Disable mandatory refresh during restore
+                window.backupForceOverwrite = isForceOverwriteBackup; // New flag for cloud overwrite
                 
                 console.log('🔒 BACKUP RESTORE: Setting MAXIMUM protection flags to prevent ANY cloud override');
+                if (isForceOverwriteBackup) {
+                    console.log('💪 BACKUP RESTORE: Force overwrite enabled - will dominate cloud data');
+                }
                 
                 // Restore all data from backup
                 tasks = backupData.tasks || [];
@@ -24298,14 +24308,23 @@
                     if (window.currentUser?.user?.id) {
                         console.log('🚀 BACKUP RESTORE: Direct cloud upload starting...');
                         
-                        // Upload tasks directly
+                        // Upload tasks directly with force overwrite if backup flag is set
+                        const uploadPayload = {
+                            tasks: tasks,
+                            userId: window.currentUser.user.id
+                        };
+                        
+                        // Add force overwrite flag if backup has it
+                        if (window.backupForceOverwrite) {
+                            uploadPayload.forceOverwrite = true;
+                            uploadPayload.backupRestore = true;
+                            console.log('💪 BACKUP RESTORE: Adding force overwrite flags to upload');
+                        }
+                        
                         const tasksResponse = await fetch(`${API_BASE}/tasks`, {
                             method: 'POST',
                             headers: getAuthHeaders(),
-                            body: JSON.stringify({
-                                tasks: tasks,
-                                userId: window.currentUser.user.id
-                            })
+                            body: JSON.stringify(uploadPayload)
                         });
                         
                         console.log('📡 BACKUP RESTORE: Tasks upload response:', tasksResponse.status, tasksResponse.statusText);
@@ -24352,6 +24371,7 @@
                         window.justRestoredBackup = false;
                         window.skipNextDownload = false;
                         window.backupRestoreInProgress = false;
+                        window.backupForceOverwrite = false; // Clear force overwrite flag
                         console.log('🔓 Backup Restore: All protection flags removed, normal sync resumed');
                     }, 30000); // 30 seconds protection
                 }).catch(error => {
@@ -24364,6 +24384,7 @@
                         window.justRestoredBackup = false;
                         window.skipNextDownload = false;
                         window.backupRestoreInProgress = false;
+                        window.backupForceOverwrite = false; // Clear force overwrite flag
                     }, 60000); // 1 minute protection on error
                 });
                 
