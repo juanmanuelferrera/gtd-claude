@@ -8789,6 +8789,19 @@
             }
             
             // Force initial sync after successful authentication
+            // Handle fresh browsers (no sync history) - they need to download data too
+            const lastSyncTime = localStorage.getItem('lastSyncTime');
+            if (!lastSyncTime || lastSyncTime === '0' || lastSyncTime === 'null') {
+                console.log('🆕 Fresh browser detected (no sync history) - downloading initial data');
+                try {
+                    await downloadAllTasks();
+                    await downloadAllLists();
+                    await downloadAllTemplates();
+                    console.log('✅ Fresh browser: Successfully loaded initial data from cloud');
+                } catch (error) {
+                    console.error('❌ Fresh browser: Failed to load initial data:', error);
+                }
+            }
             
             // Initialize premium features
             initializePremiumFeatures();
