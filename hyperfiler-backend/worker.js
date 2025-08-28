@@ -1435,7 +1435,7 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
     console.log('🔍 DEBUG: Tasks type:', typeof requestBody.tasks);
     console.log('🔍 DEBUG: Tasks length:', requestBody.tasks?.length);
     
-    const { userId, tasks, forceOverwrite, backupRestore } = requestBody;
+    const { userId, tasks, forceOverwrite, backupRestore, clientLastSync } = requestBody;
     
     if (!tasks || !Array.isArray(tasks)) {
       console.error('❌ Invalid tasks data:', { tasks: typeof tasks, isArray: Array.isArray(tasks) });
@@ -1461,6 +1461,28 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
     // Log if this is a backup restore with force overwrite
     if (forceOverwrite || backupRestore) {
       console.log('💪 FORCE OVERWRITE: Backup restore detected - will replace all server data');
+    }
+    
+    // STALE DATA PROTECTION: Check if client data is too old (unless it's a backup restore)
+    if (!forceOverwrite && !backupRestore && clientLastSync) {
+      const currentTime = Date.now();
+      const timeSinceClientSync = currentTime - clientLastSync;
+      
+      // Reject uploads from clients that haven't synced in over 5 minutes
+      if (timeSinceClientSync > 300000) { // 5 minutes
+        console.error('🚨 STALE DATA REJECTED: Client hasn\'t synced in', Math.floor(timeSinceClientSync / 1000), 'seconds');
+        console.error('🚨 Client must download fresh data before uploading');
+        
+        return new Response(JSON.stringify({ 
+          error: 'Stale data detected',
+          message: 'Your data is out of sync. Please refresh the page to get the latest data.',
+          staleTime: timeSinceClientSync,
+          requiresRefresh: true
+        }), {
+          status: 409, // Conflict status
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
     }
     
     // Get current server task count for logging
