@@ -18602,8 +18602,9 @@
                 console.log(`Repeat instances before: ${beforeRepeatCount}, after: ${afterRepeatCount}`);
                 
                 // Verify only one task was deleted
-                if (beforeCount - afterCount !== 1) {
-                    throw new Error(`Expected to delete 1 task, but deleted ${beforeCount - afterCount} tasks`);
+                const deletedCount = beforeCount - afterCount;
+                if (deletedCount !== 1) {
+                    throw new Error(`Expected to delete 1 task, but deleted ${deletedCount} tasks`);
                 }
                 
                 // 🔒 TRIPLE-LAYER PROTECTION: Pre-operation backup
