@@ -18773,7 +18773,18 @@
                             unmarkAsEvent(task.id);
                         }
                         
-                        saveTask(task); // Remove await for optimistic update
+                        // Direct sync like Lists - no complex saveTask function
+                        localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                        window.justModifiedTasks = true;
+                        uploadAllTasks().then(() => {
+                            console.log('✅ Task edit synced');
+                            setTimeout(() => {
+                                window.justModifiedTasks = false;
+                                console.log('🔓 Cleared justModifiedTasks flag');
+                            }, 5000);
+                        }).catch(error => {
+                            console.error('❌ Task edit sync failed:', error);
+                        });
                     }
                 } else {
                     // Creating new task(s)
@@ -18848,12 +18859,19 @@
                             tasksToCreate.push(task);
                         }
                         
-                        // Save all tasks (optimistic - no await)
-                        for (const task of tasksToCreate) {
-                            console.log('Saving repeat task:', task);
-                            console.log('Task repeat property:', task.repeat);
-                            saveTask(task); // Remove await for optimistic update
-                        }
+                        // Add all repeat tasks to array and sync like Lists
+                        tasks.push(...tasksToCreate);
+                        localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                        window.justModifiedTasks = true;
+                        uploadAllTasks().then(() => {
+                            console.log(`✅ ${tasksToCreate.length} repeat tasks synced`);
+                            setTimeout(() => {
+                                window.justModifiedTasks = false;
+                                console.log('🔓 Cleared justModifiedTasks flag');
+                            }, 5000);
+                        }).catch(error => {
+                            console.error('❌ Repeat tasks sync failed:', error);
+                        });
                         
                     } else {
                         // Create single task
@@ -18883,7 +18901,20 @@
                         
                         console.log('Saving single task with repeat:', task);
                         console.log('Task repeat property:', task.repeat);
-                        saveTask(task); // Remove await for optimistic update
+                        
+                        // Add task to array and direct sync like Lists
+                        tasks.push(task);
+                        localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                        window.justModifiedTasks = true;
+                        uploadAllTasks().then(() => {
+                            console.log('✅ New task synced');
+                            setTimeout(() => {
+                                window.justModifiedTasks = false;
+                                console.log('🔓 Cleared justModifiedTasks flag');
+                            }, 5000);
+                        }).catch(error => {
+                            console.error('❌ New task sync failed:', error);
+                        });
                     }
                 }
                 
