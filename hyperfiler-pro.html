@@ -12157,19 +12157,9 @@
 
 
         // Save tasks to server using EXACT Lists pattern
+        // Save tasks to localStorage and sync to cloud - EXACTLY like Lists
         async function saveTasksToServer() {
             try {
-                // 🔒 TRIPLE-LAYER PROTECTION: Pre-upload safety backup
-                if (window.TripleProtection) {
-                    await window.TripleProtection.backups.create('pre-upload', 'Safety backup before server sync');
-                }
-                
-                // LAST-WRITER-WINS: Update timestamps for all tasks being saved
-                const now = new Date().toISOString();
-                tasks.forEach(task => {
-                    task.updatedAt = now; // Fresh timestamp for last-writer-wins
-                });
-                
                 localStorage.setItem('gtdTasks', JSON.stringify(tasks));
                 
                 // Set flag to prevent downloads from overwriting changes
@@ -12178,10 +12168,11 @@
                 // Upload to server
                 await uploadAllTasks();
                 
-                // Clear flag after successful upload (standard 10-second protection)
+                // Clear flag after successful upload
                 setTimeout(() => {
                     window.justModifiedTasks = false;
-                }, 10000); // 10 seconds standard protection
+                    console.log('🔓 Cleared justModifiedTasks flag');
+                }, 5000); // 5 seconds for reliable cross-browser sync
                 
             } catch (error) {
                 console.error('Error saving tasks to server:', error);
