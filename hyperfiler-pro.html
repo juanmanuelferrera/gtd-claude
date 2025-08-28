@@ -10928,115 +10928,55 @@
         }
 
         async function immediateSyncToCloud() {
-            if (!window.currentUser) {
-                console.log('⏭️ No user authenticated - skipping sync');
-                console.log('🔍 DEBUG: window.currentUser is:', window.currentUser);
-                console.log('🔍 DEBUG: localStorage authToken:', !!localStorage.getItem('authToken'));
-                console.log('🔍 DEBUG: localStorage userEmail:', localStorage.getItem('userEmail'));
+            // EXACTLY LIKE LISTS: Simple upload without stale checks
+            console.log('🔄 immediateSyncToCloud called - using simple Lists pattern');
+            
+            // Check authentication
+            if (!window.currentUser?.user?.id) {
+                console.log('⚠️ No user ID available for tasks upload');
                 return false;
             }
             
-            // CRITICAL: Check for stale data before REPLACE sync to prevent cloud pollution
-            const lastSyncTime = localStorage.getItem('lastSyncTime');
-            const currentTime = Date.now();
-            const timeSinceLastSync = currentTime - (lastSyncTime ? parseInt(lastSyncTime) : 0);
-            
-            // If no sync in 3 minutes, MUST download fresh data first
-            if (timeSinceLastSync > 180000 && !window.justRestoredBackup && !window.backupRestoreInProgress) {
-                console.warn('🚨 STALE DATA DETECTED: Must refresh before upload to prevent cloud pollution');
-                console.warn('🚨 Time since last sync:', Math.floor(timeSinceLastSync / 1000), 'seconds');
-                
-                try {
-                    // Download fresh data from cloud FIRST
-                    console.log('📥 Downloading fresh data before upload...');
-                    window.forceMandatoryRefresh = true;
-                    
-                    const downloadResponse = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
-                        method: 'GET',
-                        headers: getAuthHeaders()
-                    });
-                    
-                    if (downloadResponse.ok) {
-                        const responseData = await downloadResponse.json();
-                        const freshTasks = (responseData.tasks || responseData || []).filter(task => !task.isDeleted && !task.is_deleted);
-                        
-                        console.log('📥 Downloaded', freshTasks.length, 'fresh tasks from cloud');
-                        
-                        // CRITICAL: Replace stale local data with fresh cloud data
-                        tasks = freshTasks;
-                        saveTasksToLocalStorage();
-                        localStorage.setItem('lastSyncTime', currentTime.toString());
-                        
-                        console.log('✅ Stale data replaced with fresh cloud data');
-                        renderCurrentView();
-                    } else {
-                        console.error('❌ Failed to download fresh data:', downloadResponse.status);
-                        throw new Error('Cannot upload with stale data - refresh failed');
-                    }
-                    
-                    window.forceMandatoryRefresh = false;
-                } catch (error) {
-                    console.error('❌ CRITICAL: Failed to refresh stale data:', error);
-                    window.forceMandatoryRefresh = false;
-                    // Abort upload to prevent cloud pollution
-                    return false;
-                }
+            const authToken = window.currentUser?.token || localStorage.getItem('authToken');
+            if (!authToken) {
+                console.log('⚠️ No auth token available for tasks upload');
+                return false;
             }
             
             try {
-                console.log('🚀 Immediate sync to cloud initiated');
+                console.log('📤 Uploading', tasks.length, 'tasks to server...');
                 
-                console.log('🚀 Syncing to cloud with httpOnly cookie authentication');
-                console.log('📤 Syncing', tasks.length, 'tasks for user:', window.currentUser.user.id);
+                const requestBody = {
+                    tasks: tasks,
+                    userId: window.currentUser.user.id
+                };
                 
                 const response = await fetch(`${API_BASE}/tasks`, {
                     method: 'POST',
-
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({
-                        tasks: tasks,
-                        userId: window.currentUser.user.id,
-                        clientLastSync: parseInt(localStorage.getItem('lastSyncTime') || '0')
-                    })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(requestBody)
                 });
                 
-                console.log('📡 Upload response status:', response.status, response.statusText);
                 
-                if (response.ok) {
-                    const responseData = await response.json();
-                    console.log('✅ Tasks successfully synced to cloud:', responseData);
-                    lastSyncTimestamp = Date.now();
-                    window.lastSyncTimestamp = Date.now();
-                    window.lastUploadTime = Date.now(); // Prevent immediate download
-                    
-                    // CRITICAL: Update lastSyncTime to mark data as fresh
-                    localStorage.setItem('lastSyncTime', Date.now().toString());
-                    
-                    // With REPLACE sync, no need to download back - server has exactly what we sent
-                    // Skip download if backup restore is in progress
-                    if (window.backupRestoreInProgress || window.justRestoredBackup || window.skipNextDownload) {
-                        console.log('🔒 UPLOAD SYNC: Skipped data download - backup restore in progress');
-                        return true;
-                    }
-                    
-                    // REPLACE SYNC: Server now has exactly what we uploaded, no merge needed
-                    console.log('✅ REPLACE SYNC: Upload complete, server has our exact data - no download needed');
-                    
-                    // Update localStorage to ensure persistence
-                    saveTasksToLocalStorage();
-                    
-                    // Refresh UI to reflect any changes
-                    renderCurrentView();
-                    
-                    return true;
-                } else {
+                if (!response.ok) {
+                    console.log('❌ Tasks upload failed with status:', response.status);
                     const errorText = await response.text();
-                    console.error('❌ Failed to sync to cloud:', response.status, response.statusText);
-                    console.error('❌ Upload error details:', errorText);
-                    return false;
+                    console.error('❌ Tasks upload error details:', errorText);
+                    throw new Error(`Tasks upload failed: ${response.status} ${errorText}`);
                 }
+                
+                const result = await response.json();
+                console.log('✅ Tasks uploaded successfully:', result);
+                window.lastUploadTime = Date.now();
+                
+                return true;
+                
             } catch (error) {
-                console.error('❌ Immediate sync error:', error);
+                console.error('❌ Error uploading tasks to server:', error);
+                showSyncStatus('Tasks sync failed', 'error');
                 return false;
             }
         }

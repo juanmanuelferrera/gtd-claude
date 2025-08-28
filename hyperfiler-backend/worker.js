@@ -1435,7 +1435,7 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
     console.log('🔍 DEBUG: Tasks type:', typeof requestBody.tasks);
     console.log('🔍 DEBUG: Tasks length:', requestBody.tasks?.length);
     
-    const { userId, tasks, forceOverwrite, backupRestore, clientLastSync } = requestBody;
+    const { userId, tasks, forceOverwrite, backupRestore } = requestBody;
     
     if (!tasks || !Array.isArray(tasks)) {
       console.error('❌ Invalid tasks data:', { tasks: typeof tasks, isArray: Array.isArray(tasks) });
@@ -1455,54 +1455,13 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
 
     const actualUserId = payload.userId;
     
-    // LISTS-STYLE REPLACE SYNC: Complete replacement strategy
-    console.log('🔄 REPLACE SYNC: Using Lists-style replace for user:', actualUserId, 'Client tasks:', tasks.length);
-    
-    // Log if this is a backup restore with force overwrite
-    if (forceOverwrite || backupRestore) {
-      console.log('💪 FORCE OVERWRITE: Backup restore detected - will replace all server data');
-    }
-    
-    // STALE DATA PROTECTION: Check if client data is too old (unless it's a backup restore)
-    if (!forceOverwrite && !backupRestore && clientLastSync) {
-      const currentTime = Date.now();
-      const timeSinceClientSync = currentTime - clientLastSync;
-      
-      // Reject uploads from clients that haven't synced in over 5 minutes
-      if (timeSinceClientSync > 300000) { // 5 minutes
-        console.error('🚨 STALE DATA REJECTED: Client hasn\'t synced in', Math.floor(timeSinceClientSync / 1000), 'seconds');
-        console.error('🚨 Client must download fresh data before uploading');
-        
-        return new Response(JSON.stringify({ 
-          error: 'Stale data detected',
-          message: 'Your data is out of sync. Please refresh the page to get the latest data.',
-          staleTime: timeSinceClientSync,
-          requiresRefresh: true
-        }), {
-          status: 409, // Conflict status
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-    }
-    
-    // Get current server task count for logging
-    const countStmt = env.DB.prepare('SELECT COUNT(*) as count FROM user_tasks WHERE user_id = ?');
-    const countResult = await countStmt.bind(actualUserId).first();
-    const serverTaskCount = countResult?.count || 0;
-    
-    console.log('📊 Server task count before replace:', serverTaskCount);
-    console.log('📊 Client task count:', tasks.length);
-    console.log('🔄 REPLACE MODE: Deleting all server tasks and replacing with client data');
-    
-    // LISTS-STYLE REPLACE: Delete all existing tasks for user, then insert all new tasks
-    console.log('🚀 SIMPLE REPLACE SYNC: Replacing all tasks for user:', actualUserId);
+    // SIMPLE SYNC: Delete all existing tasks for user, then insert all new tasks (EXACTLY like Lists)
+    console.log('🚀 SIMPLE TASKS SYNC: Replacing all tasks for user:', actualUserId);
     
     // Delete all existing tasks
     await env.DB.prepare('DELETE FROM user_tasks WHERE user_id = ?')
       .bind(actualUserId)
       .run();
-    
-    console.log('✅ Deleted all existing tasks for user');
     
     // Insert all client tasks
     const stmt = env.DB.prepare(`
@@ -1552,21 +1511,15 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
       }
     }
     
-    console.log(`✅ Inserted ${insertedCount} tasks out of ${tasks.length} received`);
-
     return new Response(JSON.stringify({ 
       success: true, 
-      synced: insertedCount,
-      received: tasks.length,
-      replaced: serverTaskCount,
-      message: `Replaced ${serverTaskCount} server tasks with ${insertedCount} client tasks`
+      synced: tasks.length 
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    console.error('❌ Simple tasks sync error:', error.message);
-    console.error('❌ Error stack:', error.stack);
+    console.error('Simple tasks sync error:', error);
     return new Response(JSON.stringify({ 
       error: 'Internal server error',
       details: error.message 
