@@ -12188,29 +12188,9 @@
             }
         }
 
-        // Save task using proven Lists pattern: update array → saveTasksToServer
+        // Save task using simple pattern like Lists: update array → saveTasksToServer
         async function saveTask(taskData) {
             try {
-                // STALE BROWSER PROTECTION: Check if we have recent data
-                const lastSyncTime = localStorage.getItem('lastSyncTime');
-                const currentTime = Date.now();
-                const timeSinceLastSync = currentTime - (lastSyncTime ? parseInt(lastSyncTime) : 0);
-                
-                // If no sync in 3 minutes and we're trying to save, refresh data first (reduced threshold)
-                if (timeSinceLastSync > 180000) { // 3 minutes (reduced from 5 minutes)
-                    console.warn('🚨 STALE BROWSER DETECTED during save - MANDATORY data refresh');
-                    try {
-                        // Set mandatory refresh flag and force download
-                        window.forceMandatoryRefresh = true;
-                        await downloadAllTasks();
-                        await downloadAllLists(); // Also refresh lists
-                        localStorage.setItem('lastSyncTime', currentTime.toString());
-                        console.log('✅ Mandatory refresh completed before save');
-                    } catch (error) {
-                        console.error('❌ CRITICAL: Failed to refresh data before save:', error);
-                        throw new Error('Cannot save with stale data - refresh failed');
-                    }
-                }
                 
                 // SECURITY: Validate input before saving
                 if (!taskData || typeof taskData !== 'object') {
