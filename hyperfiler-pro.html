@@ -18571,10 +18571,22 @@
                     await window.TripleProtection.backups.create('auto', `Pre-delete backup: ${deletedCount} tasks to be deleted`);
                 }
                 
-                // Save using standard pattern
-                console.log('🔄 DELETE: Calling saveTasksToServer for deleted task:', task.title);
+                // Save using DIRECT sync like Lists do
+                console.log('🔄 DELETE: Direct sync for deleted task:', task.title);
                 console.log('🔄 DELETE: Current user auth state:', !!window.currentUser, 'User ID:', window.currentUser?.user?.id);
-                await saveTasksToServer();
+                
+                // Save to localStorage immediately
+                localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                
+                // Direct upload like Lists
+                window.justModifiedTasks = true;
+                await uploadAllTasks();
+                
+                // Clear flag
+                setTimeout(() => {
+                    window.justModifiedTasks = false;
+                    console.log('🔓 Cleared justModifiedTasks flag');
+                }, 5000);
                 
                 // Move to trash
                 moveToTrash(taskToDelete);
