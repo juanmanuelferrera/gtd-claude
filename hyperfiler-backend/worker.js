@@ -1435,7 +1435,7 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
     console.log('🔍 DEBUG: Tasks type:', typeof requestBody.tasks);
     console.log('🔍 DEBUG: Tasks length:', requestBody.tasks?.length);
     
-    const { userId, tasks } = requestBody;
+    const { userId, tasks, forceOverwrite, backupRestore } = requestBody;
     
     if (!tasks || !Array.isArray(tasks)) {
       console.error('❌ Invalid tasks data:', { tasks: typeof tasks, isArray: Array.isArray(tasks) });
@@ -1455,172 +1455,34 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
 
     const actualUserId = payload.userId;
     
-    // MERGE SYNC: Always allow merges - timestamp protection disabled for proper merging
-    console.log('🔄 MERGE SYNC: Allowing merge for user:', actualUserId, 'Client tasks:', tasks.length);
+    // LISTS-STYLE REPLACE SYNC: Complete replacement strategy
+    console.log('🔄 REPLACE SYNC: Using Lists-style replace for user:', actualUserId, 'Client tasks:', tasks.length);
     
-    // Get the most recent server task timestamp (for logging only)
-    const serverStmt = env.DB.prepare('SELECT MAX(updated_at) as latest_update FROM user_tasks WHERE user_id = ?');
-    const serverResult = await serverStmt.bind(actualUserId).first();
-    const serverLatestUpdate = serverResult?.latest_update;
+    // Log if this is a backup restore with force overwrite
+    if (forceOverwrite || backupRestore) {
+      console.log('💪 FORCE OVERWRITE: Backup restore detected - will replace all server data');
+    }
     
-    // Get the most recent client task timestamp (for logging only)
-    const clientLatestUpdate = tasks.length > 0 ? 
-      Math.max(...tasks.map(t => new Date(t.updatedAt || t.updated_at || 0).getTime())) : 0;
-    const clientLatestDate = new Date(clientLatestUpdate).toISOString();
+    // Get current server task count for logging
+    const countStmt = env.DB.prepare('SELECT COUNT(*) as count FROM user_tasks WHERE user_id = ?');
+    const countResult = await countStmt.bind(actualUserId).first();
+    const serverTaskCount = countResult?.count || 0;
     
-    console.log('📊 Server latest update:', serverLatestUpdate);
-    console.log('📊 Client latest update:', clientLatestDate);
+    console.log('📊 Server task count before replace:', serverTaskCount);
     console.log('📊 Client task count:', tasks.length);
-    console.log('🔄 MERGE MODE: Allowing all uploads for proper task merging');
+    console.log('🔄 REPLACE MODE: Deleting all server tasks and replacing with client data');
     
-    // MERGE SYNC: Combine client tasks with existing server tasks
-    console.log('🔄 MERGE SYNC: Combining tasks for user:', actualUserId, 'Client tasks:', tasks.length);
+    // LISTS-STYLE REPLACE: Delete all existing tasks for user, then insert all new tasks
+    console.log('🚀 SIMPLE REPLACE SYNC: Replacing all tasks for user:', actualUserId);
     
-    // Get existing server tasks (INCLUDING deleted ones for proper merge)
-    const existingStmt = env.DB.prepare('SELECT * FROM user_tasks WHERE user_id = ?');
-    const existingResult = await existingStmt.bind(actualUserId).all();
-    const existingTasks = existingResult.results || [];
-    console.log('📊 Existing server tasks (including deleted):', existingTasks.length);
-    
-    // Count deleted tasks for debugging
-    const deletedTasks = existingTasks.filter(t => t.is_deleted);
-    console.log('💀 Server deleted tasks:', deletedTasks.length);
-    
-    // Create a map of client tasks by ID
-    const clientTaskMap = new Map();
-    tasks.forEach(task => {
-      clientTaskMap.set(task.id, task);
-    });
-    
-    // Create a map of server tasks by ID
-    const serverTaskMap = new Map();
-    existingTasks.forEach(task => {
-      serverTaskMap.set(task.id, task);
-    });
-    
-    // Merge strategy: Keep the most recently updated version of each task
-    const mergedTasks = new Map();
-    
-    // Add all client tasks
-    clientTaskMap.forEach((clientTask, taskId) => {
-      mergedTasks.set(taskId, clientTask);
-    });
-    
-    // Add server tasks that don't exist in client (or are older)
-    serverTaskMap.forEach((serverTask, taskId) => {
-      const clientTask = clientTaskMap.get(taskId);
-      
-      if (!clientTask) {
-        // Server task doesn't exist in client - this means it was deleted by client
-        // DO NOT resurrect deleted tasks - skip this task entirely
-        console.log('💀 Skipping server task that was deleted by client:', taskId);
-        // Don't add this task to merged results - it was deleted by client
-      } else {
-        // Both exist - handle deletion logic
-        const clientTime = new Date(clientTask.updatedAt || clientTask.updated_at || 0).getTime();
-        const serverTime = new Date(serverTask.updated_at || 0).getTime();
-        const clientDeleted = Boolean(clientTask.isDeleted || clientTask.is_deleted);
-        const serverDeleted = Boolean(serverTask.is_deleted);
-        
-        // DELETION PRIORITY: If either version is deleted, keep the most recent deletion
-        if (clientDeleted || serverDeleted) {
-          if (clientDeleted && serverDeleted) {
-            // Both deleted - keep the most recent deletion
-            if (clientTime > serverTime) {
-              // Keep client version (already set above)
-              console.log('💀 Both deleted, keeping client version (newer):', taskId);
-            } else {
-              // Keep server version
-              mergedTasks.set(taskId, {
-                id: serverTask.id,
-                title: serverTask.title,
-                notes: serverTask.notes,
-                images: serverTask.images ? JSON.parse(serverTask.images) : [],
-                dueDate: serverTask.due_date,
-                dueTime: serverTask.due_time,
-                status: serverTask.status,
-                repeatType: serverTask.repeat_type,
-                template: serverTask.template,
-                isEvent: Boolean(serverTask.is_event),
-                createdAt: serverTask.created_at,
-                updatedAt: serverTask.updated_at,
-                isDeleted: true,
-                deletedAt: serverTask.deleted_at
-              });
-              console.log('💀 Both deleted, keeping server version (newer):', taskId);
-            }
-          } else if (clientDeleted) {
-            // Only client deleted - keep client version (already set above)
-            console.log('💀 Client deleted, keeping client version:', taskId);
-          } else {
-            // Only server deleted - keep server version
-            mergedTasks.set(taskId, {
-              id: serverTask.id,
-              title: serverTask.title,
-              notes: serverTask.notes,
-              images: serverTask.images ? JSON.parse(serverTask.images) : [],
-              dueDate: serverTask.due_date,
-              dueTime: serverTask.due_time,
-              status: serverTask.status,
-              repeatType: serverTask.repeat_type,
-              template: serverTask.template,
-              isEvent: Boolean(serverTask.is_event),
-              createdAt: serverTask.created_at,
-              updatedAt: serverTask.updated_at,
-              isDeleted: true,
-              deletedAt: serverTask.deleted_at
-            });
-            console.log('💀 Server deleted, keeping server version:', taskId);
-          }
-        } else {
-          // Neither deleted - keep the most recently updated one
-          if (serverTime > clientTime) {
-            // Server version is newer
-            mergedTasks.set(taskId, {
-              id: serverTask.id,
-              title: serverTask.title,
-              notes: serverTask.notes,
-              images: serverTask.images ? JSON.parse(serverTask.images) : [],
-              dueDate: serverTask.due_date,
-              dueTime: serverTask.due_time,
-              status: serverTask.status,
-              repeatType: serverTask.repeat_type,
-              template: serverTask.template,
-              isEvent: Boolean(serverTask.is_event),
-              createdAt: serverTask.created_at,
-              updatedAt: serverTask.updated_at,
-              isDeleted: false,
-              deletedAt: null
-            });
-            console.log('📝 Server version newer, keeping server version:', taskId);
-          }
-          // Otherwise keep client version (already set above)
-        }
-      }
-    });
-    
-    console.log('🔄 Merged tasks count:', mergedTasks.size);
-    
-    // Debug: Show what tasks were merged
-    const mergedTaskIds = Array.from(mergedTasks.keys());
-    console.log('🔄 Merged task IDs:', mergedTaskIds.slice(0, 10)); // Show first 10
-    
-    // Debug: Count tasks by source
-    const clientOnlyTasks = Array.from(mergedTasks.values()).filter(task => !serverTaskMap.has(task.id));
-    const serverOnlyTasks = Array.from(mergedTasks.values()).filter(task => !clientTaskMap.has(task.id));
-    const commonTasks = Array.from(mergedTasks.values()).filter(task => clientTaskMap.has(task.id) && serverTaskMap.has(task.id));
-    
-    console.log('📊 Merge breakdown:');
-    console.log('  - Client-only tasks:', clientOnlyTasks.length);
-    console.log('  - Server-only tasks:', serverOnlyTasks.length);
-    console.log('  - Common tasks (merged):', commonTasks.length);
-    
-    // Clear existing tasks and insert merged tasks
+    // Delete all existing tasks
     await env.DB.prepare('DELETE FROM user_tasks WHERE user_id = ?')
       .bind(actualUserId)
       .run();
     
-    // Insert all merged tasks
+    console.log('✅ Deleted all existing tasks for user');
+    
+    // Insert all client tasks
     const stmt = env.DB.prepare(`
       INSERT OR REPLACE INTO user_tasks 
       (id, user_id, title, notes, images, due_date, due_time, status, repeat_type, template, 
@@ -1628,41 +1490,54 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     
-    for (const task of mergedTasks.values()) {
+    let insertedCount = 0;
+    for (const task of tasks) {
       try {
-        console.log('🔍 DEBUG: Processing merged task:', task.id, task.title?.substring(0, 50));
+        // Validate and sanitize task data
+        const validatedTask = validateAndSanitizeTask(task);
+        if (!validatedTask) {
+          console.warn('⚠️ Skipping invalid task:', task.id);
+          continue;
+        }
+        
+        console.log('🔍 DEBUG: Inserting task:', validatedTask.id, validatedTask.title?.substring(0, 50));
         
         await stmt.bind(
-          task.id,
+          validatedTask.id,
           actualUserId,
-          task.title || '',
-          task.notes || '',
-          task.images ? JSON.stringify(task.images) : '[]',
-          task.dueDate || task.due_date || null,
-          task.dueTime || task.due_time || null,
-          task.status || 'pending',
-          task.repeat || task.repeat_type || null,
-          task.template || null,
-          task.isEvent || task.is_event ? 1 : 0,
-          task.createdAt || task.created_at || new Date().toISOString(),
-          task.updatedAt || task.updated_at || new Date().toISOString(),
-          task.isDeleted || task.is_deleted ? 1 : 0,
-          task.deletedAt || task.deleted_at || null
+          validatedTask.title,
+          validatedTask.notes,
+          JSON.stringify(validatedTask.images || []),
+          validatedTask.due_date,
+          validatedTask.due_time,
+          validatedTask.status,
+          validatedTask.repeat_type,
+          validatedTask.template,
+          validatedTask.is_event ? 1 : 0,
+          validatedTask.created_at,
+          validatedTask.updated_at,
+          validatedTask.is_deleted ? 1 : 0,
+          validatedTask.deleted_at
         ).run();
-        console.log('✅ DEBUG: Merged task inserted successfully:', task.id);
+        
+        insertedCount++;
+        console.log('✅ Task inserted successfully:', validatedTask.id);
       } catch (taskError) {
-        console.error('❌ Error inserting merged task:', task.id, 'Error:', taskError.message);
+        console.error('❌ Error inserting task:', task.id, 'Error:', taskError.message);
         console.error('❌ Task data that failed:', JSON.stringify(task, null, 2));
-        throw taskError;
+        // Continue with other tasks instead of failing completely
+        continue;
       }
     }
+    
+    console.log(`✅ Inserted ${insertedCount} tasks out of ${tasks.length} received`);
 
     return new Response(JSON.stringify({ 
       success: true, 
-      synced: mergedTasks.size,
-      clientTasks: tasks.length,
-      serverTasks: existingTasks.length,
-      mergedTasks: mergedTasks.size
+      synced: insertedCount,
+      received: tasks.length,
+      replaced: serverTaskCount,
+      message: `Replaced ${serverTaskCount} server tasks with ${insertedCount} client tasks`
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });

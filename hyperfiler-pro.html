@@ -10961,51 +10961,21 @@
                     window.lastSyncTimestamp = Date.now();
                     window.lastUploadTime = Date.now(); // Prevent immediate download
                     
-                    // Download merged data back from server
+                    // With REPLACE sync, no need to download back - server has exactly what we sent
                     // Skip download if backup restore is in progress
                     if (window.backupRestoreInProgress || window.justRestoredBackup || window.skipNextDownload) {
-                        console.log('🔒 UPLOAD SYNC: Skipped merged data download - backup restore in progress');
+                        console.log('🔒 UPLOAD SYNC: Skipped data download - backup restore in progress');
                         return true;
                     }
-                    console.log('📥 Downloading merged data from server...');
-                    try {
-                        const downloadResponse = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
-                            method: 'GET',
-                            headers: getAuthHeaders()
-                        });
-                        
-                        if (downloadResponse.ok) {
-                            const responseData = await downloadResponse.json();
-                            console.log('📥 Downloaded response data:', responseData);
-                            
-                            // Handle different response formats
-                            let mergedTasks = [];
-                            if (Array.isArray(responseData)) {
-                                mergedTasks = responseData;
-                            } else if (responseData && Array.isArray(responseData.tasks)) {
-                                mergedTasks = responseData.tasks;
-                            } else {
-                                console.error('❌ Unexpected response format:', responseData);
-                                return true; // Continue without updating
-                            }
-                            
-                            console.log('📥 Downloaded merged tasks:', mergedTasks.length);
-                            
-                            // Update local tasks with merged data
-                            tasks = mergedTasks.filter(task => !task.isDeleted && !task.is_deleted);
-                            console.log('🔄 Updated local tasks with merged data:', tasks.length);
-                            
-                            // Save to localStorage
-                            saveTasksToLocalStorage();
-                            
-                            // Refresh UI
-                            renderCurrentView();
-                        } else {
-                            console.error('❌ Failed to download merged data:', downloadResponse.status);
-                        }
-                    } catch (downloadError) {
-                        console.error('❌ Error downloading merged data:', downloadError);
-                    }
+                    
+                    // REPLACE SYNC: Server now has exactly what we uploaded, no merge needed
+                    console.log('✅ REPLACE SYNC: Upload complete, server has our exact data - no download needed');
+                    
+                    // Update localStorage to ensure persistence
+                    saveTasksToLocalStorage();
+                    
+                    // Refresh UI to reflect any changes
+                    renderCurrentView();
                     
                     return true;
                 } else {
