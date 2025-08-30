@@ -394,10 +394,6 @@ export default {
 
 
       // Simple tasks sync endpoint - Lists pattern
-      if (pathname === '/tasks' && request.method === 'POST') {
-        console.log('🔍 POST /tasks endpoint hit');
-        return handleTasksSyncSimple(request, env, corsHeaders);
-      }
       
       // Test endpoint for debugging
       if (pathname === '/test' && request.method === 'POST') {

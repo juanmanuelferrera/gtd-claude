@@ -9555,101 +9555,6 @@
             }
         }
 
-        // Upload all tasks to server (Simple Sync pattern)
-        window.uploadAllTasks = async function uploadAllTasks() {
-                    // Simple sync system - reliable and proven
-            // User session check completed
-            
-            // Try to get token from localStorage as fallback
-            const fallbackToken = localStorage.getItem('authToken');
-            // Fallback token check completed
-            
-            // CRITICAL STALE BROWSER PROTECTION: Multiple layers of protection
-            
-            // EXCEPTION: Allow uploads during backup restore (user intentionally restored data)
-            if (window.justRestoredBackup) {
-                console.log('✅ BACKUP RESTORE: Upload allowed - user explicitly restored this data');
-            } else {
-                // First check: Explicit stale browser flags
-                if (window.staleBrowserDetected || window.skipInitialUpload) {
-                    console.error('🚨 BLOCKED: Upload blocked - stale browser protection active');
-                    console.error('🛡️ Stale browser still downloading fresh data from cloud');
-                    return;
-                }
-            }
-            
-            // Second check: Time-based stale detection (legacy protection)
-            const lastSyncTime = localStorage.getItem('lastSyncTime');
-            const currentTime = Date.now();
-            const timeSinceLastSync = currentTime - (lastSyncTime ? parseInt(lastSyncTime) : 0);
-            
-            if (timeSinceLastSync > 300000) { // 5 minutes (increased from 3 minutes)
-                console.error('🚨 BLOCKED: Upload attempt from stale browser detected (time-based)');
-                console.error('🛡️ Preventing potential database overwrite from old tab');
-                console.error('⏰ Last sync was', Math.floor(timeSinceLastSync / 1000), 'seconds ago');
-                throw new Error('Upload blocked - browser data is stale. Please refresh the page.');
-            }
-            
-            if (!window.currentUser?.user?.id) {
-                console.log('⚠️ No user ID available for upload');
-                // User structure validated
-                return;
-            }
-            
-            const authToken = window.currentUser?.token || fallbackToken;
-            if (!authToken) {
-                console.log('⚠️ No auth token available for upload (neither in currentUser nor localStorage)');
-                            // Token validation completed
-                return;
-            }
-            
-            console.log('✅ Using auth token from:', window.currentUser?.token ? 'currentUser' : 'localStorage');
-            
-            try {
-                console.log('📤 Uploading', tasks.length, 'tasks to server...');
-                
-                const tasksToUpload = tasks.map(cleanTaskForStorage);
-                            // Task upload preparation completed
-                
-                const requestBody = {
-                    tasks: tasksToUpload,
-                    userId: window.currentUser.user.id
-                };
-                            // Request body prepared
-                
-                const response = await fetch(`${API_BASE}/tasks`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify(requestBody)
-                });
-                
-                if (!response.ok) {
-                    console.log('❌ Upload failed with status:', response.status);
-                    console.log('❌ Response headers:', [...response.headers.entries()]);
-                    
-                    // Try to get error details from response
-                    try {
-                        const errorText = await response.text();
-                        console.log('❌ Error response body:', errorText);
-                    } catch (e) {
-                        console.log('❌ Could not read error response');
-                    }
-                    
-                    throw new Error(`Upload failed: ${response.status}`);
-                }
-                
-                console.log('✅ Tasks uploaded successfully');
-                showSyncStatus('Synced', 'success');
-                
-            } catch (error) {
-                console.error('❌ Upload error:', error);
-                showSyncStatus('Sync failed', 'error');
-                throw error;
-            }
-        };
         
         // Generate unique device ID for conflict resolution
         function generateDeviceId() {
@@ -9722,6 +9627,73 @@
                 showSyncStatus('Lists sync failed', 'error');
             }
         }
+
+        // EXACT COPY of uploadAllLists for Tasks
+        async function uploadAllTasks() {
+            // Tasks sync using simple pattern (EXACT COPY of uploadAllLists)
+            console.log('🔄 uploadAllTasks called - using simple sync pattern');
+            
+            // CRITICAL STALE BROWSER PROTECTION: Check flags first
+            // EXCEPTION: Allow uploads during backup restore (user intentionally restored data)
+            if (window.justRestoredBackup) {
+                console.log('✅ BACKUP RESTORE: Tasks upload allowed - user explicitly restored this data');
+            } else {
+                if (window.staleBrowserDetected || window.skipInitialUpload) {
+                    console.error('🚨 BLOCKED: Tasks upload blocked - stale browser protection active');
+                    console.error('🛡️ Stale browser still downloading fresh data from cloud');
+                    return;
+                }
+            }
+            
+            if (!window.currentUser?.user?.id) {
+                console.log('⚠️ No user ID available for tasks upload');
+                return;
+            }
+            
+            const authToken = window.currentUser?.token || localStorage.getItem('authToken');
+            if (!authToken) {
+                console.log('⚠️ No auth token available for tasks upload');
+                return;
+            }
+            
+            try {
+                console.log('📤 Uploading', tasks.length, 'tasks to server...');
+                
+                const requestBody = {
+                    tasks: tasks,
+                    userId: window.currentUser.user.id
+                };
+                
+                const response = await fetch(`${API_BASE}/tasks/sync`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (!response.ok) {
+                    console.log('❌ Tasks upload failed with status:', response.status);
+                    const errorText = await response.text();
+                    console.error('❌ Tasks upload error details:', errorText);
+                    throw new Error(`Tasks upload failed: ${response.status} ${errorText}`);
+                }
+                
+                const result = await response.json();
+                console.log('✅ Tasks uploaded successfully:', result);
+                window.lastUploadTime = Date.now();
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Error uploading tasks to server:', error);
+                showSyncStatus('Tasks sync failed', 'error');
+                return false;
+            }
+        }
+
+        // Make uploadAllTasks globally accessible
+        window.uploadAllTasks = uploadAllTasks;
 
         // SIMPLE DOWNLOAD: Get all lists from server (USING PROVEN TASKS METHOD WITH SAFETY)
         async function downloadAllLists() {
@@ -10930,68 +10902,6 @@
             return uniqueTasks;
         }
 
-        // EXACT COPY of uploadAllLists function for Tasks
-        async function uploadAllTasks() {
-            // Tasks sync using simple pattern (EXACT COPY of uploadAllLists)
-            console.log('🔄 uploadAllTasks called - using simple sync pattern');
-            
-            // CRITICAL STALE BROWSER PROTECTION: Check flags first
-            // EXCEPTION: Allow uploads during backup restore (user intentionally restored data)
-            if (window.justRestoredBackup) {
-                console.log('✅ BACKUP RESTORE: Tasks upload allowed - user explicitly restored this data');
-            } else {
-                if (window.staleBrowserDetected || window.skipInitialUpload) {
-                    console.error('🚨 BLOCKED: Tasks upload blocked - stale browser protection active');
-                    console.error('🛡️ Stale browser still downloading fresh data from cloud');
-                    return;
-                }
-            }
-            
-            if (!window.currentUser?.user?.id) {
-                console.log('⚠️ No user ID available for tasks upload');
-                return;
-            }
-            
-            const authToken = window.currentUser?.token || localStorage.getItem('authToken');
-            if (!authToken) {
-                console.log('⚠️ No auth token available for tasks upload');
-                return;
-            }
-            
-            try {
-                console.log('📤 Uploading', tasks.length, 'tasks to server...');
-                
-                const requestBody = {
-                    tasks: tasks,
-                    userId: window.currentUser.user.id
-                };
-                
-                const response = await fetch(`${API_BASE}/tasks/sync`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify(requestBody)
-                });
-                
-                if (!response.ok) {
-                    console.log('❌ Tasks upload failed with status:', response.status);
-                    const errorText = await response.text();
-                    console.error('❌ Tasks upload error details:', errorText);
-                    throw new Error(`Tasks upload failed: ${response.status} ${errorText}`);
-                }
-                
-                console.log('✅ Tasks uploaded successfully');
-                return true;
-                
-            } catch (error) {
-                console.error('❌ Tasks upload error:', error);
-                return false;
-            }
-        
-        // Make uploadAllTasks globally accessible
-        window.uploadAllTasks = uploadAllTasks;
                 
                 const response = await fetch(`${API_BASE}/tasks`, {
                     method: 'POST',
@@ -11023,27 +10933,6 @@
             }
         }
 
-        // Add uploadAllTasks wrapper for compatibility (defined after immediateSyncToCloud)
-        window.uploadAllTasks = async function uploadAllTasks() {
-            console.log('🔄 uploadAllTasks called - using simple sync');
-            console.log('🔄 uploadAllTasks: Current tasks count:', tasks.length);
-            console.log('🔄 uploadAllTasks: Auth check - currentUser exists:', !!window.currentUser);
-            
-            // Use the existing sync functionality
-            if (typeof immediateSyncToCloud === 'function') {
-                console.log('✅ Found immediateSyncToCloud function, calling it...');
-                const result = await immediateSyncToCloud();
-                console.log('🔄 uploadAllTasks: immediateSyncToCloud result:', result);
-                return result;
-            } else {
-                console.log('❌ immediateSyncToCloud function not found, using fallback sync method');
-                // Fallback: trigger any existing sync mechanisms
-                if (window.currentUser?.user?.id) {
-                    // This will trigger the existing sync logic
-                    saveTasksToLocalStorage();
-                }
-            }
-        };
 
         // INSTANT sync to cloud (no debouncing)
         async function instantSyncToCloud() {
