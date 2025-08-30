@@ -9692,8 +9692,13 @@
             }
         }
 
-        // Make uploadAllTasks globally accessible
-        window.uploadAllTasks = uploadAllTasks;
+        // Make uploadAllTasks globally accessible (ensure it's defined)
+        if (typeof uploadAllTasks === 'function') {
+            window.uploadAllTasks = uploadAllTasks;
+            console.log('✅ uploadAllTasks assigned to window');
+        } else {
+            console.error('❌ uploadAllTasks function not found during assignment');
+        }
 
         // SIMPLE DOWNLOAD: Get all lists from server (USING PROVEN TASKS METHOD WITH SAFETY)
         async function downloadAllLists() {
