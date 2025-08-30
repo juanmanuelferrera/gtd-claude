@@ -24234,7 +24234,7 @@
                             console.log('💪 BACKUP RESTORE: Adding force overwrite flags to upload');
                         }
                         
-                        const tasksResponse = await fetch(`${API_BASE}/tasks`, {
+                        const tasksResponse = await fetch(`${API_BASE}/tasks/sync`, {
                             method: 'POST',
                             headers: getAuthHeaders(),
                             body: JSON.stringify(uploadPayload)
