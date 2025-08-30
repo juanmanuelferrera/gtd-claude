@@ -1430,12 +1430,7 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
       });
     }
 
-    const requestBody = await request.json();
-    console.log('🔍 DEBUG: Request body keys:', Object.keys(requestBody));
-    console.log('🔍 DEBUG: Tasks type:', typeof requestBody.tasks);
-    console.log('🔍 DEBUG: Tasks length:', requestBody.tasks?.length);
-    
-    const { userId, tasks, forceOverwrite, backupRestore } = requestBody;
+    const { userId, tasks } = await request.json();
     
     if (!tasks || !Array.isArray(tasks)) {
       console.error('❌ Invalid tasks data:', { tasks: typeof tasks, isArray: Array.isArray(tasks) });
@@ -1463,58 +1458,24 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
       .bind(actualUserId)
       .run();
     
-    // Insert all client tasks
+    // Insert all tasks as a single JSON record (ultra-simple approach - EXACT COPY of Lists)
     const stmt = env.DB.prepare(`
-      INSERT OR REPLACE INTO user_tasks 
-      (id, user_id, title, notes, images, due_date, due_time, status, repeat_type, template, 
-       is_event, created_at, updated_at, is_deleted, deleted_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO user_tasks 
+      (user_id, task_data, title, created_at, updated_at)
+      VALUES (?, ?, 'JSON_TASKS_DATA', datetime('now'), datetime('now'))
     `);
     
-    let insertedCount = 0;
-    for (const task of tasks) {
-      try {
-        // Validate and sanitize task data
-        const validatedTask = validateAndSanitizeTask(task);
-        if (!validatedTask) {
-          console.warn('⚠️ Skipping invalid task:', task.id);
-          continue;
-        }
-        
-        console.log('🔍 DEBUG: Inserting task:', validatedTask.id, validatedTask.title?.substring(0, 50));
-        
-        await stmt.bind(
-          validatedTask.id,
-          actualUserId,
-          validatedTask.title,
-          validatedTask.notes,
-          JSON.stringify(validatedTask.images || []),
-          validatedTask.due_date,
-          validatedTask.due_time,
-          validatedTask.status,
-          validatedTask.repeat_type,
-          validatedTask.template,
-          validatedTask.is_event ? 1 : 0,
-          validatedTask.created_at,
-          validatedTask.updated_at,
-          validatedTask.is_deleted ? 1 : 0,
-          validatedTask.deleted_at
-        ).run();
-        
-        insertedCount++;
-        console.log('✅ Task inserted successfully:', validatedTask.id);
-      } catch (taskError) {
-        console.error('❌ Error inserting task:', task.id, 'Error:', taskError.message);
-        console.error('❌ Task data that failed:', JSON.stringify(task, null, 2));
-        // Continue with other tasks instead of failing completely
-        continue;
-      }
-    }
+    await stmt.bind(
+      actualUserId,
+      JSON.stringify(tasks) // Store entire tasks array as JSON (same as Lists)
+    ).run();
     
-    return new Response(JSON.stringify({ 
-      success: true, 
-      synced: tasks.length 
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Tasks synced successfully',
+      tasksCount: tasks.length
     }), {
+      status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
@@ -1559,35 +1520,20 @@ async function handleGetTasks(userId, request, env, corsHeaders) {
       });
     }
 
-    // Get tasks from database (filter out explicitly deleted tasks)
-    // Handle case where is_deleted column might not exist yet
-    let stmt;
-    try {
-      stmt = env.DB.prepare('SELECT * FROM user_tasks WHERE user_id = ? AND COALESCE(is_deleted, 0) = 0 ORDER BY updated_at DESC');
-    } catch (error) {
-      // If is_deleted column doesn't exist, fall back to basic query
-      console.log('⚠️ is_deleted column not found, using basic query');
-      stmt = env.DB.prepare('SELECT * FROM user_tasks WHERE user_id = ? ORDER BY updated_at DESC');
-    }
-    const result = await stmt.bind(userId).all();
+    console.log('📥 SIMPLE TASKS SYNC: Getting all tasks for user:', userId);
     
-    // Map snake_case database fields to camelCase for frontend
-    const tasks = (result.results || []).map(task => ({
-      id: task.id,
-      title: task.title,
-      notes: task.notes,
-      images: task.images ? JSON.parse(task.images) : [],
-      dueDate: task.due_date,
-      dueTime: task.due_time,
-      status: task.status,
-      repeat: task.repeat_type,
-      template: task.template,
-      isEvent: Boolean(task.is_event || false),
-      createdAt: task.created_at,
-      updatedAt: task.updated_at,
-      isDeleted: Boolean(task.is_deleted || false),
-      deletedAt: task.deleted_at || null
-    }));
+    const { results } = await env.DB.prepare(`
+      SELECT task_data FROM user_tasks 
+      WHERE user_id = ? 
+      ORDER BY created_at DESC 
+      LIMIT 1
+    `).bind(userId).all();
+    
+    // Parse the JSON data back to tasks format (EXACT COPY of Lists pattern)
+    let tasks = [];
+    if (results.length > 0 && results[0].task_data) {
+      tasks = JSON.parse(results[0].task_data);
+    }
     
     return new Response(JSON.stringify({ 
       tasks: tasks
