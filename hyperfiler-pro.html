@@ -8111,17 +8111,8 @@
             
             // Removed aggressive 5-minute auto-sync to prevent duplication
             
-            // Debounced sync on page visibility change (max once per minute)
-            let lastVisibilitySync = 0;
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden && window.currentUser) {
-                    const now = Date.now();
-                    if (now - lastVisibilitySync > 60000) { // 1 minute minimum
-                        lastVisibilitySync = now;
-                        uploadAllTasks();
-                    }
-                }
-            });
+            // REMOVED DANGEROUS UPLOAD: Don't upload on visibility change - could be stale data
+            // The second visibility handler below handles proper download
 
             // Debounced window focus handler (max once per minute)
             let lastFocusRefresh = 0;
@@ -8328,10 +8319,8 @@
 
         function refreshCurrentViewState() {
             try {
-                // Sync tasks first to get latest data (only if properly authenticated)
-                if (window.currentUser?.user?.id && window.currentUser?.token && !window.justModifiedTasks) {
-                    smartUploadTasks();
-                }
+                // REMOVED DANGEROUS UPLOAD: Don't upload on focus - could be stale data
+                // Only download fresh data when browser comes online
 
                 // Restore saved state if available
                 const savedState = sessionStorage.getItem('hyperFilerViewState');
@@ -10942,8 +10931,14 @@
         }
 
         async function immediateSyncToCloud() {
-            // EXACTLY LIKE LISTS: Simple upload without stale checks
-            console.log('🔄 immediateSyncToCloud called - using simple Lists pattern');
+            // STALE DATA PROTECTION: Only upload if we just modified tasks or have protection flag
+            if (!window.justModifiedTasks && !window.forceMandatoryRefresh && !window.backupRestoreInProgress) {
+                console.log('🛡️ STALE PROTECTION: Blocking upload - no recent modifications detected');
+                console.log('🛡️ Use downloadTasksFromCloud() instead for stale browsers');
+                return false;
+            }
+            
+            console.log('🔄 immediateSyncToCloud called - passed stale protection');
             
             // Check authentication
             if (!window.currentUser?.user?.id) {
