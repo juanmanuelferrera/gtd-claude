@@ -9071,7 +9071,7 @@
                     if (now - lastVisibilitySync > 10000) { // 10 seconds minimum for testing
                         console.log('📥 Visibility sync - smart downloading tasks, lists, and templates...');
                         lastVisibilitySync = now;
-                        pullLatestFromCloud(false).catch(error => {
+                        downloadTasksFromCloud().catch(error => {
                             console.warn('📥 Visibility tasks download failed:', error);
                         });
                         downloadAllLists().catch(error => {
@@ -9098,7 +9098,7 @@
                     if (now - lastFocusRefresh > 10000) { // 10 seconds minimum for testing
                         console.log('📥 Focus sync - smart downloading tasks and lists...');
                         lastFocusRefresh = now;
-                        pullLatestFromCloud(false).catch(error => {
+                        downloadTasksFromCloud().catch(error => {
                             console.warn('📥 Focus tasks download failed:', error);
                         });
                         downloadAllLists().catch(error => {
@@ -10853,9 +10853,8 @@
                     console.log(`📦 Downloaded ${cloudTasks.length} tasks from cloud`);
                     
                     if (cloudTasks.length > 0) {
-                        // Merge with local tasks (cloud takes precedence for conflicts)
-                        const mergedTasks = [...tasks];
-                        let hasUpdates = false;
+                        // SIMPLE REPLACE: Use identical logic to Lists sync
+                        console.log('📥 SIMPLE REPLACE: Using Lists-style sync pattern');
                         
                         cloudTasks.forEach(cloudTask => {
                             const existingIndex = mergedTasks.findIndex(t => t.id === cloudTask.id);
