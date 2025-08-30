@@ -180,6 +180,7 @@ export default {
       'https://c15bd346.hyperfiler.pages.dev',
       'https://785ec48a.hyperfiler.pages.dev',
       'https://4bc5b548.hyperfiler.pages.dev',
+      'https://64e829ff.hyperfiler.pages.dev',
       'https://hyperfiler-api.joanmanelferrera-400.workers.dev',
       'https://hyperfiler.joanmanelferrera.workers.dev',
       'https://hyperfiler.joanmanelferrera.com',
@@ -1460,7 +1461,7 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
       .bind(actualUserId)
       .run();
     
-    // Insert all tasks as a single JSON record (ultra-simple approach - EXACT COPY of Lists)
+    // Insert all tasks as a single JSON record (EXACT COPY of Lists - with required title)
     const stmt = env.DB.prepare(`
       INSERT INTO user_tasks 
       (user_id, task_data, title, created_at, updated_at)
