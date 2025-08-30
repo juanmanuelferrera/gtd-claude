@@ -178,6 +178,8 @@ export default {
       'https://9379631c.hyperfiler.pages.dev',
       'https://0be8f471.hyperfiler.pages.dev',
       'https://c15bd346.hyperfiler.pages.dev',
+      'https://785ec48a.hyperfiler.pages.dev',
+      'https://4bc5b548.hyperfiler.pages.dev',
       'https://hyperfiler-api.joanmanelferrera-400.workers.dev',
       'https://hyperfiler.joanmanelferrera.workers.dev',
       'https://hyperfiler.joanmanelferrera.com',

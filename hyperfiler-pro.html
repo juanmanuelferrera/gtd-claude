@@ -9699,9 +9699,17 @@
         async function downloadAllLists() {
             if (!window.currentUser?.user?.id) return;
             
-            // MANDATORY REFRESH: Override protection for stale browser
-            if (window.forceMandatoryRefresh || window.staleBrowserMode) {
-                console.log('🚨 MANDATORY REFRESH: Forcing lists download despite protection flags');
+            // FRESH BROWSER: Override protection for fresh browsers (no sync history)
+            const lastSyncTime = localStorage.getItem('lastSyncTime');
+            const isFreshBrowser = !lastSyncTime || lastSyncTime === '0' || lastSyncTime === 'null';
+            
+            // MANDATORY REFRESH: Override protection for stale browser or fresh browser
+            if (window.forceMandatoryRefresh || window.staleBrowserMode || isFreshBrowser) {
+                if (isFreshBrowser) {
+                    console.log('🆕 FRESH BROWSER: Forcing lists download despite protection flags');
+                } else {
+                    console.log('🚨 MANDATORY REFRESH: Forcing lists download despite protection flags');
+                }
             } else {
                 // 🔒 BACKUP RESTORE PROTECTION - highest priority
                 if (window.justRestoredBackup || window.skipNextDownload || window.backupRestoreInProgress) {
@@ -9873,9 +9881,17 @@
                 return;
             }
             
-            // MANDATORY REFRESH: Override protection for stale browser
-            if (window.forceMandatoryRefresh) {
-                console.warn('🚨 MANDATORY REFRESH: Forcing download despite protection flags');
+            // FRESH BROWSER: Override protection for fresh browsers (no sync history)
+            const lastSyncTime = localStorage.getItem('lastSyncTime');
+            const isFreshBrowser = !lastSyncTime || lastSyncTime === '0' || lastSyncTime === 'null';
+            
+            // MANDATORY REFRESH: Override protection for stale browser or fresh browser
+            if (window.forceMandatoryRefresh || isFreshBrowser) {
+                if (isFreshBrowser) {
+                    console.warn('🆕 FRESH BROWSER: Forcing download despite protection flags');
+                } else {
+                    console.warn('🚨 MANDATORY REFRESH: Forcing download despite protection flags');
+                }
                 console.warn('🛡️ This overrides normal protection to prevent database conflicts');
             } else {
                 // 🔒 BACKUP RESTORE PROTECTION - highest priority
