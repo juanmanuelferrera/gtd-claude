@@ -10925,36 +10925,7 @@
             return uniqueTasks;
         }
 
-                
-                const response = await fetch(`${API_BASE}/tasks`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify(requestBody)
-                });
-                
-                
-                if (!response.ok) {
-                    console.log('❌ Tasks upload failed with status:', response.status);
-                    const errorText = await response.text();
-                    console.error('❌ Tasks upload error details:', errorText);
-                    throw new Error(`Tasks upload failed: ${response.status} ${errorText}`);
-                }
-                
-                const result = await response.json();
-                console.log('✅ Tasks uploaded successfully:', result);
-                window.lastUploadTime = Date.now();
-                
-                return true;
-                
-            } catch (error) {
-                console.error('❌ Error uploading tasks to server:', error);
-                showSyncStatus('Tasks sync failed', 'error');
-                return false;
-            }
-        }
+        // INSTANT sync to cloud (no debouncing)
 
 
         // INSTANT sync to cloud (no debouncing)
