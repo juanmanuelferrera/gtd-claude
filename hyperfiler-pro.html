@@ -3814,7 +3814,7 @@
                         <div style="margin-bottom: 10px;">
                             <strong>Plan:</strong> <span style="color: #007bff;">HyperFiler Pro</span>
                         </div>
-                        <button class="btn btn-secondary" onclick="window.location.href='https://hyperfiler.pro/login'" style="padding: 8px 16px; background: #dc3545; border-color: #dc3545; color: white; margin-top: 10px;">🚪 Logout</button>
+                        <button class="btn btn-secondary" onclick="window.location.href='/login'" style="padding: 8px 16px; background: #dc3545; border-color: #dc3545; color: white; margin-top: 10px;">🚪 Logout</button>
                     </div>
                 </div>
             </div>
@@ -7301,13 +7301,13 @@
                     title: '🔐 Login Required',
                     message: 'Please log in to access HyperFiler Pro.',
                     action: 'Login',
-                    url: 'https://hyperfiler.pro/login'
+                    url: '/login'
                 },
                 invalid: {
                     title: '❌ Session Expired',
                     message: 'Your session has expired. Please log in again.',
                     action: 'Login',
-                    url: 'https://hyperfiler.pro/login'
+                    url: '/login'
                 },
                 subscription: {
                     title: '💳 Subscription Required',
@@ -7325,7 +7325,7 @@
                     title: '⚠️ Authentication Error',
                     message: 'Unable to verify your account. Please try again.',
                     action: 'Login',
-                    url: 'https://hyperfiler.pro/login'
+                    url: '/login'
                 }
             };
 
@@ -7592,7 +7592,7 @@
             
             // SECURITY: Clear all authentication data
             clearAuthData();
-            window.location.href = 'https://hyperfiler.pro/login';
+            window.location.href = '/login';
         }
 
         // Show soft reminders (Reaper-style)
