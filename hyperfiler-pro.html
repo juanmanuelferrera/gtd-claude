@@ -10686,6 +10686,8 @@
         }
 
 
+        let syncInProgress = false; // Declare missing variable
+        
         async function pullLatestFromCloud(forceSync = false) {
             console.log('🔧 pullLatestFromCloud called with forceSync:', forceSync);
             if (syncInProgress) return;
