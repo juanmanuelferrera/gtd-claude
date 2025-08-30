@@ -484,6 +484,10 @@ export default {
         return handleDeleteTask(taskId, request, env, corsHeaders);
       }
 
+      // Tasks sync endpoint - Same ultra-simple pattern as lists
+      if (pathname === '/tasks/sync' && request.method === 'POST') {
+        return handleTasksSyncSimple(request, env, corsHeaders);
+      }
       // Lists endpoints - Same ultra-simple pattern as tasks
       if (pathname === '/lists/sync' && request.method === 'POST') {
         return handleListsSyncSimple(request, env, corsHeaders);
@@ -4298,6 +4302,7 @@ async function handlePaymentSucceeded(invoice, env) {
     console.error('Error handling payment success:', error);
   }
 }
+
 
 // ===== LISTS SYNC FUNCTIONS (Same ultra-simple pattern as tasks) =====
 
