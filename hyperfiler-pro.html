@@ -10836,10 +10836,22 @@
         }
 
         async function downloadTasksFromCloud() {
-            console.log('☁️ Downloading all tasks from cloud...');
+            if (!window.currentUser?.user?.id) return;
+            
+            // MANDATORY REFRESH: Override protection for stale browser
+            if (window.forceMandatoryRefresh || window.staleBrowserMode) {
+                console.log('🚨 MANDATORY REFRESH: Forcing tasks download despite protection flags');
+            } else {
+                // 🔒 BACKUP RESTORE PROTECTION - highest priority
+                if (window.justRestoredBackup || window.skipNextDownload || window.backupRestoreInProgress) {
+                    console.log('🔒 BLOCKED: Tasks download skipped - backup restore in progress');
+                    return;
+                }
+                
+                // Allow downloads - let individual protection flags handle timing
+            }
             
             try {
-                console.log('☁️ Downloading with httpOnly cookie authentication');
                 
                 const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
 
@@ -10848,44 +10860,52 @@
                 
                 if (response.ok) {
                     const data = await response.json();
-                    const cloudTasks = data.tasks || [];
+                    const serverTasks = data.tasks || [];
                     
-                    console.log(`📦 Downloaded ${cloudTasks.length} tasks from cloud`);
-                    
-                    if (cloudTasks.length > 0) {
-                        // SIMPLE REPLACE: Use identical logic to Lists sync
-                        console.log('📥 SIMPLE REPLACE: Using Lists-style sync pattern');
+                    // MANDATORY REFRESH: Direct replacement with server data (skip all safety checks)
+                    if (window.forceMandatoryRefresh || window.staleBrowserMode) {
+                        console.log('🚨 MANDATORY REFRESH: Directly replacing tasks with server data (no safety checks)');
+                        tasks = serverTasks;
+                        localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                        sortTasks();
+                        renderCurrentView();
+                    } else {
+                        // PROVEN SAFETY: Prevent data loss when one side has empty data (normal sync only)
+                        const localTaskCount = tasks.length;
+                        const serverTaskCount = serverTasks.length;
                         
-                        cloudTasks.forEach(cloudTask => {
-                            const existingIndex = mergedTasks.findIndex(t => t.id === cloudTask.id);
-                            if (existingIndex >= 0) {
-                                // Update existing task if cloud version is newer
-                                const localTask = mergedTasks[existingIndex];
-                                const cloudUpdated = new Date(cloudTask.updated_at || cloudTask.updatedAt || cloudTask.createdAt);
-                                const localUpdated = new Date(localTask.updated_at || localTask.updatedAt || localTask.createdAt);
-                                
-                                if (cloudUpdated > localUpdated) {
-                                    // Preserve local properties that might not be in cloud version
-                                    mergedTasks[existingIndex] = {
-                                        ...cloudTask,
-                                        // Preserve isEvent property if it exists locally but not in cloud
-                                        isEvent: cloudTask.isEvent !== undefined ? cloudTask.isEvent : localTask.isEvent
-                                    };
-                                    hasUpdates = true;
-                                }
-                            } else {
-                                // New task from cloud
-                                mergedTasks.push(cloudTask);
-                                hasUpdates = true;
+                        // Only log if there's a significant difference or potential issue
+                        if (Math.abs(localTaskCount - serverTaskCount) > 2 || localTaskCount === 0 || serverTaskCount === 0) {
+                            console.log('📥 TASKS SAFETY CHECK: Local tasks:', localTaskCount, 'Server tasks:', serverTaskCount);
+                        }
+                        
+                        // Safety rule: If server is empty but local has tasks, upload local to server instead
+                        if (serverTaskCount === 0 && localTaskCount > 0) {
+                            console.log('🛡️ TASKS SAFETY: Server is empty but local has tasks - uploading local to server instead');
+                            await uploadAllTasks();
+                            return;
+                        }
+                        
+                        // Safety rule: If local is empty but server has tasks, it's safe to download
+                        if (localTaskCount === 0 && serverTaskCount > 0) {
+                            console.log('📥 TASKS SAFE DOWNLOAD: Local is empty, downloading from server');
+                            tasks = serverTasks;
+                            localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                            sortTasks();
+                            renderCurrentView();
+                            return;
+                        }
+                        
+                        // Normal sync: if both have data, compare and update if different
+                        if (JSON.stringify(serverTasks) !== JSON.stringify(tasks)) {
+                            // Additional safety: Check if server has significantly fewer tasks (potential data loss)
+                            if (serverTaskCount < localTaskCount * 0.5 && localTaskCount > 2) {
+                                console.log('🛡️ TASKS SAFETY: Server has significantly fewer tasks than local - skipping download to prevent data loss');
+                                return;
                             }
-                        });
-                        
-                        if (hasUpdates) {
-                            // Remove duplicates before updating
-                            tasks = removeDuplicateTasks(mergedTasks);
-                            console.log('✅ Tasks updated from cloud sync with deduplication');
                             
-                            // Update UI
+                            tasks = serverTasks;
+                            localStorage.setItem('gtdTasks', JSON.stringify(tasks));
                             sortTasks();
                             renderCurrentView();
                         }
@@ -10893,12 +10913,10 @@
                     
                     return true;
                 } else {
-                    console.error('☁️ Failed to download tasks:', response.status);
-                    return false;
+                    console.log('📥 TASKS SYNC: Download failed with status:', response.status);
                 }
             } catch (error) {
-                console.error('☁️ Download error:', error);
-                return false;
+                console.error('📥 TASKS DOWNLOAD ERROR:', error);
             }
         }
 
