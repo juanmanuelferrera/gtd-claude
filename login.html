@@ -583,7 +583,7 @@
                     // SECURITY: Wait a bit longer to ensure cookie is properly set
                     setTimeout(() => {
                         // Redirect to the correct main app file
-                        window.location.href = '/hyperfiler-pro.html';
+                        window.location.href = '/';
                     }, 1000);
 
                 } else {
@@ -732,7 +732,7 @@
                 if (response.ok) {
                     showMessage(infoMessage, 'You are already logged in. Redirecting...');
                     setTimeout(() => {
-                        window.location.href = '/hyperfiler-pro.html';
+                        window.location.href = '/';
                     }, 500);
                 } else {
                     console.log('Stored token is invalid, clearing...');
