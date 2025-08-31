@@ -5745,6 +5745,35 @@
             // Update Today view date display to reflect new language
             updateCurrentTodayDisplay();
             
+            // Force restore ALL mobile nav emojis after translations
+            restoreMobileNavEmojis();
+            
+        }
+        
+        function restoreMobileNavEmojis() {
+            setTimeout(() => {
+                const todayIcon = document.querySelector('#mobileNavToday .mobile-nav-icon');
+                if (todayIcon) {
+                    todayIcon.textContent = '🔥';
+                }
+                const addIcon = document.querySelector('#mobileBottomAddBtn .mobile-nav-icon');
+                if (addIcon) {
+                    addIcon.textContent = '➕';
+                }
+                const weekIcon = document.querySelector('#mobileNavWeek .mobile-nav-icon');
+                if (weekIcon) {
+                    weekIcon.textContent = '📅';
+                }
+                const listsIcon = document.querySelector('#mobileNavLists .mobile-nav-icon');
+                if (listsIcon) {
+                    listsIcon.textContent = '📝';
+                }
+                const moreIcon = document.querySelector('#mobileNavMore .mobile-nav-icon');
+                if (moreIcon) {
+                    moreIcon.textContent = '⋯';
+                }
+                console.log('🔥 All mobile nav emojis restored');
+            }, 50);
         }
 
         // Load preferred language on startup
