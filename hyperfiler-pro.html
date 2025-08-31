@@ -3074,7 +3074,7 @@
                 bottom: 64px;
                 left: 0;
                 right: 0;
-                background: transparent;
+                background: white;
                 border-top: 1px solid #e1e5e9;
                 box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
                 transform: translateY(100%);
@@ -3300,18 +3300,18 @@
                     <div style="display: flex; gap: 4px; align-items: center; flex-wrap: nowrap;">
                         <input type="text" id="todayTaskSearch" placeholder="🔍 Day" style="padding: 6px 6px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 10px; width: 100%; max-width: 100px; flex-shrink: 1;" oninput="searchTodayTasks()">
                         <button class="btn btn-primary btn-small" onclick="openAddTaskModal()" style="background: #ff6b35; border-color: #ff6b35; padding: 6px 6px; font-size: 10px; flex-shrink: 0;" data-translate="+ Add">+ Add</button>
-                        <button class="btn btn-small" onclick="previousDay()" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">← Prev</button>
-                        <button class="btn btn-small" onclick="nextDay()" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">Next →</button>
-                        <div id="desktopDateDisplay" style="padding: 6px 8px; font-size: 10px; color: #666; background: #f8f9fa; border-radius: 4px; border: 1px solid #e1e5e9; white-space: nowrap;"></div>
+                        <button class="btn btn-small" onclick="previousDay()" style="padding: 4px 4px; font-size: 8px; flex-shrink: 0;">← Prev</button>
+                        <button class="btn btn-small" onclick="nextDay()" style="padding: 4px 4px; font-size: 8px; flex-shrink: 0;">Next →</button>
+                        <div id="desktopDateDisplay" style="padding: 8px 12px; font-size: 14px; font-weight: bold; color: #333; background: #f8f9fa; border-radius: 6px; border: 1px solid #e1e5e9; white-space: nowrap;"></div>
                         <button class="export-btn" onclick="downloadTodayHtml()" title="Download today's schedule as HTML file" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">🖨️ Print</button>
                     </div>
                 </div>
                 
                 <!-- VERSION 3: Mobile view controls - Compact -->
                 <div class="view-controls mobile-only" style="padding: 8px; display: flex; justify-content: center; align-items: center; background: transparent !important; border: none !important; margin-bottom: 2px !important; gap: 8px;">
-                    <button class="btn btn-small" onclick="previousDay()" style="padding: 8px 6px !important; font-size: 10px !important; height: auto !important;">← Ant.</button>
-                    <div id="mobileDateDisplay" style="padding: 8px 6px; font-size: 10px; color: #666; background: #f8f9fa; border-radius: 4px; border: 1px solid #e1e5e9; white-space: nowrap;"></div>
-                    <button class="btn btn-small" onclick="nextDay()" style="padding: 8px 6px !important; font-size: 10px !important; height: auto !important;">Sig. →</button>
+                    <button class="btn btn-small" onclick="previousDay()" style="padding: 6px 4px !important; font-size: 8px !important; height: auto !important;">← Ant.</button>
+                    <div id="mobileDateDisplay" style="padding: 10px 12px; font-size: 14px; font-weight: bold; color: #333; background: #f8f9fa; border-radius: 6px; border: 1px solid #e1e5e9; white-space: nowrap;"></div>
+                    <button class="btn btn-small" onclick="nextDay()" style="padding: 6px 4px !important; font-size: 8px !important; height: auto !important;">Sig. →</button>
                 </div>
             </div>
             <div class="calendar-controls desktop-only" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -3785,7 +3785,7 @@
 
     <!-- Task Edit Modal -->
     <div id="taskModal" class="modal" onclick="closeTaskModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 350px; margin: 15vh auto 5vh; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; padding: 0; max-height: 65vh;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 350px; margin: 10vh auto 5vh; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; padding: 0; max-height: 80vh;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #1877f2 0%, #42a5f5 100%); color: white; padding: 20px 24px; position: relative;">
@@ -3878,7 +3878,7 @@
             
             <!-- Modal Footer -->
             <div style="background: #f8f9fa; padding: 20px 24px; border-top: 1px solid #e1e5e9; display: flex; gap: 12px; justify-content: space-between; align-items: center;">
-                <button onclick="deleteTaskFromModal()" style="background: #dc3545; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(220,53,69,0.3);">🗑️ Delete</button>
+                <button onclick="deleteTaskFromModal()" style="background: #dc3545; color: white; border: none; padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(220,53,69,0.3);">🗑️ Delete</button>
                 <div style="display: flex; gap: 12px;">
                     <button onclick="closeTaskModal()" style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(108,117,125,0.3);">Cancel</button>
                     <button onclick="saveTaskEdit()" id="saveTaskBtn" style="background: #28a745; color: white; border: none; padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(40,167,69,0.3);">✅ Save Task</button>
