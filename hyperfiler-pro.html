@@ -9448,6 +9448,78 @@
                 modal.classList.remove('show');
             }
         }
+        
+        // Mobile time dropdown function
+        function toggleMobileTimeDropdown(taskId, event) {
+            event.stopPropagation();
+            const task = tasks.find(t => t.id == taskId);
+            if (!task) return;
+            
+            const times = ['', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'];
+            const currentIndex = times.indexOf(task.dueTime || '');
+            const nextIndex = (currentIndex + 1) % times.length;
+            const newTime = times[nextIndex];
+            
+            updateTaskTime(taskId, newTime, event);
+        }
+        
+        // Touch swipe variables
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let currentSwipeElement = null;
+        
+        function handleTaskTouchStart(event) {
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+            currentSwipeElement = event.currentTarget;
+        }
+        
+        function handleTaskTouchMove(event) {
+            if (!currentSwipeElement) return;
+            event.preventDefault();
+            
+            const touchX = event.touches[0].clientX;
+            const deltaX = touchX - touchStartX;
+            
+            // Only show swipe actions if horizontal swipe is significant
+            if (Math.abs(deltaX) > 30) {
+                currentSwipeElement.style.transform = `translateX(${deltaX * 0.3}px)`;
+                
+                // Show action hint
+                if (deltaX > 0) {
+                    // Swipe right - show complete action
+                    currentSwipeElement.style.background = 'rgba(40, 167, 69, 0.1)';
+                } else {
+                    // Swipe left - show delete action  
+                    currentSwipeElement.style.background = 'rgba(220, 53, 69, 0.1)';
+                }
+            }
+        }
+        
+        function handleTaskTouchEnd(event) {
+            if (!currentSwipeElement) return;
+            
+            const touchX = event.changedTouches[0].clientX;
+            const deltaX = touchX - touchStartX;
+            const taskId = currentSwipeElement.dataset.taskId;
+            
+            // Reset styles
+            currentSwipeElement.style.transform = '';
+            currentSwipeElement.style.background = '';
+            
+            // Trigger action if swipe is significant enough
+            if (Math.abs(deltaX) > 80) {
+                if (deltaX > 0) {
+                    // Swipe right - complete task
+                    toggleTaskStatus(taskId, event);
+                } else {
+                    // Swipe left - delete task
+                    quickDeleteTask(taskId, event);
+                }
+            }
+            
+            currentSwipeElement = null;
+        }
 
         // Hide modal when clicking outside
         document.addEventListener('click', function(event) {
@@ -25332,7 +25404,10 @@
                      ondragstart="handleTodayDragStart(event)"
                      ondragend="handleTodayDragEnd(event)"
                      onclick="editTask('${escapedTaskId}')"
-                     style="cursor: pointer;">
+                     ontouchstart="handleTaskTouchStart(event)"
+                     ontouchmove="handleTaskTouchMove(event)"
+                     ontouchend="handleTaskTouchEnd(event)"
+                     style="cursor: pointer; position: relative; overflow: hidden;">
                     <div class="task-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="task-content" style="flex: 1;">
                             <div class="task-title">
@@ -25344,7 +25419,13 @@
                             </div>
                             ${task.notes ? `<div class="task-notes">${getTruncatedNotes(task.notes, 2)}</div>` : ''}
                         </div>
-                        <div style="display: flex; gap: 4px; margin-left: 8px; align-items: center;">
+                        <div class="mobile-only" style="display: flex; gap: 2px; margin-left: 4px; align-items: center;">
+                            <button class="mobile-time-btn" onclick="toggleMobileTimeDropdown('${escapedTaskId}', event)" 
+                                style="background: #667eea; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 500; cursor: pointer;">
+                                ${formattedTime || '⏰'}
+                            </button>
+                        </div>
+                        <div class="desktop-only" style="display: flex; gap: 4px; margin-left: 8px; align-items: center;">
                             <div class="time-adjust-controls" style="display: flex; gap: 4px; align-items: center;">
                                 <select onchange="updateTaskTime('${escapedTaskId}', this.value, event)" onclick="event.stopPropagation()" 
                                     style="background: #fff; border: 1px solid #ddd; padding: 2px 4px; border-radius: 3px; font-size: 10px; cursor: pointer; min-width: 60px;">
@@ -25373,14 +25454,6 @@
                             </div>
                             ` : ''}
                             
-                            ${localStorage.getItem('keyboardOnlyMode') !== 'true' ? `
-                            <!-- Mobile Task Actions Dropdown -->
-                            <div class="mobile-task-actions">
-                                <button class="mobile-task-more-btn" onclick="showMobileTaskModal('${escapedTaskId}', event)" title="Task actions">
-                                    ⋯
-                                </button>
-                            </div>
-                            ` : ''}
                         </div>
                     </div>
                 </div>
