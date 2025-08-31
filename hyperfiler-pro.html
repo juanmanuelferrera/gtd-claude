@@ -18821,6 +18821,8 @@
             
             document.getElementById('taskModal').style.display = 'block';
             
+            // Set auto-close timer for 4 seconds
+            setTaskModalTimeout();
             
             // Reinitialize natural language processing for this modal instance
             setTimeout(() => {
