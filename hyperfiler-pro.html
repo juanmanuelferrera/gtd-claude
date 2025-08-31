@@ -17902,40 +17902,39 @@
             if (mobileDateDisplay) {
                 mobileDateDisplay.textContent = shortDate;
             }
-                
-                // Check if we're viewing the actual current day
-                const todayStr = getLocalDateString(currentTodayDate);
-                const actualTodayStr = getLocalDateString(new Date());
-                const isActualToday = todayStr === actualTodayStr;
-                
-                // Apply different styling based on whether it's the actual current day
-                if (isActualToday) {
-                    // Current day styling - match Today tab color
-                    displayElement.style.cssText = `
-                        margin: 0; 
-                        font-size: 18px; 
-                        font-weight: 700; 
-                        color: white; 
-                        background: #FF4136; 
-                        padding: 8px 15px; 
-                        border-radius: 8px; 
-                        border: 2px solid #FF4136; 
-                        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-                        box-shadow: 0 2px 4px rgba(255, 65, 54, 0.25);
-                    `;
-                } else {
-                    // Other days styling - more subdued
-                    displayElement.style.cssText = `
-                        margin: 0; 
-                        font-size: 18px; 
-                        font-weight: 600; 
-                        color: #666; 
-                        background: #f8f9fa; 
-                        padding: 8px 15px; 
-                        border-radius: 8px; 
-                        border: 1px solid #dee2e6;
-                    `;
-                }
+            
+            // Check if we're viewing the actual current day  
+            const todayStr = getLocalDateString(currentTodayDate);
+            const actualTodayStr = getLocalDateString(new Date());
+            const isActualToday = todayStr === actualTodayStr;
+            
+            // Apply different styling based on whether it's the actual current day
+            if (displayElement && isActualToday) {
+                // Current day styling - match Today tab color
+                displayElement.style.cssText = `
+                    margin: 0; 
+                    font-size: 18px; 
+                    font-weight: 700; 
+                    color: white; 
+                    background: #FF4136; 
+                    padding: 8px 15px; 
+                    border-radius: 8px; 
+                    border: 2px solid #FF4136; 
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+                    box-shadow: 0 2px 4px rgba(255, 65, 54, 0.25);
+                `;
+            } else if (displayElement) {
+                // Other days styling - more subdued
+                displayElement.style.cssText = `
+                    margin: 0; 
+                    font-size: 18px; 
+                    font-weight: 600; 
+                    color: #666; 
+                    background: #f8f9fa; 
+                    padding: 8px 15px; 
+                    border-radius: 8px; 
+                    border: 1px solid #dee2e6;
+                `;
             }
         }
         
