@@ -2202,12 +2202,15 @@
         }
 
         .time-slot-task {
-            background: transparent;
-            border: none;
-            padding: 4px 0;
-            margin-bottom: 2px;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-left: 4px solid #007bff;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .time-slot-task:last-child {
@@ -2215,8 +2218,9 @@
         }
 
         .time-slot-task:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+            border-left-color: #0056b3;
         }
 
         .time-slot-task.completed {
