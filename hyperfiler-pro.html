@@ -38,9 +38,7 @@
 
         .header-section {
             background: inherit;
-            padding: 20px;
-            position: relative;
-            z-index: 1;
+            padding: 4px 8px;
         }
         
         .container {
@@ -54,21 +52,17 @@
             color: #1877f2;
             text-align: center;
             margin: 0;
-            font-size: 24px;
+            font-size: 18px;
         }
 
         .main-nav {
             background: none;
-            border-radius: 0;
-            box-shadow: none;
             margin-bottom: 0;
-            padding: 15px 15px 0 15px;
+            padding: 2px 8px;
             display: flex;
-            gap: 10px;
+            gap: 1px;
             overflow-x: auto;
             justify-content: flex-start;
-            position: relative;
-            border-bottom: none;
             width: 100%;
             box-sizing: border-box;
         }
@@ -104,42 +98,20 @@
 
         .nav-btn {
             border: none;
-            padding: 14px 8px;
-            border-radius: 16px 16px 0 0;
+            padding: 6px 12px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.2s ease;
             white-space: nowrap;
             text-align: center;
             color: white;
-            position: relative;
-            z-index: 2;
             flex: 1;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            margin-bottom: 0;
+            margin: 0;
         }
         
         .nav-btn.active {
-            z-index: 10;
-            margin-bottom: 0;
-            padding-bottom: 14px;
-            position: relative;
-            box-shadow: 
-                0 8px 24px rgba(0, 0, 0, 0.2),
-                0 -2px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 16px 16px 0 0;
-        }
-        
-        .nav-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 0;
-            background: inherit;
-            z-index: 11;
+            opacity: 1;
         }
         
 
@@ -337,17 +309,16 @@
 
         .calendar-section {
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 8px;
         }
 
         .calendar-section h3 {
-            margin: 0 0 20px 0;
+            margin: 0 0 8px 0;
             color: #1877f2;
             display: flex;
             align-items: center;
             gap: 8px;
+            font-size: 16px;
         }
 
         .calendar-controls {
@@ -864,9 +835,7 @@
 
         .tasks-section {
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 8px;
         }
 
         .section-header {
