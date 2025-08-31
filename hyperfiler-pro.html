@@ -189,12 +189,13 @@
                 background: transparent;
                 color: var(--things-text);
                 font-weight: 500;
-                padding: 12px 16px;
-                border-radius: 6px;
-                font-size: 15px;
-                margin-bottom: 2px;
+                padding: 24px 16px; /* Double height from 12px to 24px */
+                border-radius: 8px;
+                font-size: 16px; /* Slightly larger font */
+                margin-bottom: 4px; /* More spacing */
                 flex: unset;
                 text-align: left;
+                min-height: 56px; /* Ensure generous height */
             }
             
             .nav-btn:hover {
@@ -3480,7 +3481,10 @@
         <div class="desktop-sidebar">
             <!-- Sidebar Header -->
             <div style="padding: 0 16px 20px 16px; border-bottom: 1px solid var(--things-border); margin-bottom: 16px;">
-                <h2 style="margin: 0; font-size: 18px; font-weight: 600; color: var(--things-text);">⚡ HyperFiler Pro</h2>
+                <h2 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: var(--things-text);">⚡ HyperFiler Pro</h2>
+                <div id="sidebarUserInfo" style="font-size: 13px; color: var(--things-text-secondary); display: none;">
+                    Welcome, user
+                </div>
             </div>
             
             <div class="main-nav">
@@ -3507,11 +3511,30 @@
             </button>
             </div>
             
-            <!-- Sidebar Footer -->
-            <div style="padding: 16px; border-top: 1px solid var(--things-border); margin-top: auto;">
-                <button onclick="openSettings()" style="width: 100%; background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
-                    ⚙️ Settings
-                </button>
+            <!-- Sidebar Functions -->
+            <div style="padding: 16px; border-top: 1px solid var(--things-border); margin-top: 20px;">
+                <div style="margin-bottom: 12px;">
+                    <button onclick="createEmergencyBackup()" style="width: 100%; background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 16px; border-radius: 8px; cursor: pointer; font-size: 14px; margin-bottom: 8px; transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
+                        💾 Quick Backup
+                    </button>
+                    <button onclick="openTaskImportModal()" style="width: 100%; background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 16px; border-radius: 8px; cursor: pointer; font-size: 14px; margin-bottom: 8px; transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
+                        📥 Import Tasks
+                    </button>
+                    <button onclick="openSettings()" style="width: 100%; background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 16px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
+                        ⚙️ Settings
+                    </button>
+                </div>
+                
+                <!-- Backup Status -->
+                <div id="sidebarBackupStatus" style="padding: 12px; background: rgba(40, 167, 69, 0.1); border: 1px solid #28a745; color: #28a745; border-radius: 6px; font-size: 12px; text-align: center; margin-bottom: 12px; display: none;">
+                    💾 Auto Backup ON
+                </div>
+                
+                <!-- Language Switcher -->
+                <div style="display: flex; gap: 8px; justify-content: center;">
+                    <button onclick="switchLanguage('en')" style="background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">EN</button>
+                    <button onclick="switchLanguage('es')" style="background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">ES</button>
+                </div>
             </div>
         </div>
         
@@ -7888,6 +7911,13 @@
                         <a href="#" onclick="logout()" style="color: #dc3545; text-decoration: none;">Logout</a>
                     </div>
                 `;
+                
+                // Update sidebar user info
+                const sidebarUserInfo = document.getElementById('sidebarUserInfo');
+                if (sidebarUserInfo) {
+                    sidebarUserInfo.innerHTML = `Welcome, ${userInfo.user.email} ${getUserStatusIcon(userInfo)} | <a href="#" onclick="logout()" style="color: var(--things-danger);">Logout</a>`;
+                    sidebarUserInfo.style.display = 'block';
+                }
             }
             
             // Show trial reminder for non-paid users (diamond badge completely removed)
