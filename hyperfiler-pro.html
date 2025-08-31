@@ -55,6 +55,12 @@
             margin: 0;
             font-size: 18px;
         }
+        
+        @media (max-width: 768px) {
+            h1 {
+                display: none;
+            }
+        }
 
         .main-nav {
             background: none;
@@ -9548,8 +9554,8 @@
                     // Swipe right - show delay to next day action
                     currentSwipeElement.style.background = 'rgba(255, 193, 7, 0.1)';
                 } else {
-                    // Swipe left - show delay menu action  
-                    currentSwipeElement.style.background = 'rgba(102, 126, 234, 0.1)';
+                    // Swipe left - show delete action  
+                    currentSwipeElement.style.background = 'rgba(220, 53, 69, 0.1)';
                 }
             }
         }
@@ -9571,8 +9577,8 @@
                     // Swipe right - delay to next day
                     delayTask(taskId, 1, event);
                 } else {
-                    // Swipe left - show delay menu (same as blue button)
-                    toggleMobileTimeDropdown(taskId, event);
+                    // Swipe left - delete task
+                    quickDeleteTask(taskId, event);
                 }
             }
             
