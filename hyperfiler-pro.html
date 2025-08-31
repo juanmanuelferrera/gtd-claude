@@ -3300,8 +3300,8 @@
                     <div style="display: flex; gap: 4px; align-items: center; flex-wrap: nowrap;">
                         <input type="text" id="todayTaskSearch" placeholder="🔍 Day" style="padding: 6px 6px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 10px; width: 100%; max-width: 100px; flex-shrink: 1;" oninput="searchTodayTasks()">
                         <button class="btn btn-primary btn-small" onclick="openAddTaskModal()" style="background: #ff6b35; border-color: #ff6b35; padding: 6px 6px; font-size: 10px; flex-shrink: 0;" data-translate="+ Add">+ Add</button>
-                        <button class="btn btn-small" onclick="previousDay()" style="padding: 4px 4px; font-size: 8px; flex-shrink: 0;">← Prev</button>
-                        <button class="btn btn-small" onclick="nextDay()" style="padding: 4px 4px; font-size: 8px; flex-shrink: 0;">Next →</button>
+                        <button class="btn btn-small" onclick="previousDay()" style="padding: 8px 4px; font-size: 8px; flex-shrink: 0;">← Prev</button>
+                        <button class="btn btn-small" onclick="nextDay()" style="padding: 8px 4px; font-size: 8px; flex-shrink: 0;">Next →</button>
                         <div id="desktopDateDisplay" style="padding: 8px 12px; font-size: 14px; font-weight: bold; color: #333; background: #f8f9fa; border-radius: 6px; border: 1px solid #e1e5e9; white-space: nowrap;"></div>
                         <button class="export-btn" onclick="downloadTodayHtml()" title="Download today's schedule as HTML file" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">🖨️ Print</button>
                     </div>
@@ -3309,9 +3309,9 @@
                 
                 <!-- VERSION 3: Mobile view controls - Compact -->
                 <div class="view-controls mobile-only" style="padding: 8px; display: flex; justify-content: center; align-items: center; background: transparent !important; border: none !important; margin-bottom: 2px !important; gap: 8px;">
-                    <button class="btn btn-small" onclick="previousDay()" style="padding: 6px 4px !important; font-size: 8px !important; height: auto !important;">← Ant.</button>
+                    <button class="btn btn-small" onclick="previousDay()" style="padding: 10px 4px !important; font-size: 8px !important; height: auto !important;">← Ant.</button>
                     <div id="mobileDateDisplay" style="padding: 10px 12px; font-size: 14px; font-weight: bold; color: #333; background: #f8f9fa; border-radius: 6px; border: 1px solid #e1e5e9; white-space: nowrap;"></div>
-                    <button class="btn btn-small" onclick="nextDay()" style="padding: 6px 4px !important; font-size: 8px !important; height: auto !important;">Sig. →</button>
+                    <button class="btn btn-small" onclick="nextDay()" style="padding: 10px 4px !important; font-size: 8px !important; height: auto !important;">Sig. →</button>
                 </div>
             </div>
             <div class="calendar-controls desktop-only" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -9196,10 +9196,9 @@
                 if (titleData) {
                     if (viewName === 'today') {
                         const currentDate = getCurrentTodayDate();
-                        const dayNames = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
-                        const dayName = dayNames[currentDate.getDay()];
-                        const dayNum = currentDate.getDate();
-                        headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer;">${titleData.emoji} TODAY<br><small style="font-size: 11px; font-weight: 400; text-transform: none;">${dayName} ${dayNum}</small></span>`;
+                        const monthNames = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+                        const monthName = monthNames[currentDate.getMonth()];
+                        headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer;">${titleData.emoji} ${monthName}</span>`;
                     } else {
                         headerTitle.textContent = titleData.emoji + ' ' + translateText(titleData.key);
                     }
@@ -9553,10 +9552,9 @@
                 const headerTitle = document.getElementById('mobileHeaderTitle');
                 if (headerTitle) {
                     const currentDate = getCurrentTodayDate();
-                    const dayNames = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
-                    const dayName = dayNames[currentDate.getDay()];
-                    const dayNum = currentDate.getDate();
-                    headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer;">🔥 TODAY<br><small style="font-size: 11px; font-weight: 400; text-transform: none;">${dayName} ${dayNum}</small></span>`;
+                    const monthNames = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+                    const monthName = monthNames[currentDate.getMonth()];
+                    headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer;">🔥 ${monthName}</span>`;
                 }
             }
         }
@@ -9692,10 +9690,9 @@
                     if (titleData) {
                         if (currentView === 'today') {
                             const currentDate = getCurrentTodayDate();
-                            const dayNames = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
-                            const dayName = dayNames[currentDate.getDay()];
-                            const dayNum = currentDate.getDate();
-                            headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer;">${titleData.emoji} TODAY<br><small style="font-size: 11px; font-weight: 400; text-transform: none;">${dayName} ${dayNum}</small></span>`;
+                            const monthNames = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+                            const monthName = monthNames[currentDate.getMonth()];
+                            headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer;">${titleData.emoji} ${monthName}</span>`;
                         } else {
                             headerTitle.textContent = titleData.emoji + ' ' + translateText(titleData.key);
                         }
@@ -17870,16 +17867,13 @@
         function updateCurrentTodayDisplay() {
             const displayElement = document.getElementById('currentTodayDate');
             if (displayElement) {
+                // Show only month and year
                 const options = { 
-                    weekday: 'long', 
                     year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                    month: 'long'
                 };
                 if (currentLanguage === 'es') {
-                    // Custom Spanish formatting without "de"
-                    const formatted = currentTodayDate.toLocaleDateString('es-ES', options);
-                    displayElement.textContent = formatted.replace(' de ', ' ');
+                    displayElement.textContent = currentTodayDate.toLocaleDateString('es-ES', options);
                 } else {
                     displayElement.textContent = currentTodayDate.toLocaleDateString('en-US', options);
                 }
