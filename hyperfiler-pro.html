@@ -25626,28 +25626,85 @@
                 return `${newHours.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')}`;
             }
             
-            // Simple chronological list - no time slots
-            const timedTasks = todayTasks.filter(task => task.dueTime && task.dueTime !== '');
-            const untimedTasks = todayTasks.filter(task => !task.dueTime || task.dueTime === '');
+            // Group tasks by their actual times (only create slots for existing tasks)
+            const timeSlots = {};
+            const noTimeSlot = [];
             
-            // Sort timed tasks by time
-            timedTasks.sort((a, b) => (a.dueTime || '').localeCompare(b.dueTime || ''));
+            todayTasks.forEach(task => {
+                const hasValidTime = task.dueTime && task.dueTime !== '' && task.dueTime !== null && task.dueTime !== undefined;
+                
+                if (hasValidTime) {
+                    const timeKey = task.dueTime;
+                    if (!timeSlots[timeKey]) {
+                        timeSlots[timeKey] = [];
+                    }
+                    timeSlots[timeKey].push(task);
+                } else {
+                    task.dueTime = normalizeDueTime(task.dueTime);
+                    noTimeSlot.push(task);
+                }
+            });
             
-            // Sort untimed tasks by creation date (newest first)
-            untimedTasks.sort((a, b) => {
+            // Sort untimed tasks
+            noTimeSlot.sort((a, b) => {
                 const dateA = new Date(a.createdAt || a.created_at || 0);
                 const dateB = new Date(b.createdAt || b.created_at || 0);
                 return dateB - dateA;
             });
             
+            // Sort time slots by time
+            const sortedTimeSlots = Object.keys(timeSlots).sort();
+            const currentTime = today.toTimeString().slice(0, 5);
+            
             let html = '';
             
-            // Render simple task list with drag and drop
-            allTasks.forEach(task => {
-                html += renderTimeSlotTask(task);
+            // Render time slots (only for times that have tasks)
+            sortedTimeSlots.forEach(time => {
+                const isCurrentTime = time <= currentTime && 
+                    (sortedTimeSlots[sortedTimeSlots.indexOf(time) + 1] || '23:59') > currentTime;
+                
+                html += `
+                    <div class="time-block" 
+                         ondragover="handleTodayDragOver(event)" 
+                         ondrop="handleTodayDrop(event)" 
+                         ondragleave="handleTodayDragLeave(event)"
+                         data-time-slot="${time}">
+                        <div class="time-block-header ${isCurrentTime ? 'current-time' : ''}">
+                            <span>🕐 ${formatTime(time)}</span>
+                            ${isCurrentTime ? `<span style="margin-left: auto; font-size: 12px; padding-right: 8px;">← ${translateText('Current Time')}</span>` : ''}
+                        </div>
+                        <div class="time-block-content" 
+                             ondragover="handleTodayDragOver(event)" 
+                             ondrop="handleTodayDrop(event)" 
+                             ondragleave="handleTodayDragLeave(event)"
+                             data-time-slot="${time}">
+                            ${timeSlots[time].map(task => renderTimeSlotTask(task)).join('')}
+                        </div>
+                    </div>
+                `;
             });
             
-            html += `</div>`;
+            // Render tasks without specific time
+            if (noTimeSlot.length > 0) {
+                html += `
+                    <div class="time-block" 
+                         ondragover="handleTodayDragOver(event)" 
+                         ondrop="handleTodayDrop(event)" 
+                         ondragleave="handleTodayDragLeave(event)"
+                         data-time-slot="no-time">
+                        <div class="time-block-header">
+                            <span>📋 No Specific Time</span>
+                        </div>
+                        <div class="time-block-content" 
+                             ondragover="handleTodayDragOver(event)" 
+                             ondrop="handleTodayDrop(event)" 
+                             ondragleave="handleTodayDragLeave(event)"
+                             data-time-slot="no-time">
+                            ${noTimeSlot.map(task => renderTimeSlotTask(task)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
             
             if (container) {
                 container.innerHTML = html;
