@@ -3472,20 +3472,27 @@
             <button class="nav-btn" onclick="showView('undo')" id="nav-undo" tabindex="7">
                 ↶ Undo
             </button>
-            <button class="nav-btn" onclick="openSettings()" id="nav-settings" tabindex="8">
+            <button class="nav-btn" onclick="openSettings()" id="nav-settings" tabindex="8" style="background: #666; color: #000;">
                 ⚙️ Settings
             </button>
             </div>
             
             <!-- Sidebar Action Buttons -->
             <div style="padding: 16px; border-top: 1px solid var(--things-border); margin-top: 20px;">
-                <!-- Quick Actions - Same Line -->
+                <!-- First Line: Import JSON + Export Text -->
+                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <button onclick="openTaskImportModal()" style="flex: 1; background: white; border: 1px solid var(--things-border); color: var(--things-text); padding: 12px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
+                        📥 Import JSON
+                    </button>
+                    <button onclick="exportAllTasks()" style="flex: 1; background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 12px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
+                        📄 Export Text
+                    </button>
+                </div>
+                
+                <!-- Second Line: Backup -->
                 <div style="display: flex; gap: 8px; margin-bottom: 16px;">
                     <button onclick="createEmergencyBackup()" style="flex: 1; background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 12px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
-                        💾 Backup
-                    </button>
-                    <button onclick="openTaskImportModal()" style="flex: 1; background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 12px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
-                        📥 Import
+                        💾 Quick Backup
                     </button>
                 </div>
                 
