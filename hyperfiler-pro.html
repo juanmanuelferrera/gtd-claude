@@ -3019,7 +3019,7 @@
                 left: 0;
                 right: 0;
                 height: 64px;
-                background: transparent;
+                background: white;
                 border-top: 1px solid #e1e5e9;
                 display: flex;
                 align-items: center;
@@ -3302,7 +3302,7 @@
                         <button class="btn btn-primary btn-small" onclick="openAddTaskModal()" style="background: #ff6b35; border-color: #ff6b35; padding: 6px 6px; font-size: 10px; flex-shrink: 0;" data-translate="+ Add">+ Add</button>
                         <button class="btn btn-small" onclick="previousDay()" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">← Prev</button>
                         <button class="btn btn-small" onclick="nextDay()" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">Next →</button>
-                        <button class="btn btn-secondary btn-small" onclick="goToToday()" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">📍 Today</button>
+                        <div id="desktopDateDisplay" style="padding: 6px 8px; font-size: 10px; color: #666; background: #f8f9fa; border-radius: 4px; border: 1px solid #e1e5e9; white-space: nowrap;"></div>
                         <button class="export-btn" onclick="downloadTodayHtml()" title="Download today's schedule as HTML file" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">🖨️ Print</button>
                     </div>
                 </div>
@@ -3310,7 +3310,7 @@
                 <!-- VERSION 3: Mobile view controls - Compact -->
                 <div class="view-controls mobile-only" style="padding: 8px; display: flex; justify-content: center; align-items: center; background: transparent !important; border: none !important; margin-bottom: 2px !important; gap: 8px;">
                     <button class="btn btn-small" onclick="previousDay()" style="padding: 8px 6px !important; font-size: 10px !important; height: auto !important;">← Ant.</button>
-                    <button class="btn btn-secondary btn-small" onclick="goToToday()" style="padding: 8px 6px !important; font-size: 10px !important; height: auto !important;">📍 Hoy</button>
+                    <div id="mobileDateDisplay" style="padding: 8px 6px; font-size: 10px; color: #666; background: #f8f9fa; border-radius: 4px; border: 1px solid #e1e5e9; white-space: nowrap;"></div>
                     <button class="btn btn-small" onclick="nextDay()" style="padding: 8px 6px !important; font-size: 10px !important; height: auto !important;">Sig. →</button>
                 </div>
             </div>
@@ -17883,6 +17883,25 @@
                 } else {
                     displayElement.textContent = currentTodayDate.toLocaleDateString('en-US', options);
                 }
+            }
+            
+            // Update desktop and mobile date displays
+            const desktopDateDisplay = document.getElementById('desktopDateDisplay');
+            const mobileDateDisplay = document.getElementById('mobileDateDisplay');
+            
+            // Get short date format (DOM 31, LUN 1, etc.)
+            const dayNames = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
+            const dayName = dayNames[currentTodayDate.getDay()];
+            const dayNum = currentTodayDate.getDate();
+            const shortDate = `${dayName} ${dayNum}`;
+            
+            if (desktopDateDisplay) {
+                desktopDateDisplay.textContent = shortDate;
+            }
+            
+            if (mobileDateDisplay) {
+                mobileDateDisplay.textContent = shortDate;
+            }
                 
                 // Check if we're viewing the actual current day
                 const todayStr = getLocalDateString(currentTodayDate);
