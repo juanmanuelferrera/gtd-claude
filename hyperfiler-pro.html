@@ -1925,21 +1925,31 @@
 
         /* Today View Time Blocks */
         .time-block {
-            background: transparent;
-            margin-bottom: 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            margin-bottom: 12px;
             width: 100%;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .time-block:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: translateY(-1px);
         }
 
         .time-block-header {
-            background: transparent;
-            padding: 4px 0;
-            border-bottom: none;
-            font-weight: 500;
+            background: linear-gradient(135deg, #f1f3f4 0%, #e9ecef 100%);
+            padding: 12px 16px;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
             color: #495057;
             font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 8px;
         }
 
         .time-block-header.current-time {
