@@ -19293,14 +19293,21 @@
                 lastModified: new Date().toISOString()
             };
             
-            saveTask(newTask).then(() => {
-                tasks.push(newTask);
-                sortTasks();
-                renderCurrentView();
-            }).catch(error => {
-                console.error('Error duplicating task:', error);
-                alert('❌ Error duplicating task. Please try again.');
+            // Add task directly to array and save
+            tasks.push(newTask);
+            saveTasksToLocalStorage();
+            sortTasks();
+            renderCurrentView();
+            
+            // Sync to cloud in background
+            uploadAllTasks([{
+                type: 'create',
+                task: cleanTaskForStorage(newTask)
+            }]).catch(error => {
+                console.error('Background sync failed for duplicated task:', error);
             });
+            
+            console.log('✅ Task duplicated successfully:', newTask.title);
         }
 
         // Task editing
