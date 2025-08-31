@@ -3468,7 +3468,7 @@
                         <button class="btn btn-primary btn-small" onclick="openAddTaskModal()" style="background: #ff6b35; border-color: #ff6b35; padding: 6px 6px; font-size: 10px; flex-shrink: 0;" data-translate="+ Add">+ Add</button>
                         <button class="btn btn-small" onclick="previousDay()" style="padding: 8px 4px; font-size: 8px; flex-shrink: 0;">← Prev</button>
                         <button class="btn btn-small" onclick="nextDay()" style="padding: 8px 4px; font-size: 8px; flex-shrink: 0;">Next →</button>
-                        <div id="desktopDateDisplay" style="padding: 8px 12px; font-size: 14px; font-weight: bold; color: #333; background: #f8f9fa; border-radius: 6px; border: 1px solid #e1e5e9; white-space: nowrap;"></div>
+                        <div id="desktopDateDisplay" style="padding: 10px 16px; font-size: 15px; font-weight: 600; color: white; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); border-radius: 8px; box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3); white-space: nowrap; letter-spacing: 0.5px;"></div>
                         <button class="export-btn" onclick="downloadTodayHtml()" title="Download today's schedule as HTML file" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">🖨️ Print</button>
                     </div>
                 </div>
@@ -18355,16 +18355,27 @@
             const desktopDateDisplay = document.getElementById('desktopDateDisplay');
             const mobileDateDisplay = document.getElementById('mobileDateDisplay');
             
-            // Get short date format (DOM 31, LUN 1, etc.)
+            // Mobile: Get short date format (DOM 31, LUN 1, etc.)
             const dayNames = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
             const dayName = dayNames[currentTodayDate.getDay()];
             const dayNum = currentTodayDate.getDate();
             const shortDate = `${dayName} ${dayNum}`;
             
+            // Desktop: Full format like the red strip (e.g., "Monday, October 21, 2024")
             if (desktopDateDisplay) {
-                desktopDateDisplay.textContent = shortDate;
+                const fullOptions = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                };
+                const fullDate = currentLanguage === 'es' 
+                    ? currentTodayDate.toLocaleDateString('es-ES', fullOptions)
+                    : currentTodayDate.toLocaleDateString('en-US', fullOptions);
+                desktopDateDisplay.textContent = fullDate;
             }
             
+            // Mobile: Keep short format between buttons
             if (mobileDateDisplay) {
                 mobileDateDisplay.textContent = shortDate;
             }
