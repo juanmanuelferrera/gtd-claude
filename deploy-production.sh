@@ -5,10 +5,7 @@
 
 echo "🚀 Deploying HyperFiler to PRODUCTION only..."
 
-# Ensure we're in the deploy directory
-cd "$(dirname "$0")"
-
-# Deploy to production (master branch only)
+# Deploy from root directory (no deploy subdirectory needed)
 echo "📦 Deploying to production environment..."
 npx wrangler pages deploy . --project-name=hyperfiler --branch=master
 
