@@ -3776,7 +3776,7 @@
 
     <!-- Task Edit Modal -->
     <div id="taskModal" class="modal" onclick="closeTaskModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 480px; margin: 2vh auto; background: transparent; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; padding: 0; max-height: none;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 480px; margin: 2vh auto; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; padding: 0; max-height: none;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #1877f2 0%, #42a5f5 100%); color: white; padding: 20px 24px; position: relative;">
@@ -3880,7 +3880,7 @@
 
     <!-- Custom Date/Time Picker Modal -->
     <div id="dateTimeModal" class="modal" onclick="closeDateTimeModal(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 500px; margin: 5vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 20px; position: relative;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 500px; margin: 5vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 20px; position: relative;">
             <h3 style="margin: 0 0 20px 0; color: #1877f2; text-align: center;">📅 Select Date & Time</h3>
             
             <!-- Date Calendar Grid -->
@@ -4130,7 +4130,7 @@
 
     <!-- Backup Selection Modal -->
     <div id="backupSelectionModal" class="modal" onclick="closeBackupSelection(event)" style="z-index: 1200;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px; margin: 5vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 80vh; overflow-y: auto;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px; margin: 5vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 80vh; overflow-y: auto;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
@@ -4197,7 +4197,7 @@
 
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal" onclick="closeSettings(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 1000px; margin: 1vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 98vh; overflow: hidden; display: flex; flex-direction: column;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 1000px; margin: 1vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 98vh; overflow: hidden; display: flex; flex-direction: column;">
             
             <!-- Settings Header with Tabs -->
             <div style="background: #1877f2; color: white; padding: 20px 20px 0 20px; border-radius: 12px 12px 0 0;">
@@ -9467,7 +9467,7 @@
                 <select onchange="updateTaskTime('${taskId}', this.value, event); hideMobileTaskModal()" 
                     onfocus="clearMobileModalTimeout()"
                     onblur="setMobileModalTimeout()"
-                    style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; background: white; margin-bottom: 12px;">
+                    style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; background: transparent; margin-bottom: 12px;">
                     ${times.map(time => `
                         <option value="${time}" ${(task.dueTime || '') === time ? 'selected' : ''}>
                             ${time || 'Sin hora específica'}
@@ -25032,8 +25032,8 @@
             
             // Populate mobile version with dropdown-style filters
             if (mobileContainer && sortedTemplates.length > 0) {
-                let mobileHtml = '<div style="display: flex; flex-direction: column; gap: 8px;">';
-                mobileHtml += '<select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: transparent;" onchange="handleMobileTemplateFilter(this.value)">';
+                let mobileHtml = '<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
+                mobileHtml += '<select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: transparent; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">';
                 mobileHtml += '<option value="">All tasks</option>';
                 
                 sortedTemplates.forEach(template => {
@@ -25043,9 +25043,7 @@
                 });
                 
                 mobileHtml += '</select>';
-                mobileHtml += '<div style="display: flex; gap: 6px; flex-wrap: wrap;">';
-                mobileHtml += `<button class="filter-btn filter-no-filter" onclick="showTodayNoFilterTasks()" title="Exit filter mode and return to normal view" style="font-size: 12px; padding: 4px 8px;">➡️ ${translateText('Exit Filters')}</button>`;
-                mobileHtml += '</div>';
+                mobileHtml += `<button class="filter-btn filter-no-filter" onclick="showTodayNoFilterTasks()" title="Exit filter mode and return to normal view" style="font-size: 12px; padding: 6px 8px; white-space: nowrap;">➡️ ${translateText('Exit Filters')}</button>`;
                 mobileHtml += '</div>';
                 
                 mobileContainer.innerHTML = mobileHtml;
