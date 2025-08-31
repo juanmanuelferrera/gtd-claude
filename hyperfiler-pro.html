@@ -3799,7 +3799,8 @@
                 <!-- Task Title -->
                 <div style="margin-bottom: 20px;">
                     <label for="editTaskTitle" style="display: block; font-weight: 600; color: #333; margin-bottom: 8px; font-size: 14px;"> </label>
-                    <input type="text" id="editTaskTitle" required placeholder="Enter task" style="width: 100%; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; outline: none;">
+                    <input type="text" id="editTaskTitle" required placeholder="Enter task" style="width: 100%; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; outline: none;" 
+                           onfocus="clearTaskModalTimeout()" onblur="setTaskModalTimeout()">
                     <div style="font-size: 11px; color: #6c757d; margin-top: 4px;">💡 Use patterns: "meeting tomorrow at 3pm" or "call john monday at 10am"</div>
                 </div>
                 
@@ -3840,7 +3841,8 @@
                 <!-- Notes -->
                 <div style="margin-bottom: 20px;">
                     <div style="display: flex; align-items: flex-start; gap: 8px;">
-                        <textarea id="editTaskNotes" rows="3" placeholder="Notes" style="flex: 1; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 14px; resize: vertical; min-height: 80px; outline: none;"></textarea>
+                        <textarea id="editTaskNotes" rows="3" placeholder="Notes" style="flex: 1; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 14px; resize: vertical; min-height: 80px; outline: none;" 
+                                  onfocus="clearTaskModalTimeout()" onblur="setTaskModalTimeout()"></textarea>
                         <div style="display: flex; flex-direction: column; gap: 4px;">
                             <!-- IMAGE FUNCTIONALITY DISABLED
                             <button type="button" onclick="triggerImageUpload()" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Add image">
@@ -9540,6 +9542,23 @@
             if (mobileModalAutoHideTimeout) {
                 clearTimeout(mobileModalAutoHideTimeout);
                 mobileModalAutoHideTimeout = null;
+            }
+        }
+        
+        // Task modal auto-close functions
+        let taskModalAutoHideTimeout = null;
+        
+        function setTaskModalTimeout() {
+            clearTaskModalTimeout();
+            taskModalAutoHideTimeout = setTimeout(() => {
+                closeTaskModal();
+            }, 4000);
+        }
+        
+        function clearTaskModalTimeout() {
+            if (taskModalAutoHideTimeout) {
+                clearTimeout(taskModalAutoHideTimeout);
+                taskModalAutoHideTimeout = null;
             }
         }
         
@@ -26478,6 +26497,8 @@
             // Show the modal
             document.getElementById('taskModal').style.display = 'block';
             
+            // Set auto-close timer for 4 seconds
+            setTaskModalTimeout();
             
             // Reinitialize natural language processing for this modal instance
             setTimeout(() => {
