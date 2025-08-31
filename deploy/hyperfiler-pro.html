@@ -75,31 +75,31 @@
         
         /* Active tab creates full background color effect */
         .container.today-active {
-            background: #ffffff;
+            background: transparent;
         }
         
         .container.week-active {
-            background: #ffffff;
+            background: transparent;
         }
         
         .container.calendar-active {
-            background: #ffffff;
+            background: transparent;
         }
         
         .container.all-active {
-            background: #ffffff;
+            background: transparent;
         }
         
         .container.repeat-active {
-            background: #ffffff;
+            background: transparent;
         }
         
         .container.undo-active {
-            background: #ffffff;
+            background: transparent;
         }
         
         .container.lists-active {
-            background: #ffffff;
+            background: transparent;
         }
 
         .nav-btn {
@@ -1702,17 +1702,18 @@
 
         /* Today View Time Blocks */
         .time-block {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 15px;
-            overflow: hidden;
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            margin-bottom: 10px;
+            overflow: visible;
+            border: none;
         }
 
         .time-block-header {
-            background: #f8f9fa;
-            padding: 12px 20px;
-            border-bottom: 1px solid #dee2e6;
+            background: transparent;
+            padding: 8px 0;
+            border-bottom: none;
             font-weight: 600;
             color: #495057;
             font-size: 14px;
@@ -1728,15 +1729,15 @@
         }
 
         .time-block-content {
-            padding: 15px 20px;
+            padding: 0;
         }
 
         .time-block-content.empty {
-            padding: 20px;
+            padding: 15px 0;
             text-align: center;
             color: #6c757d;
             font-style: italic;
-            background: #f8f9fa;
+            background: transparent;
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -1748,7 +1749,7 @@
 
         .time-block.empty-slot {
             opacity: 0.6;
-            border: 2px dashed #dee2e6;
+            border: none;
         }
 
         .time-block.empty-slot:hover {
