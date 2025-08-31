@@ -60,10 +60,14 @@
             h1 {
                 display: none;
             }
+            
+            .repeat-badge {
+                display: none;
+            }
         }
 
         .main-nav {
-            background: none;
+            background: #f0f2f5;
             margin-bottom: 0;
             padding: 2px 0;
             display: flex;
@@ -9531,31 +9535,51 @@
         let touchStartX = 0;
         let touchStartY = 0;
         let currentSwipeElement = null;
+        let isSwipeInProgress = false;
+        let swipeStartTime = 0;
         
         function handleTaskTouchStart(event) {
+            if (event.touches.length !== 1) return;
+            
             touchStartX = event.touches[0].clientX;
             touchStartY = event.touches[0].clientY;
             currentSwipeElement = event.currentTarget;
+            isSwipeInProgress = false;
+            swipeStartTime = Date.now();
         }
         
         function handleTaskTouchMove(event) {
-            if (!currentSwipeElement) return;
-            event.preventDefault();
+            if (!currentSwipeElement || event.touches.length !== 1) return;
             
             const touchX = event.touches[0].clientX;
+            const touchY = event.touches[0].clientY;
             const deltaX = touchX - touchStartX;
+            const deltaY = touchY - touchStartY;
             
-            // Only show swipe actions if horizontal swipe is significant
-            if (Math.abs(deltaX) > 30) {
-                currentSwipeElement.style.transform = `translateX(${deltaX * 0.3}px)`;
+            // Check if it's primarily horizontal swipe
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 15) {
+                if (!isSwipeInProgress) {
+                    isSwipeInProgress = true;
+                    event.preventDefault();
+                }
                 
-                // Show action hint
-                if (deltaX > 0) {
-                    // Swipe right - show delay to next day action
-                    currentSwipeElement.style.background = 'rgba(255, 193, 7, 0.1)';
-                } else {
-                    // Swipe left - show delete action  
-                    currentSwipeElement.style.background = 'rgba(220, 53, 69, 0.1)';
+                // Prevent scrolling during horizontal swipe
+                if (isSwipeInProgress) {
+                    event.preventDefault();
+                    
+                    // Limit transform to reasonable range
+                    const limitedDeltaX = Math.max(-120, Math.min(120, deltaX));
+                    currentSwipeElement.style.transform = `translateX(${limitedDeltaX * 0.4}px)`;
+                    currentSwipeElement.style.transition = 'none';
+                    
+                    // Show action hint
+                    if (deltaX > 30) {
+                        currentSwipeElement.style.background = 'rgba(255, 193, 7, 0.15)';
+                    } else if (deltaX < -30) {
+                        currentSwipeElement.style.background = 'rgba(220, 53, 69, 0.15)';
+                    } else {
+                        currentSwipeElement.style.background = '';
+                    }
                 }
             }
         }
@@ -9566,23 +9590,30 @@
             const touchX = event.changedTouches[0].clientX;
             const deltaX = touchX - touchStartX;
             const taskId = currentSwipeElement.dataset.taskId;
+            const swipeTime = Date.now() - swipeStartTime;
             
-            // Reset styles
+            // Reset styles with smooth transition
+            currentSwipeElement.style.transition = 'transform 0.3s ease, background 0.3s ease';
             currentSwipeElement.style.transform = '';
             currentSwipeElement.style.background = '';
             
-            // Trigger action if swipe is significant enough
-            if (Math.abs(deltaX) > 80) {
-                if (deltaX > 0) {
-                    // Swipe right - delay to next day
-                    delayTask(taskId, 1, event);
-                } else {
-                    // Swipe left - delete task
-                    quickDeleteTask(taskId, event);
-                }
+            // Only trigger if it was a real swipe (not just a tap)
+            if (isSwipeInProgress && Math.abs(deltaX) > 60 && swipeTime < 1000) {
+                setTimeout(() => {
+                    if (deltaX > 0) {
+                        // Swipe right - delay to next day
+                        delayTask(taskId, 1, event);
+                    } else {
+                        // Swipe left - delete task
+                        quickDeleteTask(taskId, event);
+                    }
+                }, 100);
             }
             
+            // Reset swipe state
             currentSwipeElement = null;
+            isSwipeInProgress = false;
+            swipeStartTime = 0;
         }
 
         // Hide modal when clicking outside
