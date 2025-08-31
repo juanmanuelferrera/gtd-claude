@@ -3947,44 +3947,50 @@
             </div>
         </div>
         
-        <!-- Mobile Version - Scrollers -->
-        <div class="modal-content mobile-only" onclick="event.stopPropagation()" style="max-width: 350px; margin: 15vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 20px;">
-            <h3 style="margin: 0 0 20px 0; color: #1877f2; text-align: center; font-size: 16px;">📅 When?</h3>
+        <!-- Mobile Version - Beautiful Scrollers -->
+        <div class="modal-content mobile-only" onclick="event.stopPropagation()" style="width: 90%; max-width: 380px; height: 50vh; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3); padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+            <!-- Header -->
+            <div style="background: rgba(255,255,255,0.1); padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2);">
+                <h3 style="margin: 0; color: white; font-size: 18px; font-weight: 600;">📅 Select Date & Time</h3>
+            </div>
             
-            <!-- Scrollable Date/Time Pickers -->
-            <div style="display: flex; gap: 8px; margin-bottom: 20px; height: 120px;">
+            <!-- Scrollable Pickers -->
+            <div style="flex: 1; padding: 20px; display: flex; gap: 12px;">
                 <!-- Day Picker -->
                 <div style="flex: 1;">
-                    <label style="display: block; font-size: 12px; color: #666; margin-bottom: 4px; text-align: center;">Day</label>
-                    <select id="mobileDayPicker" style="width: 100%; height: 100px; font-size: 14px; border: 1px solid #dee2e6; border-radius: 8px; background: white; padding: 4px;" size="5" onchange="updateMobileDateTime()">
+                    <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">DAY</label>
+                    <select id="mobileDayPicker" style="width: 100%; height: 140px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
+                            size="6" onchange="updateMobileDateTime()" onfocus="clearDateTimeModalTimeout()" onblur="setDateTimeModalTimeout()">
                         <!-- Days will be populated by JS -->
                     </select>
                 </div>
                 
                 <!-- Month Picker -->
                 <div style="flex: 1;">
-                    <label style="display: block; font-size: 12px; color: #666; margin-bottom: 4px; text-align: center;">Month</label>
-                    <select id="mobileMonthPicker" style="width: 100%; height: 100px; font-size: 14px; border: 1px solid #dee2e6; border-radius: 8px; background: white; padding: 4px;" size="5" onchange="updateMobileDateTime()">
-                        <option value="0">Jan</option>
-                        <option value="1">Feb</option>
-                        <option value="2">Mar</option>
-                        <option value="3">Apr</option>
-                        <option value="4">May</option>
-                        <option value="5">Jun</option>
-                        <option value="6">Jul</option>
-                        <option value="7">Aug</option>
-                        <option value="8">Sep</option>
-                        <option value="9">Oct</option>
-                        <option value="10">Nov</option>
-                        <option value="11">Dec</option>
+                    <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">MONTH</label>
+                    <select id="mobileMonthPicker" style="width: 100%; height: 140px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
+                            size="6" onchange="updateMobileDateTime()" onfocus="clearDateTimeModalTimeout()" onblur="setDateTimeModalTimeout()">
+                        <option value="0">JAN</option>
+                        <option value="1">FEB</option>
+                        <option value="2">MAR</option>
+                        <option value="3">APR</option>
+                        <option value="4">MAY</option>
+                        <option value="5">JUN</option>
+                        <option value="6">JUL</option>
+                        <option value="7">AUG</option>
+                        <option value="8">SEP</option>
+                        <option value="9">OCT</option>
+                        <option value="10">NOV</option>
+                        <option value="11">DEC</option>
                     </select>
                 </div>
                 
                 <!-- Hour Picker -->
                 <div style="flex: 1;">
-                    <label style="display: block; font-size: 12px; color: #666; margin-bottom: 4px; text-align: center;">Hour</label>
-                    <select id="mobileHourPicker" style="width: 100%; height: 100px; font-size: 14px; border: 1px solid #dee2e6; border-radius: 8px; background: white; padding: 4px;" size="5" onchange="updateMobileDateTime()">
-                        <option value="">No time</option>
+                    <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">TIME</label>
+                    <select id="mobileHourPicker" style="width: 100%; height: 140px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
+                            size="6" onchange="updateMobileDateTime()" onfocus="clearDateTimeModalTimeout()" onblur="setDateTimeModalTimeout()">
+                        <option value="">--</option>
                         <option value="06:00">6 AM</option>
                         <option value="07:00">7 AM</option>
                         <option value="08:00">8 AM</option>
@@ -4007,13 +4013,14 @@
             </div>
             
             <!-- Selected Display -->
-            <div id="mobileSelectedDisplay" style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; color: #333; font-weight: 600;">
-                Select date and time
-            </div>
-            
-            <div style="display: flex; gap: 8px;">
-                <button onclick="closeDateTimeModal()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">Cancel</button>
-                <button onclick="applyMobileDateTime()" style="flex: 1; background: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">Apply</button>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
+                <div id="mobileSelectedDisplay" style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 12px; text-align: center; color: white; font-weight: 600; font-size: 14px; backdrop-filter: blur(10px);">
+                    Select date and time
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 15px;">
+                    <button onclick="closeDateTimeModal()" style="flex: 1; background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; backdrop-filter: blur(10px);">Cancel</button>
+                    <button onclick="applyMobileDateTime()" style="flex: 1; background: rgba(255,255,255,0.9); color: #667eea; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(255,255,255,0.3);">Apply</button>
+                </div>
             </div>
         </div>
     </div>
@@ -9604,6 +9611,23 @@
             }
         }
         
+        // Date/Time modal auto-close functions
+        let dateTimeModalAutoHideTimeout = null;
+        
+        function setDateTimeModalTimeout() {
+            clearDateTimeModalTimeout();
+            dateTimeModalAutoHideTimeout = setTimeout(() => {
+                closeDateTimeModal();
+            }, 4000);
+        }
+        
+        function clearDateTimeModalTimeout() {
+            if (dateTimeModalAutoHideTimeout) {
+                clearTimeout(dateTimeModalAutoHideTimeout);
+                dateTimeModalAutoHideTimeout = null;
+            }
+        }
+        
         // Get current displayed date for today view
         function getCurrentTodayDate() {
             return new Date(currentTodayDate);
@@ -12970,6 +12994,9 @@
             console.log('Modal element:', modal);
             modal.style.display = 'block';
             console.log('Modal should be visible now');
+            
+            // Set auto-close timer for 4 seconds
+            setDateTimeModalTimeout();
         }
 
         // Generate calendar grid
