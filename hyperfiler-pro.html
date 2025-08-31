@@ -219,8 +219,8 @@
             
             .desktop-sidebar {
                 width: 220px;
-                background: var(--things-surface);
-                border-right: 1px solid var(--things-border);
+                background: #fbfbfb;
+                border-right: 1px solid #e8e8e8;
                 padding: 20px 0;
                 position: fixed;
                 height: 100vh;
@@ -3452,50 +3452,43 @@
             
             <div class="main-nav">
             <button class="nav-btn active" onclick="showView('today')" id="nav-today" tabindex="1">
-                🔥 Today
+                Today
             </button>
             <button class="nav-btn" onclick="showView('week')" id="nav-week" tabindex="2" data-translate="Week">
-                📅 Week
+                Week
             </button>
             <button class="nav-btn" onclick="showView('calendar')" id="nav-calendar" tabindex="3" data-translate="Month">
-                🗓️ Month
+                Month
             </button>
             <button class="nav-btn" onclick="showView('all')" id="nav-all" tabindex="4">
-                🔍 Search
+                Search
             </button>
             <button class="nav-btn" onclick="showView('lists')" id="nav-lists" tabindex="5">
-                📝 Lists
+                Lists
             </button>
             <button class="nav-btn" onclick="showView('repeat')" id="nav-repeat" tabindex="6">
-                🔄 Repeat
+                Repeat
             </button>
             <button class="nav-btn" onclick="showView('undo')" id="nav-undo" tabindex="7">
-                ↶ Undo
+                Undo
             </button>
-            <button class="nav-btn" onclick="openSettings()" id="nav-settings" tabindex="8" style="background: #666; color: white;">
-                ⚙️ Settings
+            <button class="nav-btn" onclick="openSettings()" id="nav-settings" tabindex="8">
+                Settings
             </button>
             </div>
             
             <!-- Sidebar Action Buttons -->
             <div style="padding: 16px; border-top: 1px solid var(--things-border); margin-top: 20px;">
-                <!-- First Line: Import JSON + Export Text -->
-                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                    <button onclick="openTaskImportModal()" style="flex: 1; background: white; border: 1px solid var(--things-border); color: var(--things-text); padding: 12px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
-                        📥 Import JSON
+                <!-- Action Buttons -->
+                <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
+                    <button onclick="openTaskImportModal()" class="action-btn">
+                        Import
                     </button>
-                    <button onclick="exportAllTasks()" style="flex: 1; background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 12px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
-                        📄 Export Text
+                    <button onclick="exportAllTasks()" class="action-btn">
+                        Export
                     </button>
-                </div>
-                
-                <!-- Second Line: Import JSON Backup + Quick Backup -->
-                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                    <button onclick="openTaskImportModal()" style="flex: 1; background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 12px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
-                        📥 Import JSON Backup
-                    </button>
-                    <button onclick="createEmergencyBackup()" style="flex: 1; background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 12px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
-                        💾 Quick Backup
+                    <button onclick="createEmergencyBackup()" class="action-btn">
+                        Backup
                     </button>
                 </div>
                 
