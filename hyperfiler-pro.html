@@ -5276,6 +5276,11 @@
             translateUI();
             updateLanguageButtonStyles();
             updateHeaderLanguageButton();
+            
+            // CRITICAL: Always restore emojis after language changes
+            setTimeout(() => {
+                restoreMobileNavEmojis();
+            }, 100);
         }
         
         function toggleLanguageHeader() {
@@ -5751,29 +5756,43 @@
         }
         
         function restoreMobileNavEmojis() {
-            setTimeout(() => {
+            const todayIcon = document.querySelector('#mobileNavToday .mobile-nav-icon');
+            if (todayIcon) {
+                todayIcon.textContent = '🔥';
+                todayIcon.innerHTML = '🔥'; // Force both textContent and innerHTML
+            }
+            const addIcon = document.querySelector('#mobileBottomAddBtn .mobile-nav-icon');
+            if (addIcon) {
+                addIcon.textContent = '➕';
+                addIcon.innerHTML = '➕';
+            }
+            const weekIcon = document.querySelector('#mobileNavWeek .mobile-nav-icon');
+            if (weekIcon) {
+                weekIcon.textContent = '📅';
+                weekIcon.innerHTML = '📅';
+            }
+            const listsIcon = document.querySelector('#mobileNavLists .mobile-nav-icon');
+            if (listsIcon) {
+                listsIcon.textContent = '📝';
+                listsIcon.innerHTML = '📝';
+            }
+            const moreIcon = document.querySelector('#mobileNavMore .mobile-nav-icon');
+            if (moreIcon) {
+                moreIcon.textContent = '⋯';
+                moreIcon.innerHTML = '⋯';
+            }
+            console.log('🔥 All mobile nav emojis restored - FORCED');
+        }
+        
+        // ULTRA-ROBUST: Monitor and restore emojis continuously
+        function startEmojiMonitor() {
+            setInterval(() => {
                 const todayIcon = document.querySelector('#mobileNavToday .mobile-nav-icon');
-                if (todayIcon) {
-                    todayIcon.textContent = '🔥';
+                if (todayIcon && todayIcon.textContent !== '🔥') {
+                    console.log('🚨 Fire emoji missing! Restoring...');
+                    restoreMobileNavEmojis();
                 }
-                const addIcon = document.querySelector('#mobileBottomAddBtn .mobile-nav-icon');
-                if (addIcon) {
-                    addIcon.textContent = '➕';
-                }
-                const weekIcon = document.querySelector('#mobileNavWeek .mobile-nav-icon');
-                if (weekIcon) {
-                    weekIcon.textContent = '📅';
-                }
-                const listsIcon = document.querySelector('#mobileNavLists .mobile-nav-icon');
-                if (listsIcon) {
-                    listsIcon.textContent = '📝';
-                }
-                const moreIcon = document.querySelector('#mobileNavMore .mobile-nav-icon');
-                if (moreIcon) {
-                    moreIcon.textContent = '⋯';
-                }
-                console.log('🔥 All mobile nav emojis restored');
-            }, 50);
+            }, 2000); // Check every 2 seconds
         }
 
         // Load preferred language on startup
@@ -8573,6 +8592,13 @@
             
             initializationInProgress = true;
             
+            // CRITICAL: Ensure mobile nav emojis are present on page load
+            setTimeout(() => {
+                restoreMobileNavEmojis();
+                // Start continuous emoji monitoring
+                startEmojiMonitor();
+            }, 100);
+            
             // ======= AUTHENTICATION RESTORATION AFTER REDIRECT =======
             // Restore authentication if this page was reached via redirect from pages.dev
             try {
@@ -9292,6 +9318,9 @@
             // Update mobile navigation active state
             const mobileNavButtons = document.querySelectorAll('.mobile-nav-btn');
             mobileNavButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // CRITICAL: Restore emojis after any navigation change
+            restoreMobileNavEmojis();
             
             const activeBtn = document.getElementById(`mobileNav${viewName.charAt(0).toUpperCase() + viewName.slice(1)}`);
             if (activeBtn) {
@@ -13534,6 +13563,10 @@
             // Re-translate UI after view changes to handle dynamic content
             setTimeout(() => {
                 translateUI();
+                // CRITICAL: Restore emojis after translations
+                setTimeout(() => {
+                    restoreMobileNavEmojis();
+                }, 50);
             }, 50);
         }
 
