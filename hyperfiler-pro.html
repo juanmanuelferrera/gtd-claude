@@ -181,32 +181,57 @@
             transition: background 0.3s ease;
         }
 
-        /* Desktop Sidebar Button Styling */
+        /* Desktop Sidebar Button Styling - Professional Minimalist */
         @media (min-width: 769px) {
             .nav-btn {
-                justify-content: flex-start; /* Left-align for sidebar */
+                justify-content: flex-start;
                 width: 100%;
                 background: transparent;
-                color: var(--things-text);
-                font-weight: 500;
-                padding: 24px 16px; /* Double height from 12px to 24px */
-                border-radius: 8px;
-                font-size: 16px; /* Slightly larger font */
-                margin-bottom: 4px; /* More spacing */
+                color: #4a4a4a;
+                font-weight: 400;
+                padding: 12px 20px;
+                border-radius: 4px;
+                font-size: 14px;
+                margin-bottom: 1px;
                 flex: unset;
                 text-align: left;
-                min-height: 56px; /* Ensure generous height */
+                min-height: 40px;
+                border: none;
+                transition: all 0.12s ease;
             }
             
             .nav-btn:hover {
-                background: var(--things-shadow);
-                transform: none; /* No lift in sidebar */
+                background: #f2f2f2;
+                color: #2a2a2a;
+                transform: none;
             }
             
             .nav-btn.active {
-                background: var(--things-accent);
-                color: white;
-                font-weight: 600;
+                background: #e8e8e8;
+                color: #1a1a1a;
+                font-weight: 500;
+                border-left: 3px solid #666;
+                padding-left: 17px;
+            }
+
+            .action-btn {
+                width: 100%;
+                background: #f8f8f8;
+                color: #555;
+                font-weight: 400;
+                padding: 10px 20px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 13px;
+                text-align: left;
+                cursor: pointer;
+                transition: all 0.12s ease;
+            }
+            
+            .action-btn:hover {
+                background: #f0f0f0;
+                border-color: #bbb;
+                color: #333;
             }
         }
 
@@ -219,9 +244,9 @@
             
             .desktop-sidebar {
                 width: 220px;
-                background: #fbfbfb;
-                border-right: 1px solid #e8e8e8;
-                padding: 20px 0;
+                background: #f9f9f9;
+                border-right: 1px solid #ddd;
+                padding: 16px 0;
                 position: fixed;
                 height: 100vh;
                 overflow-y: auto;
