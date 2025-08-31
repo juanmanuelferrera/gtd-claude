@@ -9465,6 +9465,8 @@
             modalButtons.innerHTML = `
                 <div class="mobile-task-dropdown-header">⏰ Cambiar Hora</div>
                 <select onchange="updateTaskTime('${taskId}', this.value, event); hideMobileTaskModal()" 
+                    onfocus="clearMobileModalTimeout()"
+                    onblur="setMobileModalTimeout()"
                     style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; background: white; margin-bottom: 12px;">
                     ${times.map(time => `
                         <option value="${time}" ${(task.dueTime || '') === time ? 'selected' : ''}>
@@ -9476,19 +9478,19 @@
                     style="border: none; border-radius: 8px; background: #ffc107 !important; color: #333 !important; 
                            font-size: 16px; font-weight: 500; cursor: pointer; width: 100%; height: 50px; margin-bottom: 8px;
                            display: flex; align-items: center; justify-content: center;">
-                    +1D
+                    + 1 Day
                 </button>
                 <button onclick="delayTask('${taskId}', 7, event); hideMobileTaskModal()" 
                     style="border: none; border-radius: 8px; background: #007bff !important; color: white !important; 
                            font-size: 16px; font-weight: 500; cursor: pointer; width: 100%; height: 50px; margin-bottom: 8px;
                            display: flex; align-items: center; justify-content: center;">
-                    +1W
+                    + 1 Week
                 </button>
                 <button onclick="delayTask('${taskId}', 30, event); hideMobileTaskModal()" 
                     style="border: none; border-radius: 8px; background: #28a745 !important; color: white !important; 
                            font-size: 16px; font-weight: 500; cursor: pointer; width: 100%; height: 50px; margin-bottom: 8px;
                            display: flex; align-items: center; justify-content: center;">
-                    +1M
+                    + 1 Month
                 </button>
             `;
             
@@ -9500,9 +9502,23 @@
             modal.classList.add('show');
             
             // Auto-hide after 4 seconds
-            setTimeout(() => {
+            setMobileModalTimeout();
+        }
+        
+        let mobileModalAutoHideTimeout = null;
+        
+        function setMobileModalTimeout() {
+            clearMobileModalTimeout();
+            mobileModalAutoHideTimeout = setTimeout(() => {
                 hideMobileTaskModal();
             }, 4000);
+        }
+        
+        function clearMobileModalTimeout() {
+            if (mobileModalAutoHideTimeout) {
+                clearTimeout(mobileModalAutoHideTimeout);
+                mobileModalAutoHideTimeout = null;
+            }
         }
         
         // Touch swipe variables
