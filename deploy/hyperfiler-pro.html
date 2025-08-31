@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v2.0.8</title>
+    <title>⚡ HyperFiler Pro 🚀 - v2.1.0</title>
     
     <!-- DEBUG: Early error catching -->
     <script>
-        console.log('🚀 HyperFiler Pro v2.0.8 - Starting initialization...');
+        console.log('🚀 HyperFiler Pro v2.1.0 - Starting initialization...');
         window.addEventListener('error', function(e) {
             console.error('❌ UNCAUGHT ERROR:', e.message, 'at line', e.lineno, 'column', e.colno);
             console.error('Stack:', e.error?.stack);
@@ -3814,7 +3814,7 @@
                         <div style="margin-bottom: 10px;">
                             <strong>Plan:</strong> <span style="color: #007bff;">HyperFiler Pro</span>
                         </div>
-                        <button class="btn btn-secondary" onclick="window.location.href='login.html'" style="padding: 8px 16px; background: #dc3545; border-color: #dc3545; color: white; margin-top: 10px;">🚪 Logout</button>
+                        <button class="btn btn-secondary" onclick="window.location.href='/login'" style="padding: 8px 16px; background: #dc3545; border-color: #dc3545; color: white; margin-top: 10px;">🚪 Logout</button>
                     </div>
                 </div>
             </div>
@@ -7301,13 +7301,13 @@
                     title: '🔐 Login Required',
                     message: 'Please log in to access HyperFiler Pro.',
                     action: 'Login',
-                    url: 'login.html'
+                    url: '/login'
                 },
                 invalid: {
                     title: '❌ Session Expired',
                     message: 'Your session has expired. Please log in again.',
                     action: 'Login',
-                    url: 'login.html'
+                    url: '/login'
                 },
                 subscription: {
                     title: '💳 Subscription Required',
@@ -7325,7 +7325,7 @@
                     title: '⚠️ Authentication Error',
                     message: 'Unable to verify your account. Please try again.',
                     action: 'Login',
-                    url: 'login.html'
+                    url: '/login'
                 }
             };
 
@@ -7592,7 +7592,7 @@
             
             // SECURITY: Clear all authentication data
             clearAuthData();
-            window.location.href = 'login.html';
+            window.location.href = '/login';
         }
 
         // Show soft reminders (Reaper-style)
@@ -8111,17 +8111,8 @@
             
             // Removed aggressive 5-minute auto-sync to prevent duplication
             
-            // Debounced sync on page visibility change (max once per minute)
-            let lastVisibilitySync = 0;
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden && window.currentUser) {
-                    const now = Date.now();
-                    if (now - lastVisibilitySync > 60000) { // 1 minute minimum
-                        lastVisibilitySync = now;
-                        uploadAllTasks();
-                    }
-                }
-            });
+            // REMOVED DANGEROUS UPLOAD: Don't upload on visibility change - could be stale data
+            // The second visibility handler below handles proper download
 
             // Debounced window focus handler (max once per minute)
             let lastFocusRefresh = 0;
@@ -8328,10 +8319,8 @@
 
         function refreshCurrentViewState() {
             try {
-                // Sync tasks first to get latest data (only if properly authenticated)
-                if (window.currentUser?.user?.id && window.currentUser?.token && !window.justModifiedTasks) {
-                    smartUploadTasks();
-                }
+                // REMOVED DANGEROUS UPLOAD: Don't upload on focus - could be stale data
+                // Only download fresh data when browser comes online
 
                 // Restore saved state if available
                 const savedState = sessionStorage.getItem('hyperFilerViewState');
@@ -8868,6 +8857,41 @@
                     showView('stats'); // Statistics view
                 }
                 
+                // ⚡ BULK ACTION SHORTCUTS: Single-key actions for selected tasks
+                if (getSelectedTaskIds().length > 0 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+                    // Only trigger if we have selected tasks and no modifier keys
+                    if (event.key === 'd' || event.key === 'D') {
+                        event.preventDefault();
+                        deleteSelectedTasks();
+                        showInlineNotification(`⚡ Deleted ${getSelectedTaskIds().length} tasks`, 'success');
+                        return;
+                    }
+                    if (event.key === '1') {
+                        event.preventDefault();
+                        delaySelectedTasks(1);
+                        showInlineNotification(`⚡ Delayed ${getSelectedTaskIds().length} tasks by 1 day`, 'success');
+                        return;
+                    }
+                    if (event.key === '7') {
+                        event.preventDefault();
+                        delaySelectedTasks(7);
+                        showInlineNotification(`⚡ Delayed ${getSelectedTaskIds().length} tasks by 1 week`, 'success');
+                        return;
+                    }
+                    if (event.key === '3') {
+                        event.preventDefault();
+                        delaySelectedTasks(30);
+                        showInlineNotification(`⚡ Delayed ${getSelectedTaskIds().length} tasks by 1 month`, 'success');
+                        return;
+                    }
+                    if (event.key === 'Escape') {
+                        event.preventDefault();
+                        clearAllSelections();
+                        showInlineNotification('Selection cleared', 'info');
+                        return;
+                    }
+                }
+                
                 // Handle Enter key in task modal - DISABLED (handled by modal-specific handlers)
                 // Removed global Enter handler to prevent conflicts with modal handlers
                 
@@ -9066,13 +9090,13 @@
             // Debounced sync on page visibility change (max once per minute)
             let lastVisibilitySync = 0;
             document.addEventListener('visibilitychange', () => {
-                if (!document.hidden && window.currentUser && !window.justModifiedTasks) {
+                if (!document.hidden && window.currentUser) {
                     const now = Date.now();
                     if (now - lastVisibilitySync > 10000) { // 10 seconds minimum for testing
                         console.log('📥 Visibility sync - smart downloading tasks, lists, and templates...');
                         lastVisibilitySync = now;
-                        smartDownloadTasks().catch(error => {
-                            console.warn('📥 Visibility smart download failed:', error);
+                        downloadTasksFromCloud().catch(error => {
+                            console.warn('📥 Visibility tasks download failed:', error);
                         });
                         downloadAllLists().catch(error => {
                             console.warn('📥 Visibility lists download failed:', error);
@@ -9087,7 +9111,7 @@
             // Debounced window focus handler (max once per minute)  
             let lastFocusRefresh = 0;
             window.addEventListener('focus', () => {
-                if (window.currentUser && !window.justModifiedTasks) {
+                if (window.currentUser) {
                     // 🔒 CRITICAL: Check if backup restore is in progress
                     if (window.backupRestoreInProgress || window.justRestoredBackup || window.skipNextDownload) {
                         console.log('🔒 FOCUS SYNC: Blocked - backup restore in progress');
@@ -9098,8 +9122,8 @@
                     if (now - lastFocusRefresh > 10000) { // 10 seconds minimum for testing
                         console.log('📥 Focus sync - smart downloading tasks and lists...');
                         lastFocusRefresh = now;
-                        smartDownloadTasks().catch(error => {
-                            console.warn('📥 Focus smart download failed:', error);
+                        downloadTasksFromCloud().catch(error => {
+                            console.warn('📥 Focus tasks download failed:', error);
                         });
                         downloadAllLists().catch(error => {
                             console.warn('📥 Focus lists download failed:', error);
@@ -9112,10 +9136,10 @@
             
             // Optional: Backup periodic sync (less frequent than old polling)
             setInterval(() => {
-                if (!window.justModifiedTasks && navigator.onLine && window.currentUser) {
-                    console.log('📥 Backup periodic smart sync...');
-                    smartDownloadTasks().catch(error => {
-                        console.warn('📥 Backup smart sync failed:', error);
+                if (navigator.onLine && window.currentUser) {
+                    console.log('📥 Backup periodic sync...');
+                    pullLatestFromCloud(false).catch(error => {
+                        console.warn('📥 Backup tasks sync failed:', error);
                     });
                     downloadAllLists().catch(error => {
                         console.warn('📥 Backup lists sync failed:', error);
@@ -9566,101 +9590,6 @@
             }
         }
 
-        // Upload all tasks to server (Simple Sync pattern)
-        window.uploadAllTasks = async function uploadAllTasks() {
-                    // Simple sync system - reliable and proven
-            // User session check completed
-            
-            // Try to get token from localStorage as fallback
-            const fallbackToken = localStorage.getItem('authToken');
-            // Fallback token check completed
-            
-            // CRITICAL STALE BROWSER PROTECTION: Multiple layers of protection
-            
-            // EXCEPTION: Allow uploads during backup restore (user intentionally restored data)
-            if (window.justRestoredBackup) {
-                console.log('✅ BACKUP RESTORE: Upload allowed - user explicitly restored this data');
-            } else {
-                // First check: Explicit stale browser flags
-                if (window.staleBrowserDetected || window.skipInitialUpload) {
-                    console.error('🚨 BLOCKED: Upload blocked - stale browser protection active');
-                    console.error('🛡️ Stale browser still downloading fresh data from cloud');
-                    return;
-                }
-            }
-            
-            // Second check: Time-based stale detection (legacy protection)
-            const lastSyncTime = localStorage.getItem('lastSyncTime');
-            const currentTime = Date.now();
-            const timeSinceLastSync = currentTime - (lastSyncTime ? parseInt(lastSyncTime) : 0);
-            
-            if (timeSinceLastSync > 300000) { // 5 minutes (increased from 3 minutes)
-                console.error('🚨 BLOCKED: Upload attempt from stale browser detected (time-based)');
-                console.error('🛡️ Preventing potential database overwrite from old tab');
-                console.error('⏰ Last sync was', Math.floor(timeSinceLastSync / 1000), 'seconds ago');
-                throw new Error('Upload blocked - browser data is stale. Please refresh the page.');
-            }
-            
-            if (!window.currentUser?.user?.id) {
-                console.log('⚠️ No user ID available for upload');
-                // User structure validated
-                return;
-            }
-            
-            const authToken = window.currentUser?.token || fallbackToken;
-            if (!authToken) {
-                console.log('⚠️ No auth token available for upload (neither in currentUser nor localStorage)');
-                            // Token validation completed
-                return;
-            }
-            
-            console.log('✅ Using auth token from:', window.currentUser?.token ? 'currentUser' : 'localStorage');
-            
-            try {
-                console.log('📤 Uploading', tasks.length, 'tasks to server...');
-                
-                const tasksToUpload = tasks.map(cleanTaskForStorage);
-                            // Task upload preparation completed
-                
-                const requestBody = {
-                    tasks: tasksToUpload,
-                    userId: window.currentUser.user.id
-                };
-                            // Request body prepared
-                
-                const response = await fetch(`${API_BASE}/tasks`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify(requestBody)
-                });
-                
-                if (!response.ok) {
-                    console.log('❌ Upload failed with status:', response.status);
-                    console.log('❌ Response headers:', [...response.headers.entries()]);
-                    
-                    // Try to get error details from response
-                    try {
-                        const errorText = await response.text();
-                        console.log('❌ Error response body:', errorText);
-                    } catch (e) {
-                        console.log('❌ Could not read error response');
-                    }
-                    
-                    throw new Error(`Upload failed: ${response.status}`);
-                }
-                
-                console.log('✅ Tasks uploaded successfully');
-                showSyncStatus('Synced', 'success');
-                
-            } catch (error) {
-                console.error('❌ Upload error:', error);
-                showSyncStatus('Sync failed', 'error');
-                throw error;
-            }
-        };
         
         // Generate unique device ID for conflict resolution
         function generateDeviceId() {
@@ -9734,13 +9663,93 @@
             }
         }
 
+        // EXACT COPY of uploadAllLists for Tasks
+        async function uploadAllTasks() {
+            // Tasks sync using simple pattern (EXACT COPY of uploadAllLists)
+            console.log('🔄 uploadAllTasks called - using simple sync pattern');
+            
+            // CRITICAL STALE BROWSER PROTECTION: Check flags first
+            // EXCEPTION: Allow uploads during backup restore (user intentionally restored data)
+            if (window.justRestoredBackup) {
+                console.log('✅ BACKUP RESTORE: Tasks upload allowed - user explicitly restored this data');
+            } else {
+                if (window.staleBrowserDetected || window.skipInitialUpload) {
+                    console.error('🚨 BLOCKED: Tasks upload blocked - stale browser protection active');
+                    console.error('🛡️ Stale browser still downloading fresh data from cloud');
+                    return;
+                }
+            }
+            
+            if (!window.currentUser?.user?.id) {
+                console.log('⚠️ No user ID available for tasks upload');
+                return;
+            }
+            
+            const authToken = window.currentUser?.token || localStorage.getItem('authToken');
+            if (!authToken) {
+                console.log('⚠️ No auth token available for tasks upload');
+                return;
+            }
+            
+            try {
+                console.log('📤 Uploading', tasks.length, 'tasks to server...');
+                
+                const requestBody = {
+                    tasks: tasks,
+                    userId: window.currentUser.user.id
+                };
+                
+                const response = await fetch(`${API_BASE}/tasks/sync`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (!response.ok) {
+                    console.log('❌ Tasks upload failed with status:', response.status);
+                    const errorText = await response.text();
+                    console.error('❌ Tasks upload error details:', errorText);
+                    throw new Error(`Tasks upload failed: ${response.status} ${errorText}`);
+                }
+                
+                const result = await response.json();
+                console.log('✅ Tasks uploaded successfully:', result);
+                window.lastUploadTime = Date.now();
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Error uploading tasks to server:', error);
+                showSyncStatus('Tasks sync failed', 'error');
+                return false;
+            }
+        }
+
+        // Make uploadAllTasks globally accessible (ensure it's defined)
+        if (typeof uploadAllTasks === 'function') {
+            window.uploadAllTasks = uploadAllTasks;
+            console.log('✅ uploadAllTasks assigned to window');
+        } else {
+            console.error('❌ uploadAllTasks function not found during assignment');
+        }
+
         // SIMPLE DOWNLOAD: Get all lists from server (USING PROVEN TASKS METHOD WITH SAFETY)
         async function downloadAllLists() {
             if (!window.currentUser?.user?.id) return;
             
-            // MANDATORY REFRESH: Override protection for stale browser
-            if (window.forceMandatoryRefresh || window.staleBrowserMode) {
-                console.log('🚨 MANDATORY REFRESH: Forcing lists download despite protection flags');
+            // FRESH BROWSER: Override protection for fresh browsers (no sync history)
+            const lastSyncTime = localStorage.getItem('lastSyncTime');
+            const isFreshBrowser = !lastSyncTime || lastSyncTime === '0' || lastSyncTime === 'null';
+            
+            // MANDATORY REFRESH: Override protection for stale browser or fresh browser
+            if (window.forceMandatoryRefresh || window.staleBrowserMode || isFreshBrowser) {
+                if (isFreshBrowser) {
+                    console.log('🆕 FRESH BROWSER: Forcing lists download despite protection flags');
+                } else {
+                    console.log('🚨 MANDATORY REFRESH: Forcing lists download despite protection flags');
+                }
             } else {
                 // 🔒 BACKUP RESTORE PROTECTION - highest priority
                 if (window.justRestoredBackup || window.skipNextDownload || window.backupRestoreInProgress) {
@@ -9748,10 +9757,7 @@
                     return;
                 }
                 
-                // Don't download if we just modified lists or tasks to prevent overwriting
-                if (window.justModifiedLists || window.justModifiedTasks) {
-                    return;
-                }
+                // Allow downloads - let individual protection flags handle timing
             }
             
             try {
@@ -9915,9 +9921,17 @@
                 return;
             }
             
-            // MANDATORY REFRESH: Override protection for stale browser
-            if (window.forceMandatoryRefresh) {
-                console.warn('🚨 MANDATORY REFRESH: Forcing download despite protection flags');
+            // FRESH BROWSER: Override protection for fresh browsers (no sync history)
+            const lastSyncTime = localStorage.getItem('lastSyncTime');
+            const isFreshBrowser = !lastSyncTime || lastSyncTime === '0' || lastSyncTime === 'null';
+            
+            // MANDATORY REFRESH: Override protection for stale browser or fresh browser
+            if (window.forceMandatoryRefresh || isFreshBrowser) {
+                if (isFreshBrowser) {
+                    console.warn('🆕 FRESH BROWSER: Forcing download despite protection flags');
+                } else {
+                    console.warn('🚨 MANDATORY REFRESH: Forcing download despite protection flags');
+                }
                 console.warn('🛡️ This overrides normal protection to prevent database conflicts');
             } else {
                 // 🔒 BACKUP RESTORE PROTECTION - highest priority
@@ -10712,6 +10726,8 @@
         }
 
 
+        let syncInProgress = false; // Declare missing variable
+        
         async function pullLatestFromCloud(forceSync = false) {
             console.log('🔧 pullLatestFromCloud called with forceSync:', forceSync);
             if (syncInProgress) return;
@@ -10839,10 +10855,22 @@
         }
 
         async function downloadTasksFromCloud() {
-            console.log('☁️ Downloading all tasks from cloud...');
+            if (!window.currentUser?.user?.id) return;
+            
+            // MANDATORY REFRESH: Override protection for stale browser
+            if (window.forceMandatoryRefresh || window.staleBrowserMode) {
+                console.log('🚨 MANDATORY REFRESH: Forcing tasks download despite protection flags');
+            } else {
+                // 🔒 BACKUP RESTORE PROTECTION - highest priority
+                if (window.justRestoredBackup || window.skipNextDownload || window.backupRestoreInProgress) {
+                    console.log('🔒 BLOCKED: Tasks download skipped - backup restore in progress');
+                    return;
+                }
+                
+                // Allow downloads - let individual protection flags handle timing
+            }
             
             try {
-                console.log('☁️ Downloading with httpOnly cookie authentication');
                 
                 const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
 
@@ -10851,45 +10879,52 @@
                 
                 if (response.ok) {
                     const data = await response.json();
-                    const cloudTasks = data.tasks || [];
+                    const serverTasks = data.tasks || [];
                     
-                    console.log(`📦 Downloaded ${cloudTasks.length} tasks from cloud`);
-                    
-                    if (cloudTasks.length > 0) {
-                        // Merge with local tasks (cloud takes precedence for conflicts)
-                        const mergedTasks = [...tasks];
-                        let hasUpdates = false;
+                    // MANDATORY REFRESH: Direct replacement with server data (skip all safety checks)
+                    if (window.forceMandatoryRefresh || window.staleBrowserMode) {
+                        console.log('🚨 MANDATORY REFRESH: Directly replacing tasks with server data (no safety checks)');
+                        tasks = serverTasks;
+                        localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                        sortTasks();
+                        renderCurrentView();
+                    } else {
+                        // PROVEN SAFETY: Prevent data loss when one side has empty data (normal sync only)
+                        const localTaskCount = tasks.length;
+                        const serverTaskCount = serverTasks.length;
                         
-                        cloudTasks.forEach(cloudTask => {
-                            const existingIndex = mergedTasks.findIndex(t => t.id === cloudTask.id);
-                            if (existingIndex >= 0) {
-                                // Update existing task if cloud version is newer
-                                const localTask = mergedTasks[existingIndex];
-                                const cloudUpdated = new Date(cloudTask.updated_at || cloudTask.updatedAt || cloudTask.createdAt);
-                                const localUpdated = new Date(localTask.updated_at || localTask.updatedAt || localTask.createdAt);
-                                
-                                if (cloudUpdated > localUpdated) {
-                                    // Preserve local properties that might not be in cloud version
-                                    mergedTasks[existingIndex] = {
-                                        ...cloudTask,
-                                        // Preserve isEvent property if it exists locally but not in cloud
-                                        isEvent: cloudTask.isEvent !== undefined ? cloudTask.isEvent : localTask.isEvent
-                                    };
-                                    hasUpdates = true;
-                                }
-                            } else {
-                                // New task from cloud
-                                mergedTasks.push(cloudTask);
-                                hasUpdates = true;
+                        // Only log if there's a significant difference or potential issue
+                        if (Math.abs(localTaskCount - serverTaskCount) > 2 || localTaskCount === 0 || serverTaskCount === 0) {
+                            console.log('📥 TASKS SAFETY CHECK: Local tasks:', localTaskCount, 'Server tasks:', serverTaskCount);
+                        }
+                        
+                        // Safety rule: If server is empty but local has tasks, upload local to server instead
+                        if (serverTaskCount === 0 && localTaskCount > 0) {
+                            console.log('🛡️ TASKS SAFETY: Server is empty but local has tasks - uploading local to server instead');
+                            await uploadAllTasks();
+                            return;
+                        }
+                        
+                        // Safety rule: If local is empty but server has tasks, it's safe to download
+                        if (localTaskCount === 0 && serverTaskCount > 0) {
+                            console.log('📥 TASKS SAFE DOWNLOAD: Local is empty, downloading from server');
+                            tasks = serverTasks;
+                            localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                            sortTasks();
+                            renderCurrentView();
+                            return;
+                        }
+                        
+                        // Normal sync: if both have data, compare and update if different
+                        if (JSON.stringify(serverTasks) !== JSON.stringify(tasks)) {
+                            // Additional safety: Check if server has significantly fewer tasks (potential data loss)
+                            if (serverTaskCount < localTaskCount * 0.5 && localTaskCount > 2) {
+                                console.log('🛡️ TASKS SAFETY: Server has significantly fewer tasks than local - skipping download to prevent data loss');
+                                return;
                             }
-                        });
-                        
-                        if (hasUpdates) {
-                            // Remove duplicates before updating
-                            tasks = removeDuplicateTasks(mergedTasks);
-                            console.log('✅ Tasks updated from cloud sync with deduplication');
                             
-                            // Update UI
+                            tasks = serverTasks;
+                            localStorage.setItem('gtdTasks', JSON.stringify(tasks));
                             sortTasks();
                             renderCurrentView();
                         }
@@ -10897,12 +10932,10 @@
                     
                     return true;
                 } else {
-                    console.error('☁️ Failed to download tasks:', response.status);
-                    return false;
+                    console.log('📥 TASKS SYNC: Download failed with status:', response.status);
                 }
             } catch (error) {
-                console.error('☁️ Download error:', error);
-                return false;
+                console.error('📥 TASKS DOWNLOAD ERROR:', error);
             }
         }
 
@@ -10927,120 +10960,8 @@
             return uniqueTasks;
         }
 
-        async function immediateSyncToCloud() {
-            if (!window.currentUser) {
-                console.log('⏭️ No user authenticated - skipping sync');
-                console.log('🔍 DEBUG: window.currentUser is:', window.currentUser);
-                console.log('🔍 DEBUG: localStorage authToken:', !!localStorage.getItem('authToken'));
-                console.log('🔍 DEBUG: localStorage userEmail:', localStorage.getItem('userEmail'));
-                return false;
-            }
-            
-            try {
-                console.log('🚀 Immediate sync to cloud initiated');
-                
-                console.log('🚀 Syncing to cloud with httpOnly cookie authentication');
-                console.log('📤 Syncing', tasks.length, 'tasks for user:', window.currentUser.user.id);
-                
-                const response = await fetch(`${API_BASE}/tasks`, {
-                    method: 'POST',
+        // INSTANT sync to cloud (no debouncing)
 
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({
-                        tasks: tasks,
-                        userId: window.currentUser.user.id
-                    })
-                });
-                
-                console.log('📡 Upload response status:', response.status, response.statusText);
-                
-                if (response.ok) {
-                    const responseData = await response.json();
-                    console.log('✅ Tasks successfully synced to cloud:', responseData);
-                    lastSyncTimestamp = Date.now();
-                    window.lastSyncTimestamp = Date.now();
-                    window.lastUploadTime = Date.now(); // Prevent immediate download
-                    
-                    // Download merged data back from server
-                    // Skip download if backup restore is in progress
-                    if (window.backupRestoreInProgress || window.justRestoredBackup || window.skipNextDownload) {
-                        console.log('🔒 UPLOAD SYNC: Skipped merged data download - backup restore in progress');
-                        return true;
-                    }
-                    console.log('📥 Downloading merged data from server...');
-                    try {
-                        const downloadResponse = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
-                            method: 'GET',
-                            headers: getAuthHeaders()
-                        });
-                        
-                        if (downloadResponse.ok) {
-                            const responseData = await downloadResponse.json();
-                            console.log('📥 Downloaded response data:', responseData);
-                            
-                            // Handle different response formats
-                            let mergedTasks = [];
-                            if (Array.isArray(responseData)) {
-                                mergedTasks = responseData;
-                            } else if (responseData && Array.isArray(responseData.tasks)) {
-                                mergedTasks = responseData.tasks;
-                            } else {
-                                console.error('❌ Unexpected response format:', responseData);
-                                return true; // Continue without updating
-                            }
-                            
-                            console.log('📥 Downloaded merged tasks:', mergedTasks.length);
-                            
-                            // Update local tasks with merged data
-                            tasks = mergedTasks.filter(task => !task.isDeleted && !task.is_deleted);
-                            console.log('🔄 Updated local tasks with merged data:', tasks.length);
-                            
-                            // Save to localStorage
-                            saveTasksToLocalStorage();
-                            
-                            // Refresh UI
-                            renderCurrentView();
-                        } else {
-                            console.error('❌ Failed to download merged data:', downloadResponse.status);
-                        }
-                    } catch (downloadError) {
-                        console.error('❌ Error downloading merged data:', downloadError);
-                    }
-                    
-                    return true;
-                } else {
-                    const errorText = await response.text();
-                    console.error('❌ Failed to sync to cloud:', response.status, response.statusText);
-                    console.error('❌ Upload error details:', errorText);
-                    return false;
-                }
-            } catch (error) {
-                console.error('❌ Immediate sync error:', error);
-                return false;
-            }
-        }
-
-        // Add uploadAllTasks wrapper for compatibility (defined after immediateSyncToCloud)
-        window.uploadAllTasks = async function uploadAllTasks() {
-            console.log('🔄 uploadAllTasks called - using simple sync');
-            console.log('🔄 uploadAllTasks: Current tasks count:', tasks.length);
-            console.log('🔄 uploadAllTasks: Auth check - currentUser exists:', !!window.currentUser);
-            
-            // Use the existing sync functionality
-            if (typeof immediateSyncToCloud === 'function') {
-                console.log('✅ Found immediateSyncToCloud function, calling it...');
-                const result = await immediateSyncToCloud();
-                console.log('🔄 uploadAllTasks: immediateSyncToCloud result:', result);
-                return result;
-            } else {
-                console.log('❌ immediateSyncToCloud function not found, using fallback sync method');
-                // Fallback: trigger any existing sync mechanisms
-                if (window.currentUser?.user?.id) {
-                    // This will trigger the existing sync logic
-                    saveTasksToLocalStorage();
-                }
-            }
-        };
 
         // INSTANT sync to cloud (no debouncing)
         async function instantSyncToCloud() {
@@ -12196,19 +12117,9 @@
 
 
         // Save tasks to server using EXACT Lists pattern
+        // Save tasks to localStorage and sync to cloud - EXACTLY like Lists
         async function saveTasksToServer() {
             try {
-                // 🔒 TRIPLE-LAYER PROTECTION: Pre-upload safety backup
-                if (window.TripleProtection) {
-                    await window.TripleProtection.backups.create('pre-upload', 'Safety backup before server sync');
-                }
-                
-                // LAST-WRITER-WINS: Update timestamps for all tasks being saved
-                const now = new Date().toISOString();
-                tasks.forEach(task => {
-                    task.updatedAt = now; // Fresh timestamp for last-writer-wins
-                });
-                
                 localStorage.setItem('gtdTasks', JSON.stringify(tasks));
                 
                 // Set flag to prevent downloads from overwriting changes
@@ -12217,39 +12128,20 @@
                 // Upload to server
                 await uploadAllTasks();
                 
-                // Clear flag after successful upload (standard 10-second protection)
+                // Clear flag after successful upload
                 setTimeout(() => {
                     window.justModifiedTasks = false;
-                }, 10000); // 10 seconds standard protection
+                    console.log('🔓 Cleared justModifiedTasks flag');
+                }, 5000); // 5 seconds for reliable cross-browser sync
                 
             } catch (error) {
                 console.error('Error saving tasks to server:', error);
             }
         }
 
-        // Save task using proven Lists pattern: update array → saveTasksToServer
+        // Save task using simple pattern like Lists: update array → saveTasksToServer
         async function saveTask(taskData) {
             try {
-                // STALE BROWSER PROTECTION: Check if we have recent data
-                const lastSyncTime = localStorage.getItem('lastSyncTime');
-                const currentTime = Date.now();
-                const timeSinceLastSync = currentTime - (lastSyncTime ? parseInt(lastSyncTime) : 0);
-                
-                // If no sync in 3 minutes and we're trying to save, refresh data first (reduced threshold)
-                if (timeSinceLastSync > 180000) { // 3 minutes (reduced from 5 minutes)
-                    console.warn('🚨 STALE BROWSER DETECTED during save - MANDATORY data refresh');
-                    try {
-                        // Set mandatory refresh flag and force download
-                        window.forceMandatoryRefresh = true;
-                        await downloadAllTasks();
-                        await downloadAllLists(); // Also refresh lists
-                        localStorage.setItem('lastSyncTime', currentTime.toString());
-                        console.log('✅ Mandatory refresh completed before save');
-                    } catch (error) {
-                        console.error('❌ CRITICAL: Failed to refresh data before save:', error);
-                        throw new Error('Cannot save with stale data - refresh failed');
-                    }
-                }
                 
                 // SECURITY: Validate input before saving
                 if (!taskData || typeof taskData !== 'object') {
@@ -18333,8 +18225,20 @@
         async function quickDeleteTask(taskId, event) {
             event.stopPropagation();
             
-            // Call deleteTask with event parameter for proper handling
-            await deleteTask(taskId, event);
+            // ⚡ IMMEDIATE UI RESPONSE: Close modals and show feedback instantly
+            hideMobileTaskModal();
+            closeTaskModal(event);
+            showInlineNotification('⚡ Task deleted', 'success');
+            
+            // 🔄 BACKGROUND PROCESSING: Handle actual deletion without blocking UI
+            setTimeout(async () => {
+                try {
+                    await deleteTask(taskId, event);
+                } catch (error) {
+                    console.error('Background task deletion failed:', error);
+                    showInlineNotification('❌ Delete failed - task may reappear', 'error');
+                }
+            }, 0);
         }
 
         // Clear everything and start fresh
@@ -18632,8 +18536,9 @@
                 console.log(`Repeat instances before: ${beforeRepeatCount}, after: ${afterRepeatCount}`);
                 
                 // Verify only one task was deleted
-                if (beforeCount - afterCount !== 1) {
-                    throw new Error(`Expected to delete 1 task, but deleted ${beforeCount - afterCount} tasks`);
+                const deletedCount = beforeCount - afterCount;
+                if (deletedCount !== 1) {
+                    throw new Error(`Expected to delete 1 task, but deleted ${deletedCount} tasks`);
                 }
                 
                 // 🔒 TRIPLE-LAYER PROTECTION: Pre-operation backup
@@ -18641,10 +18546,22 @@
                     await window.TripleProtection.backups.create('auto', `Pre-delete backup: ${deletedCount} tasks to be deleted`);
                 }
                 
-                // Save using standard pattern
-                console.log('🔄 DELETE: Calling saveTasksToServer for deleted task:', task.title);
+                // Save using DIRECT sync like Lists do
+                console.log('🔄 DELETE: Direct sync for deleted task:', task.title);
                 console.log('🔄 DELETE: Current user auth state:', !!window.currentUser, 'User ID:', window.currentUser?.user?.id);
-                await saveTasksToServer();
+                
+                // Save to localStorage immediately
+                localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                
+                // Direct upload like Lists
+                window.justModifiedTasks = true;
+                await uploadAllTasks();
+                
+                // Clear flag
+                setTimeout(() => {
+                    window.justModifiedTasks = false;
+                    console.log('🔓 Cleared justModifiedTasks flag');
+                }, 5000);
                 
                 // Move to trash
                 moveToTrash(taskToDelete);
@@ -18831,7 +18748,18 @@
                             unmarkAsEvent(task.id);
                         }
                         
-                        saveTask(task); // Remove await for optimistic update
+                        // Direct sync like Lists - no complex saveTask function
+                        localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                        window.justModifiedTasks = true;
+                        uploadAllTasks().then(() => {
+                            console.log('✅ Task edit synced');
+                            setTimeout(() => {
+                                window.justModifiedTasks = false;
+                                console.log('🔓 Cleared justModifiedTasks flag');
+                            }, 5000);
+                        }).catch(error => {
+                            console.error('❌ Task edit sync failed:', error);
+                        });
                     }
                 } else {
                     // Creating new task(s)
@@ -18906,12 +18834,19 @@
                             tasksToCreate.push(task);
                         }
                         
-                        // Save all tasks (optimistic - no await)
-                        for (const task of tasksToCreate) {
-                            console.log('Saving repeat task:', task);
-                            console.log('Task repeat property:', task.repeat);
-                            saveTask(task); // Remove await for optimistic update
-                        }
+                        // Add all repeat tasks to array and sync like Lists
+                        tasks.push(...tasksToCreate);
+                        localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                        window.justModifiedTasks = true;
+                        uploadAllTasks().then(() => {
+                            console.log(`✅ ${tasksToCreate.length} repeat tasks synced`);
+                            setTimeout(() => {
+                                window.justModifiedTasks = false;
+                                console.log('🔓 Cleared justModifiedTasks flag');
+                            }, 5000);
+                        }).catch(error => {
+                            console.error('❌ Repeat tasks sync failed:', error);
+                        });
                         
                     } else {
                         // Create single task
@@ -18941,7 +18876,20 @@
                         
                         console.log('Saving single task with repeat:', task);
                         console.log('Task repeat property:', task.repeat);
-                        saveTask(task); // Remove await for optimistic update
+                        
+                        // Add task to array and direct sync like Lists
+                        tasks.push(task);
+                        localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                        window.justModifiedTasks = true;
+                        uploadAllTasks().then(() => {
+                            console.log('✅ New task synced');
+                            setTimeout(() => {
+                                window.justModifiedTasks = false;
+                                console.log('🔓 Cleared justModifiedTasks flag');
+                            }, 5000);
+                        }).catch(error => {
+                            console.error('❌ New task sync failed:', error);
+                        });
                     }
                 }
                 
@@ -23238,6 +23186,17 @@
                     todayCountDisplay.style.display = 'inline-block';
                     todayCountDisplay.textContent = `${selectedCount} selected`;
                 }
+                
+                // Show keyboard hints for bulk actions
+                const keyboardHints = document.getElementById('keyboardHints') || createKeyboardHints();
+                if (keyboardHints) {
+                    keyboardHints.style.display = 'block';
+                    keyboardHints.innerHTML = `
+                        <div style="font-size: 10px; color: #666; margin-top: 5px; text-align: center;">
+                            ⚡ Quick actions: <kbd>D</kbd> Delete • <kbd>1</kbd> +1Day • <kbd>7</kbd> +1Week • <kbd>3</kbd> +1Month • <kbd>Esc</kbd> Clear
+                        </div>
+                    `;
+                }
             } else {
                 // All Tasks view buttons
                 if (deleteBtn) deleteBtn.style.display = 'none';
@@ -23264,9 +23223,57 @@
                 // Hide Set Time button
                 const todaySetTimeBtn = document.getElementById('todaySetTimeBtn');
                 if (todaySetTimeBtn) todaySetTimeBtn.style.display = 'none';
+                
+                // Hide keyboard hints when no selection
+                const keyboardHints = document.getElementById('keyboardHints');
+                if (keyboardHints) keyboardHints.style.display = 'none';
             }
             
             console.log('🎯 updateSelectionUI called, selectedCount:', selectedCount);
+        }
+
+        // Create keyboard hints element if it doesn't exist
+        function createKeyboardHints() {
+            let keyboardHints = document.getElementById('keyboardHints');
+            if (!keyboardHints) {
+                keyboardHints = document.createElement('div');
+                keyboardHints.id = 'keyboardHints';
+                keyboardHints.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0,0,0,0.8);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    font-size: 12px;
+                    z-index: 10000;
+                    backdrop-filter: blur(10px);
+                    display: none;
+                `;
+                document.body.appendChild(keyboardHints);
+            }
+            return keyboardHints;
+        }
+
+        // Helper function to get selected task IDs for bulk operations
+        function getSelectedTaskIds() {
+            return Array.from(selectedTasks);
+        }
+        
+        // Helper function to clear all task selections
+        function clearAllSelections() {
+            selectedTasks.clear();
+            // Uncheck all task checkboxes
+            document.querySelectorAll('.task-card-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            // Uncheck select all checkbox
+            const selectAllCheckbox = document.getElementById('selectAllTasks');
+            if (selectAllCheckbox) selectAllCheckbox.checked = false;
+            
+            updateSelectionUI();
         }
 
         async function deleteSelectedTasks() {
@@ -24333,7 +24340,7 @@
                             console.log('💪 BACKUP RESTORE: Adding force overwrite flags to upload');
                         }
                         
-                        const tasksResponse = await fetch(`${API_BASE}/tasks`, {
+                        const tasksResponse = await fetch(`${API_BASE}/tasks/sync`, {
                             method: 'POST',
                             headers: getAuthHeaders(),
                             body: JSON.stringify(uploadPayload)
@@ -29390,11 +29397,21 @@
                         break;
                     case 'ArrowUp':
                         event.preventDefault();
-                        this.navigateTask(-1);
+                        if (event.shiftKey) {
+                            // Range selection: extend selection upward
+                            this.extendSelection(-1);
+                        } else {
+                            this.navigateTask(-1);
+                        }
                         break;
                     case 'ArrowDown':
                         event.preventDefault();
-                        this.navigateTask(1);
+                        if (event.shiftKey) {
+                            // Range selection: extend selection downward
+                            this.extendSelection(1);
+                        } else {
+                            this.navigateTask(1);
+                        }
                         break;
                     case 'Enter':
                         event.preventDefault();
@@ -29555,6 +29572,50 @@
                         selectedTaskElement.classList.add('task-selected');
                     }
                 }, 30);
+            },
+            
+            // Range selection: extend selection in given direction
+            extendSelection(direction) {
+                const visibleTasks = getVisibleTasks();
+                if (visibleTasks.length === 0) return;
+                
+                // If no task currently highlighted, start from first/last
+                if (selectedTaskIndex < 0) {
+                    selectedTaskIndex = direction > 0 ? 0 : visibleTasks.length - 1;
+                    selectedTaskElement = visibleTasks[selectedTaskIndex];
+                    highlightSelectedTask();
+                }
+                
+                // Calculate target index with bounds checking
+                let targetIndex = selectedTaskIndex + direction;
+                if (targetIndex < 0) targetIndex = 0;
+                if (targetIndex >= visibleTasks.length) targetIndex = visibleTasks.length - 1;
+                
+                // Get task ID of currently highlighted task
+                const currentTaskId = selectedTaskElement?.getAttribute('data-task-id');
+                
+                // Get task ID of target task
+                const targetTaskElement = visibleTasks[targetIndex];
+                const targetTaskId = targetTaskElement?.getAttribute('data-task-id');
+                
+                if (!currentTaskId || !targetTaskId) return;
+                
+                // Add target task to selection
+                const targetCheckbox = targetTaskElement.querySelector('.task-card-checkbox');
+                if (targetCheckbox && !targetCheckbox.checked) {
+                    targetCheckbox.checked = true;
+                    selectedTasks.add(targetTaskId);
+                }
+                
+                // Move highlight to target
+                selectedTaskIndex = targetIndex;
+                selectedTaskElement = targetTaskElement;
+                highlightSelectedTask();
+                
+                // Update UI
+                updateSelectionUI();
+                
+                console.log('📋 Range selection extended to:', targetTaskId, 'Total selected:', selectedTasks.size);
             },
             
             // Handle case when no tasks are visible

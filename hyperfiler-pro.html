@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v2.0.8</title>
+    <title>⚡ HyperFiler Pro 🚀 - v2.1.0</title>
     
     <!-- DEBUG: Early error catching -->
     <script>
-        console.log('🚀 HyperFiler Pro v2.0.8 - Starting initialization...');
+        console.log('🚀 HyperFiler Pro v2.1.0 - Starting initialization...');
         window.addEventListener('error', function(e) {
             console.error('❌ UNCAUGHT ERROR:', e.message, 'at line', e.lineno, 'column', e.colno);
             console.error('Stack:', e.error?.stack);
@@ -8855,6 +8855,41 @@
                 if (event.ctrlKey && event.key === 'y') {
                     event.preventDefault();
                     showView('stats'); // Statistics view
+                }
+                
+                // ⚡ BULK ACTION SHORTCUTS: Single-key actions for selected tasks
+                if (getSelectedTaskIds().length > 0 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+                    // Only trigger if we have selected tasks and no modifier keys
+                    if (event.key === 'd' || event.key === 'D') {
+                        event.preventDefault();
+                        deleteSelectedTasks();
+                        showInlineNotification(`⚡ Deleted ${getSelectedTaskIds().length} tasks`, 'success');
+                        return;
+                    }
+                    if (event.key === '1') {
+                        event.preventDefault();
+                        delaySelectedTasks(1);
+                        showInlineNotification(`⚡ Delayed ${getSelectedTaskIds().length} tasks by 1 day`, 'success');
+                        return;
+                    }
+                    if (event.key === '7') {
+                        event.preventDefault();
+                        delaySelectedTasks(7);
+                        showInlineNotification(`⚡ Delayed ${getSelectedTaskIds().length} tasks by 1 week`, 'success');
+                        return;
+                    }
+                    if (event.key === '3') {
+                        event.preventDefault();
+                        delaySelectedTasks(30);
+                        showInlineNotification(`⚡ Delayed ${getSelectedTaskIds().length} tasks by 1 month`, 'success');
+                        return;
+                    }
+                    if (event.key === 'Escape') {
+                        event.preventDefault();
+                        clearAllSelections();
+                        showInlineNotification('Selection cleared', 'info');
+                        return;
+                    }
                 }
                 
                 // Handle Enter key in task modal - DISABLED (handled by modal-specific handlers)
@@ -18190,8 +18225,20 @@
         async function quickDeleteTask(taskId, event) {
             event.stopPropagation();
             
-            // Call deleteTask with event parameter for proper handling
-            await deleteTask(taskId, event);
+            // ⚡ IMMEDIATE UI RESPONSE: Close modals and show feedback instantly
+            hideMobileTaskModal();
+            closeTaskModal(event);
+            showInlineNotification('⚡ Task deleted', 'success');
+            
+            // 🔄 BACKGROUND PROCESSING: Handle actual deletion without blocking UI
+            setTimeout(async () => {
+                try {
+                    await deleteTask(taskId, event);
+                } catch (error) {
+                    console.error('Background task deletion failed:', error);
+                    showInlineNotification('❌ Delete failed - task may reappear', 'error');
+                }
+            }, 0);
         }
 
         // Clear everything and start fresh
@@ -23139,6 +23186,17 @@
                     todayCountDisplay.style.display = 'inline-block';
                     todayCountDisplay.textContent = `${selectedCount} selected`;
                 }
+                
+                // Show keyboard hints for bulk actions
+                const keyboardHints = document.getElementById('keyboardHints') || createKeyboardHints();
+                if (keyboardHints) {
+                    keyboardHints.style.display = 'block';
+                    keyboardHints.innerHTML = `
+                        <div style="font-size: 10px; color: #666; margin-top: 5px; text-align: center;">
+                            ⚡ Quick actions: <kbd>D</kbd> Delete • <kbd>1</kbd> +1Day • <kbd>7</kbd> +1Week • <kbd>3</kbd> +1Month • <kbd>Esc</kbd> Clear
+                        </div>
+                    `;
+                }
             } else {
                 // All Tasks view buttons
                 if (deleteBtn) deleteBtn.style.display = 'none';
@@ -23165,9 +23223,57 @@
                 // Hide Set Time button
                 const todaySetTimeBtn = document.getElementById('todaySetTimeBtn');
                 if (todaySetTimeBtn) todaySetTimeBtn.style.display = 'none';
+                
+                // Hide keyboard hints when no selection
+                const keyboardHints = document.getElementById('keyboardHints');
+                if (keyboardHints) keyboardHints.style.display = 'none';
             }
             
             console.log('🎯 updateSelectionUI called, selectedCount:', selectedCount);
+        }
+
+        // Create keyboard hints element if it doesn't exist
+        function createKeyboardHints() {
+            let keyboardHints = document.getElementById('keyboardHints');
+            if (!keyboardHints) {
+                keyboardHints = document.createElement('div');
+                keyboardHints.id = 'keyboardHints';
+                keyboardHints.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0,0,0,0.8);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    font-size: 12px;
+                    z-index: 10000;
+                    backdrop-filter: blur(10px);
+                    display: none;
+                `;
+                document.body.appendChild(keyboardHints);
+            }
+            return keyboardHints;
+        }
+
+        // Helper function to get selected task IDs for bulk operations
+        function getSelectedTaskIds() {
+            return Array.from(selectedTasks);
+        }
+        
+        // Helper function to clear all task selections
+        function clearAllSelections() {
+            selectedTasks.clear();
+            // Uncheck all task checkboxes
+            document.querySelectorAll('.task-card-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            // Uncheck select all checkbox
+            const selectAllCheckbox = document.getElementById('selectAllTasks');
+            if (selectAllCheckbox) selectAllCheckbox.checked = false;
+            
+            updateSelectionUI();
         }
 
         async function deleteSelectedTasks() {
@@ -29291,11 +29397,21 @@
                         break;
                     case 'ArrowUp':
                         event.preventDefault();
-                        this.navigateTask(-1);
+                        if (event.shiftKey) {
+                            // Range selection: extend selection upward
+                            this.extendSelection(-1);
+                        } else {
+                            this.navigateTask(-1);
+                        }
                         break;
                     case 'ArrowDown':
                         event.preventDefault();
-                        this.navigateTask(1);
+                        if (event.shiftKey) {
+                            // Range selection: extend selection downward
+                            this.extendSelection(1);
+                        } else {
+                            this.navigateTask(1);
+                        }
                         break;
                     case 'Enter':
                         event.preventDefault();
@@ -29456,6 +29572,50 @@
                         selectedTaskElement.classList.add('task-selected');
                     }
                 }, 30);
+            },
+            
+            // Range selection: extend selection in given direction
+            extendSelection(direction) {
+                const visibleTasks = getVisibleTasks();
+                if (visibleTasks.length === 0) return;
+                
+                // If no task currently highlighted, start from first/last
+                if (selectedTaskIndex < 0) {
+                    selectedTaskIndex = direction > 0 ? 0 : visibleTasks.length - 1;
+                    selectedTaskElement = visibleTasks[selectedTaskIndex];
+                    highlightSelectedTask();
+                }
+                
+                // Calculate target index with bounds checking
+                let targetIndex = selectedTaskIndex + direction;
+                if (targetIndex < 0) targetIndex = 0;
+                if (targetIndex >= visibleTasks.length) targetIndex = visibleTasks.length - 1;
+                
+                // Get task ID of currently highlighted task
+                const currentTaskId = selectedTaskElement?.getAttribute('data-task-id');
+                
+                // Get task ID of target task
+                const targetTaskElement = visibleTasks[targetIndex];
+                const targetTaskId = targetTaskElement?.getAttribute('data-task-id');
+                
+                if (!currentTaskId || !targetTaskId) return;
+                
+                // Add target task to selection
+                const targetCheckbox = targetTaskElement.querySelector('.task-card-checkbox');
+                if (targetCheckbox && !targetCheckbox.checked) {
+                    targetCheckbox.checked = true;
+                    selectedTasks.add(targetTaskId);
+                }
+                
+                // Move highlight to target
+                selectedTaskIndex = targetIndex;
+                selectedTaskElement = targetTaskElement;
+                highlightSelectedTask();
+                
+                // Update UI
+                updateSelectionUI();
+                
+                console.log('📋 Range selection extended to:', targetTaskId, 'Total selected:', selectedTasks.size);
             },
             
             // Handle case when no tasks are visible
