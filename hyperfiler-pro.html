@@ -9545,11 +9545,11 @@
                 
                 // Show action hint
                 if (deltaX > 0) {
-                    // Swipe right - show complete action
-                    currentSwipeElement.style.background = 'rgba(40, 167, 69, 0.1)';
+                    // Swipe right - show delay to next day action
+                    currentSwipeElement.style.background = 'rgba(255, 193, 7, 0.1)';
                 } else {
-                    // Swipe left - show delete action  
-                    currentSwipeElement.style.background = 'rgba(220, 53, 69, 0.1)';
+                    // Swipe left - show delay menu action  
+                    currentSwipeElement.style.background = 'rgba(102, 126, 234, 0.1)';
                 }
             }
         }
@@ -9568,8 +9568,8 @@
             // Trigger action if swipe is significant enough
             if (Math.abs(deltaX) > 80) {
                 if (deltaX > 0) {
-                    // Swipe right - complete task
-                    toggleTaskStatus(taskId, event);
+                    // Swipe right - delay to next day
+                    delayTask(taskId, 1, event);
                 } else {
                     // Swipe left - show delay menu (same as blue button)
                     toggleMobileTimeDropdown(taskId, event);
@@ -25383,7 +25383,7 @@
                          data-time-slot="${time}">
                         <div class="time-block-header ${isCurrentTime ? 'current-time' : ''}">
                             <span>🕐 ${formatTime(time)}</span>
-                            ${isCurrentTime ? `<span style="margin-left: auto; font-size: 12px;">← ${translateText('Current Time')}</span>` : ''}
+                            ${isCurrentTime ? `<span style="margin-left: auto; font-size: 12px; padding-right: 8px;">← ${translateText('Current Time')}</span>` : ''}
                         </div>
                         <div class="time-block-content" 
                              ondragover="handleTodayDragOver(event)" 
