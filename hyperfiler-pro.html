@@ -31,7 +31,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: inherit;
+            background: #f0f2f5;
             padding: 0;
             min-height: 100vh;
         }
@@ -67,34 +67,6 @@
             box-sizing: border-box;
         }
         
-        /* Active tab creates full background color effect */
-        .container.today-active {
-            background: #FF4136;
-        }
-        
-        .container.week-active {
-            background: #0074D9;
-        }
-        
-        .container.calendar-active {
-            background: #2ECC40;
-        }
-        
-        .container.all-active {
-            background: #FF851B;
-        }
-        
-        .container.repeat-active {
-            background: #B10DC9;
-        }
-        
-        .container.undo-active {
-            background: #FFDC00;
-        }
-        
-        .container.lists-active {
-            background: #B22222;
-        }
 
         .nav-btn {
             border: none;
@@ -308,7 +280,7 @@
         }
 
         .calendar-section {
-            background: white;
+            background: transparent;
             padding: 8px;
         }
 
@@ -348,7 +320,7 @@
         }
 
         .calendar-day {
-            background: white;
+            background: transparent;
             padding: 8px 4px;
             height: 120px;
             position: relative;
@@ -412,7 +384,7 @@
         }
 
         .week-day {
-            background: white;
+            background: transparent;
             padding: 12px 8px;
             min-height: 220px;
             position: relative;
@@ -834,7 +806,7 @@
         }
 
         .tasks-section {
-            background: white;
+            background: transparent;
             padding: 8px;
         }
 
@@ -887,7 +859,7 @@
         }
 
         .task-group {
-            background: white;
+            background: transparent;
             border-radius: 8px;
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -1069,12 +1041,12 @@
             text-align: center;
             color: #666;
             padding: 40px;
-            background: white;
+            background: transparent;
             border-radius: 8px;
         }
 
         .export-section {
-            background: white;
+            background: transparent;
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -1104,7 +1076,7 @@
         }
 
         .modal-content {
-            background: white;
+            background: transparent;
             margin: 2vh auto;
             padding: 0;
             border-radius: 12px;
@@ -1671,7 +1643,7 @@
 
         /* Today View Time Blocks */
         .time-block {
-            background: white;
+            background: transparent;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             margin-bottom: 15px;
@@ -1808,7 +1780,7 @@
         }
 
         .filter-btn {
-            background: white;
+            background: transparent;
             border: 1px solid #dee2e6;
             color: #495057;
             padding: 6px 12px;
@@ -2045,7 +2017,7 @@
 
         /* All Tasks View Search and Selection */
         .all-tasks-controls {
-            background: white;
+            background: transparent;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             margin-bottom: 20px;
@@ -2226,7 +2198,7 @@
 
         /* Lists Section Styles */
         .list-section {
-            background: white;
+            background: transparent;
             border-radius: 12px;
             margin-bottom: 25px;
             box-shadow: 0 4px 12px rgba(155, 89, 182, 0.1);
@@ -2285,7 +2257,7 @@
         }
 
         .list-item {
-            background: white;
+            background: transparent;
             border-bottom: 1px solid #f1f3f4;
             padding: 16px 24px;
             display: flex;
@@ -2521,7 +2493,7 @@
             padding: 16px 20px;
             border-bottom: 1px solid #f1f3f4;
             transition: all 0.2s ease;
-            background: white;
+            background: transparent;
             cursor: move;
             position: relative;
         }
@@ -3041,7 +3013,7 @@
                 left: 0;
                 right: 0;
                 height: 64px;
-                background: white;
+                background: transparent;
                 border-top: 1px solid #e1e5e9;
                 display: flex;
                 align-items: center;
@@ -3096,7 +3068,7 @@
                 bottom: 64px;
                 left: 0;
                 right: 0;
-                background: white;
+                background: transparent;
                 border-top: 1px solid #e1e5e9;
                 box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
                 transform: translateY(100%);
@@ -3289,7 +3261,7 @@
 
         <!-- Search Section -->
         <div class="search-section" id="search-section" style="display: none;">
-            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px;">
+            <div style="background: transparent; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <h3 class="desktop-only" style="color: #1877f2; margin: 0;">🔍 Search Tasks</h3>
                     <div style="display: flex; gap: 8px; align-items: center;">
@@ -3358,7 +3330,7 @@
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                     <label for="autoPrintTimeSelect" style="font-size: 13px; color: #424242;">Print time window:</label>
-                    <select id="autoPrintTimeSelect" onchange="saveAutoPrintTime()" style="padding: 6px 10px; border: 1px solid #e1e5e9; border-radius: 6px; font-size: 12px; background: white; cursor: pointer;">
+                    <select id="autoPrintTimeSelect" onchange="saveAutoPrintTime()" style="padding: 6px 10px; border: 1px solid #e1e5e9; border-radius: 6px; font-size: 12px; background: transparent; cursor: pointer;">
                         <option value="disabled" selected>🚫 Disabled</option>
                         <option value="9-13">🕘 9:00 AM - 1:00 PM</option>
                         <option value="6-10">🕕 6:00 AM - 10:00 AM</option>
@@ -3786,7 +3758,7 @@
         </div>
         
         <div id="undoContent" style="padding: 20px;">
-            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div style="background: transparent; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                 <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
                     <h4 style="color: #1877f2; margin: 0; font-size: 16px;" data-translate="Recent Changes (Last 10)">📋 Recent Changes (Last 10)</h4>
                     <div style="font-size: 12px; color: #6c757d;" data-translate="Press Ctrl+Z to undo or click any item to undo up to that point">Press Ctrl+Z to undo or click any item to undo up to that point</div>
@@ -3807,7 +3779,7 @@
 
     <!-- Task Edit Modal -->
     <div id="taskModal" class="modal" onclick="closeTaskModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 480px; margin: 2vh auto; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; padding: 0; max-height: none;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 480px; margin: 2vh auto; background: transparent; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; padding: 0; max-height: none;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #1877f2 0%, #42a5f5 100%); color: white; padding: 20px 24px; position: relative;">
@@ -3829,7 +3801,7 @@
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <div style="flex: 1;">
                             <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333; font-size: 14px;">Date & Time:</label>
-                            <button type="button" id="dateTimeDisplay" onclick="openDateTimeModal()" style="width: 100%; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 14px; outline: none; background: white; text-align: left; cursor: pointer;">Select date & time...</button>
+                            <button type="button" id="dateTimeDisplay" onclick="openDateTimeModal()" style="width: 100%; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 14px; outline: none; background: transparent; text-align: left; cursor: pointer;">Select date & time...</button>
                             <!-- Hidden inputs for actual values -->
                             <input type="hidden" id="editTaskDateOnly">
                             <input type="hidden" id="editTaskTimeOnly">
@@ -3848,7 +3820,7 @@
                 <!-- Repeat -->
                 <div style="margin-bottom: 20px;">
                     <label for="editTaskRepeat" style="display: block; margin-bottom: 5px; font-weight: 600; color: #333; font-size: 14px;"> </label>
-                    <select id="editTaskRepeat" style="width: 100%; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 14px; transition: border-color 0.2s ease; outline: none; background: white;">
+                    <select id="editTaskRepeat" style="width: 100%; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 14px; transition: border-color 0.2s ease; outline: none; background: transparent;">
                         <option value="none">No Repeat</option>
                         <option value="daily">📅 Daily (90 days)</option>
                         <option value="weekly">🗓️ Weekly (3 months)</option>
@@ -3864,7 +3836,7 @@
                         <textarea id="editTaskNotes" rows="3" placeholder="Notes" style="flex: 1; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 14px; resize: vertical; min-height: 80px; outline: none;"></textarea>
                         <div style="display: flex; flex-direction: column; gap: 4px;">
                             <!-- IMAGE FUNCTIONALITY DISABLED
-                            <button type="button" onclick="triggerImageUpload()" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Add image">
+                            <button type="button" onclick="triggerImageUpload()" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Add image">
                                 📷
                             </button>
                             -->
@@ -3911,7 +3883,7 @@
 
     <!-- Custom Date/Time Picker Modal -->
     <div id="dateTimeModal" class="modal" onclick="closeDateTimeModal(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 500px; margin: 5vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 20px; position: relative;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 500px; margin: 5vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 20px; position: relative;">
             <h3 style="margin: 0 0 20px 0; color: #1877f2; text-align: center;">📅 Select Date & Time</h3>
             
             <!-- Date Calendar Grid -->
@@ -3944,8 +3916,8 @@
                     <div>
                         <label style="font-size: 12px; color: #666;">Minutes:</label>
                         <div id="minuteButtons" style="display: flex; gap: 5px; margin-top: 5px;">
-                            <button onclick="selectMinute('00')" id="min00" style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; background: white; cursor: pointer; font-size: 12px;">00</button>
-                            <button onclick="selectMinute('30')" id="min30" style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; background: white; cursor: pointer; font-size: 12px;">30</button>
+                            <button onclick="selectMinute('00')" id="min00" style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; background: transparent; cursor: pointer; font-size: 12px;">00</button>
+                            <button onclick="selectMinute('30')" id="min30" style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; background: transparent; cursor: pointer; font-size: 12px;">30</button>
                         </div>
                     </div>
                     <div>
@@ -3969,7 +3941,7 @@
 
     <!-- Keyboard Shortcuts Modal -->
     <div id="shortcutsModal" class="modal" onclick="closeShortcutsModal(event)" style="z-index: 1100;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 500px; margin: 5vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 80vh; overflow-y: auto;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 500px; margin: 5vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 80vh; overflow-y: auto;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
@@ -4110,7 +4082,7 @@
 
     <!-- Stats Modal -->
     <div id="statsModal" class="modal" onclick="closeStatsModal(event)" style="z-index: 1100;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px; margin: 5vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 80vh; overflow-y: auto;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px; margin: 5vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 80vh; overflow-y: auto;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
@@ -4161,7 +4133,7 @@
 
     <!-- Backup Selection Modal -->
     <div id="backupSelectionModal" class="modal" onclick="closeBackupSelection(event)" style="z-index: 1200;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px; margin: 5vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 80vh; overflow-y: auto;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px; margin: 5vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 80vh; overflow-y: auto;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
@@ -4188,7 +4160,7 @@
 
     <!-- Task Import Modal -->
     <div id="taskImportModal" class="modal" onclick="closeTaskImportModal(event)" style="z-index: 1200;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px; margin: 10vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px; margin: 10vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; position: relative;">
@@ -4228,7 +4200,7 @@
 
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal" onclick="closeSettings(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 1000px; margin: 1vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 98vh; overflow: hidden; display: flex; flex-direction: column;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 1000px; margin: 1vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 98vh; overflow: hidden; display: flex; flex-direction: column;">
             
             <!-- Settings Header with Tabs -->
             <div style="background: #1877f2; color: white; padding: 20px 20px 0 20px; border-radius: 12px 12px 0 0;">
@@ -4305,7 +4277,7 @@
                         <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <label style="font-size: 14px; color: #495057; font-weight: 600;">Date Format:</label>
-                                <select id="dateFormatSelect" onchange="saveDateFormat()" style="padding: 6px 10px; border: 1px solid #ced4da; border-radius: 4px; background: white; font-size: 13px;">
+                                <select id="dateFormatSelect" onchange="saveDateFormat()" style="padding: 6px 10px; border: 1px solid #ced4da; border-radius: 4px; background: transparent; font-size: 13px;">
                                     <option value="YYYY-MM-DD">YYYY-MM-DD</option>
                                     <option value="MM/DD/YYYY">MM/DD/YYYY</option>
                                     <option value="DD/MM/YYYY">DD/MM/YYYY</option>
@@ -4313,7 +4285,7 @@
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <label style="font-size: 14px; color: #495057; font-weight: 600;">Time Format:</label>
-                                <select id="timeFormatSelect" onchange="saveTimeFormat()" style="padding: 6px 10px; border: 1px solid #ced4da; border-radius: 4px; background: white; font-size: 13px;">
+                                <select id="timeFormatSelect" onchange="saveTimeFormat()" style="padding: 6px 10px; border: 1px solid #ced4da; border-radius: 4px; background: transparent; font-size: 13px;">
                                     <option value="default">Default</option>
                                     <option value="12hour">12-hour (AM/PM)</option>
                                     <option value="24hour">24-hour</option>
@@ -4321,7 +4293,7 @@
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <label style="font-size: 14px; color: #495057; font-weight: 600;">Tab Display:</label>
-                                <select id="tabDisplaySelect" onchange="saveTabDisplayMode()" style="padding: 6px 10px; border: 1px solid #ced4da; border-radius: 4px; background: white; font-size: 13px;">
+                                <select id="tabDisplaySelect" onchange="saveTabDisplayMode()" style="padding: 6px 10px; border: 1px solid #ced4da; border-radius: 4px; background: transparent; font-size: 13px;">
                                     <option value="both">Icon + Text</option>
                                     <option value="icon">Icon Only</option>
                                     <option value="text">Text Only</option>
@@ -4343,7 +4315,7 @@
                             </p>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <select id="mobileUIVersion" onchange="toggleMobileUIVersion()" style="padding: 8px 12px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white;">
+                            <select id="mobileUIVersion" onchange="toggleMobileUIVersion()" style="padding: 8px 12px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: transparent;">
                                 <option value="m1">M1 (Classic)</option>
                             </select>
                         </div>
@@ -4450,7 +4422,7 @@
                                     <span>📥 <span data-translate="Import Data">Import Data</span></span>
                                     <span style="font-size: 12px;">▼</span>
                                 </button>
-                                <div id="importDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 1000; margin-top: 2px;">
+                                <div id="importDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: transparent; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 1000; margin-top: 2px;">
                                     <button onclick="selectImportFormat('json')" style="width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 13px; border-bottom: 1px solid #eee;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='none'">
                                         📄 JSON Format
                                     </button>
@@ -4469,7 +4441,7 @@
                                     <span>📤 <span data-translate="Export Data">Export Data</span></span>
                                     <span style="font-size: 12px;">▼</span>
                                 </button>
-                                <div id="exportDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 1000; margin-top: 2px;">
+                                <div id="exportDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: transparent; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 1000; margin-top: 2px;">
                                     <button onclick="selectExportFormat('json')" style="width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 13px; border-bottom: 1px solid #eee;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='none'">
                                         📄 JSON Format
                                     </button>
@@ -4705,7 +4677,7 @@
 
     <!-- Quick Import Modal -->
     <div id="quickImportModal" class="modal" onclick="closeQuickImportModal(event)" style="z-index: 1200;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 400px; margin: 20vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 400px; margin: 20vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center;">
@@ -4744,7 +4716,7 @@
 
     <!-- Trash Modal -->
     <div id="trashModal" class="modal" onclick="closeTrash(event)" style="z-index: 1100;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px; margin: 5vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 80vh; overflow-y: auto;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px; margin: 5vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 80vh; overflow-y: auto;">
             
             <!-- Modal Header -->
             <div style="background: #6c757d; color: white; padding: 20px; border-radius: 12px 12px 0 0;">
@@ -4786,7 +4758,7 @@
 
     <!-- List Items Modal -->
     <div id="listItemsModal" class="modal" onclick="closeListItemsModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px; margin: 3vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px; margin: 3vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #9B59B6 0%, #8e44ad 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; flex-shrink: 0;">
@@ -4853,7 +4825,7 @@
 
     <!-- List Selection Modal for TXT Import -->
     <div id="listSelectionModal" class="modal" onclick="closeListSelectionModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 500px; margin: 10vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 70vh; overflow-y: auto;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 500px; margin: 10vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 70vh; overflow-y: auto;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
@@ -7301,7 +7273,7 @@
                         padding: 20px;
                     ">
                         <div style="
-                            background: white;
+                            background: transparent;
                             border-radius: 20px;
                             padding: 40px;
                             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
@@ -7382,7 +7354,7 @@
                     padding: 20px;
                 ">
                     <div style="
-                        background: white;
+                        background: transparent;
                         border-radius: 20px;
                         padding: 60px 40px;
                         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
@@ -7683,7 +7655,7 @@
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                background: white;
+                background: transparent;
                 padding: 35px;
                 border-radius: 15px;
                 box-shadow: 0 15px 40px rgba(0,0,0,0.2);
@@ -12912,11 +12884,11 @@
             // Reset minute buttons
             document.getElementById('min00').style.cssText = `
                 padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; 
-                background: white; color: #333; cursor: pointer; font-size: 12px;
+                background: transparent; color: #333; cursor: pointer; font-size: 12px;
             `;
             document.getElementById('min30').style.cssText = `
                 padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; 
-                background: white; color: #333; cursor: pointer; font-size: 12px;
+                background: transparent; color: #333; cursor: pointer; font-size: 12px;
             `;
             
             updateSelectedDisplay();
@@ -13287,7 +13259,7 @@
 
             // Render grouped display
             let html = `
-                <div style="background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
+                <div style="background: transparent; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
                     <div style="background: #f8f9fa; padding: 15px; border-bottom: 1px solid #e9ecef;">
                         <h4 style="margin: 0; color: #495057; display: flex; align-items: center; justify-content: space-between;">
                             🔄 Recurring Tasks
@@ -13320,7 +13292,7 @@
 
                 seriesGroup.forEach(series => {
                     html += `
-                        <div style="padding: 14px 16px; border-bottom: 1px solid #f8f9fa; display: flex; align-items: center; justify-content: space-between; background: white; transition: background 0.2s;" 
+                        <div style="padding: 14px 16px; border-bottom: 1px solid #f8f9fa; display: flex; align-items: center; justify-content: space-between; background: transparent; transition: background 0.2s;" 
                              onmouseover="this.style.background='#f8f9fa'" 
                              onmouseout="this.style.background='white'">
                             <div style="flex: 1; min-width: 0;">
@@ -13491,7 +13463,7 @@
 
             if (representativeTasks.length > 0) {
                 html += `
-                    <div style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden;">
+                    <div style="background: transparent; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden;">
                         <div style="background: linear-gradient(135deg, #B10DC9 0%, #9E0CB5 100%); color: white; padding: 15px;">
                             <h4 style="margin: 0; display: flex; align-items: center; justify-content: space-between;">
                                 🔍 Search Results
@@ -14028,7 +14000,7 @@
             // Populate mobile version with dropdown-style filters
             if (mobileContainer && sortedTemplates.length > 0) {
                 let mobileHtml = '<div style="display: flex; flex-direction: column; gap: 8px;">';
-                mobileHtml += '<select id="weekMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white;" onchange="handleMobileWeekTemplateFilter(this.value)">';
+                mobileHtml += '<select id="weekMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: transparent;" onchange="handleMobileWeekTemplateFilter(this.value)">';
                 mobileHtml += `<option value="">${translateText('All Tasks')}</option>`;
                 
                 sortedTemplates.forEach(template => {
@@ -14478,7 +14450,7 @@
             
             let html = `
                 <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;" onclick="this.remove()">
-                    <div style="background: white; border-radius: 12px; max-width: 600px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
+                    <div style="background: transparent; border-radius: 12px; max-width: 600px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
                         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center;">
                             <h3 style="margin: 0 0 10px 0;">🔄 Repeat Series Manager</h3>
                             <p style="margin: 0; opacity: 0.9; font-size: 14px;">${title}</p>
@@ -16676,7 +16648,7 @@
                 itemsHTML = items.map((item, index) => {
                     return `
                         <div style="padding: 15px 20px; border-bottom: 1px solid #f1f3f4; display: flex; align-items: center; gap: 12px;">
-                            <div style="width: 18px; height: 18px; border: 2px solid #9B59B6; border-radius: 4px; background: white;"></div>
+                            <div style="width: 18px; height: 18px; border: 2px solid #9B59B6; border-radius: 4px; background: transparent;"></div>
                             <div style="flex: 1; font-size: 16px; word-wrap: break-word;">${escapeHtml(item.text)}</div>
                         </div>
                     `;
@@ -16695,7 +16667,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background: white;
+            background: transparent;
             color: #333;
             line-height: 1.6;
         }
@@ -16720,7 +16692,7 @@
             font-size: 14px;
         }
         .list-container {
-            background: white;
+            background: transparent;
             border: 1px solid #dee2e6;
             border-radius: 8px;
             overflow: hidden;
@@ -21069,7 +21041,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background: white;
+            background: transparent;
             color: #333;
             line-height: 1.6;
         }
@@ -21699,7 +21671,7 @@
             notification.innerHTML = `
                 <div style="font-weight: 600; margin-bottom: 8px;">⚠️ Trash Full Warning</div>
                 <div style="margin-bottom: 12px;">You have ${trash.length} tasks in trash. Consider emptying it to free up space.</div>
-                <button onclick="openTrash(); this.parentNode.parentNode.remove();" style="background: white; color: #dc3545; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-right: 8px;">Open Trash</button>
+                <button onclick="openTrash(); this.parentNode.parentNode.remove();" style="background: transparent; color: #dc3545; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-right: 8px;">Open Trash</button>
                 <button onclick="this.parentNode.parentNode.remove();" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid white; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">Dismiss</button>
             `;
             
@@ -21900,7 +21872,7 @@
             `;
             
             modal.innerHTML = `
-                <div style="background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 400px; margin: 20px;">
+                <div style="background: transparent; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 400px; margin: 20px;">
                     <div style="font-size: 24px; margin-bottom: 20px;">📥 Import Options</div>
                     <div style="font-size: 16px; color: #666; margin-bottom: 30px; line-height: 1.4;">Choose your import type:</div>
                     
@@ -22074,7 +22046,7 @@
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             `;
             loadingDiv.innerHTML = `
-                <div style="background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                <div style="background: transparent; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
                     <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
                     <div style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 8px;">${title}</div>
                     <div id="importProgress" style="font-size: 14px; color: #666;">Starting...</div>
@@ -22736,7 +22708,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background: white;
+            background: transparent;
         }
         .header {
             text-align: center;
@@ -22767,7 +22739,7 @@
             margin-bottom: 10px;
         }
         .task-item {
-            background: white;
+            background: transparent;
             border: 1px solid #dee2e6;
             border-radius: 6px;
             padding: 15px;
@@ -23761,10 +23733,10 @@
                     <div style="padding: 15px; border-bottom: 1px solid #eee; text-align: center;">
                         <span style="color: #666; margin-right: 15px;">Showing ${startIndex + 1}-${Math.min(endIndex, trash.length)} of ${trash.length} items</span>
                         <button onclick="changeTrashPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} 
-                                style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ddd; background: white; cursor: ${currentPage === 1 ? 'default' : 'pointer'};">← Prev</button>
+                                style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ddd; background: transparent; cursor: ${currentPage === 1 ? 'default' : 'pointer'};">← Prev</button>
                         <span style="margin: 0 10px;">Page ${currentPage} of ${totalPages}</span>
                         <button onclick="changeTrashPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} 
-                                style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ddd; background: white; cursor: ${currentPage === totalPages ? 'default' : 'pointer'};">Next →</button>
+                                style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ddd; background: transparent; cursor: ${currentPage === totalPages ? 'default' : 'pointer'};">Next →</button>
                     </div>
                 `;
                 container.innerHTML = paginationHtml;
@@ -24903,7 +24875,7 @@
             // Populate mobile version with dropdown-style filters
             if (mobileContainer && sortedTemplates.length > 0) {
                 let mobileHtml = '<div style="display: flex; flex-direction: column; gap: 8px;">';
-                mobileHtml += '<select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white;" onchange="handleMobileTemplateFilter(this.value)">';
+                mobileHtml += '<select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: transparent;" onchange="handleMobileTemplateFilter(this.value)">';
                 mobileHtml += '<option value="">All tasks</option>';
                 
                 sortedTemplates.forEach(template => {
@@ -26589,7 +26561,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 20px;
-            background: white;
+            background: transparent;
             color: #333;
             line-height: 1.6;
         }
@@ -26847,7 +26819,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background: white;
+            background: transparent;
             color: #333;
             line-height: 1.6;
         }
@@ -30122,7 +30094,7 @@
     
     <!-- Streamlined DateTime Picker Modal -->
     <div id="dateTimePickerModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;" onclick="closeDateTimePicker(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 450px; margin: 15vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 450px; margin: 15vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
             
             <!-- Modal Header -->
             <div style="background: #007bff; color: white; padding: 16px 20px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
@@ -30143,12 +30115,12 @@
                 <div style="margin-bottom: 20px;">
                     <div style="font-size: 13px; color: #666; margin-bottom: 10px; font-weight: 600;">Quick Presets:</div>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
-                        <button onclick="quickPreset('today')" style="padding: 8px 12px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">Today</button>
-                        <button onclick="quickPreset('tomorrow')" style="padding: 8px 12px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">Tomorrow</button>
-                        <button onclick="quickPreset('+1w')" style="padding: 8px 12px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">1 Week</button>
-                        <button onclick="quickPreset('+1m')" style="padding: 8px 12px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">1 Month</button>
-                        <button onclick="quickPreset('+1d')" style="padding: 8px 12px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">+1 Day</button>
-                        <button onclick="quickPreset('clear')" style="padding: 8px 12px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">Clear</button>
+                        <button onclick="quickPreset('today')" style="padding: 8px 12px; border: 1px solid #ddd; background: transparent; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">Today</button>
+                        <button onclick="quickPreset('tomorrow')" style="padding: 8px 12px; border: 1px solid #ddd; background: transparent; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">Tomorrow</button>
+                        <button onclick="quickPreset('+1w')" style="padding: 8px 12px; border: 1px solid #ddd; background: transparent; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">1 Week</button>
+                        <button onclick="quickPreset('+1m')" style="padding: 8px 12px; border: 1px solid #ddd; background: transparent; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">1 Month</button>
+                        <button onclick="quickPreset('+1d')" style="padding: 8px 12px; border: 1px solid #ddd; background: transparent; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">+1 Day</button>
+                        <button onclick="quickPreset('clear')" style="padding: 8px 12px; border: 1px solid #ddd; background: transparent; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">Clear</button>
                     </div>
                 </div>
                 
@@ -30200,7 +30172,7 @@
 
     <!-- Weekly Support Reminder Pop-up -->
     <div id="supportReminder" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; backdrop-filter: blur(2px);">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; padding: 40px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); text-align: center;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: transparent; border-radius: 20px; padding: 40px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); text-align: center;">
             <div style="font-size: 3em; margin-bottom: 20px;">🎉</div>
             <h2 style="color: #333; margin-bottom: 15px; font-size: 1.8em;">Loving HyperFiler Pro?</h2>
             <p style="color: #666; margin-bottom: 30px; line-height: 1.6; font-size: 1.1em;">
@@ -30308,7 +30280,7 @@
     
     <!-- Bulk Time Selection Modal -->
     <div id="bulkTimeModal" class="modal" onclick="closeBulkTimeModal(event)" style="z-index: 1200;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 400px; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 400px; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; position: relative;">
@@ -30326,7 +30298,7 @@
                 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; font-weight: 600; color: #333; margin-bottom: 8px; font-size: 14px;">Time:</label>
-                    <select id="bulkTimeSelect" style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; background: white;">
+                    <select id="bulkTimeSelect" style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; background: transparent;">
                         <option value="">No specific time</option>
                     </select>
                 </div>
