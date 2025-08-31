@@ -4575,6 +4575,53 @@
         </div>
     </div>
 
+    <!-- Settings View -->
+    <div id="settings-view" class="tasks-section hidden">
+        <div class="section-header">
+            <h3>Settings</h3>
+        </div>
+        <div class="settings-content" style="padding: 20px;">
+            <!-- Settings content will be loaded here -->
+            <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
+                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">Language / Idioma</h4>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="switchLanguage('en')" 
+                            style="background: none; border: 2px solid #ddd; font-size: 14px; cursor: pointer; padding: 8px 16px; border-radius: 6px; transition: all 0.2s;"
+                            id="lang-en-btn">
+                        🇬🇧 English
+                    </button>
+                    <button onclick="switchLanguage('es')" 
+                            style="background: none; border: 2px solid #ddd; font-size: 14px; cursor: pointer; padding: 8px 16px; border-radius: 6px; transition: all 0.2s;"
+                            id="lang-es-btn">
+                        🇪🇸 Español
+                    </button>
+                </div>
+            </div>
+            
+            <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
+                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">Display Options</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div>
+                        <label style="font-size: 14px; color: #4a5568; font-weight: 500; margin-bottom: 5px; display: block;">Date Format:</label>
+                        <select id="dateFormatSelect" onchange="saveDateFormat()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
+                            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 14px; color: #4a5568; font-weight: 500; margin-bottom: 5px; display: block;">Time Format:</label>
+                        <select id="timeFormatSelect" onchange="saveTimeFormat()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
+                            <option value="default">Default</option>
+                            <option value="12hour">12-hour (AM/PM)</option>
+                            <option value="24hour">24-hour</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal" onclick="closeSettings(event)">
         <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 1000px; margin: 1vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 98vh; overflow: hidden; display: flex; flex-direction: column;">
@@ -13847,6 +13894,7 @@
             const listsView = document.getElementById('lists-view');
             const repeatView = document.getElementById('repeat-view');
             const undoView = document.getElementById('undo-view');
+            const settingsView = document.getElementById('settings-view');
             const searchSection = document.getElementById('search-section');
             
             todayView.classList.toggle('hidden', viewName !== 'today');
@@ -13857,6 +13905,7 @@
             listsView.classList.toggle('hidden', viewName !== 'lists');
             repeatView.classList.toggle('hidden', viewName !== 'repeat');
             undoView.classList.toggle('hidden', viewName !== 'undo');
+            settingsView.classList.toggle('hidden', viewName !== 'settings');
             searchSection.style.display = viewName === 'search' ? 'block' : 'none';
             
             // Update view
@@ -13882,6 +13931,8 @@
                 renderRepeatView();
             } else if (viewName === 'undo') {
                 renderUndoView();
+            } else if (viewName === 'settings') {
+                renderSettingsView();
             } else if (viewName === 'search') {
                 document.getElementById('searchInput').focus();
                 performSearch(); // Show all tasks initially
@@ -21675,6 +21726,11 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        function renderSettingsView() {
+            console.log('🔧 renderSettingsView called');
+            loadSettingsValues();
         }
 
         // Refresh undo view
