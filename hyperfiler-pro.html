@@ -13440,6 +13440,7 @@
 
         // Open custom date/time picker modal
         function openDateTimeModal() {
+            console.log('🔧 DEBUG: openDateTimeModal called');
             console.log('Opening date time modal...');
             
             // Set current values if they exist
@@ -13479,8 +13480,12 @@
             // Show modal
             const modal = document.getElementById('dateTimeModal');
             console.log('Modal element:', modal);
-            modal.style.display = 'block';
-            console.log('Modal should be visible now');
+            if (modal) {
+                modal.style.display = 'block';
+                console.log('Modal should be visible now');
+            } else {
+                console.error('dateTimeModal not found!');
+            }
             
             // Set auto-close timer for 4 seconds
             setDateTimeModalTimeout();
