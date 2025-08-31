@@ -60,10 +60,6 @@
             h1 {
                 display: none;
             }
-            
-            .repeat-badge {
-                display: none;
-            }
         }
 
         .main-nav {
@@ -3786,7 +3782,7 @@
 
     <!-- Task Edit Modal -->
     <div id="taskModal" class="modal" onclick="closeTaskModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 480px; margin: 2vh auto; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; padding: 0; max-height: none;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 350px; margin: 15vh auto 5vh; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; padding: 0; max-height: 65vh;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #1877f2 0%, #42a5f5 100%); color: white; padding: 20px 24px; position: relative;">
@@ -8211,6 +8207,9 @@
 
         // Show premium badge
         function showPremiumBadge() {
+            // Don't show on mobile
+            if (window.innerWidth <= 768) return;
+            
             const premiumBadge = document.createElement('div');
             premiumBadge.style.cssText = `
                 position: fixed;
