@@ -3890,7 +3890,8 @@
 
     <!-- Custom Date/Time Picker Modal -->
     <div id="dateTimeModal" class="modal" onclick="closeDateTimeModal(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 500px; margin: 5vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 20px; position: relative;">
+        <!-- Desktop Version -->
+        <div class="modal-content desktop-only" onclick="event.stopPropagation()" style="max-width: 500px; margin: 5vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 20px; position: relative;">
             <h3 style="margin: 0 0 20px 0; color: #1877f2; text-align: center;">📅 Select Date & Time</h3>
             
             <!-- Date Calendar Grid -->
@@ -3941,6 +3942,34 @@
             <div style="display: flex; gap: 10px; justify-content: flex-end;">
                 <button onclick="closeDateTimeModal()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Cancel</button>
                 <button onclick="applyDateTime()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Apply</button>
+            </div>
+        </div>
+        
+        <!-- Mobile Version - Simple -->
+        <div class="modal-content mobile-only" onclick="event.stopPropagation()" style="max-width: 320px; margin: 20vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 20px;">
+            <h3 style="margin: 0 0 20px 0; color: #1877f2; text-align: center; font-size: 16px;">📅 When?</h3>
+            
+            <!-- Quick Date Options -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px;">
+                <button onclick="selectQuickDate('today')" style="padding: 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; cursor: pointer;">Today</button>
+                <button onclick="selectQuickDate('tomorrow')" style="padding: 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; cursor: pointer;">Tomorrow</button>
+                <button onclick="selectQuickDate('monday')" style="padding: 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; cursor: pointer;">Monday</button>
+                <button onclick="selectQuickDate('friday')" style="padding: 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; cursor: pointer;">Friday</button>
+            </div>
+            
+            <!-- Quick Time Options -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 20px;">
+                <button onclick="selectQuickTime('09:00')" style="padding: 8px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; cursor: pointer; font-size: 12px;">9 AM</button>
+                <button onclick="selectQuickTime('12:00')" style="padding: 8px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; cursor: pointer; font-size: 12px;">12 PM</button>
+                <button onclick="selectQuickTime('15:00')" style="padding: 8px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; cursor: pointer; font-size: 12px;">3 PM</button>
+                <button onclick="selectQuickTime('18:00')" style="padding: 8px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; cursor: pointer; font-size: 12px;">6 PM</button>
+                <button onclick="selectQuickTime('')" style="padding: 8px; background: #fff5f5; border: 1px solid #dc3545; border-radius: 6px; cursor: pointer; font-size: 12px; color: #dc3545;">No time</button>
+                <button onclick="openFullDatePicker()" style="padding: 8px; background: #e3f2fd; border: 1px solid #1877f2; border-radius: 6px; cursor: pointer; font-size: 12px; color: #1877f2;">Custom</button>
+            </div>
+            
+            <div style="display: flex; gap: 8px;">
+                <button onclick="closeDateTimeModal()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">Cancel</button>
+                <button onclick="applyDateTime()" style="flex: 1; background: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">Apply</button>
             </div>
         </div>
     </div>
@@ -13123,6 +13152,53 @@
             setTimeout(() => {
                 saveTaskEdit();
             }, 100);
+        }
+
+        // Mobile quick date functions
+        function selectQuickDate(type) {
+            const today = new Date();
+            let targetDate;
+            
+            switch(type) {
+                case 'today':
+                    targetDate = today;
+                    break;
+                case 'tomorrow':
+                    targetDate = new Date(today);
+                    targetDate.setDate(today.getDate() + 1);
+                    break;
+                case 'monday':
+                    targetDate = new Date(today);
+                    const daysUntilMonday = (8 - today.getDay()) % 7 || 7;
+                    targetDate.setDate(today.getDate() + daysUntilMonday);
+                    break;
+                case 'friday':
+                    targetDate = new Date(today);
+                    const daysUntilFriday = (5 - today.getDay() + 7) % 7 || 7;
+                    targetDate.setDate(today.getDate() + daysUntilFriday);
+                    break;
+            }
+            
+            selectedDate = getLocalDateString(targetDate);
+        }
+        
+        function selectQuickTime(time) {
+            if (time === '') {
+                selectedHour = null;
+                selectedMinute = null;
+            } else {
+                const [hour, minute] = time.split(':');
+                selectedHour = hour;
+                selectedMinute = minute;
+            }
+        }
+        
+        function openFullDatePicker() {
+            // Hide mobile version and show desktop version
+            document.querySelector('.modal-content.mobile-only').style.display = 'none';
+            document.querySelector('.modal-content.desktop-only').style.display = 'block';
+            generateCalendar();
+            generateHourButtons();
         }
 
         // Update the display button text
