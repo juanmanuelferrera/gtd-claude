@@ -2983,11 +2983,12 @@
             }
             
             .mobile-header-title {
-                font-size: 18px;
+                font-size: 16px;
                 font-weight: 600;
                 flex: 1;
                 text-transform: uppercase;
                 text-align: center;
+                line-height: 1.1;
             }
             
             .mobile-header-btn {
@@ -9190,7 +9191,13 @@
             if (headerTitle) {
                 const titleData = titles[viewName];
                 if (titleData) {
-                    headerTitle.textContent = titleData.emoji + ' ' + translateText(titleData.key);
+                    if (viewName === 'today') {
+                        const today = new Date();
+                        const dateStr = today.toLocaleDateString('es-ES', {weekday: 'short', day: 'numeric', month: 'short'});
+                        headerTitle.innerHTML = `${titleData.emoji} ${translateText(titleData.key)}<br><small style="font-size: 12px; font-weight: 400; text-transform: none;">${dateStr}</small>`;
+                    } else {
+                        headerTitle.textContent = titleData.emoji + ' ' + translateText(titleData.key);
+                    }
                 } else {
                     headerTitle.textContent = viewName;
                 }
@@ -9659,7 +9666,13 @@
                 if (headerTitle) {
                     const titleData = titles[currentView];
                     if (titleData) {
-                        headerTitle.textContent = titleData.emoji + ' ' + translateText(titleData.key);
+                        if (currentView === 'today') {
+                            const today = new Date();
+                            const dateStr = today.toLocaleDateString('es-ES', {weekday: 'short', day: 'numeric', month: 'short'});
+                            headerTitle.innerHTML = `${titleData.emoji} ${translateText(titleData.key)}<br><small style="font-size: 12px; font-weight: 400; text-transform: none;">${dateStr}</small>`;
+                        } else {
+                            headerTitle.textContent = titleData.emoji + ' ' + translateText(titleData.key);
+                        }
                     } else {
                         headerTitle.textContent = currentView;
                     }
