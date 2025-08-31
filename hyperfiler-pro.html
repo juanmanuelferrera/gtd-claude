@@ -10083,7 +10083,9 @@
         
         function setTaskModalTimeout() {
             clearTaskModalTimeout();
+            console.log('⏰ Setting 6 second timeout for task modal');
             taskModalAutoHideTimeout = setTimeout(() => {
+                console.log('⏰ 6 seconds elapsed - closing task modal');
                 closeTaskModal();
             }, 6000);
         }
