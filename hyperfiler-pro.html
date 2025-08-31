@@ -29,11 +29,143 @@
             box-sizing: border-box;
         }
 
+        /* ========== THINGS APP DESIGN SYSTEM ========== */
+        :root {
+            /* Things-inspired Color Palette */
+            --things-bg: #ffffff;
+            --things-surface: #f8f9fa;
+            --things-border: #e5e5e7;
+            --things-text: #1d1d1f;
+            --things-text-secondary: #666666;
+            --things-text-tertiary: #8e8e93;
+            --things-accent: #007aff;
+            --things-success: #34c759;
+            --things-warning: #ff9500;
+            --things-danger: #ff3b30;
+            --things-shadow: rgba(0, 0, 0, 0.05);
+            --things-shadow-elevated: rgba(0, 0, 0, 0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --things-bg: #000000;
+                --things-surface: #1c1c1e;
+                --things-border: #2c2c2e;
+                --things-text: #ffffff;
+                --things-text-secondary: #98989d;
+                --things-text-tertiary: #636366;
+                --things-shadow: rgba(0, 0, 0, 0.3);
+                --things-shadow-elevated: rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        /* Things-style Typography */
+        .things-typography {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-size: 16px;
+            line-height: 1.4;
+            color: var(--things-text);
+            font-weight: 400;
+            letter-spacing: -0.01em;
+        }
+
+        .things-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--things-text);
+            line-height: 1.3;
+        }
+
+        .things-subtitle {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--things-text-secondary);
+            line-height: 1.35;
+        }
+
+        .things-caption {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--things-text-tertiary);
+            line-height: 1.3;
+        }
+
+        /* Things-style Spacing System */
+        .things-spacing {
+            padding: 16px 20px;
+            margin-bottom: 8px;
+        }
+
+        .things-tight-spacing {
+            padding: 8px 12px;
+        }
+
+        .things-content-padding {
+            padding: 20px;
+        }
+
+        .things-rhythm {
+            margin-bottom: 12px;
+        }
+
+        /* Purposeful Animations */
+        .things-animation {
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .things-micro-animation {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Touch-Friendly Targets */
+        .touch-target {
+            min-height: 44px;
+            min-width: 44px;
+            padding: 12px 16px;
+            cursor: pointer;
+        }
+
+        /* Invisible UI Elements */
+        .invisible-ui {
+            border: none;
+            background: transparent;
+            box-shadow: none;
+            transition: all 0.2s ease;
+        }
+
+        .invisible-ui:hover {
+            background: var(--things-shadow);
+        }
+
+        /* Things-style Task Completion Animation */
+        @keyframes completeTask {
+            0% { 
+                opacity: 1; 
+                transform: scale(1); 
+            }
+            50% { 
+                opacity: 0.5; 
+                transform: scale(0.95); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: scale(0.9) translateX(100%); 
+            }
+        }
+
+        .task-complete-animation {
+            animation: completeTask 0.4s ease-out forwards;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--things-bg);
+            color: var(--things-text);
             padding: 0;
             min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.4;
+            letter-spacing: -0.01em;
         }
 
         .header-section {
@@ -44,7 +176,7 @@
         .container {
             max-width: 100%;
             margin: 0;
-            padding: 0 16px;
+            padding: 0 20px; /* Things-style edge padding */
             min-height: 100vh;
             transition: background 0.3s ease;
         }
@@ -951,11 +1083,15 @@
         }
 
         .task-card {
-            border-left: 4px solid #ddd;
-            padding: 15px 20px;
-            border-bottom: 1px solid #eee;
-            transition: all 0.3s ease;
+            border-left: 4px solid var(--things-border);
+            padding: 16px 20px; /* Things generous padding */
+            border-bottom: 1px solid var(--things-border);
+            background: var(--things-bg);
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring easing */
             cursor: pointer;
+            margin-bottom: 8px; /* Things rhythm spacing */
+            border-radius: 8px; /* Soft corners like Things */
+            box-shadow: 0 1px 3px var(--things-shadow);
         }
 
         .task-card:last-child {
@@ -963,8 +1099,9 @@
         }
 
         .task-card:hover {
-            background: #f8f9fa;
-            transform: translateX(5px);
+            background: var(--things-surface);
+            transform: translateY(-1px); /* Subtle lift like Things */
+            box-shadow: 0 4px 12px var(--things-shadow-elevated);
         }
 
         .task-card.completed {
@@ -999,26 +1136,33 @@
         }
 
         .task-title {
-            font-weight: 600;
-            color: #333;
+            font-size: 16px; /* Things standard size */
+            font-weight: 500; /* Things medium weight */
+            color: var(--things-text);
+            line-height: 1.4; /* Things line height */
+            letter-spacing: -0.01em; /* Apple-style tight spacing */
             flex: 1;
             margin-right: 10px;
+            margin-bottom: 4px; /* Things micro-spacing */
         }
 
         .task-meta {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 12px;
-            color: #666;
+            font-size: 14px; /* Things subtitle size */
+            color: var(--things-text-secondary); /* Things secondary text */
+            line-height: 1.35; /* Things subtitle line height */
+            font-weight: 400;
             margin-bottom: 8px;
         }
 
 
         .task-notes {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.4;
+            font-size: 13px; /* Things caption size */
+            color: var(--things-text-tertiary); /* Things tertiary text */
+            line-height: 1.3; /* Things caption line height */
+            font-weight: 400;
             margin-bottom: 10px;
             /* Limit to 2 lines in Today view */
             overflow: hidden;
@@ -1345,9 +1489,9 @@
         }
 
         @media (max-width: 480px) {
-            /* Overall container improvements */
+            /* Overall container improvements - Things edge-to-edge */
             .container {
-                padding: 3px; /* Reduced from 5px for more content space */
+                padding: 0 16px; /* Things-style edge padding for mobile */
             }
 
             /* ONLY essential mobile touch fixes */
@@ -1400,10 +1544,21 @@
             }
 
             .nav-btn {
-                padding: 12px 16px;
+                padding: 12px 16px; /* Thumb-friendly padding */
                 font-size: 14px;
-                min-width: 44px;
-                min-height: 44px;
+                min-width: 44px; /* Apple HIG minimum */
+                min-height: 44px; /* Apple HIG minimum */
+                transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring */
+            }
+
+            /* Things-style mobile task cards */
+            .task-card {
+                margin: 0 -16px 8px -16px; /* Extend to edges */
+                border-radius: 0; /* Clean edge-to-edge */
+                border-left: none;
+                border-bottom: 1px solid var(--things-border);
+                padding: 16px; /* Generous internal padding */
+                background: var(--things-bg);
             }
 
             .calendar-day {
@@ -1853,23 +2008,24 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            width: 56px; /* Apple HIG recommended size */
+            height: 56px;
+            background: var(--things-accent); /* Things blue */
             border-radius: 50%;
-            box-shadow: 0 4px 20px rgba(40, 167, 69, 0.4);
+            box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3); /* Things-style shadow */
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            transition: all 0.3s ease;
+            border: none;
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring */
         }
 
         .floating-add-task:hover {
-            transform: scale(1.1) translateY(-2px);
-            box-shadow: 0 6px 25px rgba(40, 167, 69, 0.5);
-            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+            transform: scale(1.05) translateY(-2px); /* Subtle Things-like scale */
+            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4); /* Elevated Things shadow */
+            background: #0056b3; /* Darker Things blue on hover */
         }
 
         .floating-add-icon {
@@ -2960,15 +3116,18 @@
                 left: 0;
                 right: 0;
                 height: 64px; /* Increased from 56px to prevent cutoff */
-                background: #1877f2;
-                color: white;
+                background: var(--things-bg); /* Things background */
+                color: var(--things-text); /* Things text */
+                border-bottom: 1px solid var(--things-border); /* Things border */
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                padding: 0 16px;
+                padding: 0 16px; /* Things edge padding */
                 padding-top: env(safe-area-inset-top, 8px); /* Add safe area support */
                 z-index: 1000;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                box-shadow: 0 1px 3px var(--things-shadow); /* Things subtle shadow */
+                backdrop-filter: blur(10px); /* iOS-style blur */
+                -webkit-backdrop-filter: blur(10px);
             }
             
             .mobile-header-left,
@@ -2994,23 +3153,23 @@
             }
             
             .mobile-header-btn {
-                background: rgba(255,255,255,0.2);
+                background: transparent;
                 border: none;
-                color: white;
-                padding: 8px;
+                color: var(--things-text);
+                padding: 12px; /* Thumb-friendly */
                 border-radius: 8px;
                 font-size: 18px;
                 cursor: pointer;
-                transition: background 0.2s;
-                min-width: 40px;
-                min-height: 40px;
+                transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring */
+                min-width: 44px; /* Apple HIG minimum */
+                min-height: 44px; /* Apple HIG minimum */
                 display: flex;
                 align-items: center;
                 justify-content: center;
             }
             
             .mobile-header-btn:hover {
-                background: rgba(255,255,255,0.3);
+                background: var(--things-shadow); /* Things subtle hover */
             }
             
             .mobile-bottom-nav {
@@ -3019,13 +3178,15 @@
                 left: 0;
                 right: 0;
                 height: 64px;
-                background: white;
-                border-top: 1px solid #e1e5e9;
+                background: var(--things-bg); /* Things background */
+                border-top: 1px solid var(--things-border); /* Things border */
                 display: flex;
                 align-items: center;
                 justify-content: space-around;
                 z-index: 1000;
-                box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+                box-shadow: 0 -1px 3px var(--things-shadow); /* Things subtle shadow */
+                backdrop-filter: blur(10px); /* iOS-style blur */
+                -webkit-backdrop-filter: blur(10px);
             }
             
             .mobile-nav-btn {
@@ -3033,32 +3194,36 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                padding: 6px 12px;
-                background: rgba(0,0,0,0.05);
-                border: 1px solid #e1e5e9;
-                color: #333;
+                padding: 12px 16px; /* Thumb-friendly padding */
+                min-height: 44px; /* Apple HIG minimum touch target */
+                min-width: 44px;
+                background: var(--things-bg);
+                border: 1px solid var(--things-border);
+                color: var(--things-text);
                 font-size: 11px;
                 font-weight: 600;
                 cursor: pointer;
-                transition: all 0.2s;
-                min-width: 48px;
-                min-height: 48px;
+                transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring */
                 border-radius: 8px;
                 flex: 1;
                 max-width: 80px;
+                box-shadow: 0 1px 3px var(--things-shadow);
             }
             
             .mobile-nav-btn.active {
-                color: #1877f2;
-                background: rgba(24, 119, 242, 0.1);
+                color: var(--things-accent);
+                background: rgba(0, 122, 255, 0.1); /* Things blue tint */
+                box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
             }
             
             .mobile-nav-btn:hover {
-                background: rgba(0,0,0,0.05);
+                background: var(--things-shadow);
+                transform: translateY(-1px); /* Subtle Things lift */
             }
             
             .mobile-nav-btn.active:hover {
-                background: rgba(24, 119, 242, 0.15);
+                background: rgba(0, 122, 255, 0.15);
+                transform: translateY(-1px);
             }
             
             .mobile-nav-icon {
@@ -3126,9 +3291,9 @@
     <div class="mobile-only mobile-header">
         <div class="mobile-header-left">
             <input type="text" id="mobileSearchInput" placeholder="🔍 Search..." style="
-                background: rgba(255,255,255,0.2);
-                border: none;
-                color: white;
+                background: var(--things-surface);
+                border: 1px solid var(--things-border);
+                color: var(--things-text);
                 padding: 8px 12px;
                 border-radius: 8px;
                 font-size: 14px;
@@ -3136,6 +3301,7 @@
                 outline: none;
                 flex: 1;
                 margin-right: 8px;
+                transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             " oninput="performMobileSearch(this.value)" />
         </div>
         <div class="mobile-header-title" id="mobileHeaderTitle">
@@ -3149,42 +3315,42 @@
     </div>
 
     <div class="mobile-only mobile-bottom-nav">
-        <button class="mobile-nav-btn active" onclick="switchToMobileView('today')" id="mobileNavToday">
+        <button class="mobile-nav-btn active" onclick="provideFeedback(this); switchToMobileView('today')" id="mobileNavToday">
             <div class="mobile-nav-icon">🔥</div>
             <div data-translate="Today">Today</div>
         </button>
-        <button class="mobile-nav-btn" id="mobileBottomAddBtn" onclick="openAddTaskModalMobile()">
+        <button class="mobile-nav-btn" id="mobileBottomAddBtn" onclick="provideFeedback(this); openAddTaskModalMobile()">
             <div class="mobile-nav-icon">➕</div>
             <div data-translate="Add">Add</div>
         </button>
-        <button class="mobile-nav-btn" onclick="switchToMobileView('week')" id="mobileNavWeek">
+        <button class="mobile-nav-btn" onclick="provideFeedback(this); switchToMobileView('week')" id="mobileNavWeek">
             <div class="mobile-nav-icon">📅</div>
             <div data-translate="Week">Week</div>
         </button>
-        <button class="mobile-nav-btn" onclick="switchToMobileView('lists')" id="mobileNavLists">
+        <button class="mobile-nav-btn" onclick="provideFeedback(this); switchToMobileView('lists')" id="mobileNavLists">
             <div class="mobile-nav-icon">📝</div>
             <div data-translate="Lists">Lists</div>
         </button>
-        <button class="mobile-nav-btn" onclick="toggleMobileMoreMenu()" id="mobileNavMore">
+        <button class="mobile-nav-btn" onclick="provideFeedback(this); toggleMobileMoreMenu()" id="mobileNavMore">
             <div class="mobile-nav-icon">⋯</div>
             <div data-translate="More">More</div>
         </button>
     </div>
 
     <div class="mobile-only mobile-more-menu" id="mobileMoreMenu">
-        <button class="mobile-more-item" onclick="switchToMobileView('calendar'); hideMobileMoreMenu();">
+        <button class="mobile-more-item" onclick="provideFeedback(this); switchToMobileView('calendar'); hideMobileMoreMenu();">
             <div class="mobile-more-icon">📅</div>
             <div>Month View</div>
         </button>
-        <button class="mobile-more-item" onclick="switchToMobileView('all'); hideMobileMoreMenu();">
+        <button class="mobile-more-item" onclick="provideFeedback(this); switchToMobileView('all'); hideMobileMoreMenu();">
             <div class="mobile-more-icon">📊</div>
             <div>All Tasks</div>
         </button>
-        <button class="mobile-more-item" onclick="switchToMobileView('repeat'); hideMobileMoreMenu();">
+        <button class="mobile-more-item" onclick="provideFeedback(this); switchToMobileView('repeat'); hideMobileMoreMenu();">
             <div class="mobile-more-icon">🔄</div>
             <div>Recurring</div>
         </button>
-        <button class="mobile-more-item" onclick="undoLastAction(); hideMobileMoreMenu();">
+        <button class="mobile-more-item" onclick="provideFeedback(this); undoLastAction(); hideMobileMoreMenu();">
             <div class="mobile-more-icon">↶</div>
             <div>Undo</div>
         </button>
@@ -5793,6 +5959,41 @@
                     restoreMobileNavEmojis();
                 }
             }, 2000); // Check every 2 seconds
+        }
+
+        // ========== THINGS-STYLE MICRO-INTERACTIONS ==========
+        function provideFeedback(element, type = 'success') {
+            if (!element) return;
+            
+            // Scale feedback
+            element.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                element.style.transform = 'scale(1)';
+            }, 100);
+            
+            // Haptic feedback on supported devices
+            if (navigator.vibrate) {
+                navigator.vibrate(type === 'success' ? [10] : [10, 50, 10]);
+            }
+        }
+
+        // Instant response system for interactions
+        function instantResponse(element, action) {
+            // Immediate visual feedback
+            provideFeedback(element);
+            
+            // Immediate UI update
+            if (typeof action === 'function') {
+                requestAnimationFrame(action);
+            }
+        }
+
+        // Task completion animation
+        function animateTaskCompletion(taskElement) {
+            taskElement.style.animation = 'completeTask 0.4s ease-out forwards';
+            setTimeout(() => {
+                taskElement.style.display = 'none';
+            }, 400);
         }
 
         // Load preferred language on startup
