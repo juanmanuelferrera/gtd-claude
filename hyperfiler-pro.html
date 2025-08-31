@@ -4350,33 +4350,6 @@
                     
                 </div>
 
-                <!-- Time Slots Configuration Section -->
-                <div class="settings-section" style="padding: 20px; border-bottom: 1px solid #e0e0e0;">
-                    <h4 style="margin: 0 0 15px 0; color: #1877f2; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                        🕐 Quick Time Slots
-                    </h4>
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px;">
-                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #495057;">Configure Quick Drop Time Slots for Today View:</label>
-                        <div id="timeSlotInputs" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-                            <!-- Time slot inputs will be generated here -->
-                        </div>
-                        <div style="display: flex; gap: 8px; margin-top: 10px;">
-                            <button onclick="addTimeSlot()" 
-                                    style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                                + Add Slot
-                            </button>
-                            <button onclick="resetTimeSlots()" 
-                                    style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                                Reset to Default
-                            </button>
-                            <button onclick="saveTimeSlots()" 
-                                    style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                                Save Changes
-                            </button>
-                        </div>
-                        <small style="color: #6c757d; margin-top: 8px; display: block;">These time slots appear as quick drop zones when dragging tasks in Today view.</small>
-                    </div>
-                </div>
 
                 <!-- Auto-Print Settings Section -->
                 <div class="settings-section" style="padding: 20px;">
@@ -9198,7 +9171,7 @@
                         const currentDate = getCurrentTodayDate();
                         const monthNames = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
                         const monthName = monthNames[currentDate.getMonth()];
-                        headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer;">${titleData.emoji} ${monthName}</span>`;
+                        headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold;">${monthName}</span>`;
                     } else {
                         headerTitle.textContent = titleData.emoji + ' ' + translateText(titleData.key);
                     }
@@ -9554,7 +9527,7 @@
                     const currentDate = getCurrentTodayDate();
                     const monthNames = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
                     const monthName = monthNames[currentDate.getMonth()];
-                    headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer;">🔥 ${monthName}</span>`;
+                    headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold;">${monthName}</span>`;
                 }
             }
         }
@@ -9692,7 +9665,7 @@
                             const currentDate = getCurrentTodayDate();
                             const monthNames = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
                             const monthName = monthNames[currentDate.getMonth()];
-                            headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer;">${titleData.emoji} ${monthName}</span>`;
+                            headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold;">${monthName}</span>`;
                         } else {
                             headerTitle.textContent = titleData.emoji + ' ' + translateText(titleData.key);
                         }
@@ -25486,31 +25459,7 @@
                 `;
             });
             
-            // Add quick time slot drop targets (only show during drag operations)
-            const quickTimeSlots = getQuickTimeSlots();
-            const availableQuickSlots = quickTimeSlots.filter(slot => !timeSlots[slot]);
-            
-            if (availableQuickSlots.length > 0) {
-                html += `
-                    <div class="quick-drop-slots" style="display: none;" id="quickDropSlots">
-                        <div class="time-block-header" style="background: #e8f4f8; color: #0369a1;">
-                            <span>⚡ Quick Drop Zones</span>
-                        </div>
-                        <div class="quick-slots-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; padding: 15px;">
-                            ${availableQuickSlots.map(slot => `
-                                <div class="quick-drop-slot" 
-                                     ondragover="handleTodayDragOver(event)" 
-                                     ondrop="handleTodayDrop(event)" 
-                                     ondragleave="handleTodayDragLeave(event)"
-                                     data-time-slot="${slot}"
-                                     style="background: #f0f9ff; border: 2px dashed #0369a1; border-radius: 8px; padding: 8px; text-align: center; font-size: 12px; cursor: pointer;">
-                                    ${formatTime(slot)}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
+            // Quick time slots removed - only natural drag and drop between existing time blocks
             
             // Render tasks without specific time
             if (noTimeSlot.length > 0) {
