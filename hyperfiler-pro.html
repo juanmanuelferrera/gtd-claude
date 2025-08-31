@@ -5722,9 +5722,9 @@
                         // Ensure mobile nav icons are preserved
                         const mobileNavBtn = element.parentElement;
                         const iconDiv = mobileNavBtn.querySelector('.mobile-nav-icon');
-                        if (iconDiv && mobileNavBtn.id === 'mobileNavToday' && !iconDiv.textContent.includes('🔥')) {
+                        if (iconDiv && mobileNavBtn.id === 'mobileNavToday') {
                             iconDiv.textContent = '🔥';
-                            console.log('🔥 Fixed missing fire emoji in mobile Today button');
+                            console.log('🔥 Restored fire emoji in mobile Today button');
                         }
                         return;
                     }
@@ -28372,6 +28372,9 @@
                 
                 // Refresh trash display
                 loadModalTrash();
+                
+                // Refresh current view to show restored task
+                renderCurrentView();
                 
                 // Show success message
                 console.log('Task restored from trash:', item.title);
