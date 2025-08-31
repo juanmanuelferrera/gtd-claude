@@ -3489,8 +3489,11 @@
                     </button>
                 </div>
                 
-                <!-- Second Line: Backup -->
+                <!-- Second Line: Import JSON Backup + Quick Backup -->
                 <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <button onclick="openTaskImportModal()" style="flex: 1; background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 12px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
+                        📥 Import JSON Backup
+                    </button>
                     <button onclick="createEmergencyBackup()" style="flex: 1; background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 12px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
                         💾 Quick Backup
                     </button>
