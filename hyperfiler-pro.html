@@ -26631,9 +26631,11 @@
 
         // Render Today View with time blocks
         function renderTodayView() {
-            console.log('renderTodayView called');
+            console.log('📱 renderTodayView called for mobile debug');
             console.log('Current view:', currentView);
+            console.log('📱 Mobile debug - Total tasks:', tasks.length);
             const container = document.getElementById('todaySchedule');
+            console.log('📱 Mobile debug - Container found:', !!container);
             const today = new Date(currentTodayDate);
             const todayStr = getLocalDateString(today);
             
@@ -26665,7 +26667,9 @@
             });
             const exactlyToday = todayTasks.filter(task => task.dueDate === todayStr).length;
             const overdueShown = todayTasks.filter(task => task.dueDate && task.dueDate < todayStr && task.status === 'pending').length;
-            console.log('Today tasks found:', todayTasks.length, `(${exactlyToday} for today + ${overdueShown} overdue shown)`);
+            console.log('📱 Mobile debug - Today tasks found:', todayTasks.length, `(${exactlyToday} for today + ${overdueShown} overdue shown)`);
+            console.log('📱 Mobile debug - Container element:', container);
+            console.log('📱 Mobile debug - Container innerHTML length:', container?.innerHTML?.length || 0);
             
             console.log('🔍 First 5 tasks with dates:', tasks.slice(0, 5).map(t => ({
                 title: t.title?.substring(0, 30),
