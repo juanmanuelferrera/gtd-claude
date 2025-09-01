@@ -10026,6 +10026,62 @@
                 modal.classList.remove('show');
             }
         }
+
+        function showMobileTaskActions(taskId, event) {
+            if (event) event.stopPropagation();
+            
+            // Check if we're on mobile
+            if (window.innerWidth > 768) {
+                // On desktop, just edit the task
+                editTask(taskId, event);
+                return;
+            }
+            
+            const modal = document.getElementById('mobileTaskModal');
+            const modalButtons = document.getElementById('mobileTaskModalButtons');
+            
+            if (!modal || !modalButtons) return;
+            
+            // Clear any existing timeout
+            hideMobileTaskModal();
+            
+            // Create Things-style action panel
+            modalButtons.innerHTML = `
+                <div style="display: flex; justify-content: space-around; width: 100%; margin: 0; padding: 20px; gap: 20px;">
+                    <button onclick="toggleMobileTimeDropdown('${taskId}', event); hideMobileTaskModal()" 
+                        style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px; border-radius: 12px; transition: all 0.2s ease;">
+                        <div style="width: 50px; height: 50px; background: #007bff; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 20px;">
+                            →
+                        </div>
+                        <span style="font-size: 12px; color: #666; font-weight: 500;">Mover</span>
+                    </button>
+                    <button onclick="quickDeleteTask('${taskId}', event); hideMobileTaskModal()" 
+                        style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px; border-radius: 12px; transition: all 0.2s ease;">
+                        <div style="width: 50px; height: 50px; background: #dc3545; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 20px;">
+                            🗑️
+                        </div>
+                        <span style="font-size: 12px; color: #666; font-weight: 500;">Eliminar</span>
+                    </button>
+                    <button onclick="editTask('${taskId}', event); hideMobileTaskModal()" 
+                        style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px; border-radius: 12px; transition: all 0.2s ease;">
+                        <div style="width: 50px; height: 50px; background: #6c757d; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 16px;">
+                            •••
+                        </div>
+                        <span style="font-size: 12px; color: #666; font-weight: 500;">Más</span>
+                    </button>
+                </div>
+            `;
+            
+            // Position modal in center of screen
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.zIndex = '2000';
+            
+            // Show modal
+            modal.classList.add('show');
+        }
         
         // Mobile time dropdown function
         function toggleMobileTimeDropdown(taskId, event) {
@@ -26360,7 +26416,7 @@
                      data-task-id="${task.id}" 
                      ondragstart="handleTodayDragStart(event)"
                      ondragend="handleTodayDragEnd(event)"
-                     onclick="editTask('${escapedTaskId}')"
+                     onclick="showMobileTaskActions('${escapedTaskId}', event)"
                      ontouchstart="handleTaskTouchStart(event)"
                      ontouchmove="handleTaskTouchMove(event)"
                      ontouchend="handleTaskTouchEnd(event)"
