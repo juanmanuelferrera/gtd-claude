@@ -10084,14 +10084,14 @@
                 </div>
             `;
             
-            // Position card to take full width, centered vertically, no overlay
+            // Position card to take full width, positioned naturally in view
             modal.style.position = 'fixed';
-            modal.style.top = '50%';
+            modal.style.top = '200px';
             modal.style.left = '0';
             modal.style.right = '0';
             modal.style.bottom = 'auto';
-            modal.style.transform = 'translateY(-50%)';
-            modal.style.zIndex = '2000';
+            modal.style.transform = 'none';
+            modal.style.zIndex = '1000';
             modal.style.background = 'transparent';
             
             // Show modal
