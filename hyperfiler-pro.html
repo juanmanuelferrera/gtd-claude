@@ -26519,11 +26519,15 @@
                 return `${newHours.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')}`;
             }
             
-            // Group tasks by their actual times (only create slots for existing tasks)
+            // Separate events from regular tasks
+            const events = todayTasks.filter(task => task.isEvent);
+            const regularTasks = todayTasks.filter(task => !task.isEvent);
+            
+            // Group regular tasks by their actual times (only create slots for existing tasks)
             const timeSlots = {};
             const noTimeSlot = [];
             
-            todayTasks.forEach(task => {
+            regularTasks.forEach(task => {
                 const hasValidTime = task.dueTime && task.dueTime !== '' && task.dueTime !== null && task.dueTime !== undefined;
                 
                 if (hasValidTime) {
@@ -26550,6 +26554,20 @@
             const currentTime = today.toTimeString().slice(0, 5);
             
             let html = '';
+            
+            // Render Events section at the top (if any events exist)
+            if (events.length > 0) {
+                html += `
+                    <div class="time-block events-section" style="background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%); margin-bottom: 15px;">
+                        <div class="time-block-header" style="background: transparent; color: white; font-weight: 600;">
+                            <span>🔴 Events (${events.length})</span>
+                        </div>
+                        <div class="time-block-content" style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; margin: 8px;">
+                            ${events.map(task => renderTimeSlotTask(task)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
             
             // Render time slots (only for times that have tasks)
             sortedTimeSlots.forEach(time => {
