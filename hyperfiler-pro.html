@@ -10052,18 +10052,20 @@
                     <div style="background: white; margin: 0; padding: 25px 15px 20px; border-radius: 10px;">
                         <input type="text" id="mobileEditTitle" value="${task.title.replace(/"/g, '&quot;')}" 
                             oninput="autoSaveMobileTaskEdit('${taskId}')"
+                            onblur="saveMobileTaskEdit('${taskId}')"
                             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
                             style="width: 100%; padding: 12px 0; font-size: 17px; border: none; background: transparent; outline: none; font-weight: 400; margin-bottom: 15px; color: #000; line-height: 1.3; border-bottom: 1px solid #e5e5ea;"
                             placeholder="Título de la tarea">
                         
                         <textarea id="mobileEditNotes" placeholder="Notas" 
                             oninput="autoSaveMobileTaskEdit('${taskId}')"
+                            onblur="saveMobileTaskEdit('${taskId}')"
                             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
                             style="width: 100%; padding: 12px 0; font-size: 15px; border: none; background: transparent; outline: none; resize: none; height: 80px; color: #8e8e93; line-height: 1.4; border-bottom: 1px solid #e5e5ea;">${task.notes || ''}</textarea>
                     </div>
                     
                     <div style="background: #2c2c2e; position: absolute; bottom: 0; left: 0; right: 0; padding: 0; display: flex; height: 70px;">
-                        <button onclick="toggleMobileTimeDropdown('${taskId}', event)" 
+                        <button onclick="showMobileDateTimePicker('${taskId}', event)" 
                             style="background: transparent; border: none; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-right: 1px solid #48484a;">
                             <div style="color: white; font-size: 18px; margin-bottom: 4px;">⏰</div>
                             <span style="font-size: 10px; color: #8e8e93; font-weight: 400; text-transform: uppercase;">Time</span>
@@ -10142,6 +10144,8 @@
         // Auto-save function with debouncing to avoid too many saves
         let autoSaveTimeout = null;
         function autoSaveMobileTaskEdit(taskId) {
+            console.log('🔄 Auto-save triggered for task:', taskId);
+            
             // Clear any existing timeout
             if (autoSaveTimeout) {
                 clearTimeout(autoSaveTimeout);
@@ -10149,6 +10153,7 @@
             
             // Debounce auto-save by 500ms
             autoSaveTimeout = setTimeout(() => {
+                console.log('💾 Auto-saving task:', taskId);
                 saveMobileTaskEdit(taskId);
             }, 500);
         }
@@ -10292,67 +10297,147 @@
         }
         
         // Mobile time dropdown function
-        function toggleMobileTimeDropdown(taskId, event) {
+        function showMobileDateTimePicker(taskId, event) {
             event.stopPropagation();
             
             const task = tasks.find(t => t.id == taskId);
             if (!task) return;
             
-            // Create and show time and delay options modal
             const modal = document.getElementById('mobileTaskModal');
             const modalButtons = document.getElementById('mobileTaskModalButtons');
             
-            const times = ['', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'];
+            // Get current date or use task's due date
+            const currentDate = task.dueDate ? new Date(task.dueDate + 'T00:00:00') : new Date();
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
             
-            const changeTimeText = getTranslation('ChangeTime');
+            // Format dates for display
+            const todayStr = getLocalDateString(today);
+            const tomorrowStr = getLocalDateString(tomorrow);
+            
             modalButtons.innerHTML = `
-                <div style="display: flex; justify-content: space-around; width: 100%; margin: 0; padding: 20px; gap: 20px;">
-                    <button onclick="updateTaskTime('${taskId}', '', event); hideMobileTaskModal()" 
-                        style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px; border-radius: 12px; transition: all 0.2s ease;">
-                        <div style="width: 50px; height: 50px; background: #28a745; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 20px;">
-                            📅
+                <div style="background: #1c1c1e; width: 100%; border-radius: 12px; overflow: hidden;">
+                    <!-- Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: #1c1c1e;">
+                        <h3 style="color: white; margin: 0; font-size: 17px; font-weight: 600;">¿Cuándo?</h3>
+                        <button onclick="hideMobileTaskModal()" 
+                            style="background: none; border: none; color: #8e8e93; font-size: 17px; cursor: pointer;">Cancelar</button>
+                    </div>
+                    
+                    <!-- Quick Options -->
+                    <div style="background: #1c1c1e; padding: 0 16px;">
+                        <button onclick="setTaskDateTime('${taskId}', '${todayStr}', null); hideMobileTaskModal()" 
+                            style="background: transparent; border: none; width: 100%; padding: 12px 0; color: white; text-align: left; border-bottom: 1px solid #2c2c2e; cursor: pointer;">
+                            <span style="color: #ffd60a; margin-right: 12px;">⭐</span>Hoy
+                        </button>
+                        <button onclick="setTaskDateTime('${taskId}', '${tomorrowStr}', null); hideMobileTaskModal()" 
+                            style="background: transparent; border: none; width: 100%; padding: 12px 0; color: white; text-align: left; border-bottom: 1px solid #2c2c2e; cursor: pointer;">
+                            <span style="color: #64a5f5; margin-right: 12px;">🌙</span>Esta noche
+                        </button>
+                    </div>
+                    
+                    <!-- Calendar Section -->
+                    <div style="background: #1c1c1e; padding: 16px; color: #8e8e93;">
+                        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; margin-bottom: 12px; font-size: 13px;">
+                            <div>lun</div><div>mar</div><div>mié</div><div>jue</div><div>vie</div><div>sáb</div><div>dom</div>
                         </div>
-                        <span style="font-size: 12px; color: #666; font-weight: 500;">Hoy</span>
-                    </button>
-                    <button onclick="delayTask('${taskId}', 1, event); hideMobileTaskModal()" 
-                        style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px; border-radius: 12px; transition: all 0.2s ease;">
-                        <div style="width: 50px; height: 50px; background: #ffc107; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 20px;">
-                            ☀️
+                        <div id="calendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center;">
+                            ${generateCalendarGrid(currentDate, taskId)}
                         </div>
-                        <span style="font-size: 12px; color: #666; font-weight: 500;">Mañana</span>
-                    </button>
-                    <button onclick="delayTask('${taskId}', 7, event); hideMobileTaskModal()" 
-                        style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px; border-radius: 12px; transition: all 0.2s ease;">
-                        <div style="width: 50px; height: 50px; background: #007bff; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 20px;">
-                            📆
-                        </div>
-                        <span style="font-size: 12px; color: #666; font-weight: 500;">Semana</span>
-                    </button>
-                </div>
-                <div style="padding: 0 20px 20px;">
-                    <select onchange="updateTaskTime('${taskId}', this.value, event); hideMobileTaskModal()" 
-                        onfocus="clearMobileModalTimeout()"
-                        onblur="setMobileModalTimeout()"
-                        style="width: 100%; padding: 15px; font-size: 16px; border: 1px solid #e1e5e9; border-radius: 12px; background: white; color: #333;">
-                        <option value="">⏰ Hora específica</option>
-                        ${times.slice(1).map(time => `
-                            <option value="${time}" ${(task.dueTime || '') === time ? 'selected' : ''}>
-                                ${time}
-                            </option>
-                        `).join('')}
-                    </select>
+                    </div>
+                    
+                    <!-- Some Day Option -->
+                    <div style="background: #1c1c1e; padding: 0 16px 16px;">
+                        <button onclick="setTaskDateTime('${taskId}', null, null); hideMobileTaskModal()" 
+                            style="background: transparent; border: none; width: 100%; padding: 12px 0; color: white; text-align: left; border-bottom: 1px solid #2c2c2e; cursor: pointer;">
+                            <span style="color: #8e8e93; margin-right: 12px;">📂</span>Algún día
+                        </button>
+                        <button onclick="showTaskTimeSelector('${taskId}')" 
+                            style="background: transparent; border: none; width: 100%; padding: 12px 0; color: white; text-align: left; cursor: pointer;">
+                            <span style="color: #8e8e93; margin-right: 12px;">➕</span>Añadir recordatorio
+                        </button>
+                    </div>
                 </div>
             `;
             
-            // Position modal in center of screen
+            // Position modal full screen
             modal.style.position = 'fixed';
-            modal.style.top = '50%';
-            modal.style.left = '50%';
-            modal.style.transform = 'translate(-50%, -50%)';
-            modal.classList.add('show');
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.right = '0';
+            modal.style.bottom = '0';
+            modal.style.transform = 'none';
+            modal.style.zIndex = '1000';
+            modal.style.background = '#1c1c1e';
+            modal.style.borderRadius = '0';
+            modal.style.boxShadow = 'none';
             
-            // Auto-hide after 4 seconds
-            setMobileModalTimeout();
+            // Show modal
+            modal.classList.add('show');
+        }
+        
+        // Helper function to generate calendar grid
+        function generateCalendarGrid(currentDate, taskId) {
+            const today = new Date();
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay() + 1); // Start from Monday
+            
+            let html = '';
+            let date = new Date(startDate);
+            
+            // Generate 6 weeks (42 days) to cover all possible month layouts
+            for (let i = 0; i < 42; i++) {
+                const dateStr = getLocalDateString(date);
+                const isCurrentMonth = date.getMonth() === currentDate.getMonth();
+                const isToday = getLocalDateString(date) === getLocalDateString(today);
+                const dayNumber = date.getDate();
+                
+                const style = `
+                    padding: 8px 4px; 
+                    background: transparent; 
+                    border: none; 
+                    color: ${isCurrentMonth ? 'white' : '#444'}; 
+                    font-size: 16px; 
+                    font-weight: ${isToday ? '600' : '400'};
+                    cursor: pointer;
+                    border-radius: 8px;
+                    ${isToday ? 'background: #007aff;' : ''}
+                `;
+                
+                html += `<button onclick="setTaskDateTime('${taskId}', '${dateStr}', null); hideMobileTaskModal()" style="${style}">${dayNumber}</button>`;
+                
+                date.setDate(date.getDate() + 1);
+            }
+            
+            return html;
+        }
+        
+        // Function to set task date and time
+        function setTaskDateTime(taskId, newDate, newTime) {
+            const taskIndex = tasks.findIndex(t => t.id == taskId);
+            if (taskIndex === -1) return;
+            
+            const task = tasks[taskIndex];
+            
+            // Auto-save current changes first
+            saveMobileTaskEdit(taskId);
+            
+            // Update date and time
+            if (newDate !== undefined) {
+                tasks[taskIndex].dueDate = newDate;
+            }
+            if (newTime !== undefined) {
+                tasks[taskIndex].dueTime = newTime;
+            }
+            
+            // Save and refresh
+            saveTasks();
+            renderCurrentView();
+            
+            console.log(`📅 Updated task "${task.title}" - Date: ${newDate || 'unchanged'}, Time: ${newTime || 'unchanged'}`);
         }
         
         let mobileModalAutoHideTimeout = null;
