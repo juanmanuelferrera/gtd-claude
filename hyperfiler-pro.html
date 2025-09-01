@@ -3124,18 +3124,18 @@
             
             .mobile-task-dropdown.show {
                 display: flex !important;
-                animation: modalSlideIn 0.2s ease-out !important;
+                animation: modalCenterIn 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
             }
             
-            /* Smooth animation for modal appearance */
-            @keyframes modalSlideIn {
+            /* Smooth center animation for modal appearance */
+            @keyframes modalCenterIn {
                 from {
                     opacity: 0;
-                    transform: translateY(-10px);
+                    transform: translate(-50%, -50%) scale(0.9);
                 }
                 to {
                     opacity: 1;
-                    transform: translateY(0);
+                    transform: translate(-50%, -50%) scale(1);
                 }
             }
             
@@ -9982,9 +9982,11 @@
             // Adjust horizontal position with better edge handling
             left = Math.max(10, Math.min(left, viewportWidth - modalWidth - 10));
             
-            // Apply position relative to current viewport
-            modal.style.top = top + 'px';
-            modal.style.left = left + 'px';
+            // Always center the modal for smooth appearance
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
             
             // Show modal
             modal.classList.add('show');
