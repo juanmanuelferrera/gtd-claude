@@ -10318,25 +10318,6 @@
             
             modalButtons.innerHTML = `
                 <div style="background: #2c2c2e; width: 100%; border-radius: 12px; overflow: hidden; max-width: 340px; margin: 0 auto;">
-                    <!-- Header -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: #2c2c2e;">
-                        <h3 style="color: white; margin: 0; font-size: 17px; font-weight: 600;">¿Cuándo?</h3>
-                        <button onclick="hideMobileTaskModal()" 
-                            style="background: none; border: none; color: #8e8e93; font-size: 17px; cursor: pointer;">Cancelar</button>
-                    </div>
-                    
-                    <!-- Quick Options -->
-                    <div style="background: #2c2c2e; padding: 0 8px;">
-                        <button onclick="setTaskDateTime('${taskId}', '${todayStr}', null); hideMobileTaskModal()" 
-                            style="background: transparent; border: none; width: 100%; padding: 6px 8px; color: white; text-align: left; border-bottom: 1px solid #3a3a3c; cursor: pointer; font-size: 16px;">
-                            <span style="color: #ffd60a; margin-right: 8px;">⭐</span>Hoy
-                        </button>
-                        <button onclick="setTaskDateTime('${taskId}', '${tomorrowStr}', null); hideMobileTaskModal()" 
-                            style="background: transparent; border: none; width: 100%; padding: 6px 8px; color: white; text-align: left; border-bottom: 1px solid #3a3a3c; cursor: pointer; font-size: 16px;">
-                            <span style="color: #64a5f5; margin-right: 8px;">🌙</span>Esta noche
-                        </button>
-                    </div>
-                    
                     <!-- Calendar Section -->
                     <div style="background: #2c2c2e; padding: 8px; color: #8e8e93;">
                         <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; margin-bottom: 4px; font-size: 11px;">
