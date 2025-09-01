@@ -3425,26 +3425,6 @@
                 transform: translateY(calc(100% - 15px));
             }
             
-            .mobile-nav-handle {
-                position: absolute;
-                top: -12px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 50px;
-                height: 15px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                padding: 4px;
-            }
-            
-            .handle-bar {
-                width: 35px;
-                height: 4px;
-                background: #d0d0d0;
-                border-radius: 2px;
-            }
             
             .mobile-nav-btn {
                 display: flex !important;
@@ -3573,11 +3553,6 @@
 
     <!-- Collapsible Mobile Navigation -->
     <div class="mobile-only mobile-bottom-nav" id="mobileBottomNav">
-        <!-- Collapse/Expand Handle -->
-        <div class="mobile-nav-handle" onclick="toggleMobileNav()">
-            <div class="handle-bar"></div>
-        </div>
-        
         <button class="mobile-nav-btn active" onclick="provideFeedback(this); switchToMobileView('today')" id="mobileNavToday">
             <div class="mobile-nav-icon">🔥</div>
             <div data-translate="Today">Today</div>
@@ -6305,23 +6280,68 @@
             }, 2000); // Check every 2 seconds
         }
 
-        // Toggle mobile navigation collapse
-        function toggleMobileNav() {
+        // Mobile navigation gesture handling
+        let touchStartY = 0;
+        let touchStartTime = 0;
+        let isSwiping = false;
+        
+        function setupMobileNavGestures() {
             const nav = document.getElementById('mobileBottomNav');
             const body = document.body;
             
-            if (nav.classList.contains('collapsed')) {
-                nav.classList.remove('collapsed');
-                body.classList.remove('nav-collapsed');
-            } else {
-                nav.classList.add('collapsed');
-                body.classList.add('nav-collapsed');
-            }
+            // Touch start on navigation area
+            nav.addEventListener('touchstart', function(e) {
+                touchStartY = e.touches[0].clientY;
+                touchStartTime = Date.now();
+                isSwiping = false;
+            }, { passive: true });
             
-            // Haptic feedback
-            if (navigator.vibrate) {
-                navigator.vibrate(10);
-            }
+            // Touch move to detect swipe direction
+            nav.addEventListener('touchmove', function(e) {
+                if (!touchStartY) return;
+                
+                const touchY = e.touches[0].clientY;
+                const deltaY = touchStartY - touchY;
+                
+                // Only handle vertical swipes
+                if (Math.abs(deltaY) > 10) {
+                    isSwiping = true;
+                    e.preventDefault();
+                }
+            }, { passive: false });
+            
+            // Touch end to execute action
+            nav.addEventListener('touchend', function(e) {
+                if (!touchStartY || !isSwiping) {
+                    touchStartY = 0;
+                    return;
+                }
+                
+                const touchEndY = e.changedTouches[0].clientY;
+                const deltaY = touchStartY - touchEndY;
+                const timeDelta = Date.now() - touchStartTime;
+                
+                // Swipe up to hide, swipe down to show
+                if (Math.abs(deltaY) > 30 && timeDelta < 300) {
+                    if (deltaY > 0) {
+                        // Swipe up - hide nav
+                        nav.classList.add('collapsed');
+                        body.classList.add('nav-collapsed');
+                    } else {
+                        // Swipe down - show nav
+                        nav.classList.remove('collapsed');
+                        body.classList.remove('nav-collapsed');
+                    }
+                    
+                    // Haptic feedback
+                    if (navigator.vibrate) {
+                        navigator.vibrate(10);
+                    }
+                }
+                
+                touchStartY = 0;
+                isSwiping = false;
+            }, { passive: true });
         }
         
         // ========== THINGS-STYLE MICRO-INTERACTIONS ==========
@@ -6589,6 +6609,8 @@
 
         
         window.addEventListener('load', function() {
+            // Initialize mobile navigation gestures
+            setupMobileNavGestures();
         });
         let currentView = 'today';
         let currentCalendarDate = new Date();
