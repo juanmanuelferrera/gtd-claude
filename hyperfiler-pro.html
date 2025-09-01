@@ -10042,33 +10042,44 @@
             
             if (!modal || !modalButtons) return;
             
+            // Get task data
+            const task = tasks.find(t => t.id == taskId);
+            if (!task) return;
+            
             // Clear any existing timeout
             hideMobileTaskModal();
             
-            // Create Things-style action panel
+            // Create Things-style task card
             modalButtons.innerHTML = `
-                <div style="display: flex; justify-content: space-around; width: 100%; margin: 0; padding: 20px; gap: 20px;">
-                    <button onclick="toggleMobileTimeDropdown('${taskId}', event); hideMobileTaskModal()" 
-                        style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px; border-radius: 12px; transition: all 0.2s ease;">
-                        <div style="width: 50px; height: 50px; background: #007bff; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 20px;">
-                            →
-                        </div>
-                        <span style="font-size: 12px; color: #666; font-weight: 500;">Mover</span>
-                    </button>
-                    <button onclick="quickDeleteTask('${taskId}', event); hideMobileTaskModal()" 
-                        style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px; border-radius: 12px; transition: all 0.2s ease;">
-                        <div style="width: 50px; height: 50px; background: #dc3545; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 20px;">
-                            🗑️
-                        </div>
-                        <span style="font-size: 12px; color: #666; font-weight: 500;">Eliminar</span>
-                    </button>
-                    <button onclick="editTask('${taskId}', event); hideMobileTaskModal()" 
-                        style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px; border-radius: 12px; transition: all 0.2s ease;">
-                        <div style="width: 50px; height: 50px; background: #6c757d; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 16px;">
-                            •••
-                        </div>
-                        <span style="font-size: 12px; color: #666; font-weight: 500;">Más</span>
-                    </button>
+                <div style="padding: 25px; width: 100%; max-width: 350px; background: white; border-radius: 16px;">
+                    <div style="margin-bottom: 25px;">
+                        <input type="text" id="mobileEditTitle" value="${task.title.replace(/"/g, '&quot;')}" 
+                            onblur="saveMobileTaskEdit('${taskId}')"
+                            style="width: 100%; padding: 0; font-size: 18px; border: none; background: transparent; outline: none; font-weight: 400; margin-bottom: 15px; color: #333;"
+                            placeholder="Título de la tarea">
+                        
+                        <textarea id="mobileEditNotes" placeholder="Notas" 
+                            onblur="saveMobileTaskEdit('${taskId}')"
+                            style="width: 100%; padding: 0; font-size: 15px; border: none; background: transparent; outline: none; resize: none; min-height: 40px; color: #666; line-height: 1.4;">${task.notes || ''}</textarea>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: center; gap: 40px; padding-top: 15px; border-top: 1px solid #f0f0f0;">
+                        <button onclick="toggleMobileTimeDropdown('${taskId}', event)" 
+                            style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 8px;">
+                            <div style="width: 44px; height: 44px; background: #007bff; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; margin-bottom: 6px;">
+                                📅
+                            </div>
+                            <span style="font-size: 11px; color: #999; font-weight: 400;">Fecha</span>
+                        </button>
+                        
+                        <button onclick="editTask('${taskId}', event); hideMobileTaskModal()" 
+                            style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 8px;">
+                            <div style="width: 44px; height: 44px; background: #28a745; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; margin-bottom: 6px;">
+                                🏷️
+                            </div>
+                            <span style="font-size: 11px; color: #999; font-weight: 400;">Editar</span>
+                        </button>
+                    </div>
                 </div>
             `;
             
@@ -10081,6 +10092,106 @@
             
             // Show modal
             modal.classList.add('show');
+            
+            // Focus on title field
+            setTimeout(() => {
+                document.getElementById('mobileEditTitle')?.focus();
+            }, 100);
+            
+            // Set auto-close timer for 4 seconds
+            setTimeout(() => {
+                hideMobileTaskModal();
+            }, 4000);
+        }
+        
+        function saveMobileTaskEdit(taskId) {
+            const titleInput = document.getElementById('mobileEditTitle');
+            const notesInput = document.getElementById('mobileEditNotes');
+            
+            if (!titleInput || !notesInput) return;
+            
+            const newTitle = titleInput.value.trim();
+            const newNotes = notesInput.value.trim();
+            
+            if (!newTitle) {
+                alert('El título no puede estar vacío');
+                return;
+            }
+            
+            // Find and update the task
+            const taskIndex = tasks.findIndex(t => t.id == taskId);
+            if (taskIndex !== -1) {
+                tasks[taskIndex].title = newTitle;
+                tasks[taskIndex].notes = newNotes || '';
+                
+                // Save to storage and refresh view
+                saveTasks();
+                renderCurrentView();
+            }
+        }
+        
+        function showMobileTagEdit(taskId) {
+            const modal = document.getElementById('mobileTaskModal');
+            const modalButtons = document.getElementById('mobileTaskModalButtons');
+            
+            // Get current task
+            const task = tasks.find(t => t.id == taskId);
+            if (!task) return;
+            
+            // Extract current tags from title and notes
+            const text = `${task.title} ${task.notes || ''}`;
+            const currentTags = text.match(/@\w+/g) || [];
+            
+            modalButtons.innerHTML = `
+                <div style="padding: 20px; width: 100%; max-width: 350px;">
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="font-size: 18px; font-weight: 500; margin-bottom: 15px; text-align: center;">🏷️ Editar Tags</h3>
+                        <input type="text" id="mobileTagInput" placeholder="@casa @trabajo @urgente" 
+                            value="${currentTags.join(' ')}"
+                            style="width: 100%; padding: 15px; font-size: 16px; border: 1px solid #e1e5e9; border-radius: 12px; background: white; outline: none;">
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button onclick="saveMobileTagEdit('${taskId}'); hideMobileTaskModal()" 
+                            style="background: #007bff; border: none; color: white; padding: 12px 24px; border-radius: 20px; font-size: 16px; font-weight: 500; cursor: pointer;">
+                            Guardar
+                        </button>
+                        <button onclick="showMobileTaskActions('${taskId}', event)" 
+                            style="background: #6c757d; border: none; color: white; padding: 12px 24px; border-radius: 20px; font-size: 16px; font-weight: 500; cursor: pointer;">
+                            Volver
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function saveMobileTagEdit(taskId) {
+            const tagInput = document.getElementById('mobileTagInput');
+            if (!tagInput) return;
+            
+            const newTags = tagInput.value.trim();
+            
+            // Find task
+            const taskIndex = tasks.findIndex(t => t.id == taskId);
+            if (taskIndex === -1) return;
+            
+            const task = tasks[taskIndex];
+            
+            // Remove old tags from title and notes
+            let cleanTitle = task.title.replace(/@\w+/g, '').trim();
+            let cleanNotes = (task.notes || '').replace(/@\w+/g, '').trim();
+            
+            // Add new tags to title
+            if (newTags) {
+                cleanTitle = `${cleanTitle} ${newTags}`.trim();
+            }
+            
+            // Update task
+            tasks[taskIndex].title = cleanTitle;
+            tasks[taskIndex].notes = cleanNotes;
+            
+            // Save and refresh
+            saveTasks();
+            renderCurrentView();
         }
         
         // Mobile time dropdown function
@@ -10098,35 +10209,42 @@
             
             const changeTimeText = getTranslation('ChangeTime');
             modalButtons.innerHTML = `
-                <div class="mobile-task-dropdown-header">⏰ ${changeTimeText}</div>
-                <select onchange="updateTaskTime('${taskId}', this.value, event); hideMobileTaskModal()" 
-                    onfocus="clearMobileModalTimeout()"
-                    onblur="setMobileModalTimeout()"
-                    style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; background: transparent; margin-bottom: 12px;">
-                    ${times.map(time => `
-                        <option value="${time}" ${(task.dueTime || '') === time ? 'selected' : ''}>
-                            ${time || 'Sin hora específica'}
-                        </option>
-                    `).join('')}
-                </select>
-                <button onclick="delayTask('${taskId}', 1, event); hideMobileTaskModal()" 
-                    style="border: none; border-radius: 8px; background: #ffc107 !important; color: #333 !important; 
-                           font-size: 16px; font-weight: 500; cursor: pointer; width: 100%; height: 50px; margin-bottom: 8px;
-                           display: flex; align-items: center; justify-content: center;">
-                    + 1 Day
-                </button>
-                <button onclick="delayTask('${taskId}', 7, event); hideMobileTaskModal()" 
-                    style="border: none; border-radius: 8px; background: #007bff !important; color: white !important; 
-                           font-size: 16px; font-weight: 500; cursor: pointer; width: 100%; height: 50px; margin-bottom: 8px;
-                           display: flex; align-items: center; justify-content: center;">
-                    + 1 Week
-                </button>
-                <button onclick="delayTask('${taskId}', 30, event); hideMobileTaskModal()" 
-                    style="border: none; border-radius: 8px; background: #28a745 !important; color: white !important; 
-                           font-size: 16px; font-weight: 500; cursor: pointer; width: 100%; height: 50px; margin-bottom: 8px;
-                           display: flex; align-items: center; justify-content: center;">
-                    + 1 Month
-                </button>
+                <div style="display: flex; justify-content: space-around; width: 100%; margin: 0; padding: 20px; gap: 20px;">
+                    <button onclick="updateTaskTime('${taskId}', '', event); hideMobileTaskModal()" 
+                        style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px; border-radius: 12px; transition: all 0.2s ease;">
+                        <div style="width: 50px; height: 50px; background: #28a745; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 20px;">
+                            📅
+                        </div>
+                        <span style="font-size: 12px; color: #666; font-weight: 500;">Hoy</span>
+                    </button>
+                    <button onclick="delayTask('${taskId}', 1, event); hideMobileTaskModal()" 
+                        style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px; border-radius: 12px; transition: all 0.2s ease;">
+                        <div style="width: 50px; height: 50px; background: #ffc107; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 20px;">
+                            ☀️
+                        </div>
+                        <span style="font-size: 12px; color: #666; font-weight: 500;">Mañana</span>
+                    </button>
+                    <button onclick="delayTask('${taskId}', 7, event); hideMobileTaskModal()" 
+                        style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px; border-radius: 12px; transition: all 0.2s ease;">
+                        <div style="width: 50px; height: 50px; background: #007bff; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 20px;">
+                            📆
+                        </div>
+                        <span style="font-size: 12px; color: #666; font-weight: 500;">Semana</span>
+                    </button>
+                </div>
+                <div style="padding: 0 20px 20px;">
+                    <select onchange="updateTaskTime('${taskId}', this.value, event); hideMobileTaskModal()" 
+                        onfocus="clearMobileModalTimeout()"
+                        onblur="setMobileModalTimeout()"
+                        style="width: 100%; padding: 15px; font-size: 16px; border: 1px solid #e1e5e9; border-radius: 12px; background: white; color: #333;">
+                        <option value="">⏰ Hora específica</option>
+                        ${times.slice(1).map(time => `
+                            <option value="${time}" ${(task.dueTime || '') === time ? 'selected' : ''}>
+                                ${time}
+                            </option>
+                        `).join('')}
+                    </select>
+                </div>
             `;
             
             // Position modal in center of screen
