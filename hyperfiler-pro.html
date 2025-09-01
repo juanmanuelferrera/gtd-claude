@@ -16432,15 +16432,20 @@
         
         // Render Lists view
         function renderListsView() {
+            console.log('📱 Mobile debug - renderListsView called');
             loadListSections();
             const container = document.getElementById('listsContainer');
             const emptyState = document.getElementById('noListSections');
             
+            console.log('📱 Mobile debug - Lists container found:', !!container);
+            console.log('📱 Mobile debug - List sections count:', listSections.length);
+            
             if (!container || !emptyState) return;
             
             if (listSections.length === 0) {
-                container.innerHTML = '';
+                container.innerHTML = '<div style="background: yellow; padding: 20px;">📱 MOBILE DEBUG: No list sections found</div>';
                 emptyState.style.display = 'block';
+                console.log('📱 Mobile debug - No list sections, showing empty state');
                 return;
             }
             
@@ -26698,15 +26703,18 @@
             
             if (todayTasks.length === 0) {
                 container.innerHTML = `
-                    <div class="no-tasks-today">
+                    <div class="no-tasks-today" style="background: yellow; padding: 20px;">
                         <span class="emoji">📅</span>
-                        <h3>No tasks scheduled for today</h3>
+                        <h3>📱 MOBILE DEBUG: No tasks scheduled for today</h3>
                         <p>Click the "+ Today" button to add a new task for today</p>
                         <button class="btn btn-primary" onclick="openAddTaskModal('${todayStr}')" style="background: #ff6b35; border-color: #ff6b35;">+ Add Task for Today</button>
                     </div>
                 `;
+                console.log('📱 Mobile debug - No tasks container updated');
                 return;
             }
+            
+            console.log('📱 Mobile debug - About to render', todayTasks.length, 'tasks');
             
             // Function to round up time to next 30-minute interval
             function roundUpToNext30Min(timeStr) {
