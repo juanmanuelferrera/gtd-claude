@@ -5418,7 +5418,10 @@
                 'HeaderSearch': 'Search',
                 'HeaderRecurring': 'Recurring',
                 'HeaderLists': 'Lists',
-                'HeaderSettings': 'Settings'
+                'HeaderSettings': 'Settings',
+                
+                // Mobile modals
+                'ChangeTime': 'Change Time'
             },
             es: {
                 // Navigation
@@ -5576,6 +5579,9 @@
                 'HeaderRecurring': 'Recurrente',
                 'HeaderLists': 'Listas',
                 'HeaderSettings': 'Configuración',
+                
+                // Mobile modals
+                'ChangeTime': 'Cambiar Hora',
                 'Export Results': 'Exportar Resultados',
                 'Next Day': 'Día Siguiente',
                 'Previous Day': 'Día Anterior',
@@ -10023,8 +10029,9 @@
             
             const times = ['', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'];
             
+            const changeTimeText = getTranslation('ChangeTime');
             modalButtons.innerHTML = `
-                <div class="mobile-task-dropdown-header">⏰ Cambiar Hora</div>
+                <div class="mobile-task-dropdown-header">⏰ ${changeTimeText}</div>
                 <select onchange="updateTaskTime('${taskId}', this.value, event); hideMobileTaskModal()" 
                     onfocus="clearMobileModalTimeout()"
                     onblur="setMobileModalTimeout()"
