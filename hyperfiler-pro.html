@@ -10051,7 +10051,7 @@
             
             // Create Things-style half-screen edit card
             modalButtons.innerHTML = `
-                <div style="width: 100%; background: white; border-radius: 16px 16px 0 0; overflow: hidden; height: 300px;">
+                <div style="width: 100%; background: white; overflow: hidden; height: 300px; margin: 0 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
                     <div style="padding: 25px 20px 20px;">
                         <input type="text" id="mobileEditTitle" value="${task.title.replace(/"/g, '&quot;')}" 
                             onblur="saveMobileTaskEdit('${taskId}')"
@@ -10085,7 +10085,7 @@
                 </div>
             `;
             
-            // Position modal centered vertically, full width horizontally
+            // Position card to take full width, centered vertically, no overlay
             modal.style.position = 'fixed';
             modal.style.top = '50%';
             modal.style.left = '0';
@@ -10093,7 +10093,7 @@
             modal.style.bottom = 'auto';
             modal.style.transform = 'translateY(-50%)';
             modal.style.zIndex = '2000';
-            modal.style.background = 'rgba(0,0,0,0.3)';
+            modal.style.background = 'transparent';
             
             // Show modal
             modal.classList.add('show');
