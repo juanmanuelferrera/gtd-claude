@@ -9529,7 +9529,9 @@
                 
                 // Set initial view immediately after loading tasks
                 const savedView = localStorage.getItem('currentView') || 'today';
+                console.log('📱 Mobile debug - About to call showView with:', savedView);
                 showView(savedView); // Initialize the view properly
+                console.log('📱 Mobile debug - showView called, current view is:', currentView);
                 
                 // Force update all displays immediately to prevent "Loading..." states
                 updateCurrentTodayDisplay();
@@ -14434,6 +14436,7 @@
 
         // Navigation and view management
         function showView(viewName, preserveDate = false) {
+            console.log('📱 Mobile debug - showView called with:', viewName);
             currentView = viewName;
             
             // Reset task selection when changing views
@@ -14509,23 +14512,29 @@
             searchSection.style.display = viewName === 'search' ? 'block' : 'none';
             
             // Update view
+            console.log('📱 Mobile debug - About to render view:', viewName);
             if (viewName === 'today') {
+                console.log('📱 Mobile debug - Calling renderTodayView()');
                 renderTodayView();
                 // Restore persistent highlighting after render
                 PERSISTENT_TASK_SELECTION.restoreAfterRender();
             } else if (viewName === 'week') {
+                console.log('📱 Mobile debug - Calling renderWeekView()');
                 renderWeekView();
                 highlightCurrentDay();
                 // Restore persistent highlighting after render
                 PERSISTENT_TASK_SELECTION.restoreAfterRender();
             } else if (viewName === 'calendar') {
+                console.log('📱 Mobile debug - Calling renderCalendar()');
                 renderCalendar();
                 highlightCurrentDay();
                 // Restore persistent highlighting after render
                 PERSISTENT_TASK_SELECTION.restoreAfterRender();
             } else if (viewName === 'stats') {
+                console.log('📱 Mobile debug - Calling renderStats()');
                 renderStats();
             } else if (viewName === 'lists') {
+                console.log('📱 Mobile debug - Calling renderListsView()');
                 renderListsView();
             } else if (viewName === 'repeat') {
                 renderRepeatView();
