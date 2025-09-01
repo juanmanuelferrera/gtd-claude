@@ -10317,58 +10317,59 @@
             const tomorrowStr = getLocalDateString(tomorrow);
             
             modalButtons.innerHTML = `
-                <div style="background: #1c1c1e; width: 100%; border-radius: 12px; overflow: hidden; max-height: 500px;">
+                <div style="background: #2c2c2e; width: 100%; border-radius: 12px; overflow: hidden; max-width: 340px; margin: 0 auto;">
                     <!-- Header -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #1c1c1e;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: #2c2c2e;">
                         <h3 style="color: white; margin: 0; font-size: 17px; font-weight: 600;">¿Cuándo?</h3>
                         <button onclick="hideMobileTaskModal()" 
                             style="background: none; border: none; color: #8e8e93; font-size: 17px; cursor: pointer;">Cancelar</button>
                     </div>
                     
                     <!-- Quick Options -->
-                    <div style="background: #1c1c1e; padding: 0 12px;">
+                    <div style="background: #2c2c2e; padding: 0 8px;">
                         <button onclick="setTaskDateTime('${taskId}', '${todayStr}', null); hideMobileTaskModal()" 
-                            style="background: transparent; border: none; width: 100%; padding: 8px 0; color: white; text-align: left; border-bottom: 1px solid #2c2c2e; cursor: pointer;">
-                            <span style="color: #ffd60a; margin-right: 12px;">⭐</span>Hoy
+                            style="background: transparent; border: none; width: 100%; padding: 6px 8px; color: white; text-align: left; border-bottom: 1px solid #3a3a3c; cursor: pointer; font-size: 16px;">
+                            <span style="color: #ffd60a; margin-right: 8px;">⭐</span>Hoy
                         </button>
                         <button onclick="setTaskDateTime('${taskId}', '${tomorrowStr}', null); hideMobileTaskModal()" 
-                            style="background: transparent; border: none; width: 100%; padding: 8px 0; color: white; text-align: left; border-bottom: 1px solid #2c2c2e; cursor: pointer;">
-                            <span style="color: #64a5f5; margin-right: 12px;">🌙</span>Esta noche
+                            style="background: transparent; border: none; width: 100%; padding: 6px 8px; color: white; text-align: left; border-bottom: 1px solid #3a3a3c; cursor: pointer; font-size: 16px;">
+                            <span style="color: #64a5f5; margin-right: 8px;">🌙</span>Esta noche
                         </button>
                     </div>
                     
                     <!-- Calendar Section -->
-                    <div style="background: #1c1c1e; padding: 12px; color: #8e8e93;">
-                        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 8px; font-size: 12px;">
+                    <div style="background: #2c2c2e; padding: 8px; color: #8e8e93;">
+                        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; margin-bottom: 4px; font-size: 11px;">
                             <div>lun</div><div>mar</div><div>mié</div><div>jue</div><div>vie</div><div>sáb</div><div>dom</div>
                         </div>
-                        <div id="calendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center;">
+                        <div id="calendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center;">
                             ${generateCalendarGrid(currentDate, taskId)}
                         </div>
                     </div>
                     
                     <!-- Some Day Option -->
-                    <div style="background: #1c1c1e; padding: 0 12px 12px;">
+                    <div style="background: #2c2c2e; padding: 0 8px 8px;">
                         <button onclick="setTaskDateTime('${taskId}', null, null); hideMobileTaskModal()" 
-                            style="background: transparent; border: none; width: 100%; padding: 8px 0; color: white; text-align: left; cursor: pointer;">
-                            <span style="color: #8e8e93; margin-right: 12px;">📂</span>Algún día
+                            style="background: transparent; border: none; width: 100%; padding: 6px 8px; color: white; text-align: left; cursor: pointer; font-size: 16px;">
+                            <span style="color: #8e8e93; margin-right: 8px;">📂</span>Algún día
                         </button>
                     </div>
                 </div>
             `;
             
-            // Position modal as bottom sheet
+            // Position modal centered like iOS
             modal.style.position = 'fixed';
-            modal.style.top = 'auto';
-            modal.style.left = '0';
-            modal.style.right = '0';
-            modal.style.bottom = '0';
-            modal.style.transform = 'none';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.right = 'auto';
+            modal.style.bottom = 'auto';
+            modal.style.transform = 'translate(-50%, -50%)';
             modal.style.zIndex = '1000';
-            modal.style.background = '#1c1c1e';
-            modal.style.borderRadius = '12px 12px 0 0';
-            modal.style.boxShadow = '0 -4px 20px rgba(0,0,0,0.3)';
-            modal.style.maxHeight = '70vh';
+            modal.style.background = 'transparent';
+            modal.style.borderRadius = '12px';
+            modal.style.boxShadow = '0 4px 20px rgba(0,0,0,0.4)';
+            modal.style.maxHeight = 'auto';
+            modal.style.width = '340px';
             
             // Show modal
             modal.classList.add('show');
@@ -10393,15 +10394,16 @@
                 const dayNumber = date.getDate();
                 
                 const style = `
-                    padding: 6px 2px; 
+                    padding: 4px; 
                     background: transparent; 
                     border: none; 
-                    color: ${isCurrentMonth ? 'white' : '#444'}; 
-                    font-size: 14px; 
+                    color: ${isCurrentMonth ? 'white' : '#666'}; 
+                    font-size: 16px; 
                     font-weight: ${isToday ? '600' : '400'};
                     cursor: pointer;
-                    border-radius: 6px;
-                    min-height: 28px;
+                    border-radius: 4px;
+                    min-height: 32px;
+                    width: 32px;
                     ${isToday ? 'background: #007aff;' : ''}
                 `;
                 
