@@ -9471,7 +9471,9 @@
                 
                 // Set initial view immediately after loading tasks
                 const savedView = localStorage.getItem('currentView') || 'today';
+                console.log('📱 MOBILE DEBUG: About to call showView with:', savedView, 'Tasks loaded:', tasks.length);
                 showView(savedView); // Initialize the view properly
+                console.log('📱 MOBILE DEBUG: showView completed, currentView:', currentView);
                 
                 // Force update all displays immediately to prevent "Loading..." states
                 updateCurrentTodayDisplay();
@@ -26564,9 +26566,10 @@
 
         // Render Today View with time blocks
         function renderTodayView() {
-            console.log('renderTodayView called');
+            console.log('📱 MOBILE DEBUG: renderTodayView called, tasks.length:', tasks.length);
             console.log('Current view:', currentView);
             const container = document.getElementById('todaySchedule');
+            console.log('📱 MOBILE DEBUG: Container found:', !!container);
             const today = new Date(currentTodayDate);
             const todayStr = getLocalDateString(today);
             
