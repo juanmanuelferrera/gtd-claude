@@ -9454,7 +9454,9 @@
                 loadAutoPrintTime();
                 
                 // Load tasks from localStorage immediately to prevent empty state
+                console.log('📱 DEBUG: About to load tasks from localStorage');
                 loadTasksFromLocalStorage();
+                console.log('📱 DEBUG: After loadTasksFromLocalStorage, tasks.length:', tasks.length);
                 
                 // IMMEDIATE TOMBSTONE FILTERING - Prevent brief appearance of deleted tasks
                 if (tasks && tasks.length > 0) {
@@ -13138,6 +13140,7 @@
 
         // Fallback to localStorage
         function loadTasksFromLocalStorage() {
+            console.log('📱 DEBUG: loadTasksFromLocalStorage called');
             
             // CRITICAL: Check if mandatory refresh is required (stale browser protection)
             if (window.forceMandatoryRefresh) {
