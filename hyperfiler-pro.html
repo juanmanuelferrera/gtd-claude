@@ -317,6 +317,8 @@
             #listsContainer, #allTasks, #searchResults,
             #statsContainer, #settingsContainer, #repeatContainer {
                 padding-bottom: 80px; /* Space for bottom nav */
+                min-height: 200px; /* Ensure containers have minimum height */
+                background: rgba(255,0,0,0.1); /* Temporary: Red tint to debug visibility */
             }
             
         }
@@ -2952,6 +2954,7 @@
             display: block;
         }
         
+        /* Desktop: Hide mobile elements by default */
         .mobile-only {
             display: none !important;
         }
