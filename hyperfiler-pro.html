@@ -172,10 +172,15 @@
         }
 
         html {
-            overflow: hidden;
             height: 100%;
-            position: fixed;
             width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            html {
+                overflow: hidden;
+                position: fixed;
+            }
         }
         
         body {
@@ -184,16 +189,21 @@
             color: var(--things-text);
             padding: 0;
             margin: 0;
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            position: fixed;
             font-size: 16px;
             line-height: 1.4;
             letter-spacing: -0.01em;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: none;
-            touch-action: pan-y;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                height: 100%;
+                width: 100%;
+                overflow: hidden;
+                position: fixed;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior: none;
+                touch-action: pan-y;
+            }
         }
 
         .header-section {
@@ -205,11 +215,22 @@
             max-width: 100%;
             margin: 0;
             padding: 0 20px; /* Things-style edge padding */
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            min-height: 100vh;
             transition: background 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
         }
 
         /* Desktop Sidebar Button Styling - Professional Minimalist */
@@ -353,14 +374,6 @@
                 height: calc(100vh - 65px);
             }
             
-            /* Prevent bounce on the main container */
-            .container {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-            }
         }
 
         .main-nav {
