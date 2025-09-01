@@ -171,27 +171,16 @@
             animation: completeTask 0.4s ease-out forwards;
         }
 
-        html {
-            height: 100%;
-            width: 100%;
-        }
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             background: var(--things-bg);
             color: var(--things-text);
             padding: 0;
             margin: 0;
+            min-height: 100vh;
             font-size: 16px;
             line-height: 1.4;
             letter-spacing: -0.01em;
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                overscroll-behavior: none;
-                touch-action: pan-y;
-            }
         }
 
         .header-section {
@@ -205,14 +194,6 @@
             padding: 0 20px; /* Things-style edge padding */
             min-height: 100vh;
             transition: background 0.3s ease;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 20px;
-                padding-bottom: 80px; /* Space for bottom nav */
-                min-height: 100vh;
-            }
         }
 
         /* Desktop Sidebar Button Styling - Professional Minimalist */
@@ -331,12 +312,11 @@
                 display: none;
             }
             
-            /* Mobile content areas - simplified */
+            /* Mobile spacing adjustment */
             #todaySchedule, #weekSchedule, #monthSchedule, 
             #listsContainer, #allTasks, #searchResults,
             #statsContainer, #settingsContainer, #repeatContainer {
-                min-height: 400px;
-                padding-bottom: 20px;
+                padding-bottom: 80px; /* Space for bottom nav */
             }
             
         }
