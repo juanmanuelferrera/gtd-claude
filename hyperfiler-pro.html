@@ -10850,13 +10850,7 @@
             }
         }
 
-        // Make uploadAllTasks globally accessible (ensure it's defined)
-        if (typeof uploadAllTasks === 'function') {
-            window.uploadAllTasks = uploadAllTasks;
-            console.log('✅ uploadAllTasks assigned to window');
-        } else {
-            console.error('❌ uploadAllTasks function not found during assignment');
-        }
+        // Function will be assigned to window after DOM loads
 
         // SIMPLE DOWNLOAD: Get all lists from server (USING PROVEN TASKS METHOD WITH SAFETY)
         async function downloadAllLists() {
@@ -31714,6 +31708,12 @@
         // Simple sync system initialization
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🔄 Lists pattern sync ready');
+            
+            // Assign functions to window after DOM loads
+            window.uploadAllTasks = uploadAllTasks;
+            window.uploadAllLists = uploadAllLists;
+            window.uploadAllTemplates = uploadAllTemplates;
+            console.log('✅ All sync functions assigned to window');
             
             // Ensure simple sync functions are ready
             setTimeout(() => {
