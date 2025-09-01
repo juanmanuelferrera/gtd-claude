@@ -10065,20 +10065,20 @@
                     <div style="background: #2c2c2e; position: absolute; bottom: 0; left: 0; right: 0; padding: 0; display: flex; height: 70px;">
                         <button onclick="toggleMobileTimeDropdown('${taskId}', event)" 
                             style="background: transparent; border: none; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-right: 1px solid #48484a;">
-                            <div style="color: white; font-size: 22px; margin-bottom: 4px;">→</div>
-                            <span style="font-size: 10px; color: #8e8e93; font-weight: 400; text-transform: uppercase;">Mover</span>
+                            <div style="color: white; font-size: 18px; margin-bottom: 4px;">⏰</div>
+                            <span style="font-size: 10px; color: #8e8e93; font-weight: 400; text-transform: uppercase;">Time</span>
                         </button>
                         
-                        <button onclick="quickDeleteTask('${taskId}', event); hideMobileTaskModal()" 
+                        <button onclick="showMobileTagSelection('${taskId}')" 
                             style="background: transparent; border: none; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-right: 1px solid #48484a;">
-                            <div style="color: white; font-size: 18px; margin-bottom: 4px;">🗑️</div>
-                            <span style="font-size: 10px; color: #8e8e93; font-weight: 400; text-transform: uppercase;">Eliminar</span>
+                            <div style="color: white; font-size: 18px; margin-bottom: 4px;">🏷️</div>
+                            <span style="font-size: 10px; color: #8e8e93; font-weight: 400; text-transform: uppercase;">Tags</span>
                         </button>
                         
-                        <button onclick="editTask('${taskId}', event); hideMobileTaskModal()" 
+                        <button onclick="saveMobileTaskEdit('${taskId}'); hideMobileTaskModal()" 
                             style="background: transparent; border: none; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
-                            <div style="color: white; font-size: 16px; margin-bottom: 4px;">•••</div>
-                            <span style="font-size: 10px; color: #8e8e93; font-weight: 400; text-transform: uppercase;">Más</span>
+                            <div style="color: white; font-size: 18px; margin-bottom: 4px;">✓</div>
+                            <span style="font-size: 10px; color: #8e8e93; font-weight: 400; text-transform: uppercase;">Save</span>
                         </button>
                     </div>
                 </div>
@@ -10097,15 +10097,20 @@
             // Show modal
             modal.classList.add('show');
             
-            // Focus on title field
+            // Focus on title field and position cursor at end
             setTimeout(() => {
-                document.getElementById('mobileEditTitle')?.focus();
+                const titleInput = document.getElementById('mobileEditTitle');
+                if (titleInput) {
+                    titleInput.focus();
+                    // Position cursor at end of text
+                    titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
+                }
             }, 100);
             
-            // Set auto-close timer for 4 seconds
+            // Set auto-close timer for 6 seconds
             setTimeout(() => {
                 hideMobileTaskModal();
-            }, 4000);
+            }, 6000);
         }
         
         function saveMobileTaskEdit(taskId) {
@@ -10134,7 +10139,7 @@
             }
         }
         
-        function showMobileTagEdit(taskId) {
+        function showMobileTagSelection(taskId) {
             const modal = document.getElementById('mobileTaskModal');
             const modalButtons = document.getElementById('mobileTaskModalButtons');
             
@@ -10146,22 +10151,48 @@
             const text = `${task.title} ${task.notes || ''}`;
             const currentTags = text.match(/@\w+/g) || [];
             
+            // Get all existing tags from all tasks
+            const allTags = new Set();
+            tasks.forEach(t => {
+                const taskText = `${t.title} ${t.notes || ''}`;
+                const taskTags = taskText.match(/@\w+/g) || [];
+                taskTags.forEach(tag => allTags.add(tag));
+            });
+            const existingTags = Array.from(allTags).sort();
+            
             modalButtons.innerHTML = `
-                <div style="padding: 20px; width: 100%; max-width: 350px;">
-                    <div style="margin-bottom: 20px;">
-                        <h3 style="font-size: 18px; font-weight: 500; margin-bottom: 15px; text-align: center;">🏷️ Editar Tags</h3>
-                        <input type="text" id="mobileTagInput" placeholder="@casa @trabajo @urgente" 
-                            value="${currentTags.join(' ')}"
-                            style="width: 100%; padding: 15px; font-size: 16px; border: 1px solid #e1e5e9; border-radius: 12px; background: white; outline: none;">
+                <div style="width: 100%; background: #f2f2f7; overflow: hidden; height: 280px;">
+                    <div style="background: white; margin: 0; padding: 25px 15px 20px; border-radius: 10px;">
+                        <h3 style="font-size: 18px; font-weight: 500; margin-bottom: 15px; color: #000;">🏷️ Tags</h3>
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; max-height: 120px; overflow-y: auto;">
+                            ${existingTags.map(tag => {
+                                const isSelected = currentTags.includes(tag);
+                                return `<button onclick="toggleTag('${taskId}', '${tag}')" 
+                                    style="background: ${isSelected ? '#007bff' : '#f8f9fa'}; 
+                                           color: ${isSelected ? 'white' : '#333'}; 
+                                           border: 1px solid ${isSelected ? '#007bff' : '#e1e5e9'}; 
+                                           padding: 8px 12px; border-radius: 16px; font-size: 14px; cursor: pointer; transition: all 0.2s;">
+                                    ${tag}
+                                </button>`;
+                            }).join('')}
+                        </div>
+                        
+                        <input type="text" id="mobileNewTag" placeholder="Escribir nuevo tag..." 
+                            style="width: 100%; padding: 12px 0; font-size: 15px; border: none; background: transparent; outline: none; color: #8e8e93; border-bottom: 1px solid #e5e5ea;">
                     </div>
-                    <div style="display: flex; gap: 10px; justify-content: center;">
-                        <button onclick="saveMobileTagEdit('${taskId}'); hideMobileTaskModal()" 
-                            style="background: #007bff; border: none; color: white; padding: 12px 24px; border-radius: 20px; font-size: 16px; font-weight: 500; cursor: pointer;">
-                            Guardar
+                    
+                    <div style="background: #2c2c2e; position: absolute; bottom: 0; left: 0; right: 0; padding: 0; display: flex; height: 70px;">
+                        <button onclick="addNewTag('${taskId}')" 
+                            style="background: transparent; border: none; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-right: 1px solid #48484a;">
+                            <div style="color: white; font-size: 18px; margin-bottom: 4px;">+</div>
+                            <span style="font-size: 10px; color: #8e8e93; font-weight: 400; text-transform: uppercase;">Añadir</span>
                         </button>
+                        
                         <button onclick="showMobileTaskActions('${taskId}', event)" 
-                            style="background: #6c757d; border: none; color: white; padding: 12px 24px; border-radius: 20px; font-size: 16px; font-weight: 500; cursor: pointer;">
-                            Volver
+                            style="background: transparent; border: none; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
+                            <div style="color: white; font-size: 18px; margin-bottom: 4px;">✓</div>
+                            <span style="font-size: 10px; color: #8e8e93; font-weight: 400; text-transform: uppercase;">Listo</span>
                         </button>
                     </div>
                 </div>
@@ -10196,6 +10227,54 @@
             // Save and refresh
             saveTasks();
             renderCurrentView();
+        }
+        
+        function toggleTag(taskId, tag) {
+            const taskIndex = tasks.findIndex(t => t.id == taskId);
+            if (taskIndex === -1) return;
+            
+            const task = tasks[taskIndex];
+            const text = `${task.title} ${task.notes || ''}`;
+            
+            if (text.includes(tag)) {
+                // Remove tag
+                tasks[taskIndex].title = task.title.replace(new RegExp(tag, 'g'), '').trim();
+                tasks[taskIndex].notes = (task.notes || '').replace(new RegExp(tag, 'g'), '').trim();
+            } else {
+                // Add tag to title
+                tasks[taskIndex].title = `${task.title} ${tag}`.trim();
+            }
+            
+            saveTasks();
+            renderCurrentView();
+            
+            // Refresh the tag selection view
+            showMobileTagSelection(taskId);
+        }
+        
+        function addNewTag(taskId) {
+            const newTagInput = document.getElementById('mobileNewTag');
+            if (!newTagInput) return;
+            
+            let newTag = newTagInput.value.trim();
+            if (!newTag) return;
+            
+            // Ensure tag starts with @
+            if (!newTag.startsWith('@')) {
+                newTag = '@' + newTag;
+            }
+            
+            const taskIndex = tasks.findIndex(t => t.id == taskId);
+            if (taskIndex === -1) return;
+            
+            // Add tag to title
+            tasks[taskIndex].title = `${tasks[taskIndex].title} ${newTag}`.trim();
+            
+            saveTasks();
+            renderCurrentView();
+            
+            // Refresh the tag selection view
+            showMobileTagSelection(taskId);
         }
         
         // Mobile time dropdown function
@@ -17984,7 +18063,7 @@
             return `
                 <div class="${cardClass}" onclick="editTask('${task.id}')" data-task-id="${task.id}">
                     <div class="task-header">
-                        <div class="task-title">${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}${makeLinksClickable(task.title)}</div>
+                        <div class="task-title">${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}</div>
                     </div>
                     
                     <div class="task-meta">
@@ -22395,7 +22474,7 @@
                         timeSlots[time].forEach(task => {
                             htmlContent += `
             <div class="task-item">
-                <div class="task-title">${task.title}${task.isEvent ? '<span class="event-badge">EVENT</span>' : ''}</div>
+                <div class="task-title">${renderTaskTitle(task, '', task.isEvent ? '<span class="event-badge">EVENT</span>' : '')}</div>
                 ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
             </div>
 `;
@@ -22412,7 +22491,7 @@
                         untimedTasks.forEach(task => {
                             htmlContent += `
             <div class="task-item">
-                <div class="task-title">${task.title}${task.isEvent ? '<span class="event-badge">EVENT</span>' : ''}</div>
+                <div class="task-title">${renderTaskTitle(task, '', task.isEvent ? '<span class="event-badge">EVENT</span>' : '')}</div>
                 ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
             </div>
 `;
@@ -23811,7 +23890,7 @@
                 return `
                     <div class="${cardClass}" onclick="editTask('${task.id}')" style="cursor: pointer; margin-bottom: 10px;">
                         <div class="task-header">
-                            <div class="task-title">${task.title}</div>
+                            <div class="task-title">${renderTaskTitle(task)}</div>
                             <div class="task-status">${task.status === 'completed' ? '✅' : '📋'}</div>
                         </div>
                         
@@ -24065,7 +24144,7 @@
                     
                     htmlContent += `
         <div class="task-item"${className}>
-            <div class="task-title">${task.isEvent ? '🔴 ' : ''}${task.title}</div>
+            <div class="task-title">${renderTaskTitle(task, task.isEvent ? '🔴 ' : '')}</div>
             <div class="task-meta">
                 <span>📅 ${task.dueDate ? formatDate(task.dueDate) : 'No date'}</span>
                 ${task.dueTime ? `<span>🕐 ${task.dueTime}</span>` : ''}
@@ -24171,7 +24250,7 @@
                     
                     <div class="task-card-content">
                         <div class="task-header">
-                            <div class="task-title">${isEvent ? '🔴 ' : ''}${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}${makeLinksClickable(task.title)}</div>
+                            <div class="task-title">${isEvent ? '🔴 ' : ''}${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}</div>
                             <div class="task-status">${isCompleted ? '✅' : '📋'}</div>
                         </div>
                         
@@ -25645,6 +25724,34 @@
             return makeLinksClickable(truncatedText) + '<span style="color: #999; font-style: italic;">...</span>';
         }
 
+        // Function to extract tags from text and return clean text without tags
+        function extractTagsAndCleanText(text) {
+            if (!text) return { cleanText: '', tags: [] };
+            
+            // Extract all tags (@word patterns)
+            const tagRegex = /@\w+/g;
+            const tags = text.match(tagRegex) || [];
+            
+            // Remove tags from text, also removing extra spaces
+            const cleanText = text.replace(tagRegex, '').replace(/\s+/g, ' ').trim();
+            
+            return { cleanText, tags };
+        }
+        
+        // Function to check if a task has any tags (in title or notes)
+        function hasTaskTags(task) {
+            const titleTags = (task.title.match(/@\w+/g) || []).length > 0;
+            const notesTags = (task.notes && task.notes.match(/@\w+/g) || []).length > 0;
+            return titleTags || notesTags;
+        }
+        
+        // Function to render task title with clean text and tag indicator
+        function renderTaskTitle(task, prefix = '', suffix = '') {
+            const { cleanText } = extractTagsAndCleanText(task.title);
+            const tagIndicator = hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : '';
+            return `${prefix}${makeLinksClickable(cleanText)}${tagIndicator}${suffix}`;
+        }
+
         function makeLinksClickable(text) {
             if (!text) return '';
             
@@ -26550,8 +26657,8 @@
                                 ${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}
                                 ${isMovedFromPast ? `<span class="overdue-badge" title="Atrasada desde ${formatDateForDisplay(task.originalDueDate)}" style="background: #ff4757; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">📅 ${formatDateForDisplay(task.originalDueDate)}</span>` : ''}
                                 ${hasImages ? `<span class="image-indicator" title="This task has images" style="background: #28a745; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">📷</span>` : ''}
-                                ${makeLinksClickable(task.title)}
-                                ${task.notes ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}
+                                ${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}
+                                ${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}
                             </div>
                         </div>
                         <div class="desktop-only" style="display: flex; gap: 4px; margin-left: 8px; align-items: center;">
@@ -27978,7 +28085,7 @@
                     htmlContent += `
         <div class="task-item ${task.isEvent ? 'event-task' : ''}">
             <div class="task-header">
-                <div class="task-title">${task.isEvent ? '🔴 ' : ''}${task.title}</div>
+                <div class="task-title">${renderTaskTitle(task, task.isEvent ? '🔴 ' : '')}</div>
                 <div class="task-meta">`;
                     
                     if (task.dueDate) {
@@ -28017,7 +28124,7 @@
                     htmlContent += `
         <div class="task-item completed-task ${task.isEvent ? 'event-task' : ''}">
             <div class="task-header">
-                <div class="task-title">${task.isEvent ? '🔴 ' : ''}${task.title}</div>
+                <div class="task-title">${renderTaskTitle(task, task.isEvent ? '🔴 ' : '')}</div>
                 <div class="task-meta">`;
                     
                     if (task.dueDate) {
@@ -28229,7 +28336,7 @@
                     
                     htmlContent += `
             <div class="task-item">
-                <div class="task-title">${task.title}</div>
+                <div class="task-title">${renderTaskTitle(task)}</div>
                 ${isEvent ? '<div><span class="event-badge">Event</span></div>' : ''}
                 ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
             </div>`;
@@ -28250,7 +28357,7 @@
                     
                     htmlContent += `
             <div class="task-item">
-                <div class="task-title">${task.title}</div>
+                <div class="task-title">${renderTaskTitle(task)}</div>
                 ${isEvent ? '<div><span class="event-badge">Event</span></div>' : ''}
                 ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
             </div>`;
@@ -28405,7 +28512,7 @@
                 dateTasks.forEach(task => {
                     const isEvent = task.allDay === false;
                     html += `<div class="task-item ${isEvent ? 'event' : ''}">`;
-                    html += `<div class="task-title">${task.title}</div>`;
+                    html += `<div class="task-title">${renderTaskTitle(task)}</div>`;
                     
                     if (task.startTime && task.endTime) {
                         html += `<div class="task-time">⏰ ${task.startTime} - ${task.endTime}</div>`;
@@ -28680,7 +28787,7 @@
                 timeSlots[time].forEach(task => {
                     html += `
                         <div class="task-item${task.isEvent ? ' event' : ''}">
-                            <div class="task-title">${task.title}</div>
+                            <div class="task-title">${renderTaskTitle(task)}</div>
                             <div class="task-time">${task.time}</div>
                             ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
                         </div>
@@ -28695,7 +28802,7 @@
                 noTimeSlot.forEach(task => {
                     html += `
                         <div class="task-item${task.isEvent ? ' event' : ''}">
-                            <div class="task-title">${task.title}</div>
+                            <div class="task-title">${renderTaskTitle(task)}</div>
                             ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
                         </div>
                     `;
@@ -28730,7 +28837,7 @@
                 tasksByDate[date].forEach(task => {
                     html += `
                         <div class="task-item${task.isEvent ? ' event' : ''}">
-                            <div class="task-title">${task.title}</div>
+                            <div class="task-title">${renderTaskTitle(task)}</div>
                             ${task.time ? `<div class="task-time">${task.time}</div>` : ''}
                             ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
                         </div>
@@ -28752,7 +28859,7 @@
             tasks.forEach(task => {
                 html += `
                     <div class="task-item">
-                        <div class="task-title">${task.title}</div>
+                        <div class="task-title">${renderTaskTitle(task)}</div>
                         <div class="task-details">
                             <span class="repeat-badge">🔄 ${task.repeat}</span>
                             ${task.dueDate ? ` | Due: ${formatDate(task.dueDate)}` : ''}
