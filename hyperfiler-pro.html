@@ -10048,37 +10048,37 @@
             
             // Create Things-style half-screen edit card
             modalButtons.innerHTML = `
-                <div style="width: 100%; background: white; overflow: hidden; height: 300px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
-                    <div style="padding: 25px 20px 20px;">
+                <div style="width: 100%; background: #f2f2f7; overflow: hidden; height: 280px;">
+                    <div style="background: white; margin: 0; padding: 25px 15px 20px; border-radius: 10px;">
                         <input type="text" id="mobileEditTitle" value="${task.title.replace(/"/g, '&quot;')}" 
                             onblur="saveMobileTaskEdit('${taskId}')"
                             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                            style="width: 100%; padding: 0; font-size: 20px; border: none; background: transparent; outline: none; font-weight: 400; margin-bottom: 20px; color: #333; line-height: 1.3;"
+                            style="width: 100%; padding: 12px 0; font-size: 17px; border: none; background: transparent; outline: none; font-weight: 400; margin-bottom: 15px; color: #000; line-height: 1.3; border-bottom: 1px solid #e5e5ea;"
                             placeholder="Título de la tarea">
                         
                         <textarea id="mobileEditNotes" placeholder="Notas" 
                             onblur="saveMobileTaskEdit('${taskId}')"
                             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                            style="width: 100%; padding: 0; font-size: 16px; border: none; background: transparent; outline: none; resize: none; height: 100px; color: #666; line-height: 1.4;">${task.notes || ''}</textarea>
+                            style="width: 100%; padding: 12px 0; font-size: 15px; border: none; background: transparent; outline: none; resize: none; height: 80px; color: #8e8e93; line-height: 1.4; border-bottom: 1px solid #e5e5ea;">${task.notes || ''}</textarea>
                     </div>
                     
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: #2c2c2e; padding: 20px; display: flex; justify-content: space-around; align-items: center;">
+                    <div style="background: #2c2c2e; position: absolute; bottom: 0; left: 0; right: 0; padding: 0; display: flex; height: 70px;">
                         <button onclick="toggleMobileTimeDropdown('${taskId}', event)" 
-                            style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px;">
-                            <div style="color: white; font-size: 26px; margin-bottom: 6px;">→</div>
-                            <span style="font-size: 12px; color: #8e8e93; font-weight: 400;">Mover</span>
+                            style="background: transparent; border: none; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-right: 1px solid #48484a;">
+                            <div style="color: white; font-size: 22px; margin-bottom: 4px;">→</div>
+                            <span style="font-size: 10px; color: #8e8e93; font-weight: 400; text-transform: uppercase;">Mover</span>
                         </button>
                         
                         <button onclick="quickDeleteTask('${taskId}', event); hideMobileTaskModal()" 
-                            style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px;">
-                            <div style="color: white; font-size: 22px; margin-bottom: 6px;">🗑️</div>
-                            <span style="font-size: 12px; color: #8e8e93; font-weight: 400;">Eliminar</span>
+                            style="background: transparent; border: none; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-right: 1px solid #48484a;">
+                            <div style="color: white; font-size: 18px; margin-bottom: 4px;">🗑️</div>
+                            <span style="font-size: 10px; color: #8e8e93; font-weight: 400; text-transform: uppercase;">Eliminar</span>
                         </button>
                         
-                        <button onclick="showMobileTagEdit('${taskId}')" 
-                            style="background: transparent; border: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 12px;">
-                            <div style="color: white; font-size: 20px; margin-bottom: 6px;">•••</div>
-                            <span style="font-size: 12px; color: #8e8e93; font-weight: 400;">Más</span>
+                        <button onclick="editTask('${taskId}', event); hideMobileTaskModal()" 
+                            style="background: transparent; border: none; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
+                            <div style="color: white; font-size: 16px; margin-bottom: 4px;">•••</div>
+                            <span style="font-size: 10px; color: #8e8e93; font-weight: 400; text-transform: uppercase;">Más</span>
                         </button>
                     </div>
                 </div>
