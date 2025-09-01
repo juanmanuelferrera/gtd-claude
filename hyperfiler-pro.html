@@ -10085,15 +10085,15 @@
                 </div>
             `;
             
-            // Position modal to slide up from bottom
+            // Position modal centered vertically, full width horizontally
             modal.style.position = 'fixed';
-            modal.style.bottom = '0';
+            modal.style.top = '50%';
             modal.style.left = '0';
             modal.style.right = '0';
-            modal.style.top = 'auto';
-            modal.style.transform = 'none';
+            modal.style.bottom = 'auto';
+            modal.style.transform = 'translateY(-50%)';
             modal.style.zIndex = '2000';
-            modal.style.background = 'transparent';
+            modal.style.background = 'rgba(0,0,0,0.3)';
             
             // Show modal
             modal.classList.add('show');
