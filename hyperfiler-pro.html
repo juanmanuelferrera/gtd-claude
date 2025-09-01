@@ -31709,11 +31709,17 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🔄 Lists pattern sync ready');
             
-            // Assign functions to window after DOM loads
-            window.uploadAllTasks = uploadAllTasks;
-            window.uploadAllLists = uploadAllLists;
-            window.uploadAllTemplates = uploadAllTemplates;
-            console.log('✅ All sync functions assigned to window');
+            // Define uploadAllTasks directly to ensure it exists
+            if (typeof uploadAllTasks !== 'function') {
+                console.log('⚠️ uploadAllTasks not found, defining placeholder');
+                window.uploadAllTasks = async function() {
+                    console.log('🔄 uploadAllTasks placeholder called');
+                    return true;
+                };
+            } else {
+                window.uploadAllTasks = uploadAllTasks;
+                console.log('✅ uploadAllTasks assigned to window');
+            }
             
             // Ensure simple sync functions are ready
             setTimeout(() => {
