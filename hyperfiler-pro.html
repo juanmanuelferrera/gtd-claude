@@ -1005,6 +1005,12 @@
             box-shadow: 0 12px 40px rgba(40, 167, 69, 0.25), 0 4px 12px rgba(40, 167, 69, 0.15) !important;
         }
 
+        .task-amplifier.overdue {
+            background: linear-gradient(135deg, #fd7e14 0%, #e67e22 50%, #d63384 100%);
+            border-color: #d63384;
+            box-shadow: 0 12px 40px rgba(253, 126, 20, 0.25), 0 4px 12px rgba(253, 126, 20, 0.15) !important;
+        }
+
 
         /* Completed tasks when selected */
         .task-selected.completed,
@@ -1015,6 +1021,16 @@
             color: white !important;
             box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3), 0 2px 8px rgba(40, 167, 69, 0.2) !important;
             opacity: 0.95 !important;
+        }
+
+        /* Overdue tasks when selected */
+        .task-selected.overdue,
+        .week-task-item.task-selected.overdue,
+        .calendar-task-item.task-selected.overdue {
+            background: linear-gradient(135deg, #fd7e14 0%, #e67e22 50%, #d63384 100%) !important;
+            border: 2px solid #d63384 !important;
+            color: white !important;
+            box-shadow: 0 6px 20px rgba(253, 126, 20, 0.3), 0 2px 8px rgba(253, 126, 20, 0.2) !important;
         }
 
         
@@ -1139,6 +1155,11 @@
             border: 2px solid #42b883;
         }
 
+        .task-group.overdue {
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+            border: 2px solid #dc3545;
+        }
+
 
         .group-header {
             background: #1877f2;
@@ -1159,6 +1180,10 @@
         .group-header.today {
             background: linear-gradient(135deg, #42b883 0%, #369870 100%);
             animation: pulse-header 3s infinite;
+        }
+
+        .group-header.overdue {
+            background: linear-gradient(135deg, #dc3545 0%, #c0392b 100%);
         }
 
 
@@ -2236,11 +2261,26 @@
         }
 
 
+        .time-slot-task.overdue {
+            border-left-color: #dc3545;
+            background: linear-gradient(90deg, #f8d7da 0%, #ffffff 100%);
+        }
+
         .time-slot-task.moved-from-past {
             border-left-color: #ff6b6b;
             background: linear-gradient(90deg, #fff0f0 0%, #fffafa 100%);
             border: 1px solid #ffcdd2;
             box-shadow: 0 2px 4px rgba(255, 107, 107, 0.1);
+        }
+
+        .overdue-badge {
+            animation: pulse-overdue 2s infinite;
+        }
+
+        @keyframes pulse-overdue {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
         }
 
 
@@ -2443,7 +2483,7 @@
             padding-right: 40px; /* Make room for checkbox */
         }
 
-        .event-badge {
+        .event-badge, .overdue-badge {
             font-size: 11px;
             padding: 2px 8px;
             border-radius: 12px;
@@ -2454,6 +2494,11 @@
         .event-badge {
             background: #ffe6e6;
             color: #dc3545;
+        }
+
+        .overdue-badge {
+            background: #f8d7da;
+            color: #721c24;
         }
 
 
@@ -18150,6 +18195,8 @@
             
             if (isEvent) {
                 cardClass += ' event';
+            } else if (isOverdue) {
+                cardClass += ' overdue';
             }
             
             const timeDisplay = task.dueTime ? ` at ${formatTime(task.dueTime)}` : '';
@@ -24318,7 +24365,7 @@
             const isOverdue = task.status === 'pending' && task.dueDate && task.dueDate < getLocalDateString();
             const isSelected = selectedTasks.has(task.id);
             
-            const cardClass = `task-card task-card-selectable ${isEvent ? 'event' : ''} ${isCompleted ? 'completed' : ''} ${isSelected ? 'selected' : ''}`;
+            const cardClass = `task-card task-card-selectable ${isEvent ? 'event' : ''} ${isCompleted ? 'completed' : ''} ${isOverdue ? 'overdue' : ''} ${isSelected ? 'selected' : ''}`;
             
             const timeDisplay = task.dueTime ? ` at ${formatTime(task.dueTime)}` : '';
             const dateText = task.dueDate ? formatDate(task.dueDate) + timeDisplay : 'No due date';
@@ -24339,6 +24386,7 @@
                         <div class="task-meta">
                             <span>📅 ${dateText}</span>
                             ${isEvent ? '<span class="event-badge">Event</span>' : ''}
+                            ${isOverdue ? '<span class="overdue-badge">Overdue</span>' : ''}
                         </div>
                         
                         ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
@@ -26722,12 +26770,14 @@
 
         // Render individual task in time slot
         function renderTimeSlotTask(task) {
+            const overdue = task.status === 'pending' && task.dueDate < getLocalDateString();
             const isMovedFromPast = task.isOverdue && task.originalDueDate;
             const hasImages = taskHasImages(task);
             const classes = [
                 'time-slot-task',
                 task.status === 'completed' ? 'completed' : '',
                 task.isEvent ? 'event' : '',
+                overdue ? 'overdue' : '',
                 isMovedFromPast ? 'moved-from-past' : ''
             ].filter(Boolean).join(' ');
             
