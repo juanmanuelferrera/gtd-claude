@@ -10317,23 +10317,15 @@
             const tomorrowStr = getLocalDateString(tomorrow);
             
             modalButtons.innerHTML = `
-                <div style="background: #2c2c2e; width: 100%; border-radius: 12px; overflow: hidden; max-width: 340px; margin: 0 auto;">
+                <div style="background: #2c2c2e; width: 100%; border-radius: 12px; overflow: hidden; max-width: 280px; margin: 0 auto;">
                     <!-- Calendar Section -->
-                    <div style="background: #2c2c2e; padding: 8px; color: #8e8e93;">
-                        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; margin-bottom: 4px; font-size: 11px;">
+                    <div style="background: #2c2c2e; padding: 12px; color: #8e8e93;">
+                        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; margin-bottom: 6px; font-size: 11px;">
                             <div>lun</div><div>mar</div><div>mié</div><div>jue</div><div>vie</div><div>sáb</div><div>dom</div>
                         </div>
-                        <div id="calendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center;">
+                        <div id="calendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center;">
                             ${generateCalendarGrid(currentDate, taskId)}
                         </div>
-                    </div>
-                    
-                    <!-- Some Day Option -->
-                    <div style="background: #2c2c2e; padding: 0 8px 8px;">
-                        <button onclick="setTaskDateTime('${taskId}', null, null); hideMobileTaskModal()" 
-                            style="background: transparent; border: none; width: 100%; padding: 6px 8px; color: white; text-align: left; cursor: pointer; font-size: 16px;">
-                            <span style="color: #8e8e93; margin-right: 8px;">📂</span>Algún día
-                        </button>
                     </div>
                 </div>
             `;
@@ -10350,10 +10342,15 @@
             modal.style.borderRadius = '12px';
             modal.style.boxShadow = '0 4px 20px rgba(0,0,0,0.4)';
             modal.style.maxHeight = 'auto';
-            modal.style.width = '340px';
+            modal.style.width = '280px';
             
             // Show modal
             modal.classList.add('show');
+            
+            // Auto-close after 6 seconds
+            setTimeout(() => {
+                hideMobileTaskModal();
+            }, 6000);
         }
         
         // Helper function to generate calendar grid
@@ -10375,16 +10372,19 @@
                 const dayNumber = date.getDate();
                 
                 const style = `
-                    padding: 4px; 
+                    padding: 2px; 
                     background: transparent; 
                     border: none; 
                     color: ${isCurrentMonth ? 'white' : '#666'}; 
-                    font-size: 16px; 
+                    font-size: 14px; 
                     font-weight: ${isToday ? '600' : '400'};
                     cursor: pointer;
-                    border-radius: 4px;
-                    min-height: 32px;
-                    width: 32px;
+                    border-radius: 3px;
+                    height: 28px;
+                    width: 28px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                     ${isToday ? 'background: #007aff;' : ''}
                 `;
                 
