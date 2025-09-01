@@ -337,6 +337,20 @@
                 -webkit-overflow-scrolling: touch;
                 overscroll-behavior: contain;
                 position: relative;
+                transition: height 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            }
+            
+            /* When nav is collapsed, give more space to content */
+            .nav-collapsed #todaySchedule, 
+            .nav-collapsed #weekSchedule, 
+            .nav-collapsed #monthSchedule,
+            .nav-collapsed #listsContainer, 
+            .nav-collapsed #allTasks, 
+            .nav-collapsed #searchResults,
+            .nav-collapsed #statsContainer, 
+            .nav-collapsed #settingsContainer, 
+            .nav-collapsed #repeatContainer {
+                height: calc(100vh - 65px);
             }
             
             /* Prevent bounce on the main container */
@@ -3391,6 +3405,32 @@
                 box-shadow: 0 -1px 3px var(--things-shadow); /* Things subtle shadow */
                 backdrop-filter: blur(10px); /* iOS-style blur */
                 -webkit-backdrop-filter: blur(10px);
+                transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            }
+            
+            .mobile-bottom-nav.collapsed {
+                transform: translateY(calc(100% - 15px));
+            }
+            
+            .mobile-nav-handle {
+                position: absolute;
+                top: -12px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 50px;
+                height: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                padding: 4px;
+            }
+            
+            .handle-bar {
+                width: 35px;
+                height: 4px;
+                background: #d0d0d0;
+                border-radius: 2px;
             }
             
             .mobile-nav-btn {
@@ -3518,7 +3558,13 @@
         </div>
     </div>
 
-    <div class="mobile-only mobile-bottom-nav">
+    <!-- Collapsible Mobile Navigation -->
+    <div class="mobile-only mobile-bottom-nav" id="mobileBottomNav">
+        <!-- Collapse/Expand Handle -->
+        <div class="mobile-nav-handle" onclick="toggleMobileNav()">
+            <div class="handle-bar"></div>
+        </div>
+        
         <button class="mobile-nav-btn active" onclick="provideFeedback(this); switchToMobileView('today')" id="mobileNavToday">
             <div class="mobile-nav-icon">🔥</div>
             <div data-translate="Today">Today</div>
@@ -6246,6 +6292,25 @@
             }, 2000); // Check every 2 seconds
         }
 
+        // Toggle mobile navigation collapse
+        function toggleMobileNav() {
+            const nav = document.getElementById('mobileBottomNav');
+            const body = document.body;
+            
+            if (nav.classList.contains('collapsed')) {
+                nav.classList.remove('collapsed');
+                body.classList.remove('nav-collapsed');
+            } else {
+                nav.classList.add('collapsed');
+                body.classList.add('nav-collapsed');
+            }
+            
+            // Haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(10);
+            }
+        }
+        
         // ========== THINGS-STYLE MICRO-INTERACTIONS ==========
         function provideFeedback(element, type = 'success') {
             if (!element) return;
