@@ -176,13 +176,6 @@
             width: 100%;
         }
         
-        @media (max-width: 768px) {
-            html {
-                overflow: hidden;
-                position: fixed;
-            }
-        }
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             background: var(--things-bg);
@@ -196,11 +189,6 @@
         
         @media (max-width: 768px) {
             body {
-                height: 100%;
-                width: 100%;
-                overflow: hidden;
-                position: fixed;
-                -webkit-overflow-scrolling: touch;
                 overscroll-behavior: none;
                 touch-action: pan-y;
             }
@@ -221,14 +209,8 @@
         
         @media (max-width: 768px) {
             .container {
-                height: 100vh;
-                overflow: hidden;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
                 padding: 0 20px;
+                padding-bottom: 80px; /* Space for bottom nav */
             }
         }
 
@@ -348,30 +330,12 @@
                 display: none;
             }
             
-            /* App-like behavior for mobile */
+            /* Mobile content areas - simplified */
             #todaySchedule, #weekSchedule, #monthSchedule, 
             #listsContainer, #allTasks, #searchResults,
             #statsContainer, #settingsContainer, #repeatContainer {
-                height: calc(100vh - 130px);
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-                overscroll-behavior: contain;
-                position: relative;
-                transition: height 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                min-height: 400px;
                 padding-bottom: 20px;
-            }
-            
-            /* When nav is collapsed, give more space to content */
-            .nav-collapsed #todaySchedule, 
-            .nav-collapsed #weekSchedule, 
-            .nav-collapsed #monthSchedule,
-            .nav-collapsed #listsContainer, 
-            .nav-collapsed #allTasks, 
-            .nav-collapsed #searchResults,
-            .nav-collapsed #statsContainer, 
-            .nav-collapsed #settingsContainer, 
-            .nav-collapsed #repeatContainer {
-                height: calc(100vh - 75px);
             }
             
         }
