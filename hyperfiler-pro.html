@@ -222,14 +222,13 @@
         @media (max-width: 768px) {
             .container {
                 height: 100vh;
-                display: flex;
-                flex-direction: column;
                 overflow: hidden;
                 position: fixed;
                 top: 0;
                 left: 0;
                 right: 0;
                 bottom: 0;
+                padding: 0 20px;
             }
         }
 
@@ -353,12 +352,13 @@
             #todaySchedule, #weekSchedule, #monthSchedule, 
             #listsContainer, #allTasks, #searchResults,
             #statsContainer, #settingsContainer, #repeatContainer {
-                height: calc(100vh - 120px);
+                height: calc(100vh - 130px);
                 overflow-y: auto;
                 -webkit-overflow-scrolling: touch;
                 overscroll-behavior: contain;
                 position: relative;
                 transition: height 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                padding-bottom: 20px;
             }
             
             /* When nav is collapsed, give more space to content */
@@ -371,7 +371,7 @@
             .nav-collapsed #statsContainer, 
             .nav-collapsed #settingsContainer, 
             .nav-collapsed #repeatContainer {
-                height: calc(100vh - 65px);
+                height: calc(100vh - 75px);
             }
             
         }
