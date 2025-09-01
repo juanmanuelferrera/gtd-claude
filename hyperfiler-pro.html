@@ -26629,11 +26629,12 @@
                 container.innerHTML = `
                     <div class="no-tasks-today">
                         <span class="emoji">📅</span>
-                        <h3>No tasks scheduled for today</h3>
+                        <h3>📱 DEBUG: No tasks for ${todayStr} (Total tasks: ${tasks.length})</h3>
                         <p>Click the "+ Today" button to add a new task for today</p>
                         <button class="btn btn-primary" onclick="openAddTaskModal('${todayStr}')" style="background: #ff6b35; border-color: #ff6b35;">+ Add Task for Today</button>
                     </div>
                 `;
+                console.log('📱 DEBUG: Rendered no-tasks message');
                 return;
             }
             
