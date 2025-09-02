@@ -260,8 +260,11 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
     }
     
     let html = `
-        <div style="text-align: center; margin-bottom: 10px; font-size: 16px; font-weight: 600;">
-            Hora
+        <div style="margin-bottom: 10px;">
+            <div onclick="clearTimeAndClose('${taskId}')" 
+                 style="padding: 10px; margin: 2px 0; cursor: pointer; border-radius: 6px; text-align: center; background: #f8f9fa; font-weight: 600;"
+                 onmouseover="this.style.background='#e9ecef'"
+                 onmouseout="this.style.background='#f8f9fa'">Untimed</div>
         </div>
         <div style="margin-bottom: 10px;">
     `;
@@ -279,9 +282,6 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
     });
     
     html += `
-        </div>
-        <div style="display: flex; gap: 8px;">
-            <button onclick="clearTimeAndClose('${taskId}')" style="flex: 1; padding: 8px; background: #f0f0f0; border: none; border-radius: 6px; font-size: 14px;">Borrar</button>
         </div>
     `;
     
