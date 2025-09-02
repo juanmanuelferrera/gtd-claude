@@ -4,14 +4,30 @@
 window.addEventListener('load', async () => {
     console.log('🚀 Initializing HyperFiler Pro...');
     
+    // Ensure tasks array is initialized
+    if (typeof tasks === 'undefined') {
+        window.tasks = [];
+    }
+    
+    // Load tasks from local storage first
+    if (typeof loadTasksFromLocalStorage === 'function') {
+        await loadTasksFromLocalStorage();
+        console.log('📥 Loaded', tasks.length, 'tasks from localStorage');
+    }
+    
     // Check if user is logged in
     if (typeof checkAuthentication === 'function') {
         await checkAuthentication();
     }
     
-    // Load tasks from local storage
-    if (typeof loadTasksFromLocalStorage === 'function') {
-        await loadTasksFromLocalStorage();
+    // Initialize sync system
+    if (typeof initializeSimpleSync === 'function' && window.currentUser) {
+        initializeSimpleSync();
+    }
+    
+    // Sort tasks after loading
+    if (typeof sortTasks === 'function') {
+        sortTasks();
     }
     
     // Initialize the UI
@@ -20,12 +36,40 @@ window.addEventListener('load', async () => {
         showView('today');
     }
     
-    // Force render the view
-    if (typeof renderCurrentView === 'function') {
-        renderCurrentView();
+    // Force render the view multiple times to ensure data displays
+    const forceRender = () => {
+        if (typeof renderCurrentView === 'function') {
+            renderCurrentView();
+            console.log('🔄 Forced render - tasks:', tasks.length);
+        }
+    };
+    
+    // Initial render
+    setTimeout(forceRender, 100);
+    setTimeout(forceRender, 500);
+    setTimeout(forceRender, 2000);
+    setTimeout(forceRender, 4000);
+    
+    // Listen for download completion and force render
+    const originalDownloadAllTasks = window.downloadAllTasks;
+    if (originalDownloadAllTasks) {
+        window.downloadAllTasks = async function(...args) {
+            const result = await originalDownloadAllTasks.apply(this, args);
+            setTimeout(() => {
+                console.log('📥 Download completed, tasks:', tasks.length);
+                if (typeof sortTasks === 'function') {
+                    sortTasks();
+                }
+                if (typeof renderCurrentView === 'function') {
+                    renderCurrentView();
+                    console.log('🔄 Forced render after download');
+                }
+            }, 500);
+            return result;
+        };
     }
     
-    console.log('✅ HyperFiler Pro initialized');
+    console.log('✅ HyperFiler Pro initialized with', tasks.length, 'tasks');
 });
 
 // Hide broken template literals and overlays immediately
@@ -73,6 +117,19 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(hideOverlays, 1000);
     setTimeout(hideOverlays, 2000);
 });
+
+// Ensure critical functions are globally accessible
+window.renderCurrentView = window.renderCurrentView || renderCurrentView;
+window.renderTodayView = window.renderTodayView || renderTodayView;
+window.renderTasks = window.renderTasks || renderTasks;
+window.sortTasks = window.sortTasks || sortTasks;
+window.toggleTaskStatus = window.toggleTaskStatus || toggleTaskStatus;
+window.deleteTask = window.deleteTask || deleteTask;
+window.delayTask = window.delayTask || delayTask;
+window.openAddTaskModal = window.openAddTaskModal || openAddTaskModal;
+window.editTask = window.editTask || editTask;
+window.saveTaskEdit = window.saveTaskEdit || saveTaskEdit;
+window.closeTaskModal = window.closeTaskModal || closeTaskModal;
 
 // Stub out missing repeat manager functions to prevent errors
 window.showRepeatManager = window.showRepeatManager || function() {

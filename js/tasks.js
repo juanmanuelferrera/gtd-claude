@@ -853,13 +853,18 @@ async function saveTaskEdit() {
 /**
  * Open add task modal
  */
-function openAddTaskModal() {
+function openAddTaskModal(dateStr) {
+    // Use the existing openAddTaskModal function logic but allow optional date
     currentEditTaskId = null;
     
     // Clear form fields
-    document.getElementById('editTaskTitle').value = '';
-    document.getElementById('editTaskNotes').value = '';
-    document.getElementById('editTaskIsEvent').checked = false;
+    const titleField = document.getElementById('editTaskTitle');
+    const notesField = document.getElementById('editTaskNotes');
+    const eventCheckbox = document.getElementById('editTaskIsEvent');
+    
+    if (titleField) titleField.value = '';
+    if (notesField) notesField.value = '';
+    if (eventCheckbox) eventCheckbox.checked = false;
     
     // Clear images
     if (typeof noteImagesData !== 'undefined') {
@@ -869,12 +874,17 @@ function openAddTaskModal() {
         displayNoteImages();
     }
     
-    // Set default date to today
-    const currentDate = getLocalDateString(new Date());
-    document.getElementById('editTaskDateOnly').value = currentDate;
-    document.getElementById('editTaskTimeOnly').value = '';
-    document.getElementById('editTaskDate').value = currentDate;
-    document.getElementById('editTaskTime').value = '';
+    // Set date - use provided date or today
+    const targetDate = dateStr || getLocalDateString(new Date());
+    const dateOnlyField = document.getElementById('editTaskDateOnly');
+    const timeOnlyField = document.getElementById('editTaskTimeOnly');
+    const dateField = document.getElementById('editTaskDate');
+    const timeField = document.getElementById('editTaskTime');
+    
+    if (dateOnlyField) dateOnlyField.value = targetDate;
+    if (timeOnlyField) timeOnlyField.value = '';
+    if (dateField) dateField.value = targetDate;
+    if (timeField) timeField.value = '';
     
     // Set modal title for adding
     const modalTitle = document.querySelector('#taskModal h3');
@@ -883,7 +893,9 @@ function openAddTaskModal() {
     }
     
     // Load and render templates
-    renderTemplateButtons();
+    if (typeof renderTemplateButtons === 'function') {
+        renderTemplateButtons();
+    }
     
     // Reset repeat dropdown
     const repeatDropdown = document.getElementById('editTaskRepeat');
@@ -894,7 +906,10 @@ function openAddTaskModal() {
     }
     
     // Show modal
-    document.getElementById('taskModal').style.display = 'block';
+    const modal = document.getElementById('taskModal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
     
     // Set auto-close timer
     if (typeof setTaskModalTimeout === 'function') {
@@ -1127,4 +1142,185 @@ function toggleTaskComplete(taskId, event) {
     setTimeout(() => {
         window.justModifiedTasks = false;
     }, 5000);
+}
+
+/**
+ * Toggle task status (alias for toggleTaskComplete)
+ */
+function toggleTaskStatus(taskId, event) {
+    return toggleTaskComplete(taskId, event);
+}
+
+/**
+ * Delete task permanently
+ */
+async function deleteTask(taskId, event) {
+    if (event) event.stopPropagation();
+    
+    console.log('🗑️ PERMANENT DELETE: Deleting task', taskId);
+    
+    try {
+        // Find the task before deletion for debugging
+        const taskToDelete = tasks.find(t => t.id === taskId);
+        console.log('🗑️ Task to delete:', taskToDelete);
+        
+        // Remove task from local array
+        const taskIndex = tasks.findIndex(t => t.id === taskId);
+        if (taskIndex >= 0) {
+            // Move to trash before permanent deletion if function exists
+            if (typeof moveToTrash === 'function') {
+                moveToTrash(taskToDelete);
+            }
+            
+            // Remove task permanently from local array
+            tasks.splice(taskIndex, 1);
+            console.log('🗑️ Task permanently removed from local array:', taskId);
+        } else {
+            console.error('🗑️ ERROR: Task not found in array:', taskId);
+            return;
+        }
+        
+        // Save updated tasks to localStorage
+        saveTasksToLocalStorage();
+        console.log('🗑️ Updated localStorage, new task count:', tasks.length);
+        
+        // Delete from server if function exists
+        if (typeof deleteTaskFromCloud === 'function') {
+            try {
+                await deleteTaskFromCloud(taskId);
+                console.log('✅ Task successfully deleted from server:', taskId);
+            } catch (serverError) {
+                console.error('❌ Failed to delete from server:', serverError);
+                // Continue with local deletion even if server deletion fails
+            }
+        }
+        
+        // Clean up event registry if functions exist
+        if (typeof unmarkAsEvent === 'function') {
+            unmarkAsEvent(taskId);
+        }
+        
+        // Update UI immediately
+        if (typeof sortTasks === 'function') {
+            sortTasks();
+        }
+        if (typeof renderCurrentView === 'function') {
+            renderCurrentView();
+        }
+        
+        // Background sync
+        window.justModifiedTasks = true;
+        setTimeout(async () => {
+            if (typeof uploadAllTasks === 'function') {
+                try {
+                    await uploadAllTasks();
+                } catch (error) {
+                    console.error('Background sync failed for deletion:', error);
+                }
+            }
+        }, 100);
+        
+        setTimeout(() => {
+            window.justModifiedTasks = false;
+        }, 5000);
+        
+    } catch (error) {
+        console.error('🗑️ Error deleting task:', error);
+        alert('❌ Error deleting task. Please try again.');
+    }
+}
+
+/**
+ * Delay task by specified number of days
+ */
+async function delayTask(taskId, days, event) {
+    if (event) event.stopPropagation();
+    
+    try {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) {
+            console.error('Task not found:', taskId);
+            return;
+        }
+        
+        // Save state for undo before change
+        saveStateForUndo('delay task', task);
+        
+        // Calculate new date
+        const currentDate = task.dueDate ? new Date(task.dueDate) : new Date();
+        const newDate = new Date(currentDate);
+        
+        // Handle month addition properly for +1M button (30 days = 1 month)
+        if (days === 30) {
+            // Add 1 month properly
+            newDate.setMonth(newDate.getMonth() + 1);
+        } else {
+            // Add days for +1D (1 day) and +1W (7 days)
+            newDate.setDate(newDate.getDate() + days);
+        }
+        
+        // Update task
+        task.dueDate = getLocalDateString(newDate);
+        task.updatedAt = new Date().toISOString();
+        
+        // Save to localStorage
+        saveTasksToLocalStorage();
+        
+        // Update UI
+        if (typeof sortTasks === 'function') {
+            sortTasks();
+        }
+        if (typeof renderCurrentView === 'function') {
+            renderCurrentView();
+        }
+        
+        // Background sync
+        window.justModifiedTasks = true;
+        setTimeout(async () => {
+            if (typeof uploadAllTasks === 'function') {
+                try {
+                    await uploadAllTasks();
+                } catch (error) {
+                    console.error('Background sync failed for delay:', error);
+                }
+            }
+        }, 100);
+        
+        setTimeout(() => {
+            window.justModifiedTasks = false;
+        }, 5000);
+        
+    } catch (error) {
+        console.error('Error delaying task:', error);
+        alert('❌ Error delaying task. Please try again.');
+    }
+}
+
+/**
+ * Sort tasks array
+ */
+function sortTasks() {
+    tasks.sort((a, b) => {
+        // First, prioritize by completion status (pending first)
+        if (a.status !== b.status) {
+            return a.status === 'completed' ? 1 : -1;
+        }
+        
+        // Then by date (earlier dates first)
+        if (a.dueDate !== b.dueDate) {
+            if (!a.dueDate) return 1;
+            if (!b.dueDate) return -1;
+            return a.dueDate.localeCompare(b.dueDate);
+        }
+        
+        // Then by time (earlier times first)
+        if (a.dueTime !== b.dueTime) {
+            if (!a.dueTime) return 1;
+            if (!b.dueTime) return -1;
+            return a.dueTime.localeCompare(b.dueTime);
+        }
+        
+        // Finally by creation date (newer first)
+        return new Date(b.createdAt) - new Date(a.createdAt);
+    });
 }
