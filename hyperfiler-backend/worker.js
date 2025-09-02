@@ -160,6 +160,8 @@ export default {
       'https://hyperfiler.pro',
       'https://www.hyperfiler.pro',
       'https://hyperfiler.pages.dev',
+      'https://231bf96d.hyperfiler-fresh.pages.dev',
+      'https://a88bcd5f.hyperfiler-fresh.pages.dev',
       'https://79380aff.hyperfiler.pages.dev',
       'https://c55ad0dd.hyperfiler.pages.dev',
       'https://f1febe64.hyperfiler.pages.dev',
