@@ -1797,6 +1797,80 @@ async function editListSection(sectionId) {
     }
 }
 
+// URL hash handling for direct actions
+function handleUrlHash() {
+    const hash = window.location.hash.slice(1); // Remove the #
+    
+    if (hash === 'new') {
+        // Open the add task modal
+        setTimeout(() => {
+            if (typeof openAddTaskModal === 'function') {
+                openAddTaskModal();
+                console.log('🔗 Opened add task modal from URL hash #new');
+            }
+        }, 1000); // Delay to ensure page and scripts are fully loaded
+        
+        // Clear the hash to prevent repeated triggers
+        window.history.replaceState(null, null, window.location.pathname + window.location.search);
+    }
+}
+
+// Initialize hash handling on page load and hash changes
+window.addEventListener('load', handleUrlHash);
+window.addEventListener('hashchange', handleUrlHash);
+
+// Debug arrow key navigation
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        console.log('🔍 Arrow key debug:', {
+            key: event.key,
+            currentView: window.currentView,
+            target: event.target.tagName,
+            isInput: event.target.tagName === 'INPUT',
+            isTextarea: event.target.tagName === 'TEXTAREA',
+            filterNavigationActive: window.filterNavigationActive
+        });
+        
+        // Manual navigation if not working
+        if (event.target.tagName !== 'INPUT' && 
+            event.target.tagName !== 'TEXTAREA' && 
+            event.target.tagName !== 'SELECT' &&
+            !event.target.contentEditable) {
+            
+            if (event.key === 'ArrowLeft') {
+                if (window.currentView === 'today' && typeof previousDay === 'function') {
+                    event.preventDefault();
+                    previousDay();
+                    console.log('🔍 Manual previousDay() called');
+                } else if (window.currentView === 'week' && typeof previousWeekSmart === 'function') {
+                    event.preventDefault();
+                    previousWeekSmart();
+                    console.log('🔍 Manual previousWeekSmart() called');
+                } else if (window.currentView === 'calendar' && typeof previousMonthSmart === 'function') {
+                    event.preventDefault();
+                    previousMonthSmart();
+                    console.log('🔍 Manual previousMonthSmart() called');
+                }
+            } else if (event.key === 'ArrowRight') {
+                if (window.currentView === 'today' && typeof nextDay === 'function') {
+                    event.preventDefault();
+                    nextDay();
+                    console.log('🔍 Manual nextDay() called');
+                } else if (window.currentView === 'week' && typeof nextWeekSmart === 'function') {
+                    event.preventDefault();
+                    nextWeekSmart();
+                    console.log('🔍 Manual nextWeekSmart() called');
+                } else if (window.currentView === 'calendar' && typeof nextMonthSmart === 'function') {
+                    event.preventDefault();
+                    nextMonthSmart();
+                    console.log('🔍 Manual nextMonthSmart() called');
+                }
+            }
+        }
+    }
+});
+
+
 // Delete list section
 async function deleteListSection(sectionId) {
     const section = window.listSections?.find(s => s.id === sectionId);

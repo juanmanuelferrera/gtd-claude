@@ -159,7 +159,7 @@ export default {
     const allowedOrigins = [
       'https://hyperfiler.pro',
       'https://www.hyperfiler.pro',
-      'https://25021535.hyperfiler-fresh.pages.dev',
+      'https://74b94f50.hyperfiler-fresh.pages.dev',
       'https://master.hyperfiler-fresh.pages.dev',
       'https://hyperfiler-fresh.pages.dev',
       'http://localhost:3000',
