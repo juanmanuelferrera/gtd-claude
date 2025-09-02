@@ -5361,6 +5361,22 @@
     <input type="file" id="importFileInput" accept=".json" onchange="handleJsonImportFile(event)" style="display: none;">
     <input type="file" id="importTxtInput" accept=".txt,.org,text/*" onchange="handleTextImportFile(event)" style="display: none;">
     <!-- External JavaScript Files -->
+    <!-- Core modules (load first) -->
+    <script src="js/core/StateManager.js"></script>
+    <script src="js/core/DateUtils.js"></script>
+    <script src="js/core/TaskUtils.js"></script>
+    <script src="js/core/TemplateProcessor.js"></script>
+    <script src="js/core/ModalManager.js"></script>
+    
+    <!-- Feature modules -->
+    <script src="js/features/DragDrop.js"></script>
+    <script src="js/features/Search.js"></script>
+    
+    <!-- Component modules -->
+    <script src="js/components/TemplateFilter.js"></script>
+    <script src="js/components/TaskCard.js"></script>
+    
+    <!-- Original modules -->
     <script src="js/globals.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/auth.js"></script>

@@ -1338,7 +1338,7 @@ function renderWeekView() {
         const date = new Date(monday);
         date.setDate(monday.getDate() + i);
         const dateStr = getLocalDateString(date);
-        const dayTasks = tasks.filter(task => task.dueDate === dateStr && task.status !== 'deleted');
+        const dayTasks = (window.tasks || []).filter(task => task.dueDate === dateStr && task.status !== 'deleted');
         weekTasks.push(...dayTasks);
     }
     
@@ -1388,7 +1388,7 @@ function renderWeekView() {
         
         // Check for tasks on this date
         let dayTasks = typeof getTasksForDate === 'function' ? getTasksForDate(dateStr) : 
-                        tasks.filter(task => task.dueDate === dateStr && task.status !== 'deleted');
+                        (window.tasks || []).filter(task => task.dueDate === dateStr && task.status !== 'deleted');
         
         // Apply template filter if active
         if (window.activeWeekTemplateFilter) {
@@ -1917,7 +1917,7 @@ function renderCalendar() {
     // Get all tasks for the month to populate template filters
     const year = currentCalendarDate.getFullYear();
     const month = currentCalendarDate.getMonth();
-    const monthTasks = tasks.filter(task => {
+    const monthTasks = (window.tasks || []).filter(task => {
         if (!task.dueDate || task.status === 'deleted') return false;
         const taskDate = new Date(task.dueDate);
         return taskDate.getFullYear() === year && taskDate.getMonth() === month;
@@ -1984,7 +1984,7 @@ function renderCalendar() {
         }
         
         let dayTasks = typeof getTasksForDate === 'function' ? getTasksForDate(dateStr) : 
-                        tasks.filter(task => task.dueDate === dateStr && task.status !== 'deleted');
+                        (window.tasks || []).filter(task => task.dueDate === dateStr && task.status !== 'deleted');
         
         // Apply template filter if active
         if (window.activeMonthTemplateFilter) {

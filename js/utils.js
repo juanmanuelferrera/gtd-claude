@@ -44,71 +44,84 @@ function sanitizeInput(input) {
     return cleaned || null;
 }
 
-// Utility function to get local date string consistently (avoids timezone issues)
+// Utility functions - now using centralized utilities with backward compatibility
+
+// Delegate to DateUtils for consistency
 function getLocalDateString(date = new Date()) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return DateUtils.getLocalDateString ? DateUtils.getLocalDateString(date) : (() => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    })();
 }
 
 function getTasksForDate(dateStr) {
-    return tasks.filter(task => task.dueDate === dateStr && task.status !== 'deleted');
+    const tasksArray = window.tasks || tasks || [];
+    return TaskUtils.getTasksForDate ? 
+        TaskUtils.getTasksForDate(tasksArray, dateStr) :
+        tasksArray.filter(task => task.dueDate === dateStr && task.status !== 'deleted');
 }
 
 function formatDate(dateStr) {
-    if (!dateStr) return 'No date';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric'
-    });
-}
-
-function formatDateForDisplay(dateStr) {
-    if (!dateStr) return 'No date';
-    const date = new Date(dateStr);
-    const today = new Date();
-    const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
-    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-    
-    if (dateStr === getLocalDateString(today)) {
-        return 'Today';
-    } else if (dateStr === getLocalDateString(tomorrow)) {
-        return 'Tomorrow';
-    } else if (dateStr === getLocalDateString(yesterday)) {
-        return 'Yesterday';
-    } else {
+    return DateUtils.formatDate ? DateUtils.formatDate(dateStr) : (() => {
+        if (!dateStr) return 'No date';
+        const date = new Date(dateStr);
         return date.toLocaleDateString('en-US', {
+            weekday: 'short',
             month: 'short',
             day: 'numeric'
         });
-    }
+    })();
+}
+
+function formatDateForDisplay(dateStr) {
+    return DateUtils.formatDateForDisplay ? DateUtils.formatDateForDisplay(dateStr) : (() => {
+        if (!dateStr) return 'No date';
+        const date = new Date(dateStr);
+        const today = new Date();
+        const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+        const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+        
+        if (dateStr === getLocalDateString(today)) {
+            return 'Today';
+        } else if (dateStr === getLocalDateString(tomorrow)) {
+            return 'Tomorrow';
+        } else if (dateStr === getLocalDateString(yesterday)) {
+            return 'Yesterday';
+        } else {
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+    })();
 }
 
 function formatTime(timeStr) {
-    if (!timeStr) return '';
-    return timeStr; // Display in 24-hour format
+    return DateUtils.formatTime ? DateUtils.formatTime(timeStr) : (() => {
+        if (!timeStr) return '';
+        return timeStr; // Display in 24-hour format
+    })();
 }
 
-// Helper function to make links clickable in text
+// Delegate to TaskUtils
 function makeLinksClickable(text) {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    return text.replace(urlRegex, '<a href="$1" target="_blank" onclick="event.stopPropagation()">$1</a>');
+    return TaskUtils.makeLinksClickable ? TaskUtils.makeLinksClickable(text) : (() => {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text.replace(urlRegex, '<a href="$1" target="_blank" onclick="event.stopPropagation()">$1</a>');
+    })();
 }
 
-// Helper function to extract tags and clean text
 function extractTagsAndCleanText(text) {
-    return {
+    return TaskUtils.extractTagsAndCleanText ? TaskUtils.extractTagsAndCleanText(text) : {
         cleanText: text,
         tags: []
     };
 }
 
-// Helper function to check if task has tags
 function hasTaskTags(task) {
-    return false; // Simplified for now
+    return TaskUtils.hasTaskTags ? TaskUtils.hasTaskTags(task) : false;
 }
 
 // Global variables needed for module communication
