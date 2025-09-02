@@ -1,5323 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>⚡ HyperFiler Pro 🚀 - v3.5</title>
+
+        console.log('🚀 HyperFiler Pro v3.5 - Starting initialization...');
+        window.addEventListener('error', function(e) {
+            console.error('❌ UNCAUGHT ERROR:', e.message, 'at line', e.lineno, 'column', e.colno);
+            console.error('Stack:', e.error?.stack);
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('❌ UNHANDLED PROMISE REJECTION:', e.reason);
+        });
+        
+        // Prevent mobile bounce/pull-to-refresh
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length > 1) return; // Allow multi-touch gestures
+            
+            // Check if we're scrolling inside a scrollable element
+            let scrollable = e.target.closest('#todaySchedule, #weekSchedule, #monthSchedule, #listsContainer, #allTasks, #searchResults, #statsContainer, #settingsContainer, #repeatContainer, .modal-content');
+            
+            if (!scrollable) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        // TEMPORARILY DISABLED - testing pages.dev deployment
+        if (false && window.location.hostname.includes('.pages.dev')) {
+            console.log('🚫 Pages.dev redirect temporarily disabled for testing');
+        }
     
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        /* ========== THINGS APP DESIGN SYSTEM ========== */
-        :root {
-            /* Things-inspired Color Palette */
-            --things-bg: #ffffff;
-            --things-surface: #f8f9fa;
-            --things-border: #e5e5e7;
-            --things-text: #1d1d1f;
-            --things-text-secondary: #666666;
-            --things-text-tertiary: #8e8e93;
-            --things-accent: #007aff;
-            --things-success: #34c759;
-            --things-warning: #ff9500;
-            --things-danger: #ff3b30;
-            --things-shadow: rgba(0, 0, 0, 0.05);
-            --things-shadow-elevated: rgba(0, 0, 0, 0.1);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --things-bg: #000000;
-                --things-surface: #1c1c1e;
-                --things-border: #2c2c2e;
-                --things-text: #ffffff;
-                --things-text-secondary: #98989d;
-                --things-text-tertiary: #636366;
-                --things-shadow: rgba(0, 0, 0, 0.3);
-                --things-shadow-elevated: rgba(0, 0, 0, 0.5);
-            }
-        }
-
-        /* Things-style Typography */
-        .things-typography {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            font-size: 16px;
-            line-height: 1.4;
-            color: var(--things-text);
-            font-weight: 400;
-            letter-spacing: -0.01em;
-        }
-
-        .things-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--things-text);
-            line-height: 1.3;
-        }
-
-        .things-subtitle {
-            font-size: 14px;
-            font-weight: 400;
-            color: var(--things-text-secondary);
-            line-height: 1.35;
-        }
-
-        .things-caption {
-            font-size: 13px;
-            font-weight: 400;
-            color: var(--things-text-tertiary);
-            line-height: 1.3;
-        }
-
-        /* Things-style Spacing System */
-        .things-spacing {
-            padding: 16px 20px;
-            margin-bottom: 8px;
-        }
-
-        .things-tight-spacing {
-            padding: 8px 12px;
-        }
-
-        .things-content-padding {
-            padding: 20px;
-        }
-
-        .things-rhythm {
-            margin-bottom: 12px;
-        }
-
-        /* Purposeful Animations */
-        .things-animation {
-            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-
-        .things-micro-animation {
-            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Touch-Friendly Targets */
-        .touch-target {
-            min-height: 44px;
-            min-width: 44px;
-            padding: 12px 16px;
-            cursor: pointer;
-        }
-
-        /* Invisible UI Elements */
-        .invisible-ui {
-            border: none;
-            background: transparent;
-            box-shadow: none;
-            transition: all 0.2s ease;
-        }
-
-        .invisible-ui:hover {
-            background: var(--things-shadow);
-        }
-
-        /* Things-style Task Completion Animation */
-        @keyframes completeTask {
-            0% { 
-                opacity: 1; 
-                transform: scale(1); 
-            }
-            50% { 
-                opacity: 0.5; 
-                transform: scale(0.95); 
-            }
-            100% { 
-                opacity: 0; 
-                transform: scale(0.9) translateX(100%); 
-            }
-        }
-
-        .task-complete-animation {
-            animation: completeTask 0.4s ease-out forwards;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            background: var(--things-bg);
-            color: var(--things-text);
-            padding: 0;
-            margin: 0;
-            min-height: 100vh;
-            font-size: 16px;
-            line-height: 1.4;
-            letter-spacing: -0.01em;
-        }
-
-        .header-section {
-            background: inherit;
-            padding: 2px 0;
+        // SECURITY: Input sanitization functions
+        function sanitizeHTML(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
         
-        .container {
-            max-width: 100%;
-            margin: 0;
-            padding: 0 20px; /* Things-style edge padding */
-            min-height: 100vh;
-            transition: background 0.3s ease;
-        }
-
-        /* Desktop Sidebar Button Styling - Professional Minimalist */
-        @media (min-width: 769px) {
-            .nav-btn {
-                justify-content: flex-start;
-                width: 100%;
-                background: transparent !important;
-                color: #2d3748 !important;
-                font-weight: 500;
-                padding: 14px 20px;
-                border-radius: 8px;
-                font-size: 15px;
-                margin-bottom: 3px;
-                flex: unset;
-                text-align: left;
-                min-height: 44px;
-                border: none !important;
-                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                position: relative;
-            }
-            
-            .nav-btn:hover {
-                background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%) !important;
-                color: #1a202c !important;
-                transform: translateX(2px);
-                box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
-            }
-            
-            .nav-btn.active {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-                color: white !important;
-                font-weight: 600;
-                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25) !important;
-                border: none !important;
-                padding-left: 20px;
-            }
-            
-            .nav-btn.active::before {
-                content: '';
-                position: absolute;
-                left: 0;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 4px;
-                height: 60%;
-                background: rgba(255,255,255,0.6);
-                border-radius: 0 2px 2px 0;
-            }
-
-            .action-btn {
-                width: 100%;
-                background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-                color: #475569;
-                font-weight: 500;
-                padding: 12px 20px;
-                border: 1px solid #e2e8f0;
-                border-radius: 6px;
-                font-size: 13px;
-                text-align: left;
-                cursor: pointer;
-                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            }
-            
-            .action-btn:hover {
-                background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-                border-color: #94a3b8;
-                color: #334155;
-                transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            }
-        }
-
-        /* Desktop Sidebar Layout */
-        @media (min-width: 769px) {
-            .desktop-layout {
-                display: flex;
-                min-height: 100vh;
-            }
-            
-            .desktop-sidebar {
-                width: 220px;
-                background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%) !important;
-                border-right: 1px solid #d8d8d8 !important;
-                padding: 16px 0;
-                position: fixed;
-                height: 100vh;
-                overflow-y: auto;
-                z-index: 100;
-                box-shadow: 0 0 20px rgba(0,0,0,0.03) !important;
-            }
-            
-            .desktop-content {
-                margin-left: 220px;
-                flex: 1;
-                padding: 20px;
-                min-height: 100vh;
-            }
-            
-            /* Hide desktop header - now in sidebar */
-            .header-section {
-                display: none;
-            }
-        }
-
-        h1 {
-            color: #1877f2;
-            text-align: center;
-            margin: 0;
-            font-size: 18px;
-        }
-        
-        @media (max-width: 768px) {
-            h1 {
-                display: none;
-            }
-            
-            /* Mobile spacing adjustment */
-            #todaySchedule, #weekSchedule, #monthSchedule, 
-            #listsContainer, #allTasks, #searchResults,
-            #statsContainer, #settingsContainer, #repeatContainer {
-                padding-bottom: 80px; /* Space for bottom nav */
-            }
-            
-        }
-
-        .main-nav {
-            background: white;
-            border-bottom: 1px solid #e1e5e9;
-            margin-bottom: 0;
-            padding: 4px 0;
-            display: flex;
-            gap: 2px;
-            overflow-x: auto;
-            justify-content: flex-start;
-            width: 100%;
-            box-sizing: border-box;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        /* Desktop Sidebar Navigation */
-        @media (min-width: 769px) {
-            .main-nav {
-                background: transparent;
-                border-bottom: none;
-                box-shadow: none;
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
-                padding: 0 16px;
-                width: 100%;
-            }
-        }
-        
-
-        .nav-btn {
-            border: none;
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: background 0.2s ease;
-            white-space: nowrap;
-            text-align: center;
-            color: white;
-            flex: 1;
-            margin: 0;
-        }
-        
-        .nav-btn.active {
-            opacity: 1;
-        }
-        
-
-        /* Today - Red */
-        #nav-today {
-            background: #FF4136;
-        }
-        #nav-today:hover {
-            background: #E6392F;
-            transform: translateY(-2px);
-        }
-        #nav-today.active {
-            background: #FF4136;
-        }
-
-        /* Week - Blue */
-        #nav-week {
-            background: #0074D9;
-        }
-        #nav-week:hover {
-            background: #0066C3;
-            transform: translateY(-2px);
-        }
-        #nav-week.active {
-            background: #0074D9;
-        }
-
-        /* Month - Green */
-        #nav-calendar {
-            background: #2ECC40;
-        }
-        #nav-calendar:hover {
-            background: #29B939;
-            transform: translateY(-2px);
-        }
-        #nav-calendar.active {
-            background: #2ECC40;
-        }
-
-        /* Search - Orange */
-        #nav-all {
-            background: #FF851B;
-        }
-        #nav-all:hover {
-            background: #E6771A;
-            transform: translateY(-2px);
-        }
-        #nav-all.active {
-            background: #FF851B;
-        }
-
-        /* Lists - Maroon */
-        #nav-lists {
-            background: #CD5C5C;
-        }
-        #nav-lists:hover {
-            background: #DC143C;
-            transform: translateY(-2px);
-        }
-        #nav-lists.active {
-            background: #B22222;
-        }
-
-        /* Repeat - Purple */
-        #nav-repeat {
-            background: #B10DC9;
-        }
-        #nav-repeat:hover {
-            background: #9E0CB5;
-            transform: translateY(-2px);
-        }
-        #nav-repeat.active {
-            background: #B10DC9;
-        }
-
-        /* Undo - Yellow */
-        #nav-undo {
-            background: #FFDC00 !important;
-            color: black !important;
-        }
-        #nav-undo:hover {
-            background: #E6C600 !important;
-            transform: translateY(-2px) !important;
-        }
-        #nav-undo.active {
-            background: #FFDC00 !important;
-        }
-
-        /* Content area - white card effect */
-        .content-container {
-            background: transparent;
-            border: none;
-            margin: 0;
-            padding: 0;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .content-container::before {
-            display: none;
-        }
-
-
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .form-row .form-group {
-            flex: 1;
-            margin-bottom: 0;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #333;
-            font-size: 14px;
-        }
-
-        input[type="text"], input[type="date"], input[type="time"], textarea, select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
-
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #1877f2;
-            box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.1);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-
-        .btn {
-            background: #1877f2;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            margin: 5px;
-            min-width: 100px;
-        }
-
-        .btn:hover {
-            background: #166fe5;
-            transform: translateY(-1px);
-        }
-
-        .btn-secondary {
-            background: #42b883;
-        }
-
-        .btn-secondary:hover {
-            background: #369870;
-        }
-
-        .btn-danger {
-            background: #e74c3c;
-        }
-
-        .btn-danger:hover {
-            background: #c0392b;
-        }
-
-        .btn-small {
-            padding: 8px 12px;
-            font-size: 12px;
-            min-width: 80px;
-        }
-
-        .content-area {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0;
-        }
-
-        .calendar-section {
-            background: transparent;
-            padding: 0;
-        }
-
-        .calendar-section h3 {
-            margin: 0 0 8px 0;
-            color: #1877f2;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 16px;
-        }
-
-        .calendar-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 1px;
-            background: #ddd;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .calendar-header {
-            background: #1877f2;
-            color: white;
-            padding: 12px 4px;
-            text-align: center;
-            font-weight: 600;
-            font-size: 12px;
-        }
-
-        .calendar-day {
-            background: transparent;
-            padding: 8px 4px;
-            height: 120px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            font-size: 12px;
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-
-        .calendar-day:hover {
-            background: #f8f9fa;
-        }
-
-        /* Subtle scrollbar styling for calendar cells */
-        .calendar-day::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .calendar-day::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .calendar-day::-webkit-scrollbar-thumb {
-            background: #ddd;
-            border-radius: 2px;
-        }
-
-        .calendar-day::-webkit-scrollbar-thumb:hover {
-            background: #bbb;
-        }
-
-        .calendar-day.other-month {
-            background: #f5f5f5;
-            color: #999;
-        }
-
-        .calendar-day.today {
-            background: #d4edda;
-            border: 2px solid #28a745;
-            font-weight: bold;
-        }
-
-
-        @keyframes pulse-event {
-            0% { box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4); }
-            50% { box-shadow: 0 4px 16px rgba(220, 53, 69, 0.8); }
-            100% { box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4); }
-        }
-
-        .week-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 2px;
-            background: #ddd;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .week-day {
-            background: transparent;
-            padding: 12px 8px;
-            min-height: 220px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            font-size: 13px;
-            border-right: 1px solid #eee;
-            overflow: hidden;
-        }
-
-        .week-day:last-child {
-            border-right: none;
-        }
-
-        .week-day:hover {
-            background: #f8f9fa;
-        }
-
-        .week-day.today {
-            background: #d4edda;
-            border: 2px solid #28a745;
-            font-weight: bold;
-        }
-
-
-
-
-        .week-day.drop-target {
-            background: #e8f5e8;
-            border: 2px dashed #28a745;
-        }
-
-        .week-day-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .week-day-name {
-            font-weight: 600;
-            font-size: 12px;
-            color: #666;
-        }
-
-        .week-day-number {
-            font-weight: 700;
-            font-size: 16px;
-            color: #333;
-        }
-
-        .week-task-item {
-            background: #e3f2fd;
-            border: 1px solid #1877f2;
-            border-radius: 4px;
-            padding: 5px 8px;
-            margin: 3px 0;
-            font-size: 11px;
-            cursor: grab;
-            max-width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            position: relative;
-            transition: all 0.2s ease;
-            line-height: 1.3;
-        }
-
-        .week-task-item:hover {
-            background: #bbdefb;
-            border-color: #0d47a1;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-
-        .week-task-item:hover::after {
-            content: attr(data-full-text);
-            position: absolute;
-            left: 50%;
-            top: 100%;
-            transform: translateX(-50%);
-            background: #1877f2;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            white-space: normal;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            max-width: 250px;
-            word-wrap: break-word;
-            margin-top: 4px;
-            opacity: 0;
-            animation: tooltipFadeIn 0.2s ease forwards;
-            pointer-events: none;
-        }
-
-        @keyframes tooltipFadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .week-task-item.event {
-            background: #ffcccc;
-            border: 1px solid #dc3545;
-            color: #721c24;
-            font-weight: bold;
-            box-shadow: 0 1px 3px rgba(220, 53, 69, 0.3);
-        }
-
-        .week-task-item.event:hover {
-            background: #ffb3b3;
-            border-color: #a71e2a;
-            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
-        }
-
-        .week-task-item.event:hover::after {
-            background: #dc3545;
-            color: white;
-        }
-
-        .week-task-item:active {
-            cursor: grabbing;
-        }
-
-        .week-task-item.dragging {
-            opacity: 0.7;
-            transform: rotate(2deg) scale(1.05);
-            z-index: 1000;
-            position: relative;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            border: 2px solid #007bff;
-        }
-
-        /* Hide other tasks while dragging */
-        #weekGrid.dragging-active .week-task-item:not(.dragging) {
-            opacity: 0.1;
-            filter: blur(3px);
-            transform: scale(0.95);
-            transition: all 0.2s ease;
-        }
-
-        .week-task-time {
-            font-size: 9px;
-            color: #666;
-            margin-left: 2px;
-        }
-
-        .week-task-item.event .week-task-time {
-            color: #721c24;
-            font-weight: bold;
-        }
-
-        .calendar-day.drop-target {
-            background: #e8f5e8;
-            border: 2px dashed #28a745;
-        }
-
-        .calendar-day-number {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .calendar-task-item {
-            background: #e3f2fd;
-            border: 1px solid #1877f2;
-            border-radius: 3px;
-            padding: 4px 6px;
-            margin: 2px 0;
-            font-size: 11px;
-            cursor: grab;
-            max-width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            line-height: 1.3;
-            color: #1565c0;
-            font-weight: 500;
-            display: block;
-            min-height: 18px;
-            flex-shrink: 0;
-        }
-
-        .calendar-task-item.event {
-            background: #ffcccc;
-            border: 1px solid #dc3545;
-            color: #721c24;
-            font-weight: bold;
-            box-shadow: 0 1px 3px rgba(220, 53, 69, 0.3);
-        }
-
-        /* Enhanced Task Selection Highlighting - Elegant & Harmonious */
-        .task-selected,
-        .week-task-item.task-selected,
-        .calendar-task-item.task-selected,
-        .time-slot-task.task-selected {
-            background: linear-gradient(135deg, #1877f2 0%, #4267b2 50%, #365899 100%) !important;
-            border: 2px solid #1565c0 !important;
-            color: white !important;
-            box-shadow: 0 6px 20px rgba(24, 119, 242, 0.3), 0 2px 8px rgba(24, 119, 242, 0.2) !important;
-            transform: translateY(-2px) !important;
-            z-index: 100 !important;
-            position: relative !important;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-
-        /* Force white text for all content within selected tasks */
-        .task-selected *,
-        .week-task-item.task-selected *,
-        .calendar-task-item.task-selected *,
-        .time-slot-task.task-selected *,
-        .task-selected .task-content,
-        .task-selected .task-title,
-        .task-selected .task-time,
-        .task-selected .task-notes,
-        .task-selected .task-due,
-        .task-selected span,
-        .task-selected div {
-            color: white !important;
-        }
-        
-        /* Events get special highlighting */
-        .task-selected.event,
-        .week-task-item.task-selected.event,
-        .calendar-task-item.task-selected.event {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 50%, #bd2130 100%) !important;
-            border: 2px solid #bd2130 !important;
-            color: white !important;
-            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3), 0 2px 8px rgba(220, 53, 69, 0.2) !important;
-        }
-        
-        /* Ensure consistent highlighting across all views */
-        div.week-task-item.task-selected,
-        div.calendar-task-item.task-selected,
-        .week-day div.week-task-item.task-selected,
-        .calendar-day div.calendar-task-item.task-selected,
-        #weekGrid .week-task-item.task-selected,
-        #calendarGrid .calendar-task-item.task-selected,
-        #todaySchedule .time-slot-task.task-selected {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-            border: 2px solid #5a6fd8 !important;
-            color: white !important;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
-            transform: translateY(-1px) !important;
-            z-index: 100 !important;
-            position: relative !important;
-            transition: all 0.2s ease !important;
-        }
-
-        /* Keyboard focus indicator for accessibility */
-        .task-selected::before {
-            content: "▶";
-            position: absolute;
-            left: -12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: white;
-            font-size: 10px;
-            z-index: 101;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-
-        /* Task Text Amplifier - Shows full text for selected tasks */
-        .task-amplifier {
-            background: linear-gradient(135deg, #1877f2 0%, #4267b2 50%, #365899 100%) !important;
-            color: white !important;
-            padding: 12px 20px !important;
-            border-radius: 16px !important;
-            box-shadow: 0 12px 40px rgba(24, 119, 242, 0.25), 0 4px 12px rgba(24, 119, 242, 0.15) !important;
-            font-size: 16px !important;
-            font-weight: 600 !important;
-            max-width: 80vw !important;
-            z-index: 10000 !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-            transition: opacity 0.3s ease !important;
-            border: 3px solid #1565c0 !important;
-            visibility: hidden !important;
-        }
-
-        .task-amplifier.visible {
-            opacity: 1 !important;
-            visibility: visible !important;
-        }
-
-        .task-amplifier::before {
-            content: "";
-            position: absolute;
-            top: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-bottom: 8px solid #1877f2;
-        }
-
-        .task-amplifier .amplifier-content {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .task-amplifier .amplifier-icon {
-            font-size: 16px;
-            opacity: 0.8;
-        }
-
-        .task-amplifier .amplifier-text {
-            flex: 1;
-            line-height: 1.3;
-        }
-
-        .task-amplifier .amplifier-meta {
-            font-size: 11px;
-            opacity: 0.7;
-            margin-left: 10px;
-        }
-
-        /* Special styling for different task types in amplifier */
-        .task-amplifier.event {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 50%, #bd2130 100%);
-            border-color: #bd2130;
-            box-shadow: 0 12px 40px rgba(220, 53, 69, 0.25), 0 4px 12px rgba(220, 53, 69, 0.15) !important;
-        }
-
-        .task-amplifier.completed {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 50%, #17a2b8 100%);
-            border-color: #1e7e34;
-            box-shadow: 0 12px 40px rgba(40, 167, 69, 0.25), 0 4px 12px rgba(40, 167, 69, 0.15) !important;
-        }
-
-        .task-amplifier.overdue {
-            background: linear-gradient(135deg, #fd7e14 0%, #e67e22 50%, #d63384 100%);
-            border-color: #d63384;
-            box-shadow: 0 12px 40px rgba(253, 126, 20, 0.25), 0 4px 12px rgba(253, 126, 20, 0.15) !important;
-        }
-
-
-        /* Completed tasks when selected */
-        .task-selected.completed,
-        .week-task-item.task-selected.completed,
-        .calendar-task-item.task-selected.completed {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 50%, #17a2b8 100%) !important;
-            border: 2px solid #1e7e34 !important;
-            color: white !important;
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3), 0 2px 8px rgba(40, 167, 69, 0.2) !important;
-            opacity: 0.95 !important;
-        }
-
-        /* Overdue tasks when selected */
-        .task-selected.overdue,
-        .week-task-item.task-selected.overdue,
-        .calendar-task-item.task-selected.overdue {
-            background: linear-gradient(135deg, #fd7e14 0%, #e67e22 50%, #d63384 100%) !important;
-            border: 2px solid #d63384 !important;
-            color: white !important;
-            box-shadow: 0 6px 20px rgba(253, 126, 20, 0.3), 0 2px 8px rgba(253, 126, 20, 0.2) !important;
-        }
-
-        
-        /* Override hover states when selected */
-        .week-task-item.task-selected:hover,
-        .calendar-task-item.task-selected:hover {
-            background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 50%, #0a58ca 100%) !important;
-            border: 2px solid #084298 !important;
-            color: white !important;
-            box-shadow: 0 8px 25px rgba(13, 110, 253, 0.4), 0 3px 10px rgba(13, 110, 253, 0.3) !important;
-            transform: translateY(-3px) !important;
-        }
-
-        .task-selected.event {
-            background: #ff6b6b !important;
-            border: 2px solid #ff4757 !important;
-            color: white !important;
-        }
-
-        /* Day cursor highlighting */
-        .day-cursor {
-            background: rgba(24, 119, 242, 0.2) !important;
-            border: 3px solid #1877f2 !important;
-            box-shadow: 0 0 15px rgba(24, 119, 242, 0.4) !important;
-            position: relative;
-        }
-
-        .day-cursor::before {
-            content: "📍";
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            font-size: 12px;
-            z-index: 100;
-        }
-
-
-        .calendar-task-item:active {
-            cursor: grabbing;
-        }
-
-        .calendar-task-item.dragging {
-            opacity: 0.7;
-            transform: rotate(2deg) scale(1.05);
-            z-index: 1000;
-            position: relative;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            border: 2px solid #007bff;
-        }
-
-        /* Hide other tasks while dragging in calendar */
-        #calendarGrid.dragging-active .calendar-task-item:not(.dragging) {
-            opacity: 0.1;
-            filter: blur(3px);
-            transform: scale(0.95);
-            transition: all 0.2s ease;
-        }
-
-        .tasks-section {
-            background: transparent;
-            padding: 0;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #eee;
-        }
-
-        .section-header h3 {
-            margin: 0;
-            color: #1877f2;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
-        }
-
-        /* View-specific header colors to match tabs */
-        #today-view .section-header h3 {
-            color: #FF4136;
-        }
-
-        #week-view .section-header h3 {
-            color: #0074D9;
-        }
-
-        #calendar-view .section-header h3 {
-            color: #2ECC40;
-        }
-
-        #tasks-view .section-header h3 {
-            color: #FF851B;
-        }
-
-        #lists-view .section-header h3 {
-            color: #B22222;
-        }
-
-        #repeat-view .section-header h3 {
-            color: #B10DC9;
-        }
-
-        .view-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        .task-group {
-            background: transparent;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .task-group.today {
-            box-shadow: 0 4px 12px rgba(66, 184, 131, 0.3);
-            border: 2px solid #42b883;
-        }
-
-        .task-group.overdue {
-            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-            border: 2px solid #dc3545;
-        }
-
-
-        .group-header {
-            background: #1877f2;
-            color: white;
-            padding: 15px 20px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.3s ease;
-            user-select: none;
-        }
-
-        .group-header:hover {
-            background: #166fe5;
-        }
-
-        .group-header.today {
-            background: linear-gradient(135deg, #42b883 0%, #369870 100%);
-            animation: pulse-header 3s infinite;
-        }
-
-        .group-header.overdue {
-            background: linear-gradient(135deg, #dc3545 0%, #c0392b 100%);
-        }
-
-
-        @keyframes pulse-header {
-            0% { background: linear-gradient(135deg, #42b883 0%, #369870 100%); }
-            50% { background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%); }
-            100% { background: linear-gradient(135deg, #42b883 0%, #369870 100%); }
-        }
-
-        .group-title {
-            font-size: 16px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .task-count {
-            background: rgba(255,255,255,0.2);
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-        }
-
-        .dropdown-arrow {
-            font-size: 18px;
-            transition: transform 0.3s ease;
-        }
-
-        .dropdown-arrow.expanded {
-            transform: rotate(180deg);
-        }
-
-        .group-tasks {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .group-tasks.expanded {
-            max-height: 2000px;
-        }
-
-        .task-card {
-            border-left: 4px solid var(--things-border);
-            padding: 16px 20px; /* Things generous padding */
-            border-bottom: 1px solid var(--things-border);
-            background: var(--things-bg);
-            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring easing */
-            cursor: pointer;
-            margin-bottom: 8px; /* Things rhythm spacing */
-            border-radius: 8px; /* Soft corners like Things */
-            box-shadow: 0 1px 3px var(--things-shadow);
-        }
-
-        .task-card:last-child {
-            border-bottom: none;
-        }
-
-        .task-card:hover {
-            background: var(--things-surface);
-            transform: translateY(-1px); /* Subtle lift like Things */
-            box-shadow: 0 4px 12px var(--things-shadow-elevated);
-        }
-
-        .task-card.completed {
-            opacity: 0.6;
-            text-decoration: line-through;
-            background: #f8f9fa;
-        }
-
-
-        .task-card.event {
-            border-left-color: #dc3545;
-            background: linear-gradient(90deg, #ffe6e6 0%, #fff5f5 50%, #ffffff 100%);
-            border: 2px solid #dc3545;
-            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-        }
-
-        .task-card.event .task-title {
-            color: #721c24;
-            font-weight: 700;
-        }
-
-
-        .task-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-        }
-
-        .task-title {
-            font-size: 16px; /* Things standard size */
-            font-weight: 500; /* Things medium weight */
-            color: var(--things-text);
-            line-height: 1.4; /* Things line height */
-            letter-spacing: -0.01em; /* Apple-style tight spacing */
-            flex: 1;
-            margin-right: 10px;
-            margin-bottom: 4px; /* Things micro-spacing */
-        }
-
-        .task-meta {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px; /* Things subtitle size */
-            color: var(--things-text-secondary); /* Things secondary text */
-            line-height: 1.35; /* Things subtitle line height */
-            font-weight: 400;
-            margin-bottom: 8px;
-        }
-
-
-        .task-notes {
-            font-size: 13px; /* Things caption size */
-            color: var(--things-text-tertiary); /* Things tertiary text */
-            line-height: 1.3; /* Things caption line height */
-            font-weight: 400;
-            margin-bottom: 10px;
-            /* Limit to 2 lines in Today view */
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-
-        .task-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .task-checkbox {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .no-tasks {
-            text-align: center;
-            color: #666;
-            padding: 40px;
-            background: transparent;
-            border-radius: 8px;
-        }
-
-        .export-section {
-            background: transparent;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .export-section h3 {
-            color: #1877f2;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            cursor: pointer;
-        }
-
-        .modal-content {
-            background: white;
-            margin: 2vh auto;
-            padding: 0;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            max-width: 500px;
-            width: 90%;
-            max-height: 96vh;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #eee;
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1877f2;
-            margin: 0;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .close-btn:hover {
-            color: #333;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        /* Settings tabs styling */
-        .settings-tab:hover {
-            background-color: #f8f9fa !important;
-            color: #1877f2 !important;
-        }
-        
-        .settings-tab.active {
-            border-bottom-color: #1877f2 !important;
-            color: #1877f2 !important;
-            background-color: #f8f9fa !important;
-        }
-        
-        .settings-tab-content {
-            padding: 20px 0;
-        }
-
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #1877f2;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 5px;
-            }
-
-            .container {
-                padding: 5px;
-            }
-
-            h1 {
-                font-size: 20px;
-                margin-bottom: 15px;
-            }
-
-            .main-nav {
-                padding: 10px;
-                gap: 5px;
-            }
-
-            .nav-btn {
-                padding: 10px 15px;
-                font-size: 12px;
-                min-width: 100px;
-            }
-
-
-            .form-row {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .calendar-section, .tasks-section {
-                padding: 15px;
-            }
-
-            .calendar-day {
-                height: 100px;
-                padding: 4px 2px;
-                overflow-y: auto;
-                overflow-x: hidden;
-            }
-
-            .calendar-controls {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .section-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
-
-            .view-controls {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .task-actions {
-                justify-content: center;
-            }
-
-            .btn {
-                padding: 10px 16px;
-                font-size: 12px;
-            }
-
-            .modal-content {
-                margin: 10% auto;
-                padding: 20px;
-                width: 95%;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-
-            .week-day {
-                min-height: 150px;
-                padding: 8px 4px;
-            }
-
-            .week-day-header {
-                margin-bottom: 6px;
-                padding-bottom: 4px;
-            }
-
-            .week-day-name {
-                font-size: 10px;
-            }
-
-            .week-day-number {
-                font-size: 14px;
-            }
-
-            .week-task-item {
-                padding: 6px 8px;
-                font-size: 12px;
-                margin: 2px 0;
-                line-height: 1.3;
-            }
-
-            .week-task-item:hover::after {
-                max-width: 200px;
-                font-size: 11px;
-                left: 0;
-                transform: none;
-            }
-
-            .week-task-time {
-                font-size: 11px;
-                opacity: 0.8;
-            }
-        }
-
-        /* Tablet: Transition to mobile layout */
-        @media (max-width: 640px) {
-            .week-grid {
-                grid-template-columns: 1fr;
-                gap: 6px;
-                background: transparent;
-                border: none;
-            }
-
-            .week-day {
-                min-height: auto;
-                padding: 10px;
-                border: 1px solid #ddd;
-                border-radius: 6px;
-                margin-bottom: 6px;
-            }
-
-            .week-day-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 6px;
-                padding-bottom: 4px;
-                border-bottom: 1px solid #e3f2fd;
-            }
-
-            .week-day-number {
-                background: #1877f2;
-                color: white;
-                width: 24px;
-                height: 24px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 14px;
-                font-weight: 600;
-            }
-
-            .week-day.today .week-day-number {
-                background: #ff6b35;
-            }
-
-            .view-controls {
-                flex-wrap: wrap;
-                gap: 6px;
-            }
-
-            .view-controls .btn {
-                flex: 1;
-                min-width: 120px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            /* Overall container improvements - Things edge-to-edge */
-            .container {
-                padding: 0 16px; /* Things-style edge padding for mobile */
-            }
-
-            /* ONLY essential mobile touch fixes */
-            input:focus, textarea:focus {
-                outline: none;
-                border-color: #1877f2;
-                box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
-            }
-            
-            /* Mobile modal adjustments */
-            .modal-content {
-                max-width: 97% !important; /* Increased from 95% */
-                margin: 3vh auto !important; /* Reduced margins */
-                padding: 0 !important;
-            }
-            
-            /* Mobile text input optimizations */
-            input[type="text"], 
-            input[type="email"], 
-            input[type="search"], 
-            textarea {
-                padding: 8px 12px !important; /* Compact but usable padding */
-                margin: 4px 0 !important; /* Reduced margins */
-            }
-            
-            /* Mobile link truncation fixes */
-            .task-title a,
-            .task-notes a {
-                word-break: break-all !important; /* Break long URLs */
-                overflow-wrap: break-word !important; /* Modern browsers */
-                display: inline !important;
-                max-width: 100% !important;
-            }
-            
-            /* Mobile task title wrapping */
-            .task-title {
-                word-wrap: break-word !important;
-                overflow-wrap: break-word !important;
-                white-space: normal !important;
-            }
-
-            h1 {
-                font-size: 20px;
-                margin-bottom: 15px;
-            }
-
-            .main-nav {
-                padding: 10px;
-                gap: 5px;
-            }
-
-            .nav-btn {
-                padding: 12px 16px; /* Thumb-friendly padding */
-                font-size: 14px;
-                min-width: 44px; /* Apple HIG minimum */
-                min-height: 44px; /* Apple HIG minimum */
-                transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring */
-            }
-
-            /* Things-style mobile task cards */
-            .task-card {
-                margin: 0 -16px 8px -16px; /* Extend to edges */
-                border-radius: 0; /* Clean edge-to-edge */
-                border-left: none;
-                border-bottom: 1px solid var(--things-border);
-                padding: 16px; /* Generous internal padding */
-                background: var(--things-bg);
-            }
-
-            .calendar-day {
-                height: 90px;
-                padding: 6px 4px;
-                overflow-y: auto;
-                overflow-x: hidden;
-            }
-
-            .calendar-task-item {
-                font-size: 12px;
-                padding: 4px 6px;
-                line-height: 1.3;
-                min-height: 16px;
-                flex-shrink: 0;
-            }
-
-            .task-card {
-                padding: 12px 15px;
-            }
-
-            .task-actions {
-                flex-direction: column;
-                gap: 5px;
-            }
-
-            .btn {
-                width: 100%;
-            }
-
-            /* Week View - Vertical Layout for Mobile */
-            .week-grid {
-                grid-template-columns: 1fr;
-                gap: 8px;
-                background: transparent;
-                border: none;
-            }
-
-            .week-day {
-                min-height: auto;
-                padding: 12px;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                margin-bottom: 8px;
-            }
-
-            .week-day-header {
-                margin-bottom: 8px;
-                padding-bottom: 6px;
-                border-bottom: 2px solid #e3f2fd;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            .week-day-name {
-                font-size: 12px;
-                font-weight: 600;
-                color: #1877f2;
-            }
-
-            .week-day-number {
-                font-size: 16px;
-                font-weight: 700;
-                background: #1877f2;
-                color: white;
-                width: 28px;
-                height: 28px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .week-day.today .week-day-number {
-                background: #ff6b35;
-            }
-
-            .week-task-item {
-                padding: 7px 9px;
-                font-size: 11px;
-                margin: 5px 0;
-                border-radius: 4px;
-                border-left: 3px solid #1877f2;
-            }
-
-            .week-task-item:hover::after {
-                max-width: 180px;
-                font-size: 11px;
-                left: 0;
-                transform: none;
-            }
-
-            .week-task-item.event {
-                border-left-color: #dc3545;
-                background: #fff5f5;
-            }
-
-            .week-task-time {
-                font-size: 9px;
-                margin-top: 2px;
-                color: #666;
-                font-weight: 500;
-            }
-
-            /* Week View Controls */
-            .view-controls {
-                flex-direction: column;
-                gap: 8px;
-                width: 100%;
-            }
-
-            .view-controls .btn {
-                width: 100%;
-                margin: 0;
-            }
-
-            /* Calendar Controls */
-            .calendar-controls {
-                flex-direction: column;
-                gap: 10px;
-                text-align: center;
-            }
-
-            .calendar-controls h4 {
-                margin: 0;
-                font-size: 16px;
-            }
-
-            /* Section spacing */
-            .calendar-section {
-                padding: 10px;
-                margin-bottom: 15px;
-            }
-
-            .section-header {
-                margin-bottom: 0px !important;
-                padding-bottom: 0px !important;
-                border-bottom: none !important;
-            }
-            
-            .calendar-controls {
-                border-top: none !important;
-                border-bottom: none !important;
-                margin-top: 0px !important;
-                margin-bottom: 0px !important;
-                padding-top: 0px !important;
-                padding-bottom: 0px !important;
-            }
-            
-            /* Add line between date and filters on mobile */
-            #currentWeekMobile {
-                border-bottom: 1px solid #eee !important;
-                padding-bottom: 10px !important;
-                margin-bottom: 10px !important;
-            }
-            
-            /* Add line between buttons and filters in today view mobile */
-            #todayTemplateFiltersMobile {
-                border-top: 1px solid #eee !important;
-                padding-top: 10px !important;
-                margin-top: 10px !important;
-            }
-            
-            /* Add line between date and filters in week view mobile */
-            #weekTemplateFiltersMobile {
-                border-top: 1px solid #eee !important;
-                padding-top: 10px !important;
-                margin-top: 10px !important;
-            }
-
-            /* Mobile-specific input improvements */
-            input[type="text"] {
-                font-size: 16px; /* Prevents zoom on iOS */
-                padding: 12px 15px;
-                border-radius: 8px;
-                width: 100% !important;
-                max-width: none !important;
-                margin-bottom: 10px;
-            }
-
-            /* Filter buttons on mobile */
-            .filter-btn {
-                padding: 8px 12px;
-                font-size: 14px;
-                margin: 2px;
-                min-height: 44px;
-                white-space: nowrap;
-            }
-
-            /* Quick filter container on mobile */
-            div[style*="flex-wrap"] {
-                gap: 4px !important;
-            }
-
-            /* Today and Week view search improvements */
-            #todayTaskSearch, #weekTaskSearch, #monthTaskSearch, #repeatTaskSearch {
-                margin-right: 0 !important;
-                margin-bottom: 10px;
-            }
-
-            /* Better stacking for Today/Week view controls */
-            .view-controls {
-                flex-wrap: wrap;
-                justify-content: flex-start;
-                align-items: stretch;
-            }
-
-            .view-controls input {
-                order: -1; /* Put search input first */
-                flex: 1 1 100%;
-                min-width: 0;
-            }
-
-            .view-controls .btn {
-                flex: 1 1 auto;
-                min-width: 80px;
-                margin: 2px;
-            }
-
-            /* Better modal close button on mobile */
-            .close-btn {
-                width: 44px !important;
-                height: 44px !important;
-                font-size: 20px;
-            }
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        /* Today View Time Blocks */
-        .time-block {
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-            margin-bottom: 12px;
-            width: 100%;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-            overflow: hidden;
-            transition: all 0.2s ease;
-        }
-
-        .time-block:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transform: translateY(-1px);
-        }
-
-        .time-block-header {
-            background: linear-gradient(135deg, #f1f3f4 0%, #e9ecef 100%);
-            padding: 12px 16px;
-            border-bottom: 1px solid #dee2e6;
-            font-weight: 600;
-            color: #495057;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .time-block-header.current-time {
-            background: #FF4136;
-            color: white;
-            border-left: 4px solid #FF4136;
-        }
-
-        .time-block-content {
-            padding: 0;
-        }
-
-        .time-block-content.empty {
-            padding: 20px;
-            text-align: center;
-            color: #6c757d;
-            font-style: italic;
-            background: #f8f9fa;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .time-block-content.empty:hover {
-            background: #e3f2fd;
-            color: #1877f2;
-        }
-
-        .time-block.empty-slot {
-            opacity: 0.6;
-            border: 2px dashed #dee2e6;
-        }
-
-        .time-block.empty-slot:hover {
-            opacity: 1;
-            border-color: #1877f2;
-        }
-
-        .empty-slot-message {
-            padding: 10px;
-            text-align: center;
-            color: #6c757d;
-            font-style: italic;
-            font-size: 12px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-
-        .empty-slot-message:hover {
-            background: #e3f2fd;
-            color: #1877f2;
-        }
-
-        /* Floating Add Button for Today View */
-        .floating-add-container {
-            display: flex;
-            justify-content: center;
-            margin: 30px 0 20px 0;
-        }
-
-        .floating-add-btn {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 16px 32px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .floating-add-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
-        }
-
-        .floating-add-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 10px rgba(40, 167, 69, 0.3);
-        }
-
-        .add-icon {
-            font-size: 20px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-        }
-
-        .add-text {
-            font-size: 16px;
-            letter-spacing: 0.5px;
-        }
-
-
-        /* Search Filter Buttons */
-        .search-filter-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 8px;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-        }
-
-        .filter-btn {
-            background: transparent;
-            border: 1px solid #dee2e6;
-            color: #495057;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-
-        .filter-btn:hover {
-            background: #e3f2fd;
-            border-color: #1877f2;
-            color: #1877f2;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(24,119,242,0.2);
-        }
-
-        .filter-btn.active {
-            background: #1877f2;
-            border-color: #1877f2;
-            color: white;
-            box-shadow: 0 2px 6px rgba(24,119,242,0.3);
-        }
-
-        .filter-btn.filter-clear {
-            background: #f8f9fa;
-            border-color: #6c757d;
-            color: #6c757d;
-        }
-
-        .filter-btn.filter-clear:hover {
-            background: #dc3545;
-            border-color: #dc3545;
-            color: white;
-        }
-
-
-
-
-        .export-btn {
-            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 4px rgba(23,162,184,0.3);
-        }
-
-        .export-btn:hover {
-            background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 3px 6px rgba(23,162,184,0.4);
-        }
-
-        /* Floating Add Task Button */
-        .floating-add-task {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 56px; /* Apple HIG recommended size */
-            height: 56px;
-            background: var(--things-accent); /* Things blue */
-            border-radius: 50%;
-            box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3); /* Things-style shadow */
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            border: none;
-            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring */
-        }
-
-        .floating-add-task:hover {
-            transform: scale(1.05) translateY(-2px); /* Subtle Things-like scale */
-            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4); /* Elevated Things shadow */
-            background: #0056b3; /* Darker Things blue on hover */
-        }
-
-        .floating-add-icon {
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            line-height: 1;
-        }
-
-        /* Hide floating button on mobile when quick add is visible */
-        @media (max-width: 768px) {
-            .floating-add-task {
-                display: none;
-            }
-            #today-view .floating-add-task {
-                display: none;
-            }
-        }
-
-        /* Template Management Styles */
-        .template-btn {
-            background: #e3f2fd;
-            color: #1976d2;
-            border: 1px solid #bbdefb;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
-
-        .template-btn:hover {
-            background: #bbdefb;
-            transform: translateY(-1px);
-        }
-
-        .template-btn:active {
-            transform: translateY(0);
-        }
-
-        .template-btn.deleting {
-            background: #ffebee;
-            color: #d32f2f;
-            border-color: #ffcdd2;
-        }
-
-        .time-slot-task {
-            background: white;
-            border: 1px solid #e9ecef;
-            border-left: 4px solid #007bff;
-            padding: 2px 12px;
-            margin-bottom: 4px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-        }
-
-        .time-slot-task:last-child {
-            margin-bottom: 0;
-        }
-
-        .time-slot-task:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-            transform: translateY(-2px);
-            border-left-color: #0056b3;
-        }
-
-        .time-slot-task.completed {
-            opacity: 0.7;
-            background: #f1f3f4;
-            border-left-color: #6c757d;
-        }
-
-        .time-slot-task.event {
-            border-left-color: #dc3545;
-            background: linear-gradient(90deg, #ffe6e6 0%, #fff5f5 100%);
-        }
-
-
-        .time-slot-task.overdue {
-            border-left-color: #dc3545;
-            background: linear-gradient(90deg, #f8d7da 0%, #ffffff 100%);
-        }
-
-        .time-slot-task.moved-from-past {
-            border-left-color: #ff6b6b;
-            background: linear-gradient(90deg, #fff0f0 0%, #fffafa 100%);
-            border: 1px solid #ffcdd2;
-            box-shadow: 0 2px 4px rgba(255, 107, 107, 0.1);
-        }
-
-        .overdue-badge {
-            animation: pulse-overdue 2s infinite;
-        }
-
-        @keyframes pulse-overdue {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
-
-
-        .time-slot-task .task-title {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 4px;
-        }
-
-        .time-slot-task .task-notes {
-            font-size: 13px;
-            color: #6c757d;
-            line-height: 1.4;
-        }
-
-        .no-tasks-today {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-        }
-
-        .no-tasks-today .emoji {
-            font-size: 48px;
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        /* Drag and Drop Styles for Today View */
-        .time-slot-task.dragging {
-            opacity: 0.5;
-            transform: rotate(2deg);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            z-index: 1000;
-        }
-
-        .time-block.drag-over {
-            background: #e3f2fd;
-            border: 2px dashed #1877f2;
-            transform: scale(1.02);
-        }
-
-        .time-block-content.drag-over {
-            background: #f0f8ff;
-            border: 2px dashed #1877f2;
-            border-radius: 8px;
-        }
-
-        .time-slot-task {
-            cursor: grab;
-        }
-
-        .time-slot-task:active {
-            cursor: grabbing;
-        }
-
-        /* All Tasks View Search and Selection */
-        .all-tasks-controls {
-            background: transparent;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            padding: 20px;
-        }
-
-        .search-control {
-            margin-bottom: 15px;
-        }
-
-        .search-control input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
-
-        .search-control input:focus {
-            outline: none;
-            border-color: #1877f2;
-            box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.1);
-        }
-
-        .selection-controls {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .selection-actions {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            color: #495057;
-            font-size: 14px;
-        }
-
-        .checkbox-container input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .selected-count {
-            background: #e3f2fd;
-            color: #1877f2;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-            border: 2px solid #dc3545;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-            border-color: #c82333;
-        }
-
-        /* Task Cards with Selection */
-        .task-card-selectable {
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .task-card-selectable.selected {
-            background: #1877f2;
-            border-color: #1877f2;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(24, 119, 242, 0.2);
-        }
-
-        .task-item.selected {
-            background: #1877f2;
-            border-color: #1877f2;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(24, 119, 242, 0.2);
-        }
-
-        .task-card.selected {
-            background: #1877f2 !important;
-            border-color: #1877f2 !important;
-            color: white !important;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(24, 119, 242, 0.2);
-        }
-
-        .task-card.selected .task-title,
-        .task-card.selected .task-meta,
-        .task-card.selected .task-notes {
-            color: white !important;
-        }
-
-        .time-slot-task.selected {
-            background: #1877f2 !important;
-            background-color: #1877f2 !important;
-            border: 3px solid #1877f2 !important;
-            border-left: 8px solid #1877f2 !important;
-            color: white !important;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(24, 119, 242, 0.2) !important;
-        }
-
-        .time-slot-task.selected * {
-            color: white !important;
-        }
-
-        div.time-slot-task.selected {
-            background: #1877f2 !important;
-            border: 3px solid #0066cc !important;
-        }
-
-        .task-card-checkbox {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .task-card-content {
-            padding-right: 40px; /* Make room for checkbox */
-        }
-
-        .event-badge, .overdue-badge {
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-weight: 600;
-            margin-left: 8px;
-        }
-
-        .event-badge {
-            background: #ffe6e6;
-            color: #dc3545;
-        }
-
-        .overdue-badge {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-
-        /* Additional styles for All Tasks view groups */
-        .group-count {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            margin-left: 10px;
-            font-weight: 600;
-        }
-
-        .group-title {
-            display: flex;
-            align-items: center;
-            flex: 1;
-        }
-
-        /* Lists Section Styles */
-        .list-section {
-            background: white;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.1);
-            border: 2px solid #f8f9fa;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .list-section:hover {
-            box-shadow: 0 6px 20px rgba(155, 89, 182, 0.15);
-            border-color: #e8d5f0;
-            transform: translateY(-2px);
-        }
-
-        .list-section-header {
-            background: linear-gradient(135deg, #B22222 0%, #CD5C5C 100%);
-            color: white;
-            padding: 18px 24px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s ease;
-            user-select: none;
-        }
-
-        .list-section-header:hover {
-            background: linear-gradient(135deg, #DC143C 0%, #B22222 100%);
-        }
-
-        .list-section-title {
-            font-size: 18px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .list-section-meta {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .list-section-content {
-            padding: 0;
-            max-height: 600px;
-            overflow-y: auto;
-        }
-
-        .list-section-content.collapsed {
-            max-height: 0;
-            overflow: hidden;
-        }
-
-        .list-item {
-            background: white;
-            border-bottom: 1px solid #f1f3f4;
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            transition: all 0.2s ease;
-            cursor: move;
-            position: relative;
-        }
-
-        .list-item:hover {
-            background: #f8f9fa;
-            padding-left: 28px;
-        }
-
-        .list-item:last-child {
-            border-bottom: none;
-        }
-
-        .list-item-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex: 1;
-        }
-
-        .list-item-title {
-            font-weight: 500;
-            color: #2c3e50;
-            flex: 1;
-        }
-
-        .list-item-actions {
-            display: flex;
-            gap: 8px;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        .list-item:hover .list-item-actions {
-            opacity: 1;
-        }
-
-        .list-action-btn {
-            background: none;
-            border: none;
-            padding: 6px;
-            border-radius: 4px;
-            cursor: pointer;
-            color: #6c757d;
-            transition: all 0.2s ease;
-            font-size: 14px;
-        }
-
-        .list-action-btn:hover {
-            background: #e9ecef;
-            color: #495057;
-        }
-
-        .list-action-btn.delete:hover {
-            background: #f8d7da;
-            color: #dc3545;
-        }
-
-        /* List Item Drag and Drop Styles */
-        .list-item-drag-handle {
-            color: #9ca3af;
-            font-size: 14px;
-            margin-right: 12px;
-            cursor: grab;
-            transition: color 0.2s ease;
-            user-select: none;
-            line-height: 1;
-            padding: 4px;
-        }
-
-        .list-item-drag-handle:hover {
-            color: #6b7280;
-        }
-
-        .list-item-drag-handle:active {
-            cursor: grabbing;
-        }
-
-        .list-item.dragging {
-            opacity: 0.5;
-            transform: rotate(1deg);
-            z-index: 1000;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .list-item.drag-over {
-            border-top: 3px solid #9B59B6;
-            padding-top: 13px;
-        }
-
-        .list-item.drag-over-bottom {
-            border-bottom: 3px solid #9B59B6;
-            padding-bottom: 13px;
-        }
-
-        .list-section-content.dragging-active .list-item:not(.dragging) {
-            transition: transform 0.2s ease, padding 0.2s ease;
-        }
-
-        /* Section drag and drop styles */
-        .list-section-drag-handle {
-            color: #9ca3af;
-            font-size: 16px;
-            cursor: grab;
-            transition: color 0.2s ease;
-            user-select: none;
-            line-height: 1;
-            padding: 8px;
-            position: absolute;
-            left: -30px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .list-section-drag-handle:hover {
-            color: #6b7280;
-        }
-
-        .list-section-drag-handle:active {
-            cursor: grabbing;
-        }
-
-        .list-section {
-            position: relative;
-        }
-
-        .list-section.dragging {
-            opacity: 0.5;
-            transform: rotate(0.5deg);
-            z-index: 1000;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .list-section.drag-over {
-            border-top: 4px solid #B22222;
-            padding-top: 16px;
-        }
-
-        .list-section.drag-over-bottom {
-            border-bottom: 4px solid #B22222;
-            padding-bottom: 16px;
-        }
-
-        #listsContainer.dragging-active .list-section:not(.dragging) {
-            transition: transform 0.2s ease, padding 0.2s ease;
-        }
-
-        .empty-list-section {
-            padding: 40px 24px;
-            text-align: center;
-            color: #6c757d;
-        }
-
-        .empty-list-section h4 {
-            margin: 0 0 10px 0;
-            color: #9B59B6;
-        }
-
-        .empty-list-section p {
-            margin: 0 0 20px 0;
-            font-size: 14px;
-        }
-
-        .add-list-btn {
-            background: #9B59B6;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .add-list-btn:hover {
-            background: #8e44ad;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
-        }
-
-        .section-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .section-action-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s ease;
-        }
-
-        .section-action-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Empty state for Lists */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6c757d;
-        }
-
-        .empty-state h4 {
-            margin: 0 0 15px 0;
-            color: #9B59B6;
-            font-size: 24px;
-        }
-
-        .empty-state p {
-            margin: 0 0 25px 0;
-            font-size: 16px;
-            line-height: 1.5;
-        }
-
-        /* List Items Modal Styles */
-        .list-modal-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 20px;
-            border-bottom: 1px solid #f1f3f4;
-            transition: all 0.2s ease;
-            background: white;
-            cursor: move;
-            position: relative;
-        }
-
-        .list-modal-item:hover {
-            background: #f8f9fa;
-            padding-left: 24px;
-        }
-
-        .list-modal-item:last-child {
-            border-bottom: none;
-        }
-
-        .list-modal-item.completed {
-            background: #f8f9fa;
-            opacity: 0.7;
-        }
-
-        .list-modal-item.completed .list-modal-item-text {
-            text-decoration: line-through;
-            color: #6c757d;
-        }
-
-        .list-modal-item-checkbox {
-            margin-right: 12px;
-            transform: scale(1.2);
-            cursor: pointer;
-        }
-
-        .list-modal-item-content {
-            display: flex;
-            align-items: center;
-            flex: 1;
-        }
-
-        .list-modal-item-text {
-            flex: 1;
-            font-size: 15px;
-            color: #2c3e50;
-            line-height: 1.4;
-            word-break: break-word;
-        }
-
-        .list-modal-item-actions {
-            display: flex;
-            gap: 8px;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        .list-modal-item:hover .list-modal-item-actions {
-            opacity: 1;
-        }
-
-        .list-modal-action-btn {
-            background: none;
-            border: none;
-            padding: 6px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            color: #6c757d;
-            transition: all 0.2s ease;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 28px;
-            height: 28px;
-        }
-
-        .list-modal-action-btn:hover {
-            background: #e9ecef;
-            color: #495057;
-        }
-
-        .list-modal-action-btn.edit:hover {
-            background: #e3f2fd;
-            color: #1976d2;
-        }
-
-        .list-modal-action-btn.delete:hover {
-            background: #ffebee;
-            color: #d32f2f;
-        }
-
-        /* Drag and Drop Styles for List Items */
-        .list-modal-item-drag-handle {
-            color: #9ca3af;
-            font-size: 16px;
-            margin-right: 12px;
-            cursor: grab;
-            transition: color 0.2s ease;
-            user-select: none;
-            line-height: 1;
-        }
-
-        .list-modal-item-drag-handle:hover {
-            color: #6b7280;
-        }
-
-        .list-modal-item-drag-handle:active {
-            cursor: grabbing;
-        }
-
-        .list-modal-item.dragging {
-            opacity: 0.5;
-            transform: rotate(2deg);
-            z-index: 1000;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .list-modal-item.drag-over {
-            border-top: 3px solid #9B59B6;
-            padding-top: 13px;
-        }
-
-        .list-modal-item.drag-over-bottom {
-            border-bottom: 3px solid #9B59B6;
-            padding-bottom: 13px;
-        }
-
-        #listItemsContainer.dragging-active .list-modal-item:not(.dragging) {
-            transition: transform 0.2s ease, padding 0.2s ease;
-        }
-
-        /* Input focus styles for modal */
-        #newListItemInput:focus {
-            outline: none;
-            border-color: #9B59B6;
-            box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.1);
-        }
-
-        /* VERSION 3: Mobile Navigation System */
-        
-        /* Mobile detection and display control */
-        .desktop-only {
-            display: block;
-        }
-        
-        /* Desktop: Hide mobile elements by default */
-        .mobile-only {
-            display: none !important;
-        }
-        
-        /* Absolutely ensure mobile elements are hidden by default */
-        .mobile-header,
-        .mobile-bottom-nav,
-        .mobile-more-menu {
-            display: none !important;
-        }
-        
-        /* Desktop-specific styles to preserve original layout */
-        @media (min-width: 769px) {
-            body {
-                padding: 0 !important; /* Original desktop body padding */
-            }
-            
-            .container {
-                max-width: 1200px !important;
-                margin: 0 auto !important;
-                min-height: 100vh !important;
-                padding: 0 !important; /* Original desktop container */
-            }
-            
-            .header-section {
-                background: #f0f2f5 !important;
-                padding: 20px !important;
-                position: relative !important;
-                z-index: 1 !important;
-            }
-            
-            /* Force hide mobile navigation on desktop */
-            .mobile-only,
-            .mobile-header,
-            .mobile-bottom-nav,
-            .mobile-more-menu {
-                display: none !important;
-                visibility: hidden !important;
-                height: 0 !important;
-                overflow: hidden !important;
-            }
-            
-            /* Hide mobile task actions on desktop only - more specific */
-            @media (min-width: 769px) {
-                .mobile-task-actions {
-                    display: none !important;
-                    visibility: hidden !important;
-                    height: 0 !important;
-                    overflow: hidden !important;
-                }
-            }
-            
-            /* Force show desktop task actions */
-            .task-actions {
-                display: flex !important;
-            }
-            
-            /* Force show desktop navigation on desktop */
-            .desktop-only {
-                display: block !important;
-            }
-            
-            /* Ensure desktop navigation takes full width */
-            .main-nav.desktop-only {
-                display: flex !important;
-                width: 100% !important;
-                justify-content: flex-start !important;
-                gap: 10px !important;
-            }
-            
-            .main-nav.desktop-only .nav-btn {
-                flex: 1 !important;
-                min-width: 0 !important;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .desktop-only {
-                display: none !important;
-            }
-            
-            .mobile-only {
-                display: block !important;
-            }
-            
-            .mobile-only.mobile-header {
-                display: flex !important;
-            }
-            
-            /* Mobile time-slot-task styling - iOS Standards */
-            .time-slot-task {
-                background: white !important;
-                border: 1px solid #e9ecef !important;
-                border-left: 4px solid #007bff !important;
-                padding: 1px 12px !important;
-                margin-bottom: 4px !important;
-                border-radius: 6px !important;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
-                display: flex !important;
-                align-items: center !important;
-                visibility: visible !important;
-                min-height: 44px !important;
-            }
-            
-            .time-slot-task .task-content {
-                padding-top: 0px !important;
-                justify-content: flex-start !important;
-                padding-top: 8px !important;
-            }
-            
-            .mobile-only.mobile-bottom-nav {
-                display: flex !important;
-            }
-            
-            /* Hide section titles on mobile */
-            .section-header h3 {
-                display: none !important;
-            }
-            
-            .mobile-only.mobile-more-menu {
-                display: none !important; /* Hidden by default, shown via JS */
-            }
-            
-            .mobile-only.mobile-more-menu.show {
-                display: block !important;
-            }
-            
-            /* Mobile view controls need flex display */
-            .mobile-only.view-controls {
-                display: flex !important;
-            }
-            
-            .mobile-only.calendar-controls {
-                display: block !important;
-            }
-            
-            /* Force mobile footer buttons to stay inline */
-            .mobile-only .btn {
-                width: auto !important;
-                max-width: none !important;
-                display: inline-block !important;
-                flex-shrink: 0 !important;
-            }
-            
-            /* Force mobile navigation controls to be horizontal */
-            .mobile-only.view-controls {
-                display: flex !important;
-                flex-direction: row !important;
-                flex-wrap: nowrap !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-            }
-            
-            .mobile-only.view-controls .btn {
-                width: auto !important;
-                flex: 1 !important;
-                margin: 0 !important;
-                display: inline-block !important;
-            }
-            
-            /* Hide desktop task actions on mobile */
-            .task-actions {
-                display: none !important;
-            }
-            
-            /* Show mobile task actions dropdown - ensure visibility */
-            .mobile-task-actions {
-                display: block !important;
-                position: relative !important;
-                visibility: visible !important;
-                height: auto !important;
-                overflow: visible !important;
-                opacity: 1 !important;
-                z-index: 10 !important;
-            }
-            
-            .mobile-task-more-btn {
-                background: #667eea !important;
-                color: white !important;
-                border: none !important;
-                padding: 8px 12px !important;
-                border-radius: 6px !important;
-                font-size: 16px !important;
-                font-weight: bold !important;
-                cursor: pointer !important;
-                min-height: 44px !important;
-                min-width: 44px !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-            }
-            
-            .mobile-task-dropdown {
-                position: fixed !important;
-                background: transparent !important;
-                display: none !important;
-                z-index: 99999 !important;
-                padding: 0 !important;
-                width: 100% !important;
-                overflow: visible !important;
-            }
-            
-            .mobile-task-dropdown.show {
-                display: flex !important;
-            }
-            
-            /* Smooth center animation for modal appearance */
-            @keyframes modalCenterIn {
-                from {
-                    opacity: 0;
-                    transform: translate(-50%, -50%) scale(0.9);
-                }
-                to {
-                    opacity: 1;
-                    transform: translate(-50%, -50%) scale(1);
-                }
-            }
-            
-            .mobile-task-dropdown-content {
-                background: white !important;
-                border-radius: 16px !important;
-                box-shadow: 0 8px 32px rgba(0,0,0,0.3) !important;
-                width: 100% !important;
-                height: auto !important;
-                overflow: hidden !important;
-                padding: 12px !important;
-                margin: 0 !important;
-                display: flex !important;
-                flex-direction: column !important;
-            }
-            
-            .mobile-task-dropdown-header {
-                text-align: center !important;
-                font-size: 18px !important;
-                font-weight: 600 !important;
-                color: #333 !important;
-                margin-bottom: 20px !important;
-                padding-bottom: 16px !important;
-                border-bottom: 1px solid #eee !important;
-            }
-            
-            .mobile-task-dropdown-buttons {
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 8px !important;
-                margin-top: 8px !important;
-            }
-            
-            .mobile-task-dropdown button {
-                padding: 12px !important;
-                border: none !important;
-                border-radius: 8px !important;
-                font-size: 13px !important;
-                font-weight: 500 !important;
-                cursor: pointer !important;
-                text-align: center !important;
-                background: #f8f9fa !important;
-                color: #333 !important;
-                transition: all 0.2s ease !important;
-                height: 60px !important;
-                width: 100% !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                border: 1px solid #dee2e6 !important;
-                box-sizing: border-box !important;
-            }
-            
-            .mobile-task-dropdown button.full-width {
-                grid-column: 1 / -1 !important;
-                font-size: 16px !important;
-            }
-            
-            .mobile-task-dropdown button:hover {
-                background: #e9ecef !important;
-                transform: translateY(-1px) !important;
-                border-color: #667eea !important;
-            }
-            
-            .mobile-task-dropdown button.primary {
-                background: #667eea !important;
-                color: white !important;
-            }
-            
-            .mobile-task-dropdown button.primary:hover {
-                background: #5a6fd8 !important;
-                border-color: #4c63d2 !important;
-            }
-            
-            .mobile-task-dropdown button.success {
-                background: #28a745 !important;
-                color: white !important;
-            }
-            
-            .mobile-task-dropdown button.success:hover {
-                background: #218838 !important;
-                border-color: #1e7e34 !important;
-            }
-            
-            .mobile-task-dropdown button.warning {
-                background: #ffc107 !important;
-                color: #333 !important;
-            }
-            
-            .mobile-task-dropdown button.warning:hover {
-                background: #e0a800 !important;
-                border-color: #d39e00 !important;
-            }
-            
-            .mobile-task-dropdown button.danger {
-                background: #dc3545 !important;
-                color: white !important;
-            }
-            
-            .mobile-task-dropdown button.danger:hover {
-                background: #c82333 !important;
-                border-color: #bd2130 !important;
-            }
-            
-            
-            /* Add body padding for fixed mobile navigation - MOBILE ONLY */
-            body {
-                padding-top: calc(64px + env(safe-area-inset-top, 0px)) !important; /* Height of mobile header with safe area */
-                padding-bottom: 80px !important; /* Height of mobile bottom nav */
-            }
-            
-            .container {
-                padding: 0 !important; /* Remove default container padding on mobile */
-                max-width: none !important; /* Remove width constraint for full screen usage */
-                width: 100% !important; /* Full width on mobile */
-                margin: 0 !important; /* Remove auto margins that center content */
-            }
-            
-            /* Mobile Navigation Styles */
-            .mobile-header {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 64px; /* Increased from 56px to prevent cutoff */
-                background: var(--things-bg); /* Things background */
-                color: var(--things-text); /* Things text */
-                border-bottom: 1px solid var(--things-border); /* Things border */
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 0 16px; /* Things edge padding */
-                padding-top: env(safe-area-inset-top, 8px); /* Add safe area support */
-                z-index: 1000;
-                box-shadow: 0 1px 3px var(--things-shadow); /* Things subtle shadow */
-                backdrop-filter: blur(10px); /* iOS-style blur */
-                -webkit-backdrop-filter: blur(10px);
-            }
-            
-            .mobile-header-left,
-            .mobile-header-right {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                flex: 0 0 auto;
-            }
-            
-            .mobile-header-left {
-                flex: 1;
-                max-width: 40%;
-            }
-            
-            .mobile-header-title {
-                font-size: 16px;
-                font-weight: 600;
-                flex: 1;
-                text-transform: uppercase;
-                text-align: center;
-                line-height: 1.1;
-            }
-            
-            .mobile-header-btn {
-                background: transparent;
-                border: none;
-                color: var(--things-text);
-                padding: 12px; /* Thumb-friendly */
-                border-radius: 8px;
-                font-size: 18px;
-                cursor: pointer;
-                transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring */
-                min-width: 44px; /* Apple HIG minimum */
-                min-height: 44px; /* Apple HIG minimum */
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .mobile-header-btn:hover {
-                background: var(--things-shadow); /* Things subtle hover */
-            }
-            
-            .mobile-bottom-nav {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                height: 64px;
-                background: var(--things-bg); /* Things background */
-                border-top: 1px solid var(--things-border); /* Things border */
-                display: flex;
-                align-items: center;
-                justify-content: space-around;
-                z-index: 1000;
-                box-shadow: 0 -1px 3px var(--things-shadow); /* Things subtle shadow */
-                backdrop-filter: blur(10px); /* iOS-style blur */
-                -webkit-backdrop-filter: blur(10px);
-                transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            }
-            
-            /* Removed collapsible navigation styles */
-            
-            
-            .mobile-nav-btn {
-                display: flex !important;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                padding: 12px 16px; /* Thumb-friendly padding */
-                min-height: 44px; /* Apple HIG minimum touch target */
-                min-width: 44px;
-                background: var(--things-bg);
-                border: 1px solid var(--things-border);
-                color: var(--things-text);
-                font-size: 11px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring */
-                border-radius: 8px;
-                flex: 1;
-                max-width: 80px;
-                box-shadow: 0 1px 3px var(--things-shadow);
-            }
-            
-            .mobile-nav-btn.active {
-                color: var(--things-accent);
-                background: rgba(0, 122, 255, 0.1); /* Things blue tint */
-                box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
-            }
-            
-            .mobile-nav-btn:hover {
-                background: var(--things-shadow);
-                transform: translateY(-1px); /* Subtle Things lift */
-            }
-            
-            .mobile-nav-btn.active:hover {
-                background: rgba(0, 122, 255, 0.15);
-                transform: translateY(-1px);
-            }
-            
-            .mobile-nav-icon {
-                font-size: 22px;
-                margin-bottom: 2px;
-                line-height: 1;
-                display: block;
-            }
-                
-            /* Mobile More Menu */
-            .mobile-more-menu {
-                position: fixed;
-                bottom: 64px;
-                left: 0;
-                right: 0;
-                background: white;
-                border-top: 1px solid #e1e5e9;
-                box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
-                transform: translateY(100%);
-                transition: transform 0.3s ease;
-                z-index: 999;
-                max-height: 50vh;
-                overflow-y: auto;
-            }
-            
-            .mobile-more-menu.show {
-                transform: translateY(0);
-            }
-            
-            .mobile-more-item {
-                display: flex;
-                align-items: center;
-                padding: 16px 20px;
-                border-bottom: 1px solid #f0f2f5;
-                background: none;
-                border: none;
-                width: 100%;
-                text-align: left;
-                font-size: 16px;
-                color: #1c1e21;
-                cursor: pointer;
-                transition: background 0.2s;
-            }
-            
-            .mobile-more-item:hover {
-                background: #f0f2f5;
-            }
-            
-            .mobile-more-item:last-child {
-                border-bottom: none;
-            }
-            
-            .mobile-more-icon {
-                font-size: 20px;
-                margin-right: 16px;
-                width: 24px;
-                text-align: center;
-            }
-            
-        }
-    </style>
-</head>
-<body>
-    <!-- VERSION 3: Mobile Navigation -->
-    <div class="mobile-only mobile-header">
-        <div class="mobile-header-left">
-            <input type="text" id="mobileSearchInput" placeholder="🔍 Search..." style="
-                background: var(--things-surface);
-                border: 1px solid var(--things-border);
-                color: var(--things-text);
-                padding: 8px 12px;
-                border-radius: 8px;
-                font-size: 14px;
-                width: 100%;
-                outline: none;
-                flex: 1;
-                margin-right: 8px;
-                transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            " oninput="performMobileSearch(this.value)" />
-        </div>
-        <div class="mobile-header-title" id="mobileHeaderTitle">
-            Today
-        </div>
-        <div class="mobile-header-right">
-            <button class="mobile-header-btn" id="mobileHeaderAddBtn" onclick="openAddTaskModalMobile()" title="Add new task">
-                +
-            </button>
-        </div>
-    </div>
-
-    <!-- Collapsible Mobile Navigation -->
-    <div class="mobile-only mobile-bottom-nav" id="mobileBottomNav">
-        <button class="mobile-nav-btn active" onclick="provideFeedback(this); switchToMobileView('today')" id="mobileNavToday">
-            <div class="mobile-nav-icon">🔥</div>
-            <div data-translate="Today">Today</div>
-        </button>
-        <button class="mobile-nav-btn" id="mobileBottomAddBtn" onclick="provideFeedback(this); openAddTaskModalMobile()">
-            <div class="mobile-nav-icon">➕</div>
-            <div data-translate="Add">Add</div>
-        </button>
-        <button class="mobile-nav-btn" onclick="provideFeedback(this); switchToMobileView('week')" id="mobileNavWeek">
-            <div class="mobile-nav-icon">📅</div>
-            <div data-translate="Week">Week</div>
-        </button>
-        <button class="mobile-nav-btn" onclick="provideFeedback(this); switchToMobileView('lists')" id="mobileNavLists">
-            <div class="mobile-nav-icon">📝</div>
-            <div data-translate="Lists">Lists</div>
-        </button>
-        <button class="mobile-nav-btn" onclick="provideFeedback(this); toggleMobileMoreMenu()" id="mobileNavMore">
-            <div class="mobile-nav-icon">⋯</div>
-            <div data-translate="More">More</div>
-        </button>
-    </div>
-
-    <div class="mobile-only mobile-more-menu" id="mobileMoreMenu">
-        <button class="mobile-more-item" onclick="provideFeedback(this); switchToMobileView('calendar'); hideMobileMoreMenu();">
-            <div class="mobile-more-icon">📅</div>
-            <div>Month View</div>
-        </button>
-        <button class="mobile-more-item" onclick="provideFeedback(this); switchToMobileView('all'); hideMobileMoreMenu();">
-            <div class="mobile-more-icon">📊</div>
-            <div>All Tasks</div>
-        </button>
-        <button class="mobile-more-item" onclick="provideFeedback(this); switchToMobileView('repeat'); hideMobileMoreMenu();">
-            <div class="mobile-more-icon">🔄</div>
-            <div>Recurring</div>
-        </button>
-        <button class="mobile-more-item" onclick="provideFeedback(this); undoLastAction(); hideMobileMoreMenu();">
-            <div class="mobile-more-icon">↶</div>
-            <div>Undo</div>
-        </button>
-        <div style="border-top: 1px solid #e0e0e0; margin: 8px 0; padding-top: 8px;">
-            <div style="text-align: center; font-size: 12px; color: #666; margin-bottom: 8px;">Language / Idioma</div>
-            <div style="display: flex; justify-content: center; gap: 16px;">
-                <button onclick="openSettings(); hideMobileMoreMenu();" 
-                        title="Settings / Ajustes"
-                        style="background: none; border: none; font-size: 28px; cursor: pointer; padding: 4px;">⚙️</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Desktop Sidebar Layout -->
-    <div class="desktop-layout">
-        <!-- Sidebar Navigation -->
-        <div class="desktop-sidebar desktop-only">
-            <!-- Sidebar Header -->
-            <div style="padding: 0 16px 20px 16px; border-bottom: 1px solid var(--things-border); margin-bottom: 16px;">
-                <h2 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: var(--things-text);">⚡ HyperFiler Pro</h2>
-                <div id="sidebarUserInfo" style="font-size: 13px; color: var(--things-text-secondary); display: none;">
-                    Welcome, user
-                </div>
-            </div>
-            
-            <div class="main-nav">
-            <button class="nav-btn active" onclick="showView('today')" id="nav-today" tabindex="1">
-                Today
-            </button>
-            <button class="nav-btn" onclick="showView('week')" id="nav-week" tabindex="2" data-translate="Week">
-                Week
-            </button>
-            <button class="nav-btn" onclick="showView('calendar')" id="nav-calendar" tabindex="3" data-translate="Month">
-                Month
-            </button>
-            <button class="nav-btn" onclick="showView('all')" id="nav-all" tabindex="4">
-                Search
-            </button>
-            <button class="nav-btn" onclick="showView('lists')" id="nav-lists" tabindex="5">
-                Lists
-            </button>
-            <button class="nav-btn" onclick="showView('repeat')" id="nav-repeat" tabindex="6">
-                Repeat
-            </button>
-            <button class="nav-btn" onclick="showView('undo')" id="nav-undo" tabindex="7">
-                Undo
-            </button>
-            <button class="nav-btn" onclick="showView('settings')" id="nav-settings" tabindex="8">
-                Settings
-            </button>
-            </div>
-            
-            <!-- Sidebar Action Buttons -->
-            <div style="padding: 16px; border-top: 1px solid var(--things-border); margin-top: 20px;">
-                <!-- Action Buttons -->
-                <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
-                    <button onclick="importTasks()" class="action-btn">
-                        📥 Import JSON
-                    </button>
-                    <button onclick="exportAllTasks()" class="action-btn">
-                        Export
-                    </button>
-                    <button onclick="createEmergencyBackup()" class="action-btn">
-                        Backup
-                    </button>
-                </div>
-                
-                <!-- Backup Status -->
-                <div id="sidebarBackupStatus" style="padding: 12px; background: rgba(40, 167, 69, 0.1); border: 1px solid #28a745; color: #28a745; border-radius: 6px; font-size: 12px; text-align: center; margin-bottom: 12px; display: none;">
-                    💾 Auto Backup ON
-                </div>
-                
-                <!-- Language Switcher -->
-                <div style="display: flex; gap: 8px; justify-content: center;">
-                    <button onclick="switchLanguage('en')" style="background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">EN</button>
-                    <button onclick="switchLanguage('es')" style="background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">ES</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Main Content Area -->
-        <div class="desktop-content">
-            <!-- Content Container that connects to tabs -->
-            <div class="content-container">
-            <div>
-
-        <!-- Search Section -->
-        <div class="search-section" id="search-section" style="display: none;">
-            <div style="background: transparent; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h3 class="desktop-only" style="color: #1877f2; margin: 0;">🔍 Search Tasks</h3>
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <input type="text" id="searchInput" placeholder="🔍 Search by title, notes, or date..." style="padding: 8px 12px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 12px; max-width: 300px;" onkeyup="performSearch()">
-                        <button class="btn btn-primary btn-small" onclick="openAddTaskModal()" style="background: #ff6b35; border-color: #ff6b35;" data-translate="+ Add Task">+ Add Task</button>
-                    </div>
-                </div>
-                
-                <!-- Quick Filter Buttons -->
-                <div class="search-filter-buttons" style="margin-bottom: 15px;">
-                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
-                        <span class="desktop-only" style="font-size: 12px; color: #6c757d; margin-right: 10px;" data-translate="Quick filters">Quick filters:</span>
-                        <button class="filter-btn" onclick="quickSearch('@casa')" title="Filter tasks at home">@casa</button>
-                        <button class="filter-btn" onclick="quickSearch('@recados')" title="Filter errands/shopping">@recados</button>
-                        <button class="filter-btn" onclick="quickSearch('@vedicvault')" title="Filter spiritual/content tasks">@vedicvault</button>
-                        <button class="filter-btn" onclick="quickSearch('@facebook')" title="Filter social media tasks">@facebook</button>
-                        <button class="filter-btn" onclick="quickSearch('@theonething')" title="Filter priority focus tasks">@theonething</button>
-                    </div>
-                </div>
-                
-                <div id="searchResults" style="max-height: 400px; overflow-y: auto;"></div>
-            </div>
-        </div>
-
-        <!-- Today View -->
-        <div id="today-view" class="tasks-section">
-            <div class="section-header">
-                <div class="desktop-only" style="display: flex; align-items: center; gap: 12px;">
-                    <h3 data-translate="TODAY">🔥 TODAY</h3>
-                    <h4 id="currentTodayDate" style="margin: 0; font-size: 16px; font-weight: 600; color: white; letter-spacing: 0.5px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); padding: 8px 16px; border-radius: 6px; box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);">Loading...</h4>
-                </div>
-                <div class="view-controls desktop-only">
-                    <div style="display: flex; gap: 4px; align-items: center; flex-wrap: nowrap;">
-                        <input type="text" id="todayTaskSearch" placeholder="🔍 Day" style="padding: 6px 6px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 10px; width: 100%; max-width: 100px; flex-shrink: 1;" oninput="searchTodayTasks()">
-                        <button class="btn btn-primary btn-small" onclick="openAddTaskModal()" style="background: #ff6b35; border-color: #ff6b35; padding: 6px 6px; font-size: 10px; flex-shrink: 0;" data-translate="+ Add">+ Add</button>
-                        <button class="btn btn-small" onclick="previousDay()" style="padding: 8px 4px; font-size: 8px; flex-shrink: 0;">← Prev</button>
-                        <button class="btn btn-primary btn-small" onclick="goToToday()" style="background: #dc3545; border-color: #dc3545; padding: 8px 12px; font-size: 10px; flex-shrink: 0;">🔥 Today</button>
-                        <button class="btn btn-small" onclick="nextDay()" style="padding: 8px 4px; font-size: 8px; flex-shrink: 0;">Next →</button>
-                        <button class="export-btn" onclick="downloadTodayHtml()" title="Download today's schedule as HTML file" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">🖨️ Print</button>
-                    </div>
-                </div>
-                
-                <!-- VERSION 3: Mobile view controls - Compact -->
-                <div class="view-controls mobile-only" style="padding: 8px; display: flex; justify-content: center; align-items: center; background: transparent !important; border: none !important; margin-bottom: 2px !important; gap: 8px;">
-                    <button class="btn btn-small" onclick="previousDay()" style="padding: 10px 4px !important; font-size: 8px !important; height: auto !important;">← Ant.</button>
-                    <div id="mobileDateDisplay" style="padding: 10px 12px; font-size: 14px; font-weight: bold; color: #333; background: #f8f9fa; border-radius: 6px; border: 1px solid #e1e5e9; white-space: nowrap;"></div>
-                    <button class="btn btn-small" onclick="nextDay()" style="padding: 10px 4px !important; font-size: 8px !important; height: auto !important;">Sig. →</button>
-                </div>
-            </div>
-            <!-- Desktop filter controls -->
-            <div id="todayTemplateFilters" class="desktop-only" style="margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
-                <!-- Dynamic template filters will be generated here -->
-            </div>
-            
-            <!-- Mobile filter controls -->
-            <div id="todayTemplateFiltersMobile" class="mobile-only" style="margin-bottom: 15px; padding: 0px 8px; background: transparent !important; border: none !important; margin-top: -4px !important;">
-                <!-- Dynamic template filters will be generated here for mobile -->
-            </div>
-            
-            <!-- Auto-Print Settings - COMMENTED OUT -->
-            <!-- 
-            <div style="margin-bottom: 15px; padding: 12px; background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); border-radius: 8px; border-left: 4px solid #2196f3;">
-                <div style="margin-bottom: 8px; font-weight: 600; color: #1565c0; display: flex; align-items: center; gap: 8px;">
-                    🖨️ Auto-Print Daily Schedule
-                    <span style="font-size: 11px; color: #666; font-weight: normal;">(Downloads to Downloads folder when opening the app)</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <label for="autoPrintTimeSelect" style="font-size: 13px; color: #424242;">Print time window:</label>
-                    <select id="autoPrintTimeSelect" onchange="saveAutoPrintTime()" style="padding: 6px 10px; border: 1px solid #e1e5e9; border-radius: 6px; font-size: 12px; background: transparent; cursor: pointer;">
-                        <option value="disabled" selected>🚫 Disabled</option>
-                        <option value="9-13">🕘 9:00 AM - 1:00 PM</option>
-                        <option value="6-10">🕕 6:00 AM - 10:00 AM</option>
-                        <option value="7-11">🕖 7:00 AM - 11:00 AM</option>
-                        <option value="8-12">🕗 8:00 AM - 12:00 PM</option>
-                        <option value="10-14">🕙 10:00 AM - 2:00 PM</option>
-                        <option value="11-15">🕚 11:00 AM - 3:00 PM</option>
-                    </select>
-                </div>
-            </div>
-            -->
-            
-            <!-- Batch operations for Today view -->
-            <div id="todayBatchOperations" style="display: none; position: absolute; z-index: 1000; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e1e5e9; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <span id="todaySelectedCount" class="selected-count" style="display: none; font-size: 11px; background: #e3f2fd; color: #1877f2; padding: 4px 12px; border-radius: 12px;">0 selected</span>
-                    <button class="btn btn-danger btn-small" id="todayDeleteSelectedBtn" onclick="deleteSelectedTasks()" style="display: none; font-size: 11px; padding: 8px 12px;">
-                        🗑️ Delete
-                    </button>
-                    <button class="btn btn-warning btn-small" id="todayDelaySelectedDayBtn" onclick="delaySelectedTasks(1)" style="display: none; font-size: 11px; padding: 8px 12px; background: #ffc107; color: #333;">
-                        📅 +1D
-                    </button>
-                    <button class="btn btn-info btn-small" id="todayDelaySelectedWeekBtn" onclick="delaySelectedTasks(7)" style="display: none; font-size: 11px; padding: 8px 12px; background: #17a2b8; color: white;">
-                        📅 +1W
-                    </button>
-                    <button class="btn btn-secondary btn-small" id="todayDelaySelectedMonthBtn" onclick="delaySelectedTasks(30)" style="display: none; font-size: 11px; padding: 8px 12px;">
-                        📅 +1M
-                    </button>
-                    <button class="btn btn-primary btn-small" id="todaySetTimeBtn" onclick="console.log('🎯 Set Time button clicked'); event.stopPropagation(); openBulkTimeModal();" style="display: none; font-size: 11px; padding: 8px 12px; background: #007bff; color: white;">
-                        ⏰ Set Time
-                    </button>
-                </div>
-            </div>
-
-            <div id="todaySchedule">
-                <!-- Today's schedule will be generated here -->
-            </div>
-        </div>
-
-        <!-- Calendar View -->
-        <div id="calendar-view" class="calendar-section hidden">
-            <div class="section-header">
-                <h3 class="desktop-only" data-translate="MONTH">🗓️ MONTH</h3>
-                <div class="view-controls desktop-only">
-                    <div style="display: flex; gap: 4px; align-items: center; flex-wrap: nowrap;">
-                        <input type="text" id="monthTaskSearch" placeholder="🔍 Month" style="padding: 6px 6px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 10px; width: 100%; max-width: 100px; flex-shrink: 1;" oninput="searchMonthTasks()">
-                        <button class="btn btn-primary btn-small" onclick="openAddTaskModal()" style="background: #ff6b35; border-color: #ff6b35; padding: 6px 6px; font-size: 10px; flex-shrink: 0;" data-translate="+ Add">+ Add</button>
-                        <button class="btn btn-small" onclick="previousMonth()" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">← Prev</button>
-                        <button class="btn btn-small" onclick="nextMonth()" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">Next →</button>
-                        <button class="btn btn-secondary btn-small" onclick="goToCurrentMonth()" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">📍 Month</button>
-                    </div>
-                </div>
-                
-                <!-- VERSION 3: Mobile month controls -->
-                <div class="view-controls mobile-only" style="padding: 10px; display: flex; justify-content: center; align-items: center; background: rgba(255,255,255,0.9); border-radius: 8px; margin-bottom: 10px; gap: 8px;">
-                    <button class="btn btn-small" onclick="previousMonth()" style="padding: 8px 12px; font-size: 14px;">← Prev</button>
-                    <button class="btn btn-secondary btn-small" onclick="goToCurrentMonth()" style="padding: 8px 12px; font-size: 14px;">📍 Month</button>
-                    <button class="btn btn-small" onclick="nextMonth()" style="padding: 8px 12px; font-size: 14px;">Next →</button>
-                </div>
-            </div>
-            <div id="monthTemplateFilters" style="margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
-                <!-- Dynamic template filters will be generated here -->
-            </div>
-            <div class="calendar-controls">
-                <h4 id="currentMonth">Loading...</h4>
-            </div>
-            <div class="calendar-grid" id="calendarGrid">
-                <!-- Calendar will be generated here -->
-            </div>
-            
-            <!-- Dynamic Month Statistics -->
-            <div id="monthStats" style="margin-top: 15px; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: white; text-align: center; font-size: 13px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <!-- Dynamic content will be generated here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Week View -->
-        <div id="week-view" class="calendar-section">
-            <div class="section-header">
-                <h3 class="desktop-only" data-translate="WEEK">📅 WEEK</h3>
-                <div class="view-controls desktop-only">
-                    <div style="display: flex; gap: 4px; align-items: center; flex-wrap: nowrap;">
-                        <input type="text" id="weekTaskSearch" placeholder="🔍 Week" style="padding: 6px 6px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 10px; width: 100%; max-width: 100px; flex-shrink: 1;" oninput="searchWeekTasks()">
-                        <button class="btn btn-small" onclick="previousWeek()" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">← Prev</button>
-                        <button class="btn btn-small" onclick="nextWeek()" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">Next →</button>
-                        <button class="btn btn-secondary btn-small" onclick="goToCurrentWeek()" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">📍 Week</button>
-                    </div>
-                </div>
-            </div>
-            <!-- Week Date Display -->
-            <div class="calendar-controls desktop-only" style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
-                <h4 id="currentWeek" style="margin: 0; font-size: 18px; font-weight: 600; color: #333;">Loading...</h4>
-            </div>
-            
-            <!-- Mobile Controls -->
-            <div class="calendar-controls mobile-only" style="margin-bottom: 20px;">
-                <!-- Navigation buttons -->
-                <div style="padding: 8px; display: flex; justify-content: center; align-items: center; background: transparent !important; border: none !important; margin-bottom: 2px !important; gap: 8px;">
-                    <button class="btn btn-small" onclick="previousWeek()" style="padding: 8px 6px !important; font-size: 10px !important; height: auto !important;">← Ant.</button>
-                    <button class="btn btn-secondary btn-small" onclick="goToCurrentWeek()" style="padding: 8px 6px !important; font-size: 10px !important; height: auto !important;">📍 Semana</button>
-                    <button class="btn btn-small" onclick="nextWeek()" style="padding: 8px 6px !important; font-size: 10px !important; height: auto !important;">Sig. →</button>
-                </div>
-                <!-- Week date range on separate line -->
-                <div style="padding: 8px; background: transparent; text-align: center;">
-                    <h4 id="currentWeekMobile" style="margin: 0; font-size: 16px; font-weight: 500; color: #666;">Loading...</h4>
-                </div>
-            </div>
-            <!-- Desktop filter controls -->
-            <div id="weekTemplateFilters" class="desktop-only" style="margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
-                <!-- Dynamic template filters will be generated here -->
-            </div>
-            
-            <!-- Mobile filter controls -->
-            <div id="weekTemplateFiltersMobile" class="mobile-only" style="margin-bottom: 15px; padding: 0px 8px; background: transparent !important; border: none !important; margin-top: -4px !important;">
-                <!-- Dynamic template filters will be generated here for mobile -->
-            </div>
-            <div class="week-grid" id="weekGrid">
-                <!-- Week will be generated here -->
-            </div>
-            
-            <!-- Dynamic Week Statistics -->
-            <div id="weekStats" style="margin-top: 15px; padding: 12px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 8px; color: white; text-align: center; font-size: 13px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <!-- Dynamic content will be generated here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Tasks Section -->
-        <div id="tasks-view" class="tasks-section hidden">
-            <div class="section-header">
-                <h3 id="tasks-title">📋 All Tasks</h3>
-                <div class="view-controls">
-                    <button class="btn btn-primary btn-small" onclick="openAddTaskModal()" style="background: #ff6b35; border-color: #ff6b35; padding: 8px 8px; font-size: 11px;" data-translate="+ Add">+ Add</button>
-                    <button class="btn btn-secondary btn-small" onclick="expandAllGroups()">📂 Expand All</button>
-                    <button class="btn btn-secondary btn-small" onclick="collapseAllGroups()">📁 Collapse All</button>
-                </div>
-            </div>
-            
-            <!-- Search and Selection Controls -->
-            <div class="all-tasks-controls">
-                <div class="selection-controls" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
-                    <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
-                        <input type="text" id="allTasksSearchInput" placeholder="🔍 Search..." onkeyup="performAllTasksSearch()" style="padding: 8px 8px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 11px; max-width: 140px;">
-                        <button class="filter-btn filter-clear" onclick="clearAllTasksTemplateFilter()" title="Clear all filters" style="display: none; font-size: 11px; padding: 6px 8px;">✖ Clear</button>
-                    </div>
-                    <!-- Template filters will be dynamically generated here -->
-                    <div id="allTasksTemplateFilters" style="display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
-                        <!-- Dynamic template filters will be generated here -->
-                    </div>
-                    <div class="selection-actions" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
-                        <label class="checkbox-container" style="font-size: 11px;">
-                            <input type="checkbox" id="selectAllTasks" onchange="toggleSelectAll()">
-                            <span class="checkmark"></span>
-                            Select All
-                        </label>
-                        <button class="btn btn-danger btn-small" id="deleteSelectedBtn" onclick="deleteSelectedTasks()" style="display: none; font-size: 11px; padding: 8px 6px;">
-                            🗑️ Delete
-                        </button>
-                        <button class="btn btn-warning btn-small" id="delaySelectedDayBtn" onclick="delaySelectedTasks(1)" style="display: none; font-size: 11px; padding: 8px 6px; background: #ffc107; color: #333;">
-                            📅 +1D
-                        </button>
-                        <button class="btn btn-info btn-small" id="delaySelectedWeekBtn" onclick="delaySelectedTasks(7)" style="display: none; font-size: 11px; padding: 8px 6px; background: #17a2b8; color: white;">
-                            📅 +1W
-                        </button>
-                        <button class="btn btn-secondary btn-small" id="delaySelectedMonthBtn" onclick="delaySelectedTasks(30)" style="display: none; font-size: 11px; padding: 8px 6px;">
-                            📅 +1M
-                        </button>
-                        <button class="btn btn-secondary btn-small" onclick="printSearchResults()" id="printSearchBtn" style="background: #17a2b8; color: white; border-color: #17a2b8; font-size: 11px; padding: 8px 6px;">
-                            🖨️ Print
-                        </button>
-                        <button class="btn btn-secondary btn-small" onclick="openTrash()" id="trashBtn" style="background: #6c757d; color: white; border-color: #6c757d; font-weight: 600; font-size: 11px; padding: 8px 6px;">
-                            🗑️ Trash (<span id="trashCount">0</span>)
-                        </button>
-                        <span id="selectedCount" class="selected-count" style="display: none; font-size: 11px;">0 selected</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="tasksContainer">
-                <div class="no-tasks" id="noTasks">
-                    <p>📝 No tasks yet. Add your first task above!</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Repeat Tasks View -->
-        <div id="repeat-view" class="tasks-section hidden">
-            <div class="section-header">
-                <h3>🔄 Repeat Management</h3>
-                <div class="view-controls">
-                    <input type="text" id="repeatTaskSearch" placeholder="🔍 Search repeat tasks..." style="padding: 8px 12px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 12px; width: 100%; max-width: 320px; margin-right: 10px;" oninput="searchRepeatTasks()">
-                    <button class="export-btn" onclick="exportRepeatHtml()" title="Export repeat tasks search results as HTML" id="exportRepeatBtn" style="display: none; margin-right: 10px;">📄 Export Results</button>
-                    <button class="btn btn-primary btn-small" onclick="openAddTaskModal()" style="background: #ff6b35; border-color: #ff6b35; padding: 8px 8px; font-size: 11px;" data-translate="+ Add">+ Add</button>
-                </div>
-                
-            </div>
-            
-            <div id="repeatTasksContent">
-                <div id="repeatTasksList">
-                    <!-- Repeat tasks will be generated here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Lists View -->
-        <div id="lists-view" class="tasks-section">
-            <div class="section-header">
-                <h3 class="desktop-only">📝 Lists Management</h3>
-                <div class="view-controls">
-                    <button class="btn btn-primary btn-small" onclick="openCreateSectionModal()" style="margin-right: 10px; background: #9B59B6; border-color: #9B59B6;">+ New Section</button>
-                    <button class="btn btn-secondary btn-small" onclick="toggleAllSections()" style="background: #800000; border-color: #800000; margin-right: 10px;">📁 Toggle All</button>
-                    <button class="btn btn-secondary btn-small" onclick="showListSelectionForTXTImport()" style="background: #007bff; border-color: #007bff;">📋 Import TXT</button>
-                </div>
-            </div>
-            
-            <div id="listsContent">
-                <div id="listsContainer">
-                    <!-- Lists sections will be generated here -->
-                </div>
-                
-                <!-- Empty state -->
-                <div id="noListSections" class="empty-state" style="display: none;">
-                    <h4>📝 No List Sections Yet</h4>
-                    <p>Create your first list section to organize your lists by categories.</p>
-                    <button class="btn btn-primary" onclick="openCreateSectionModal()" style="background: #9B59B6; border-color: #9B59B6;">+ Create First Section</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats View -->
-        <div id="stats-view" class="tasks-section hidden">
-            <div class="section-header">
-                <h3>⚙️ Settings & Statistics</h3>
-                <div class="view-controls">
-                    <button class="btn btn-primary btn-small" onclick="openAddTaskModal()" style="background: #ff6b35; border-color: #ff6b35;" data-translate="+ Add Task">+ Add Task</button>
-                </div>
-            </div>
-            
-            <!-- Settings Tabs -->
-            <div class="settings-tabs" style="display: flex; width: 100%; margin-bottom: 20px; border-bottom: 2px solid #e9ecef;">
-                <button class="settings-tab active" onclick="showSettingsTab('overview')" data-tab="overview" style="flex: 1; padding: 12px 16px; border: none; background: none; font-weight: 600; color: #495057; border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.3s ease;">📊 Overview</button>
-                <button class="settings-tab" onclick="showSettingsTab('backups')" data-tab="backups" style="flex: 1; padding: 12px 16px; border: none; background: none; font-weight: 600; color: #495057; border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.3s ease;">💾 Backups</button>
-                <button class="settings-tab" onclick="showSettingsTab('productivity')" data-tab="productivity" style="flex: 1; padding: 12px 16px; border: none; background: none; font-weight: 600; color: #495057; border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.3s ease;">📈 Analytics</button>
-                <button class="settings-tab" onclick="showSettingsTab('preferences')" data-tab="preferences" style="flex: 1; padding: 12px 16px; border: none; background: none; font-weight: 600; color: #495057; border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.3s ease;">⚙️ Settings</button>
-            </div>
-            
-            <!-- Overview Tab -->
-            <div id="overview-tab" class="settings-tab-content">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalTasks">0</div>
-                        <div class="stat-label">Total Tasks</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="completedTasks">0</div>
-                        <div class="stat-label">Completed</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="pendingTasks">0</div>
-                        <div class="stat-label">Pending</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="overdueTasks">0</div>
-                        <div class="stat-label">Overdue</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="todayTasks">0</div>
-                        <div class="stat-label">Due Today</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="criticalTasks">0</div>
-                        <div class="stat-label">Critical Tasks</div>
-                    </div>
-                </div>
-                
-                <!-- Quick Actions -->
-                <div style="margin-top: 30px;">
-                    <h4 style="color: #1877f2; margin-bottom: 15px;">🚀 Quick Actions</h4>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="btn btn-secondary" onclick="exportTasks()" style="padding: 10px 20px; background: #28a745; border-color: #28a745; color: white;">📤 Export Data</button>
-                        <button class="btn btn-secondary" onclick="importTasks()" style="padding: 10px 20px; background: #007bff; border-color: #007bff; color: white;">📥 Import Data</button>
-                        <button class="btn btn-secondary" onclick="clearAllTasks()" style="padding: 10px 20px; background: #dc3545; border-color: #dc3545; color: white;">🗑️ Clear All</button>
-                        <button class="btn btn-secondary" onclick="performUndo()" style="padding: 10px 20px; background: #ffc107; border-color: #ffc107; color: #212529;">↶ Undo Last</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Backups Tab -->
-            <div id="backups-tab" class="settings-tab-content hidden">
-                <h4 style="color: #1877f2; margin-bottom: 15px;">💾 Backup Status</h4>
-                
-                <!-- Backup Summary Cards -->
-                <div class="stats-grid" style="margin-bottom: 20px;">
-                    <div class="stat-card">
-                        <div class="stat-number" id="dailyBackups">0</div>
-                        <div class="stat-label">Daily Backups</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="weeklyBackups">0</div>
-                        <div class="stat-label">Weekly Backups</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="monthlyBackups">0</div>
-                        <div class="stat-label">Monthly Backups</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="manualBackups">0</div>
-                        <div class="stat-label">Manual Exports</div>
-                    </div>
-                </div>
-                
-                <!-- Last Backup Dates -->
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                    <h5 style="margin: 0 0 10px 0; color: #495057;">📅 Last Backup Dates</h5>
-                    <div id="lastBackupDates" style="font-size: 14px; line-height: 1.5;">
-                        <!-- Backup dates will be populated here -->
-                    </div>
-                </div>
-                
-                <!-- Backup Details -->
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                    <h5 style="margin: 0 0 10px 0; color: #495057;">📁 Recent Backup Files (Latest 3 of each type)</h5>
-                    <div id="backupFilesList" style="font-size: 12px; line-height: 1.4; max-height: 300px; overflow-y: auto;">
-                        <!-- Backup files list will be populated here -->
-                    </div>
-                </div>
-                
-                <!-- Backup Actions -->
-                <div style="margin-top: 20px;">
-                    <h5 style="color: #495057; margin-bottom: 10px;">🔧 Backup Management</h5>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="btn btn-secondary" onclick="exportTasks()" style="padding: 10px 20px; background: #17a2b8; border-color: #17a2b8; color: white;">💾 Create Backup</button>
-                        <button class="btn btn-secondary" onclick="checkAllBackups()" style="padding: 10px 20px; background: #6c757d; border-color: #6c757d; color: white;">🔄 Refresh Status</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Productivity Tab -->
-            <div id="productivity-tab" class="settings-tab-content hidden">
-                <h4 style="color: #1877f2; margin-bottom: 15px;">📈 Productivity Insights</h4>
-                <div id="productivityInsights">
-                    <!-- Insights will be generated here -->
-                </div>
-                
-                <!-- Completion Rates -->
-                <div style="margin-top: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                    <h5 style="margin: 0 0 15px 0; color: #495057;">📊 Task Completion Analysis</h5>
-                    <div id="completionAnalysis" style="font-size: 14px; line-height: 1.6;">
-                        <!-- Analysis will be populated here -->
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Preferences Tab -->
-            <div id="preferences-tab" class="settings-tab-content hidden">
-                <h4 style="color: #1877f2; margin-bottom: 15px;">⚙️ Application Settings</h4>
-                
-                <!-- Auto-Print Settings -->
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                    <h5 style="margin: 0 0 10px 0; color: #495057;">🖨️ Auto-Print Settings</h5>
-                    <div style="font-size: 14px; line-height: 1.5;">
-                        <label style="display: flex; align-items: center; margin-bottom: 10px;">
-                            <input type="checkbox" id="autoPrintEnabled" style="margin-right: 8px;">
-                            Enable auto-print for today's tasks
-                        </label>
-                        <div style="color: #6c757d; font-size: 12px;">
-                            When enabled, today's tasks will be automatically printed
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Sync Settings -->
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                    <h5 style="margin: 0 0 10px 0; color: #495057;">☁️ Sync Settings</h5>
-                    <div style="font-size: 14px; line-height: 1.5;">
-                        <div style="margin-bottom: 10px;">
-                            <strong>Sync Status:</strong> <span id="syncStatus" style="color: #28a745;">✅ Connected</span>
-                        </div>
-                        <div style="margin-bottom: 8px;">
-                            <label style="display: block; font-weight: 500; margin-bottom: 4px;">Sync Period:</label>
-                            <select id="syncPeriodSelect" onchange="updateSyncPeriod()" style="padding: 4px 8px; border: 1px solid #dee2e6; border-radius: 4px; font-size: 12px;">
-                                <option value="30">Last 30 days</option>
-                                <option value="60" selected>Last 60 days</option>
-                                <option value="90">Last 90 days</option>
-                                <option value="180">Last 6 months</option>
-                                <option value="365">Last year</option>
-                                <option value="all">All data</option>
-                            </select>
-                        </div>
-                        <div style="color: #6c757d; font-size: 11px;">
-                            • New devices sync only recent data<br>
-                            • Old tasks (90+ days) won't upload to cloud<br>
-                            • Existing synced devices work normally
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Account Info -->
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                    <h5 style="margin: 0 0 10px 0; color: #495057;">👤 Account Information</h5>
-                    <div style="font-size: 14px; line-height: 1.5;">
-                        <div style="margin-bottom: 10px;">
-                            <strong>Email:</strong> <span id="userEmail">Loading...</span> <a href="/upgrade-compare.html" style="color: #ff6b35; text-decoration: none; margin-left: 8px; font-size: 16px;" title="Save Money">💰</a>
-                        </div>
-                        <div style="margin-bottom: 10px;">
-                            <strong>Plan:</strong> <span style="color: #007bff;">HyperFiler Pro</span>
-                        </div>
-                        <button class="btn btn-secondary" onclick="window.location.href='/login'" style="padding: 8px 16px; background: #dc3545; border-color: #dc3545; color: white; margin-top: 10px;">🚪 Logout</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Undo View -->
-    <div id="undo-view" class="tasks-section hidden">
-        <div class="section-header">
-            <h3>↶ Undo Management</h3>
-            <div class="view-controls">
-                <button class="btn btn-secondary btn-small" onclick="refreshUndoView()" style="background: #6c757d; border-color: #6c757d;">🔄 Refresh</button>
-            </div>
-        </div>
-        
-        <div id="undoContent" style="padding: 20px;">
-            <div style="background: transparent; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
-                    <h4 style="color: #1877f2; margin: 0; font-size: 16px;" data-translate="Recent Changes (Last 10)">📋 Recent Changes (Last 10)</h4>
-                    <div style="font-size: 12px; color: #6c757d;" data-translate="Press Ctrl+Z to undo or click any item to undo up to that point">Press Ctrl+Z to undo or click any item to undo up to that point</div>
-                </div>
-                
-                <div id="undoList">
-                    <!-- Undo history will be populated here -->
-                </div>
-                
-                <div id="undoEmpty" style="text-align: center; color: #6c757d; padding: 40px 20px; display: none;">
-                    <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
-                    <h4 style="margin: 0 0 8px 0; color: #495057;" data-translate="No Actions to Undo">No Actions to Undo</h4>
-                    <p style="margin: 0; font-size: 14px;" data-translate="Make some changes to see undo history here">Make some changes to see undo history here</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Task Edit Modal -->
-    <div id="taskModal" class="modal" onclick="closeTaskModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 350px; margin: 10vh auto 5vh; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; padding: 0; max-height: 80vh;">
-            
-            <!-- Modal Header -->
-            <div style="background: linear-gradient(135deg, #1877f2 0%, #42a5f5 100%); color: white; padding: 20px 24px; position: relative;">
-                <h3 style="margin: 0; font-size: 18px; font-weight: 600;" id="modalTitle">✏️ Edit Task</h3>
-                <button onclick="closeTaskModal()" style="position: absolute; top: 50%; right: 20px; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s ease;">&times;</button>
-            </div>
-            
-            <!-- Modal Body -->
-            <div style="padding: 24px; flex: 1; overflow-y: auto;">
-                
-                <!-- Task Title -->
-                <div style="margin-bottom: 20px;">
-                    <label for="editTaskTitle" style="display: block; font-weight: 600; color: #333; margin-bottom: 8px; font-size: 14px;"> </label>
-                    <input type="text" id="editTaskTitle" required placeholder="Enter task" style="width: 100%; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; outline: none;" 
-                           onfocus="clearTaskModalTimeout()" onblur="setTaskModalTimeout()">
-                    <div style="font-size: 11px; color: #6c757d; margin-top: 4px;">💡 Use patterns: "meeting tomorrow at 3pm" or "call john monday at 10am"</div>
-                </div>
-                
-                <!-- Date & Time -->
-                <div style="margin-bottom: 20px;">
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <div style="flex: 1;">
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333; font-size: 14px;">Date & Time:</label>
-                            <button type="button" id="dateTimeDisplay" onclick="openDateTimeModal()" style="width: 100%; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 14px; outline: none; background: transparent; text-align: left; cursor: pointer;">Select date & time...</button>
-                            <!-- Hidden inputs for actual values -->
-                            <input type="hidden" id="editTaskDateOnly">
-                            <input type="hidden" id="editTaskTimeOnly">
-                        </div>
-                        <label style="display: flex; align-items: center; cursor: pointer; font-size: 14px; font-weight: 600; margin-left: 10px; white-space: nowrap; margin-top: 20px;">
-                            <input type="checkbox" id="editTaskIsEvent" style="margin-right: 8px; transform: scale(1.2);">
-                            <span style="color: #dc3545;">🔴 Event</span>
-                        </label>
-                    </div>
-                    
-                    <!-- Hidden inputs to store actual values -->
-                    <input type="hidden" id="editTaskDate">
-                    <input type="hidden" id="editTaskTime">
-                </div>
-                
-                <!-- Repeat -->
-                <div style="margin-bottom: 20px;">
-                    <label for="editTaskRepeat" style="display: block; margin-bottom: 5px; font-weight: 600; color: #333; font-size: 14px;"> </label>
-                    <select id="editTaskRepeat" style="width: 100%; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 14px; transition: border-color 0.2s ease; outline: none; background: transparent;">
-                        <option value="none">No Repeat</option>
-                        <option value="daily">📅 Daily (90 days)</option>
-                        <option value="weekly">🗓️ Weekly (3 months)</option>
-                        <option value="biweekly">📆 Bi-weekly (6 months)</option>
-                        <option value="monthly">📅 Monthly (12 months)</option>
-                        <option value="yearly">🎂 Yearly (5 years)</option>
-                    </select>
-                </div>
-                
-                <!-- Notes -->
-                <div style="margin-bottom: 20px;">
-                    <div style="display: flex; align-items: flex-start; gap: 8px;">
-                        <textarea id="editTaskNotes" rows="3" placeholder="Notes" style="flex: 1; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 14px; resize: vertical; min-height: 80px; outline: none;" 
-                                  onfocus="clearTaskModalTimeout()" onblur="setTaskModalTimeout()"></textarea>
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <!-- IMAGE FUNCTIONALITY DISABLED
-                            <button type="button" onclick="triggerImageUpload()" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Add image">
-                                📷
-                            </button>
-                            -->
-                            <!-- IMAGE FUNCTIONALITY DISABLED
-                            <input type="file" id="imageUpload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-                            -->
-                        </div>
-                    </div>
-                    <div id="noteImages" style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
-                    <div id="noteSizeIndicator" style="margin-top: 8px; font-size: 12px; color: #666; text-align: right;"></div>
-                </div>
-
-                <!-- Template Management -->
-                <div style="margin-bottom: 0;">
-                    <label style="display: block; font-weight: 600; color: #333; margin-bottom: 8px; font-size: 14px;"> </label>
-                    
-                    <!-- Existing Templates -->
-                    <div id="templateButtons" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; min-height: 32px; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
-                        <!-- Template buttons will be inserted here -->
-                    </div>
-                    
-                    <!-- Add New Template -->
-                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                        <input type="text" id="newTemplateInput" placeholder="Enter new template (e.g., @work)" style="flex: 1; padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; font-size: 14px;">
-                        <button type="button" onclick="(async () => await addNewTemplate())()" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">Add</button>
-                        <button type="button" onclick="resetTaskTitle()" style="background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;" title="Clear task title">Reset</button>
-                    </div>
-                    
-                </div>
-                
-            </div>
-            
-            <!-- Modal Footer -->
-            <div style="background: #f8f9fa; padding: 20px 24px; border-top: 1px solid #e1e5e9; display: flex; gap: 12px; justify-content: space-between; align-items: center;">
-                <button onclick="deleteTaskFromModal()" style="background: #dc3545; color: white; border: none; padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(220,53,69,0.3);">🗑️ Delete</button>
-                <div style="display: flex; gap: 12px;">
-                    <button onclick="closeTaskModal()" style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(108,117,125,0.3);">Cancel</button>
-                    <button onclick="saveTaskEdit()" id="saveTaskBtn" style="background: #28a745; color: white; border: none; padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(40,167,69,0.3);">✅ Save Task</button>
-                </div>
-            </div>
-            
-        </div>
-    </div>
-
-    <!-- Custom Date/Time Picker Modal -->
-    <div id="dateTimeModal" class="modal" onclick="closeDateTimeModal(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-        <!-- Desktop Version -->
-        <div class="modal-content desktop-only" onclick="event.stopPropagation()" style="width: 90%; max-width: 380px; height: 50vh; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3); padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-            <!-- Header -->
-            <div style="background: rgba(255,255,255,0.1); padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2);">
-                <h3 style="margin: 0; color: white; font-size: 18px; font-weight: 600;">Select Date & Time</h3>
-            </div>
-            
-            <!-- Scrollable Pickers -->
-            <div style="flex: 1; padding: 15px; display: flex; gap: 12px;">
-                <!-- Day Picker -->
-                <div style="flex: 1;">
-                    <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">DAY</label>
-                    <select id="desktopDayPicker" style="width: 100%; height: 100px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
-                            size="4" onchange="updateDesktopDateTime()">
-                        <!-- Days will be populated by JS -->
-                    </select>
-                </div>
-                
-                <!-- Month Picker -->
-                <div style="flex: 1;">
-                    <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">MONTH</label>
-                    <select id="desktopMonthPicker" style="width: 100%; height: 100px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
-                            size="4" onchange="updateDesktopDateTime()">
-                        <option value="0">JAN</option>
-                        <option value="1">FEB</option>
-                        <option value="2">MAR</option>
-                        <option value="3">APR</option>
-                        <option value="4">MAY</option>
-                        <option value="5">JUN</option>
-                        <option value="6">JUL</option>
-                        <option value="7">AUG</option>
-                        <option value="8">SEP</option>
-                        <option value="9">OCT</option>
-                        <option value="10">NOV</option>
-                        <option value="11">DEC</option>
-                    </select>
-                </div>
-                
-                <!-- Hour Picker -->
-                <div style="flex: 1;">
-                    <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">TIME</label>
-                    <select id="desktopHourPicker" style="width: 100%; height: 100px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
-                            size="4" onchange="updateDesktopDateTime()">
-                        <option value="">--</option>
-                        <option value="06:00">6 AM</option>
-                        <option value="07:00">7 AM</option>
-                        <option value="08:00">8 AM</option>
-                        <option value="09:00">9 AM</option>
-                        <option value="10:00">10 AM</option>
-                        <option value="11:00">11 AM</option>
-                        <option value="12:00">12 PM</option>
-                        <option value="13:00">1 PM</option>
-                        <option value="14:00">2 PM</option>
-                        <option value="15:00">3 PM</option>
-                        <option value="16:00">4 PM</option>
-                        <option value="17:00">5 PM</option>
-                        <option value="18:00">6 PM</option>
-                        <option value="19:00">7 PM</option>
-                        <option value="20:00">8 PM</option>
-                        <option value="21:00">9 PM</option>
-                        <option value="22:00">10 PM</option>
-                    </select>
-                </div>
-            </div>
-            
-            <!-- Selected Display -->
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
-                <div id="desktopSelectedDisplay" style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 12px; text-align: center; color: white; font-weight: 600; font-size: 14px; backdrop-filter: blur(10px);">
-                    Select date and time
-                </div>
-                <div style="display: flex; gap: 12px; margin-top: 15px;">
-                    <button onclick="closeDateTimeModal()" style="flex: 1; background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; backdrop-filter: blur(10px);">Cancel</button>
-                    <button onclick="applyDesktopDateTime()" style="flex: 1; background: rgba(255,255,255,0.9); color: #667eea; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(255,255,255,0.3);">Apply</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Mobile Version - Beautiful Scrollers -->
-        <div class="modal-content mobile-only" onclick="event.stopPropagation()" style="width: 90%; max-width: 380px; height: 50vh; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3); padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-            <!-- Header -->
-            <div style="background: rgba(255,255,255,0.1); padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2);">
-                <h3 style="margin: 0; color: white; font-size: 18px; font-weight: 600;">📅 Select Date & Time</h3>
-            </div>
-            
-            <!-- Scrollable Pickers -->
-            <div style="flex: 1; padding: 15px; display: flex; gap: 12px;">
-                <!-- Day Picker -->
-                <div style="flex: 1;">
-                    <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">DAY</label>
-                    <select id="mobileDayPicker" style="width: 100%; height: 100px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
-                            size="4" onchange="updateMobileDateTime()" onfocus="clearDateTimeModalTimeout()" onblur="setDateTimeModalTimeout()">
-                        <!-- Days will be populated by JS -->
-                    </select>
-                </div>
-                
-                <!-- Month Picker -->
-                <div style="flex: 1;">
-                    <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">MONTH</label>
-                    <select id="mobileMonthPicker" style="width: 100%; height: 100px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
-                            size="4" onchange="updateMobileDateTime()" onfocus="clearDateTimeModalTimeout()" onblur="setDateTimeModalTimeout()">
-                        <option value="0">JAN</option>
-                        <option value="1">FEB</option>
-                        <option value="2">MAR</option>
-                        <option value="3">APR</option>
-                        <option value="4">MAY</option>
-                        <option value="5">JUN</option>
-                        <option value="6">JUL</option>
-                        <option value="7">AUG</option>
-                        <option value="8">SEP</option>
-                        <option value="9">OCT</option>
-                        <option value="10">NOV</option>
-                        <option value="11">DEC</option>
-                    </select>
-                </div>
-                
-                <!-- Hour Picker -->
-                <div style="flex: 1;">
-                    <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">TIME</label>
-                    <select id="mobileHourPicker" style="width: 100%; height: 100px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
-                            size="4" onchange="updateMobileDateTime()" onfocus="clearDateTimeModalTimeout()" onblur="setDateTimeModalTimeout()">
-                        <option value="">--</option>
-                        <option value="06:00">6 AM</option>
-                        <option value="07:00">7 AM</option>
-                        <option value="08:00">8 AM</option>
-                        <option value="09:00">9 AM</option>
-                        <option value="10:00">10 AM</option>
-                        <option value="11:00">11 AM</option>
-                        <option value="12:00">12 PM</option>
-                        <option value="13:00">1 PM</option>
-                        <option value="14:00">2 PM</option>
-                        <option value="15:00">3 PM</option>
-                        <option value="16:00">4 PM</option>
-                        <option value="17:00">5 PM</option>
-                        <option value="18:00">6 PM</option>
-                        <option value="19:00">7 PM</option>
-                        <option value="20:00">8 PM</option>
-                        <option value="21:00">9 PM</option>
-                        <option value="22:00">10 PM</option>
-                    </select>
-                </div>
-            </div>
-            
-            <!-- Selected Display -->
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
-                <div id="mobileSelectedDisplay" style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 12px; text-align: center; color: white; font-weight: 600; font-size: 14px; backdrop-filter: blur(10px);">
-                    Select date and time
-                </div>
-                <div style="display: flex; gap: 12px; margin-top: 15px;">
-                    <button onclick="closeDateTimeModal()" style="flex: 1; background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; backdrop-filter: blur(10px);">Cancel</button>
-                    <button onclick="applyMobileDateTime()" style="flex: 1; background: rgba(255,255,255,0.9); color: #667eea; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(255,255,255,0.3);">Apply</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Keyboard Shortcuts Modal -->
-    <div id="shortcutsModal" class="modal" onclick="closeShortcutsModal(event)" style="z-index: 1100;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 500px; margin: 5vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 80vh; overflow-y: auto;">
-            
-            <!-- Modal Header -->
-            <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
-                <h3 style="margin: 0; font-size: 18px; font-weight: 600;">⌨️ Keyboard Shortcuts</h3>
-                    <button onclick="closeShortcutsModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;">&times;</button>
-            </div>
-            
-            <!-- Modal Body -->
-            <div style="padding: 20px;">
-                <div style="display: grid; gap: 8px;">
-                    <!-- Navigation Shortcuts -->
-                    <div style="margin-bottom: 12px;">
-                        <h4 style="margin: 0 0 8px 0; color: #666; font-size: 14px; font-weight: 600;">📱 Navigation</h4>
-                        <div style="display: grid; gap: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #e3f2fd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Today View</span>
-                                <kbd style="background: #bbdefb; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + T</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #e3f2fd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Week View</span>
-                                <kbd style="background: #bbdefb; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + W</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #e3f2fd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Month View</span>
-                                <kbd style="background: #bbdefb; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + M</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #e3f2fd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">All Tasks + Search</span>
-                                <kbd style="background: #bbdefb; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + A</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #e3f2fd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Repeat View</span>
-                                <kbd style="background: #bbdefb; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + R</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #e3f2fd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Undo View</span>
-                                <kbd style="background: #bbdefb; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + U</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #e3f2fd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Lists View</span>
-                                <kbd style="background: #bbdefb; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + L</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #e3f2fd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Statistics View</span>
-                                <kbd style="background: #bbdefb; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + Y</kbd>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Action Shortcuts -->
-                    <div style="margin-bottom: 12px;">
-                        <h4 style="margin: 0 0 8px 0; color: #666; font-size: 14px; font-weight: 600;">⚡ Actions</h4>
-                        <div style="display: grid; gap: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff3cd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">New Task</span>
-                                <kbd style="background: #ffeaa7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + N</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff3cd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Search in Current View</span>
-                                <kbd style="background: #ffeaa7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + S</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff3cd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Filter Navigation</span>
-                                <kbd style="background: #ffeaa7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + F</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff3cd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Time Dropdown (Selected Task)</span>
-                                <kbd style="background: #ffeaa7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + J</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff3cd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Open Trash</span>
-                                <kbd style="background: #ffeaa7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + H</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff3cd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Undo (up to 10 steps)</span>
-                                <kbd style="background: #ffeaa7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + Z</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff3cd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Export All Data (text file)</span>
-                                <kbd style="background: #ffeaa7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + E</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff3cd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;" data-translate="Create Manual Backup">Create Manual Backup</span>
-                                <kbd style="background: #ffeaa7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + B</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff3cd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Toggle Keyboard-Only Mode</span>
-                                <kbd style="background: #ffeaa7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + K</kbd>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Arrow Key Navigation -->
-                    <div style="margin-bottom: 12px;">
-                        <h4 style="margin: 0 0 8px 0; color: #666; font-size: 14px; font-weight: 600;">🎯 Navigation (Week/Month)</h4>
-                        <div style="display: grid; gap: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #e8f5e8; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Navigate Days</span>
-                                <kbd style="background: #c3e6c3; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">← →</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #e8f5e8; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Navigate Tasks</span>
-                                <kbd style="background: #c3e6c3; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">↑ ↓</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff3cd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Edit Task</span>
-                                <kbd style="background: #ffeaa7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Enter</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f8d7da; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Delete Selected Task</span>
-                                <kbd style="background: #f1aeb5; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Space</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f8d7da; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Clear Selection</span>
-                                <kbd style="background: #f1aeb5; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Esc</kbd>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Info Shortcuts -->
-                    <div>
-                        <h4 style="margin: 0 0 8px 0; color: #666; font-size: 14px; font-weight: 600;">ℹ️ Info</h4>
-                        <div style="display: grid; gap: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f3e5f5; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Show Shortcuts</span>
-                                <kbd style="background: #e1bee7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + I</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f3e5f5; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Show Stats</span>
-                                <kbd style="background: #e1bee7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + T</kbd>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Stats Modal -->
-    <div id="statsModal" class="modal" onclick="closeStatsModal(event)" style="z-index: 1100;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px; margin: 5vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 80vh; overflow-y: auto;">
-            
-            <!-- Modal Header -->
-            <div style="background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
-                <h3 style="margin: 0; font-size: 18px; font-weight: 600;">📊 Statistics</h3>
-                <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Task performance overview</p>
-                <button onclick="closeStatsModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;">&times;</button>
-            </div>
-            
-            <!-- Modal Body -->
-            <div style="padding: 20px;" id="statsModalContent">
-                <!-- Stats content will be populated here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Permanent Transparent Shortcut Reminder - Desktop Only -->
-    <div id="shortcutReminder" class="desktop-only" style="
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        background: rgba(0, 0, 0, 0.08);
-        color: rgba(0, 0, 0, 0.55);
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        opacity: 0.75;
-        z-index: 999;
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(0, 0, 0, 0.15);
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    " onclick="openShortcutsModal()" title="Click for all keyboard shortcuts" 
-       onmouseover="this.style.opacity='0.9'; this.style.background='rgba(0,0,0,0.12)'"
-       onmouseout="this.style.opacity='0.75'; this.style.background='rgba(0,0,0,0.08)'">
-        Ctrl+I shortcuts
-    </div>
-
-    <!-- Mobile Task Actions Modal -->
-    <div id="mobileTaskModal" class="mobile-task-dropdown" onclick="if(event.target === this) hideMobileTaskModal()">
-        <div class="mobile-task-dropdown-content">
-            <div class="mobile-task-dropdown-buttons" id="mobileTaskModalButtons">
-                <!-- Buttons will be populated by JavaScript -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Backup Selection Modal -->
-    <div id="backupSelectionModal" class="modal" onclick="closeBackupSelection(event)" style="z-index: 1200;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px; margin: 5vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 80vh; overflow-y: auto;">
-            
-            <!-- Modal Header -->
-            <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
-                <h3 style="margin: 0; font-size: 18px; font-weight: 600;">💾 Select Backup to Restore</h3>
-                <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Choose which backup you want to restore</p>
-                <button onclick="closeBackupSelection()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;">&times;</button>
-            </div>
-            
-            <!-- Modal Body -->
-            <div style="padding: 20px;">
-                <div id="backupsList">
-                    <!-- Backup list will be populated here -->
-                </div>
-                
-                <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #eee; text-align: center;">
-                    <button onclick="closeBackupSelection()" 
-                            style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px;">
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Task Import Modal -->
-    <div id="taskImportModal" class="modal" onclick="closeTaskImportModal(event)" style="z-index: 1200;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px; margin: 10vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
-            
-            <!-- Modal Header -->
-            <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; position: relative;">
-                <h3 style="margin: 0; font-size: 18px; font-weight: 600;">
-                    📥 <span data-translate="Import Tasks">Import Tasks</span>
-                </h3>
-                <button onclick="closeTaskImportModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; line-height: 1;" title="Close">×</button>
-            </div>
-            
-            <!-- Modal Body -->
-            <div style="padding: 30px 20px;">
-                <p style="margin: 0 0 20px 0; color: #666; text-align: center;" data-translate="Paste your tasks below (one per line):">Paste your tasks below (one per line):</p>
-                
-                <textarea id="taskImportTextarea" 
-                          placeholder="Enter tasks here, one per line..." 
-                          style="width: 100%; height: 200px; padding: 15px; border: 1px solid #ced4da; border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical; box-sizing: border-box;"
-                          data-translate-placeholder="Enter tasks here, one per line..."></textarea>
-                
-                <div style="display: flex; justify-content: space-between; gap: 12px; margin-top: 20px;">
-                    <button onclick="closeTaskImportModal()" 
-                            style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background 0.2s;"
-                            onmouseover="this.style.background='#5a6268'"
-                            onmouseout="this.style.background='#6c757d'">
-                        <span data-translate="Cancel">Cancel</span>
-                    </button>
-                    
-                    <button onclick="importTasksFromTextarea()" 
-                            style="background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s;"
-                            onmouseover="this.style.background='#218838'"
-                            onmouseout="this.style.background='#28a745'">
-                        📥 <span data-translate="Import">Import</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Settings View -->
-    <div id="settings-view" class="tasks-section hidden">
-        <div class="section-header">
-            <h3>Settings</h3>
-        </div>
-        <div class="settings-content" style="padding: 20px;">
-            <!-- Settings content will be loaded here -->
-            <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">Language / Idioma</h4>
-                <div style="display: flex; gap: 12px;">
-                    <button onclick="switchLanguage('en')" 
-                            style="background: none; border: 2px solid #ddd; font-size: 14px; cursor: pointer; padding: 8px 16px; border-radius: 6px; transition: all 0.2s;"
-                            id="lang-en-btn">
-                        🇬🇧 English
-                    </button>
-                    <button onclick="switchLanguage('es')" 
-                            style="background: none; border: 2px solid #ddd; font-size: 14px; cursor: pointer; padding: 8px 16px; border-radius: 6px; transition: all 0.2s;"
-                            id="lang-es-btn">
-                        🇪🇸 Español
-                    </button>
-                </div>
-            </div>
-            
-            <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">Display Options</h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                    <div>
-                        <label style="font-size: 14px; color: #4a5568; font-weight: 500; margin-bottom: 5px; display: block;">Date Format:</label>
-                        <select id="dateFormatSelect" onchange="saveDateFormat()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
-                            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-                            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-                            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="font-size: 14px; color: #4a5568; font-weight: 500; margin-bottom: 5px; display: block;">Time Format:</label>
-                        <select id="timeFormatSelect" onchange="saveTimeFormat()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
-                            <option value="default">Default</option>
-                            <option value="12hour">12-hour (AM/PM)</option>
-                            <option value="24hour">24-hour</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="modal" onclick="closeSettings(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 1000px; margin: 1vh auto; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 98vh; overflow: hidden; display: flex; flex-direction: column;">
-            
-            <!-- Settings Header with Tabs -->
-            <div style="background: #1877f2; color: white; padding: 20px 20px 0 20px; border-radius: 12px 12px 0 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <div>
-                        <h3 style="margin: 0; font-size: 20px; font-weight: 600;">⚙️ Settings / Ajustes</h3>
-                        <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Configure your preferences</p>
-                    </div>
-                    <button onclick="closeSettings()" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button>
-                </div>
-                
-                <!-- Tab Navigation -->
-                <div class="settings-tabs" style="display: flex; gap: 0; border-bottom: 2px solid rgba(255,255,255,0.2);">
-                    <button class="settings-tab-btn active" onclick="switchSettingsTab('general')" data-tab="general" 
-                            style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 12px 8px; cursor: pointer; font-weight: 600; border-radius: 8px 8px 0 0; transition: all 0.2s; flex: 1; text-align: center;">
-                        🎛️ <span data-translate="General">General</span>
-                    </button>
-                    <button class="settings-tab-btn" onclick="switchSettingsTab('data')" data-tab="data"
-                            style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); border: none; padding: 12px 8px; cursor: pointer; font-weight: 600; border-radius: 8px 8px 0 0; transition: all 0.2s; flex: 1; text-align: center;">
-                        💾 <span data-translate="Data">Data</span>
-                    </button>
-                    <button class="settings-tab-btn" onclick="switchSettingsTab('trash')" data-tab="trash"
-                            style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); border: none; padding: 12px 8px; cursor: pointer; font-weight: 600; border-radius: 8px 8px 0 0; transition: all 0.2s; flex: 1; text-align: center;">
-                        🗑️ <span data-translate="Trash">Trash</span>
-                    </button>
-                    <button class="settings-tab-btn" onclick="switchSettingsTab('backup')" data-tab="backup"
-                            style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); border: none; padding: 12px 8px; cursor: pointer; font-weight: 600; border-radius: 8px 8px 0 0; transition: all 0.2s; flex: 1; text-align: center;">
-                        🛡️ <span data-translate="Backup">Backup</span>
-                    </button>
-                    <button class="settings-tab-btn" onclick="switchSettingsTab('shortcuts')" data-tab="shortcuts"
-                            style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); border: none; padding: 12px 8px; cursor: pointer; font-weight: 600; border-radius: 8px 8px 0 0; transition: all 0.2s; flex: 1; text-align: center;">
-                        ⌨️ <span data-translate="Shortcuts">Shortcuts</span>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Settings Body -->
-            <div class="settings-body" style="flex: 1; overflow-y: auto; padding: 0;">
-                
-                <!-- General Tab -->
-                <div id="settings-tab-general" class="settings-tab-content" style="display: block; padding: 0;">
-                
-                <!-- Language Section -->
-                <div class="settings-section" style="padding: 15px 20px; border-bottom: 1px solid #e0e0e0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h4 style="margin: 0; color: #1877f2; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                            🌐 Language / Idioma
-                        </h4>
-                        <div style="display: flex; gap: 12px; align-items: center;">
-                            <button onclick="switchLanguage('en')" 
-                                    style="background: none; border: 2px solid #ddd; font-size: 24px; cursor: pointer; padding: 8px 12px; border-radius: 6px; transition: all 0.2s; display: flex; align-items: center; gap: 6px;"
-                                    onmouseover="this.style.borderColor='#1877f2'"
-                                    onmouseout="this.style.borderColor='#ddd'"
-                                    id="lang-en-btn">
-                                🇬🇧 <span style="font-size: 12px; font-weight: 600;">EN</span>
-                            </button>
-                            <button onclick="switchLanguage('es')" 
-                                    style="background: none; border: 2px solid #ddd; font-size: 24px; cursor: pointer; padding: 8px 12px; border-radius: 6px; transition: all 0.2s; display: flex; align-items: center; gap: 6px;"
-                                    onmouseover="this.style.borderColor='#1877f2'"
-                                    onmouseout="this.style.borderColor='#ddd'"
-                                    id="lang-es-btn">
-                                🇪🇸 <span style="font-size: 12px; font-weight: 600;">ES</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Display Options Section -->
-                <div class="settings-section" style="padding: 15px 20px; border-bottom: 1px solid #e0e0e0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                        <h4 style="margin: 0; color: #1877f2; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                            🎨 Display Options
-                        </h4>
-                        <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <label style="font-size: 14px; color: #495057; font-weight: 600;">Date Format:</label>
-                                <select id="dateFormatSelect" onchange="saveDateFormat()" style="padding: 6px 10px; border: 1px solid #ced4da; border-radius: 4px; background: transparent; font-size: 13px;">
-                                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-                                    <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-                                    <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-                                </select>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <label style="font-size: 14px; color: #495057; font-weight: 600;">Time Format:</label>
-                                <select id="timeFormatSelect" onchange="saveTimeFormat()" style="padding: 6px 10px; border: 1px solid #ced4da; border-radius: 4px; background: transparent; font-size: 13px;">
-                                    <option value="default">Default</option>
-                                    <option value="12hour">12-hour (AM/PM)</option>
-                                    <option value="24hour">24-hour</option>
-                                </select>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <label style="font-size: 14px; color: #495057; font-weight: 600;">Tab Display:</label>
-                                <select id="tabDisplaySelect" onchange="saveTabDisplayMode()" style="padding: 6px 10px; border: 1px solid #ced4da; border-radius: 4px; background: transparent; font-size: 13px;">
-                                    <option value="both">Icon + Text</option>
-                                    <option value="icon">Icon Only</option>
-                                    <option value="text">Text Only</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mobile UI Version Section -->
-                <div class="settings-section" style="padding: 15px 20px; border-bottom: 1px solid #e0e0e0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h4 style="margin: 0; color: #1877f2; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                                📱 <span data-translate="Mobile UI Version">Mobile UI Version</span>
-                            </h4>
-                            <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">
-                                Mobile interface optimized for touch devices
-                            </p>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <select id="mobileUIVersion" onchange="toggleMobileUIVersion()" style="padding: 8px 12px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: transparent;">
-                                <option value="m1">M1 (Classic)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Keyboard-Only Mode Section -->
-                <div class="settings-section" style="padding: 15px 20px; border-bottom: 1px solid #e0e0e0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h4 style="margin: 0; color: #1877f2; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                                ⌨️ <span data-translate="Keyboard-Only Mode">Keyboard-Only Mode</span>
-                            </h4>
-                            <p style="margin: 5px 0 0 0; font-size: 12px; color: #666; max-width: 300px;">
-                                <span data-translate="Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation">Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation</span>
-                            </p>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" id="keyboardOnlyMode" onchange="toggleKeyboardOnlyMode()" style="transform: scale(1.2);">
-                            <label for="keyboardOnlyMode" style="font-size: 14px; color: #495057; font-weight: 600; cursor: pointer;">
-                                <span data-translate="Enable">Enable</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                </div>
-
-
-                <!-- Auto-Print Settings Section -->
-                <div class="settings-section" style="padding: 20px;">
-                    <h4 style="margin: 0 0 15px 0; color: #1877f2; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                        🖨️ Auto-Print Settings
-                    </h4>
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px;">
-                        <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #495057;">
-                            <input type="checkbox" id="autoPrintEnabled" onchange="toggleAutoPrint()" style="margin-right: 8px;">
-                            Enable Auto-Print
-                        </label>
-                        <div id="autoPrintControls" style="opacity: 0.5; pointer-events: none;">
-                            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #495057;">Auto-Print Time:</label>
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                <input type="time" id="autoPrintTime" onchange="saveAutoPrintTime()" style="padding: 6px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px;">
-                                <button onclick="activateCurrentTime()" 
-                                        style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                                    Activate
-                                </button>
-                            </div>
-                        </div>
-                        <small style="color: #6c757d; margin-top: 8px; display: block;">Enable to automatically print today's tasks at the specified time</small>
-                    </div>
-                </div>
-
-                </div>
-
-                <!-- Data Tab -->
-                <div id="settings-tab-data" class="settings-tab-content" style="display: none; padding: 0;">
-
-                <!-- Data Management Section -->
-                <div class="settings-section" style="padding: 15px 20px 20px 20px;">
-                    <h4 style="margin: 0 0 15px 0; color: #1877f2; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                        💾 Data Management
-                    </h4>
-                    <!-- Two Column Layout: Import/Export | Backup -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <!-- Import/Export Column -->
-                        <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <h5 style="margin: 0 0 8px 0; color: #666; font-size: 14px; font-weight: 600; text-align: center;">
-                                📝 <span data-translate="Text Files">Text Files</span>
-                            </h5>
-                            
-                            <!-- Import Button with Dropdown -->
-                            <div style="position: relative; width: 100%;">
-                                <button onclick="toggleImportDropdown()" 
-                                        style="background: #007bff; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; width: 100%; display: flex; align-items: center; justify-content: space-between;"
-                                        onmouseover="this.style.background='#0056b3'"
-                                        onmouseout="this.style.background='#007bff'">
-                                    <span>📥 <span data-translate="Import Data">Import Data</span></span>
-                                    <span style="font-size: 12px;">▼</span>
-                                </button>
-                                <div id="importDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: transparent; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 1000; margin-top: 2px;">
-                                    <button onclick="selectImportFormat('json')" style="width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 13px; border-bottom: 1px solid #eee;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='none'">
-                                        📄 JSON Format
-                                    </button>
-                                    <button onclick="selectImportFormat('txt')" style="width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 13px;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='none'">
-                                        📝 Text Format
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Export Button with Dropdown -->
-                            <div style="position: relative; width: 100%;">
-                                <button onclick="toggleExportDropdown()" 
-                                        style="background: #28a745; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; width: 100%; display: flex; align-items: center; justify-content: space-between;"
-                                        onmouseover="this.style.background='#218838'"
-                                        onmouseout="this.style.background='#28a745'">
-                                    <span>📤 <span data-translate="Export Data">Export Data</span></span>
-                                    <span style="font-size: 12px;">▼</span>
-                                </button>
-                                <div id="exportDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: transparent; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 1000; margin-top: 2px;">
-                                    <button onclick="selectExportFormat('json')" style="width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 13px; border-bottom: 1px solid #eee;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='none'">
-                                        📄 JSON Format
-                                    </button>
-                                    <button onclick="selectExportFormat('txt')" style="width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 13px;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='none'">
-                                        📝 Text Format
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Backup Column -->
-                        <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <h5 style="margin: 0 0 8px 0; color: #666; font-size: 14px; font-weight: 600; text-align: center;">
-                                📄 <span data-translate="JSON Files">JSON Files</span>
-                            </h5>
-                            <button onclick="createEmergencyBackup()" 
-                                    style="background: #ffc107; color: #212529; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; width: 100%;"
-                                    onmouseover="this.style.background='#e0a800'"
-                                    onmouseout="this.style.background='#ffc107'">
-                                💾 <span data-translate="Create Backup">Create Backup</span>
-                            </button>
-                            <button onclick="restoreFromEmergencyBackup()" 
-                                    style="background: #6c757d; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; width: 100%;"
-                                    onmouseover="this.style.background='#545b62'"
-                                    onmouseout="this.style.background='#6c757d'">
-                                🔄 <span data-translate="Restore Backup">Restore Backup</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                </div>
-
-                <!-- Backup Tab -->
-                <div id="settings-tab-backup" class="settings-tab-content" style="display: none; padding: 0;">
-
-                <!-- Backup Settings Section -->
-                <div class="settings-section" style="padding: 20px;">
-                    <h4 style="margin: 0 0 15px 0; color: #1877f2; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                        🔄 Backup Settings
-                    </h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 6px;">
-                            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #495057;">
-                                <input type="checkbox" id="autoBackupEnabled" onchange="saveBackupSettings()" style="margin-right: 8px;">
-                                <span data-translate="Enable Automatic Backups">Habilitar Respaldos Automáticos</span>
-                            </label>
-                            <small style="color: #6c757d;" data-translate="Automatically create backups based on your schedule">Crear respaldos automáticamente según tu horario</small>
-                        </div>
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 6px;">
-                            <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #495057;" data-translate="Choose Backup Types:">Elegir Tipos de Respaldo:</label>
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <label style="display: flex; align-items: center; font-weight: normal; color: #495057;">
-                                    <input type="checkbox" id="dailyBackupEnabled" onchange="saveBackupSettings()" style="margin-right: 8px;">
-                                    <span data-translate="Daily Backups">📅 Respaldos Diarios</span>
-                                </label>
-                                <label style="display: flex; align-items: center; font-weight: normal; color: #495057;">
-                                    <input type="checkbox" id="weeklyBackupEnabled" onchange="saveBackupSettings()" style="margin-right: 8px;">
-                                    <span data-translate="Weekly Backups">📊 Respaldos Semanales</span>
-                                </label>
-                                <label style="display: flex; align-items: center; font-weight: normal; color: #495057;">
-                                    <input type="checkbox" id="monthlyBackupEnabled" onchange="saveBackupSettings()" style="margin-right: 8px;">
-                                    <span data-translate="Monthly Backups">📆 Respaldos Mensuales</span>
-                                </label>
-                            </div>
-                            <small style="color: #6c757d; margin-top: 8px; display: block;" data-translate="Select which automatic backups you want to enable">Selecciona qué respaldos automáticos quieres habilitar</small>
-                        </div>
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 6px;">
-                            <button onclick="showBackupStats()" 
-                                    style="background: #28a745; color: white; border: none; padding: 10px 16px; border-radius: 4px; cursor: pointer; font-size: 14px; width: 100%;">
-                                <span data-translate="View Backup Stats">📈 Ver Estadísticas de Respaldo</span>
-                            </button>
-                        </div>
-                        <div style="background: #fff2f2; padding: 15px; border-radius: 6px; border: 2px solid #ffebee;">
-                            <div style="margin-bottom: 10px;">
-                                <div style="font-weight: 600; color: #d32f2f; margin-bottom: 5px;">⚠️ Danger Zone</div>
-                                <small style="color: #666; font-size: 12px;" data-translate="Delete all tasks permanently - this cannot be undone">Eliminar todas las tareas permanentemente - esto no se puede deshacer</small>
-                            </div>
-                            <button onclick="clearAllTasks()" 
-                                    style="background: #dc3545; color: white; border: none; padding: 10px 16px; border-radius: 4px; cursor: pointer; font-size: 14px; width: 100%; font-weight: 600;"
-                                    onmouseover="this.style.background='#c82333'"
-                                    onmouseout="this.style.background='#dc3545'">
-                                🗑️ <span data-translate="Delete All Tasks">Delete All Tasks</span>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- Additional spacing at bottom of Data tab -->
-                    <div style="height: 40px;"></div>
-                </div>
-
-                </div>
-
-                <!-- Trash Tab -->
-                <div id="settings-tab-trash" class="settings-tab-content" style="display: none; padding: 20px;">
-                    <h4 style="margin: 0 0 20px 0; color: #1877f2; font-size: 18px; text-align: center;">
-                        🗑️ Trash
-                    </h4>
-                    <div id="trashContainer">
-                        <!-- Trash Actions -->
-                        <div style="display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;">
-                            <button onclick="refreshTrashModal()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">🔄 Refresh</button>
-                            <button onclick="clearTrashModal()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">🗑️ Empty Trash</button>
-                        </div>
-                        
-                        <!-- Trash Items -->
-                        <div id="modalTrashList" style="max-height: 400px; overflow-y: auto;">
-                            <!-- Trash items will be populated here -->
-                            <div style="text-align: center; padding: 40px; color: #6c757d;">
-                                <p style="margin: 0;">Loading trash items...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Shortcuts Tab -->
-                <div id="settings-tab-shortcuts" class="settings-tab-content" style="display: none; padding: 20px;">
-                    <h4 style="margin: 0 0 20px 0; color: #1877f2; font-size: 18px; text-align: center;">
-                        ⌨️ Keyboard Shortcuts
-                    </h4>
-                    
-                    <!-- Shortcuts Grid -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                        
-                        <!-- Navigation Shortcuts -->
-                        <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border-left: 4px solid #007bff;">
-                            <h5 style="margin: 0 0 12px 0; color: #007bff; font-size: 14px; font-weight: 600;">🧭 Navigation</h5>
-                            <div style="space-y: 8px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Today view</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+T</kbd>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Week view</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+W</kbd>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Month view</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+M</kbd>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Statistics view</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+Y</kbd>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Search tasks</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+S</kbd>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Task Management -->
-                        <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border-left: 4px solid #28a745;">
-                            <h5 style="margin: 0 0 12px 0; color: #28a745; font-size: 14px; font-weight: 600;">📝 Task Management</h5>
-                            <div style="space-y: 8px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Add new task</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+N</kbd>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Save task (in modal)</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Enter</kbd>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Undo last action</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+Z</kbd>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Cancel/Close</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Esc</kbd>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Data Management -->
-                        <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border-left: 4px solid #fd7e14;">
-                            <h5 style="margin: 0 0 12px 0; color: #fd7e14; font-size: 14px; font-weight: 600;">💾 Data Management</h5>
-                            <div style="space-y: 8px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Export data</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+E</kbd>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Quick backup</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+B</kbd>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Open settings</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+H</kbd>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">View shortcuts</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+I</kbd>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Templates & Quick Actions -->
-                        <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border-left: 4px solid #6f42c1;">
-                            <h5 style="margin: 0 0 12px 0; color: #6f42c1; font-size: 14px; font-weight: 600;">⚡ Quick Actions</h5>
-                            <div style="space-y: 8px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Template autocomplete</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">@</kbd>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Return to today</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+U</kbd>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 13px; color: #495057;">Focus navigation</span>
-                                    <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Enter</kbd>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Pro Tips -->
-                    <div style="margin-top: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px; border-radius: 8px;">
-                        <h5 style="margin: 0 0 10px 0; color: white; font-size: 14px; font-weight: 600;">💡 Pro Tips</h5>
-                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.5;">
-                            <li>Use <kbd style="background: rgba(255,255,255,0.2); padding: 1px 4px; border-radius: 2px;">@</kbd> followed by project names for quick templates</li>
-                            <li>Combine <kbd style="background: rgba(255,255,255,0.2); padding: 1px 4px; border-radius: 2px;">Ctrl+N</kbd> + natural language for smart task entry</li>
-                            <li>Use <kbd style="background: rgba(255,255,255,0.2); padding: 1px 4px; border-radius: 2px;">Enter</kbd> on navigation buttons for keyboard-only workflow</li>
-                        </ul>
-                    </div>
-                </div>
-
-
-
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Import Modal -->
-    <div id="quickImportModal" class="modal" onclick="closeQuickImportModal(event)" style="z-index: 1200;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 400px; margin: 20vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
-            
-            <!-- Modal Header -->
-            <div style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center;">
-                <h3 style="margin: 0; font-size: 18px; font-weight: 600;">
-                    📥 <span data-translate="Quick Import">Quick Import</span>
-                </h3>
-                <button onclick="closeQuickImportModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; line-height: 1;" title="Close">×</button>
-            </div>
-            
-            <!-- Modal Body -->
-            <div style="padding: 30px 20px;">
-                <p style="margin: 0 0 20px 0; color: #666; text-align: center;" data-translate="Choose the type of file you want to import:">Choose the type of file you want to import:</p>
-                
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <button onclick="document.getElementById('importFileInput').click(); closeQuickImportModal();" 
-                            style="background: #28a745; color: white; border: none; padding: 15px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;"
-                            onmouseover="this.style.background='#218838'"
-                            onmouseout="this.style.background='#28a745'">
-                        📋 <span data-translate="Import Backup">Import Backup</span>
-                    </button>
-                    
-                    <button onclick="document.getElementById('importTxtInput').click(); closeQuickImportModal();" 
-                            style="background: #007bff; color: white; border: none; padding: 15px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;"
-                            onmouseover="this.style.background='#0056b3'"
-                            onmouseout="this.style.background='#007bff'">
-                        📄 <span data-translate="Import TXT File">Import TXT File</span>
-                    </button>
-                </div>
-                
-                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
-                    <small style="color: #999;" data-translate="Supported formats: .json, .txt">Supported formats: .json, .txt</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Trash Modal -->
-    <div id="trashModal" class="modal" onclick="closeTrash(event)" style="z-index: 1100;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px; margin: 5vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 80vh; overflow-y: auto;">
-            
-            <!-- Modal Header -->
-            <div style="background: #6c757d; color: white; padding: 20px; border-radius: 12px 12px 0 0;">
-                <h3 style="margin: 0; font-size: 18px; font-weight: 600;">🗑️ Trash</h3>
-                <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Deleted tasks are stored here</p>
-                <button onclick="closeTrash()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;">&times;</button>
-            </div>
-            
-            <!-- Modal Body -->
-            <div style="padding: 20px;">
-                
-                <!-- Trash Controls -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #eee;">
-                    <div>
-                        <strong id="trashStats">0 deleted tasks</strong>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="restoreAllTasks()" id="restoreAllBtn" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; display: none;">
-                            ↪ Restore All
-                        </button>
-                        <button onclick="emptyTrash()" id="emptyTrashBtn" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; display: none;">
-                            🗑️ Empty Trash
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Trash Items -->
-                <div id="trashItems">
-                    <div style="text-align: center; color: #666; padding: 40px;">
-                        <div style="font-size: 48px; margin-bottom: 16px;">🗑️</div>
-                        <p>Trash is empty</p>
-                    </div>
-                </div>
-                
-            </div>
-            
-        </div>
-    </div>
-
-    <!-- List Items Modal -->
-    <div id="listItemsModal" class="modal" onclick="closeListItemsModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px; margin: 3vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;">
-            
-            <!-- Modal Header -->
-            <div style="background: linear-gradient(135deg, #9B59B6 0%, #8e44ad 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; flex-shrink: 0;">
-                <h3 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 600;" id="listItemsModalTitle">📋 List Items</h3>
-                <p style="margin: 0; font-size: 14px; opacity: 0.9;" id="listItemsModalSubtitle">Manage items in this list</p>
-                <button onclick="closeListItemsModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='none'">&times;</button>
-            </div>
-            
-            <!-- Add Item Section -->
-            <div style="padding: 20px; border-bottom: 2px solid #f1f3f4; flex-shrink: 0;">
-                <div style="display: flex; gap: 12px; align-items: center;">
-                    <input type="text" id="newListItemInput" placeholder="Enter new item..." style="flex: 1; padding: 12px 16px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; transition: border-color 0.2s;" onkeypress="handleAddItemKeyPress(event)">
-                    <button onclick="addListItem()" style="background: #9B59B6; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; white-space: nowrap;" onmouseover="this.style.background='#8e44ad'" onmouseout="this.style.background='#9B59B6'">
-                        + Add Item
-                    </button>
-                </div>
-            </div>
-            
-            <!-- List Items Container -->
-            <div style="flex: 1; overflow-y: auto; min-height: 200px;">
-                <div id="listItemsContainer">
-                    <!-- List items will be rendered here -->
-                </div>
-                
-                <!-- Empty state -->
-                <div id="emptyListItems" style="display: none; text-align: center; padding: 60px 20px; color: #6c757d;">
-                    <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
-                    <h4 style="margin: 0 0 12px 0; color: #9B59B6;">No Items Yet</h4>
-                    <p style="margin: 0; font-size: 14px;">Add your first item to get started.</p>
-                </div>
-            </div>
-            
-            <!-- Modal Footer -->
-            <div style="padding: 20px; border-top: 2px solid #f1f3f4; background: #f8f9fa; border-radius: 0 0 12px 12px; flex-shrink: 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="font-size: 14px; color: #6c757d;">
-                        <span id="listItemsCount">0 items</span>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="toggleAllListItems()" style="background: #6f42c1; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#5a2d91'" onmouseout="this.style.background='#6f42c1'">
-                            ✓ Toggle All
-                        </button>
-                        <button onclick="exportListToHTML()" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
-                            📄 Export HTML
-                        </button>
-                        <button id="convertSelectedBtn" onclick="convertSelectedItemsToTasks()" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: background 0.2s; display: none;" onmouseover="this.style.background='#0056b3'" onmouseout="this.style.background='#007bff'">
-                            📅 Convert Completed
-                        </button>
-                        <button onclick="convertEntireListToTasks()" style="background: #6f42c1; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#5a2d91'" onmouseout="this.style.background='#6f42c1'">
-                            📅 Convert All
-                        </button>
-                        <button onclick="deleteCompletedListItems()" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
-                            🗑️ Delete
-                        </button>
-                        <button onclick="closeListItemsModal()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#545b62'" onmouseout="this.style.background='#6c757d'">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
-    </div>
-
-    <!-- List Selection Modal for TXT Import -->
-    <div id="listSelectionModal" class="modal" onclick="closeListSelectionModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 500px; margin: 10vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0; max-height: 70vh; overflow-y: auto;">
-            
-            <!-- Modal Header -->
-            <div style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
-                <h3 style="margin: 0; font-size: 18px; font-weight: 600;">📋 Select List for TXT Import</h3>
-            </div>
-
-            <!-- Modal Body -->
-            <div style="padding: 20px;">
-                <p style="margin: 0 0 15px 0; color: #666;">Choose which list to import your TXT file items into:</p>
-                
-                <div id="listSelectionContent" style="max-height: 300px; overflow-y: auto;">
-                    <!-- List sections will be populated here -->
-                </div>
-            </div>
-
-            <!-- Modal Footer -->
-            <div style="padding: 20px; border-top: 2px solid #f1f3f4; background: #f8f9fa; border-radius: 0 0 12px 12px;">
-                <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                    <button onclick="closeListSelectionModal()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <input type="file" id="importJsonFile" accept=".json" onchange="handleJsonImportFile(event)" style="display: none;">
-    <input type="file" id="importTextFile" accept=".txt,.org,text/*" onchange="handleTextImportFile(event)" style="display: none;">
-    <input type="file" id="importListTXTFile" accept=".txt" onchange="handleNewTXTImport(event)" style="position: absolute; left: -9999px; opacity: 0;">
-    
-    <!-- Header quick import file inputs -->
-    <input type="file" id="importFileInput" accept=".json" onchange="handleJsonImportFile(event)" style="display: none;">
-    <input type="file" id="importTxtInput" accept=".txt,.org,text/*" onchange="handleTextImportFile(event)" style="display: none;">
-
-
-
+        function sanitizeInput(input) {
+            if (typeof input !== 'string') return input;
+            
+            // Remove dangerous characters and scripts
+            return input
+                .replace(/)<[^<]*)*<\/script>/gi, '')
+                .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+                .replace(/javascript:/gi, '')
+                .replace(/on\w+\s*=/gi, '')
+                .replace(/data:text\/html/gi, '')
+                .trim();
+        }
+        // TRANSLATION SYSTEM
+        let currentLanguage = 'en';
         
         const translations = {
             en: {
@@ -5644,11 +375,9 @@
                 'Untimed': 'Sin hora'
             }
         };
-
         function translateText(key) {
             return translations[currentLanguage][key] || key;
         }
-
         function switchLanguage(lang) {
             currentLanguage = lang;
             localStorage.setItem('preferredLanguage', lang);
@@ -5709,7 +438,6 @@
                 btn.title = titleText;
             }
         }
-
         function translateUI() {
             // Translate navigation buttons with explicit emoji mapping
             const navButtons = {
@@ -5721,7 +449,6 @@
                 'nav-repeat': { icon: '🔄', key: 'Repeat' },
                 'nav-undo': { icon: '↶', key: 'Undo' }
             };
-
             // Get current tab display mode to respect user preference
             const currentTabDisplayMode = localStorage.getItem('tabDisplayMode') || 'both';
             
@@ -5745,7 +472,6 @@
                     element.textContent = content;
                 }
             });
-
             // Translate section headers
             const headers = document.querySelectorAll('h3');
             headers.forEach(header => {
@@ -5764,7 +490,6 @@
                     header.innerHTML = `📋 ${translateText('All Tasks')}`;
                 }
             });
-
             // Translate "Quick filters" labels
             const quickFilterLabels = document.querySelectorAll('span');
             quickFilterLabels.forEach(span => {
@@ -5773,7 +498,6 @@
                     span.textContent = translateText('Quick filters') + ':';
                 }
             });
-
             // Translate "No Specific Time" in time blocks
             const timeHeaders = document.querySelectorAll('.time-block-header span');
             timeHeaders.forEach(span => {
@@ -5782,7 +506,6 @@
                     span.textContent = '📋 ' + translateText('No Specific Time');
                 }
             });
-
             // Translate placeholder texts
             const searchInputs = document.querySelectorAll('input[placeholder]');
             searchInputs.forEach(input => {
@@ -5799,7 +522,6 @@
                     input.placeholder = translateText('🔍 Month');
                 }
             });
-
             // Translate common buttons
             const buttons = document.querySelectorAll('button:not(.nav-btn)');
             buttons.forEach(button => {
@@ -5893,7 +615,6 @@
                         button.textContent = newText;
                     }
                 });
-
                 // Handle specific navigation patterns with exact text matching
                 if (text === '← Prev Day') {
                     button.textContent = '← ' + translateText('Prev Day');
@@ -5933,7 +654,6 @@
                     button.textContent = '📋 Import TXT';
                 }
             });
-
             // Update mobile nav
             const mobileNavItems = {
                 'mobileNavToday': 'Today',
@@ -5941,7 +661,6 @@
                 'mobileNavAll': 'All Tasks',
                 'mobileNavLists': 'Lists'
             };
-
             Object.entries(mobileNavItems).forEach(([id, key]) => {
                 const element = document.getElementById(id);
                 if (element) {
@@ -5951,7 +670,6 @@
                     }
                 }
             });
-
             // Translate mobile more menu items
             const mobileMoreItems = document.querySelectorAll('.mobile-more-item');
             mobileMoreItems.forEach(item => {
@@ -5969,7 +687,6 @@
                     }
                 }
             });
-
             // Translate select options
             const selectOptions = document.querySelectorAll('option');
             selectOptions.forEach(option => {
@@ -5980,13 +697,11 @@
                     option.textContent = translateText('All Tasks').toLowerCase();
                 }
             });
-
             // Update flag button tooltips
             const enFlag = document.getElementById('flag-en');
             const esFlag = document.getElementById('flag-es');
             if (enFlag) enFlag.title = 'Switch to English';
             if (esFlag) esFlag.title = 'Cambiar a Español';
-
             // Translate Settings Modal Elements
             const settingsElements = [
                 // Headers
@@ -6042,7 +757,6 @@
                 // Language button text
                 { selector: 'span', match: 'English', key: 'English' }
             ];
-
             settingsElements.forEach(({ selector, match, key }) => {
                 const elements = document.querySelectorAll(`#settingsModal ${selector}`);
                 elements.forEach(element => {
@@ -6086,7 +800,6 @@
                     }
                 });
             });
-
             // Translate elements with data-translate attributes (except nav buttons which are handled above)
             const dataTranslateElements = document.querySelectorAll('[data-translate]:not(.nav-btn)');
             dataTranslateElements.forEach(element => {
@@ -6125,7 +838,6 @@
                     }
                 }
             });
-
             // Update Today view date display to reflect new language
             updateCurrentTodayDisplay();
             
@@ -6173,7 +885,6 @@
                 }
             }, 2000); // Check every 2 seconds
         }
-
         // Mobile navigation - simplified (no gestures)
         
         function setupMobileNavGestures() {
@@ -6196,7 +907,6 @@
                 navigator.vibrate(type === 'success' ? [10] : [10, 50, 10]);
             }
         }
-
         // Instant response system for interactions
         function instantResponse(element, action) {
             // Immediate visual feedback
@@ -6207,7 +917,6 @@
                 requestAnimationFrame(action);
             }
         }
-
         // Task completion animation
         function animateTaskCompletion(taskElement) {
             taskElement.style.animation = 'completeTask 0.4s ease-out forwards';
@@ -6215,7 +924,6 @@
                 taskElement.style.display = 'none';
             }, 400);
         }
-
         // Load preferred language on startup
         function initializeLanguage() {
             const savedLang = localStorage.getItem('preferredLanguage');
@@ -6229,7 +937,6 @@
         const API_BASE = window.location.hostname.includes('localhost') 
             ? 'http://localhost:8787' 
             : 'https://hyperfiler-fresh-api.joanmanelferrera-400.workers.dev';
-
         // Helper function to clear authentication data
         function clearAuthData() {
             // Clear BOTH localStorage and sessionStorage to be thorough
@@ -6257,7 +964,6 @@
             window.currentUser = null;
             window.location.reload();
         };
-
         function getAuthHeaders() {
             // ALWAYS check localStorage first (for persistent login)
             let authToken = null;
@@ -6303,10 +1009,7 @@
             
             return fetch(url, { ...defaultOptions, ...options });
         }
-
-
         // Debug verification
-
         function validateTaskData(task) {
             if (!task || typeof task !== 'object') return null;
             
@@ -6325,13 +1028,11 @@
                 updatedAt: task.updatedAt
             };
         }
-
         // Global variables - ATOMIC DELETE v3.0.0 - 2025-01-09 - Atomic deletion: UI → Database → Refresh
         let tasks = [];
         
         // VERSION 2: Event Registry System - Bulletproof Event preservation
         let eventTaskIds = new Set(); // Tracks which tasks are Events
-
         // Event Registry Management Functions
         function loadEventRegistry() {
             try {
@@ -6344,7 +1045,6 @@
                 eventTaskIds = new Set();
             }
         }
-
         function saveEventRegistry() {
             try {
                 localStorage.setItem('gtd_event_registry', JSON.stringify([...eventTaskIds]));
@@ -6352,21 +1052,17 @@
                 console.error('Error saving Event Registry:', error);
             }
         }
-
         function markAsEvent(taskId) {
             eventTaskIds.add(taskId);
             saveEventRegistry();
         }
-
         function unmarkAsEvent(taskId) {
             eventTaskIds.delete(taskId);
             saveEventRegistry();
         }
-
         function isRegisteredEvent(taskId) {
             return eventTaskIds.has(taskId);
         }
-
         // Post-download healing: Restore isEvent properties from registry
         function healEventProperties() {
             let healedCount = 0;
@@ -6384,7 +1080,6 @@
             
             return healedCount;
         }
-
         // Clean up registry: Remove deleted task IDs
         function cleanEventRegistry() {
             const taskIdSet = new Set(tasks.map(t => t.id));
@@ -6443,7 +1138,6 @@
                 }
             }
         }
-
         
         window.addEventListener('load', function() {
             // Mobile navigation simplified - no gestures
@@ -6457,14 +1151,13 @@
         let currentEditTaskId = null;
         let undoStack = [];
         let maxUndoSteps = 10;
-
         // SECURITY: Client-side input validation functions
         function validateTaskInput(input) {
             if (typeof input !== 'string') return null;
             
             // Remove dangerous content
             const cleaned = input
-                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/)<[^<]*)*<\/script>/gi, '')
                 .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
                 .replace(/javascript:/gi, '')
                 .replace(/on\w+\s*=/gi, '')
@@ -6488,7 +1181,7 @@
             
             // Remove dangerous content but don't limit length here
             const cleaned = notes
-                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/)<[^<]*)*<\/script>/gi, '')
                 .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
                 .replace(/javascript:/gi, '')
                 .replace(/on\w+\s*=/gi, '')
@@ -6506,7 +1199,6 @@
             
             return cleaned;
         }
-
         // Image handling functions for notes - now using attachments
         // COMMENTED OUT: Image functionality disabled for now
         /*
@@ -7429,10 +2121,8 @@
             document.body.appendChild(overlay);
         }
         */
-
         // Authentication and subscription verification
         // NOTE: Authentication functions moved to top of script for early availability
-
         // PLACEHOLDER FUNCTIONS: Create minimal functions to prevent JavaScript errors
         function triggerImageUpload() {
             console.log('Image functionality is currently disabled');
@@ -7473,7 +2163,6 @@
         function taskHasImages(task) {
             return false; // Always return false since images are disabled
         }
-
         // Authentication check state management
         let lastAuthCheck = 0;
         let lastAuthenticationState = false;
@@ -7544,7 +2233,6 @@
                     }
                 }
                 
-
                 // SECURITY: Try httpOnly cookie first, fallback to localStorage for cross-domain
                 // Add retry logic to prevent bouncing on temporary network issues
                 let response;
@@ -7583,7 +2271,6 @@
                         }
                     }
                 }
-
                 if (!response || !response.ok) {
                     console.error('❌ Authentication failed after retries:', lastError);
                     lastAuthenticationState = false;
@@ -7604,15 +2291,12 @@
                     showAccessDenied('login');
                     return false;
                 }
-
                 const userInfo = await response.json();
-
                 // Check subscription status - TEMPORARILY DISABLED FOR TESTING
                 // if (!userInfo.subscription || userInfo.subscription.plan_name === 'free') {
                 //     showAccessDenied('subscription');
                 //     return false;
                 // }
-
                 // Subscription expired check - TEMPORARILY DISABLED FOR TESTING
                 // if (userInfo.subscription.current_period_end) {
                 //     const expiryDate = new Date(userInfo.subscription.current_period_end);
@@ -7621,7 +2305,6 @@
                 //         return false;
                 //     }
                 // }
-
                 // Store user info for app use
                 window.currentUser = userInfo;
                 
@@ -7726,7 +2409,6 @@
                 
                 lastAuthenticationState = true;
                 return true;
-
             } catch (error) {
                 console.error('Auth check failed:', error);
                 lastAuthenticationState = false;
@@ -7734,7 +2416,6 @@
                 return false;
             }
         }
-
         // Show access denied screen
         // Prevent multiple rapid access denied redirects
         window.accessDeniedShown = false;
@@ -7786,9 +2467,7 @@
                     url: '/login'
                 }
             };
-
             const config = messages[reason] || messages.error;
-
             // Special handling for login - show inline form instead of redirect
             if (reason === 'login') {
                 document.body.innerHTML = `
@@ -7870,7 +2549,6 @@
                 }, 100);
                 return;
             }
-
             // For other access denied reasons, show redirect screen
             document.body.innerHTML = `
                 <div style="
@@ -7921,12 +2599,10 @@
                             ${config.action}
                         </a>
                         
-
                     </div>
                 </div>
             `;
         }
-
         // Show user info in header
         // Handle inline login form submission
         async function handleInlineLogin(event) {
@@ -7974,7 +2650,6 @@
                 errorDiv.style.display = 'block';
             }
         }
-
         // Get user status icon based on payment status
         function getUserStatusIcon(userInfo) {
             // Check if user has paid (licensed) - includes both Stripe customers and promo code users
@@ -7985,7 +2660,6 @@
                 return '<a href="/upgrade-compare.html" style="color: #ff6b35; font-weight: 600; text-decoration: none; margin-left: 8px;" title="Purchase License">💳 Trial</a>';
             }
         }
-
         function showUserInfo(userInfo) {
             const header = document.querySelector('h1');
             if (header) {
@@ -8042,8 +2716,6 @@
             console.log('Pro badge display disabled');
         }
         
-
-
         // Logout function
         async function logout() {
             try {
@@ -8059,7 +2731,6 @@
             clearAuthData();
             window.location.href = '/login';
         }
-
         // Show soft reminders (Reaper-style)
         function showTrialReminder(userInfo) {
             if (!userInfo.trialStatus) return;
@@ -8448,7 +3119,6 @@
                 alert('Error processing upgrade. Please try again.');
             }
         }
-
         // Initialize premium features
         function initializePremiumFeatures() {
             
@@ -8470,7 +3140,6 @@
             // Show premium badge
             showPremiumBadge();
         }
-
         // Check for task migration from free version
         function checkForTaskMigration() {
             const hasLocalTasks = localStorage.getItem('gtdTasks');
@@ -8484,7 +3153,6 @@
                 }, 2000);
             }
         }
-
         // Show migration success message
         function showMigrationSuccessMessage() {
             const messageEl = document.createElement('div');
@@ -8551,7 +3219,6 @@
                 }
             }, 10000);
         }
-
         // Cloud sync functionality
         // Sync Period Management
         function updateSyncPeriod() {
@@ -8578,7 +3245,6 @@
             
             // REMOVED DANGEROUS UPLOAD: Don't upload on visibility change - could be stale data
             // The second visibility handler below handles proper download
-
             // Debounced window focus handler (max once per minute)
             let lastFocusRefresh = 0;
             window.addEventListener('focus', () => {
@@ -8590,37 +3256,30 @@
                     }
                 }
             });
-
             // Handle window blur to save current state
             window.addEventListener('blur', () => {
                 saveCurrentViewState();
             });
-
             // Ultra-fast periodic refresh check (every 5 seconds when active)
             let lastAutoRefresh = 0;
             // REMOVED: Redundant 5-second sync - using 500ms ultra-fast sync instead
         }
-
         // Direct delete task from cloud database
         async function deleteTaskFromCloud(taskId) {
             try {
                 if (!window.currentUser?.user?.id) {
                     throw new Error('No authentication');
                 }
-
                 
                 const response = await fetch(`${API_BASE}/tasks/${taskId}`, {
                     method: 'DELETE',
                     mode: 'cors',
-
                     headers: getAuthHeaders()
                 });
-
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
                     throw new Error(`Delete failed: ${response.status} ${errorData.error || response.statusText}`);
                 }
-
                 return true;
                 
             } catch (error) {
@@ -8628,12 +3287,8 @@
                 throw error;
             }
         }
-
-
         // Global sync lock to prevent race conditions
         let syncPromise = null;
-
-
         // Add premium analytics
         function addPremiumAnalytics() {
             
@@ -8658,7 +3313,6 @@
                 };
             };
         }
-
         // Enable advanced export options
         function enableAdvancedExports() {
             
@@ -8713,7 +3367,6 @@
                 printWindow.print();
             };
         }
-
         // Enable collaboration features
         function enableCollaboration() {
             
@@ -8739,7 +3392,6 @@
                 }
             };
         }
-
         // Show premium badge
         function showPremiumBadge() {
             // Don't show on mobile
@@ -8762,7 +3414,6 @@
             premiumBadge.innerHTML = '👑 PRO';
             document.body.appendChild(premiumBadge);
         }
-
         // State management functions for handling external link navigation
         function saveCurrentViewState() {
             try {
@@ -8784,12 +3435,10 @@
             } catch (error) {
             }
         }
-
         function refreshCurrentViewState() {
             try {
                 // REMOVED DANGEROUS UPLOAD: Don't upload on focus - could be stale data
                 // Only download fresh data when browser comes online
-
                 // Restore saved state if available
                 const savedState = sessionStorage.getItem('hyperFilerViewState');
                 if (savedState) {
@@ -8809,12 +3458,10 @@
                                 }
                             }
                         });
-
                         // Restore scroll position
                         if (state.scrollPosition) {
                             window.scrollTo(0, state.scrollPosition);
                         }
-
                         // Reselect task if it was selected
                         if (state.selectedTaskId) {
                             setTimeout(() => {
@@ -8826,18 +3473,15 @@
                         }
                     }
                 }
-
                 // Always refresh the current view to ensure data is up to date
                 setTimeout(() => {
                     refreshCurrentView();
                 }, 200);
-
             } catch (error) {
                 // Fallback: just refresh the current view
                 refreshCurrentView();
             }
         }
-
         function refreshCurrentView() {
             // Refresh the current view to ensure data is up to date
             switch (currentView) {
@@ -8861,7 +3505,6 @@
                     showView('today');
             }
         }
-
         // Setup mobile touch events for better focus behavior
         function setupMobileTouchEvents() {
             console.log('📱 Setting up mobile touch events for Add Task buttons');
@@ -8938,7 +3581,6 @@
             document.getElementById('editTaskDate').value = currentDate;
             document.getElementById('editTaskTime').value = ''; // Empty = "No specific time"
         }
-
         // Perform stale browser refresh when authentication is ready
         async function performStaleRefresh() {
             try {
@@ -9009,7 +3651,6 @@
                 console.error('❌ Error during stale refresh:', error);
             }
         }
-
         // Initialize the app
         // Prevent multiple initialization attempts
         let initializationInProgress = false;
@@ -9434,7 +4075,6 @@
                     scheduleBackupChecks();
                     checkAllBackups();
                 }, 100); // Quick defer for backups - reduced from 5000ms
-
                 // Initialize calendar and week view
                 try {
                     renderCalendar();
@@ -9526,7 +4166,6 @@
                 initializationInProgress = false;
             }
         });
-
         // ============================================================================
         // SIMPLE SYNC SYSTEM - Lists pattern implementation
         // ============================================================================
@@ -9586,7 +4225,6 @@
                     }
                 }
             });
-
             // Debounced window focus handler (max once per minute)  
             let lastFocusRefresh = 0;
             window.addEventListener('focus', () => {
@@ -9632,10 +4270,7 @@
             console.log('✅ Simple sync system initialized with immediate sync pattern');
         }
         
-
         
-
-
         // Simple sync system - no bypass functions needed
         window.testSimpleSync = async function() {
             try {
@@ -9682,7 +4317,6 @@
                 return false;
             }
         };
-
         // Simple sync integration
         // All operations now use the proven Lists pattern: update array → saveTasksToServer → render
         
@@ -9715,12 +4349,9 @@
                 }
             }, 3000);
         }
-
         // OLD SYNC FUNCTION REMOVED - Using new immediate sync implementation instead
-
         // VERSION 3: Mobile Navigation Functions
         let mobileMoreMenuOpen = false;
-
         function switchToMobileView(viewName) {
             // Update mobile header title
             const titles = {
@@ -9748,7 +4379,6 @@
                     headerTitle.textContent = viewName;
                 }
             }
-
             // Update mobile navigation active state
             const mobileNavButtons = document.querySelectorAll('.mobile-nav-btn');
             mobileNavButtons.forEach(btn => btn.classList.remove('active'));
@@ -9764,18 +4394,15 @@
             } else if (viewName === 'week') {
                 document.getElementById('mobileNavWeek').classList.add('active');
             }
-
             // Call the existing view switching function
             if (viewName === 'calendar') {
                 showView('calendar');
             } else {
                 showView(viewName);
             }
-
             // Hide more menu if open
             hideMobileMoreMenu();
         }
-
         function toggleMobileMoreMenu() {
             const moreMenu = document.getElementById('mobileMoreMenu');
             if (moreMenu) {
@@ -9787,7 +4414,6 @@
                 }
             }
         }
-
         function hideMobileMoreMenu() {
             const moreMenu = document.getElementById('mobileMoreMenu');
             if (moreMenu) {
@@ -9795,11 +4421,9 @@
                 mobileMoreMenuOpen = false;
             }
         }
-
         function goBack() {
             // Implement back navigation if needed
         }
-
         function openSearchView() {
             // Open search functionality
             performSearch = performSearch || function() {
@@ -9816,12 +4440,10 @@
                 }
             }, 100);
         }
-
         function openSettingsView() {
             // Open settings/stats view
             showView('stats');
         }
-
         function showSettingsTab(tabName) {
             // Hide all tab contents
             const allTabs = document.querySelectorAll('.settings-tab-content');
@@ -9873,7 +4495,6 @@
                 }
             }
         }
-
         function undoLastAction() {
             // Use existing undo functionality
             if (typeof performUndo === 'function') {
@@ -9881,7 +4502,6 @@
             } else {
             }
         }
-
         function showHelpModal() {
             // Show help/keyboard shortcuts
             if (typeof showKeyboardShortcuts === 'function') {
@@ -9890,7 +4510,6 @@
                 alert('Keyboard Shortcuts:\n\nCtrl+N: Add new task\nCtrl+T: Today view\nCtrl+W: Week view\nCtrl+M: Month view\nCtrl+L: Lists view\nCtrl+R: Repeat view\nCtrl+U: Undo view\nCtrl+Y: Statistics view\nCtrl+S: Search\nCtrl+Z: Undo action\nCtrl+B: Create backup\n\nUse arrow keys to navigate tasks\nPress Enter to edit a task\nPress Space to delete selected task');
             }
         }
-
         // Mobile task actions dropdown functionality
         let mobileTaskDropdownTimeout;
         
@@ -10002,7 +4621,6 @@
                 hideMobileTaskModal();
             }, 3000); // Auto-close after 3 seconds
         }
-
         function hideMobileTaskModal() {
             // Clear any existing timeout
             if (mobileTaskDropdownTimeout) {
@@ -10015,7 +4633,6 @@
                 modal.classList.remove('show');
             }
         }
-
         function showMobileTaskActions(taskId, event) {
             if (event) event.stopPropagation();
             
@@ -10587,14 +5204,12 @@
             isSwipeInProgress = false;
             swipeStartTime = 0;
         }
-
         // Hide modal when clicking outside
         document.addEventListener('click', function(event) {
             if (!event.target.closest('.mobile-task-actions') && !event.target.closest('#mobileTaskModal')) {
                 hideMobileTaskModal();
             }
         });
-
         // Hide mobile more menu when clicking outside
         document.addEventListener('click', function(event) {
             const moreMenu = document.getElementById('mobileMoreMenu');
@@ -10606,7 +5221,6 @@
                 }
             }
         });
-
         // Update mobile navigation state when desktop navigation is used
         function updateMobileNavigation() {
             if (typeof currentView !== 'undefined') {
@@ -10644,7 +5258,6 @@
                         headerTitle.textContent = currentView;
                     }
                 }
-
                 // Update mobile navigation active state
                 const mobileNavButtons = document.querySelectorAll('.mobile-nav-btn');
                 mobileNavButtons.forEach(btn => btn.classList.remove('active'));
@@ -10659,7 +5272,6 @@
                 // Other views are in the "More" menu, so no bottom nav highlight
             }
         }
-
         
         // Generate unique device ID for conflict resolution
         function generateDeviceId() {
@@ -10667,9 +5279,7 @@
             localStorage.setItem('deviceId', deviceId);
             return deviceId;
         }
-
         // ===== LISTS SYNC FUNCTIONS (Same ultra-simple pattern as tasks) =====
-
         // SIMPLE UPLOAD: Send all lists to server (USING PROVEN TASKS METHOD)
         // Simple lists upload function
         async function uploadAllLists() {
@@ -10732,7 +5342,6 @@
                 showSyncStatus('Lists sync failed', 'error');
             }
         }
-
         // EXACT COPY of uploadAllLists for Tasks
         async function uploadAllTasks() {
             // Tasks sync using simple pattern (EXACT COPY of uploadAllLists)
@@ -10796,9 +5405,7 @@
                 return false;
             }
         }
-
         // Function will be assigned to window after DOM loads
-
         // SIMPLE DOWNLOAD: Get all lists from server (USING PROVEN TASKS METHOD WITH SAFETY)
         async function downloadAllLists() {
             if (!window.currentUser?.user?.id) return;
@@ -10826,10 +5433,8 @@
             
             try {
                 const response = await fetch(`${API_BASE}/lists/${window.currentUser.user.id}`, {
-
                     headers: getAuthHeaders()
                 });
-
                 if (response.ok) {
                     const data = await response.json();
                     const serverListSections = data.listSections || [];
@@ -10892,9 +5497,7 @@
                 console.log('📥 LISTS SYNC: Download error:', error);
             }
         }
-
         // ===== TEMPLATES SYNC FUNCTIONS (Same ultra-simple pattern as tasks and lists) =====
-
         // SIMPLE UPLOAD: Send all templates to server
         async function uploadAllTemplates() {
             if (!window.currentUser?.user?.id) return;
@@ -10906,14 +5509,12 @@
                 
                 const response = await fetch(`${API_BASE}/templates/sync`, {
                     method: 'POST',
-
                     headers: getAuthHeaders(),
                     body: JSON.stringify({
                         userId: window.currentUser.user.id,
                         templates: templatesArray // Send entire templates array
                     })
                 });
-
                 if (response.ok) {
                 } else {
                     console.error('❌ TEMPLATES SYNC: Upload failed:', response.status);
@@ -10922,7 +5523,6 @@
                 console.error('❌ TEMPLATES SYNC: Upload error:', error);
             }
         }
-
         // SIMPLE DOWNLOAD: Get all templates from server
         async function downloadAllTemplates() {
             if (!window.currentUser?.user?.id) return;
@@ -10945,10 +5545,8 @@
             
             try {
                 const response = await fetch(`${API_BASE}/templates/${window.currentUser.user.id}`, {
-
                     headers: getAuthHeaders()
                 });
-
                 if (response.ok) {
                     const data = await response.json();
                     const serverTemplates = data.templates || [];
@@ -10977,7 +5575,6 @@
                 console.log('📥 TEMPLATES SYNC: Download error:', error);
             }
         }
-
         // Download all tasks from server (Lists pattern implementation)
         async function downloadAllTasks() {
             if (!window.currentUser?.user?.id) {
@@ -11158,26 +5755,22 @@
                 throw error;
             }
         }
-
         // DELTA SYNC: Download only changes since last sync (90% bandwidth reduction)
         async function downloadTaskChanges() {
             if (!window.currentUser?.user?.id) {
                 console.log('⚠️ No user ID available for delta sync');
                 return null;
             }
-
             const authToken = window.currentUser?.token || localStorage.getItem('authToken');
             if (!authToken) {
                 console.log('⚠️ No auth token available for delta sync');
                 return null;
             }
-
             const lastSyncTime = localStorage.getItem('lastSyncTime');
             if (!lastSyncTime) {
                 console.log('📥 No last sync time - falling back to full sync');
                 return null; // Fall back to full sync
             }
-
             try {
                 console.log(`📥 DELTA SYNC: Getting changes since ${new Date(parseInt(lastSyncTime)).toISOString()}`);
                 
@@ -11187,35 +5780,26 @@
                         'Content-Type': 'application/json'
                     }
                 });
-
                 if (!response.ok) {
                     console.warn(`📥 DELTA SYNC failed (${response.status}) - falling back to full sync`);
                     return null; // Fall back to full sync
                 }
-
                 const data = await response.json();
                 const changes = data.changes;
-
                 console.log(`📊 DELTA SYNC: ${changes.created.length} created, ${changes.updated.length} updated, ${changes.deleted.length} deleted`);
-
                 // Apply changes to local tasks array
                 applyTaskChanges(changes);
-
                 // Update last sync time
                 localStorage.setItem('lastSyncTime', Date.now().toString());
-
                 // Save updated tasks to localStorage
                 localStorage.setItem('gtdTasks', JSON.stringify(tasks));
-
                 console.log('✅ DELTA SYNC completed successfully');
                 return changes;
-
             } catch (error) {
                 console.warn('📥 DELTA SYNC error - falling back to full sync:', error);
                 return null; // Fall back to full sync
             }
         }
-
         // Apply delta changes to local tasks array
         function applyTaskChanges(changes) {
             // Apply created tasks
@@ -11226,7 +5810,6 @@
                     console.log(`📄 DELTA: Created task "${newTask.title}"`);
                 }
             }
-
             // Apply updated tasks
             for (const updatedTask of changes.updated) {
                 const existingIndex = tasks.findIndex(t => t.id === updatedTask.id);
@@ -11239,7 +5822,6 @@
                     console.log(`📄 DELTA: Added missing task "${updatedTask.title}"`);
                 }
             }
-
             // Apply deleted tasks
             for (const deletedTaskId of changes.deleted) {
                 const existingIndex = tasks.findIndex(t => t.id === deletedTaskId);
@@ -11249,26 +5831,21 @@
                     console.log(`🗑️ DELTA: Deleted task "${deletedTask.title}"`);
                 }
             }
-
             console.log(`📊 DELTA: Local tasks count now: ${tasks.length}`);
         }
-
         // DELTA SYNC: Upload only changed tasks (90% bandwidth reduction)
         async function uploadTaskChanges(localChanges) {
             if (!window.currentUser?.user?.id) {
                 console.log('⚠️ No user ID available for delta upload');
                 return false;
             }
-
             const authToken = window.currentUser?.token || localStorage.getItem('authToken');
             if (!authToken) {
                 console.log('⚠️ No auth token available for delta upload');
                 return false;
             }
-
             try {
                 console.log(`📤 DELTA UPLOAD: Sending ${(localChanges.created || []).length} created, ${(localChanges.updated || []).length} updated, ${(localChanges.deleted || []).length} deleted`);
-
                 const response = await fetch(`${API_BASE}/tasks/delta`, {
                     method: 'POST',
                     headers: {
@@ -11279,12 +5856,10 @@
                         changes: localChanges
                     })
                 });
-
                 if (!response.ok) {
                     console.warn(`📤 DELTA UPLOAD failed (${response.status}) - falling back to full upload`);
                     return false; // Fall back to full upload
                 }
-
                 const result = await response.json();
                 console.log(`✅ DELTA UPLOAD: Successfully processed ${result.processed} changes`);
                 
@@ -11292,26 +5867,22 @@
                 localStorage.setItem('lastSyncTime', Date.now().toString());
                 
                 return true;
-
             } catch (error) {
                 console.warn('📤 DELTA UPLOAD error - falling back to full upload:', error);
                 return false; // Fall back to full upload
             }
         }
-
         // Local change tracking for delta uploads
         let localChanges = {
             created: [],
             updated: [],
             deleted: []
         };
-
         // Track when a task is created locally
         function trackTaskCreated(task) {
             localChanges.created.push(task);
             console.log(`📝 TRACKED: Created task "${task.title}"`);
         }
-
         // Track when a task is updated locally
         function trackTaskUpdated(task) {
             // Remove from created if it was just created (to avoid duplication)
@@ -11329,7 +5900,6 @@
             }
             console.log(`📝 TRACKED: Updated task "${task.title}"`);
         }
-
         // Track when a task is deleted locally
         function trackTaskDeleted(taskId) {
             // Remove from created/updated if it exists
@@ -11342,7 +5912,6 @@
             }
             console.log(`📝 TRACKED: Deleted task ${taskId}`);
         }
-
         // Clear local change tracking after successful sync
         function clearLocalChanges() {
             localChanges = {
@@ -11352,21 +5921,17 @@
             };
             console.log('📝 CLEARED: Local change tracking reset');
         }
-
         // Smart upload function that uses delta sync when possible
         async function smartUploadTasks() {
             // Check if we have any local changes to upload
             const hasChanges = localChanges.created.length > 0 || 
                              localChanges.updated.length > 0 || 
                              localChanges.deleted.length > 0;
-
             if (!hasChanges) {
                 console.log('📤 No local changes to upload');
                 return true; // Nothing to upload is success
             }
-
             console.log(`📤 SMART UPLOAD: ${localChanges.created.length} created, ${localChanges.updated.length} updated, ${localChanges.deleted.length} deleted`);
-
             // Try delta upload first
             const deltaSuccess = await uploadTaskChanges(localChanges);
             
@@ -11384,7 +5949,6 @@
                 return fullUploadSuccess;
             }
         }
-
         // Debug function to check delta sync status
         function debugDeltaSync() {
             console.log('🔍 DELTA SYNC DEBUG INFO:');
@@ -11408,10 +5972,8 @@
             
             return window.deltaDebug;
         }
-
         // Expose debug function globally for console testing
         window.debugDeltaSync = debugDeltaSync;
-
         // Smart sync function that uses delta sync when possible
         async function smartDownloadTasks() {
             // Skip if protection flags are set (unless mandatory refresh)
@@ -11427,14 +5989,12 @@
                     return;
                 }
             }
-
             // Always use full sync for mandatory refresh (stale browser)
             if (window.forceMandatoryRefresh || window.staleBrowserMode) {
                 console.log('🚨 MANDATORY REFRESH: Using full sync');
                 await downloadAllTasks();
                 return;
             }
-
             // Try delta sync first
             const changes = await downloadTaskChanges();
             
@@ -11484,7 +6044,6 @@
                 const response = await fetch(apiUrl, {
                     headers: getAuthHeaders()
                 });
-
                 if (response.ok) {
                     const data = await response.json();
                     const serverTasks = data.tasks || [];
@@ -11788,8 +6347,6 @@
                 console.log('📥 SIMPLE SYNC: Download error:', error);
             }
         }
-
-
         let syncInProgress = false; // Declare missing variable
         
         async function pullLatestFromCloud(forceSync = false) {
@@ -11818,7 +6375,6 @@
                 console.log('🌐 API URL:', `${API_BASE}/tasks/${window.currentUser.user.id}`);
                 
                 const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
-
                     headers: getAuthHeaders()
                 });
                 
@@ -11917,7 +6473,6 @@
                 syncInProgress = false;
             }
         }
-
         async function downloadTasksFromCloud() {
             if (!window.currentUser?.user?.id) return;
             
@@ -11937,7 +6492,6 @@
             try {
                 
                 const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
-
                     headers: getAuthHeaders()
                 });
                 
@@ -12002,7 +6556,6 @@
                 console.error('📥 TASKS DOWNLOAD ERROR:', error);
             }
         }
-
         // Remove duplicate tasks based on ID and return clean array
         function removeDuplicateTasks(taskArray) {
             const seen = new Set();
@@ -12023,10 +6576,7 @@
             
             return uniqueTasks;
         }
-
         // INSTANT sync to cloud (no debouncing)
-
-
         // INSTANT sync to cloud (no debouncing)
         async function instantSyncToCloud() {
             const timeSinceLastSync = Date.now() - lastSyncTimestamp;
@@ -12039,7 +6589,6 @@
                 console.log('⏭️ Skipping instant sync - too recent (500ms protection)');
             }
         }
-
         // ===============================================
         // 🔒 TRIPLE-LAYER PROTECTION SYSTEM v1.0
         // ===============================================
@@ -12736,7 +7285,6 @@
                 };
             }
         };
-
         // 🔒 TRIPLE-LAYER PROTECTION UI Functions
         window.createManualBackup = async function() {
             if (!window.TripleProtection) {
@@ -12752,7 +7300,6 @@
                 alert('❌ Failed to create manual backup');
             }
         };
-
         window.showTripleProtectionDetails = function() {
             if (!window.TripleProtection) {
                 alert('❌ Triple-Layer Protection not initialized');
@@ -12782,7 +7329,6 @@
             
             alert(details);
         };
-
         window.updateProtectionStatus = function() {
             if (!window.TripleProtection) return;
             
@@ -12796,7 +7342,6 @@
             if (versionCount) versionCount.textContent = status.layer2_versions;
             if (conflictCount) conflictCount.textContent = status.layer3_conflicts;
         };
-
         // 🔄 VERSION HISTORY UI Functions
         window.showTaskVersionHistory = function(taskId) {
             if (!window.TripleProtection) {
@@ -12828,7 +7373,6 @@
             details += `\nUse rollbackTask('${taskId}', 'version_id') to restore a version`;
             alert(details);
         };
-
         window.rollbackTask = async function(taskId, versionId) {
             if (!window.TripleProtection) {
                 alert('❌ Triple-Layer Protection not initialized');
@@ -12852,7 +7396,6 @@
                 }
             }
         };
-
         window.compareTaskVersions = function(taskId, versionId1, versionId2) {
             if (!window.TripleProtection) {
                 alert('❌ Triple-Layer Protection not initialized');
@@ -12886,7 +7429,6 @@
             
             alert(details);
         };
-
         // 📋 CONFLICT RESOLUTION UI Functions
         window.showConflictLogs = function() {
             if (!window.TripleProtection) {
@@ -12927,7 +7469,6 @@
             
             alert(details);
         };
-
         window.simulateConflict = async function(taskId) {
             if (!window.TripleProtection) {
                 alert('❌ Triple-Layer Protection not initialized');
@@ -12981,7 +7522,6 @@
                 alert('No conflict detected in simulation');
             }
         };
-
         window.resolveManualConflict = async function(conflictId, strategy) {
             if (!window.TripleProtection) {
                 alert('❌ Triple-Layer Protection not initialized');
@@ -13007,7 +7547,6 @@
                 alert('❌ Manual resolution failed');
             }
         };
-
         window.getConflictStats = function() {
             if (!window.TripleProtection) {
                 console.log('❌ Triple-Layer Protection not initialized');
@@ -13018,14 +7557,12 @@
             console.log('📋 Conflict Resolution Statistics:', stats);
             return stats;
         };
-
         // Auto-update protection status every 30 seconds
         setInterval(() => {
             if (window.TripleProtection) {
                 updateProtectionStatus();
             }
         }, 30000);
-
         // ULTRA-SYNC: Manual ultra-fast sync for cross-browser testing
         window.ultraSync = async function() {
             console.log('🚀 ULTRA-SYNC: Force uploading all data...');
@@ -13049,7 +7586,6 @@
                 console.log('🔓 ULTRA-SYNC: Flags cleared, downloads will resume');
             }, 5000); // 5 seconds for reliable cross-browser sync
         };
-
         // ULTRA-PULL: Manual ultra-fast download for cross-browser testing  
         window.ultraPull = async function() {
             console.log('📥 ULTRA-PULL: Force downloading all data...');
@@ -13067,9 +7603,6 @@
             
             console.log('✅ ULTRA-PULL: Download complete, view refreshed');
         };
-
-
-
         // Helper function to normalize dueTime values consistently across the app
         function normalizeDueTime(dueTime) {
             // Convert any falsy value OR "00:00" OR "untimed" to null for consistent handling
@@ -13078,7 +7611,6 @@
             }
             return dueTime;
         }
-
         // Fallback to localStorage
         function loadTasksFromLocalStorage() {
             console.log('📱 DEBUG: loadTasksFromLocalStorage called');
@@ -13143,14 +7675,12 @@
                         console.log('Task move check failed (non-critical):', err.message)
                     );
                 }, 50); // Reduced from 500ms
-
                 // Option 1: Timer-based automatic task movement (every 1 hour)
                 setInterval(() => {
                     checkAndMoveIncompleteTasks().catch(err => 
                         console.log('Scheduled task move check failed (non-critical):', err.message)
                     );
                 }, 60 * 60 * 1000); // 1 hour = 60 minutes * 60 seconds * 1000 milliseconds
-
                 // Option 2: Focus/visibility detection for immediate task movement
                 document.addEventListener('visibilitychange', () => {
                     if (!document.hidden) {
@@ -13179,8 +7709,6 @@
                 renderCurrentView();
             }
         }
-
-
         // Save tasks to server using EXACT Lists pattern
         // Save tasks to localStorage and sync to cloud - EXACTLY like Lists
         async function saveTasksToServer() {
@@ -13203,7 +7731,6 @@
                 console.error('Error saving tasks to server:', error);
             }
         }
-
         // Save task using simple pattern like Lists: update array → saveTasksToServer
         async function saveTask(taskData) {
             try {
@@ -13300,7 +7827,6 @@
                 return taskData;
             }
         }
-
         // Sort tasks by due date and event priority
         function sortTasks() {
             tasks.sort((a, b) => {
@@ -13343,9 +7869,7 @@
                 return new Date(b.createdAt) - new Date(a.createdAt);
             });
         }
-
         // Add new task
-
         // Streamlined DateTime Picker Functions
         
         // Open datetime picker modal
@@ -13800,12 +8324,10 @@
             closeDateTimePicker();
         }
         
-
         // Variables for custom calendar
         let selectedDate = null;
         let selectedHour = null;
         let selectedMinute = null;
-
         // Open custom date/time picker modal
         function openDateTimeModal() {
             console.log('🔧 DEBUG: openDateTimeModal called');
@@ -13855,7 +8377,6 @@
             // Set auto-close timer for 4 seconds
             setDateTimeModalTimeout();
         }
-
         // Generate calendar grid
         function generateCalendar() {
             console.log('generateCalendar called');
@@ -13937,7 +8458,6 @@
             
             console.log('Calendar generation completed. Grid children count:', grid.children.length);
         }
-
         // Generate hour buttons
         function generateHourButtons() {
             console.log('generateHourButtons called');
@@ -13972,13 +8492,11 @@
                 container.appendChild(hourButton);
             }
         }
-
         // Change month
         function changeMonth(direction) {
             currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
             generateCalendar();
         }
-
         // Select date
         function selectDate(year, month, day) {
             selectedDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
@@ -13997,14 +8515,12 @@
             generateCalendar(); // Refresh to show selection
             updateSelectedDisplay();
         }
-
         // Select hour
         function selectHour(hour) {
             selectedHour = hour;
             generateHourButtons(); // Refresh to show selection
             updateSelectedDisplay();
         }
-
         // Select minute
         function selectMinute(minute) {
             selectedMinute = minute;
@@ -14023,7 +8539,6 @@
             
             updateSelectedDisplay();
         }
-
         // Clear time
         function clearTime() {
             selectedHour = null;
@@ -14042,7 +8557,6 @@
             
             updateSelectedDisplay();
         }
-
         // Update selected date/time display
         function updateSelectedDisplay() {
             const display = document.getElementById('selectedDateTime');
@@ -14064,14 +8578,11 @@
                 display.textContent = 'No date selected';
             }
         }
-
         // Close custom date/time picker modal
         function closeDateTimeModal(event) {
             if (event && event.target !== event.currentTarget) return;
             document.getElementById('dateTimeModal').style.display = 'none';
         }
-
-
         // Apply selected date and time from modal
         function applyDateTime() {
             let timeValue = '';
@@ -14101,7 +8612,6 @@
                 saveTaskEdit();
             }, 100);
         }
-
         // Mobile quick date functions
         function selectQuickDate(type) {
             const today = new Date();
@@ -14182,7 +8692,6 @@
             
             updateMobileDateTime();
         }
-
         function initializeDesktopDatePickers() {
             const today = new Date();
             const dayPicker = document.getElementById('desktopDayPicker');
@@ -14250,7 +8759,6 @@
         function applyMobileDateTime() {
             applyDateTime();
         }
-
         function updateDesktopDateTime() {
             const dayPicker = document.getElementById('desktopDayPicker');
             const monthPicker = document.getElementById('desktopMonthPicker');
@@ -14285,7 +8793,6 @@
         function applyDesktopDateTime() {
             applyDateTime();
         }
-
         // Update the display button text
         function updateDateTimeDisplay() {
             const dateValue = document.getElementById('editTaskDateOnly').value;
@@ -14319,7 +8826,6 @@
                 button.textContent = 'Select date & time...';
             }
         }
-
         // Navigation and view management
         function showView(viewName, preserveDate = false) {
             currentView = viewName;
@@ -14440,7 +8946,6 @@
                 }, 50);
             }, 50);
         }
-
         // Show loading state
         function showLoadingState() {
             // Find the currently visible view or default to today-view
@@ -14458,7 +8963,6 @@
                 console.warn('Could not find content element for loading state');
             }
         }
-
         // Render current view
         function renderCurrentView() {
             // Force set hasLoadedOnce to prevent loading state issues
@@ -14496,12 +9000,10 @@
                 renderTasks(currentView);
             }
         }
-
         // Render repeat tasks view
         function renderRepeatView() {
             const container = document.getElementById('repeatTasksList');
             if (!container) return;
-
             // Render repeat view started
             console.log('Total tasks:', tasks.length);
             
@@ -14536,7 +9038,6 @@
             Object.keys(seriesMap).forEach(title => {
                 console.log(`- Series "${title}": ${seriesMap[title].tasks.length} tasks`);
             });
-
             // Process each series to get stable representative data
             const seriesList = Object.values(seriesMap);
             const today = getLocalDateString();
@@ -14553,7 +9054,6 @@
                     if (!aIsUpcoming && bIsUpcoming) return 1;
                     return aDate.localeCompare(bDate);
                 });
-
                 // Set stable data
                 series.representative = series.tasks[0];
                 series.seriesCount = series.tasks.length;
@@ -14573,7 +9073,6 @@
                 `;
                 return;
             }
-
             // Group by repeat period for organized display
             const groupedByPeriod = {
                 'daily': [],
@@ -14583,7 +9082,6 @@
                 'yearly': [],
                 'unknown': []
             };
-
             seriesList.forEach(series => {
                 const period = series.repeatType;
                 if (groupedByPeriod[period]) {
@@ -14592,12 +9090,10 @@
                     groupedByPeriod['unknown'].push(series);
                 }
             });
-
             // Sort each group alphabetically by title
             Object.values(groupedByPeriod).forEach(group => {
                 group.sort((a, b) => a.title.localeCompare(b.title));
             });
-
             // Render grouped display
             let html = `
                 <div style="background: transparent; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;">
@@ -14608,7 +9104,6 @@
                         </h4>
                     </div>
             `;
-
             const periodConfig = {
                 'daily': { name: '📅 Daily', color: '#28a745' },
                 'weekly': { name: '🗓️ Weekly', color: '#007bff' },
@@ -14617,7 +9112,6 @@
                 'yearly': { name: '🎂 Yearly', color: '#dc3545' },
                 'unknown': { name: '❓ Other', color: '#6c757d' }
             };
-
             Object.entries(groupedByPeriod).forEach(([period, seriesGroup]) => {
                 if (seriesGroup.length === 0) return;
                 
@@ -14630,7 +9124,6 @@
                         </div>
                         <div>
                 `;
-
                 seriesGroup.forEach(series => {
                     html += `
                         <div style="padding: 14px 16px; border-bottom: 1px solid #f8f9fa; display: flex; align-items: center; justify-content: space-between; background: transparent; transition: background 0.2s;" 
@@ -14655,17 +9148,14 @@
                         </div>
                     `;
                 });
-
                 html += `
                         </div>
                     </div>
                 `;
             });
-
             html += `</div>`;
             container.innerHTML = html;
         }
-
         // Simple delete function for repeat series - Teux Deux style
         async function deleteRepeatSeries(taskId) {
             const representativeTask = tasks.find(t => t.id == taskId);
@@ -14709,25 +9199,21 @@
                 setTimeout(() => { window.justModifiedTasks = false; }, 5000);
             }
         }
-
         // Refresh repeat view
         function refreshRepeatView() {
             renderRepeatView();
         }
-
         // Search repeat tasks
         function searchRepeatTasks() {
             const searchInputElement = document.getElementById('repeatTaskSearch');
             if (!searchInputElement) return;
             
             const searchTerm = searchInputElement.value.toLowerCase();
-
             if (!searchTerm.trim()) {
                 // If search is empty, show all repeat tasks
                 renderRepeatView();
                 return;
             }
-
             // Filter repeat tasks based on search term (exclude EKADASI @vcal tasks)
             const filteredTasks = tasks.filter(task => 
                 ((task.repeat && task.repeat !== 'none') || 
@@ -14739,7 +9225,6 @@
                 (task.title.toLowerCase().includes(searchTerm) || 
                  (task.notes && task.notes.toLowerCase().includes(searchTerm)))
             );
-
             console.log(`🔍 Repeat search: "${searchTerm}" found ${filteredTasks.length} tasks`);
             
             // Render repeat view with filtered tasks
@@ -14752,7 +9237,6 @@
             tasks = tasksToShow;
             renderRepeatView();
             tasks = tempTasks;
-
             if (repeatTasks.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
@@ -14762,7 +9246,6 @@
                 `;
                 return;
             }
-
             // Group and render filtered tasks similar to renderRepeatView
             const groupedByTitle = {};
             repeatTasks.forEach(task => {
@@ -14772,7 +9255,6 @@
                 }
                 groupedByTitle[title].push(task);
             });
-
             const representativeTasks = [];
             const today = getLocalDateString();
             
@@ -14791,7 +9273,6 @@
                 representative._groupTasks = tasksInGroup;
                 representativeTasks.push(representative);
             });
-
             // Render search results
             let html = `
                 <div style="background: #e8f4fd; border: 1px solid #1877f2; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
@@ -14801,7 +9282,6 @@
                     </div>
                 </div>
             `;
-
             if (representativeTasks.length > 0) {
                 html += `
                     <div style="background: transparent; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden;">
@@ -14813,7 +9293,6 @@
                         </div>
                         <div style="padding: 0;">
                 `;
-
                 representativeTasks.forEach(task => {
                     const dueDateStr = task.dueDate ? formatDate(new Date(task.dueDate)) : 'No date';
                     const dueTimeStr = task.dueTime ? ` at ${formatTime(task.dueTime)}` : '';
@@ -14852,16 +9331,13 @@
                         </div>
                     `;
                 });
-
                 html += `
                         </div>
                     </div>
                 `;
             }
-
             container.innerHTML = html;
         }
-
         // Search today tasks
         function searchTodayTasks() {
             const searchInputElement = document.getElementById('todayTaskSearch');
@@ -14907,13 +9383,11 @@
             renderTodayView();
             tasks = tempTasks;
         }
-
         // Mobile search function - searches current view dynamically
         function performMobileSearch(searchTerm) {
             // Delegate to the combined filter function
             performMobileTemplateFilter();
         }
-
         // Mobile template filter function
         function performMobileTemplateFilter() {
             const templateSelect = document.getElementById('mobileTemplateFilter');
@@ -14989,7 +9463,6 @@
             
             tasks = tempTasks; // Restore original tasks
         }
-
         // Populate mobile template filter dropdown
         function populateMobileTemplateFilter() {
             const templateSelect = document.getElementById('mobileTemplateFilter');
@@ -15011,7 +9484,6 @@
                 templateSelect.appendChild(option);
             });
         }
-
         // Search week tasks
         function searchWeekTasks() {
             const searchInputElement = document.getElementById('weekTaskSearch');
@@ -15055,14 +9527,12 @@
             renderWeekView();
             tasks = tempTasks;
         }
-
         // Quick search functions for Today view
         function quickTodaySearch(term) {
             const searchInput = document.getElementById('todayTaskSearch');
             searchInput.value = term;
             searchTodayTasks();
         }
-
         function clearTodaySearch() {
             const searchInput = document.getElementById('todayTaskSearch');
             const exportBtn = document.getElementById('exportTodayFilteredBtn');
@@ -15129,14 +9599,12 @@
                 invertButton.classList.add('active');
             }
         }
-
         // Quick search functions for Week view
         function quickWeekSearch(term) {
             const searchInput = document.getElementById('weekTaskSearch');
             searchInput.value = term;
             searchWeekTasks();
         }
-
         function clearWeekSearch() {
             const searchInput = document.getElementById('weekTaskSearch');
             const exportBtn = document.getElementById('exportWeekBtn');
@@ -15153,7 +9621,6 @@
             // Clear template filter state
             clearWeekTemplateFilter();
         }
-
         // Invert Week search - show tasks NOT matching current search
         function invertWeekSearch() {
             const searchInput = document.getElementById('weekTaskSearch');
@@ -15191,7 +9658,6 @@
                 invertButton.classList.add('active');
             }
         }
-
         // Search functions for Month view
         function searchMonthTasks() {
             const searchInputElement = document.getElementById('monthTaskSearch');
@@ -15234,14 +9700,12 @@
             renderCalendarView();
             tasks = tempTasks;
         }
-
         // Quick search functions for Month view
         function quickMonthSearch(term) {
             const searchInput = document.getElementById('monthTaskSearch');
             searchInput.value = term;
             searchMonthTasks();
         }
-
         function clearMonthSearch() {
             const searchInput = document.getElementById('monthTaskSearch');
             const exportBtn = document.getElementById('exportMonthBtn');
@@ -15258,7 +9722,6 @@
             // Clear template filter state
             clearMonthTemplateFilter();
         }
-
         // Invert Month search - show tasks NOT matching current search
         function invertMonthSearch() {
             const searchInput = document.getElementById('monthTaskSearch');
@@ -15296,7 +9759,6 @@
                 invertButton.classList.add('active');
             }
         }
-
         // Week Template Filter Functions
         let activeWeekTemplateFilter = null;
         
@@ -15366,7 +9828,6 @@
                 updateWeekTemplateButtonStates(activeWeekTemplateFilter);
             }
         }
-
         // Handle mobile dropdown template filter selection for week view
         function handleMobileWeekTemplateFilter(selectedValue) {
             if (selectedValue === '') {
@@ -15375,7 +9836,6 @@
                 filterWeekByTemplate(selectedValue);
             }
         }
-
         function filterWeekByTemplate(template) {
             const allTasks = document.querySelectorAll('#weekGrid .week-task-item');
             
@@ -15407,7 +9867,6 @@
                 }
             });
         }
-
         function clearWeekTemplateFilter() {
             activeWeekTemplateFilter = null;
             
@@ -15427,7 +9886,6 @@
                 invertButton.classList.remove('active');
             }
         }
-
         function updateWeekTemplateButtonStates(activeTemplate) {
             const templateButtons = document.querySelectorAll('#weekTemplateFilters .filter-btn:not(.filter-clear):not(.filter-invert)');
             templateButtons.forEach(button => {
@@ -15441,13 +9899,11 @@
                 }
             });
         }
-
         function invertWeekTemplateFilter() {
             if (!activeWeekTemplateFilter) {
                 alert('Please select a template filter first before inverting');
                 return;
             }
-
             const allTasks = document.querySelectorAll('#weekGrid .week-task-item');
             const template = activeWeekTemplateFilter;
             
@@ -15475,7 +9931,6 @@
                 invertButton.classList.add('active');
             }
         }
-
         function showWeekNoFilterTasks() {
             // Exit filter mode completely - return to normal unfiltered state
             clearWeekTemplateFilter();
@@ -15487,7 +9942,6 @@
             // Re-render week view to normal state
             renderWeekView();
         }
-
         // Month Template Filter Functions
         let activeMonthTemplateFilter = null;
         
@@ -15534,7 +9988,6 @@
                 updateMonthTemplateButtonStates(activeMonthTemplateFilter);
             }
         }
-
         function filterMonthByTemplate(template) {
             const allTasks = document.querySelectorAll('#calendarGrid .calendar-task-item');
             
@@ -15566,7 +10019,6 @@
                 }
             });
         }
-
         function clearMonthTemplateFilter() {
             activeMonthTemplateFilter = null;
             
@@ -15586,7 +10038,6 @@
                 invertButton.classList.remove('active');
             }
         }
-
         function updateMonthTemplateButtonStates(activeTemplate) {
             const templateButtons = document.querySelectorAll('#monthTemplateFilters .filter-btn:not(.filter-clear):not(.filter-invert)');
             templateButtons.forEach(button => {
@@ -15600,13 +10051,11 @@
                 }
             });
         }
-
         function invertMonthTemplateFilter() {
             if (!activeMonthTemplateFilter) {
                 alert('Please select a template filter first before inverting');
                 return;
             }
-
             const allTasks = document.querySelectorAll('#calendarGrid .calendar-task-item');
             const template = activeMonthTemplateFilter;
             
@@ -15634,7 +10083,6 @@
                 invertButton.classList.add('active');
             }
         }
-
         function showMonthNoFilterTasks() {
             // Exit filter mode completely - return to normal unfiltered state
             clearMonthTemplateFilter();
@@ -15646,7 +10094,6 @@
             // Re-render month view to normal state
             renderCalendarView();
         }
-
         // Go to task function - navigates to the appropriate view and highlights the task
         function goToTask(taskId) {
             const task = tasks.find(t => t.id == taskId);
@@ -15654,7 +10101,6 @@
                 alert('Task not found');
                 return;
             }
-
             // Determine which view to switch to based on task date
             const today = getLocalDateString();
             const taskDate = task.dueDate;
@@ -15689,7 +10135,6 @@
                     showView('calendar');
                 }
             }
-
             // Highlight the task after switching views
             setTimeout(() => {
                 const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
@@ -15704,7 +10149,6 @@
                 }
             }, 300);
         }
-
         // Delete single repeat task instance (not the entire series)
         async function deleteSingleRepeatInstance(taskId) {
             try {
@@ -15753,7 +10197,6 @@
                 alert('❌ Error deleting task. Please try again.');
             }
         }
-
         // View all instances of a repeat series
         function viewRepeatSeries(taskId) {
             const representativeTask = tasks.find(t => t.id == taskId);
@@ -15779,7 +10222,6 @@
             // Create and show modal
             showRepeatSeriesModal(taskTitle, allTasksWithTitle, representativeTask);
         }
-
         function showRepeatSeriesModal(title, seriesTasks, representativeTask) {
             const today = getLocalDateString();
             const repeatType = representativeTask.repeat || representativeTask.repeatType || 'Unknown';
@@ -15889,7 +10331,6 @@
             
             document.body.insertAdjacentHTML('beforeend', html);
         }
-
         // Pause a repeat series (prevents generating new instances)
         function pauseRepeatSeries(taskId) {
             const representativeTask = tasks.find(t => t.id == taskId);
@@ -15910,7 +10351,6 @@
                 renderCurrentView();
             }
         }
-
         // Resume a paused repeat series
         function resumeRepeatSeries(taskId) {
             const representativeTask = tasks.find(t => t.id == taskId);
@@ -15931,7 +10371,6 @@
                 renderCurrentView();
             }
         }
-
         // Skip the next occurrence of a repeat series
         function skipNextRepeat(taskId) {
             const representativeTask = tasks.find(t => t.id == taskId);
@@ -15966,7 +10405,6 @@
                 renderCurrentView();
             }
         }
-
         // Edit repeat series settings
         function editRepeatSeries(taskId) {
             const representativeTask = tasks.find(t => t.id == taskId);
@@ -15988,7 +10426,6 @@
                 }
             }
         }
-
         // Change repeat type using dropdown
         async function changeRepeatTypeDropdown(taskId, newType) {
             console.log('=== changeRepeatTypeDropdown FUNCTION CALLED ===');
@@ -16172,7 +10609,6 @@
                 alert('❌ Error updating repeat type. Check console for details.');
             }
         }
-
         // Remove entire repeat series
         async function removeRepeatSeries(taskId) {
             try {
@@ -16243,12 +10679,10 @@
                 alert('❌ Error removing repeat series. Check console for details.');
             }
         }
-
         // Change repeat type for a task
         function changeRepeatType(taskId) {
             const task = tasks.find(t => t.id == taskId);
             if (!task) return;
-
             const newType = prompt(`Change repeat type for "${task.title}":\n\nEnter one of:\n- daily\n- weekly\n- biweekly\n- yearly\n- none (to remove repeat)\n\nCurrent: ${task.repeatType || 'none'}`, task.repeatType || 'none');
             
             if (newType !== null && newType !== task.repeatType) {
@@ -16264,12 +10698,10 @@
                 }
             }
         }
-
         // Remove repeat from a task
         function removeRepeat(taskId) {
             const task = tasks.find(t => t.id == taskId);
             if (!task) return;
-
             if (confirm(`Remove repeat setting from "${task.title}"?\n\nThis will convert it to a single task.`)) {
                 saveStateForUndo('remove repeat');
                 task.repeatType = null;
@@ -16279,7 +10711,6 @@
                 });
             }
         }
-
         // Lists Management Functions
         
         // Global variable to store list sections
@@ -16459,7 +10890,6 @@
             }
         }
         
-
         async function toggleAllSections() {
             // Check if all sections are collapsed
             const allCollapsed = listSections.every(section => section.collapsed);
@@ -16591,7 +11021,6 @@
                 renderListsView();
             }
         }
-
         async function moveListToSection(sourceSectionId, listId) {
             const sourceSection = listSections.find(s => s.id === sourceSectionId);
             if (!sourceSection) return;
@@ -16646,7 +11075,6 @@
             
             alert(`✅ List "${list.name}" moved to section "${targetSection.name}".`);
         }
-
         async function mergeListWithAnother(sourceSectionId, sourceListId) {
             const sourceSection = listSections.find(s => s.id === sourceSectionId);
             if (!sourceSection) return;
@@ -16735,7 +11163,6 @@
             
             alert(`✅ Merge complete!\n\n${mergedCount} items merged from "${sourceList.name}" to "${targetList.name}".\nSource list has been deleted.`);
         }
-
         async function duplicateList(sectionId, listId) {
             const section = listSections.find(s => s.id === sectionId);
             if (!section) return;
@@ -17037,7 +11464,6 @@
                 renderListsView(); // Update the count in main view
             }
         }
-
         async function toggleAllListItems() {
             const section = listSections.find(s => s.id == currentListSectionId);
             if (!section) return;
@@ -17058,7 +11484,6 @@
             renderListItems();
             renderListsView(); // Update the count in main view
         }
-
         // Convert list item to today task
         async function convertItemToTask(itemIndex) {
             const section = listSections.find(s => s.id == currentListSectionId);
@@ -17715,7 +12140,6 @@
                 });
             }, 100);
         }
-
         // Import TXT file - handles both structured and simple import
         function importTXTFile() {
             const importMode = document.querySelector('input[name="importMode"]:checked').value;
@@ -17931,20 +12355,17 @@
             
             alert(`✅ Simple import complete! Added ${addedCount} new items to "${list.name}" in section "${section.name}".`);
         }
-
         // Close list selection modal
         function closeListSelectionModal(event) {
             if (event && event.target !== event.currentTarget) return;
             document.getElementById('listSelectionModal').style.display = 'none';
         }
-
         // Helper function to escape HTML
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-
         // Export list to HTML
         function exportListToHTML() {
             const section = listSections.find(s => s.id == currentListSectionId);
@@ -17970,8 +12391,6 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
-
-
         // Generate HTML for list export
         function generateListHTML(sectionName, listName, items) {
             const date = new Date().toLocaleDateString();
@@ -18053,7 +12472,6 @@
         <h1>${escapeHtml(listName)}</h1>
         <div class="date">Generated on ${date}</div>
     </div>
-
     <div class="list-container">
         ${itemsHTML}
     </div>
@@ -18074,8 +12492,6 @@
                 applyTabDisplayMode(tabDisplayMode);
             }, 200);
         });
-
-
         // Group tasks by date
         function groupTasksByDate(tasks) {
             const grouped = {};
@@ -18132,7 +12548,6 @@
             
             return sortedGrouped;
         }
-
         // Render individual task card
         function renderTaskCard(task) {
             const isOverdue = task.dueDate && task.dueDate < getLocalDateString() && task.status === 'pending';
@@ -18183,7 +12598,6 @@
                 </div>
             `;
         }
-
         // Calendar rendering
         function renderCalendar() {
             const grid = document.getElementById('calendarGrid');
@@ -18428,7 +12842,6 @@
             // Update dynamic month statistics
             updateMonthStats(year, month);
         }
-
         // Update dynamic month statistics
         function updateMonthStats(year, month) {
             const monthTasks = tasks.filter(task => {
@@ -18504,7 +12917,6 @@
                 monthStats.style.background = `linear-gradient(135deg, ${gradient})`;
             }
         }
-
         // Week view rendering
         function renderWeekView() {
             const grid = document.getElementById('weekGrid');
@@ -18698,7 +13110,6 @@
             // Update dynamic week statistics
             updateWeekStats();
         }
-
         // Update dynamic week statistics
         function updateWeekStats() {
             const monday = getMonday(currentWeekDate);
@@ -18777,7 +13188,6 @@
                 weekStats.style.background = `linear-gradient(135deg, ${gradient})`;
             }
         }
-
         // Helper function to get Monday of a given week
         function getMonday(date) {
             const d = new Date(date);
@@ -18785,23 +13195,19 @@
             const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
             return new Date(d.setDate(diff));
         }
-
         // Week navigation functions
         function previousWeek() {
             currentWeekDate.setDate(currentWeekDate.getDate() - 7);
             renderWeekView();
         }
-
         function nextWeek() {
             currentWeekDate.setDate(currentWeekDate.getDate() + 7);
             renderWeekView();
         }
-
         function goToCurrentWeek() {
             currentWeekDate = new Date();
             renderWeekView();
         }
-
         // Today navigation functions
         function previousDay() {
             // TODAY VIEW: Find previous day with tasks
@@ -18831,7 +13237,6 @@
             console.log('⬅️ No previous day with tasks found, going to previous day:', getLocalDateString(searchDate));
             renderTodayView();
         }
-
         function nextDay() {
             // TODAY VIEW: Find next day with tasks
             const oldDate = new Date(currentTodayDate);
@@ -18860,7 +13265,6 @@
             console.log('➡️ No next day with tasks found, going to next day:', getLocalDateString(searchDate));
             renderTodayView();
         }
-
         // WEEK VIEW: Smart week navigation functions
         function previousWeekSmart() {
             // Find previous week with tasks
@@ -18893,7 +13297,6 @@
             // If no week with tasks found, just go to previous week
             previousWeek();
         }
-
         function nextWeekSmart() {
             // Find next week with tasks
             let searchDate = new Date(currentWeekDate);
@@ -18925,7 +13328,6 @@
             // If no week with tasks found, just go to next week
             nextWeek();
         }
-
         // MONTH VIEW: Smart month navigation functions  
         function previousMonthSmart() {
             // Find previous month with tasks
@@ -18957,7 +13359,6 @@
             // If no month with tasks found, just go to previous month
             previousMonth();
         }
-
         function nextMonthSmart() {
             // Find next month with tasks
             let searchDate = new Date(currentDate);
@@ -18988,12 +13389,10 @@
             // If no month with tasks found, just go to next month
             nextMonth();
         }
-
         function goToToday() {
             currentTodayDate = new Date();
             renderTodayView();
         }
-
         function updateCurrentTodayDisplay() {
             const displayElement = document.getElementById('currentTodayDate');
             if (displayElement) {
@@ -19085,7 +13484,6 @@
                 displayElement.textContent = `${translatedMonth} ${year}`;
             }
         }
-
         // Task operations
         async function toggleTaskStatus(taskId, event) {
             event.stopPropagation();
@@ -19106,7 +13504,6 @@
                 alert('❌ Error updating task. Please try again.');
             }
         }
-
         async function deleteTask(taskId, event) {
             if (event) event.stopPropagation();
             
@@ -19238,7 +13635,6 @@
                 alert('❌ Error deleting task. Please try again.');
             }
         }
-
         async function delayTask(taskId, days, event) {
             event.stopPropagation();
             
@@ -19484,7 +13880,6 @@
                 }
             }
         }
-
         // Delay task by hours function
         async function delayTaskByHours(taskId, hours) {
             try {
@@ -19515,10 +13910,8 @@
                 console.error('Error delaying task by hours:', error);
             }
         }
-
         // Delete task using proven Lists pattern: update array → saveTasksToServer → render
         // REMOVED DUPLICATE - using the full deleteTask function above with confirmation logic
-
         async function quickDeleteTask(taskId, event) {
             event.stopPropagation();
             
@@ -19537,7 +13930,6 @@
                 }
             }, 0);
         }
-
         // Clear everything and start fresh
         async function clearEverythingAndStartFresh() {
             const confirmation = confirm('🔄 This will delete ALL local data and start completely fresh. Continue?');
@@ -19567,7 +13959,6 @@
                 }
             }
         }
-
         async function clearAllTasks() {
             // First warning
             const firstConfirmation = confirm('⚠️ WARNING: This will DELETE ALL your tasks, events, and templates FOREVER!\n\nThis action CANNOT be undone!\n\nAre you absolutely sure you want to continue?');
@@ -19625,7 +14016,6 @@
                 }
             }
         }
-
         function duplicateTask(taskId, event) {
             event.stopPropagation();
             console.log('🔄 Duplicating task with ID:', taskId, typeof taskId);
@@ -19663,7 +14053,6 @@
             
             console.log('✅ Task duplicated successfully:', newTask.title);
         }
-
         // Task editing
         function editTask(taskId, event) {
             console.log('🔄 editTask called with taskId:', taskId);
@@ -19811,13 +14200,11 @@
                 }
             }, 100); // Small delay to ensure modal is fully displayed
         }
-
         function closeTaskModal(event) {
             if (event && event.target !== event.currentTarget) return;
             document.getElementById('taskModal').style.display = 'none';
             currentEditTaskId = null;
         }
-
         async function deleteTaskFromModal() {
             if (!currentEditTaskId) return;
             
@@ -19905,7 +14292,6 @@
                 alert(`❌ Error deleting task: ${error.message}`);
             }
         }
-
         let isSaving = false; // Prevent double saves
         
         async function saveTaskEdit() {
@@ -20254,8 +14640,6 @@
                 isSaving = false;
             }
         }
-
-
         // Undo functionality
         function saveStateForUndo(action, task = null) {
             try {
@@ -20305,7 +14689,6 @@
                 // Don't block the main operation if undo save fails
             }
         }
-
         async function performUndo() {
             console.log('🎯 performUndo called, undo stack length:', undoStack.length);
             if (undoStack.length === 0) {
@@ -20313,7 +14696,6 @@
                 alert('Nothing to undo');
                 return;
             }
-
             const lastState = undoStack.pop();
             console.log('🎯 Restoring state:', lastState.action);
             
@@ -20370,7 +14752,6 @@
                 undoStack.push(lastState);
             }
         }
-
         function showUndoNotification(message) {
             // Create a temporary notification
             const notification = document.createElement('div');
@@ -20402,7 +14783,6 @@
                 }, 300);
             }, 3000);
         }
-
         // Show All Tasks view filtered by specific date
         function showAllTasksForDate(dateStr) {
             // Switch to All Tasks view
@@ -20420,7 +14800,6 @@
                 }, 200);
             }
         }
-
         // Focus on the specific date in All Tasks view
         function focusOnDateInAllTasks(dateStr) {
             // Find the task group that contains tasks for this date
@@ -20474,8 +14853,6 @@
                 }
             }
         }
-
-
         // Go to search facility with cursor ready
         function goToSearch() {
             // Check if we're already in a view that has search
@@ -20492,7 +14869,6 @@
                 // Focus will be set automatically by showView function
             }
         }
-
         // Date adjustment functions for edit modal
         function adjustTaskDate(days) {
             const dateInput = document.getElementById('editTaskDate');
@@ -20545,7 +14921,6 @@
             // Update the display
             updateDateTimeDisplay();
         }
-
         function setTaskToToday() {
             const dateInput = document.getElementById('editTaskDate');
             const timeInput = document.getElementById('editTaskTime');
@@ -20587,13 +14962,11 @@
             // Update the display
             updateDateTimeDisplay();
         }
-
         // Calendar navigation
         function previousMonth() {
             currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
             renderCalendar();
         }
-
         function nextMonth() {
             currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
             renderCalendar();
@@ -20603,7 +14976,6 @@
             currentCalendarDate = new Date();
             renderCalendar();
         }
-
         // Drag and drop
         function handleDragStart(e) {
             const taskIdStr = e.target.dataset.taskId;
@@ -20653,7 +15025,6 @@
                 calendarGrid.classList.add('dragging-active');
             }
         }
-
         function handleDragEnd(e) {
             e.target.classList.remove('dragging');
             draggedTask = null;
@@ -20671,12 +15042,10 @@
                 calendarGrid.classList.remove('dragging-active');
             }
         }
-
         function handleDragOver(e) {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
         }
-
         function handleDragEnter(e) {
             e.preventDefault();
             if (draggedTask && (e.currentTarget.classList.contains('calendar-day') || e.currentTarget.classList.contains('week-day'))) {
@@ -20687,7 +15056,6 @@
                 e.currentTarget.classList.add('drop-target');
             }
         }
-
         function handleDragLeave(e) {
             // Only remove drop-target if we're truly leaving the calendar day
             // Check if the related target is outside the current target
@@ -20700,7 +15068,6 @@
                 e.currentTarget.classList.remove('drop-target');
             }
         }
-
         async function handleDrop(e) {
             e.preventDefault();
             e.currentTarget.classList.remove('drop-target');
@@ -20787,12 +15154,10 @@
             }
             // } // Removed confirm dialog
         }
-
         // Utility functions
         function getTasksForDate(dateStr) {
             return tasks.filter(task => task.dueDate === dateStr);
         }
-
         function formatDate(dateStr) {
             if (!dateStr) return 'No date';
             const date = new Date(dateStr);
@@ -20802,7 +15167,6 @@
                 day: 'numeric'
             });
         }
-
         function formatDateForFilename(dateStr) {
             if (!dateStr) return 'no-date';
             const date = new Date(dateStr);
@@ -20811,7 +15175,6 @@
             const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         }
-
         function formatDateForDisplay(dateStr) {
             if (!dateStr) return currentLanguage === 'es' ? 'Sin fecha' : 'No date';
             const date = new Date(dateStr);
@@ -20841,7 +15204,6 @@
                 }
             }
         }
-
         function formatDateHeader(dateStr) {
             const date = new Date(dateStr);
             const today = new Date();
@@ -20869,12 +15231,10 @@
                 }
             }
         }
-
         function formatTime(timeStr) {
             if (!timeStr) return '';
             return timeStr; // Display in 24-hour format
         }
-
         // Utility function to get local date string consistently (avoids timezone issues)
         function getLocalDateString(date = new Date()) {
             const year = date.getFullYear();
@@ -20882,7 +15242,6 @@
             const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         }
-
         // Initialize natural language processing event listeners
         function initializeNaturalLanguageProcessing() {
             const taskTitleInput = document.getElementById('editTaskTitle');
@@ -20977,7 +15336,6 @@
                 }, 50);
             });
         }
-
         // Natural language parsing for task input
         function parseNaturalLanguage(input) {
             if (!input || typeof input !== 'string') return null;
@@ -21391,13 +15749,11 @@
             
             return null;
         }
-
         // Function to detect and update existing repeat tasks (disabled)
         async function updateExistingRepeatTasks() {
             console.log('🔄 Repeat task detection not available without SQLite database');
             alert('🔄 Repeat task auto-detection is not available in this version.\nYou can manually set repeat patterns when editing tasks.');
         }
-
         // Group management
         function toggleGroup(dateKey) {
             const tasksContainer = document.getElementById(`tasks-${dateKey}`);
@@ -21415,7 +15771,6 @@
                 }
             }
         }
-
         function expandAllGroups() {
             document.querySelectorAll('[id^="tasks-"]').forEach(container => {
                 container.classList.add('expanded');
@@ -21424,7 +15779,6 @@
                 arrow.classList.add('expanded');
             });
         }
-
         function collapseAllGroups() {
             document.querySelectorAll('[id^="tasks-"]').forEach(container => {
                 container.classList.remove('expanded');
@@ -21433,7 +15787,6 @@
                 arrow.classList.remove('expanded');
             });
         }
-
         // Statistics
         function renderStats() {
             const total = tasks.length;
@@ -21476,11 +15829,9 @@
             document.getElementById('productivityInsights').innerHTML = insights
                 .map(insight => `<div style="padding: 10px; background: #f8f9fa; border-radius: 6px; margin-bottom: 10px;">${insight}</div>`)
                 .join('');
-
             // Update backup statistics
             renderBackupStats();
         }
-
         function showBackupStats() {
             try {
                 const settings = getBackupSettings();
@@ -21520,7 +15871,6 @@
                 alert('❌ Error al mostrar estadísticas de respaldos.');
             }
         }
-
         function renderBackupStats() {
             try {
                 // Update backup counts
@@ -21528,7 +15878,6 @@
                 document.getElementById('weeklyBackups').textContent = backupSettings.backupCounts.weekly?.length || 0;
                 document.getElementById('monthlyBackups').textContent = backupSettings.backupCounts.monthly?.length || 0;
                 document.getElementById('manualBackups').textContent = backupSettings.backupCounts.manualExports?.length || 0;
-
                 // Format last backup dates
                 const lastBackupDates = document.getElementById('lastBackupDates');
                 const dates = [];
@@ -21547,28 +15896,22 @@
                     const date = new Date(backupSettings.lastMonthlyBackup);
                     dates.push(`📅 <strong>Monthly:</strong> ${formatBackupDate(date)}`);
                 }
-
                 // Add next scheduled times
                 const now = new Date();
                 const tomorrow2AM = new Date(now);
                 tomorrow2AM.setDate(tomorrow2AM.getDate() + 1);
                 tomorrow2AM.setHours(2, 0, 0, 0);
                 dates.push(`⏰ <strong>Next Daily:</strong> ${formatBackupDate(tomorrow2AM)}`);
-
                 if (dates.length === 0) {
                     dates.push('📅 No backups created yet');
                 }
-
                 lastBackupDates.innerHTML = dates.join('<br>');
-
                 // Render backup files list
                 renderBackupFilesList();
-
             } catch (error) {
                 console.error('Error rendering backup stats:', error);
             }
         }
-
         function formatBackupDate(date) {
             if (!date || isNaN(date.getTime())) return 'Never';
             
@@ -21577,7 +15920,6 @@
             const diffDays = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60 * 24));
             const diffHours = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60));
             const diffMinutes = Math.floor(Math.abs(diffMs) / (1000 * 60));
-
             let timeAgo = '';
             if (diffMs > 0) {
                 // Future date
@@ -21602,21 +15944,17 @@
                     timeAgo = 'Just now';
                 }
             }
-
             return `${date.toLocaleDateString()} ${date.toLocaleTimeString()} (${timeAgo})`;
         }
-
         function renderBackupFilesList() {
             const container = document.getElementById('backupFilesList');
             let html = '';
-
             const backupTypes = [
                 { key: 'daily', label: '📅 Daily Backups', icon: '📅' },
                 { key: 'weekly', label: '📄 Weekly Backups', icon: '📄' },
                 { key: 'monthly', label: '📆 Monthly Backups', icon: '📆' },
                 { key: 'manualExports', label: '📤 Manual Exports', icon: '📤' }
             ];
-
             backupTypes.forEach(type => {
                 const files = backupSettings.backupCounts[type.key] || [];
                 if (files.length > 0) {
@@ -21633,7 +15971,6 @@
                         html += `<span style="font-size: 11px; color: #868e96;">  Created: ${formatBackupDate(date)}</span>`;
                         html += `</div>`;
                     });
-
                     if (files.length > 3) {
                         html += `<div style="margin-left: 15px; color: #868e96; font-size: 11px;">... and ${files.length - 3} more</div>`;
                     }
@@ -21644,14 +15981,11 @@
                     html += `</div>`;
                 }
             });
-
             if (html === '') {
                 html = '<div style="color: #6c757d; text-align: center; padding: 20px;">No backup files tracked yet</div>';
             }
-
             container.innerHTML = html;
         }
-
         // Export/Import
         async function exportTasks() {
             try {
@@ -21693,7 +16027,6 @@
                 alert('❌ Error exporting tasks.');
             }
         }
-
         // Automatic Backup System
         let backupSettings = {
             lastTaskCountBackup: 0,
@@ -21710,7 +16043,6 @@
                 manualExports: []
             }
         };
-
         function loadBackupSettings() {
             try {
                 console.log('📥 Loading backup settings from localStorage...');
@@ -21750,7 +16082,6 @@
                 console.error('Error loading backup settings:', error);
             }
         }
-
         function saveBackupSettings() {
             try {
                 console.log('💾 Saving backup settings...');
@@ -21802,7 +16133,6 @@
                 console.error('Error saving backup settings:', error);
             }
         }
-
         async function createAutomaticBackup(reason) {
             try {
                 console.log('🔄 Creating automatic backup for reason:', reason);
@@ -21829,11 +16159,9 @@
                 };
                 
                 console.log('📦 Backup data size:', JSON.stringify(exportData).length, 'characters');
-
                 const dataStr = JSON.stringify(exportData, null, 2);
                 const blob = new Blob([dataStr], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
-
                 // Organize by backup type and date
                 let folderPath = 'gtd-backups/';
                 let backupType;
@@ -21854,9 +16182,7 @@
                     folderPath += `other/${dateFolder}/`;
                     backupType = 'other';
                 }
-
                 const filename = `auto-backup-${reason}-${timestamp}.json`;
-
                 const jsonLink = document.createElement('a');
                 jsonLink.href = url;
                 jsonLink.download = filename;
@@ -21869,12 +16195,10 @@
                 
                 URL.revokeObjectURL(url);
                 console.log('✅ Backup download completed');
-
                 // Track backup for cleanup management
                 if (backupType && backupSettings.backupCounts[backupType]) {
                     trackBackupFile(backupType, filename, timestamp);
                 }
-
                 console.log(`✅ Automatic backup created: ${reason} -> Downloads folder`);
                 return true;
             } catch (error) {
@@ -21882,7 +16206,6 @@
                 return false;
             }
         }
-
         function trackBackupFile(backupType, filePath, timestamp) {
             try {
                 // Add new backup to tracking
@@ -21891,12 +16214,10 @@
                     timestamp: timestamp,
                     created: new Date().toISOString()
                 });
-
                 // Sort by timestamp (newest first)
                 backupSettings.backupCounts[backupType].sort((a, b) => 
                     new Date(b.timestamp) - new Date(a.timestamp)
                 );
-
                 // Keep only the latest maxBackupFiles
                 if (backupSettings.backupCounts[backupType].length > backupSettings.maxBackupFiles) {
                     const toRemove = backupSettings.backupCounts[backupType].splice(backupSettings.maxBackupFiles);
@@ -21908,7 +16229,6 @@
                     // Show notification about cleanup
                     showBackupCleanupNotification(backupType, toRemove.length);
                 }
-
                 saveBackupSettings();
                 
                 // Update backup stats if stats view is currently visible
@@ -21919,7 +16239,6 @@
                 console.error('Error tracking backup file:', error);
             }
         }
-
         function showBackupCleanupNotification(backupType, removedCount) {
             const notification = document.createElement('div');
             notification.style.cssText = `
@@ -21956,7 +16275,6 @@
                 }
             }, 7000);
         }
-
         function checkTaskCountBackup() {
             const currentTaskCount = tasks.length;
             if (currentTaskCount >= backupSettings.nextTaskCountBackup) {
@@ -21969,7 +16287,6 @@
                 showBackupNotification(`Automatic backup created: ${currentTaskCount} tasks reached`);
             }
         }
-
         function checkWeeklyBackup() {
             const settings = getBackupSettings();
             if (!settings.enabled || !settings.weekly) return;
@@ -21988,7 +16305,6 @@
                 showBackupNotification('Weekly backup created automatically');
             }
         }
-
         function checkDailyBackup() {
             const settings = getBackupSettings();
             if (!settings.enabled || !settings.daily) return;
@@ -22021,7 +16337,6 @@
                 showBackupNotification('Daily backup created automatically');
             }
         }
-
         function checkMonthlyBackup() {
             const settings = getBackupSettings();
             if (!settings.enabled || !settings.monthly) return;
@@ -22040,13 +16355,11 @@
                 showBackupNotification('Monthly backup created automatically');
             }
         }
-
         // Manual test backup function (for debugging)
         window.testBackup = function() {
             console.log('🧪 Testing manual backup creation...');
             createAutomaticBackup('manual-test');
         };
-
         // Test all automatic backup types
         window.testAllBackups = function() {
             console.log('🧪 Testing ALL backup types...');
@@ -22061,7 +16374,6 @@
             setTimeout(() => createAutomaticBackup('test-monthly'), 2000);
             setTimeout(() => createAutomaticBackup('test-task-count'), 3000);
         };
-
         // Force check of automatic backup functions
         window.testBackupChecks = function() {
             console.log('🧪 Testing backup check functions...');
@@ -22069,7 +16381,6 @@
             setTimeout(() => checkWeeklyBackup(), 1000);
             setTimeout(() => checkMonthlyBackup(), 2000);
         };
-
         // Schedule daily backup checks
         function scheduleBackupChecks() {
             // Check backups every 2 hours to reduce frequency
@@ -22086,7 +16397,6 @@
                 checkAutoPrintToday(); // Also check auto print on load
             }, 200); // Quick check after page load - reduced from 5000ms
         }
-
         function showBackupNotification(message) {
             // Create notification element
             const notification = document.createElement('div');
@@ -22129,13 +16439,11 @@
                 }, 300);
             }, 5000);
         }
-
         function checkAllBackups() {
             checkDailyBackup();
             checkWeeklyBackup();
             checkMonthlyBackup();
         }
-
         // Auto print today's schedule at 9:00 AM
         // Render undo view with list of recent changes
         function renderUndoView() {
@@ -22215,17 +16523,14 @@
                 `;
             }).join('');
         }
-
         function renderSettingsView() {
             console.log('🔧 renderSettingsView called');
             loadSettingsValues();
         }
-
         // Refresh undo view
         function refreshUndoView() {
             renderUndoView();
         }
-
         // Undo to a specific point in history
         async function undoToPoint(targetIndex) {
             if (targetIndex < 0 || targetIndex >= undoStack.length) {
@@ -22268,7 +16573,6 @@
                 alert('❌ Error performing undo. Please try again.');
             }
         }
-
         // Helper function to check if a task is part of a repeat series
         function isTaskPartOfRepeatSeries(task) {
             if (!task || !task.title) return false;
@@ -22279,7 +16583,6 @@
             // Check if at least one task in the series has a proper repeat value
             return tasksWithSameTitle.some(t => t.repeat && t.repeat !== 'none');
         }
-
         // Save auto-print time preference
         function saveAutoPrintTime() {
             // Try to get both possible elements
@@ -22298,7 +16601,6 @@
                 console.log('Auto-print time saved:', selectedTime);
             }
         }
-
         // Load auto-print time preference
         function loadAutoPrintTime() {
             const savedTime = localStorage.getItem('autoPrintTime') || 'disabled';
@@ -22316,7 +16618,6 @@
             
             return savedTime;
         }
-
         // Get time window from preference
         function getAutoPrintTimeWindow() {
             const timeWindow = localStorage.getItem('autoPrintTime') || 'disabled';
@@ -22328,7 +16629,6 @@
             const [start, end] = timeWindow.split('-').map(Number);
             return { start, end };
         }
-
         function checkAutoPrintToday() {
             const now = new Date();
             const currentHour = now.getHours();
@@ -22343,7 +16643,6 @@
             
             // Check if current time is within the selected window
             const isAutoPrintTime = currentHour >= timeWindow.start && currentHour < timeWindow.end;
-
         // Toggle auto-print controls based on checkbox
         function toggleAutoPrint() {
             const checkbox = document.getElementById('autoPrintEnabled');
@@ -22369,7 +16668,6 @@
                 }
             }
         }
-
         // Set current time and activate auto-print
         function activateCurrentTime() {
             const now = new Date();
@@ -22509,10 +16807,8 @@
         <h1>Today's Schedule</h1>
         <div class="date">${dateString}</div>
     </div>
-
     <div class="content">
 `;
-
                 if (todayTasks.length === 0) {
                     htmlContent += `
         <div class="time-block">
@@ -22583,11 +16879,9 @@
             📄 Automatically generated at 9:00 AM
         </div>
     </div>
-
 </body>
 </html>
 `;
-
                 // Create and download file
                 const blob = new Blob([htmlContent], { type: 'text/html' });
                 const url = URL.createObjectURL(blob);
@@ -22653,7 +16947,6 @@
                 }, 300);
             }, 5000);
         }
-
         // Inline Notification System
         function showInlineNotification(message, type = 'info') {
             // Remove any existing notifications
@@ -22768,7 +17061,6 @@
             `;
             document.head.appendChild(style);
         }
-
         // Keyboard-Only Mode Functions
         function toggleKeyboardOnlyMode() {
             const checkbox = document.getElementById('keyboardOnlyMode');
@@ -22900,7 +17192,6 @@
             
         }
         
-
         // Tab Display Mode Functions
         function saveTabDisplayMode() {
             const select = document.getElementById('tabDisplaySelect');
@@ -22979,7 +17270,6 @@
                 }
             });
         }
-
         // Mobile UI Version System
         function toggleMobileUIVersion() {
             const select = document.getElementById('mobileUIVersion');
@@ -23032,14 +17322,12 @@
                 }, 100);
             }, 100);
         }
-
         // Trash Warning System
         function checkTrashWarning() {
             if (trash.length >= 200) {
                 showTrashWarning();
             }
         }
-
         function showTrashWarning() {
             const notification = document.createElement('div');
             notification.style.cssText = `
@@ -23078,7 +17366,6 @@
                 }
             }, 10000);
         }
-
         // Export all data as human-readable text file
         function exportTasksAsText() {
             // Confirmation dialog
@@ -23185,7 +17472,6 @@
                 alert('❌ Error exporting text file.');
             }
         }
-
         function importTextFile() {
             const input = document.createElement('input');
             input.type = 'file';
@@ -23238,11 +17524,9 @@
             input.click();
             document.body.removeChild(input);
         }
-
         function importTasks() {
             showImportOptionsModal();
         }
-
         function showImportOptionsModal() {
             const modal = document.createElement('div');
             modal.id = 'importOptionsModal';
@@ -23349,7 +17633,6 @@
                 };
             });
         }
-
         // Import/Export Modal Functions
         // Dropdown functions for Import/Export buttons
         function toggleImportDropdown() {
@@ -23362,7 +17645,6 @@
             // Toggle import dropdown
             dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
         }
-
         function toggleExportDropdown() {
             const dropdown = document.getElementById('exportDropdown');
             const importDropdown = document.getElementById('importDropdown');
@@ -23373,7 +17655,6 @@
             // Toggle export dropdown
             dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
         }
-
         function selectImportFormat(format) {
             // Close dropdown
             document.getElementById('importDropdown').style.display = 'none';
@@ -23385,7 +17666,6 @@
                 document.getElementById('importTextFile').click();
             }
         }
-
         function selectExportFormat(format) {
             // Close dropdown
             document.getElementById('exportDropdown').style.display = 'none';
@@ -23397,7 +17677,6 @@
                 exportTasksAsText(); // Call the existing text export function
             }
         }
-
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
             const importDropdown = document.getElementById('importDropdown');
@@ -23416,7 +17695,6 @@
                 headerImportDropdown.style.display = 'none';
             }
         });
-
         // Utility function to show loading indicator
         function showLoadingIndicator(title = 'Processing...') {
             const loadingDiv = document.createElement('div');
@@ -23450,7 +17728,6 @@
             document.body.appendChild(loadingDiv);
             return loadingDiv;
         }
-
         // Utility function to hide loading indicator
         function hideLoadingIndicator() {
             const loadingIndicator = document.getElementById('importLoadingIndicator');
@@ -23458,7 +17735,6 @@
                 document.body.removeChild(loadingIndicator);
             }
         }
-
         // Utility function to update progress text
         function updateProgress(text) {
             const progressElement = document.getElementById('importProgress');
@@ -23466,7 +17742,6 @@
                 progressElement.textContent = text;
             }
         }
-
         async function handleJsonImportFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -23650,7 +17925,6 @@
             
             event.target.value = '';
         }
-
         async function handleTextImportFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -23750,7 +18024,6 @@
             
             event.target.value = '';
         }
-
         // Move incomplete tasks from previous days to today (except Events)
         async function moveIncompleteTasks() {
             console.log('⏭️ moveIncompleteTasks - checking for tasks to move to today');
@@ -23862,7 +18135,6 @@
                 return 0;
             }
         }
-
         // Auto-move incomplete tasks on app load
         async function checkAndMoveIncompleteTasks() {
             try {
@@ -23907,10 +18179,7 @@
                 console.error('❌ Error checking incomplete tasks:', error);
             }
         }
-
         // Navigate to add task and focus on input
-
-
         // Search functionality
         function performSearch() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -23945,7 +18214,6 @@
                 exportBtn.style.display = 'none';
             }
         }
-
         function renderSearchResults(filteredTasks) {
             const searchResults = document.getElementById('searchResults');
             
@@ -23980,16 +18248,13 @@
             
             searchResults.innerHTML = resultsHTML;
         }
-
         // All Tasks Search and Selection Functionality
         let selectedTasks = new Set();
         let currentFilteredTasks = []; // Store currently filtered tasks for printing
-
         function renderAllTasksView() {
             showView('all');
             performAllTasksSearch();
         }
-
         function performAllTasksSearch() {
             
             const searchInputElement = document.getElementById('allTasksSearchInput');
@@ -24049,7 +18314,6 @@
             
             renderTasksWithSelection(filteredTasks);
         }
-
         // Print current search results to HTML
         function printSearchResults() {
             
@@ -24196,7 +18460,6 @@
         <br><strong>📊 Results Found:</strong> ${totalTasks} task${totalTasks !== 1 ? 's' : ''}
     </div>
 `;
-
             // Add tasks by groups
             Object.keys(taskGroups).forEach(dateKey => {
                 const groupData = taskGroups[dateKey];
@@ -24258,7 +18521,6 @@
                 newWindow.print();
             }, 1000);
         }
-
         function renderTasksWithSelection(filteredTasks) {
             
             const container = document.getElementById('tasksContainer');
@@ -24304,7 +18566,6 @@
             
             container.innerHTML = html;
         }
-
         function renderSelectableTaskCard(task) {
             const isEvent = task.isEvent;
             const isCompleted = task.status === 'completed';
@@ -24340,7 +18601,6 @@
                 </div>
             `;
         }
-
         function getGroupTitle(dateKey) {
             if (dateKey === 'no-date') return 'No Due Date';
             if (dateKey === 'overdue') return 'Overdue Tasks';
@@ -24351,7 +18611,6 @@
             if (dateKey === 'future') return 'Future';
             return dateKey;
         }
-
         function toggleTaskSelection(taskId) {
             // Task selection toggled
             
@@ -24379,7 +18638,6 @@
             
             updateSelectionUI();
         }
-
         function toggleSelectAll() {
             const selectAllCheckbox = document.getElementById('selectAllTasks');
             const allTaskCheckboxes = document.querySelectorAll('.task-card-checkbox');
@@ -24409,7 +18667,6 @@
             // Selection completed
             updateSelectionUI();
         }
-
         function updateSelectionUI() {
             const selectedCount = selectedTasks.size;
             const selectAllCheckbox = document.getElementById('selectAllTasks');
@@ -24552,7 +18809,6 @@
             
             console.log('🎯 updateSelectionUI called, selectedCount:', selectedCount);
         }
-
         // Create keyboard hints element if it doesn't exist
         function createKeyboardHints() {
             let keyboardHints = document.getElementById('keyboardHints');
@@ -24577,7 +18833,6 @@
             }
             return keyboardHints;
         }
-
         // Helper function to get selected task IDs for bulk operations
         function getSelectedTaskIds() {
             return Array.from(selectedTasks);
@@ -24596,7 +18851,6 @@
             
             updateSelectionUI();
         }
-
         async function deleteSelectedTasks() {
             // Preserve selected tasks before any operations that might clear them
             window.bulkDeleteSelectedTasks = new Set([...selectedTasks]);
@@ -24690,7 +18944,6 @@
                 window.bulkDeleteSelectedTasks = null;
             }
         }
-
         function delaySelectedTasks(days) {
             // Preserve selected tasks before any operations that might clear them
             window.bulkDelaySelectedTasks = new Set([...selectedTasks]);
@@ -24798,7 +19051,6 @@
                 renderCurrentView();
             }
         }
-
         // Optimistic feedback system
         function showOptimisticFeedback(message, type = 'info', duration = 3000) {
             // Remove existing feedback
@@ -25035,10 +19287,8 @@
                 closeBulkTimeModal();
             }
         }
-
         // Simple Trash System
         var trash = [];
-
         function moveToTrash(taskData) {
             const tasksToTrash = Array.isArray(taskData) ? taskData : [taskData];
             
@@ -25057,14 +19307,12 @@
             // Update trash counter
             updateTrashCounter();
         }
-
         function updateTrashCounter() {
             const counter = document.getElementById('trashCount');
             if (counter) {
                 counter.textContent = trash.length;
             }
         }
-
         function loadTrash() {
             try {
                 const saved = localStorage.getItem('gtd_trash');
@@ -25076,17 +19324,14 @@
                 trash = [];
             }
         }
-
         function openTrash() {
             document.getElementById('trashModal').style.display = 'block';
             renderTrash();
         }
-
         function closeTrash(event) {
             if (event && event.target !== event.currentTarget) return;
             document.getElementById('trashModal').style.display = 'none';
         }
-
         function renderTrash() {
             const container = document.getElementById('trashItems');
             const stats = document.getElementById('trashStats');
@@ -25109,11 +19354,9 @@
                 emptyTrashBtn.style.display = 'none';
                 return;
             }
-
             // Show control buttons
             restoreAllBtn.style.display = 'inline-block';
             emptyTrashBtn.style.display = 'inline-block';
-
             // Render trash items with pagination for large lists
             const itemsPerPage = 50; // Limit to 50 items per page to prevent performance issues
             const currentPage = window.trashCurrentPage || 1;
@@ -25170,7 +19413,6 @@
                 container.innerHTML = html;
             }
         }
-
         function changeTrashPage(newPage) {
             const totalPages = Math.ceil(trash.length / 50);
             if (newPage < 1 || newPage > totalPages) return;
@@ -25178,17 +19420,14 @@
             window.trashCurrentPage = newPage;
             renderTrash();
         }
-
         async function restoreTask(trashId) {
             const index = trash.findIndex(item => item.trashId === trashId);
             if (index === -1) return;
-
             const task = trash[index];
             
             // Remove trash metadata
             delete task.deletedAt;
             delete task.trashId;
-
             try {
                 // Add back to tasks
                 await saveTask(task);
@@ -25208,11 +19447,9 @@
                 alert('❌ Error restoring task');
             }
         }
-
         function deleteForever(trashId) {
             const index = trash.findIndex(item => item.trashId === trashId);
             if (index === -1) return;
-
             const task = trash[index];
             if (confirm(`Permanently delete "${task.title}"? This cannot be undone.`)) {
                 trash.splice(index, 1);
@@ -25221,7 +19458,6 @@
                 renderTrash();
             }
         }
-
         async function restoreAllTasks() {
             if (trash.length === 0) return;
             
@@ -25250,7 +19486,6 @@
                 }
             }
         }
-
         function emptyTrash() {
             if (trash.length === 0) return;
             
@@ -25262,7 +19497,6 @@
                 alert('🗑️ Trash emptied');
             }
         }
-
         // FILE SYSTEM BACKUP SYSTEM - NO localStorage
         function createEmergencyBackup() {
             // Prevent creating backups too frequently (minimum 3 minutes between manual backups)
@@ -25317,13 +19551,11 @@
             
             return backupData;
         }
-
         function getEmergencyBackups() {
             // No longer used - backups are now file-based
             console.log('ℹ️ Emergency backups are now file-based. Use import function to restore from Downloads folder.');
             return [];
         }
-
         function getAllBackups() {
             try {
                 // Get manual emergency backups
@@ -25332,25 +19564,21 @@
                     type: 'manual',
                     typeLabel: 'Manual'
                 }));
-
                 // Get automatic backups
                 const automaticBackups = getAutomaticBackups().map(backup => ({
                     ...backup,
                     type: 'automatic',
                     typeLabel: backup.backupType ? backup.backupType.charAt(0).toUpperCase() + backup.backupType.slice(1) : 'Auto'
                 }));
-
                 // Combine and sort by timestamp (newest first)
                 const allBackups = [...emergencyBackups, ...automaticBackups];
                 allBackups.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
                 return allBackups;
             } catch (error) {
                 console.error('Error loading all backups:', error);
                 return [];
             }
         }
-
         function getAutomaticBackups() {
             try {
                 const backupsData = localStorage.getItem('gtd_automatic_backups');
@@ -25360,7 +19588,6 @@
                 return [];
             }
         }
-
         function storeAutomaticBackup(backupType) {
             try {
                 const newBackup = {
@@ -25374,28 +19601,21 @@
                     trash: JSON.parse(JSON.stringify(trash || [])),
                     forceCloudOverwrite: true // Special flag to ensure backup restore always overwrites cloud data
                 };
-
                 // Get existing automatic backups
                 const existingBackups = getAutomaticBackups();
-
                 // Add new backup to the beginning
                 const allBackups = [newBackup, ...existingBackups];
-
                 // Keep only the latest 10 automatic backups (2 of each type approximately)
                 const latestBackups = allBackups.slice(0, 10);
-
                 // Save to localStorage
                 localStorage.setItem('gtd_automatic_backups', JSON.stringify(latestBackups));
-
                 console.log(`💾 Automatic ${backupType} backup stored`);
                 return newBackup;
-
             } catch (error) {
                 console.error('Error storing automatic backup:', error);
                 return null;
             }
         }
-
         function restoreFromEmergencyBackup() {
             // Open file selection dialog for backup restore
             const input = document.createElement('input');
@@ -25437,7 +19657,6 @@
             input.click();
             document.body.removeChild(input);
         }
-
         function showBackupSelectionModal() {
             const backups = getAllBackups();
             const backupsListContainer = document.getElementById('backupsList');
@@ -25538,7 +19757,6 @@
             
             document.getElementById('backupSelectionModal').style.display = 'block';
         }
-
         function selectBackupToRestore(backupId) {
             const backups = getAllBackups();
             const backup = backups.find(b => b.id === backupId);
@@ -25585,13 +19803,11 @@
                 alert(translateText('❌ Error restoring backup. Please try again.'));
             }
         }
-
         function closeBackupSelection(event) {
             if (!event || event.target === document.getElementById('backupSelectionModal')) {
                 document.getElementById('backupSelectionModal').style.display = 'none';
             }
         }
-
         async function restoreFromBackupData(backupData) {
             try {
                 // Check for special backup flag
@@ -25743,7 +19959,6 @@
                 window.backupRestoreInProgress = false;
             }
         }
-
         function getTimeAgo(timestamp) {
             const now = new Date();
             const backupDate = new Date(timestamp);
@@ -25760,9 +19975,7 @@
                 return `${diffDays}d ago`;
             }
         }
-
         // Removed automatic emergency backups - only manual quick backups now
-
         // Create emergency backup only on actual page close (not refresh)
         let hasUserInteracted = false;
         document.addEventListener('click', () => { hasUserInteracted = true; }, { once: true });
@@ -25782,7 +19995,6 @@
                 }
             }
         });
-
         // Function to convert URLs to clickable links and process checkbox lists
         function getTruncatedNotes(notes, maxLines) {
             if (!notes) return '';
@@ -25798,7 +20010,6 @@
             const truncatedText = lines.slice(0, maxLines).join('\n');
             return makeLinksClickable(truncatedText) + '<span style="color: #999; font-style: italic;">...</span>';
         }
-
         // Function to extract tags from text and return clean text without tags
         function extractTagsAndCleanText(text) {
             if (!text) return { cleanText: '', tags: [] };
@@ -25826,7 +20037,6 @@
             const tagIndicator = hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : '';
             return `${prefix}${makeLinksClickable(cleanText)}${tagIndicator}${suffix}`;
         }
-
         function makeLinksClickable(text) {
             if (!text) return '';
             
@@ -25875,7 +20085,6 @@
             return text;
         }
         
-
         // Notes Preview Functions
         function switchNotesMode(mode) {
             const textarea = document.getElementById('editTaskNotes');
@@ -25907,7 +20116,6 @@
                 previewBtn.style.background = '#1877f2';
             }
         }
-
         function updateNotesPreview() {
             const textarea = document.getElementById('editTaskNotes');
             const preview = document.getElementById('notesPreview');
@@ -25922,8 +20130,6 @@
                 }
             }
         }
-
-
         function toggleCheckboxInNotes(checkbox) {
             // Find the parent task element to get the task ID
             const taskElement = checkbox.closest('[data-task-id]');
@@ -25970,11 +20176,9 @@
                 checkbox.checked = !checkbox.checked;
             });
         }
-
         function escapeRegExp(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
-
         // Update the original renderTasks function to use the new search functionality
         function renderTasks(viewType) {
             
@@ -26046,10 +20250,8 @@
             
             container.innerHTML = html;
         }
-
         // Current active template filter
         let activeTemplateFilter = null;
-
         // Filter Today view tasks by template (visual only, doesn't affect search)
         // Handle mobile dropdown template filter selection
         function handleMobileTemplateFilter(selectedValue) {
@@ -26176,14 +20378,12 @@
                 mobileDropdown.value = activeTemplate || '';
             }
         }
-
         // Invert template filter - show tasks NOT matching current template
         function invertTodayTemplateFilter() {
             if (!activeTemplateFilter) {
                 alert('Please select a template filter first before inverting');
                 return;
             }
-
             const allTasks = document.querySelectorAll('#todaySchedule .time-slot-task');
             const template = activeTemplateFilter;
             const filteredTasks = [];
@@ -26226,7 +20426,6 @@
                 invertButton.classList.add('active');
             }
         }
-
         function showTodayNoFilterTasks() {
             // Exit filter mode completely - return to normal unfiltered state
             clearTodayTemplateFilter();
@@ -26251,7 +20450,6 @@
                 }
             });
         }
-
         // Generate dynamic template filter buttons for Today view
         function renderTodayTemplateFilters(todayTasks) {
             const container = document.getElementById('todayTemplateFilters');
@@ -26324,10 +20522,8 @@
                 }, 10);
             }
         }
-
         // All Tasks Template Filter Functions
         let activeAllTasksTemplateFilter = null;
-
         // Generate dynamic template filter buttons for All Tasks view
         function renderAllTasksTemplateFilters(allTasks) {
             const container = document.getElementById('allTasksTemplateFilters');
@@ -26380,7 +20576,6 @@
                 updateAllTasksTemplateButtonStates(activeAllTasksTemplateFilter);
             }
         }
-
         function filterAllTasksByTemplate(template) {
             // If same template clicked again, clear filter
             if (activeAllTasksTemplateFilter === template) {
@@ -26474,7 +20669,6 @@
                 }
             });
         }
-
         // Optimized visual filter for All Tasks (like Week view) - no re-rendering
         function filterAllTasksByTemplateVisual(template) {
             console.log(`🔍 Visual filtering All Tasks by: "${template}"`);
@@ -26502,12 +20696,10 @@
                 }
             });
         }
-
         function showAllTasksNoFilterTasks() {
             // Exit filter mode completely - return to normal unfiltered state
             clearAllTasksTemplateFilter();
         }
-
         // Render Today View with time blocks
         function renderTodayView() {
             console.log('📱 MOBILE DEBUG: renderTodayView called, tasks.length:', tasks.length);
@@ -26715,7 +20907,6 @@
         function taskHasImages(task) {
             return task.images && task.images.length > 0;
         }
-
         // Render individual task in time slot
         function renderTimeSlotTask(task) {
             const overdue = task.status === 'pending' && task.dueDate < getLocalDateString();
@@ -26791,7 +20982,6 @@
                 </div>
             `;
         }
-
         // Generate time options for dropdown (full hours only)
         function generateTimeOptions(selectedTime) {
             const allowedTimes = ['06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'];
@@ -26805,7 +20995,6 @@
             
             return options;
         }
-
         // Generate time adjustment options dropdown
         function generateTimeAdjustmentOptions(currentTime) {
             const adjustments = [
@@ -26828,7 +21017,6 @@
             
             return options;
         }
-
         // Global state for time dropdown
         let timeDropdownActive = false;
         
@@ -26843,31 +21031,25 @@
                 console.log('⚠️ No task selected for time dropdown');
                 return;
             }
-
             const taskId = selectedElement.getAttribute('data-task-id');
             if (!taskId) {
                 console.log('⚠️ Selected element has no task ID');
                 return;
             }
-
             // Find the existing time select dropdown within the selected task
             const timeSelect = selectedElement.querySelector('select[onchange*="updateTaskTime"]');
             if (!timeSelect) {
                 console.log('⚠️ No time dropdown found in selected task');
                 return;
             }
-
             const task = tasks.find(t => t.id === taskId);
             if (!task) {
                 console.log('⚠️ Task not found:', taskId);
                 return;
             }
-
             console.log('⏰ Opening existing time dropdown for task:', task.title);
-
             // Set active state
             timeDropdownActive = true;
-
             // Make the dropdown bigger and more visible
             timeSelect.style.fontSize = '16px';
             timeSelect.style.padding = '8px 12px';
@@ -26879,14 +21061,12 @@
             timeSelect.style.fontWeight = '600';
             timeSelect.style.boxShadow = '0 4px 12px rgba(24, 119, 242, 0.3)';
             timeSelect.style.zIndex = '1000';
-
             // Don't focus to prevent native dropdown opening
             // timeSelect.focus();
             
             // Create custom keyboard navigation overlay
             let selectedIndex = timeSelect.selectedIndex;
             const options = Array.from(timeSelect.options);
-
             function updateSelection() {
                 timeSelect.selectedIndex = selectedIndex;
                 // Update visual indicator
@@ -26895,7 +21075,6 @@
                 console.log('⏰ Selected option:', options[selectedIndex].text, 'Value:', options[selectedIndex].value);
             }
             updateSelection();
-
             function handleKeyDown(event) {
                 // Prevent all default behavior to override native dropdown
                 event.preventDefault();
@@ -26922,7 +21101,6 @@
                         break;
                 }
             }
-
             function cleanupKeyboardNav() {
                 timeDropdownActive = false;
                 document.removeEventListener('keydown', handleKeyDown, true);
@@ -26940,10 +21118,8 @@
                 timeSelect.blur();
                 console.log('⏰ Time dropdown navigation closed');
             }
-
             // Add keyboard event listener with highest priority
             document.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
-
             // Clean up when clicking outside
             function handleClickOutside(event) {
                 if (!timeSelect.contains(event.target)) {
@@ -26952,10 +21128,8 @@
                 }
             }
             document.addEventListener('click', handleClickOutside);
-
             console.log('⏰ Enhanced keyboard navigation added to existing dropdown');
         }
-
         // Clear current view filter based on active view
         function clearCurrentViewFilter() {
             switch (currentView) {
@@ -26975,10 +21149,8 @@
                     console.log('⚠️ No filter clear function for view:', currentView);
             }
         }
-
         // Debounce timer for smooth filtering
         let filterDebounceTimer = null;
-
         // Apply dynamic filter based on active view (with debounce for smoothness)
         function applyDynamicFilter(filterText) {
             // Clear any existing timer to debounce rapid navigation
@@ -27008,7 +21180,6 @@
                 }
             }, 50); // Reduced to 50ms for more responsive feel
         }
-
         // Activate filter navigation (Ctrl+F)
         function activateFilterNavigation() {
             // Find the current view's filter container
@@ -27031,12 +21202,10 @@
                 console.log('⚠️ Filter navigation not available in this view');
                 return;
             }
-
             if (!filterContainer) {
                 console.log('⚠️ Filter container not found for', currentView);
                 return;
             }
-
             // Get all filter buttons
             const filterButtons = Array.from(filterContainer.querySelectorAll('.filter-btn'));
             console.log(`🔍 DEBUG: Found ${filterButtons.length} filter buttons in ${currentView} view`);
@@ -27047,20 +21216,16 @@
                 console.log('⚠️ Container inner HTML:', filterContainer.innerHTML);
                 return;
             }
-
             console.log(`🔍 Activating filter navigation for ${viewName} view with ${filterButtons.length} filters`);
-
             // Set active state
             filterNavigationActive = true;
             let selectedIndex = 0;
-
             // Style the filter container
             filterContainer.style.border = '3px solid #ff6b35';
             filterContainer.style.borderRadius = '8px';
             filterContainer.style.padding = '12px';
             filterContainer.style.background = 'rgba(255, 107, 53, 0.1)';
             filterContainer.style.boxShadow = '0 4px 12px rgba(255, 107, 53, 0.3)';
-
             function updateSelection() {
                 filterButtons.forEach((btn, idx) => {
                     if (idx === selectedIndex) {
@@ -27096,7 +21261,6 @@
                 });
             }
             updateSelection();
-
             function handleKeyDown(event) {
                 console.log('🔍 FILTER NAV: Key pressed:', event.key, 'Active:', filterNavigationActive);
                 event.preventDefault();
@@ -27136,7 +21300,6 @@
                         break;
                 }
             }
-
             function cleanupFilterNav() {
                 filterNavigationActive = false;
                 document.removeEventListener('keydown', handleKeyDown, { capture: true });
@@ -27165,10 +21328,8 @@
                 
                 console.log('🔍 Filter navigation closed');
             }
-
             // Add keyboard event listener with highest priority
             document.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
-
             // Clean up when clicking outside (with delay to prevent immediate closure)
             function handleClickOutside(event) {
                 if (!filterContainer.contains(event.target)) {
@@ -27181,15 +21342,12 @@
             setTimeout(() => {
                 document.addEventListener('click', handleClickOutside);
             }, 100);
-
             console.log('🔍 Filter navigation activated with left/right arrow navigation');
         }
-
         // Focus on current view's search field (Ctrl+S)
         function focusCurrentViewSearch() {
             let searchField = null;
             let viewName = '';
-
             // Find the appropriate search field based on current view
             switch (currentView) {
                 case 'today':
@@ -27225,7 +21383,6 @@
                     }, 100);
                     return;
             }
-
             if (searchField) {
                 // Style the search field temporarily to show it's focused
                 const originalStyles = {
@@ -27233,27 +21390,22 @@
                     boxShadow: searchField.style.boxShadow,
                     background: searchField.style.background
                 };
-
                 searchField.style.border = '3px solid #007bff';
                 searchField.style.boxShadow = '0 0 0 3px rgba(0, 123, 255, 0.25)';
                 searchField.style.background = '#f8f9fa';
-
                 searchField.focus();
                 searchField.select(); // Select any existing text
-
                 // Reset styles after a short time
                 setTimeout(() => {
                     searchField.style.border = originalStyles.border;
                     searchField.style.boxShadow = originalStyles.boxShadow;
                     searchField.style.background = originalStyles.background;
                 }, 2000);
-
                 console.log(`🔍 Focused on ${viewName} search field`);
             } else {
                 console.log(`⚠️ No search field found for ${viewName} view`);
             }
         }
-
         // Go to All Tasks and focus search (Ctrl+A enhanced)
         function goToAllTasksSearch() {
             console.log('🔍 Navigating to All Tasks with search focus');
@@ -27266,22 +21418,18 @@
                     searchField.style.border = '3px solid #28a745';
                     searchField.style.boxShadow = '0 0 0 3px rgba(40, 167, 69, 0.25)';
                     searchField.style.background = '#f8fff8';
-
                     searchField.focus();
                     searchField.select();
-
                     // Reset styles after a short time
                     setTimeout(() => {
                         searchField.style.border = '';
                         searchField.style.boxShadow = '';
                         searchField.style.background = '';
                     }, 2000);
-
                     console.log('🔍 All Tasks search field focused and ready');
                 }
             }, 100);
         }
-
         // Change task time from dropdown
         async function changeTaskTime(taskId, newTime, event) {
             event.stopPropagation();
@@ -27309,7 +21457,6 @@
                 alert('❌ Error changing task time. Please try again.');
             }
         }
-
         // Adjust task time by specified hours (positive or negative)
         async function adjustTaskTime(taskId, hours, event) {
             event.stopPropagation();
@@ -27517,7 +21664,6 @@
                 renderTodayView();
             }
         }
-
         // Mobile-specific add task function with Things-style interface
         function openAddTaskModalMobile(dateStr) {
             console.log('📱 Mobile Add Task clicked - opening Things-style interface');
@@ -27590,7 +21736,6 @@
                 document.getElementById('mobileNewTitle')?.focus();
             }, 100);
         }
-
         function saveMobileNewTask(dateStr) {
             const titleInput = document.getElementById('mobileNewTitle');
             const notesInput = document.getElementById('mobileNewNotes');
@@ -27627,12 +21772,10 @@
             
             console.log('✅ New task created:', title);
         }
-
         function showMobileNewTaskOptions() {
             // Placeholder for additional options like repeat, time, etc.
             alert('Opciones adicionales - próximamente');
         }
-
         // Open modal for adding new task
         function openAddTaskModal(dateStr) {
             // Clear the form for new task
@@ -27754,13 +21897,11 @@
                 }
             }, 100);
         }
-
         // Template Management Functions
         let customTemplates = [];
         
         // Legacy sync variables (to prevent errors in old code)
         let lastSyncTimestamp = 0;
-
         // Load templates from localStorage
         function loadTemplates() {
             const saved = localStorage.getItem('gtdTemplates');
@@ -27772,7 +21913,6 @@
             }
             renderTemplateButtons();
         }
-
         // Save templates to localStorage
         async function saveTemplates() {
             localStorage.setItem('gtdTemplates', JSON.stringify(customTemplates));
@@ -27789,7 +21929,6 @@
                 console.log('🔓 Cleared justModifiedTemplates flag');
             }, 10000); // 10-second protection
         }
-
         // Render template buttons in modal
         function renderTemplateButtons() {
             const container = document.getElementById('templateButtons');
@@ -27850,14 +21989,12 @@
                 container.appendChild(button);
             });
         }
-
         // Reset/clear task title
         function resetTaskTitle() {
             const titleInput = document.getElementById('editTaskTitle');
             titleInput.value = '';
             titleInput.focus();
         }
-
         // Insert template and replace current content
         function insertTemplateToTask(template) {
             const titleInput = document.getElementById('editTaskTitle');
@@ -27874,7 +22011,6 @@
             // Position cursor at the end
             titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
         }
-
         // Add new template
         async function addNewTemplate() {
             const input = document.getElementById('newTemplateInput');
@@ -27905,7 +22041,6 @@
             input.value = '';
             input.focus();
         }
-
         // Delete template
         async function deleteTemplate(template) {
             if (confirm(`Delete template "${template}"?`)) {
@@ -27917,7 +22052,6 @@
                 updateSearchFilterButtons();
             }
         }
-
         // Extract all unique templates from tasks
         function extractTemplatesFromTasks() {
             const templatesSet = new Set();
@@ -27934,7 +22068,6 @@
             
             return Array.from(templatesSet).sort();
         }
-
         // Populate template filter dropdown
         function populateTemplateFilter() {
             const templateSelect = document.getElementById('templateFilterSelect');
@@ -27954,13 +22087,11 @@
                 templateSelect.appendChild(option);
             });
         }
-
         // Update search filter buttons with current templates
         function updateSearchFilterButtons() {
             // This function will update the search filters to match current templates
             // Implementation can be added if needed
         }
-
         // Handle Enter key in new template input
         document.addEventListener('DOMContentLoaded', function() {
             // Load templates when page loads
@@ -27980,8 +22111,6 @@
                 }
             });
         });
-
-
         // Quick Search Functions
         function quickSearch(term) {
             const searchInput = document.getElementById('searchInput');
@@ -27996,7 +22125,6 @@
             // Perform search
             performSearch();
         }
-
         function clearSearch() {
             const searchInput = document.getElementById('searchInput');
             searchInput.value = '';
@@ -28011,14 +22139,12 @@
             document.getElementById('exportHtmlBtn').style.display = 'none';
             window.currentSearchResults = null;
         }
-
         // Export search results to HTML file
         function exportSearchToHtml() {
             if (!window.currentSearchResults || window.currentSearchResults.length === 0) {
                 alert('No search results to export');
                 return;
             }
-
             const searchTerm = document.getElementById('searchInput').value;
             const timestamp = getLocalDateString();
             const formattedDate = new Date().toLocaleDateString('en-US', { 
@@ -28027,17 +22153,14 @@
                 month: 'long', 
                 day: 'numeric' 
             });
-
             // Group tasks by status
             const tasksByStatus = {
                 pending: [],
                 completed: []
             };
-
             window.currentSearchResults.forEach(task => {
                 tasksByStatus[task.status].push(task);
             });
-
             // Sort tasks by date and time
             const sortTasks = (tasks) => {
                 return tasks.sort((a, b) => {
@@ -28047,7 +22170,6 @@
                     return (a.dueTime || '').localeCompare(b.dueTime || '');
                 });
             };
-
             let htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -28170,7 +22292,6 @@
             Generated on ${formattedDate}
         </div>
     </div>`;
-
             // Render pending tasks
             if (tasksByStatus.pending.length > 0) {
                 htmlContent += `
@@ -28209,7 +22330,6 @@
                 
                 htmlContent += `</div>`;
             }
-
             // Render completed tasks
             if (tasksByStatus.completed.length > 0) {
                 htmlContent += `
@@ -28248,12 +22368,10 @@
                 
                 htmlContent += `</div>`;
             }
-
             // Add statistics
             const completedCount = tasksByStatus.completed.length;
             const pendingCount = tasksByStatus.pending.length;
             const eventsCount = window.currentSearchResults.filter(t => t.isEvent).length;
-
             htmlContent += `
     <div class="stats">
         <strong>Search Summary:</strong> 
@@ -28262,10 +22380,8 @@
         ${pendingCount} pending | 
         ${eventsCount} events
     </div>
-
 </body>
 </html>`;
-
             // Create and open HTML file for printing
             const blob = new Blob([htmlContent], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
@@ -28276,7 +22392,6 @@
                 newWindow.print();
             }, 1000);
         }
-
         // Download Today HTML function
         function downloadTodayHtml() {
             
@@ -28296,13 +22411,10 @@
                 }
                 return false;
             });
-
-
             if (todayTasks.length === 0) {
                 alert('No tasks scheduled for today to export.');
                 return;
             }
-
             // Generate the same HTML content as the print function
             let htmlContent = `
 <!DOCTYPE html>
@@ -28403,13 +22515,10 @@
         <h1>Today's Schedule</h1>
         <div class="date">${formattedDate}</div>
     </div>
-
     <div class="content">`;
-
             // Group tasks by time
             const timedTasks = todayTasks.filter(task => task.dueTime);
             const untimedTasks = todayTasks.filter(task => !task.dueTime);
-
             // Group timed tasks by hour
             const tasksByTime = {};
             timedTasks.forEach(task => {
@@ -28419,14 +22528,12 @@
                 }
                 tasksByTime[timeKey].push(task);
             });
-
             // Add timed tasks grouped by time
             const sortedTimes = Object.keys(tasksByTime).sort();
             sortedTimes.forEach(time => {
                 htmlContent += `
         <div class="time-block">
             <div class="time-block-header">🕐 ${time}</div>`;
-
                 tasksByTime[time].forEach(task => {
                     const isEvent = task.isEvent;
                     
@@ -28437,17 +22544,14 @@
                 ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
             </div>`;
                 });
-
                 htmlContent += `
         </div>`;
             });
-
             // Add untimed tasks
             if (untimedTasks.length > 0) {
                 htmlContent += `
         <div class="time-block">
             <div class="time-block-header">📋 Other Tasks</div>`;
-
                 untimedTasks.forEach(task => {
                     const isEvent = task.isEvent;
                     
@@ -28458,23 +22562,18 @@
                 ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
             </div>`;
                 });
-
                 htmlContent += `
         </div>`;
             }
-
             // Add summary
             const eventCount = todayTasks.filter(t => t.isEvent).length;
-
             htmlContent += `
         <div class="summary">
             <strong>Summary:</strong> ${todayTasks.length} total tasks${eventCount > 0 ? ` | ${eventCount} events` : ''}
         </div>
     </div>
-
 </body>
 </html>`;
-
             // Create and download the file
             const blob = new Blob([htmlContent], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
@@ -28496,21 +22595,18 @@
                 URL.revokeObjectURL(url);
             }, 1000);
         }
-
         // Export filtered month tasks to HTML
         function exportMonthHtml() {
             if (!window.currentMonthFilteredTasks || window.currentMonthFilteredTasks.length === 0) {
                 alert('No filtered tasks to export');
                 return;
             }
-
             const searchTerm = window.currentMonthSearchTerm || '';
             const filteredTasks = window.currentMonthFilteredTasks;
             
             // Get current month info
             const currentDate = new Date(currentCalendarDate);
             const monthName = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-
             const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -28541,21 +22637,17 @@
         <p><strong>Month:</strong> ${monthName}</p>
         <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
     </div>
-
     <div class="search-info">
         <strong>🔍 Search Results:</strong> Showing tasks matching "${searchTerm}" for ${monthName}
         <br><strong>Total Results:</strong> ${filteredTasks.length} tasks
     </div>
-
     ${generateMonthTasksHTML(filteredTasks)}
-
     <div class="stats">
         <p><strong>Export Summary:</strong> ${filteredTasks.length} tasks matching "${searchTerm}" in ${monthName}</p>
         <p>Generated by HyperFiler Pro at ${new Date().toLocaleString()}</p>
     </div>
 </body>
 </html>`;
-
             // Create and download the file
             const blob = new Blob([htmlContent], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
@@ -28573,13 +22665,11 @@
                 URL.revokeObjectURL(url);
             }, 1000);
         }
-
         // Helper function to generate month tasks HTML
         function generateMonthTasksHTML(filteredTasks) {
             if (filteredTasks.length === 0) {
                 return '<p>No tasks found matching the search criteria.</p>';
             }
-
             // Group tasks by date
             const tasksByDate = {};
             filteredTasks.forEach(task => {
@@ -28590,7 +22680,6 @@
                     tasksByDate[task.dueDate].push(task);
                 }
             });
-
             let html = '';
             Object.keys(tasksByDate).sort().forEach(date => {
                 const dateTasks = tasksByDate[date];
@@ -28601,7 +22690,6 @@
                     month: 'long', 
                     day: 'numeric' 
                 });
-
                 html += `<div class="day-section">`;
                 html += `<h3 class="day-header">${formattedDate}</h3>`;
                 
@@ -28625,21 +22713,17 @@
                 
                 html += `</div>`;
             });
-
             return html;
         }
-
         // Export filtered today tasks to HTML
         function exportTodayFiltered() {
             if (!window.currentTodayFilteredTasks || window.currentTodayFilteredTasks.length === 0) {
                 alert('No filtered tasks to export');
                 return;
             }
-
             const searchTerm = window.currentTodaySearchTerm || '';
             const todayDate = getLocalDateString(currentDisplayDate);
             const filteredTasks = window.currentTodayFilteredTasks;
-
             // Create HTML content similar to downloadTodayHtml but for filtered results
             const htmlContent = `
 <!DOCTYPE html>
@@ -28671,21 +22755,17 @@
         <p><strong>Date:</strong> ${formatDate(todayDate)}</p>
         <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
     </div>
-
     <div class="search-info">
         <strong>🔍 Filtered Results:</strong> Showing tasks matching "${searchTerm}"
         <br><strong>Total Results:</strong> ${filteredTasks.length} tasks
     </div>
-
     ${generateTodayTasksHTML(filteredTasks, todayDate)}
-
     <div class="stats">
         <p><strong>Export Summary:</strong> ${filteredTasks.length} filtered tasks for ${formatDate(todayDate)}</p>
         <p>Generated by HyperFiler Pro at ${new Date().toLocaleString()}</p>
     </div>
 </body>
 </html>`;
-
             try {
                 // Create downloadable file
                 const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
@@ -28713,14 +22793,12 @@
                 alert('❌ Export failed. Please try again or check browser console for details.');
             }
         }
-
         // Export week tasks to HTML
         function exportWeekHtml() {
             if (!window.currentWeekFilteredTasks || window.currentWeekFilteredTasks.length === 0) {
                 alert('No filtered tasks to export');
                 return;
             }
-
             const searchTerm = window.currentWeekSearchTerm || '';
             const filteredTasks = window.currentWeekFilteredTasks;
             
@@ -28728,7 +22806,6 @@
             const startOfWeek = new Date(currentWeekStart);
             const endOfWeek = new Date(currentWeekStart);
             endOfWeek.setDate(endOfWeek.getDate() + 6);
-
             const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -28759,21 +22836,17 @@
         <p><strong>Week:</strong> ${formatDate(startOfWeek.toISOString().split('T')[0])} - ${formatDate(endOfWeek.toISOString().split('T')[0])}</p>
         <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
     </div>
-
     <div class="search-info">
         <strong>🔍 Filtered Results:</strong> Showing tasks matching "${searchTerm}"
         <br><strong>Total Results:</strong> ${filteredTasks.length} tasks
     </div>
-
     ${generateWeekTasksHTML(filteredTasks)}
-
     <div class="stats">
         <p><strong>Export Summary:</strong> ${filteredTasks.length} filtered tasks for week ${formatDate(startOfWeek.toISOString().split('T')[0])} - ${formatDate(endOfWeek.toISOString().split('T')[0])}</p>
         <p>Generated by HyperFiler Pro at ${new Date().toLocaleString()}</p>
     </div>
 </body>
 </html>`;
-
             // Open in new window for printing
             const printWindow = window.open('', '_blank');
             printWindow.document.write(htmlContent);
@@ -28785,17 +22858,14 @@
                 printWindow.print();
             }, 500);
         }
-
         // Export repeat tasks search results to HTML
         function exportRepeatHtml() {
             if (!window.currentRepeatFilteredTasks || window.currentRepeatFilteredTasks.length === 0) {
                 alert('No filtered repeat tasks to export');
                 return;
             }
-
             const searchTerm = window.currentRepeatSearchTerm || '';
             const filteredTasks = window.currentRepeatFilteredTasks;
-
             const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -28825,21 +22895,17 @@
         <h1>🔄 HyperFiler Pro - Repeat Tasks Search</h1>
         <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
     </div>
-
     <div class="search-info">
         <strong>🔍 Search Results:</strong> Showing repeat tasks matching "${searchTerm}"
         <br><strong>Total Results:</strong> ${filteredTasks.length} tasks
     </div>
-
     ${generateRepeatTasksHTML(filteredTasks)}
-
     <div class="stats">
         <p><strong>Export Summary:</strong> ${filteredTasks.length} repeat tasks matching "${searchTerm}"</p>
         <p>Generated by HyperFiler Pro at ${new Date().toLocaleString()}</p>
     </div>
 </body>
 </html>`;
-
             // Open in new window for printing
             const printWindow = window.open('', '_blank');
             printWindow.document.write(htmlContent);
@@ -28851,17 +22917,14 @@
                 printWindow.print();
             }, 500);
         }
-
         // Helper functions for HTML generation
         function generateTodayTasksHTML(tasks, date) {
             if (tasks.length === 0) {
                 return '<div class="task-item"><div class="task-title">No tasks found for the selected date</div></div>';
             }
-
             // Group tasks by time
             const timeSlots = {};
             const noTimeSlot = [];
-
             tasks.forEach(task => {
                 if (task.dueDate === date) {
                     if (task.time && task.time !== '') {
@@ -28873,9 +22936,7 @@
                     }
                 }
             });
-
             let html = '';
-
             // Timed tasks
             const sortedTimes = Object.keys(timeSlots).sort();
             sortedTimes.forEach(time => {
@@ -28891,7 +22952,6 @@
                 });
                 html += '</div>';
             });
-
             // Untimed tasks
             if (noTimeSlot.length > 0) {
                 html += '<div class="time-slot"><h3>📋 No Specific Time</h3>';
@@ -28905,15 +22965,12 @@
                 });
                 html += '</div>';
             }
-
             return html;
         }
-
         function generateWeekTasksHTML(tasks) {
             if (tasks.length === 0) {
                 return '<div class="task-item"><div class="task-title">No tasks found</div></div>';
             }
-
             // Group tasks by date
             const tasksByDate = {};
             tasks.forEach(task => {
@@ -28922,7 +22979,6 @@
                     tasksByDate[task.dueDate].push(task);
                 }
             });
-
             let html = '';
             const sortedDates = Object.keys(tasksByDate).sort();
             
@@ -28941,15 +22997,12 @@
                 });
                 html += '</div>';
             });
-
             return html;
         }
-
         function generateRepeatTasksHTML(tasks) {
             if (tasks.length === 0) {
                 return '<div class="task-item"><div class="task-title">No repeat tasks found</div></div>';
             }
-
             let html = '';
             
             tasks.forEach(task => {
@@ -28965,11 +23018,8 @@
                     </div>
                 `;
             });
-
             return html;
         }
-
-
         // Create dynamic drop zones near dragged task
         function createDynamicDropZones(draggedElement) {
             // Remove any existing dynamic drop zones
@@ -29120,7 +23170,6 @@
             
             return baseTimes.slice(0, 9); // Always return exactly 9 slots
         }
-
         // Drag and Drop handlers for Today view
         function handleTodayDragStart(event) {
             const taskId = event.target.dataset.taskId;
@@ -29155,7 +23204,6 @@
             
             console.log('🔄 Started dragging task:', draggedTask.title);
         }
-
         function handleTodayDragEnd(event) {
             console.log('🔄 Drag ended');
             event.target.classList.remove('dragging');
@@ -29181,7 +23229,6 @@
                 slot.classList.remove('drag-over');
             });
         }
-
         function handleTodayDragOver(event) {
             event.preventDefault();
             event.dataTransfer.dropEffect = 'move';
@@ -29226,7 +23273,6 @@
                 }
             }
         }
-
         function handleTodayDragLeave(event) {
             const timeBlock = event.currentTarget.closest('.time-block');
             const content = event.currentTarget;
@@ -29241,7 +23287,6 @@
                 content.classList.remove('drag-over');
             }
         }
-
         async function handleTodayDrop(event) {
             console.log('🔄 Drop event triggered');
             event.preventDefault();
@@ -29307,19 +23352,15 @@
                 alert('❌ Error updating task time. Please try again.');
             }
         }
-
-
         // Modal functions
         function openShortcutsModal() {
             document.getElementById('shortcutsModal').style.display = 'block';
         }
-
         function closeShortcutsModal(event) {
             if (!event || event.target === document.getElementById('shortcutsModal')) {
                 document.getElementById('shortcutsModal').style.display = 'none';
             }
         }
-
         function openSettings() {
             try {
                 console.log('Opening settings modal...');
@@ -29335,20 +23376,17 @@
                 console.error('Error opening settings:', error);
             }
         }
-
         function switchSettingsTab(tabName) {
             // Hide all tab contents
             const allTabContents = document.querySelectorAll('.settings-tab-content');
             allTabContents.forEach(content => {
                 content.style.display = 'none';
             });
-
             // Show selected tab content
             const selectedTab = document.getElementById(`settings-tab-${tabName}`);
             if (selectedTab) {
                 selectedTab.style.display = 'block';
             }
-
             // Update tab button styles
             const allTabButtons = document.querySelectorAll('.settings-tab-btn');
             allTabButtons.forEach(btn => {
@@ -29356,7 +23394,6 @@
                 btn.style.background = 'rgba(255,255,255,0.1)';
                 btn.style.color = 'rgba(255,255,255,0.8)';
             });
-
             // Activate selected tab button
             const selectedButton = document.querySelector(`.settings-tab-btn[data-tab="${tabName}"]`);
             if (selectedButton) {
@@ -29466,7 +23503,6 @@
                 }
             }
         }
-
         function saveAllSettings() {
             try {
                 console.log('Saving all settings...');
@@ -29527,7 +23563,6 @@
                 console.error('Error saving settings:', error);
             }
         }
-
         function closeSettings(event) {
             if (!event || event.target === document.getElementById('settingsModal')) {
                 // Save all settings before closing
@@ -29535,7 +23570,6 @@
                 document.getElementById('settingsModal').style.display = 'none';
             }
         }
-
         function loadSettingsValues() {
             try {
                 console.log('Loading settings values...');
@@ -29670,7 +23704,6 @@
                 console.error('Error loading settings values:', error);
             }
         }
-
         function updateLanguageButtonStyles() {
             const currentLang = localStorage.getItem('preferredLanguage') || 'en';
             const enBtn = document.getElementById('lang-en-btn');
@@ -29691,17 +23724,14 @@
                 esBtn.style.background = 'rgba(24, 119, 242, 0.1)';
             }
         }
-
         function updateDateFormat(format) {
             localStorage.setItem('dateFormat', format);
             updateDateTimeDisplay();
         }
-
         function updateTimeFormat(format) {
             localStorage.setItem('timeFormat', format);
             updateDateTimeDisplay();
         }
-
         // Backup Status Indicator Functions
         function updateBackupStatusIndicator() {
             try {
@@ -29736,14 +23766,12 @@
                 console.error('Error updating backup status indicator:', error);
             }
         }
-
         // Time Slots Configuration Functions
         function getQuickTimeSlots() {
             const saved = localStorage.getItem('quickTimeSlots');
             const defaultSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
             return saved ? JSON.parse(saved) : defaultSlots;
         }
-
         function saveTimeSlots() {
             try {
                 const inputs = document.querySelectorAll('#timeSlotInputs input[type="time"]');
@@ -29773,12 +23801,10 @@
                 alert(translateText('Error saving time slots. Please try again.'));
             }
         }
-
         function loadTimeSlots() {
             const timeSlots = getQuickTimeSlots();
             renderTimeSlotInputs(timeSlots);
         }
-
         function renderTimeSlotInputs(timeSlots) {
             const container = document.getElementById('timeSlotInputs');
             if (!container) return;
@@ -29805,7 +23831,6 @@
                 container.appendChild(inputContainer);
             });
         }
-
         function addTimeSlot() {
             const timeSlots = getQuickTimeSlots();
             // Add a new slot at 9:00 AM or next hour after last slot
@@ -29817,41 +23842,34 @@
             timeSlots.push(newSlot);
             renderTimeSlotInputs(timeSlots);
         }
-
         function removeTimeSlot(index) {
             const timeSlots = getQuickTimeSlots();
             timeSlots.splice(index, 1);
             renderTimeSlotInputs(timeSlots);
         }
-
         function resetTimeSlots() {
             const defaultSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
             renderTimeSlotInputs(defaultSlots);
         }
-
         function openStatsModal() {
             populateStatsModal();
             document.getElementById('statsModal').style.display = 'block';
         }
-
         function closeStatsModal(event) {
             if (!event || event.target === document.getElementById('statsModal')) {
                 document.getElementById('statsModal').style.display = 'none';
             }
         }
-
         function openTaskImportModal() {
             document.getElementById('taskImportModal').style.display = 'block';
             document.getElementById('taskImportTextarea').focus();
         }
-
         function closeTaskImportModal(event) {
             if (!event || event.target === document.getElementById('taskImportModal')) {
                 document.getElementById('taskImportModal').style.display = 'none';
                 document.getElementById('taskImportTextarea').value = '';
             }
         }
-
         function importTasksFromTextarea() {
             try {
                 const textarea = document.getElementById('taskImportTextarea');
@@ -29936,12 +23954,10 @@
                 alert('Error importing tasks. Please try again.');
             }
         }
-
         function getTasks() {
             const storedTasks = localStorage.getItem('gtdTasks');
             return storedTasks ? JSON.parse(storedTasks) : [];
         }
-
         function getBackupSettings() {
             const saved = localStorage.getItem('gtdBackupSettings');
             const defaultSettings = {
@@ -29965,7 +23981,6 @@
             };
             return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
         }
-
         function openDownloadsFolder() {
             console.log('openDownloadsFolder called');
             
@@ -30045,7 +24060,6 @@
                 }
             }
         }
-
         function populateStatsModal() {
             const tasks = getTasks();
             const completed = tasks.filter(t => t.status === 'completed').length;
@@ -30053,10 +24067,8 @@
             const overdue = tasks.filter(t => t.status === 'pending' && t.dueDate && new Date(t.dueDate) < new Date()).length;
             const today = getLocalDateString();
             const todayTasks = tasks.filter(t => t.dueDate === today).length;
-
             // Get backup information
             const backupSettings = getBackupSettings();
-
             const statsContent = `
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; margin-bottom: 20px;">
                     <div style="text-align: center; padding: 16px; background: #e3f2fd; border-radius: 8px;">
@@ -30205,7 +24217,6 @@
             
             document.getElementById('statsModalContent').innerHTML = statsContent;
         }
-
         // Task navigation variables
         let selectedTaskIndex = -1;
         let selectedDayTasks = [];
@@ -30282,7 +24293,6 @@
                 }
             }
         };
-
         // Helper function to highlight selected task
         function highlightSelectedTask() {
             if (selectedTaskElement) {
@@ -30299,7 +24309,6 @@
                 }
             }
         }
-
         // Function to highlight current day
         function highlightCurrentDay() {
             // Prevent multiple simultaneous highlighting calls
@@ -30322,10 +24331,8 @@
                     if (previousCursor) {
                         previousCursor.classList.remove('day-cursor');
                     }
-
                     const weekView = document.getElementById('week-view');
                     const calendarView = document.getElementById('calendar-view');
-
                     if (weekView && !weekView.classList.contains('hidden')) {
                         // Highlight current day in week view
                         const currentDateISO = getLocalDateString(currentWeekDate);
@@ -30361,7 +24368,6 @@
                 }
             });
         }
-
         // Function to get tasks for the currently selected day in calendar view
         function getSelectedDayTasks() {
             const calendarView = document.getElementById('calendar-view');
@@ -30390,7 +24396,6 @@
             }
             return [];
         }
-
         // Function to get tasks for the currently selected day in week view
         function getSelectedWeekDayTasks() {
             const weekView = document.getElementById('week-view');
@@ -30402,7 +24407,6 @@
             }
             return [];
         }
-
         // Function to get all tasks from the current view
         function getVisibleTasks() {
             const weekView = document.getElementById('week-view');
@@ -30449,7 +24453,6 @@
             }
             return [];
         }
-
         // Function to reset task selection
         function resetTaskSelection() {
             selectedTaskIndex = -1;
@@ -30461,7 +24464,6 @@
             // Hide the task amplifier and clear timers
             TaskAmplifier.hide();
         }
-
         // Set day cursor to specific date in specific view
         function setDayCursor(date, view) {
             const dateStr = getLocalDateString(date);
@@ -30477,7 +24479,6 @@
                 dayElement.classList.add('day-cursor');
             }
         }
-
         // Task Text Amplifier System
         const TaskAmplifier = {
             element: null,
@@ -30550,7 +24551,6 @@
                 
                 console.log('✅ Timer ID:', this.showTimer);
             },
-
             show(taskElement) {
                 console.log('🔍 TaskAmplifier.show called with:', taskElement);
                 console.log('🔍 Current view:', currentView);
@@ -30729,7 +24729,6 @@
                 }, delay);
             }
         };
-
         // Enhanced Navigation Manager - Unified task selection system
         const NavigationManager = {
             // Debouncing for smooth navigation
@@ -31070,7 +25069,6 @@
                     }
                 }
             },
-
             deleteSelectedTask() {
                 if (selectedTaskElement) {
                     const taskId = selectedTaskElement.getAttribute('data-task-id');
@@ -31089,7 +25087,6 @@
                     }
                 }
             },
-
             showDeleteFeedback(taskText) {
                 // Create temporary toast notification
                 const toast = document.createElement('div');
@@ -31129,7 +25126,6 @@
                     }, 300);
                 }, 2000);
             },
-
             clearSelection() {
                 selectedTaskIndex = -1;
                 selectedTaskElement = null;
@@ -31147,9 +25143,35 @@
                 return Array.from(viewElement.querySelectorAll(config.taskSelector));
             }
         };
-
-    <!-- Streamlined DateTime Picker Modal -->
-    <div id="dateTimePickerModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;" onclick="closeDateTimePicker(event)">
+        // Delete feedback handled by NavigationManager
+        // Keyboard shortcuts temporarily disabled due to syntax error
+        /*
+        document.addEventListener('keydown', async function(event) {
+            // Debug Ctrl+L capture
+            if (event.ctrlKey && event.key === 'l') {
+                console.log('🔥 Ctrl+L captured at top level - main handler');
+            }
+            
+            // Ctrl+S: Focus search field in current view
+            if (event.ctrlKey && event.key === 's') {
+                event.preventDefault(); // Prevent browser save dialog
+                
+                let searchField = null;
+                
+                // Determine current view and find its search field
+                const currentView = localStorage.getItem('currentView') || 'today';
+                
+                switch(currentView) {
+                    case 'today':
+                        searchField = document.getElementById('todayTaskSearch');
+                        break;
+                    case 'week':
+                        searchField = document.getElementById('weekTaskSearch');
+                        break;
+                    case 'calendar':
+                        searchField = document.getElementById('monthTaskSearch');
+                        break;
+                    case 'all':
                         searchField = document.getElementById('allTasksSearchInput');
                         break;
                     case 'repeat':
@@ -31521,152 +25543,115 @@
                     return;
                 }
                 
+                // Navigation temporarily disabled for debugging
+                // NavigationManager.handleKeyEvent(event);
+            }
+        });
+        */
     
-    <!-- Streamlined DateTime Picker Modal -->
-    <div id="dateTimePickerModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;" onclick="closeDateTimePicker(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 450px; margin: 15vh auto; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
-            
-            <!-- Modal Header -->
-            <div style="background: #007bff; color: white; padding: 16px 20px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="margin: 0; font-size: 16px; font-weight: 600;">📅 Quick Date & Time</h3>
-                <button onclick="closeDateTimePicker()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer;">&times;</button>
-            </div>
-            
-            <!-- Modal Body -->
-            <div style="padding: 20px;">
-                
-                <!-- DateTime Input -->
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px;">Date & Time:</label>
-                    <input type="datetime-local" id="quickDateTimeInput" style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 14px;" onchange="updateQuickPreview()">
-                </div>
-                
-                <!-- Quick Preset Buttons -->
-                <div style="margin-bottom: 20px;">
-                    <div style="font-size: 13px; color: #666; margin-bottom: 10px; font-weight: 600;">Quick Presets:</div>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
-                        <button onclick="quickPreset('today')" style="padding: 8px 12px; border: 1px solid #ddd; background: transparent; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">Today</button>
-                        <button onclick="quickPreset('tomorrow')" style="padding: 8px 12px; border: 1px solid #ddd; background: transparent; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">Tomorrow</button>
-                        <button onclick="quickPreset('+1w')" style="padding: 8px 12px; border: 1px solid #ddd; background: transparent; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">1 Week</button>
-                        <button onclick="quickPreset('+1m')" style="padding: 8px 12px; border: 1px solid #ddd; background: transparent; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">1 Month</button>
-                        <button onclick="quickPreset('+1d')" style="padding: 8px 12px; border: 1px solid #ddd; background: transparent; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">+1 Day</button>
-                        <button onclick="quickPreset('clear')" style="padding: 8px 12px; border: 1px solid #ddd; background: transparent; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">Clear</button>
-                    </div>
-                </div>
-                
-                <!-- Preview -->
-                <div style="padding: 12px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e1e5e9; text-align: center;">
-                    <div style="font-size: 12px; color: #666; margin-bottom: 2px;">Preview:</div>
-                    <div id="quickDateTimePreview" style="font-size: 14px; font-weight: 600; color: #333;">Select date and time</div>
-                </div>
-            </div>
-            
-            <!-- Modal Footer -->
-            <div style="background: #f8f9fa; padding: 16px 20px; border-top: 1px solid #e1e5e9; display: flex; gap: 10px; justify-content: flex-end; border-radius: 0 0 12px 12px;">
-                <button onclick="clearQuickDateTime()" style="background: #6c757d; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-size: 13px; cursor: pointer;">Clear</button>
-                <button onclick="closeDateTimePicker()" style="background: #6c757d; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-size: 13px; cursor: pointer;">Cancel</button>
-                <button onclick="confirmQuickDateTime()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">Save</button>
-            </div>
-        </div>
-    </div>
 
-    <!-- Task Text Amplifier -->
-    <div id="taskAmplifier" class="task-amplifier">
-        <div class="amplifier-content">
-            <span class="amplifier-icon"></span>
-            <span class="amplifier-text"></span>
-            <span class="amplifier-meta"></span>
-        </div>
-    </div>
-
-
-
-
-    <!-- Weekly Support Reminder Pop-up -->
-    <div id="supportReminder" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; backdrop-filter: blur(2px);">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: transparent; border-radius: 20px; padding: 40px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); text-align: center;">
-            <div style="font-size: 3em; margin-bottom: 20px;">🎉</div>
-            <h2 style="color: #333; margin-bottom: 15px; font-size: 1.8em;">Loving HyperFiler Pro?</h2>
-            <p style="color: #666; margin-bottom: 30px; line-height: 1.6; font-size: 1.1em;">
-                You've been using HyperFiler Pro in <strong>trial mode</strong>. Purchase your license for €49.98 to continue using all features without reminders.
-            </p>
+        // Simple sync system initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔄 Lists pattern sync ready');
             
-            <div style="margin-bottom: 20px;">
-                <button onclick="supportDevelopment()" style="background: linear-gradient(45deg, #28a745, #20c997); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1.1em; font-weight: 700; margin: 10px; cursor: pointer; transition: all 0.3s ease;">
-                    💳 Purchase License
-                </button>
-            </div>
+            // Define uploadAllTasks directly to ensure it exists
+            if (typeof uploadAllTasks !== 'function') {
+                console.log('⚠️ uploadAllTasks not found, defining placeholder');
+                window.uploadAllTasks = async function() {
+                    console.log('🔄 uploadAllTasks placeholder called');
+                    return true;
+                };
+            } else {
+                window.uploadAllTasks = uploadAllTasks;
+                console.log('✅ uploadAllTasks assigned to window');
+            }
             
-            <div>
-                <button onclick="postponeReminder()" style="background: none; color: #666; border: 2px solid #ddd; padding: 12px 25px; border-radius: 50px; font-size: 1em; margin: 5px; cursor: pointer; transition: all 0.3s ease;">
-                    Maybe Later (10 days)
-                </button>
-                <button onclick="hideReminderLonger()" style="background: none; color: #999; border: 1px solid #eee; padding: 10px 20px; border-radius: 25px; font-size: 0.9em; margin: 5px; cursor: pointer;">
-                    Hide for a Month
-                </button>
-            </div>
-            
-            <p style="color: #999; font-size: 0.85em; margin-top: 20px;">
-                💡 <strong>HYPERFILER IS NOT FREE.</strong> This is a paid software product. If you use it more than 60 days you are required to purchase a license. This reminder appears every 10 days. You can continue using HyperFiler Pro in <strong>trial mode</strong> as long as you need.
-            </p>
-        </div>
-    </div>
-
+            // Ensure simple sync functions are ready
+            setTimeout(() => {
+                console.log('🔄 Simple sync functions ready...');
+                // Ensure our uploadAllTasks function is used
+                if (window.uploadAllTasks && typeof window.uploadAllTasks === 'function') {
+                    console.log('✅ uploadAllTasks function is properly set');
+                } else {
+                    console.error('❌ uploadAllTasks function missing!');
+                }
+            }, 1000);
+        });
     
-    <!-- Bulk Time Selection Modal -->
-    <div id="bulkTimeModal" class="modal" onclick="closeBulkTimeModal(event)" style="z-index: 1200;">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 400px; background: transparent; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); padding: 0;">
-            
-            <!-- Modal Header -->
-            <div style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; position: relative;">
-                <h3 style="margin: 0; font-size: 18px; font-weight: 600;">
-                    ⏰ Set Time for Selected Tasks
-                </h3>
-                <button onclick="closeBulkTimeModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; line-height: 1;" title="Close">×</button>
-            </div>
-            
-            <!-- Modal Body -->
-            <div style="padding: 30px 20px;">
-                <p style="margin: 0 0 20px 0; color: #666; text-align: center;">
-                    Choose a time for <span id="bulkTimeTaskCount" style="font-weight: bold;">0</span> selected task(s)
-                </p>
-                
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; color: #333; margin-bottom: 8px; font-size: 14px;">Time:</label>
-                    <select id="bulkTimeSelect" style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; background: transparent;">
-                        <option value="">No specific time</option>
-                    </select>
-                </div>
-                
-                <div style="display: flex; gap: 12px; margin-top: 30px;">
-                    <button onclick="closeBulkTimeModal()" 
-                            style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
-                        Cancel
-                    </button>
-                    <button onclick="applyBulkTime()" 
-                            style="flex: 1; background: #17a2b8; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
-                        Apply Time
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Close desktop layout divs -->
-        </div> <!-- Close desktop-content -->
-    </div> <!-- Close desktop-layout -->
-    
-    <!-- Mobile-only container for mobile navigation -->
-    <div class="container mobile-only">
-    </div>
 
-    <!-- External JavaScript Files -->
-    <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/tasks.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/sync.js"></script>
-    <script src="js/patches.js"></script>
-
-</body>
-</html>
+        // Weekly Support Reminder System
+        function checkSupportReminder() {
+            try {
+                const lastShown = localStorage.getItem('supportReminderLastShown');
+                const hideUntil = localStorage.getItem('supportReminderHideUntil');
+                const now = Date.now();
+                
+                // Check if we should hide it longer
+                if (hideUntil && now < parseInt(hideUntil)) {
+                    return;
+                }
+                
+                // Show every 10 days (864000000 ms)
+                const tenDaysInMs = 10 * 24 * 60 * 60 * 1000;
+                
+                if (!lastShown || (now - parseInt(lastShown)) > tenDaysInMs) {
+                    // Make sure the element exists before showing
+                    const reminderElement = document.getElementById('supportReminder');
+                    if (reminderElement) {
+                        reminderElement.style.display = 'block';
+                        localStorage.setItem('supportReminderLastShown', now.toString());
+                    }
+                }
+            } catch (error) {
+                console.error('Error in checkSupportReminder:', error);
+            }
+        }
+        
+        function supportDevelopment() {
+            try {
+                const reminder = document.getElementById('supportReminder');
+                if (reminder) reminder.style.display = 'none';
+                // Redirect to payment page
+                window.open('/upgrade-compare.html', '_blank');
+            } catch (error) {
+                console.error('Error in supportDevelopment:', error);
+            }
+        }
+        
+        function postponeReminder() {
+            try {
+                const reminder = document.getElementById('supportReminder');
+                if (reminder) reminder.style.display = 'none';
+                // Will show again in 10 days
+            } catch (error) {
+                console.error('Error in postponeReminder:', error);
+            }
+        }
+        
+        function hideReminderLonger() {
+            try {
+                const reminder = document.getElementById('supportReminder');
+                if (reminder) reminder.style.display = 'none';
+                // Hide for 1 month (30 days)
+                const monthFromNow = Date.now() + (30 * 24 * 60 * 60 * 1000);
+                localStorage.setItem('supportReminderHideUntil', monthFromNow.toString());
+            } catch (error) {
+                console.error('Error in hideReminderLonger:', error);
+            }
+        }
+        
+        // Start the reminder system 
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for page to be fully loaded and interactive
+            setTimeout(() => {
+                try {
+                    // Only check if the page is properly loaded
+                    if (document.readyState === 'complete') {
+                        checkSupportReminder();
+                    }
+                } catch (error) {
+                    console.error('Support reminder error:', error);
+                }
+            }, 10000); // Wait 10 seconds to ensure everything is loaded
+        });
+    
