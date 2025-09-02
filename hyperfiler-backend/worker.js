@@ -185,6 +185,8 @@ export default {
       'https://1e9aace9.hyperfiler-fresh.pages.dev',
       'https://93deb3f3.hyperfiler-fresh.pages.dev',
       'https://31b152f2.hyperfiler-fresh.pages.dev',
+      'https://5bc4f58b.hyperfiler-fresh.pages.dev',
+      'https://9a131f7c.hyperfiler-fresh.pages.dev',
       'https://a5e1559d.hyperfiler-fresh.pages.dev',
       'https://3147530c.hyperfiler-fresh.pages.dev',
       'https://79380aff.hyperfiler.pages.dev',
