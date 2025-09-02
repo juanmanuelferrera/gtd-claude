@@ -1099,6 +1099,18 @@ function renderTodayTemplateFilters(todayTasks) {
     
     let html = '';
     
+    // Add toggle all time slots button first
+    html += `<button onclick="toggleAllTimeSlots()" title="Toggle all time slots" style="
+        background: #007AFF; 
+        color: white; 
+        border: 1px solid #007AFF; 
+        padding: 4px 8px; 
+        border-radius: 4px; 
+        font-size: 11px; 
+        cursor: pointer;
+        margin-right: 8px;
+    ">⏰ Toggle All</button>`;
+    
     // Add template filter buttons
     Array.from(templatesInUse).sort().forEach(template => {
         const isActive = window.activeTodayTemplateFilter === template;
@@ -1154,6 +1166,9 @@ function renderTodayView() {
     // Get today's tasks AND overdue tasks (only show overdue on current day)
     const isToday = todayStr === getLocalDateString(new Date());
     let todayTasks = tasks.filter(task => {
+        // Exclude deleted tasks
+        if (task.status === 'deleted') return false;
+        
         // Show tasks for this specific date
         if (task.dueDate === todayStr) return true;
         
@@ -1204,8 +1219,21 @@ function renderTodayView() {
     const timedTasks = regularTasks.filter(task => task.dueTime);
     const untimedTasks = regularTasks.filter(task => !task.dueTime);
     
-    // Sort timed tasks by time
-    timedTasks.sort((a, b) => (a.dueTime || '').localeCompare(b.dueTime || ''));
+    // Sort timed tasks by status first (pending first, completed last), then by time
+    timedTasks.sort((a, b) => {
+        if (a.status !== b.status) {
+            return a.status === 'completed' ? 1 : -1;
+        }
+        return (a.dueTime || '').localeCompare(b.dueTime || '');
+    });
+    
+    // Sort untimed tasks by status (pending first, completed last)
+    untimedTasks.sort((a, b) => {
+        if (a.status !== b.status) {
+            return a.status === 'completed' ? 1 : -1;
+        }
+        return 0;
+    });
     
     // Group by time slots
     const timeSlots = {};
@@ -1237,6 +1265,14 @@ function renderTodayView() {
     
     // Render time slots
     Object.keys(timeSlots).sort().forEach(time => {
+        // Sort tasks within this time slot (pending first, completed last)
+        timeSlots[time].sort((a, b) => {
+            if (a.status !== b.status) {
+                return a.status === 'completed' ? 1 : -1;
+            }
+            return 0;
+        });
+        
         html += `
             <div class="time-block" 
                  data-time="${time}"
@@ -1245,8 +1281,11 @@ function renderTodayView() {
                  ondragenter="handleTimeSlotDragEnter(event)"
                  ondragleave="handleTimeSlotDragLeave(event)"
                  style="min-height: 60px; position: relative;">
-                <div class="time-block-header">🕐 ${time}</div>
-                <div class="time-block-content">`;
+                <div class="time-block-header" onclick="toggleTimeBlock('${time}')" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <span id="arrow-${time}" class="group-arrow">▼</span>
+                    🕐 ${time}
+                </div>
+                <div class="time-block-content" id="content-${time}">`;
         
         timeSlots[time].forEach(task => {
             html += renderTaskCard(task);
@@ -1261,8 +1300,11 @@ function renderTodayView() {
     if (untimedTasks.length > 0) {
         html += `
             <div class="time-block">
-                <div class="time-block-header">📋 No Specific Time</div>
-                <div class="time-block-content">`;
+                <div class="time-block-header" onclick="toggleTimeBlock('untimed')" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <span id="arrow-untimed" class="group-arrow">▶</span>
+                    📋 No Specific Time
+                </div>
+                <div class="time-block-content" id="content-untimed" style="display: none;">`;
         
         untimedTasks.forEach(task => {
             html += renderTaskCard(task);
@@ -1289,23 +1331,21 @@ function renderWeekView() {
     // Update the week display
     updateCurrentWeekDisplay();
     
-    // Add template buttons before the grid
-    const weekView = document.getElementById('week-view');
-    const existingTemplates = weekView.querySelector('.template-buttons-section');
-    if (existingTemplates) {
-        existingTemplates.remove();
-    }
-    
-    const templateHtml = renderTemplateButtonsSection();
-    if (templateHtml) {
-        const templateDiv = document.createElement('div');
-        templateDiv.className = 'template-buttons-section';
-        templateDiv.innerHTML = templateHtml;
-        grid.parentNode.insertBefore(templateDiv, grid);
-    }
-    
-    // Get Monday of the current week
+    // Get all tasks for the week to populate template filters
     const monday = getMonday(currentWeekDate);
+    const weekTasks = [];
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + i);
+        const dateStr = getLocalDateString(date);
+        const dayTasks = tasks.filter(task => task.dueDate === dateStr && task.status !== 'deleted');
+        weekTasks.push(...dayTasks);
+    }
+    
+    // Render template filter buttons
+    renderWeekTemplateFilters(weekTasks);
+    
+    // Use already calculated monday and get sunday
     const sunday = new Date(monday);
     sunday.setDate(sunday.getDate() + 6);
     
@@ -1347,8 +1387,17 @@ function renderWeekView() {
         }
         
         // Check for tasks on this date
-        const dayTasks = typeof getTasksForDate === 'function' ? getTasksForDate(dateStr) : 
-                        tasks.filter(task => task.dueDate === dateStr);
+        let dayTasks = typeof getTasksForDate === 'function' ? getTasksForDate(dateStr) : 
+                        tasks.filter(task => task.dueDate === dateStr && task.status !== 'deleted');
+        
+        // Apply template filter if active
+        if (window.activeWeekTemplateFilter) {
+            dayTasks = dayTasks.filter(task => {
+                const text = `${task.title || ''} ${task.notes || ''}`;
+                return text.includes(window.activeWeekTemplateFilter);
+            });
+        }
+        
         if (dayTasks.length > 0) {
             dayElement.classList.add('has-tasks');
         }
@@ -1471,15 +1520,6 @@ function renderWeekView() {
         grid.appendChild(dayElement);
     }
     
-    // Generate template filters based on week's tasks
-    const weekTasks = tasks.filter(task => {
-        if (!task.dueDate) return false;
-        const taskDate = new Date(task.dueDate + 'T00:00:00');
-        return taskDate >= monday && taskDate <= sunday;
-    });
-    if (typeof renderWeekTemplateFilters === 'function') {
-        renderWeekTemplateFilters(weekTasks);
-    }
     
     // Ensure the current day has the day cursor, or find first day with tasks
     const currentDateISO = getLocalDateString(currentWeekDate);
@@ -1874,23 +1914,17 @@ function renderCalendar() {
     // Update the month display
     updateCurrentMonthDisplay();
     
-    // Add template buttons before the grid
-    const calendarView = document.getElementById('calendar-view');
-    const existingTemplates = calendarView.querySelector('.template-buttons-section');
-    if (existingTemplates) {
-        existingTemplates.remove();
-    }
-    
-    const templateHtml = renderTemplateButtonsSection();
-    if (templateHtml) {
-        const templateDiv = document.createElement('div');
-        templateDiv.className = 'template-buttons-section';
-        templateDiv.innerHTML = templateHtml;
-        grid.parentNode.insertBefore(templateDiv, grid);
-    }
-    
+    // Get all tasks for the month to populate template filters
     const year = currentCalendarDate.getFullYear();
     const month = currentCalendarDate.getMonth();
+    const monthTasks = tasks.filter(task => {
+        if (!task.dueDate || task.status === 'deleted') return false;
+        const taskDate = new Date(task.dueDate);
+        return taskDate.getFullYear() === year && taskDate.getMonth() === month;
+    });
+    
+    // Render template filter buttons
+    renderMonthTemplateFilters(monthTasks);
     
     // Format month name with translations
     const monthNames = [
@@ -1949,8 +1983,17 @@ function renderCalendar() {
             dayElement.classList.add('today');
         }
         
-        const dayTasks = typeof getTasksForDate === 'function' ? getTasksForDate(dateStr) : 
-                        tasks.filter(task => task.dueDate === dateStr);
+        let dayTasks = typeof getTasksForDate === 'function' ? getTasksForDate(dateStr) : 
+                        tasks.filter(task => task.dueDate === dateStr && task.status !== 'deleted');
+        
+        // Apply template filter if active
+        if (window.activeMonthTemplateFilter) {
+            dayTasks = dayTasks.filter(task => {
+                const text = `${task.title || ''} ${task.notes || ''}`;
+                return text.includes(window.activeMonthTemplateFilter);
+            });
+        }
+        
         if (dayTasks.length > 0) {
             dayElement.classList.add('has-tasks');
             
@@ -2074,15 +2117,6 @@ function renderCalendar() {
         grid.appendChild(dayElement);
     }
     
-    // Generate template filters based on month's tasks
-    const monthTasks = tasks.filter(task => {
-        if (!task.dueDate) return false;
-        const taskDate = new Date(task.dueDate + 'T00:00:00');
-        return taskDate.getFullYear() === year && taskDate.getMonth() === month;
-    });
-    if (typeof renderMonthTemplateFilters === 'function') {
-        renderMonthTemplateFilters(monthTasks);
-    }
     
     // Update dynamic month statistics
     if (typeof updateMonthStats === 'function') {

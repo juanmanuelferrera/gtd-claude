@@ -309,121 +309,121 @@
         /* Desktop Sidebar Navigation */
         @media (min-width: 769px) {
             .main-nav {
-                background: transparent;
+                background: var(--things-surface);
+                border-right: 1px solid var(--things-border);
                 border-bottom: none;
                 box-shadow: none;
                 display: flex;
                 flex-direction: column;
-                gap: 4px;
-                padding: 0 16px;
-                width: 100%;
+                gap: 8px;
+                padding: 20px 12px;
+                width: 220px;
+                height: 100vh;
+                position: fixed;
+                left: 0;
+                top: 0;
+                z-index: 100;
+                overflow-y: auto;
+            }
+            
+            .container {
+                margin-left: 220px;
+                width: calc(100% - 220px);
             }
         }
         
 
         .nav-btn {
-            border: none;
-            padding: 6px 12px;
+            all: unset;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px 16px;
+            text-align: left;
+            color: var(--things-text-secondary);
+            font-size: 16px;
+            font-weight: 400;
             cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: background 0.2s ease;
-            white-space: nowrap;
-            text-align: center;
-            color: white;
-            flex: 1;
-            margin: 0;
+            border-radius: 8px;
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: transparent;
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .nav-btn:hover {
+            color: var(--things-text);
+            background: rgba(128, 128, 128, 0.05);
+        }
+        
+        .nav-btn:focus-visible {
+            outline: 2px solid var(--things-accent);
+            outline-offset: 2px;
         }
         
         .nav-btn.active {
-            opacity: 1;
+            background: linear-gradient(to right, rgba(0, 122, 255, 0.08), transparent);
+            color: var(--things-text);
+            font-weight: 500;
+        }
+        
+        .nav-btn.active::before {
+            background: var(--things-accent);
+        }
+        
+        /* Subtle color coding for different sections */
+        #nav-today:hover { background: linear-gradient(to right, rgba(255, 59, 48, 0.05), transparent); }
+        #nav-today.active { background: linear-gradient(to right, rgba(255, 59, 48, 0.08), transparent); }
+        #nav-today.active::before { background: #FF3B30; }
+        
+        #nav-week:hover { background: linear-gradient(to right, rgba(0, 122, 255, 0.05), transparent); }
+        #nav-week.active { background: linear-gradient(to right, rgba(0, 122, 255, 0.08), transparent); }
+        #nav-week.active::before { background: #007AFF; }
+        
+        #nav-calendar:hover { background: linear-gradient(to right, rgba(52, 199, 89, 0.05), transparent); }
+        #nav-calendar.active { background: linear-gradient(to right, rgba(52, 199, 89, 0.08), transparent); }
+        #nav-calendar.active::before { background: #34C759; }
+        
+        #nav-all:hover { background: linear-gradient(to right, rgba(175, 82, 222, 0.05), transparent); }
+        #nav-all.active { background: linear-gradient(to right, rgba(175, 82, 222, 0.08), transparent); }
+        #nav-all.active::before { background: #AF52DE; }
+        
+        #nav-lists:hover { background: linear-gradient(to right, rgba(255, 159, 10, 0.05), transparent); }
+        #nav-lists.active { background: linear-gradient(to right, rgba(255, 159, 10, 0.08), transparent); }
+        #nav-lists.active::before { background: #FF9F0A; }
+        
+        #nav-repeat:hover { background: linear-gradient(to right, rgba(90, 200, 250, 0.05), transparent); }
+        #nav-repeat.active { background: linear-gradient(to right, rgba(90, 200, 250, 0.08), transparent); }
+        #nav-repeat.active::before { background: #5AC8FA; }
+        
+        #nav-undo:hover { background: linear-gradient(to right, rgba(255, 214, 10, 0.05), transparent); }
+        #nav-undo.active { background: linear-gradient(to right, rgba(255, 214, 10, 0.08), transparent); }
+        #nav-undo.active::before { background: #FFD60A; }
+        
+        #nav-settings:hover { background: linear-gradient(to right, rgba(142, 142, 147, 0.05), transparent); }
+        #nav-settings.active { background: linear-gradient(to right, rgba(142, 142, 147, 0.08), transparent); }
+        #nav-settings.active::before { background: #8E8E93; }
+        
+        .nav-btn-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
         }
         
 
-        /* Today - Red */
-        #nav-today {
-            background: #FF4136;
-        }
-        #nav-today:hover {
-            background: #E6392F;
-            transform: translateY(-2px);
-        }
-        #nav-today.active {
-            background: #FF4136;
-        }
-
-        /* Week - Blue */
-        #nav-week {
-            background: #0074D9;
-        }
-        #nav-week:hover {
-            background: #0066C3;
-            transform: translateY(-2px);
-        }
-        #nav-week.active {
-            background: #0074D9;
-        }
-
-        /* Month - Green */
-        #nav-calendar {
-            background: #2ECC40;
-        }
-        #nav-calendar:hover {
-            background: #29B939;
-            transform: translateY(-2px);
-        }
-        #nav-calendar.active {
-            background: #2ECC40;
-        }
-
-        /* Search - Orange */
-        #nav-all {
-            background: #FF851B;
-        }
-        #nav-all:hover {
-            background: #E6771A;
-            transform: translateY(-2px);
-        }
-        #nav-all.active {
-            background: #FF851B;
-        }
-
-        /* Lists - Maroon */
-        #nav-lists {
-            background: #CD5C5C;
-        }
-        #nav-lists:hover {
-            background: #DC143C;
-            transform: translateY(-2px);
-        }
-        #nav-lists.active {
-            background: #B22222;
-        }
-
-        /* Repeat - Purple */
-        #nav-repeat {
-            background: #B10DC9;
-        }
-        #nav-repeat:hover {
-            background: #9E0CB5;
-            transform: translateY(-2px);
-        }
-        #nav-repeat.active {
-            background: #B10DC9;
-        }
-
-        /* Undo - Yellow */
-        #nav-undo {
-            background: #FFDC00 !important;
-            color: black !important;
-        }
-        #nav-undo:hover {
-            background: #E6C600 !important;
-            transform: translateY(-2px) !important;
-        }
-        #nav-undo.active {
-            background: #FFDC00 !important;
-        }
+        /* Remove individual button colors for Apple-style */
 
         /* Content area - white card effect */
         .content-container {
@@ -3534,28 +3534,28 @@
             
             <div class="main-nav">
             <button class="nav-btn active" onclick="showView('today')" id="nav-today" tabindex="1">
-                Today
+                📋 Today
             </button>
             <button class="nav-btn" onclick="showView('week')" id="nav-week" tabindex="2" data-translate="Week">
-                Week
+                📊 Week
             </button>
             <button class="nav-btn" onclick="showView('calendar')" id="nav-calendar" tabindex="3" data-translate="Month">
-                Month
+                📆 Month
             </button>
-            <button class="nav-btn" onclick="showView('all')" id="nav-all" tabindex="4">
-                Search
+            <button class="nav-btn" onclick="showView('all'); setTimeout(() => { const searchInput = document.getElementById('allTasksSearchInput'); if (searchInput) searchInput.focus(); }, 100);" id="nav-all" tabindex="4">
+                🔍 Search
             </button>
             <button class="nav-btn" onclick="showView('lists')" id="nav-lists" tabindex="5">
-                Lists
+                📂 Lists
             </button>
             <button class="nav-btn" onclick="showView('repeat')" id="nav-repeat" tabindex="6">
-                Repeat
+                🔄 Repeat
             </button>
             <button class="nav-btn" onclick="showView('undo')" id="nav-undo" tabindex="7">
-                Undo
+                ↩️ Undo
             </button>
             <button class="nav-btn" onclick="showView('settings')" id="nav-settings" tabindex="8">
-                Settings
+                ⚙️ Settings
             </button>
             </div>
             
@@ -3563,14 +3563,57 @@
             <div style="padding: 16px; border-top: 1px solid var(--things-border); margin-top: 20px;">
                 <!-- Action Buttons -->
                 <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
-                    <button onclick="importTasks()" class="action-btn">
+                    <button onclick="quickBackupJSON()" class="action-btn" style="
+                        all: unset;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        padding: 10px 14px;
+                        background: linear-gradient(to right, rgba(255, 214, 10, 0.1), transparent);
+                        border-left: 3px solid #FFD60A;
+                        border-radius: 6px;
+                        color: var(--things-text-secondary);
+                        cursor: pointer;
+                        font-size: 14px;
+                        transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                    " onmouseover="this.style.background='linear-gradient(to right, rgba(255, 214, 10, 0.15), transparent)'" 
+                       onmouseout="this.style.background='linear-gradient(to right, rgba(255, 214, 10, 0.1), transparent)'">
+                        💾 Quick Backup
+                    </button>
+                    <button onclick="document.getElementById('jsonImportFile2').click()" class="action-btn" style="
+                        all: unset;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        padding: 10px 14px;
+                        background: linear-gradient(to right, rgba(0, 122, 255, 0.1), transparent);
+                        border-left: 3px solid #007AFF;
+                        border-radius: 6px;
+                        color: var(--things-text-secondary);
+                        cursor: pointer;
+                        font-size: 14px;
+                        transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                    " onmouseover="this.style.background='linear-gradient(to right, rgba(0, 122, 255, 0.15), transparent)'" 
+                       onmouseout="this.style.background='linear-gradient(to right, rgba(0, 122, 255, 0.1), transparent)'">
                         📥 Import JSON
                     </button>
-                    <button onclick="exportAllTasks()" class="action-btn">
-                        Export
-                    </button>
-                    <button onclick="createEmergencyBackup()" class="action-btn">
-                        Backup
+                    <input type="file" id="jsonImportFile2" accept=".json" style="display: none;" onchange="importJSONBackup(this)">
+                    <button onclick="exportAllTasks()" class="action-btn" style="
+                        all: unset;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        padding: 10px 14px;
+                        background: linear-gradient(to right, rgba(52, 199, 89, 0.1), transparent);
+                        border-left: 3px solid #34C759;
+                        border-radius: 6px;
+                        color: var(--things-text-secondary);
+                        cursor: pointer;
+                        font-size: 14px;
+                        transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                    " onmouseover="this.style.background='linear-gradient(to right, rgba(52, 199, 89, 0.15), transparent)'" 
+                       onmouseout="this.style.background='linear-gradient(to right, rgba(52, 199, 89, 0.1), transparent)'">
+                        📤 Export All
                     </button>
                 </div>
                 
@@ -4912,19 +4955,21 @@
                         <!-- Backup Column -->
                         <div style="display: flex; flex-direction: column; gap: 10px;">
                             <h5 style="margin: 0 0 8px 0; color: #666; font-size: 14px; font-weight: 600; text-align: center;">
-                                📄 <span data-translate="JSON Files">JSON Files</span>
+                                🛡️ <span data-translate="Quick Backup">Quick Backup</span>
                             </h5>
-                            <button onclick="createEmergencyBackup()" 
+                            <button onclick="quickBackupJSON()" 
                                     style="background: #ffc107; color: #212529; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; width: 100%;"
                                     onmouseover="this.style.background='#e0a800'"
                                     onmouseout="this.style.background='#ffc107'">
-                                💾 <span data-translate="Create Backup">Create Backup</span>
+                                💾 <span data-translate="Quick Backup JSON">Quick Backup JSON</span>
                             </button>
-                            <button onclick="restoreFromEmergencyBackup()" 
+                            <button onclick="document.getElementById('jsonImportFile').click()" 
                                     style="background: #6c757d; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; width: 100%;"
                                     onmouseover="this.style.background='#545b62'"
                                     onmouseout="this.style.background='#6c757d'">
-                                🔄 <span data-translate="Restore Backup">Restore Backup</span>
+                                📥 <span data-translate="Import JSON Backup">Import JSON Backup</span>
+                            </button>
+                            <input type="file" id="jsonImportFile" accept=".json" style="display: none;" onchange="importJSONBackup(this)">
                             </button>
                         </div>
                     </div>
@@ -5324,6 +5369,31 @@
     <script src="js/sync.js"></script>
     <script src="js/missing-functions.js"></script>
     <script src="js/patches.js"></script>
+
+    <!-- Floating Action Button (FAB) for Quick Add Task -->
+    <button id="fabAddTask" onclick="openAddTaskModal()" style="
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: var(--things-accent);
+        color: white;
+        border: none;
+        font-size: 28px;
+        font-weight: 300;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    " onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 20px rgba(0, 122, 255, 0.6)'" 
+       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0, 122, 255, 0.4)'">
+        +
+    </button>
 
 </body>
 </html>

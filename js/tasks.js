@@ -1268,16 +1268,23 @@ function toggleTaskComplete(taskId, event) {
     // Save state for undo
     saveStateForUndo('toggle_complete', task);
     
-    // Toggle completion status
-    task.status = task.status === 'completed' ? 'pending' : 'completed';
-    task.updatedAt = new Date().toISOString();
-    
-    // Animate if completing
-    if (task.status === 'completed') {
+    // If task is pending, move to trash instead of marking complete
+    if (task.status === 'pending') {
+        // Move to trash
+        task.status = 'deleted';
+        task.deletedAt = new Date().toISOString();
+        task.updatedAt = new Date().toISOString();
+        
+        // Animate completion before removal
         const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
         if (taskElement) {
             animateTaskCompletion(taskElement);
         }
+    } else if (task.status === 'deleted') {
+        // Restore from trash
+        task.status = 'pending';
+        task.deletedAt = null;
+        task.updatedAt = new Date().toISOString();
     }
     
     // Save and sync

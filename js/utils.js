@@ -53,7 +53,7 @@ function getLocalDateString(date = new Date()) {
 }
 
 function getTasksForDate(dateStr) {
-    return tasks.filter(task => task.dueDate === dateStr);
+    return tasks.filter(task => task.dueDate === dateStr && task.status !== 'deleted');
 }
 
 function formatDate(dateStr) {

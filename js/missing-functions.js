@@ -24,13 +24,36 @@ function renderWeekTemplateFilters(weekTasks) {
     }
     
     let html = '';
-    html += '<button onclick="clearWeekTemplateFilter()" class="template-filter-btn" style="background: #666;">Show All</button>';
     
+    // Add template filter buttons
     Array.from(templatesInUse).sort().forEach(template => {
         const isActive = window.activeWeekTemplateFilter === template;
-        const activeClass = isActive ? 'template-filter-active' : '';
-        html += `<button onclick="filterWeekByTemplate('${template}')" class="template-filter-btn ${activeClass}">${template}</button>`;
+        const buttonClass = isActive ? 'filter-btn active' : 'filter-btn';
+        const title = `Filter tasks by template: ${template}`;
+        
+        html += `<button class="${buttonClass}" onclick="filterWeekByTemplate('${template}')" title="${title}" style="
+            background: ${isActive ? '#007bff' : 'transparent'}; 
+            color: ${isActive ? 'white' : '#007bff'}; 
+            border: 1px solid #007bff; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 11px; 
+            cursor: pointer;
+        ">${template}</button>`;
     });
+    
+    // Add clear filter button if filter is active
+    if (window.activeWeekTemplateFilter) {
+        html += `<button class="filter-btn filter-clear" onclick="clearWeekTemplateFilter()" title="Clear template filter" style="
+            background: #dc3545; 
+            color: white; 
+            border: 1px solid #dc3545; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 11px; 
+            cursor: pointer;
+        ">✖ Clear</button>`;
+    }
     
     container.innerHTML = html;
 }
@@ -55,13 +78,36 @@ function renderMonthTemplateFilters(monthTasks) {
     }
     
     let html = '';
-    html += '<button onclick="clearMonthTemplateFilter()" class="template-filter-btn" style="background: #666;">Show All</button>';
     
+    // Add template filter buttons
     Array.from(templatesInUse).sort().forEach(template => {
         const isActive = window.activeMonthTemplateFilter === template;
-        const activeClass = isActive ? 'template-filter-active' : '';
-        html += `<button onclick="filterMonthByTemplate('${template}')" class="template-filter-btn ${activeClass}">${template}</button>`;
+        const buttonClass = isActive ? 'filter-btn active' : 'filter-btn';
+        const title = `Filter tasks by template: ${template}`;
+        
+        html += `<button class="${buttonClass}" onclick="filterMonthByTemplate('${template}')" title="${title}" style="
+            background: ${isActive ? '#007bff' : 'transparent'}; 
+            color: ${isActive ? 'white' : '#007bff'}; 
+            border: 1px solid #007bff; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 11px; 
+            cursor: pointer;
+        ">${template}</button>`;
     });
+    
+    // Add clear filter button if filter is active
+    if (window.activeMonthTemplateFilter) {
+        html += `<button class="filter-btn filter-clear" onclick="clearMonthTemplateFilter()" title="Clear template filter" style="
+            background: #dc3545; 
+            color: white; 
+            border: 1px solid #dc3545; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 11px; 
+            cursor: pointer;
+        ">✖ Clear</button>`;
+    }
     
     container.innerHTML = html;
 }
@@ -69,23 +115,31 @@ function renderMonthTemplateFilters(monthTasks) {
 // Week template filter functions
 function filterWeekByTemplate(template) {
     window.activeWeekTemplateFilter = template;
-    showWeekView();
+    if (typeof renderWeekView === 'function') {
+        renderWeekView();
+    }
 }
 
 function clearWeekTemplateFilter() {
     window.activeWeekTemplateFilter = null;
-    showWeekView();
+    if (typeof renderWeekView === 'function') {
+        renderWeekView();
+    }
 }
 
 // Month template filter functions  
 function filterMonthByTemplate(template) {
     window.activeMonthTemplateFilter = template;
-    showMonthView();
+    if (typeof renderCalendar === 'function') {
+        renderCalendar();
+    }
 }
 
 function clearMonthTemplateFilter() {
     window.activeMonthTemplateFilter = null;
-    showMonthView();
+    if (typeof renderCalendar === 'function') {
+        renderCalendar();
+    }
 }
 
 // Simple calendar picker for task cards
@@ -325,6 +379,55 @@ function setTimeAndClose(taskId, time) {
 function clearTimeAndClose(taskId) {
     updateTaskTime(taskId, '', { stopPropagation: () => {} });
     closeTimeDropdown();
+}
+
+// Template buttons section rendering
+function renderTemplateButtonsSection() {
+    const allTemplates = new Set();
+    tasks.forEach(task => {
+        const text = `${task.title || ''} ${task.notes || ''}`;
+        const templateMatches = text.match(/@\w+/g);
+        if (templateMatches) {
+            templateMatches.forEach(template => allTemplates.add(template));
+        }
+    });
+    
+    if (allTemplates.size === 0) return '';
+    
+    let html = '<div style="margin-bottom: 15px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">';
+    
+    Array.from(allTemplates).sort().forEach(template => {
+        html += `<button onclick="filterByTemplate('${template}')" style="
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 11px; 
+            cursor: pointer;
+        ">${template}</button>`;
+    });
+    
+    html += '</div>';
+    return html;
+}
+
+// Time block toggle function for Today view
+function toggleTimeBlock(timeKey) {
+    const content = document.getElementById(`content-${timeKey}`);
+    const arrow = document.getElementById(`arrow-${timeKey}`);
+    
+    if (content && arrow) {
+        const isCollapsed = content.style.display === 'none';
+        
+        if (isCollapsed) {
+            content.style.display = 'block';
+            arrow.textContent = '▼';
+        } else {
+            content.style.display = 'none';
+            arrow.textContent = '▶';
+        }
+    }
 }
 
 
@@ -1356,9 +1459,9 @@ function handleDragStart(e) {
     
     // Try both string and number comparison since task IDs can be either
     const taskId = parseInt(taskIdStr);
-    draggedTask = window.tasks?.find(t => t.id == taskIdStr || t.id === taskId);
+    window.draggedTask = window.tasks?.find(t => t.id == taskIdStr || t.id === taskId);
     
-    if (!draggedTask) {
+    if (!window.draggedTask) {
         console.error('Task not found for drag:', taskIdStr);
         return;
     }
@@ -1402,7 +1505,7 @@ function handleDragStart(e) {
 
 function handleDragEnd(e) {
     e.target.classList.remove('dragging');
-    draggedTask = null;
+    window.draggedTask = null;
     document.querySelectorAll('.drop-target').forEach(el => {
         el.classList.remove('drop-target');
     });
@@ -1425,7 +1528,7 @@ function handleDragOver(e) {
 
 function handleDragEnter(e) {
     e.preventDefault();
-    if (draggedTask && (e.currentTarget.classList.contains('calendar-day') || e.currentTarget.classList.contains('week-day'))) {
+    if (window.draggedTask && (e.currentTarget.classList.contains('calendar-day') || e.currentTarget.classList.contains('week-day'))) {
         // Clear all existing drop-targets before adding to current element
         document.querySelectorAll('.drop-target').forEach(el => {
             el.classList.remove('drop-target');
@@ -1451,7 +1554,7 @@ async function handleDrop(e) {
     e.preventDefault();
     e.currentTarget.classList.remove('drop-target');
     
-    if (!draggedTask) {
+    if (!window.draggedTask) {
         console.error('No draggedTask found in handleDrop');
         return;
     }
@@ -1462,27 +1565,27 @@ async function handleDrop(e) {
         return;
     }
     
-    if (newDate === draggedTask.dueDate) {
+    if (newDate === window.draggedTask.dueDate) {
         return;
     }
     
     // Store task info before async operations (draggedTask can become null)
-    const taskTitle = draggedTask.title;
-    const taskId = draggedTask.id;
+    const taskTitle = window.draggedTask.title;
+    const taskId = window.draggedTask.id;
     
     const newDateObj = new Date(newDate);
-    const oldDate = draggedTask.dueDate ? new Date(draggedTask.dueDate) : null;
+    const oldDate = window.draggedTask.dueDate ? new Date(window.draggedTask.dueDate) : null;
     
     try {
         // Update task date
-        draggedTask.dueDate = newDate;
-        draggedTask.updatedAt = new Date().toISOString();
+        window.draggedTask.dueDate = newDate;
+        window.draggedTask.updatedAt = new Date().toISOString();
         
         // Update in memory tasks array
         if (window.tasks) {
-            const existingIndex = window.tasks.findIndex(t => t.id === draggedTask.id);
+            const existingIndex = window.tasks.findIndex(t => t.id === window.draggedTask.id);
             if (existingIndex >= 0) {
-                window.tasks[existingIndex] = draggedTask;
+                window.tasks[existingIndex] = window.draggedTask;
             }
         }
         
@@ -2198,6 +2301,112 @@ function toggleAllSections() {
 function showListSelectionForTXTImport() {
     console.log('Showing list selection for TXT import...');
     // Placeholder for TXT import
+}
+
+// Quick Backup and Import JSON functions
+function quickBackupJSON() {
+    try {
+        const backup = {
+            version: '1.0',
+            timestamp: new Date().toISOString(),
+            tasks: tasks || [],
+            customTemplates: customTemplates || [],
+            listSections: listSections || [],
+            settings: {
+                language: localStorage.getItem('language') || 'en',
+                theme: localStorage.getItem('theme') || 'light'
+            }
+        };
+        
+        const jsonStr = JSON.stringify(backup, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        a.href = url;
+        a.download = `hyperfiler-backup-${timestamp}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showNotification('✅ Backup created successfully!', 'success');
+    } catch (error) {
+        console.error('Backup error:', error);
+        showNotification('❌ Failed to create backup', 'error');
+    }
+}
+
+function importJSONBackup(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const backup = JSON.parse(e.target.result);
+            
+            if (!backup.tasks || !Array.isArray(backup.tasks)) {
+                throw new Error('Invalid backup format');
+            }
+            
+            if (confirm(`Import ${backup.tasks.length} tasks from backup?\nThis will replace your current data!`)) {
+                // Import tasks
+                tasks = backup.tasks || [];
+                localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                
+                // Import templates
+                if (backup.customTemplates) {
+                    customTemplates = backup.customTemplates;
+                    localStorage.setItem('customTemplates', JSON.stringify(customTemplates));
+                }
+                
+                // Import lists
+                if (backup.listSections) {
+                    listSections = backup.listSections;
+                    localStorage.setItem('listSections', JSON.stringify(listSections));
+                }
+                
+                // Refresh the view
+                renderCurrentView();
+                showNotification('✅ Backup imported successfully!', 'success');
+                
+                // Close settings modal
+                closeSettings();
+            }
+        } catch (error) {
+            console.error('Import error:', error);
+            showNotification('❌ Failed to import backup', 'error');
+        }
+    };
+    reader.readAsText(file);
+}
+
+// Toggle all time slots function
+function toggleAllTimeSlots() {
+    // Get all time slot content elements
+    const timeSlots = document.querySelectorAll('.time-block-content');
+    const arrows = document.querySelectorAll('.group-arrow');
+    
+    // Check if any are visible
+    let anyVisible = false;
+    timeSlots.forEach(slot => {
+        if (slot.style.display !== 'none') {
+            anyVisible = true;
+        }
+    });
+    
+    // Toggle all
+    timeSlots.forEach((slot, index) => {
+        if (anyVisible) {
+            slot.style.display = 'none';
+            if (arrows[index]) arrows[index].textContent = '▶';
+        } else {
+            slot.style.display = 'block';
+            if (arrows[index]) arrows[index].textContent = '▼';
+        }
+    });
 }
 
 // Export functions
