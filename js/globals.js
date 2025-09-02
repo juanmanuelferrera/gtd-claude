@@ -13,7 +13,14 @@ if (typeof window.listSections === 'undefined') {
 }
 
 if (typeof window.customTemplates === 'undefined') {
-    window.customTemplates = [];
+    // Load templates from localStorage
+    try {
+        const stored = localStorage.getItem('gtd_custom_templates');
+        window.customTemplates = stored ? JSON.parse(stored) : [];
+    } catch (error) {
+        console.error('Error loading templates:', error);
+        window.customTemplates = [];
+    }
 }
 
 if (typeof window.currentView === 'undefined') {

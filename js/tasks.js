@@ -255,6 +255,168 @@ function loadTasksFromLocalStorage() {
 }
 
 /**
+ * Quick add task with template
+ */
+function quickAddTaskWithTemplate(templateName) {
+    console.log('Quick adding task with template:', templateName);
+    
+    // Create task for today with the template
+    const today = new Date();
+    const todayStr = getLocalDateString(today);
+    
+    const newTask = {
+        id: Date.now().toString(),
+        title: `@ ${templateName}`,
+        notes: '',
+        dueDate: todayStr,
+        dueTime: null,
+        status: 'pending',
+        template: templateName,
+        repeat: null,
+        isEvent: false,
+        createdAt: new Date().toISOString(),
+        lastModified: new Date().toISOString()
+    };
+    
+    // Add task to array
+    tasks.push(newTask);
+    
+    // Save to localStorage and server
+    saveTasksToLocalStorage();
+    saveTasks().then(() => {
+        console.log('Task created with template:', templateName);
+        renderCurrentView();
+    }).catch(error => {
+        console.error('Error saving task with template:', error);
+    });
+}
+
+/**
+ * Update task date
+ */
+async function updateTaskDate(taskId, newDate, event) {
+    console.log('🔄 updateTaskDate called with:', taskId, newDate);
+    event.stopPropagation();
+    
+    try {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) {
+            console.error('Task not found:', taskId);
+            return;
+        }
+        
+        console.log(`🔄 Updating task "${task.title}" date from "${task.dueDate}" to "${newDate}"`);
+        
+        // Save state for undo
+        if (typeof saveStateForUndo === 'function') {
+            saveStateForUndo('update date', task);
+        }
+        
+        // Update task date
+        task.dueDate = newDate || null;
+        
+        // Save to server
+        await saveTasks();
+        
+        // Re-render current view to reposition the task
+        if (typeof renderCurrentView === 'function') {
+            renderCurrentView();
+        }
+        
+        console.log('✅ Task date updated and repositioned successfully');
+    } catch (error) {
+        console.error('❌ Error updating task date:', error);
+        showNotification('Failed to update task date', 'error');
+    }
+}
+
+/**
+ * Open date picker for task
+ */
+function openDatePicker(taskId, event) {
+    event.stopPropagation();
+    
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    // Store the task ID for the modal
+    window.currentDateTimeTaskId = taskId;
+    
+    // Open the existing dateTimeModal
+    const modal = document.getElementById('dateTimeModal');
+    if (modal) {
+        // Populate current values
+        if (typeof populateDateTimeModal === 'function') {
+            populateDateTimeModal(task.dueDate, task.dueTime);
+        }
+        modal.style.display = 'block';
+    }
+}
+
+/**
+ * Open time picker for task
+ */
+function openTimePicker(taskId, event) {
+    event.stopPropagation();
+    
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    // Store the task ID for the modal
+    window.currentDateTimeTaskId = taskId;
+    
+    // Open the existing dateTimeModal
+    const modal = document.getElementById('dateTimeModal');
+    if (modal) {
+        // Populate current values
+        if (typeof populateDateTimeModal === 'function') {
+            populateDateTimeModal(task.dueDate, task.dueTime);
+        }
+        modal.style.display = 'block';
+    }
+}
+
+/**
+ * Update task time
+ */
+async function updateTaskTime(taskId, newTime, event) {
+    console.log('🔄 updateTaskTime called with:', taskId, newTime);
+    event.stopPropagation();
+    
+    try {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) {
+            console.error('Task not found:', taskId);
+            return;
+        }
+        
+        const timeDescription = newTime === '' ? 'untimed (no specific time)' : newTime;
+        console.log(`🔄 Updating task "${task.title}" time from "${task.dueTime}" to "${timeDescription}"`);
+        
+        // Save state for undo
+        if (typeof saveStateForUndo === 'function') {
+            saveStateForUndo('update time', task);
+        }
+        
+        // Update task time (empty string for untimed tasks)
+        task.dueTime = newTime || null;
+        
+        // Save to server
+        await saveTasks();
+        
+        // Re-render current view to reposition the task if needed
+        if (typeof renderCurrentView === 'function') {
+            renderCurrentView();
+        }
+        
+        console.log('✅ Task time updated successfully');
+    } catch (error) {
+        console.error('❌ Error updating task time:', error);
+        showNotification('Failed to update task time', 'error');
+    }
+}
+
+/**
  * Duplicate an existing task
  */
 function duplicateTask(taskId, event) {

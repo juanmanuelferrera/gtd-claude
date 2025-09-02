@@ -842,33 +842,41 @@ function renderTaskCard(task) {
     const timeDisplay = task.dueTime ? ` at ${formatTime(task.dueTime)}` : '';
     
     return `
-        <div class="${cardClass}" onclick="editTask('${task.id}')" data-task-id="${task.id}">
-            <div class="task-header">
-                <div class="task-title">${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}${isOverdue && !isEvent ? ' <span style="color: #dc3545; font-weight: bold;">⚠️ OVERDUE</span>' : ''}</div>
-            </div>
-            
-            ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
-            
-            <div class="task-actions">
-                <div class="checkbox-container">
-                    <input type="checkbox" class="task-checkbox" ${task.status === 'completed' ? 'checked' : ''} 
-                           onclick="toggleTaskStatus('${task.id}', event)">
-                    <label>Mark as ${task.status === 'completed' ? 'pending' : 'completed'}</label>
-                </div>
-                
-                <div class="action-buttons" style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button onclick="delayTask('${task.id}', 1, event)" 
-                            style="background: #ffc107; color: #333; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;" 
-                            title="Delay by 1 day">+1D</button>
-                    <button onclick="delayTask('${task.id}', 7, event)" 
-                            style="background: #17a2b8; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;" 
-                            title="Delay by 1 week">+1W</button>
-                    <button onclick="deleteTask('${task.id}', event)" 
-                            style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;" 
-                            title="Delete task">🗑️</button>
+        <div class="${cardClass}" 
+             onclick="editTask('${task.id}')" 
+             data-task-id="${task.id}" 
+             draggable="true"
+             ondragstart="handleDragStart(event)"
+             ondragend="handleDragEnd(event)"
+             style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; min-height: 40px; cursor: move;">
+            <div style="display: flex; align-items: center; flex: 1;">
+                <div style="margin-right: 8px; color: #ccc; cursor: grab;">⋮⋮</div>
+                <input type="checkbox" class="task-checkbox" ${task.status === 'completed' ? 'checked' : ''} 
+                       onclick="toggleTaskStatus('${task.id}', event)" style="margin-right: 10px;">
+                <div class="task-title" style="flex: 1;">
+                    ${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}
+                    ${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}
+                    ${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}
+                    ${isOverdue && !isEvent ? ' <span style="color: #dc3545; font-weight: bold;">OVERDUE</span>' : ''}
+                    ${task.notes ? ` <span style="color: #666; font-size: 12px; margin-left: 8px;">📝</span>` : ''}
                 </div>
             </div>
-            
+            <div class="action-buttons" style="display: flex; gap: 4px; align-items: center;">
+                <span style="cursor: pointer; font-size: 16px; padding: 4px; position: relative;" 
+                      title="Change date and time" 
+                      onclick="event.stopPropagation(); openIOSDateTimePicker('${task.id}', '${task.dueDate || ''}', '${task.dueTime || ''}', this)">
+                    📅
+                </span>
+                <button onclick="delayTask('${task.id}', 1, event)" 
+                        style="background: #ffc107; color: #333; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; white-space: nowrap;" 
+                        title="Delay by 1 day">+1D</button>
+                <button onclick="delayTask('${task.id}', 7, event)" 
+                        style="background: #17a2b8; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; white-space: nowrap;" 
+                        title="Delay by 1 week">+1W</button>
+                <button onclick="delayTask('${task.id}', 30, event)" 
+                        style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; white-space: nowrap;" 
+                        title="Delay by 1 month">+1M</button>
+            </div>
         </div>
     `;
 }
@@ -1046,10 +1054,88 @@ function renderTasksWithSelection(filteredTasks) {
 }
 
 /**
+ * Update the date display in the Today view header
+ */
+function updateCurrentTodayDisplay() {
+    const displayElement = document.getElementById('currentTodayDate');
+    if (displayElement) {
+        const fullOptions = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        };
+        const formattedDate = currentTodayDate.toLocaleDateString('en-US', fullOptions);
+        displayElement.textContent = formattedDate;
+    }
+}
+
+/**
+ * Render template filter buttons for Today view
+ */
+function renderTodayTemplateFilters(todayTasks) {
+    const container = document.getElementById('todayTemplateFilters');
+    if (!container) return;
+    
+    // Extract templates from today's tasks
+    const templatesInUse = new Set();
+    todayTasks.forEach(task => {
+        const text = `${task.title || ''} ${task.notes || ''}`;
+        const templateMatches = text.match(/@\w+/g);
+        if (templateMatches) {
+            templateMatches.forEach(template => templatesInUse.add(template));
+        }
+    });
+    
+    if (templatesInUse.size === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    let html = '';
+    
+    // Add template filter buttons
+    Array.from(templatesInUse).sort().forEach(template => {
+        const isActive = window.activeTodayTemplateFilter === template;
+        const buttonClass = isActive ? 'filter-btn active' : 'filter-btn';
+        const title = `Filter tasks by template: ${template}`;
+        
+        html += `<button class="${buttonClass}" onclick="filterTodayByTemplate('${template}')" title="${title}" style="
+            background: ${isActive ? '#007bff' : 'transparent'}; 
+            color: ${isActive ? 'white' : '#007bff'}; 
+            border: 1px solid #007bff; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 11px; 
+            cursor: pointer;
+        ">${template}</button>`;
+    });
+    
+    // Add clear filter button if filter is active
+    if (window.activeTodayTemplateFilter) {
+        html += `<button class="filter-btn filter-clear" onclick="clearTodayTemplateFilter()" title="Clear template filter" style="
+            background: #dc3545; 
+            color: white; 
+            border: 1px solid #dc3545; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 11px; 
+            cursor: pointer;
+        ">✖ Clear</button>`;
+    }
+    
+    container.innerHTML = html;
+}
+
+/**
  * Basic renderTodayView function
  */
 function renderTodayView() {
     console.log('📱 MOBILE DEBUG: renderTodayView called, tasks.length:', tasks.length);
+    
+    // Update the date display
+    updateCurrentTodayDisplay();
+    
     const container = document.getElementById('todaySchedule');
     
     if (!container) {
@@ -1062,7 +1148,7 @@ function renderTodayView() {
     
     // Get today's tasks AND overdue tasks (only show overdue on current day)
     const isToday = todayStr === getLocalDateString(new Date());
-    const todayTasks = tasks.filter(task => {
+    let todayTasks = tasks.filter(task => {
         // Show tasks for this specific date
         if (task.dueDate === todayStr) return true;
         
@@ -1074,13 +1160,30 @@ function renderTodayView() {
         return false;
     });
     
+    // Apply template filter if active
+    if (window.activeTodayTemplateFilter) {
+        todayTasks = todayTasks.filter(task => {
+            const text = `${task.title || ''} ${task.notes || ''}`;
+            return text.includes(window.activeTodayTemplateFilter);
+        });
+    }
+    
     console.log('Today tasks found:', todayTasks.length);
     
+    // Render template filter buttons first
+    renderTodayTemplateFilters(todayTasks);
+    
+    console.log('DEBUG: todayTasks after filter:', todayTasks.length, 'activeTodayTemplateFilter:', window.activeTodayTemplateFilter);
+    
     if (todayTasks.length === 0) {
+        const message = window.activeTodayTemplateFilter 
+            ? `No tasks with template "${window.activeTodayTemplateFilter}" for ${todayStr}`
+            : `No tasks for ${todayStr}`;
+        
         container.innerHTML = `
             <div class="no-tasks-today">
                 <span class="emoji">📅</span>
-                <h3>No tasks for ${todayStr}</h3>
+                <h3>${message}</h3>
                 <p>Click the "+ Add Task" button to add a new task for today</p>
                 <button class="btn btn-primary" onclick="openAddTaskModal('${todayStr}')" style="background: #ff6b35; border-color: #ff6b35;">+ Add Task for Today</button>
             </div>
@@ -1088,9 +1191,13 @@ function renderTodayView() {
         return;
     }
     
-    // Group tasks by time
-    const timedTasks = todayTasks.filter(task => task.dueTime);
-    const untimedTasks = todayTasks.filter(task => !task.dueTime);
+    // Separate events from regular tasks
+    const eventTasks = todayTasks.filter(task => task.isEvent);
+    const regularTasks = todayTasks.filter(task => !task.isEvent);
+    
+    // Group regular tasks by time
+    const timedTasks = regularTasks.filter(task => task.dueTime);
+    const untimedTasks = regularTasks.filter(task => !task.dueTime);
     
     // Sort timed tasks by time
     timedTasks.sort((a, b) => (a.dueTime || '').localeCompare(b.dueTime || ''));
@@ -1107,10 +1214,32 @@ function renderTodayView() {
     
     let html = '<div class="today-tasks-grouped">';
     
+    // Render events first (always at top)
+    if (eventTasks.length > 0) {
+        html += `
+            <div class="time-block">
+                <div class="time-block-header">🎯 Events</div>
+                <div class="time-block-content">`;
+        
+        eventTasks.forEach(task => {
+            html += renderTaskCard(task);
+        });
+        
+        html += `
+                </div>
+            </div>`;
+    }
+    
     // Render time slots
     Object.keys(timeSlots).sort().forEach(time => {
         html += `
-            <div class="time-block">
+            <div class="time-block" 
+                 data-time="${time}"
+                 ondragover="handleTimeSlotDragOver(event)"
+                 ondrop="handleTimeSlotDrop(event, '${time}')"
+                 ondragenter="handleTimeSlotDragEnter(event)"
+                 ondragleave="handleTimeSlotDragLeave(event)"
+                 style="min-height: 60px; position: relative;">
                 <div class="time-block-header">🕐 ${time}</div>
                 <div class="time-block-content">`;
         
@@ -1154,6 +1283,21 @@ function renderWeekView() {
     
     // Update the week display
     updateCurrentWeekDisplay();
+    
+    // Add template buttons before the grid
+    const weekView = document.getElementById('week-view');
+    const existingTemplates = weekView.querySelector('.template-buttons-section');
+    if (existingTemplates) {
+        existingTemplates.remove();
+    }
+    
+    const templateHtml = renderTemplateButtonsSection();
+    if (templateHtml) {
+        const templateDiv = document.createElement('div');
+        templateDiv.className = 'template-buttons-section';
+        templateDiv.innerHTML = templateHtml;
+        grid.parentNode.insertBefore(templateDiv, grid);
+    }
     
     // Get Monday of the current week
     const monday = getMonday(currentWeekDate);
@@ -1724,6 +1868,21 @@ function renderCalendar() {
     
     // Update the month display
     updateCurrentMonthDisplay();
+    
+    // Add template buttons before the grid
+    const calendarView = document.getElementById('calendar-view');
+    const existingTemplates = calendarView.querySelector('.template-buttons-section');
+    if (existingTemplates) {
+        existingTemplates.remove();
+    }
+    
+    const templateHtml = renderTemplateButtonsSection();
+    if (templateHtml) {
+        const templateDiv = document.createElement('div');
+        templateDiv.className = 'template-buttons-section';
+        templateDiv.innerHTML = templateHtml;
+        grid.parentNode.insertBefore(templateDiv, grid);
+    }
     
     const year = currentCalendarDate.getFullYear();
     const month = currentCalendarDate.getMonth();

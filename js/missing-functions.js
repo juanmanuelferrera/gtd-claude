@@ -3,6 +3,374 @@
  * Contains all functions referenced in HTML but missing from other modules
  */
 
+// Template filter functions for Week and Month views
+function renderWeekTemplateFilters(weekTasks) {
+    const container = document.getElementById('weekTemplateFilters');
+    if (!container) return;
+    
+    // Extract templates from week's tasks
+    const templatesInUse = new Set();
+    weekTasks.forEach(task => {
+        const text = `${task.title || ''} ${task.notes || ''}`;
+        const templateMatches = text.match(/@\w+/g);
+        if (templateMatches) {
+            templateMatches.forEach(template => templatesInUse.add(template));
+        }
+    });
+    
+    if (templatesInUse.size === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    let html = '';
+    html += '<button onclick="clearWeekTemplateFilter()" class="template-filter-btn" style="background: #666;">Show All</button>';
+    
+    Array.from(templatesInUse).sort().forEach(template => {
+        const isActive = window.activeWeekTemplateFilter === template;
+        const activeClass = isActive ? 'template-filter-active' : '';
+        html += `<button onclick="filterWeekByTemplate('${template}')" class="template-filter-btn ${activeClass}">${template}</button>`;
+    });
+    
+    container.innerHTML = html;
+}
+
+function renderMonthTemplateFilters(monthTasks) {
+    const container = document.getElementById('monthTemplateFilters');
+    if (!container) return;
+    
+    // Extract templates from month's tasks
+    const templatesInUse = new Set();
+    monthTasks.forEach(task => {
+        const text = `${task.title || ''} ${task.notes || ''}`;
+        const templateMatches = text.match(/@\w+/g);
+        if (templateMatches) {
+            templateMatches.forEach(template => templatesInUse.add(template));
+        }
+    });
+    
+    if (templatesInUse.size === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    let html = '';
+    html += '<button onclick="clearMonthTemplateFilter()" class="template-filter-btn" style="background: #666;">Show All</button>';
+    
+    Array.from(templatesInUse).sort().forEach(template => {
+        const isActive = window.activeMonthTemplateFilter === template;
+        const activeClass = isActive ? 'template-filter-active' : '';
+        html += `<button onclick="filterMonthByTemplate('${template}')" class="template-filter-btn ${activeClass}">${template}</button>`;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Week template filter functions
+function filterWeekByTemplate(template) {
+    window.activeWeekTemplateFilter = template;
+    showWeekView();
+}
+
+function clearWeekTemplateFilter() {
+    window.activeWeekTemplateFilter = null;
+    showWeekView();
+}
+
+// Month template filter functions  
+function filterMonthByTemplate(template) {
+    window.activeMonthTemplateFilter = template;
+    showMonthView();
+}
+
+function clearMonthTemplateFilter() {
+    window.activeMonthTemplateFilter = null;
+    showMonthView();
+}
+
+// Combined iOS-style date and time picker
+function openIOSDateTimePicker(taskId, currentDate, currentTime, buttonElement) {
+    // Get button position
+    const buttonRect = buttonElement.getBoundingClientRect();
+    
+    // Create modal overlay (transparent, just for backdrop clicks)
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+        background: transparent; z-index: 10000; 
+        padding: 0; margin: 0;
+    `;
+    
+    // Create compact iOS-style picker positioned near button
+    const picker = document.createElement('div');
+    picker.style.cssText = `
+        background: white; border-radius: 12px; width: 320px; 
+        padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        position: fixed; z-index: 10001;
+        left: ${Math.min(buttonRect.left, window.innerWidth - 340)}px;
+        top: ${Math.min(buttonRect.bottom + 5, window.innerHeight - 400)}px;
+        border: 1px solid #e0e0e0;
+    `;
+    
+    const today = new Date();
+    const selectedDate = currentDate ? new Date(currentDate) : today;
+    
+    picker.innerHTML = `
+        <div style="text-align: center; padding: 10px 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <button onclick="previousMonth()" style="background: none; border: none; font-size: 18px; color: #007AFF;">◀</button>
+                <div id="monthYearDisplay" style="font-size: 18px; font-weight: 600; color: #333; min-width: 180px;">
+                    ${selectedDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+                </div>
+                <button onclick="nextMonth()" style="background: none; border: none; font-size: 18px; color: #007AFF;">▶</button>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 10px; text-align: center;">
+            <div style="font-weight: 600; color: #666; padding: 4px; font-size: 12px;">L</div>
+            <div style="font-weight: 600; color: #666; padding: 4px; font-size: 12px;">M</div>
+            <div style="font-weight: 600; color: #666; padding: 4px; font-size: 12px;">X</div>
+            <div style="font-weight: 600; color: #666; padding: 4px; font-size: 12px;">J</div>
+            <div style="font-weight: 600; color: #666; padding: 4px; font-size: 12px;">V</div>
+            <div style="font-weight: 600; color: #666; padding: 4px; font-size: 12px;">S</div>
+            <div style="font-weight: 600; color: #666; padding: 4px; font-size: 12px;">D</div>
+        </div>
+        <div id="calendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; margin-bottom: 15px; text-align: center;">
+        </div>
+        <div style="margin-bottom: 15px; padding: 10px; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <div style="font-weight: 600; margin-bottom: 8px; color: #333;">Hora</div>
+            <input type="time" id="timePicker" value="${currentTime || ''}" 
+                   style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px;">
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button onclick="clearIOSDateTime('${taskId}')" style="flex: 1; padding: 8px; background: #f0f0f0; border: none; border-radius: 6px; font-size: 14px;">Borrar</button>
+            <button onclick="setTodayDateTime('${taskId}')" style="flex: 1; padding: 8px; background: #007AFF; color: white; border: none; border-radius: 6px; font-size: 14px;">Hoy</button>
+        </div>
+    `;
+    
+    // Store overlay reference and current date BEFORE adding to DOM
+    window.currentIOSDatePicker = overlay;
+    window.currentPickerDate = new Date(selectedDate);
+    window.currentTaskId = taskId;
+    window.selectedCalendarDay = selectedDate.getDate(); // Set initial selected day
+    
+    overlay.appendChild(picker);
+    document.body.appendChild(overlay);
+    
+    // Close on backdrop click
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            closeIOSDatePicker();
+        }
+    });
+    
+    // Generate calendar after picker is fully rendered
+    setTimeout(() => {
+        console.log('DEBUG: About to generate calendar grid');
+        const testGrid = document.getElementById('calendarGrid');
+        console.log('DEBUG: calendarGrid element found:', !!testGrid);
+        console.log('DEBUG: currentPickerDate before calling generateCalendarGrid:', window.currentPickerDate);
+        try {
+            generateCalendarGrid();
+            console.log('DEBUG: generateCalendarGrid completed successfully');
+        } catch (error) {
+            console.error('DEBUG: Error in generateCalendarGrid:', error);
+        }
+    }, 100);
+}
+
+function closeIOSDatePicker() {
+    const overlay = window.currentIOSDatePicker;
+    if (overlay) {
+        document.body.removeChild(overlay);
+        window.currentIOSDatePicker = null;
+    }
+}
+
+function generateCalendarGrid() {
+    console.log('DEBUG: generateCalendarGrid function called');
+    
+    try {
+        const grid = document.getElementById('calendarGrid');
+        console.log('DEBUG: grid element:', grid);
+        console.log('DEBUG: currentPickerDate:', window.currentPickerDate);
+        
+        if (!grid || !window.currentPickerDate) {
+            console.log('DEBUG: Calendar grid not found or no currentPickerDate');
+            return;
+        }
+        
+        console.log('DEBUG: About to create currentDate from:', window.currentPickerDate);
+        const currentDate = new Date(window.currentPickerDate);
+        console.log('DEBUG: currentDate created:', currentDate);
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        
+        console.log('DEBUG: Generating calendar for year:', year, 'month:', month);
+        console.log('DEBUG: Year type:', typeof year, 'Month type:', typeof month);
+        
+        // First day of month and how many days
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        
+        console.log('DEBUG: Days in month:', daysInMonth);
+        
+        // Get day of week (0=Sunday, adjust to Monday=0)
+        const firstDayOfWeek = (firstDay.getDay() + 6) % 7;
+        
+        console.log('DEBUG: First day of week:', firstDayOfWeek);
+        
+        let html = '';
+        
+        // Empty cells for days before month starts
+        for (let i = 0; i < firstDayOfWeek; i++) {
+            html += '<div style="padding: 6px;"></div>';
+        }
+        
+        console.log('DEBUG: Added', firstDayOfWeek, 'empty cells');
+        
+        // Days of the month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
+            const isSelected = window.selectedCalendarDay === day;
+            
+            let dayStyle = 'padding: 6px; cursor: pointer; border-radius: 50%; font-size: 14px; min-height: 28px; display: flex; align-items: center; justify-content: center; transition: background 0.2s;';
+            if (isSelected) {
+                dayStyle += ' background: #007AFF; color: white; font-weight: bold;';
+            } else if (isToday) {
+                dayStyle += ' background: #e0e0e0; color: #333; font-weight: bold;';
+            } else {
+                dayStyle += ' color: #333;';
+            }
+            
+            html += `<div onclick="selectAndSetCalendarDay(${day})" style="${dayStyle}" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='${isSelected ? '#007AFF' : (isToday ? '#e0e0e0' : 'transparent')}'">${day}</div>`;
+        }
+        
+        console.log('DEBUG: Generated', daysInMonth, 'day cells');
+        
+        // Fill remaining cells to complete the grid
+        const totalCells = firstDayOfWeek + daysInMonth;
+        const remainingCells = totalCells % 7;
+        if (remainingCells > 0) {
+            for (let i = 0; i < (7 - remainingCells); i++) {
+                html += '<div style="padding: 6px;"></div>';
+            }
+        }
+        
+        console.log('DEBUG: Generated HTML length:', html.length);
+        console.log('DEBUG: HTML preview:', html.substring(0, 400));
+        console.log('DEBUG: Days in month:', daysInMonth);
+        console.log('DEBUG: First day of week:', firstDayOfWeek);
+        
+        if (html.length === 0) {
+            console.error('DEBUG: No HTML generated for calendar!');
+            return;
+        }
+        
+        grid.innerHTML = html;
+        console.log('DEBUG: Calendar grid populated with', daysInMonth, 'days');
+        console.log('DEBUG: Grid innerHTML after assignment:', grid.innerHTML.length);
+        console.log('DEBUG: Grid children count:', grid.children.length);
+        
+        // Update month/year display
+        const display = document.getElementById('monthYearDisplay');
+        if (display) {
+            display.textContent = currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+        }
+        
+    } catch (error) {
+        console.error('DEBUG: Exception in generateCalendarGrid:', error);
+        console.error('DEBUG: Error stack:', error.stack);
+    }
+}
+
+function selectCalendarDay(day) {
+    window.selectedCalendarDay = day;
+    generateCalendarGrid();
+}
+
+function selectAndSetCalendarDay(day) {
+    window.selectedCalendarDay = day;
+    // Immediately set the date+time when day is clicked
+    setIOSDateTime(window.currentTaskId);
+}
+
+function previousMonth() {
+    if (window.currentPickerDate) {
+        window.currentPickerDate.setMonth(window.currentPickerDate.getMonth() - 1);
+        generateCalendarGrid();
+    }
+}
+
+function nextMonth() {
+    if (window.currentPickerDate) {
+        window.currentPickerDate.setMonth(window.currentPickerDate.getMonth() + 1);
+        generateCalendarGrid();
+    }
+}
+
+function setTodayDateTime(taskId) {
+    const today = new Date();
+    const todayStr = today.getFullYear() + '-' + 
+                   String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(today.getDate()).padStart(2, '0');
+    const currentTime = document.getElementById('timePicker')?.value || '';
+    
+    updateTaskDate(taskId, todayStr, { stopPropagation: () => {} });
+    if (currentTime) {
+        updateTaskTime(taskId, currentTime, { stopPropagation: () => {} });
+    }
+    closeIOSDatePicker();
+}
+
+function clearIOSDateTime(taskId) {
+    updateTaskDate(taskId, '', { stopPropagation: () => {} });
+    updateTaskTime(taskId, '', { stopPropagation: () => {} });
+    closeIOSDatePicker();
+}
+
+function setIOSDateTime(taskId) {
+    if (window.selectedCalendarDay && window.currentPickerDate) {
+        const year = window.currentPickerDate.getFullYear();
+        const month = String(window.currentPickerDate.getMonth() + 1).padStart(2, '0');
+        const day = String(window.selectedCalendarDay).padStart(2, '0');
+        const newDate = `${year}-${month}-${day}`;
+        const newTime = document.getElementById('timePicker')?.value || '';
+        
+        updateTaskDate(taskId, newDate, { stopPropagation: () => {} });
+        if (newTime) {
+            updateTaskTime(taskId, newTime, { stopPropagation: () => {} });
+        }
+        closeIOSDatePicker();
+    }
+}
+
+// Missing core functions
+function saveTasks() {
+    if (window.tasks) {
+        localStorage.setItem('gtd_tasks', JSON.stringify(window.tasks));
+        console.log('💾 Tasks saved to localStorage');
+    }
+}
+
+function showNotification(message, type = 'info') {
+    console.log(`📢 ${type.toUpperCase()}: ${message}`);
+}
+
+function clearTaskModalTimeout() {
+    if (window.taskModalTimeout) {
+        clearTimeout(window.taskModalTimeout);
+        window.taskModalTimeout = null;
+    }
+}
+
+function setTaskModalTimeout() {
+    clearTaskModalTimeout();
+    window.taskModalTimeout = setTimeout(() => {
+        // Auto-save or cleanup logic
+    }, 5000);
+}
+
 // Global variables declared in globals.js
 // selectedTasks, activeAllTasksTemplateFilter, currentLanguage, dragged, mobileMoreMenuOpen
 
@@ -989,7 +1357,7 @@ function openSettings() {
 }
 
 // Drag and Drop functions for tasks
-let draggedTask = null;
+// draggedTask declared in tasks.js
 
 function handleDragStart(e) {
     const taskIdStr = e.target.dataset.taskId;
@@ -1397,6 +1765,476 @@ async function deleteList(sectionId, listId) {
         if (typeof renderListsView === 'function') {
             renderListsView();
         }
+    }
+}
+
+// Open list modal to view/edit list items
+function openListModal(sectionId, listId) {
+    console.log('Opening list modal for:', sectionId, listId);
+    
+    const section = window.listSections?.find(s => s.id == sectionId);
+    if (!section) {
+        console.error('Section not found:', sectionId);
+        return;
+    }
+    
+    const list = section.lists?.find(l => l.id == listId);
+    if (!list) {
+        console.error('List not found:', listId);
+        return;
+    }
+    
+    // Store current list context
+    window.currentListSectionId = sectionId;
+    window.currentListId = listId;
+    
+    // Update modal title
+    const titleElement = document.getElementById('listItemsModalTitle');
+    const subtitleElement = document.getElementById('listItemsModalSubtitle');
+    
+    if (titleElement) {
+        titleElement.textContent = `📋 ${list.name}`;
+    }
+    if (subtitleElement) {
+        subtitleElement.textContent = '';
+    }
+    
+    // Initialize items if not exists
+    if (!list.items) {
+        list.items = [];
+    }
+    
+    // Clear input
+    const inputElement = document.getElementById('newListItemInput');
+    if (inputElement) {
+        inputElement.value = '';
+    }
+    
+    // Render items
+    if (typeof renderListItems === 'function') {
+        renderListItems();
+    }
+    
+    // Show modal
+    const modal = document.getElementById('listItemsModal');
+    if (modal) {
+        modal.style.display = 'block';
+        
+        // Focus input after a short delay
+        setTimeout(() => {
+            if (inputElement) {
+                inputElement.focus();
+            }
+        }, 100);
+    }
+}
+
+// Render list items in modal
+function renderListItems() {
+    const section = window.listSections?.find(s => s.id == window.currentListSectionId);
+    if (!section) return;
+    
+    const list = section.lists?.find(l => l.id == window.currentListId);
+    if (!list) return;
+    
+    const container = document.getElementById('listItemsContainer');
+    const emptyState = document.getElementById('emptyListItems');
+    const countElement = document.getElementById('listItemsCount');
+    
+    if (!container) return;
+    
+    if (!list.items || list.items.length === 0) {
+        container.innerHTML = '';
+        if (emptyState) emptyState.style.display = 'block';
+        if (countElement) countElement.textContent = '0 items';
+        return;
+    }
+    
+    if (emptyState) emptyState.style.display = 'none';
+    if (countElement) countElement.textContent = `${list.items.length} item${list.items.length === 1 ? '' : 's'}`;
+    
+    // Sort items: unchecked first, then checked
+    const sortedItems = [...list.items].sort((a, b) => {
+        if (a.completed === b.completed) return 0;
+        return a.completed ? 1 : -1;
+    });
+    
+    let html = '';
+    sortedItems.forEach((item, index) => {
+        const originalIndex = list.items.indexOf(item);
+        html += `
+            <div class="list-modal-item ${item.completed ? 'completed' : ''}" 
+                 data-item-index="${originalIndex}">
+                <div class="list-modal-item-content">
+                    <input type="checkbox" 
+                           class="list-modal-item-checkbox" 
+                           ${item.completed ? 'checked' : ''} 
+                           onchange="toggleListItem(${originalIndex})">
+                    <div class="list-modal-item-text">${escapeHtml(item.text)}</div>
+                </div>
+                <div class="list-modal-item-actions">
+                    <button class="list-modal-action-btn edit" 
+                            onclick="editListItem(${originalIndex})" 
+                            title="Edit item">✏️</button>
+                    <button class="list-modal-action-btn delete" 
+                            onclick="deleteListItem(${originalIndex})" 
+                            title="Delete item">🗑️</button>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Render template buttons in the Add Task modal
+function renderTemplateButtons() {
+    const container = document.getElementById('templateButtons');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (!window.customTemplates || window.customTemplates.length === 0) {
+        container.innerHTML = '<span style="color: #999; font-size: 12px;">No templates created yet</span>';
+        return;
+    }
+    
+    window.customTemplates.forEach(template => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'template-btn';
+        button.textContent = template;
+        button.title = `Left-click to add "${template}" to task • Right-click or long-press to delete`;
+        
+        let touchStartTime = 0;
+        let touchTimer = null;
+        
+        // Touch start for mobile long-press
+        button.addEventListener('touchstart', (e) => {
+            touchStartTime = Date.now();
+            touchTimer = setTimeout(async () => {
+                e.preventDefault();
+                button.classList.add('deleting');
+                if (confirm(`Delete template "${template}"?`)) {
+                    await deleteTemplate(template);
+                } else {
+                    button.classList.remove('deleting');
+                }
+            }, 800);
+        });
+        
+        // Touch end to cancel long-press timer
+        button.addEventListener('touchend', (e) => {
+            clearTimeout(touchTimer);
+            const touchDuration = Date.now() - touchStartTime;
+            if (touchDuration < 800) {
+                insertTemplateToTask(template);
+            }
+            button.classList.remove('deleting');
+        });
+        
+        // Left click: insert template (for desktop)
+        button.addEventListener('click', (e) => {
+            if (!('ontouchstart' in window)) {
+                insertTemplateToTask(template);
+            }
+        });
+        
+        // Right click: delete template (for desktop)
+        button.addEventListener('contextmenu', async (e) => {
+            e.preventDefault();
+            await deleteTemplate(template);
+        });
+        
+        container.appendChild(button);
+    });
+}
+
+// Insert template into task title input
+function insertTemplateToTask(template) {
+    const titleInput = document.getElementById('editTaskTitle');
+    if (!titleInput) return;
+    
+    const currentValue = titleInput.value.trim();
+    if (currentValue) {
+        titleInput.value = currentValue + ' ' + template;
+    } else {
+        titleInput.value = template;
+    }
+    titleInput.focus();
+    titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
+}
+
+// Delete template
+async function deleteTemplate(template) {
+    if (!window.customTemplates) return;
+    
+    window.customTemplates = window.customTemplates.filter(t => t !== template);
+    
+    // Save templates
+    localStorage.setItem('gtd_custom_templates', JSON.stringify(window.customTemplates));
+    
+    // Upload to server
+    if (typeof uploadAllTemplates === 'function') {
+        await uploadAllTemplates();
+    }
+    
+    // Re-render template buttons
+    renderTemplateButtons();
+}
+
+// Open Add Task Modal
+function openAddTaskModal(dateStr) {
+    // Clear the form for new task
+    const titleInput = document.getElementById('editTaskTitle');
+    const notesInput = document.getElementById('editTaskNotes');
+    const eventCheckbox = document.getElementById('editTaskIsEvent');
+    
+    if (titleInput) titleInput.value = '';
+    if (notesInput) notesInput.value = '';
+    if (eventCheckbox) eventCheckbox.checked = false;
+    
+    // Set the date
+    const now = new Date();
+    const currentDate = now.toISOString().split('T')[0];
+    const dateToUse = dateStr || currentDate;
+    
+    const dateInput = document.getElementById('editTaskDate');
+    const timeInput = document.getElementById('editTaskTime');
+    
+    if (dateInput) dateInput.value = dateToUse;
+    if (timeInput) timeInput.value = '';
+    
+    // Change modal title
+    const modalTitle = document.querySelector('#taskModal h3');
+    if (modalTitle) {
+        modalTitle.textContent = '➕ Add New Task';
+    }
+    
+    // Set global variable to indicate we're adding, not editing
+    window.currentEditTaskId = null;
+    
+    // Render template buttons
+    renderTemplateButtons();
+    
+    // Show the modal
+    const modal = document.getElementById('taskModal');
+    if (modal) {
+        modal.style.display = 'block';
+        
+        // Focus on title input
+        setTimeout(() => {
+            if (titleInput) titleInput.focus();
+        }, 100);
+    }
+}
+
+// Date/Time Modal Functions
+function populateDateTimeModal(currentDate, currentTime) {
+    // Store current values
+    window.selectedModalDate = currentDate;
+    window.selectedModalTime = currentTime;
+    
+    // Replace day picker with calendar grid
+    const dayPickerContainer = document.getElementById('desktopDayPicker')?.parentElement || document.getElementById('mobileDayPicker')?.parentElement;
+    if (dayPickerContainer) {
+        const currentDateObj = currentDate ? new Date(currentDate) : new Date();
+        const year = currentDateObj.getFullYear();
+        const month = currentDateObj.getMonth();
+        
+        dayPickerContainer.innerHTML = `
+            <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">CALENDAR</label>
+            <div style="background: rgba(255,255,255,0.9); border-radius: 12px; padding: 8px; backdrop-filter: blur(10px);">
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 11px; text-align: center;">
+                    <div style="font-weight: bold; color: #666;">M</div>
+                    <div style="font-weight: bold; color: #666;">T</div>
+                    <div style="font-weight: bold; color: #666;">W</div>
+                    <div style="font-weight: bold; color: #666;">T</div>
+                    <div style="font-weight: bold; color: #666;">F</div>
+                    <div style="font-weight: bold; color: #666;">S</div>
+                    <div style="font-weight: bold; color: #666;">S</div>
+                    ${generateCalendarGrid(year, month, currentDateObj.getDate())}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Populate month picker
+    const monthPicker = document.getElementById('desktopMonthPicker') || document.getElementById('mobileMonthPicker');
+    if (monthPicker && currentDate) {
+        const date = new Date(currentDate);
+        monthPicker.value = date.getMonth();
+    }
+    
+    // Populate hour picker
+    const hourPicker = document.getElementById('desktopHourPicker') || document.getElementById('mobileHourPicker');
+    if (hourPicker) {
+        hourPicker.value = currentTime || '';
+    }
+    
+    updateDateTimeDisplay();
+}
+
+// Generate calendar grid for date selection
+function generateCalendarGrid(year, month, selectedDay) {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDate = new Date(firstDay);
+    
+    // Adjust to start from Monday (0 = Sunday, 1 = Monday)
+    const dayOfWeek = (firstDay.getDay() + 6) % 7;
+    startDate.setDate(startDate.getDate() - dayOfWeek);
+    
+    let html = '';
+    let date = new Date(startDate);
+    
+    // Generate 6 weeks (42 days) to cover all possible month layouts
+    for (let i = 0; i < 42; i++) {
+        const isCurrentMonth = date.getMonth() === month;
+        const isSelected = isCurrentMonth && date.getDate() === selectedDay;
+        const isToday = date.toDateString() === new Date().toDateString();
+        
+        let cellStyle = 'padding: 4px; cursor: pointer; border-radius: 4px; font-size: 12px;';
+        
+        if (!isCurrentMonth) {
+            cellStyle += ' color: #ccc;';
+        } else if (isSelected) {
+            cellStyle += ' background: #667eea; color: white; font-weight: bold;';
+        } else if (isToday) {
+            cellStyle += ' background: #e3f2fd; color: #1976d2; font-weight: bold;';
+        } else {
+            cellStyle += ' color: #333;';
+        }
+        
+        const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        
+        html += `<div style="${cellStyle}" onclick="selectModalDate('${dateStr}')">${date.getDate()}</div>`;
+        
+        date.setDate(date.getDate() + 1);
+    }
+    
+    return html;
+}
+
+// Select date in modal calendar
+function selectModalDate(dateStr) {
+    window.selectedModalDate = dateStr;
+    updateDateTimeDisplay();
+    
+    // Re-populate to update selection
+    populateDateTimeModal(dateStr, window.selectedModalTime);
+}
+
+function closeDateTimeModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    const modal = document.getElementById('dateTimeModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function applyDesktopDateTime() {
+    const hourPicker = document.getElementById('desktopHourPicker') || document.getElementById('mobileHourPicker');
+    
+    // Use the selected date from calendar and time from picker
+    const selectedDate = window.selectedModalDate;
+    const selectedTime = hourPicker ? hourPicker.value : window.selectedModalTime;
+    
+    // Update the task
+    const taskId = window.currentDateTimeTaskId;
+    if (taskId) {
+        if (selectedDate) {
+            updateTaskDate(taskId, selectedDate, { stopPropagation: () => {} });
+        }
+        if (selectedTime) {
+            updateTaskTime(taskId, selectedTime, { stopPropagation: () => {} });
+        }
+    }
+    
+    closeDateTimeModal();
+}
+
+function updateDateTimeDisplay() {
+    // Update the modal display
+    const display = document.getElementById('desktopSelectedDisplay') || document.getElementById('mobileSelectedDisplay');
+    if (display) {
+        display.textContent = 'Date and time selected';
+    }
+}
+
+// Today view template filtering
+function filterTodayByTemplate(template) {
+    if (window.activeTodayTemplateFilter === template) {
+        // Toggle off if same template clicked
+        clearTodayTemplateFilter();
+    } else {
+        // Set new filter
+        window.activeTodayTemplateFilter = template;
+        renderTodayView();
+    }
+}
+
+function clearTodayTemplateFilter() {
+    window.activeTodayTemplateFilter = null;
+    renderTodayView();
+}
+
+// Time slot drag and drop for Today view
+function handleTimeSlotDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+}
+
+function handleTimeSlotDragEnter(e) {
+    e.preventDefault();
+    if (window.draggedTask) {
+        e.currentTarget.classList.add('drop-target');
+    }
+}
+
+function handleTimeSlotDragLeave(e) {
+    // Remove drop-target class when leaving the time slot
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        e.currentTarget.classList.remove('drop-target');
+    }
+}
+
+async function handleTimeSlotDrop(e, targetTime) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drop-target');
+    
+    if (!window.draggedTask) {
+        console.error('No draggedTask found in time slot drop');
+        return;
+    }
+    
+    try {
+        console.log(`Moving task "${window.draggedTask.title}" to time ${targetTime}`);
+        
+        // Update task time
+        window.draggedTask.dueTime = targetTime;
+        window.draggedTask.updatedAt = new Date().toISOString();
+        
+        // Save to localStorage and server
+        if (typeof saveTasksToLocalStorage === 'function') {
+            saveTasksToLocalStorage();
+        }
+        if (typeof saveTasks === 'function') {
+            await saveTasks();
+        }
+        
+        // Re-render Today view to show new position
+        if (typeof renderTodayView === 'function') {
+            renderTodayView();
+        }
+        
+        console.log('✅ Task time updated via drag and drop');
+    } catch (error) {
+        console.error('❌ Error in time slot drop:', error);
     }
 }
 
