@@ -5,8 +5,13 @@ window.addEventListener('load', async () => {
     console.log('🚀 Initializing HyperFiler Pro...');
     
     // Check if user is logged in
-    if (typeof checkAuthStatus === 'function') {
-        await checkAuthStatus();
+    if (typeof checkAuthentication === 'function') {
+        await checkAuthentication();
+    }
+    
+    // Load tasks from local storage
+    if (typeof loadTasksFromLocalStorage === 'function') {
+        await loadTasksFromLocalStorage();
     }
     
     // Initialize the UI
@@ -15,9 +20,9 @@ window.addEventListener('load', async () => {
         showView('today');
     }
     
-    // Load tasks if user is authenticated
-    if (window.currentUser && typeof loadTasks === 'function') {
-        await loadTasks();
+    // Force render the view
+    if (typeof renderCurrentView === 'function') {
+        renderCurrentView();
     }
     
     console.log('✅ HyperFiler Pro initialized');
