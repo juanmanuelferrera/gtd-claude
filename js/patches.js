@@ -118,18 +118,29 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(hideOverlays, 2000);
 });
 
-// Ensure critical functions are globally accessible
-window.renderCurrentView = window.renderCurrentView || renderCurrentView;
-window.renderTodayView = window.renderTodayView || renderTodayView;
-window.renderTasks = window.renderTasks || renderTasks;
-window.sortTasks = window.sortTasks || sortTasks;
-window.toggleTaskStatus = window.toggleTaskStatus || toggleTaskStatus;
-window.deleteTask = window.deleteTask || deleteTask;
-window.delayTask = window.delayTask || delayTask;
-window.openAddTaskModal = window.openAddTaskModal || openAddTaskModal;
-window.editTask = window.editTask || editTask;
-window.saveTaskEdit = window.saveTaskEdit || saveTaskEdit;
-window.closeTaskModal = window.closeTaskModal || closeTaskModal;
+// Ensure critical functions are globally accessible and patch variable references
+window.renderCurrentView = window.renderCurrentView || (typeof renderCurrentView !== 'undefined' ? renderCurrentView : null);
+window.renderTodayView = window.renderTodayView || (typeof renderTodayView !== 'undefined' ? renderTodayView : null);
+window.renderTasks = window.renderTasks || (typeof renderTasks !== 'undefined' ? renderTasks : null);
+window.sortTasks = window.sortTasks || (typeof sortTasks !== 'undefined' ? sortTasks : null);
+window.toggleTaskStatus = window.toggleTaskStatus || (typeof toggleTaskStatus !== 'undefined' ? toggleTaskStatus : null);
+window.deleteTask = window.deleteTask || (typeof deleteTask !== 'undefined' ? deleteTask : null);
+window.delayTask = window.delayTask || (typeof delayTask !== 'undefined' ? delayTask : null);
+window.openAddTaskModal = window.openAddTaskModal || (typeof openAddTaskModal !== 'undefined' ? openAddTaskModal : null);
+window.editTask = window.editTask || (typeof editTask !== 'undefined' ? editTask : null);
+window.saveTaskEdit = window.saveTaskEdit || (typeof saveTaskEdit !== 'undefined' ? saveTaskEdit : null);
+window.closeTaskModal = window.closeTaskModal || (typeof closeTaskModal !== 'undefined' ? closeTaskModal : null);
+
+// Ensure global variables are synced between bare names and window properties
+if (typeof window.tasks !== 'undefined' && typeof tasks === 'undefined') {
+    window.tasks = window.tasks;
+}
+if (typeof window.listSections !== 'undefined' && typeof listSections === 'undefined') {
+    window.listSections = window.listSections;
+}
+if (typeof window.customTemplates !== 'undefined' && typeof customTemplates === 'undefined') {
+    window.customTemplates = window.customTemplates;
+}
 
 // Stub out missing repeat manager functions to prevent errors
 window.showRepeatManager = window.showRepeatManager || function() {

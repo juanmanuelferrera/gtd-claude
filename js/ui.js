@@ -844,12 +844,7 @@ function renderTaskCard(task) {
     return `
         <div class="${cardClass}" onclick="editTask('${task.id}')" data-task-id="${task.id}">
             <div class="task-header">
-                <div class="task-title">${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}</div>
-            </div>
-            
-            <div class="task-meta">
-                ${task.dueDate ? `<span>📅 ${formatDate(task.dueDate)}${timeDisplay}</span>` : ''}
-                ${isOverdue && !isEvent ? '<span style="color: #dc3545; font-weight: bold;">⚠️ OVERDUE</span>' : ''}
+                <div class="task-title">${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}${isOverdue && !isEvent ? ' <span style="color: #dc3545; font-weight: bold;">⚠️ OVERDUE</span>' : ''}</div>
             </div>
             
             ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
@@ -973,12 +968,8 @@ function toggleGroup(dateKey) {
 function performAllTasksSearch() {
     const searchInputElement = document.getElementById('allTasksSearchInput');
     
-    if (!searchInputElement) {
-        console.error('🔍 ERROR: Search input element not found');
-        return;
-    }
-    
-    const searchTerm = searchInputElement.value.toLowerCase();
+    // Get search term if input exists, otherwise show all tasks
+    const searchTerm = searchInputElement ? searchInputElement.value.toLowerCase() : '';
     
     if (!Array.isArray(tasks)) {
         console.error('Tasks array not properly initialized');
@@ -1019,7 +1010,7 @@ function performAllTasksSearch() {
  * Render tasks with selection support
  */
 function renderTasksWithSelection(filteredTasks) {
-    const container = document.getElementById('allTasks');
+    const container = document.getElementById('tasksContainer');
     
     if (!container) {
         console.error('allTasks container not found');
@@ -1097,13 +1088,58 @@ function renderTodayView() {
         return;
     }
     
-    // Simple list rendering for today's tasks
-    let html = '<div class="today-tasks-list">';
-    todayTasks.forEach(task => {
-        html += renderTaskCard(task);
-    });
-    html += '</div>';
+    // Group tasks by time
+    const timedTasks = todayTasks.filter(task => task.dueTime);
+    const untimedTasks = todayTasks.filter(task => !task.dueTime);
     
+    // Sort timed tasks by time
+    timedTasks.sort((a, b) => (a.dueTime || '').localeCompare(b.dueTime || ''));
+    
+    // Group by time slots
+    const timeSlots = {};
+    timedTasks.forEach(task => {
+        const timeKey = task.dueTime;
+        if (!timeSlots[timeKey]) {
+            timeSlots[timeKey] = [];
+        }
+        timeSlots[timeKey].push(task);
+    });
+    
+    let html = '<div class="today-tasks-grouped">';
+    
+    // Render time slots
+    Object.keys(timeSlots).sort().forEach(time => {
+        html += `
+            <div class="time-block">
+                <div class="time-block-header">🕐 ${time}</div>
+                <div class="time-block-content">`;
+        
+        timeSlots[time].forEach(task => {
+            html += renderTaskCard(task);
+        });
+        
+        html += `
+                </div>
+            </div>`;
+    });
+    
+    // Render untimed tasks
+    if (untimedTasks.length > 0) {
+        html += `
+            <div class="time-block">
+                <div class="time-block-header">📋 No Specific Time</div>
+                <div class="time-block-content">`;
+        
+        untimedTasks.forEach(task => {
+            html += renderTaskCard(task);
+        });
+        
+        html += `
+                </div>
+            </div>`;
+    }
+    
+    html += '</div>';
     container.innerHTML = html;
 }
 
@@ -1341,16 +1377,41 @@ function renderAllTasksView() {
 /**
  * Render Lists View
  */
-function renderListsView() {
-    if (typeof loadListSections === 'function') {
-        loadListSections();
+function loadListSections() {
+    try {
+        const saved = localStorage.getItem('gtd_list_sections');
+        const loadedSections = saved ? JSON.parse(saved) : [];
+        
+        // Don't overwrite if window.listSections already has data from sync
+        if (!window.listSections || window.listSections.length === 0) {
+            window.listSections = loadedSections;
+        }
+        
+        console.log('📋 loadListSections - localStorage:', loadedSections.length, 'window:', window.listSections?.length || 0);
+    } catch (error) {
+        console.error('Error loading list sections:', error);
+        window.listSections = window.listSections || [];
     }
+}
+
+function renderListsView() {
+    loadListSections();
+    console.log('📋 Lists view - listSections:', window.listSections);
+    
     const container = document.getElementById('listsContainer');
     const emptyState = document.getElementById('noListSections');
     
-    if (!container || !emptyState) return;
+    if (!container) {
+        console.error('listsContainer not found');
+        return;
+    }
+    if (!emptyState) {
+        console.error('noListSections not found');
+        return;
+    }
     
     const listSections = typeof window.listSections !== 'undefined' ? window.listSections : [];
+    console.log('📋 Rendering', listSections.length, 'list sections');
     
     if (listSections.length === 0) {
         container.innerHTML = '';
@@ -1942,3 +2003,28 @@ function initializeUI() {
     
     console.log('✅ UI module initialized');
 }
+
+// List management functions
+async function toggleListSection(sectionId) {
+    const section = window.listSections.find(s => s.id === sectionId);
+    if (section) {
+        section.collapsed = !section.collapsed;
+        if (typeof saveListSections === 'function') {
+            await saveListSections();
+        }
+        renderListsView();
+    }
+}
+
+async function saveListSections() {
+    try {
+        localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
+        console.log('💾 Saved list sections to localStorage');
+    } catch (error) {
+        console.error('Error saving list sections:', error);
+    }
+}
+
+// Make functions globally available
+window.toggleListSection = toggleListSection;
+window.saveListSections = saveListSections;
