@@ -863,9 +863,14 @@ function renderTaskCard(task) {
             </div>
             <div class="action-buttons" style="display: flex; gap: 4px; align-items: center;">
                 <span style="cursor: pointer; font-size: 16px; padding: 4px; position: relative;" 
-                      title="Change date and time" 
+                      title="Change date" 
                       onclick="event.stopPropagation(); openIOSDateTimePicker('${task.id}', '${task.dueDate || ''}', '${task.dueTime || ''}', this)">
                     📅
+                </span>
+                <span style="cursor: pointer; font-size: 16px; padding: 4px; position: relative;" 
+                      title="Change time" 
+                      onclick="event.stopPropagation(); openTimeDropdown('${task.id}', '${task.dueTime || ''}', this)">
+                    🕐
                 </span>
                 <button onclick="delayTask('${task.id}', 1, event)" 
                         style="background: #ffc107; color: #333; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; white-space: nowrap;" 

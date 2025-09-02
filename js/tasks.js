@@ -765,7 +765,8 @@ async function saveTaskEdit() {
         const dateValue = document.getElementById('editTaskDateOnly').value;
         const timeValue = document.getElementById('editTaskTimeOnly').value;
         
-        const dueDate = dateValue || null;
+        // If no date provided, use today's date for new tasks
+        const dueDate = dateValue || (currentEditTaskId ? null : getLocalDateString(new Date()));
         const dueTime = timeValue || null;
         
         if (currentEditTaskId) {

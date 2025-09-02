@@ -88,206 +88,246 @@ function clearMonthTemplateFilter() {
     showMonthView();
 }
 
-// Combined iOS-style date and time picker
+// Simple calendar picker for task cards
 function openIOSDateTimePicker(taskId, currentDate, currentTime, buttonElement) {
+    // Remove any existing picker
+    if (window.currentIOSDatePicker) {
+        document.body.removeChild(window.currentIOSDatePicker);
+    }
+    
     // Get button position
     const buttonRect = buttonElement.getBoundingClientRect();
     
-    // Create modal overlay (transparent, just for backdrop clicks)
+    // Create overlay
     const overlay = document.createElement('div');
     overlay.style.cssText = `
         position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-        background: transparent; z-index: 10000; 
-        padding: 0; margin: 0;
+        background: rgba(0,0,0,0.3); z-index: 10000;
     `;
     
-    // Create compact iOS-style picker positioned near button
+    // Create picker
     const picker = document.createElement('div');
     picker.style.cssText = `
         background: white; border-radius: 12px; width: 320px; 
-        padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         position: fixed; z-index: 10001;
-        left: ${Math.min(buttonRect.left, window.innerWidth - 340)}px;
-        top: ${Math.min(buttonRect.bottom + 5, window.innerHeight - 400)}px;
+        left: ${Math.max(10, Math.min(buttonRect.left, window.innerWidth - 340))}px;
+        top: ${Math.max(10, Math.min(buttonRect.bottom + 10, window.innerHeight - 450))}px;
         border: 1px solid #e0e0e0;
     `;
     
+    // Get current date info
     const today = new Date();
-    const selectedDate = currentDate ? new Date(currentDate) : today;
+    const pickerDate = currentDate ? new Date(currentDate) : today;
+    const year = pickerDate.getFullYear();
+    const month = pickerDate.getMonth();
+    const selectedDay = pickerDate.getDate();
+    
+    // Generate calendar HTML
+    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                       'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    
+    // Calculate calendar grid
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const firstDayOfWeek = (firstDay.getDay() + 6) % 7; // Monday = 0
+    
+    let calendarHTML = '';
+    
+    // Empty cells before month starts
+    for (let i = 0; i < firstDayOfWeek; i++) {
+        calendarHTML += '<div></div>';
+    }
+    
+    // Days of month
+    for (let day = 1; day <= daysInMonth; day++) {
+        const isSelected = day === selectedDay;
+        const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
+        
+        let style = 'padding: 8px; cursor: pointer; border-radius: 50%; font-size: 14px; text-align: center;';
+        if (isSelected) {
+            style += ' background: #007AFF; color: white; font-weight: bold;';
+        } else if (isToday) {
+            style += ' background: #e0e0e0; color: #333;';
+        } else {
+            style += ' color: #333;';
+        }
+        
+        calendarHTML += `<div onclick="setPickerDate('${taskId}', ${year}, ${month}, ${day})" style="${style}">${day}</div>`;
+    }
     
     picker.innerHTML = `
-        <div style="text-align: center; padding: 10px 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 15px;">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                <button onclick="previousMonth()" style="background: none; border: none; font-size: 18px; color: #007AFF;">◀</button>
-                <div id="monthYearDisplay" style="font-size: 18px; font-weight: 600; color: #333; min-width: 180px;">
-                    ${selectedDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
-                </div>
-                <button onclick="nextMonth()" style="background: none; border: none; font-size: 18px; color: #007AFF;">▶</button>
-            </div>
+        <div style="text-align: center; margin-bottom: 15px; font-size: 16px; font-weight: 600;">
+            ${monthNames[month]} ${year}
         </div>
-        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 10px; text-align: center;">
-            <div style="font-weight: 600; color: #666; padding: 4px; font-size: 12px;">L</div>
-            <div style="font-weight: 600; color: #666; padding: 4px; font-size: 12px;">M</div>
-            <div style="font-weight: 600; color: #666; padding: 4px; font-size: 12px;">X</div>
-            <div style="font-weight: 600; color: #666; padding: 4px; font-size: 12px;">J</div>
-            <div style="font-weight: 600; color: #666; padding: 4px; font-size: 12px;">V</div>
-            <div style="font-weight: 600; color: #666; padding: 4px; font-size: 12px;">S</div>
-            <div style="font-weight: 600; color: #666; padding: 4px; font-size: 12px;">D</div>
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 10px; text-align: center; font-size: 12px; color: #666;">
+            <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
         </div>
-        <div id="calendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; margin-bottom: 15px; text-align: center;">
-        </div>
-        <div style="margin-bottom: 15px; padding: 10px; border: 1px solid #e0e0e0; border-radius: 8px;">
-            <div style="font-weight: 600; margin-bottom: 8px; color: #333;">Hora</div>
-            <input type="time" id="timePicker" value="${currentTime || ''}" 
-                   style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px;">
-        </div>
-        <div style="display: flex; gap: 8px;">
-            <button onclick="clearIOSDateTime('${taskId}')" style="flex: 1; padding: 8px; background: #f0f0f0; border: none; border-radius: 6px; font-size: 14px;">Borrar</button>
-            <button onclick="setTodayDateTime('${taskId}')" style="flex: 1; padding: 8px; background: #007AFF; color: white; border: none; border-radius: 6px; font-size: 14px;">Hoy</button>
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;">
+            ${calendarHTML}
         </div>
     `;
     
-    // Store overlay reference and current date BEFORE adding to DOM
+    // Store references
     window.currentIOSDatePicker = overlay;
-    window.currentPickerDate = new Date(selectedDate);
     window.currentTaskId = taskId;
-    window.selectedCalendarDay = selectedDate.getDate(); // Set initial selected day
     
     overlay.appendChild(picker);
     document.body.appendChild(overlay);
     
+    // Auto-close after 6 seconds
+    window.calendarAutoCloseTimer = setTimeout(() => {
+        closeTaskPicker();
+    }, 6000);
+    
     // Close on backdrop click
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) {
-            closeIOSDatePicker();
+            closeTaskPicker();
         }
     });
-    
-    // Generate calendar after picker is fully rendered
-    setTimeout(() => {
-        console.log('DEBUG: About to generate calendar grid');
-        const testGrid = document.getElementById('calendarGrid');
-        console.log('DEBUG: calendarGrid element found:', !!testGrid);
-        console.log('DEBUG: currentPickerDate before calling generateCalendarGrid:', window.currentPickerDate);
-        try {
-            generateCalendarGrid();
-            console.log('DEBUG: generateCalendarGrid completed successfully');
-        } catch (error) {
-            console.error('DEBUG: Error in generateCalendarGrid:', error);
-        }
-    }, 100);
 }
 
-function closeIOSDatePicker() {
-    const overlay = window.currentIOSDatePicker;
-    if (overlay) {
-        document.body.removeChild(overlay);
+function closeTaskPicker() {
+    if (window.calendarAutoCloseTimer) {
+        clearTimeout(window.calendarAutoCloseTimer);
+        window.calendarAutoCloseTimer = null;
+    }
+    if (window.currentIOSDatePicker) {
+        document.body.removeChild(window.currentIOSDatePicker);
         window.currentIOSDatePicker = null;
     }
 }
 
-function generateCalendarGrid() {
-    console.log('DEBUG: generateCalendarGrid function called');
+function setPickerDate(taskId, year, month, day) {
+    const newDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    updateTaskDate(taskId, newDate, { stopPropagation: () => {} });
+    closeTaskPicker();
+}
+
+function setTaskToday(taskId) {
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const timeInput = document.getElementById('timePicker');
+    const time = timeInput ? timeInput.value : '';
     
-    try {
-        const grid = document.getElementById('calendarGrid');
-        console.log('DEBUG: grid element:', grid);
-        console.log('DEBUG: currentPickerDate:', window.currentPickerDate);
+    updateTaskDate(taskId, todayStr, { stopPropagation: () => {} });
+    if (time) {
+        updateTaskTime(taskId, time, { stopPropagation: () => {} });
+    }
+    closeTaskPicker();
+}
+
+function clearTaskDateTime(taskId) {
+    updateTaskDate(taskId, '', { stopPropagation: () => {} });
+    updateTaskTime(taskId, '', { stopPropagation: () => {} });
+    closeTaskPicker();
+}
+
+// Time dropdown picker
+function openTimeDropdown(taskId, currentTime, buttonElement) {
+    // Remove any existing picker
+    if (window.currentTimeDropdown) {
+        document.body.removeChild(window.currentTimeDropdown);
+    }
+    
+    // Get button position
+    const buttonRect = buttonElement.getBoundingClientRect();
+    
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+        background: rgba(0,0,0,0.3); z-index: 10000;
+    `;
+    
+    // Create picker
+    const picker = document.createElement('div');
+    picker.style.cssText = `
+        background: white; border-radius: 12px; width: 200px; 
+        padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        position: fixed; z-index: 10001;
+        left: ${Math.max(10, Math.min(buttonRect.left, window.innerWidth - 220))}px;
+        top: ${Math.max(10, Math.min(buttonRect.bottom + 10, window.innerHeight - 300))}px;
+        border: 1px solid #e0e0e0; max-height: 250px; overflow-y: auto;
+    `;
+    
+    // Generate time options from 6:00 to 22:00 every hour
+    const times = [];
+    for (let hour = 6; hour <= 22; hour++) {
+        times.push(`${String(hour).padStart(2, '0')}:00`);
+    }
+    
+    let html = `
+        <div style="text-align: center; margin-bottom: 10px; font-size: 16px; font-weight: 600;">
+            Hora
+        </div>
+        <div style="margin-bottom: 10px;">
+    `;
+    
+    times.forEach(time => {
+        const isSelected = time === currentTime;
+        const style = isSelected 
+            ? 'background: #007AFF; color: white; font-weight: bold;'
+            : 'background: #f8f9fa;';
         
-        if (!grid || !window.currentPickerDate) {
-            console.log('DEBUG: Calendar grid not found or no currentPickerDate');
-            return;
+        html += `<div onclick="setTimeAndClose('${taskId}', '${time}')" 
+                      style="padding: 8px; margin: 2px 0; cursor: pointer; border-radius: 6px; text-align: center; ${style}"
+                      onmouseover="this.style.background='${isSelected ? '#0056CC' : '#e9ecef'}'"
+                      onmouseout="this.style.background='${isSelected ? '#007AFF' : '#f8f9fa'}'">${time}</div>`;
+    });
+    
+    html += `
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button onclick="clearTimeAndClose('${taskId}')" style="flex: 1; padding: 8px; background: #f0f0f0; border: none; border-radius: 6px; font-size: 14px;">Borrar</button>
+        </div>
+    `;
+    
+    picker.innerHTML = html;
+    
+    // Store references
+    window.currentTimeDropdown = overlay;
+    
+    overlay.appendChild(picker);
+    document.body.appendChild(overlay);
+    
+    // Auto-close after 6 seconds
+    window.timeAutoCloseTimer = setTimeout(() => {
+        closeTimeDropdown();
+    }, 6000);
+    
+    // Close on backdrop click
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            closeTimeDropdown();
         }
-        
-        console.log('DEBUG: About to create currentDate from:', window.currentPickerDate);
-        const currentDate = new Date(window.currentPickerDate);
-        console.log('DEBUG: currentDate created:', currentDate);
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        
-        console.log('DEBUG: Generating calendar for year:', year, 'month:', month);
-        console.log('DEBUG: Year type:', typeof year, 'Month type:', typeof month);
-        
-        // First day of month and how many days
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const daysInMonth = lastDay.getDate();
-        
-        console.log('DEBUG: Days in month:', daysInMonth);
-        
-        // Get day of week (0=Sunday, adjust to Monday=0)
-        const firstDayOfWeek = (firstDay.getDay() + 6) % 7;
-        
-        console.log('DEBUG: First day of week:', firstDayOfWeek);
-        
-        let html = '';
-        
-        // Empty cells for days before month starts
-        for (let i = 0; i < firstDayOfWeek; i++) {
-            html += '<div style="padding: 6px;"></div>';
-        }
-        
-        console.log('DEBUG: Added', firstDayOfWeek, 'empty cells');
-        
-        // Days of the month
-        for (let day = 1; day <= daysInMonth; day++) {
-            const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
-            const isSelected = window.selectedCalendarDay === day;
-            
-            let dayStyle = 'padding: 6px; cursor: pointer; border-radius: 50%; font-size: 14px; min-height: 28px; display: flex; align-items: center; justify-content: center; transition: background 0.2s;';
-            if (isSelected) {
-                dayStyle += ' background: #007AFF; color: white; font-weight: bold;';
-            } else if (isToday) {
-                dayStyle += ' background: #e0e0e0; color: #333; font-weight: bold;';
-            } else {
-                dayStyle += ' color: #333;';
-            }
-            
-            html += `<div onclick="selectAndSetCalendarDay(${day})" style="${dayStyle}" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='${isSelected ? '#007AFF' : (isToday ? '#e0e0e0' : 'transparent')}'">${day}</div>`;
-        }
-        
-        console.log('DEBUG: Generated', daysInMonth, 'day cells');
-        
-        // Fill remaining cells to complete the grid
-        const totalCells = firstDayOfWeek + daysInMonth;
-        const remainingCells = totalCells % 7;
-        if (remainingCells > 0) {
-            for (let i = 0; i < (7 - remainingCells); i++) {
-                html += '<div style="padding: 6px;"></div>';
-            }
-        }
-        
-        console.log('DEBUG: Generated HTML length:', html.length);
-        console.log('DEBUG: HTML preview:', html.substring(0, 400));
-        console.log('DEBUG: Days in month:', daysInMonth);
-        console.log('DEBUG: First day of week:', firstDayOfWeek);
-        
-        if (html.length === 0) {
-            console.error('DEBUG: No HTML generated for calendar!');
-            return;
-        }
-        
-        grid.innerHTML = html;
-        console.log('DEBUG: Calendar grid populated with', daysInMonth, 'days');
-        console.log('DEBUG: Grid innerHTML after assignment:', grid.innerHTML.length);
-        console.log('DEBUG: Grid children count:', grid.children.length);
-        
-        // Update month/year display
-        const display = document.getElementById('monthYearDisplay');
-        if (display) {
-            display.textContent = currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-        }
-        
-    } catch (error) {
-        console.error('DEBUG: Exception in generateCalendarGrid:', error);
-        console.error('DEBUG: Error stack:', error.stack);
+    });
+}
+
+function closeTimeDropdown() {
+    if (window.timeAutoCloseTimer) {
+        clearTimeout(window.timeAutoCloseTimer);
+        window.timeAutoCloseTimer = null;
+    }
+    if (window.currentTimeDropdown) {
+        document.body.removeChild(window.currentTimeDropdown);
+        window.currentTimeDropdown = null;
     }
 }
 
-function selectCalendarDay(day) {
-    window.selectedCalendarDay = day;
-    generateCalendarGrid();
+function setTimeAndClose(taskId, time) {
+    updateTaskTime(taskId, time, { stopPropagation: () => {} });
+    closeTimeDropdown();
 }
+
+function clearTimeAndClose(taskId) {
+    updateTaskTime(taskId, '', { stopPropagation: () => {} });
+    closeTimeDropdown();
+}
+
+
 
 function selectAndSetCalendarDay(day) {
     window.selectedCalendarDay = day;
@@ -295,55 +335,7 @@ function selectAndSetCalendarDay(day) {
     setIOSDateTime(window.currentTaskId);
 }
 
-function previousMonth() {
-    if (window.currentPickerDate) {
-        window.currentPickerDate.setMonth(window.currentPickerDate.getMonth() - 1);
-        generateCalendarGrid();
-    }
-}
 
-function nextMonth() {
-    if (window.currentPickerDate) {
-        window.currentPickerDate.setMonth(window.currentPickerDate.getMonth() + 1);
-        generateCalendarGrid();
-    }
-}
-
-function setTodayDateTime(taskId) {
-    const today = new Date();
-    const todayStr = today.getFullYear() + '-' + 
-                   String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-                   String(today.getDate()).padStart(2, '0');
-    const currentTime = document.getElementById('timePicker')?.value || '';
-    
-    updateTaskDate(taskId, todayStr, { stopPropagation: () => {} });
-    if (currentTime) {
-        updateTaskTime(taskId, currentTime, { stopPropagation: () => {} });
-    }
-    closeIOSDatePicker();
-}
-
-function clearIOSDateTime(taskId) {
-    updateTaskDate(taskId, '', { stopPropagation: () => {} });
-    updateTaskTime(taskId, '', { stopPropagation: () => {} });
-    closeIOSDatePicker();
-}
-
-function setIOSDateTime(taskId) {
-    if (window.selectedCalendarDay && window.currentPickerDate) {
-        const year = window.currentPickerDate.getFullYear();
-        const month = String(window.currentPickerDate.getMonth() + 1).padStart(2, '0');
-        const day = String(window.selectedCalendarDay).padStart(2, '0');
-        const newDate = `${year}-${month}-${day}`;
-        const newTime = document.getElementById('timePicker')?.value || '';
-        
-        updateTaskDate(taskId, newDate, { stopPropagation: () => {} });
-        if (newTime) {
-            updateTaskTime(taskId, newTime, { stopPropagation: () => {} });
-        }
-        closeIOSDatePicker();
-    }
-}
 
 // Missing core functions
 function saveTasks() {
@@ -2053,7 +2045,7 @@ function populateDateTimeModal(currentDate, currentTime) {
                     <div style="font-weight: bold; color: #666;">F</div>
                     <div style="font-weight: bold; color: #666;">S</div>
                     <div style="font-weight: bold; color: #666;">S</div>
-                    ${generateCalendarGrid(year, month, currentDateObj.getDate())}
+                    <!-- Calendar grid placeholder -->
                 </div>
             </div>
         `;
@@ -2075,46 +2067,6 @@ function populateDateTimeModal(currentDate, currentTime) {
     updateDateTimeDisplay();
 }
 
-// Generate calendar grid for date selection
-function generateCalendarGrid(year, month, selectedDay) {
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startDate = new Date(firstDay);
-    
-    // Adjust to start from Monday (0 = Sunday, 1 = Monday)
-    const dayOfWeek = (firstDay.getDay() + 6) % 7;
-    startDate.setDate(startDate.getDate() - dayOfWeek);
-    
-    let html = '';
-    let date = new Date(startDate);
-    
-    // Generate 6 weeks (42 days) to cover all possible month layouts
-    for (let i = 0; i < 42; i++) {
-        const isCurrentMonth = date.getMonth() === month;
-        const isSelected = isCurrentMonth && date.getDate() === selectedDay;
-        const isToday = date.toDateString() === new Date().toDateString();
-        
-        let cellStyle = 'padding: 4px; cursor: pointer; border-radius: 4px; font-size: 12px;';
-        
-        if (!isCurrentMonth) {
-            cellStyle += ' color: #ccc;';
-        } else if (isSelected) {
-            cellStyle += ' background: #667eea; color: white; font-weight: bold;';
-        } else if (isToday) {
-            cellStyle += ' background: #e3f2fd; color: #1976d2; font-weight: bold;';
-        } else {
-            cellStyle += ' color: #333;';
-        }
-        
-        const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-        
-        html += `<div style="${cellStyle}" onclick="selectModalDate('${dateStr}')">${date.getDate()}</div>`;
-        
-        date.setDate(date.getDate() + 1);
-    }
-    
-    return html;
-}
 
 // Select date in modal calendar
 function selectModalDate(dateStr) {
