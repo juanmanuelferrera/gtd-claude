@@ -60,7 +60,35 @@ class DateUtils {
     }
 
     /**
-     * Get Monday of the week for a given date
+     * Get week start day from user preferences (0=Sunday, 1=Monday)
+     */
+    static getWeekStartDay() {
+        const saved = localStorage.getItem('weekStartDay');
+        return saved !== null ? parseInt(saved) : 1; // Default to Monday (1)
+    }
+
+    /**
+     * Get start of the week for a given date based on user preference
+     */
+    static getWeekStart(date) {
+        const d = new Date(date);
+        const day = d.getDay();
+        const weekStartDay = this.getWeekStartDay();
+        
+        let diff;
+        if (weekStartDay === 0) { // Sunday start
+            diff = day; // Days since Sunday
+        } else { // Monday start
+            diff = day === 0 ? 6 : day - 1; // Days since Monday
+        }
+        
+        const weekStart = new Date(d);
+        weekStart.setDate(d.getDate() - diff);
+        return weekStart;
+    }
+
+    /**
+     * Get Monday of the week for a given date (legacy compatibility)
      */
     static getMonday(date) {
         const d = new Date(date);
@@ -70,13 +98,13 @@ class DateUtils {
     }
 
     /**
-     * Get date range for a week
+     * Get date range for a week based on user preference
      */
     static getWeekRange(baseDate) {
-        const monday = this.getMonday(baseDate);
-        const sunday = new Date(monday);
-        sunday.setDate(monday.getDate() + 6);
-        return { start: monday, end: sunday };
+        const weekStart = this.getWeekStart(baseDate);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        return { start: weekStart, end: weekEnd };
     }
 
     /**

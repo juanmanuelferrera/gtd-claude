@@ -142,7 +142,9 @@ class TaskUtils {
      * Check if task is overdue
      */
     static isOverdue(task) {
-        return DateUtils.isOverdue(task);
+        if (!task.dueDate || task.status !== 'pending' || task.isEvent) return false;
+        const today = DateUtils.getLocalDateString ? DateUtils.getLocalDateString(new Date()) : '';
+        return task.dueDate < today;
     }
 
     /**

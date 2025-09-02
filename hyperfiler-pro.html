@@ -4720,6 +4720,13 @@
                             <option value="24hour">24-hour</option>
                         </select>
                     </div>
+                    <div>
+                        <label style="font-size: 14px; color: #4a5568; font-weight: 500; margin-bottom: 5px; display: block;">Week Starts On:</label>
+                        <select id="weekStartSelect" onchange="saveWeekStart()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
+                            <option value="0">Sunday</option>
+                            <option value="1">Monday</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -5362,19 +5369,9 @@
     <input type="file" id="importTxtInput" accept=".txt,.org,text/*" onchange="handleTextImportFile(event)" style="display: none;">
     <!-- External JavaScript Files -->
     <!-- Core modules (load first) -->
-    <script src="js/core/StateManager.js"></script>
     <script src="js/core/DateUtils.js"></script>
     <script src="js/core/TaskUtils.js"></script>
     <script src="js/core/TemplateProcessor.js"></script>
-    <script src="js/core/ModalManager.js"></script>
-    
-    <!-- Feature modules -->
-    <script src="js/features/DragDrop.js"></script>
-    <script src="js/features/Search.js"></script>
-    
-    <!-- Component modules -->
-    <script src="js/components/TemplateFilter.js"></script>
-    <script src="js/components/TaskCard.js"></script>
     
     <!-- Original modules -->
     <script src="js/globals.js"></script>

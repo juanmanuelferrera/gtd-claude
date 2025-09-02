@@ -237,6 +237,7 @@ async function downloadAllTasks() {
         if (window.forceMandatoryRefresh || window.staleBrowserMode) {
             console.log('🚨 MANDATORY REFRESH: Directly replacing with server data');
             tasks = serverTasks;
+            window.tasks = tasks; // Sync to window
         } else {
             // Normal sync: merge with conflict detection
             await mergeTasksWithConflictResolution(serverTasks);
@@ -304,6 +305,7 @@ async function mergeTasksWithConflictResolution(serverTasks) {
     if (!tasks || tasks.length === 0) {
         // No local tasks, use server tasks
         tasks = serverTasks;
+        window.tasks = tasks; // Sync to window
         return;
     }
     
@@ -348,6 +350,7 @@ async function mergeTasksWithConflictResolution(serverTasks) {
     }
     
     tasks = mergedTasks;
+    window.tasks = tasks; // Sync to window
     console.log(`✅ Merged tasks: ${serverTasks.length} from server, ${tasks.length} total after merge`);
 }
 

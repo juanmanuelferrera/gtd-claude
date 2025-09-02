@@ -238,6 +238,10 @@ function loadTasksFromLocalStorage() {
             
             console.log(`📥 Loaded ${tasks.length} tasks from localStorage`);
             
+            // CRITICAL: Sync to window.tasks for other modules
+            window.tasks = tasks;
+            console.log(`🔄 Synced ${tasks.length} tasks to window.tasks`);
+            
             // Load and clean event registry
             loadEventRegistry();
             cleanEventRegistry();
@@ -251,6 +255,7 @@ function loadTasksFromLocalStorage() {
     } catch (error) {
         console.error('Error loading tasks from localStorage:', error);
         tasks = [];
+        window.tasks = tasks; // Sync empty array to window
     }
 }
 
@@ -280,6 +285,7 @@ function quickAddTaskWithTemplate(templateName) {
     
     // Add task to array
     tasks.push(newTask);
+    window.tasks = tasks; // Sync to window
     
     // Save to localStorage and server
     saveTasksToLocalStorage();
@@ -442,6 +448,7 @@ function duplicateTask(taskId, event) {
     
     // Add task directly to array and save
     tasks.push(newTask);
+    window.tasks = tasks; // Sync to window
     saveTasksToLocalStorage();
     sortTasks();
     renderCurrentView();
@@ -963,6 +970,7 @@ async function saveTaskEdit() {
                 };
                 
                 tasks.push(newTask);
+                window.tasks = tasks; // Sync to window
                 
                 if (isEvent) {
                     markAsEvent(taskId);

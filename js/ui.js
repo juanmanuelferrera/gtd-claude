@@ -1328,32 +1328,39 @@ function renderWeekView() {
     
     if (!grid || !weekTitle) return;
     
+    // DEBUG: Clear any active template filter to test
+    window.activeWeekTemplateFilter = null;
+    console.log('DEBUG: Cleared week template filter');
+    
     // Update the week display
     updateCurrentWeekDisplay();
     
-    // Get all tasks for the week to populate template filters
-    const monday = getMonday(currentWeekDate);
+    // Get week range based on user preference
+    const weekRange = DateUtils.getWeekRange ? DateUtils.getWeekRange(currentWeekDate) : { start: getMonday(currentWeekDate), end: new Date() };
+    const weekStart = weekRange.start;
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    
     const weekTasks = [];
+    console.log('DEBUG: Week view - Total tasks available:', (window.tasks || []).length);
     for (let i = 0; i < 7; i++) {
-        const date = new Date(monday);
-        date.setDate(monday.getDate() + i);
+        const date = new Date(weekStart);
+        date.setDate(weekStart.getDate() + i);
         const dateStr = getLocalDateString(date);
         const dayTasks = (window.tasks || []).filter(task => task.dueDate === dateStr && task.status !== 'deleted');
+        console.log(`DEBUG: Week day ${i} (${dateStr}): found ${dayTasks.length} tasks`);
         weekTasks.push(...dayTasks);
     }
+    console.log('DEBUG: Week view - Total week tasks found:', weekTasks.length);
     
     // Render template filter buttons
     renderWeekTemplateFilters(weekTasks);
     
-    // Use already calculated monday and get sunday
-    const sunday = new Date(monday);
-    sunday.setDate(sunday.getDate() + 6);
-    
     // Set week title
-    const mondayStr = monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const sundayStr = sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const year = monday.getFullYear();
-    weekTitle.textContent = `${mondayStr} - ${sundayStr}, ${year}`;
+    const startStr = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const endStr = weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const year = weekStart.getFullYear();
+    weekTitle.textContent = `${startStr} - ${endStr}, ${year}`;
     
     // Clear grid
     grid.innerHTML = '';
@@ -1361,20 +1368,35 @@ function renderWeekView() {
     const today = new Date();
     const todayStr = getLocalDateString(today);
     
-    // Generate 7 days starting from Monday
-    const dayNames = [
-        typeof translateText === 'function' ? translateText('Monday') : 'Monday', 
-        typeof translateText === 'function' ? translateText('Tuesday') : 'Tuesday', 
-        typeof translateText === 'function' ? translateText('Wednesday') : 'Wednesday', 
-        typeof translateText === 'function' ? translateText('Thursday') : 'Thursday', 
-        typeof translateText === 'function' ? translateText('Friday') : 'Friday', 
-        typeof translateText === 'function' ? translateText('Saturday') : 'Saturday', 
-        typeof translateText === 'function' ? translateText('Sunday') : 'Sunday'
-    ];
+    // Generate 7 days starting from week start preference
+    const weekStartDay = DateUtils.getWeekStartDay ? DateUtils.getWeekStartDay() : 1;
+    let dayNames;
+    
+    if (weekStartDay === 0) { // Sunday first
+        dayNames = [
+            typeof translateText === 'function' ? translateText('Sunday') : 'Sunday',
+            typeof translateText === 'function' ? translateText('Monday') : 'Monday', 
+            typeof translateText === 'function' ? translateText('Tuesday') : 'Tuesday', 
+            typeof translateText === 'function' ? translateText('Wednesday') : 'Wednesday', 
+            typeof translateText === 'function' ? translateText('Thursday') : 'Thursday', 
+            typeof translateText === 'function' ? translateText('Friday') : 'Friday', 
+            typeof translateText === 'function' ? translateText('Saturday') : 'Saturday'
+        ];
+    } else { // Monday first (default)
+        dayNames = [
+            typeof translateText === 'function' ? translateText('Monday') : 'Monday', 
+            typeof translateText === 'function' ? translateText('Tuesday') : 'Tuesday', 
+            typeof translateText === 'function' ? translateText('Wednesday') : 'Wednesday', 
+            typeof translateText === 'function' ? translateText('Thursday') : 'Thursday', 
+            typeof translateText === 'function' ? translateText('Friday') : 'Friday', 
+            typeof translateText === 'function' ? translateText('Saturday') : 'Saturday', 
+            typeof translateText === 'function' ? translateText('Sunday') : 'Sunday'
+        ];
+    }
     
     for (let i = 0; i < 7; i++) {
-        const date = new Date(monday);
-        date.setDate(monday.getDate() + i);
+        const date = new Date(weekStart);
+        date.setDate(weekStart.getDate() + i);
         const dateStr = getLocalDateString(date);
         
         const dayElement = document.createElement('div');
@@ -1390,12 +1412,16 @@ function renderWeekView() {
         let dayTasks = typeof getTasksForDate === 'function' ? getTasksForDate(dateStr) : 
                         (window.tasks || []).filter(task => task.dueDate === dateStr && task.status !== 'deleted');
         
+        console.log(`DEBUG: Week day rendering ${dateStr}: found ${dayTasks.length} tasks before filter`);
+        
         // Apply template filter if active
         if (window.activeWeekTemplateFilter) {
+            console.log(`DEBUG: Active week template filter: "${window.activeWeekTemplateFilter}"`);
             dayTasks = dayTasks.filter(task => {
                 const text = `${task.title || ''} ${task.notes || ''}`;
                 return text.includes(window.activeWeekTemplateFilter);
             });
+            console.log(`DEBUG: Week day ${dateStr}: after template filter ${dayTasks.length} tasks`);
         }
         
         if (dayTasks.length > 0) {
@@ -1455,7 +1481,12 @@ function renderWeekView() {
             return new Date(a.createdAt) - new Date(b.createdAt);
         });
         
+        console.log(`DEBUG: Week day ${dateStr}: rendering ${sortedDayTasks.length} sorted tasks`);
+        
         // Add task items
+        sortedDayTasks.forEach(task => {
+            console.log(`DEBUG: Week day ${dateStr}: rendering task "${task.title}" (${task.id})`);
+        });
         sortedDayTasks.forEach(task => {
             const taskElement = document.createElement('div');
             taskElement.className = task.isEvent ? 'week-task-item event' : 'week-task-item';
@@ -1491,6 +1522,7 @@ function renderWeekView() {
             }
             
             dayElement.appendChild(taskElement);
+            console.log(`DEBUG: Week day ${dateStr}: appended task "${task.title}" to dayElement`);
         });
         
         // Drop events
@@ -1911,17 +1943,23 @@ function renderCalendar() {
     
     if (!grid || !monthTitle) return;
     
+    // DEBUG: Clear any active template filter to test  
+    window.activeMonthTemplateFilter = null;
+    console.log('DEBUG: Cleared month template filter');
+    
     // Update the month display
     updateCurrentMonthDisplay();
     
     // Get all tasks for the month to populate template filters
     const year = currentCalendarDate.getFullYear();
     const month = currentCalendarDate.getMonth();
+    console.log(`DEBUG: Month view ${year}-${month}: Total tasks available:`, (window.tasks || []).length);
     const monthTasks = (window.tasks || []).filter(task => {
         if (!task.dueDate || task.status === 'deleted') return false;
         const taskDate = new Date(task.dueDate);
         return taskDate.getFullYear() === year && taskDate.getMonth() === month;
     });
+    console.log(`DEBUG: Month view ${year}-${month}: Found ${monthTasks.length} tasks for month`);
     
     // Render template filter buttons
     renderMonthTemplateFilters(monthTasks);
@@ -1936,16 +1974,31 @@ function renderCalendar() {
     
     grid.innerHTML = '';
     
-    // Day headers (Monday first)
-    const dayHeaders = [
-        typeof translateText === 'function' ? translateText('Monday').substring(0, 3) : 'Mon', 
-        typeof translateText === 'function' ? translateText('Tuesday').substring(0, 3) : 'Tue', 
-        typeof translateText === 'function' ? translateText('Wednesday').substring(0, 3) : 'Wed', 
-        typeof translateText === 'function' ? translateText('Thursday').substring(0, 3) : 'Thu', 
-        typeof translateText === 'function' ? translateText('Friday').substring(0, 3) : 'Fri', 
-        typeof translateText === 'function' ? translateText('Saturday').substring(0, 3) : 'Sat', 
-        typeof translateText === 'function' ? translateText('Sunday').substring(0, 3) : 'Sun'
-    ];
+    // Day headers based on week start preference
+    const weekStartDay = DateUtils.getWeekStartDay ? DateUtils.getWeekStartDay() : 1;
+    let dayHeaders;
+    
+    if (weekStartDay === 0) { // Sunday first
+        dayHeaders = [
+            typeof translateText === 'function' ? translateText('Sunday').substring(0, 3) : 'Sun',
+            typeof translateText === 'function' ? translateText('Monday').substring(0, 3) : 'Mon', 
+            typeof translateText === 'function' ? translateText('Tuesday').substring(0, 3) : 'Tue', 
+            typeof translateText === 'function' ? translateText('Wednesday').substring(0, 3) : 'Wed', 
+            typeof translateText === 'function' ? translateText('Thursday').substring(0, 3) : 'Thu', 
+            typeof translateText === 'function' ? translateText('Friday').substring(0, 3) : 'Fri', 
+            typeof translateText === 'function' ? translateText('Saturday').substring(0, 3) : 'Sat'
+        ];
+    } else { // Monday first (default)
+        dayHeaders = [
+            typeof translateText === 'function' ? translateText('Monday').substring(0, 3) : 'Mon', 
+            typeof translateText === 'function' ? translateText('Tuesday').substring(0, 3) : 'Tue', 
+            typeof translateText === 'function' ? translateText('Wednesday').substring(0, 3) : 'Wed', 
+            typeof translateText === 'function' ? translateText('Thursday').substring(0, 3) : 'Thu', 
+            typeof translateText === 'function' ? translateText('Friday').substring(0, 3) : 'Fri', 
+            typeof translateText === 'function' ? translateText('Saturday').substring(0, 3) : 'Sat', 
+            typeof translateText === 'function' ? translateText('Sunday').substring(0, 3) : 'Sun'
+        ];
+    }
     dayHeaders.forEach(day => {
         const header = document.createElement('div');
         header.className = 'calendar-header';
@@ -1957,9 +2010,17 @@ function renderCalendar() {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const startDate = new Date(firstDay);
-    // Adjust for Monday-first week (0=Sunday, 1=Monday, etc.)
+    
+    // Adjust start date based on week start preference
     const dayOfWeek = firstDay.getDay();
-    const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    let daysToSubtract;
+    
+    if (weekStartDay === 0) { // Sunday first
+        daysToSubtract = dayOfWeek;
+    } else { // Monday first
+        daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    }
+    
     startDate.setDate(startDate.getDate() - daysToSubtract);
     
     const today = new Date();

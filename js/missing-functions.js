@@ -1349,6 +1349,13 @@ function loadSettingsValues() {
             timeFormatElement.value = timeFormat;
         }
         
+        // Load week start day
+        const weekStartDay = localStorage.getItem('weekStartDay') || '1';
+        const weekStartElement = document.getElementById('weekStartSelect');
+        if (weekStartElement) {
+            weekStartElement.value = weekStartDay;
+        }
+        
         // Load auto-print settings (default to false/unchecked)
         const autoPrintEnabled = localStorage.getItem('autoPrintEnabled') === 'true';
         const autoPrintEnabledElement = document.getElementById('autoPrintEnabled');
@@ -1586,6 +1593,10 @@ async function handleDrop(e) {
             const existingIndex = window.tasks.findIndex(t => t.id === window.draggedTask.id);
             if (existingIndex >= 0) {
                 window.tasks[existingIndex] = window.draggedTask;
+                // Sync back to local tasks variable for immediate UI update
+                if (typeof tasks !== 'undefined') {
+                    tasks = window.tasks;
+                }
             }
         }
         
@@ -1603,16 +1614,21 @@ async function handleDrop(e) {
             sortTasks();
         }
         
-        // Refresh views based on current view
-        if (window.currentView === 'today' && typeof renderTodayView === 'function') {
-            renderTodayView();
-        } else if (window.currentView === 'week' && typeof renderWeekView === 'function') {
-            renderWeekView();
-        } else if (window.currentView === 'calendar' && typeof renderCalendar === 'function') {
-            renderCalendar();
-        } else if (typeof renderCurrentView === 'function') {
-            renderCurrentView();
-        }
+        // Force immediate UI refresh for all views
+        console.log('🔄 Force refreshing UI after drag and drop');
+        
+        // Force re-render the current view immediately
+        setTimeout(() => {
+            if (window.currentView === 'today' && typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else if (window.currentView === 'week' && typeof renderWeekView === 'function') {
+                renderWeekView();
+            } else if (window.currentView === 'calendar' && typeof renderCalendar === 'function') {
+                renderCalendar();
+            } else if (typeof renderCurrentView === 'function') {
+                renderCurrentView();
+            }
+        }, 10); // Minimal delay to ensure DOM updates are processed
         
         // Show brief success notification
         const notification = document.createElement('div');
@@ -1723,6 +1739,26 @@ function saveTimeFormat() {
         localStorage.setItem('timeFormat', select.value);
         console.log('Time format saved:', select.value);
     }
+}
+
+function saveWeekStart() {
+    const select = document.getElementById('weekStartSelect');
+    if (select) {
+        localStorage.setItem('weekStartDay', select.value);
+        console.log('Week start day saved:', select.value);
+        
+        // Refresh week and calendar views if they're currently displayed
+        if (window.currentView === 'week' && typeof renderWeekView === 'function') {
+            renderWeekView();
+        } else if (window.currentView === 'calendar' && typeof renderCalendar === 'function') {
+            renderCalendar();
+        }
+    }
+}
+
+function getWeekStartDay() {
+    const saved = localStorage.getItem('weekStartDay');
+    return saved !== null ? parseInt(saved) : 1; // Default to Monday (1)
 }
 
 function getBackupSettings() {

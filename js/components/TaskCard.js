@@ -53,7 +53,7 @@ class TaskCard {
      * Get CSS class for task card based on context and task properties
      */
     static getCardClass(task, context) {
-        const isOverdue = TaskUtils.isOverdue && TaskUtils.isOverdue(task);
+        const isOverdue = TaskUtils.isOverdue ? TaskUtils.isOverdue(task) : false;
         let cardClass = `task-card ${task.status}`;
         
         if (task.isEvent) {

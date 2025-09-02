@@ -184,6 +184,10 @@ class DragDropManager {
             const taskIndex = window.tasks.findIndex(t => t.id === task.id);
             if (taskIndex >= 0) {
                 window.tasks[taskIndex] = task;
+                // Sync back to local tasks variable
+                if (typeof tasks !== 'undefined') {
+                    tasks = window.tasks;
+                }
             }
             
             // Save and sync
@@ -210,6 +214,16 @@ class DragDropManager {
         try {
             task.dueTime = newTime;
             task.updatedAt = new Date().toISOString();
+            
+            // Update in tasks array
+            const taskIndex = window.tasks.findIndex(t => t.id === task.id);
+            if (taskIndex >= 0) {
+                window.tasks[taskIndex] = task;
+                // Sync back to local tasks variable
+                if (typeof tasks !== 'undefined') {
+                    tasks = window.tasks;
+                }
+            }
             
             await this.saveAndSync();
             this.refreshCurrentView();
