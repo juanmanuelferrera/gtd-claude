@@ -11216,8 +11216,8 @@
         }
         
         // Variables for list items modal
-        let currentListSectionId = null;
-        let currentListId = null;
+        window.currentListSectionId = null;
+        window.currentListId = null;
         
         // Open list modal to manage items
         function openListModal(sectionId, listId) {
@@ -11228,8 +11228,8 @@
             if (!list) return;
             
             // Store current list context
-            currentListSectionId = sectionId;
-            currentListId = listId;
+            window.currentListSectionId = sectionId;
+            window.currentListId = listId;
             
             // Update modal title
             document.getElementById('listItemsModalTitle').textContent = `📋 ${list.name}`;
@@ -11259,8 +11259,8 @@
         function closeListItemsModal(event) {
             if (!event || event.target === document.getElementById('listItemsModal')) {
                 document.getElementById('listItemsModal').style.display = 'none';
-                currentListSectionId = null;
-                currentListId = null;
+                window.currentListSectionId = null;
+                window.currentListId = null;
             }
         }
         
@@ -11388,10 +11388,10 @@
         
         // Toggle list item completion
         async function toggleListItem(itemIndex) {
-            const section = listSections.find(s => s.id == currentListSectionId);
+            const section = listSections.find(s => s.id == window.currentListSectionId);
             if (!section) return;
             
-            const list = section.lists.find(l => l.id == currentListId);
+            const list = section.lists.find(l => l.id == window.currentListId);
             if (!list || !list.items || !list.items[itemIndex]) return;
             
             // Toggle completed status

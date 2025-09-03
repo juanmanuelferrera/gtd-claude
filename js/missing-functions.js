@@ -412,23 +412,53 @@ function renderTemplateButtonsSection() {
     return html;
 }
 
-// Time block toggle function for Today view
+// Time block toggle function with state persistence and rapid-click protection
 function toggleTimeBlock(timeKey) {
+    if (!timeKey) return;
+    
+    // Rapid-click protection
+    const currentTime = Date.now();
+    if (!window.toggleTimeBlockLastClick) window.toggleTimeBlockLastClick = {};
+    if (window.toggleTimeBlockLastClick[timeKey] && 
+        currentTime - window.toggleTimeBlockLastClick[timeKey] < 300) {
+        console.log(`⏱️ Rapid-click blocked for ${timeKey}`);
+        return;
+    }
+    window.toggleTimeBlockLastClick[timeKey] = currentTime;
+    
     const content = document.getElementById(`content-${timeKey}`);
     const arrow = document.getElementById(`arrow-${timeKey}`);
     
-    if (content && arrow) {
-        const isCollapsed = content.style.display === 'none';
+    if (!content || !arrow) {
+        console.warn(`Time block elements not found: ${timeKey}`);
+        return;
+    }
+    
+    try {
+        // Get current collapse states from localStorage
+        const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
         
-        if (isCollapsed) {
-            content.style.display = 'block';
-            arrow.textContent = '▼';
-        } else {
-            content.style.display = 'none';
-            arrow.textContent = '▶';
-        }
+        // Toggle state
+        const isCurrentlyCollapsed = content.style.display === 'none' || collapseStates[timeKey] === true;
+        collapseStates[timeKey] = !isCurrentlyCollapsed;
+        
+        // Apply visual state with accessibility
+        content.style.display = collapseStates[timeKey] ? 'none' : 'block';
+        arrow.textContent = collapseStates[timeKey] ? '▶' : '▼';
+        arrow.setAttribute('aria-expanded', (!collapseStates[timeKey]).toString());
+        arrow.setAttribute('aria-label', 
+            collapseStates[timeKey] ? `Expand ${timeKey} time block` : `Collapse ${timeKey} time block`);
+        
+        // Persist state
+        localStorage.setItem('timeblock_collapse_states', JSON.stringify(collapseStates));
+        
+        console.log(`🔄 Time block ${timeKey} ${collapseStates[timeKey] ? 'collapsed' : 'expanded'}`);
+        
+    } catch (error) {
+        console.error(`Error toggling time block ${timeKey}:`, error);
     }
 }
+window.toggleTimeBlock = toggleTimeBlock;
 
 
 
@@ -532,6 +562,11 @@ function performSearch() {
         return titleMatch || notesMatch || dateMatch;
     });
     
+    // Auto-expand sections containing search results
+    if (filteredTasks.length > 0) {
+        autoExpandSectionsWithResults(filteredTasks);
+    }
+    
     // Render results
     if (searchResults) {
         if (filteredTasks.length === 0) {
@@ -547,6 +582,75 @@ function performSearch() {
     }
     
     if (exportBtn) exportBtn.style.display = filteredTasks.length > 0 ? 'block' : 'none';
+}
+
+// Auto-expand sections containing search results
+function autoExpandSectionsWithResults(filteredTasks) {
+    try {
+        const sectionsToExpand = new Set();
+        const timeBlocksToExpand = new Set();
+        
+        filteredTasks.forEach(task => {
+            // Expand date-based sections
+            if (task.dueDate) {
+                const dateKey = task.dueDate;
+                sectionsToExpand.add(dateKey);
+                
+                // Also expand time blocks if task has time
+                if (task.dueTime) {
+                    timeBlocksToExpand.add(task.dueTime);
+                }
+            }
+            
+            // Expand list sections
+            if (task.listSectionId) {
+                sectionsToExpand.add(`section-${task.listSectionId}`);
+                if (task.listId) {
+                    sectionsToExpand.add(`list-${task.listId}`);
+                }
+            }
+        });
+        
+        // Expand date group sections
+        sectionsToExpand.forEach(dateKey => {
+            const content = document.getElementById(`tasks-${dateKey}`);
+            const arrow = document.getElementById(`arrow-${dateKey}`);
+            
+            if (content && content.style.display === 'none') {
+                content.style.display = 'block';
+                content.classList.add('expanded');
+                if (arrow) {
+                    arrow.textContent = '▼';
+                    arrow.setAttribute('aria-expanded', 'true');
+                    arrow.classList.add('expanded');
+                }
+            }
+        });
+        
+        // Expand time block sections
+        timeBlocksToExpand.forEach(timeKey => {
+            const content = document.getElementById(`content-${timeKey}`);
+            const arrow = document.getElementById(`arrow-${timeKey}`);
+            
+            if (content && content.style.display === 'none') {
+                content.style.display = 'block';
+                if (arrow) {
+                    arrow.textContent = '▼';
+                    arrow.setAttribute('aria-expanded', 'true');
+                }
+                
+                // Update localStorage state
+                const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
+                collapseStates[timeKey] = false;
+                localStorage.setItem('timeblock_collapse_states', JSON.stringify(collapseStates));
+            }
+        });
+        
+        console.log(`🔍 Auto-expanded ${sectionsToExpand.size} sections and ${timeBlocksToExpand.size} time blocks for search results`);
+        
+    } catch (error) {
+        console.error('Error in autoExpandSectionsWithResults:', error);
+    }
 }
 
 function performMobileSearch(value) {
@@ -658,6 +762,11 @@ function searchTodayTasks() {
         const notesMatch = task.notes && task.notes.toLowerCase().includes(searchTerm);
         return titleMatch || notesMatch;
     });
+    
+    // Auto-expand time blocks containing search results
+    if (searchTerm && todayTasks.length > 0) {
+        autoExpandSectionsWithResults(todayTasks);
+    }
     
     // Render filtered results
     const container = document.getElementById('todaySchedule');
@@ -807,6 +916,8 @@ function expandAllGroups() {
     });
     document.querySelectorAll('[id^="arrow-"]').forEach(arrow => {
         arrow.classList.add('expanded');
+        arrow.textContent = '▼';
+        arrow.setAttribute('aria-expanded', 'true');
     });
     document.querySelectorAll('.group-content').forEach(content => {
         content.style.display = 'block';
@@ -819,6 +930,8 @@ function collapseAllGroups() {
     });
     document.querySelectorAll('[id^="arrow-"]').forEach(arrow => {
         arrow.classList.remove('expanded');
+        arrow.textContent = '▶';
+        arrow.setAttribute('aria-expanded', 'false');
     });
     document.querySelectorAll('.group-content').forEach(content => {
         content.style.display = 'none';
@@ -1940,22 +2053,66 @@ async function deleteListItem(itemIndex) {
 
 async function toggleListItem(itemIndex) {
     console.log('🔍 Global toggleListItem called:', itemIndex);
+    
+    // Rapid-click protection
+    const currentTime = Date.now();
+    if (!window.toggleListItemLastClick) window.toggleListItemLastClick = {};
+    const clickKey = `${window.currentListSectionId}-${window.currentListId}-${itemIndex}`;
+    if (window.toggleListItemLastClick[clickKey] && 
+        currentTime - window.toggleListItemLastClick[clickKey] < 300) {
+        console.log(`⏱️ Rapid-click blocked for list item ${itemIndex}`);
+        return;
+    }
+    window.toggleListItemLastClick[clickKey] = currentTime;
+    
+    // Enhanced null checks
+    if (itemIndex === null || itemIndex === undefined || itemIndex < 0) {
+        console.warn('Invalid itemIndex provided to toggleListItem:', itemIndex);
+        return;
+    }
+    
     const section = window.listSections?.find(s => s.id == window.currentListSectionId);
-    if (!section) return;
+    if (!section) {
+        console.warn('No section found for currentListSectionId:', window.currentListSectionId);
+        return;
+    }
     
     const list = section.lists?.find(l => l.id == window.currentListId);
-    if (!list || !list.items || !list.items[itemIndex]) return;
-    
-    // Toggle completed status
-    list.items[itemIndex].completed = !list.items[itemIndex].completed;
-    console.log('✅ Toggled item:', list.items[itemIndex].text, 'completed:', list.items[itemIndex].completed);
-    
-    // Save and refresh
-    if (typeof saveListSections === 'function') {
-        await saveListSections();
+    if (!list || !list.items || !list.items[itemIndex]) {
+        console.warn('No list or item found:', { 
+            listId: window.currentListId, 
+            itemIndex, 
+            itemsLength: list?.items?.length 
+        });
+        return;
     }
-    if (typeof renderListItems === 'function') {
-        renderListItems();
+    
+    try {
+        // Toggle completed status
+        const item = list.items[itemIndex];
+        const wasCompleted = item.completed;
+        item.completed = !wasCompleted;
+        
+        console.log('✅ Toggled item:', item.text, 'completed:', item.completed);
+        
+        // Update accessibility attributes for the item element
+        const itemElement = document.querySelector(`[data-item-index="${itemIndex}"]`);
+        if (itemElement) {
+            itemElement.setAttribute('aria-checked', item.completed.toString());
+            itemElement.setAttribute('aria-label', 
+                `${item.text} - ${item.completed ? 'completed' : 'pending'}`);
+        }
+        
+        // Save and refresh
+        if (typeof saveListSections === 'function') {
+            await saveListSections();
+        }
+        if (typeof renderListItems === 'function') {
+            renderListItems();
+        }
+        
+    } catch (error) {
+        console.error('Error in toggleListItem:', error);
     }
 }
 
@@ -2501,7 +2658,55 @@ async function handleTimeSlotDrop(e, targetTime) {
 
 function toggleAllSections() {
     console.log('Toggling all sections...');
-    // Placeholder for toggle all sections
+    
+    try {
+        // Find all section containers
+        const sections = document.querySelectorAll('[id^="section-"]');
+        const arrows = document.querySelectorAll('[id^="arrow-section-"]');
+        
+        if (sections.length === 0) {
+            console.warn('No sections found to toggle');
+            return;
+        }
+        
+        // Check if any sections are visible
+        let anyVisible = false;
+        sections.forEach(section => {
+            const content = section.querySelector('.section-content');
+            if (content && content.style.display !== 'none') {
+                anyVisible = true;
+            }
+        });
+        
+        // Toggle all sections with consistent indicators and accessibility
+        sections.forEach((section, index) => {
+            const content = section.querySelector('.section-content');
+            const arrow = arrows[index] || section.querySelector('.section-arrow');
+            
+            if (content) {
+                if (anyVisible) {
+                    content.style.display = 'none';
+                    if (arrow) {
+                        arrow.textContent = '▶';
+                        arrow.setAttribute('aria-expanded', 'false');
+                        arrow.setAttribute('aria-label', 'Expand section');
+                    }
+                } else {
+                    content.style.display = 'block';
+                    if (arrow) {
+                        arrow.textContent = '▼';
+                        arrow.setAttribute('aria-expanded', 'true');
+                        arrow.setAttribute('aria-label', 'Collapse section');
+                    }
+                }
+            }
+        });
+        
+        console.log(`✅ Toggled ${sections.length} sections - ${anyVisible ? 'collapsed' : 'expanded'} all`);
+        
+    } catch (error) {
+        console.error('Error in toggleAllSections:', error);
+    }
 }
 
 function showListSelectionForTXTImport() {
@@ -2603,14 +2808,20 @@ function toggleAllTimeSlots() {
         }
     });
     
-    // Toggle all
+    // Toggle all with consistent accessibility
     timeSlots.forEach((slot, index) => {
         if (anyVisible) {
             slot.style.display = 'none';
-            if (arrows[index]) arrows[index].textContent = '▶';
+            if (arrows[index]) {
+                arrows[index].textContent = '▶';
+                arrows[index].setAttribute('aria-expanded', 'false');
+            }
         } else {
             slot.style.display = 'block';
-            if (arrows[index]) arrows[index].textContent = '▼';
+            if (arrows[index]) {
+                arrows[index].textContent = '▼';
+                arrows[index].setAttribute('aria-expanded', 'true');
+            }
         }
     });
 }
@@ -2690,6 +2901,67 @@ function printSearchResults() {
 function openTrash() {
     console.log('Opening trash...');
     alert('Trash functionality not yet implemented');
+}
+
+// Keyboard support for collapse/expand functionality
+function setupCollapseExpandKeyboardSupport() {
+    document.addEventListener('keydown', function(e) {
+        // Only handle keyboard events when no input/textarea is focused
+        if (document.activeElement && 
+            (document.activeElement.tagName === 'INPUT' || 
+             document.activeElement.tagName === 'TEXTAREA' ||
+             document.activeElement.isContentEditable)) {
+            return;
+        }
+        
+        // Handle keyboard shortcuts for collapse/expand
+        if (e.ctrlKey || e.metaKey) {
+            switch(e.key) {
+                case 'e':
+                    e.preventDefault();
+                    console.log('🎹 Keyboard: Expand all groups');
+                    if (typeof expandAllGroups === 'function') {
+                        expandAllGroups();
+                    }
+                    break;
+                case 'c':
+                    e.preventDefault();
+                    console.log('🎹 Keyboard: Collapse all groups');
+                    if (typeof collapseAllGroups === 'function') {
+                        collapseAllGroups();
+                    }
+                    break;
+                case 't':
+                    e.preventDefault();
+                    console.log('🎹 Keyboard: Toggle all time slots');
+                    if (typeof toggleAllTimeSlots === 'function') {
+                        toggleAllTimeSlots();
+                    }
+                    break;
+            }
+        }
+        
+        // Individual arrow navigation with arrow keys
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            const focusedElement = document.activeElement;
+            if (focusedElement && focusedElement.classList.contains('group-arrow')) {
+                e.preventDefault();
+                const timeKey = focusedElement.id.replace('arrow-', '');
+                if (timeKey && typeof toggleTimeBlock === 'function') {
+                    toggleTimeBlock(timeKey);
+                }
+            }
+        }
+    });
+    
+    console.log('🎹 Keyboard shortcuts initialized: Ctrl+E (expand), Ctrl+C (collapse), Ctrl+T (toggle time blocks)');
+}
+
+// Initialize keyboard support on page load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupCollapseExpandKeyboardSupport);
+} else {
+    setupCollapseExpandKeyboardSupport();
 }
 
 // Make all functions globally accessible
@@ -2897,6 +3169,26 @@ function handleAddItemKeyPress(event) {
         addListItem();
     }
 }
+
+// Export tasks as JSON file
+function exportTasksJSON() {
+    try {
+        const tasks = window.tasks || [];
+        const dataStr = JSON.stringify(tasks, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `hyperfiler-tasks-${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        console.log('📁 Tasks exported as JSON successfully');
+    } catch (error) {
+        console.error('Export failed:', error);
+        alert('Export failed. Please try again.');
+    }
+}
+window.exportTasksJSON = exportTasksJSON;
 
 // Save list sections to server
 async function saveListSections() {
