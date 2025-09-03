@@ -10882,20 +10882,47 @@
         
         // Toggle list section collapse/expand
         async function toggleListSection(sectionId) {
-            const section = listSections.find(s => s.id === sectionId);
+            console.log('🔄 toggleListSection called with ID:', sectionId);
+            
+            // Use global scope to match ui.js implementation
+            const sections = window.listSections || listSections;
+            if (!sections) {
+                console.warn('No listSections found in toggleListSection');
+                return;
+            }
+            
+            const section = sections.find(s => s.id === sectionId);
             if (section) {
+                console.log('📁 Toggling section:', section.name, 'collapsed:', !section.collapsed);
                 section.collapsed = !section.collapsed;
+                
+                // Update global reference
+                if (window.listSections) {
+                    window.listSections = sections;
+                }
+                
                 await saveListSections();
                 renderListsView();
+            } else {
+                console.warn('Section not found with ID:', sectionId, 'Available sections:', sections.map(s => s.id));
             }
         }
         
         async function toggleAllSections() {
+            console.log('🔄 toggleAllSections called');
+            
+            // Use global scope
+            const sections = window.listSections || listSections;
+            if (!sections) {
+                console.warn('No listSections found in toggleAllSections');
+                return;
+            }
+            
             // Check if all sections are collapsed
-            const allCollapsed = listSections.every(section => section.collapsed);
+            const allCollapsed = sections.every(section => section.collapsed);
             
             // Toggle all sections to the opposite state
-            listSections.forEach(section => {
+            sections.forEach(section => {
                 section.collapsed = !allCollapsed;
             });
             
