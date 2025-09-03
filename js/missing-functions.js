@@ -3200,7 +3200,7 @@ async function saveListSections() {
             return;
         }
         
-        const response = await fetch(`${window.API_BASE_URL || ''}/lists/sync`, {
+        const response = await fetch(`${API_BASE}/lists/sync`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
