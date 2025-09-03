@@ -25303,22 +25303,31 @@
                 !filterNavigationActive) {
                 
                 event.preventDefault();
+                event.stopImmediatePropagation();
+                
+                console.log('🔍 Arrow key navigation:', event.key, 'view:', currentView);
                 
                 if (event.key === 'ArrowLeft') {
                     if (currentView === 'today') {
                         previousDay();
+                        console.log('← Previous day');
                     } else if (currentView === 'week') {
                         previousWeekSmart();
+                        console.log('← Previous week');
                     } else if (currentView === 'calendar') {
                         previousMonthSmart();
+                        console.log('← Previous month');
                     }
                 } else if (event.key === 'ArrowRight') {
                     if (currentView === 'today') {
                         nextDay();
+                        console.log('→ Next day');
                     } else if (currentView === 'week') {
                         nextWeekSmart();
+                        console.log('→ Next week');
                     } else if (currentView === 'calendar') {
                         nextMonthSmart();
+                        console.log('→ Next month');
                     }
                 }
             }

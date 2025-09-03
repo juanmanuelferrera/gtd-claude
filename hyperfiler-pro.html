@@ -4030,6 +4030,32 @@
                     </div>
                 </div>
                 
+                <!-- Manual Import/Export JSON -->
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <h5 style="margin: 0 0 15px 0; color: #495057;">📤 Import / Export JSON Backup</h5>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <button onclick="exportTasksJSON()" 
+                                    style="width: 100%; background: #28a745; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                                    onmouseover="this.style.background='#218838'"
+                                    onmouseout="this.style.background='#28a745'">
+                                📤 Export JSON
+                            </button>
+                            <small style="color: #6c757d; font-size: 12px; display: block; margin-top: 5px; text-align: center;">Download all tasks as JSON file</small>
+                        </div>
+                        <div>
+                            <input type="file" id="jsonImportFileSettings" accept=".json" style="display: none;" onchange="importJSONBackup(this)">
+                            <button onclick="document.getElementById('jsonImportFileSettings').click()" 
+                                    style="width: 100%; background: #007bff; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                                    onmouseover="this.style.background='#0056b3'"
+                                    onmouseout="this.style.background='#007bff'">
+                                📥 Import JSON
+                            </button>
+                            <small style="color: #6c757d; font-size: 12px; display: block; margin-top: 5px; text-align: center;">Upload JSON backup file</small>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Backup Details -->
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
                     <h5 style="margin: 0 0 10px 0; color: #495057;">📁 Recent Backup Files (Latest 3 of each type)</h5>
@@ -5037,6 +5063,33 @@
                             </button>
                         </div>
                     </div>
+                    
+                    <!-- Manual Import/Export JSON -->
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <h5 style="margin: 0 0 15px 0; color: #495057;">📤 Import / Export JSON Backup</h5>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <button onclick="exportTasksJSON()" 
+                                        style="width: 100%; background: #28a745; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                                        onmouseover="this.style.background='#218838'"
+                                        onmouseout="this.style.background='#28a745'">
+                                    📤 Export JSON
+                                </button>
+                                <small style="color: #6c757d; font-size: 12px; display: block; margin-top: 5px; text-align: center;">Download all tasks as JSON file</small>
+                            </div>
+                            <div>
+                                <input type="file" id="jsonImportFileSettings" accept=".json" style="display: none;" onchange="importJSONBackup(this)">
+                                <button onclick="document.getElementById('jsonImportFileSettings').click()" 
+                                        style="width: 100%; background: #007bff; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                                        onmouseover="this.style.background='#0056b3'"
+                                        onmouseout="this.style.background='#007bff'">
+                                    📥 Import JSON
+                                </button>
+                                <small style="color: #6c757d; font-size: 12px; display: block; margin-top: 5px; text-align: center;">Upload JSON backup file</small>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Additional spacing at bottom of Data tab -->
                     <div style="height: 40px;"></div>
                 </div>

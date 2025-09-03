@@ -159,11 +159,8 @@ export default {
     const allowedOrigins = [
       'https://hyperfiler.pro',
       'https://www.hyperfiler.pro',
-      'https://74b94f50.hyperfiler-fresh.pages.dev',
-      'https://master.hyperfiler-fresh.pages.dev',
-      'https://hyperfiler-fresh.pages.dev',
-      'http://localhost:3000',
-      'http://localhost:8080'
+      'https://249d1ffe.hyperfiler-fresh.pages.dev',
+      'https://master.hyperfiler-fresh.pages.dev'
     ];
     
     // Support wildcard matching for Cloudflare Pages URLs

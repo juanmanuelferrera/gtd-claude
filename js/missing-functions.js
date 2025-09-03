@@ -1819,56 +1819,146 @@ function handleUrlHash() {
 window.addEventListener('load', handleUrlHash);
 window.addEventListener('hashchange', handleUrlHash);
 
-// Debug arrow key navigation
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-        console.log('🔍 Arrow key debug:', {
-            key: event.key,
-            currentView: window.currentView,
-            target: event.target.tagName,
-            isInput: event.target.tagName === 'INPUT',
-            isTextarea: event.target.tagName === 'TEXTAREA',
-            filterNavigationActive: window.filterNavigationActive
-        });
+// Utility function for HTML escaping
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// List item management functions (global scope)
+async function addListItem() {
+    console.log('🔍 Global addListItem called');
+    const input = document.getElementById('newListItemInput');
+    const text = input.value.trim();
+    
+    if (!text) {
+        console.error('Empty list item text');
+        input.focus();
+        return;
+    }
+    
+    // Use global variables (not window.)
+    const listSections = window.listSections;
+    const currentListSectionId = window.currentListSectionId;
+    const currentListId = window.currentListId;
+    
+    console.log('🔍 Current context:', { currentListSectionId, currentListId, listSectionsLength: listSections?.length });
+    
+    const section = listSections?.find(s => s.id == currentListSectionId);
+    if (!section) {
+        console.error('❌ Section not found:', currentListSectionId);
+        return;
+    }
+    
+    const list = section.lists?.find(l => l.id == currentListId);
+    if (!list) {
+        console.error('❌ List not found:', currentListId);
+        return;
+    }
+    
+    if (!list.items) {
+        list.items = [];
+    }
+    
+    // Add new item
+    const newItem = {
+        id: Date.now().toString(),
+        text: text,
+        completed: false,
+        createdAt: new Date().toISOString()
+    };
+    
+    list.items.unshift(newItem);
+    console.log('✅ Added item:', newItem.text, 'to list:', list.name);
+    
+    // Save and refresh using window functions
+    if (typeof window.saveListSections === 'function') {
+        await window.saveListSections();
+        console.log('💾 Saved to localStorage and server');
+    }
+    if (typeof renderListItems === 'function') {
+        renderListItems();
+        console.log('🔄 Refreshed list items');
+    }
+    if (typeof renderListsView === 'function') {
+        renderListsView();
+        console.log('🔄 Refreshed lists view');
+    }
+    
+    // Clear input and focus
+    input.value = '';
+    input.focus();
+}
+
+async function editListItem(itemIndex) {
+    console.log('🔍 Global editListItem called:', itemIndex);
+    const section = window.listSections?.find(s => s.id == window.currentListSectionId);
+    if (!section) return;
+    
+    const list = section.lists?.find(l => l.id == window.currentListId);
+    if (!list || !list.items || !list.items[itemIndex]) return;
+    
+    const item = list.items[itemIndex];
+    const newText = prompt('Edit item:', item.text);
+    
+    if (newText !== null && newText.trim() && newText.trim() !== item.text) {
+        item.text = newText.trim();
+        item.updatedAt = new Date().toISOString();
+        console.log('✅ Edited item:', item.text);
         
-        // Manual navigation if not working
-        if (event.target.tagName !== 'INPUT' && 
-            event.target.tagName !== 'TEXTAREA' && 
-            event.target.tagName !== 'SELECT' &&
-            !event.target.contentEditable) {
-            
-            if (event.key === 'ArrowLeft') {
-                if (window.currentView === 'today' && typeof previousDay === 'function') {
-                    event.preventDefault();
-                    previousDay();
-                    console.log('🔍 Manual previousDay() called');
-                } else if (window.currentView === 'week' && typeof previousWeekSmart === 'function') {
-                    event.preventDefault();
-                    previousWeekSmart();
-                    console.log('🔍 Manual previousWeekSmart() called');
-                } else if (window.currentView === 'calendar' && typeof previousMonthSmart === 'function') {
-                    event.preventDefault();
-                    previousMonthSmart();
-                    console.log('🔍 Manual previousMonthSmart() called');
-                }
-            } else if (event.key === 'ArrowRight') {
-                if (window.currentView === 'today' && typeof nextDay === 'function') {
-                    event.preventDefault();
-                    nextDay();
-                    console.log('🔍 Manual nextDay() called');
-                } else if (window.currentView === 'week' && typeof nextWeekSmart === 'function') {
-                    event.preventDefault();
-                    nextWeekSmart();
-                    console.log('🔍 Manual nextWeekSmart() called');
-                } else if (window.currentView === 'calendar' && typeof nextMonthSmart === 'function') {
-                    event.preventDefault();
-                    nextMonthSmart();
-                    console.log('🔍 Manual nextMonthSmart() called');
-                }
-            }
+        // Save and refresh
+        if (typeof saveListSections === 'function') {
+            await saveListSections();
+        }
+        if (typeof renderListItems === 'function') {
+            renderListItems();
         }
     }
-});
+}
+
+async function deleteListItem(itemIndex) {
+    console.log('🔍 Global deleteListItem called:', itemIndex);
+    const section = window.listSections?.find(s => s.id == window.currentListSectionId);
+    if (!section) return;
+    
+    const list = section.lists?.find(l => l.id == window.currentListId);
+    if (!list || !list.items || !list.items[itemIndex]) return;
+    
+    // Delete item
+    const deletedItem = list.items.splice(itemIndex, 1)[0];
+    console.log('✅ Deleted item:', deletedItem.text);
+    
+    // Save and refresh
+    if (typeof saveListSections === 'function') {
+        await saveListSections();
+    }
+    if (typeof renderListItems === 'function') {
+        renderListItems();
+    }
+}
+
+async function toggleListItem(itemIndex) {
+    console.log('🔍 Global toggleListItem called:', itemIndex);
+    const section = window.listSections?.find(s => s.id == window.currentListSectionId);
+    if (!section) return;
+    
+    const list = section.lists?.find(l => l.id == window.currentListId);
+    if (!list || !list.items || !list.items[itemIndex]) return;
+    
+    // Toggle completed status
+    list.items[itemIndex].completed = !list.items[itemIndex].completed;
+    console.log('✅ Toggled item:', list.items[itemIndex].text, 'completed:', list.items[itemIndex].completed);
+    
+    // Save and refresh
+    if (typeof saveListSections === 'function') {
+        await saveListSections();
+    }
+    if (typeof renderListItems === 'function') {
+        renderListItems();
+    }
+}
+
 
 
 // Delete list section
@@ -1975,19 +2065,25 @@ async function deleteList(sectionId, listId) {
 
 // Open list modal to view/edit list items
 function openListModal(sectionId, listId) {
-    console.log('Opening list modal for:', sectionId, listId);
+    console.log('🔍 CLICK DEBUG: Opening list modal for:', sectionId, listId);
+    console.log('🔍 CLICK DEBUG: listSections available:', !!window.listSections);
+    console.log('🔍 CLICK DEBUG: listSections content:', window.listSections);
     
     const section = window.listSections?.find(s => s.id == sectionId);
     if (!section) {
-        console.error('Section not found:', sectionId);
+        console.error('❌ Section not found:', sectionId);
+        console.log('Available sections:', window.listSections?.map(s => s.id));
         return;
     }
     
     const list = section.lists?.find(l => l.id == listId);
     if (!list) {
-        console.error('List not found:', listId);
+        console.error('❌ List not found:', listId);
+        console.log('Available lists in section:', section.lists?.map(l => l.id));
         return;
     }
+    
+    console.log('✅ Found list:', list.name);
     
     // Store current list context
     window.currentListSectionId = sectionId;
@@ -2649,5 +2745,202 @@ window.handleTextImportFile = handleTextImportFile;
 window.selectedTasks = selectedTasks;
 window.activeAllTasksTemplateFilter = activeAllTasksTemplateFilter;
 window.currentLanguage = currentLanguage;
+
+// Global list modal functions
+async function toggleAllListItems() {
+    const listSections = window.listSections;
+    const currentListSectionId = window.currentListSectionId;
+    const currentListId = window.currentListId;
+    
+    const section = listSections.find(s => s.id == currentListSectionId);
+    if (!section) return;
+    
+    const list = section.lists.find(l => l.id == currentListId);
+    if (!list || !list.items || list.items.length === 0) return;
+    
+    const allCompleted = list.items.every(item => item.completed);
+    list.items.forEach(item => {
+        item.completed = !allCompleted;
+    });
+    
+    await window.saveListSections();
+    window.openListItemsModal(currentListSectionId, currentListId);
+}
+
+async function exportListToHTML() {
+    const listSections = window.listSections;
+    const currentListSectionId = window.currentListSectionId;
+    const currentListId = window.currentListId;
+    
+    const section = listSections.find(s => s.id == currentListSectionId);
+    if (!section) return;
+    
+    const list = section.lists.find(l => l.id == currentListId);
+    if (!list) return;
+    
+    const uncompletedItems = (list.items || []).filter(item => !item.completed);
+    const htmlContent = window.generateListHTML ? window.generateListHTML(section.name, list.name, uncompletedItems) : 'Export function not available';
+    
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${section.name}-${list.name}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+async function convertEntireListToTasks() {
+    const listSections = window.listSections;
+    const currentListSectionId = window.currentListSectionId;
+    const currentListId = window.currentListId;
+    
+    const section = listSections.find(s => s.id == currentListSectionId);
+    if (!section) return;
+    
+    const list = section.lists.find(l => l.id == currentListId);
+    if (!list || !list.items || list.items.length === 0) return;
+    
+    if (!confirm(`Convert all ${list.items.length} items from "${list.name}" to tasks for today?`)) {
+        return;
+    }
+    
+    const today = window.formatDate ? window.formatDate(new Date()) : new Date().toISOString().split('T')[0];
+    
+    if (typeof window.addTask === 'function') {
+        for (let item of list.items) {
+            if (!item.completed) {
+                await window.addTask(item.text, today, null, null, false);
+            }
+        }
+    }
+    
+    window.closeListItemsModal();
+    if (typeof window.switchToTodayView === 'function') {
+        window.switchToTodayView();
+    }
+}
+
+async function deleteCompletedListItems() {
+    const listSections = window.listSections;
+    const currentListSectionId = window.currentListSectionId;
+    const currentListId = window.currentListId;
+    
+    const section = listSections.find(s => s.id == currentListSectionId);
+    if (!section) return;
+    
+    const list = section.lists.find(l => l.id == currentListId);
+    if (!list || !list.items || list.items.length === 0) return;
+    
+    const completedCount = list.items.filter(item => item.completed).length;
+    if (completedCount === 0) {
+        alert('No completed items to delete');
+        return;
+    }
+    
+    if (!confirm(`Delete ${completedCount} completed items?`)) {
+        return;
+    }
+    
+    list.items = list.items.filter(item => !item.completed);
+    
+    await window.saveListSections();
+    window.openListItemsModal(currentListSectionId, currentListId);
+}
+
+function closeListItemsModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('listItemsModal').style.display = 'none';
+}
+
+async function convertSelectedItemsToTasks() {
+    const listSections = window.listSections;
+    const currentListSectionId = window.currentListSectionId;
+    const currentListId = window.currentListId;
+    
+    const section = listSections.find(s => s.id == currentListSectionId);
+    if (!section) return;
+    
+    const list = section.lists.find(l => l.id == currentListId);
+    if (!list || !list.items || list.items.length === 0) return;
+    
+    const selectedItems = list.items.filter(item => item.completed);
+    if (selectedItems.length === 0) {
+        alert('No completed items to convert');
+        return;
+    }
+    
+    if (!confirm(`Convert ${selectedItems.length} completed items to tasks for today?`)) {
+        return;
+    }
+    
+    const today = window.formatDate ? window.formatDate(new Date()) : new Date().toISOString().split('T')[0];
+    
+    if (typeof window.addTask === 'function') {
+        for (let item of selectedItems) {
+            await window.addTask(item.text, today, null, null, false);
+        }
+    }
+    
+    window.closeListItemsModal();
+    if (typeof window.switchToTodayView === 'function') {
+        window.switchToTodayView();
+    }
+}
+
+// Handle Enter key press in add item input
+function handleAddItemKeyPress(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        addListItem();
+    }
+}
+
+// Save list sections to server
+async function saveListSections() {
+    try {
+        const userId = window.getCurrentUserId ? window.getCurrentUserId() : 'demo_user';
+        
+        if (!window.listSections) {
+            console.warn('No listSections to save');
+            return;
+        }
+        
+        const response = await fetch(`${window.API_BASE_URL || ''}/lists/sync`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                userId: userId,
+                listSections: window.listSections
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('✅ Lists synced to server:', data.synced, 'sections');
+        return data;
+    } catch (error) {
+        console.error('❌ Failed to sync lists to server:', error);
+        throw error;
+    }
+}
+
+// Export global functions
+window.handleAddItemKeyPress = handleAddItemKeyPress;
+window.saveListSections = saveListSections;
+window.toggleAllListItems = toggleAllListItems;
+window.exportListToHTML = exportListToHTML;
+window.convertEntireListToTasks = convertEntireListToTasks;
+window.deleteCompletedListItems = deleteCompletedListItems;
+window.closeListItemsModal = closeListItemsModal;
+window.convertSelectedItemsToTasks = convertSelectedItemsToTasks;
 
 console.log('✅ Missing functions module loaded with', Object.keys(window).filter(k => typeof window[k] === 'function' && (k.startsWith('open') || k.startsWith('perform') || k.startsWith('search') || k.startsWith('handle'))).length, 'functions');
