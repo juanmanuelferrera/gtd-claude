@@ -1,0 +1,153 @@
+* HyperFiler Pro - GTD Task Management System
+
+** Overview
+A well-structured Getting Things Done (GTD) productivity application with cloud synchronization and premium features.
+
+** Architecture
+
+*** Frontend
+- Single-page application (hyperfiler-pro.html)
+- Things app-inspired design system
+- Responsive and mobile-optimized
+
+*** Backend
+- Cloudflare Workers API
+- D1 database for data persistence
+- Serverless architecture
+
+*** Payment Processing
+- Stripe integration for premium subscriptions
+- Promo code support
+
+** Key Features
+
+*** Task Management
+- Full CRUD operations
+- Due dates and time tracking
+- Templates and repeat functionality
+- Event vs task distinction
+
+*** Security
+- Robust input sanitization (worker.js:4-149)
+- Rate limiting per IP/User-Agent
+- SQL injection protection
+- XSS attack prevention
+
+*** Multi-tier System
+- Free tier with basic features
+- Pro tier with advanced capabilities
+- Promotional code support
+
+*** Cloud Sync
+- User authentication system
+- Cross-device synchronization
+- Real-time data updates
+
+** Technical Stack
+
+| Component    | Technology           |
+|--------------+---------------------|
+| Deployment   | Cloudflare Workers  |
+| Frontend     | Cloudflare Pages    |
+| Database     | Cloudflare D1       |
+| Payments     | Stripe API          |
+| Styling      | Custom CSS          |
+| Language     | JavaScript          |
+
+** Security Measures
+
+*** Input Validation
+- Comprehensive sanitization against XSS
+- UUID validation for user IDs
+- Timestamp format verification
+
+*** Access Control
+- Secure query construction
+- User-scoped data access
+- Password hashing with salt
+
+*** Rate Limiting
+- Request throttling by IP
+- User-Agent tracking
+- Automatic cleanup of old entries
+
+** Project Structure
+
+#+BEGIN_EXAMPLE
+gtd-claude/
+├── hyperfiler-pro.html        # Main application
+├── hyperfiler-backend/         # API backend
+│   ├── worker.js              # Main API handler
+│   ├── migrations/            # Database schema
+│   └── package.json           # Dependencies
+├── js/                        # Frontend modules
+│   ├── core/                  # Core utilities
+│   ├── components/            # UI components
+│   └── features/              # Feature modules
+└── wrangler.toml              # Deployment config
+#+END_EXAMPLE
+
+** Database Schema
+
+*** Core Tables
+- users: User accounts and authentication
+- user_tasks: Task storage with all GTD fields
+- user_subscriptions: Billing and plan management
+- user_usage: Usage tracking and metrics
+- promo_codes: Promotional code management
+
+*** Indexes
+- Optimized queries on user_id
+- Fast lookups for due_date
+- Efficient stripe_customer_id searches
+
+** Recent Updates
+
+*** Version History
+- v3.8.1: Latest stable release
+- Split refactoring completed successfully
+- Enhanced security layers implemented
+
+** Recommendations
+
+*** Security Improvements
+- [ ] Move admin password hash from wrangler.toml:14 to environment secrets
+- [ ] Implement JWT token rotation
+- [ ] Add audit logging for sensitive operations
+
+*** Performance Optimizations
+- [ ] Consider implementing caching layer
+- [ ] Add database connection pooling
+- [ ] Optimize image storage strategy
+
+*** Feature Enhancements
+- [ ] Add team collaboration features
+- [ ] Implement offline mode
+- [ ] Add data export functionality
+
+** Development Commands
+
+*** Local Development
+#+BEGIN_SRC bash
+npm run dev              # Start local server
+npm run lint            # Run linter
+npm run typecheck       # Type checking
+#+END_SRC
+
+*** Database Management
+#+BEGIN_SRC bash
+npm run db:migrate:local  # Apply local migrations
+npm run db:console:local  # Database console
+#+END_SRC
+
+*** Deployment
+#+BEGIN_SRC bash
+npm run deploy           # Deploy to production
+wrangler deploy         # Alternative deployment
+#+END_SRC
+
+** API Endpoints
+The worker.js handles all API routes with comprehensive security checks and rate limiting.
+
+** License
+ISC License (as specified in package.json)
