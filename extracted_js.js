@@ -8799,13 +8799,11 @@
             const timeValue = document.getElementById('editTaskTimeOnly').value;
             const button = document.getElementById('dateTimeDisplay');
             
+            if (!button) return;
+            
             if (dateValue && timeValue) {
-                const date = new Date(dateValue);
-                const dateStr = date.toLocaleDateString('en-US', { 
-                    weekday: 'short', 
-                    month: 'short', 
-                    day: 'numeric' 
-                });
+                // Use formatDateForDisplay for consistent "Today" formatting
+                const dateStr = formatDateForDisplay(dateValue);
                 
                 // Format time to 12-hour format for better readability
                 const [hours, minutes] = timeValue.split(':');
@@ -8813,15 +8811,11 @@
                 const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
                 const formattedTime = `${hour12}:${minutes} ${ampm}`;
                 
-                button.textContent = `${dateStr} at ${formattedTime}`;
+                button.textContent = `${dateStr}, ${formattedTime}`;
             } else if (dateValue) {
-                const date = new Date(dateValue);
-                const dateStr = date.toLocaleDateString('en-US', { 
-                    weekday: 'short', 
-                    month: 'short', 
-                    day: 'numeric' 
-                });
-                button.textContent = `${dateStr} (no time)`;
+                // Use formatDateForDisplay for consistent "Today" formatting
+                const dateStr = formatDateForDisplay(dateValue);
+                button.textContent = dateStr;  // Just show "Today" without "(no time)"
             } else {
                 button.textContent = 'Select date & time...';
             }
