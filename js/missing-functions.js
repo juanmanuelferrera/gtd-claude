@@ -2660,9 +2660,9 @@ function toggleAllSections() {
     console.log('Toggling all sections...');
     
     try {
-        // Find all section containers
-        const sections = document.querySelectorAll('[id^="section-"]');
-        const arrows = document.querySelectorAll('[id^="arrow-section-"]');
+        // Find all section containers - Lists view uses .list-section
+        const sections = document.querySelectorAll('.list-section');
+        const arrows = document.querySelectorAll('.list-section-header span');
         
         if (sections.length === 0) {
             console.warn('No sections found to toggle');
@@ -2672,35 +2672,35 @@ function toggleAllSections() {
         // Check if any sections are visible
         let anyVisible = false;
         sections.forEach(section => {
-            const content = section.querySelector('.section-content');
-            if (content && content.style.display !== 'none') {
+            const content = section.querySelector('.list-section-content');
+            if (content && !content.classList.contains('collapsed')) {
                 anyVisible = true;
             }
         });
         
-        // Toggle all sections with consistent indicators and accessibility
-        sections.forEach((section, index) => {
-            const content = section.querySelector('.section-content');
-            const arrow = arrows[index] || section.querySelector('.section-arrow');
-            
-            if (content) {
-                if (anyVisible) {
-                    content.style.display = 'none';
-                    if (arrow) {
-                        arrow.textContent = '▶';
-                        arrow.setAttribute('aria-expanded', 'false');
-                        arrow.setAttribute('aria-label', 'Expand section');
-                    }
-                } else {
-                    content.style.display = 'block';
-                    if (arrow) {
-                        arrow.textContent = '▼';
-                        arrow.setAttribute('aria-expanded', 'true');
-                        arrow.setAttribute('aria-label', 'Collapse section');
-                    }
+        console.log(`Found ${sections.length} sections, anyVisible: ${anyVisible}`);
+        
+        // Toggle all sections using the data-section-id
+        sections.forEach(section => {
+            const sectionId = section.dataset.sectionId;
+            if (sectionId) {
+                // Find the corresponding listSection data
+                const listSection = window.listSections?.find(s => s.id === sectionId);
+                if (listSection) {
+                    // Toggle the collapsed state
+                    listSection.collapsed = anyVisible; // If any visible, collapse all; otherwise expand all
+                    console.log(`Toggling section ${listSection.name} to collapsed: ${listSection.collapsed}`);
                 }
             }
         });
+        
+        // Save and re-render
+        if (typeof saveListSections === 'function') {
+            saveListSections();
+        }
+        if (typeof renderListsView === 'function') {
+            renderListsView();
+        }
         
         console.log(`✅ Toggled ${sections.length} sections - ${anyVisible ? 'collapsed' : 'expanded'} all`);
         
