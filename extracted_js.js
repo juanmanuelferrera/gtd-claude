@@ -18403,7 +18403,24 @@
                 return;
             }
             
-            let filteredTasks = tasks;
+            // Business rule: No tasks from previous days should exist
+            // Auto-move any past tasks to today before filtering
+            const today = getLocalDateString(new Date());
+            const updatedTasks = tasks.map(task => {
+                if (task.dueDate && task.dueDate < today && task.status === 'pending') {
+                    console.log(`📅 Auto-moving past task to today: "${task.title}" from ${task.dueDate} to ${today}`);
+                    return { ...task, dueDate: today, originalDueDate: task.dueDate };
+                }
+                return task;
+            });
+            
+            // Update the global tasks array with moved tasks
+            if (updatedTasks.some((task, index) => task.dueDate !== tasks[index].dueDate)) {
+                tasks.splice(0, tasks.length, ...updatedTasks);
+                saveTasks(); // Persist the changes
+            }
+            
+            let filteredTasks = updatedTasks;
             
             // Apply search term filter
             if (searchTerm) {
