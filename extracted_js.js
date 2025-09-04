@@ -12737,7 +12737,12 @@
             const timeDisplay = task.dueTime ? ` at ${formatTime(task.dueTime)}` : '';
             
             return `
-                <div class="${cardClass}" onclick="editTask('${task.id}')" data-task-id="${task.id}">
+                <div class="${cardClass}" 
+                     onclick="handleTaskCardClick('${task.id}', event)" 
+                     oncontextmenu="editTask('${task.id}', event); return false;"
+                     ontouchstart="handleTaskTouchStart('${task.id}', event)"
+                     ontouchend="handleTaskTouchEnd('${task.id}', event)"
+                     data-task-id="${task.id}">
                     <div class="task-header">
                         <div class="task-title">${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}</div>
                     </div>
@@ -12749,7 +12754,8 @@
                     
                     ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
                     
-                    <div class="task-actions">
+                    <!-- Desktop Task Actions -->
+                    <div class="task-actions desktop-task-actions">
                         <div class="checkbox-container">
                             <input type="checkbox" class="task-checkbox" ${task.status === 'completed' ? 'checked' : ''} 
                                    onclick="toggleTaskStatus('${task.id}', event)">
@@ -12767,6 +12773,35 @@
                                     style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;" 
                                     title="Delete task">🗑️</button>
                         </div>
+                    </div>
+                    
+                    <!-- Mobile Single Action Button -->
+                    <div class="mobile-task-actions">
+                        <button class="mobile-task-action-btn" 
+                                onclick="handleMobileTaskAction('${task.id}', event)"
+                                style="
+                                    width: 100%;
+                                    height: 48px;
+                                    background: ${task.status === 'completed' ? 
+                                        'linear-gradient(135deg, #28a745 0%, #20c997 100%)' : 
+                                        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
+                                    color: white;
+                                    border: none;
+                                    border-radius: 12px;
+                                    font-size: 16px;
+                                    font-weight: 600;
+                                    cursor: pointer;
+                                    margin-top: 12px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    gap: 8px;
+                                    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                                ">
+                            <span>${task.status === 'completed' ? '↩️' : '✓'}</span>
+                            <span>${task.status === 'completed' ? 'Undo Complete' : 'Mark Complete'}</span>
+                        </button>
                     </div>
                     
                 </div>
@@ -25952,8 +25987,70 @@
             }, 10000); // Wait 10 seconds to ensure everything is loaded
         });
         
-        // Export floating toolbar functions globally
+        // Handle mobile task action - single frictionless button
+        function handleMobileTaskAction(taskId, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            // Simple toggle: complete if pending, uncomplete if completed
+            if (task.status === 'completed') {
+                task.status = 'pending';
+                task.completedAt = null;
+                showInlineNotification('↩️ Task restored', 'info');
+            } else {
+                task.status = 'completed';
+                task.completedAt = new Date().toISOString();
+                showInlineNotification('✅ Task completed!', 'success');
+            }
+            
+            saveTasksToLocalStorage();
+            renderCurrentView();
+        }
+        
+        // Touch handling for mobile task cards
+        let touchTimer;
+        let touchStartTime;
+        
+        function handleTaskTouchStart(taskId, event) {
+            touchStartTime = Date.now();
+            touchTimer = setTimeout(() => {
+                // Long press detected - show edit modal
+                navigator.vibrate && navigator.vibrate(50); // Haptic feedback
+                editTask(taskId, event);
+            }, 500); // 500ms long press
+        }
+        
+        function handleTaskTouchEnd(taskId, event) {
+            if (touchTimer) {
+                clearTimeout(touchTimer);
+                touchTimer = null;
+            }
+            
+            const touchDuration = Date.now() - touchStartTime;
+            if (touchDuration < 500) {
+                // Short tap - do nothing, let the action button handle it
+            }
+        }
+        
+        function handleTaskCardClick(taskId, event) {
+            // On desktop, edit task immediately
+            if (window.innerWidth > 768) {
+                editTask(taskId, event);
+            }
+            // On mobile, do nothing - let the action button or long press handle it
+        }
+        
+        // Export mobile and toolbar functions globally
         window.completeSelectedTasks = completeSelectedTasks;
         window.hideFloatingSelectionToolbar = hideFloatingSelectionToolbar;
         window.showMoreSelectionActions = showMoreSelectionActions;
+        window.handleMobileTaskAction = handleMobileTaskAction;
+        window.handleTaskCardClick = handleTaskCardClick;
+        window.handleTaskTouchStart = handleTaskTouchStart;
+        window.handleTaskTouchEnd = handleTaskTouchEnd;
     
