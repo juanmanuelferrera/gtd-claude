@@ -3200,10 +3200,19 @@ async function saveListSections() {
             return;
         }
         
+        // Get auth token
+        const authToken = localStorage.getItem('auth_token');
+        if (!authToken) {
+            console.warn('No auth token found for lists sync - saving to localStorage only');
+            localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
+            return;
+        }
+        
         const response = await fetch(`${API_BASE}/lists/sync`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
             },
             credentials: 'include',
             body: JSON.stringify({
@@ -3218,10 +3227,24 @@ async function saveListSections() {
         
         const data = await response.json();
         console.log('✅ Lists synced to server:', data.synced, 'sections');
+        
+        // Also save to localStorage for consistency
+        localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
+        
         return data;
     } catch (error) {
         console.error('❌ Failed to sync lists to server:', error);
-        throw error;
+        
+        // Save to localStorage as fallback
+        try {
+            localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
+            console.log('💾 Lists saved to localStorage as fallback');
+        } catch (localError) {
+            console.error('❌ Failed to save to localStorage:', localError);
+        }
+        
+        // Don't throw the error to prevent breaking the UI
+        // throw error;
     }
 }
 
