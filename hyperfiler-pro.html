@@ -3492,11 +3492,244 @@
             border-radius: 10px 10px 0 0 !important;
         }
         
+        /* Modern Mobile App Header Styles */
+        .modern-app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            z-index: 9999;
+            display: none; /* Hidden by default, shown on mobile */
+            overflow: hidden;
+        }
+        
+        /* Gradient Background */
+        .header-gradient-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            opacity: 1;
+        }
+        
+        /* Header Content Container */
+        .header-content {
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            padding-top: env(safe-area-inset-top, 0px);
+        }
+        
+        /* Search Wrapper */
+        .header-search-wrapper {
+            flex: 1;
+            max-width: 160px;
+            margin-right: 16px;
+        }
+        
+        /* Search Input with Glass Morphism */
+        .header-search-input {
+            width: 100%;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px) saturate(180%);
+            -webkit-backdrop-filter: blur(10px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 0 16px;
+            font-size: 14px;
+            color: white;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        .header-search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+        }
+        
+        .header-search-input:focus {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Title Wrapper */
+        .header-title-wrapper {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        
+        /* Dynamic Title */
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            margin: 0;
+            letter-spacing: -0.5px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.3s ease;
+        }
+        
+        /* Add Button */
+        .header-add-btn {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 0;
+        }
+        
+        .add-btn-icon {
+            font-size: 24px;
+            color: white;
+            font-weight: 300;
+            line-height: 1;
+            display: block;
+        }
+        
+        .header-add-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .header-add-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* Mobile Only - Show the modern header */
+        @media (max-width: 768px) {
+            .modern-app-header {
+                display: block;
+            }
+            
+            /* Adjust body padding for new header */
+            body {
+                padding-top: calc(64px + env(safe-area-inset-top, 0px)) !important;
+            }
+        }
+        
+        /* Desktop - Hide modern header */
+        @media (min-width: 769px) {
+            .modern-app-header {
+                display: none !important;
+            }
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .header-gradient-bg {
+                background: linear-gradient(135deg, #4c5fd5 0%, #5a3e8a 100%);
+            }
+            
+            .header-search-input {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.2);
+            }
+            
+            .header-add-btn {
+                background: rgba(255, 255, 255, 0.15);
+                border-color: rgba(255, 255, 255, 0.2);
+            }
+        }
+        
+        /* Landscape orientation adjustments */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .modern-app-header {
+                height: 48px;
+            }
+            
+            .header-search-input {
+                height: 32px;
+                font-size: 13px;
+            }
+            
+            .header-add-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .header-title {
+                font-size: 16px;
+            }
+            
+            body {
+                padding-top: calc(48px + env(safe-area-inset-top, 0px)) !important;
+            }
+        }
+        
+        /* Animation for title changes */
+        @keyframes titleFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header-title.animating {
+            animation: titleFadeIn 0.3s ease-out;
+        }
+        
     </style>
 </head>
 <body>
-    <!-- VERSION 3: Mobile Navigation -->
-    <div class="mobile-only mobile-header">
+    <!-- Modern Mobile App Header with Gradient & Glass Morphism -->
+    <div class="modern-app-header" id="modernAppHeader">
+        <!-- Gradient Background -->
+        <div class="header-gradient-bg"></div>
+        
+        <!-- Header Content -->
+        <div class="header-content">
+            <!-- Left: Search Input with Glass Effect -->
+            <div class="header-search-wrapper">
+                <input type="text" 
+                       id="headerSearchInput" 
+                       class="header-search-input" 
+                       placeholder="🔍 Search..."
+                       oninput="performMobileSearch(this.value)" />
+            </div>
+            
+            <!-- Center: Dynamic Title -->
+            <div class="header-title-wrapper">
+                <h1 class="header-title" id="dynamicHeaderTitle">Today</h1>
+            </div>
+            
+            <!-- Right: Add Button -->
+            <button class="header-add-btn" 
+                    id="headerAddBtn" 
+                    onclick="openAddTaskModalMobile()"
+                    aria-label="Add new task">
+                <span class="add-btn-icon">+</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Legacy Mobile Navigation (hidden by default, keeping for compatibility) -->
+    <div class="mobile-only mobile-header" style="display: none;">
         <div class="mobile-header-left">
             <input type="text" id="mobileSearchInput" placeholder="🔍 Search..." style="
                 background: var(--things-surface);

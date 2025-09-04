@@ -4363,7 +4363,10 @@
                 'lists': { key: 'HeaderLists', emoji: '📝' }
             };
             
+            // Update both legacy and modern header titles
             const headerTitle = document.getElementById('mobileHeaderTitle');
+            const modernHeaderTitle = document.getElementById('dynamicHeaderTitle');
+            
             if (headerTitle) {
                 const titleData = titles[viewName];
                 if (titleData) {
@@ -4378,6 +4381,27 @@
                 } else {
                     headerTitle.textContent = viewName;
                 }
+            }
+            
+            // Update modern header with clean title (no emojis)
+            if (modernHeaderTitle) {
+                const cleanTitles = {
+                    'today': 'Today',
+                    'week': 'Week',
+                    'calendar': 'Calendar',
+                    'all': 'All Tasks',
+                    'repeat': 'Recurring',
+                    'lists': 'Lists'
+                };
+                
+                // Add animation class
+                modernHeaderTitle.classList.add('animating');
+                modernHeaderTitle.textContent = cleanTitles[viewName] || viewName;
+                
+                // Remove animation class after animation completes
+                setTimeout(() => {
+                    modernHeaderTitle.classList.remove('animating');
+                }, 300);
             }
             // Update mobile navigation active state
             const mobileNavButtons = document.querySelectorAll('.mobile-nav-btn');
@@ -8823,6 +8847,28 @@
         // Navigation and view management
         function showView(viewName, preserveDate = false) {
             currentView = viewName;
+            
+            // Update modern header title
+            const modernHeaderTitle = document.getElementById('dynamicHeaderTitle');
+            if (modernHeaderTitle) {
+                const cleanTitles = {
+                    'today': 'Today',
+                    'week': 'Week',
+                    'calendar': 'Calendar',
+                    'all': 'All Tasks',
+                    'search': 'Search',
+                    'repeat': 'Recurring',
+                    'lists': 'Lists',
+                    'stats': 'Statistics',
+                    'undo': 'History'
+                };
+                
+                modernHeaderTitle.classList.add('animating');
+                modernHeaderTitle.textContent = cleanTitles[viewName] || viewName;
+                setTimeout(() => {
+                    modernHeaderTitle.classList.remove('animating');
+                }, 300);
+            }
             
             // Reset task selection when changing views
             if (typeof resetTaskSelection === 'function') {
