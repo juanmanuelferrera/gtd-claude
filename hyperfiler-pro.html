@@ -3765,9 +3765,16 @@
                 bottom: calc(80px + 16px) !important; /* 80px bottom nav + 16px spacing */
                 bottom: calc(80px + 16px + env(safe-area-inset-bottom, 0px)) !important; /* Add safe area */
                 right: 20px !important; /* Closer to edge on mobile */
-                width: 52px !important; /* Slightly smaller on mobile */
-                height: 52px !important;
+                width: 56px !important; /* Keep consistent size */
+                height: 56px !important; /* Match width exactly for perfect circle */
+                min-width: 56px !important; /* Prevent compression */
+                min-height: 56px !important; /* Prevent compression */
+                max-width: 56px !important; /* Prevent expansion */
+                max-height: 56px !important; /* Prevent expansion */
+                border-radius: 50% !important; /* Ensure perfect circle */
                 font-size: 26px !important;
+                flex-shrink: 0 !important; /* Prevent flexbox compression */
+                aspect-ratio: 1 !important; /* Modern CSS for perfect square ratio */
             }
         }
         
