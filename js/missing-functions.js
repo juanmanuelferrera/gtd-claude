@@ -562,8 +562,8 @@ function performSearch() {
         return titleMatch || notesMatch || dateMatch;
     });
     
-    // Auto-expand sections containing search results
-    if (filteredTasks.length > 0) {
+    // Auto-expand sections containing search results (only when actively searching)
+    if (searchTerm && searchTerm.trim() && filteredTasks.length > 0) {
         autoExpandSectionsWithResults(filteredTasks);
     }
     
@@ -587,6 +587,8 @@ function performSearch() {
 // Auto-expand sections containing search results
 function autoExpandSectionsWithResults(filteredTasks) {
     try {
+        console.log('🔍 autoExpandSectionsWithResults called with', filteredTasks.length, 'tasks');
+        
         const sectionsToExpand = new Set();
         const timeBlocksToExpand = new Set();
         
@@ -1136,21 +1138,93 @@ function openDateTimeModal() {
     if (modal) {
         modal.style.display = 'block';
         
-        // Set current values if they exist
+        // Get current values or set defaults
         const currentDate = document.getElementById('editTaskDateOnly').value;
         const currentTime = document.getElementById('editTaskTimeOnly').value;
+        
+        // Set default to today if no date is set
+        const defaultDate = currentDate || getLocalDateString(new Date());
+        const defaultTime = currentTime || '';
         
         // Set desktop inputs
         const desktopDateInput = document.getElementById('desktopDateInput');
         const desktopTimeInput = document.getElementById('desktopTimeInput');
-        if (desktopDateInput) desktopDateInput.value = currentDate || '';
-        if (desktopTimeInput) desktopTimeInput.value = currentTime || '';
+        if (desktopDateInput) desktopDateInput.value = defaultDate;
+        if (desktopTimeInput) desktopTimeInput.value = defaultTime;
         
         // Set mobile inputs
         const mobileDateInput = document.getElementById('mobileDateInput');
         const mobileTimeInput = document.getElementById('mobileTimeInput');
-        if (mobileDateInput) mobileDateInput.value = currentDate || '';
-        if (mobileTimeInput) mobileTimeInput.value = currentTime || '';
+        if (mobileDateInput) mobileDateInput.value = defaultDate;
+        if (mobileTimeInput) mobileTimeInput.value = defaultTime;
+        
+        // Initialize the picker selects with current values
+        initializeDateTimePickers(defaultDate, defaultTime);
+    }
+}
+
+function initializeDateTimePickers(dateStr, timeStr) {
+    const date = new Date(dateStr);
+    
+    // Set day picker
+    const dayPicker = document.getElementById('desktopDayPicker');
+    if (dayPicker) {
+        populateDayPicker(date.getMonth(), date.getFullYear());
+        dayPicker.value = date.getDate().toString();
+    }
+    
+    // Set month picker
+    const monthPicker = document.getElementById('desktopMonthPicker');
+    if (monthPicker) {
+        monthPicker.value = date.getMonth().toString();
+    }
+    
+    // Set hour picker
+    const hourPicker = document.getElementById('desktopHourPicker');
+    if (hourPicker && timeStr) {
+        hourPicker.value = timeStr;
+    }
+}
+
+function populateDayPicker(month, year) {
+    const dayPicker = document.getElementById('desktopDayPicker');
+    if (!dayPicker) return;
+    
+    // Clear existing options
+    dayPicker.innerHTML = '';
+    
+    // Get number of days in the month
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    // Add day options
+    for (let day = 1; day <= daysInMonth; day++) {
+        const option = document.createElement('option');
+        option.value = day.toString();
+        option.textContent = day.toString();
+        dayPicker.appendChild(option);
+    }
+}
+
+function updateDesktopDateTime() {
+    // Update the day picker when month changes
+    const monthPicker = document.getElementById('desktopMonthPicker');
+    const dayPicker = document.getElementById('desktopDayPicker');
+    
+    if (monthPicker && dayPicker) {
+        const selectedMonth = parseInt(monthPicker.value);
+        const currentYear = new Date().getFullYear();
+        const currentDay = dayPicker.value;
+        
+        // Repopulate days for the new month
+        populateDayPicker(selectedMonth, currentYear);
+        
+        // Try to restore the previously selected day if it exists in the new month
+        if (currentDay) {
+            const daysInMonth = new Date(currentYear, selectedMonth + 1, 0).getDate();
+            if (parseInt(currentDay) <= daysInMonth) {
+                dayPicker.value = currentDay;
+            }
+        }
     }
 }
 
@@ -1163,22 +1237,51 @@ function closeDateTimeModal(event) {
 }
 
 function applyDesktopDateTime() {
+    // Get values from pickers
+    const dayPicker = document.getElementById('desktopDayPicker');
+    const monthPicker = document.getElementById('desktopMonthPicker');
+    const hourPicker = document.getElementById('desktopHourPicker');
+    
+    // Also check for direct inputs as fallback
     const dateInput = document.getElementById('desktopDateInput');
     const timeInput = document.getElementById('desktopTimeInput');
     
-    if (dateInput && timeInput) {
-        // Update the main form fields
-        const mainDateInput = document.getElementById('editTaskDateOnly');
-        const mainTimeInput = document.getElementById('editTaskTimeOnly');
+    let finalDate = '';
+    let finalTime = '';
+    
+    // Build date from pickers if available
+    if (dayPicker && monthPicker) {
+        const day = dayPicker.value;
+        const month = parseInt(monthPicker.value);
+        const year = new Date().getFullYear(); // Use current year
         
-        if (mainDateInput) mainDateInput.value = dateInput.value;
-        if (mainTimeInput) mainTimeInput.value = timeInput.value;
-        
-        // Update display
-        if (typeof updateDateTimeDisplay === 'function') {
-            updateDateTimeDisplay();
+        if (day && month !== '') {
+            const date = new Date(year, month, parseInt(day));
+            finalDate = getLocalDateString(date);
         }
     }
+    
+    // Use direct date input as fallback
+    if (!finalDate && dateInput) {
+        finalDate = dateInput.value;
+    }
+    
+    // Get time from picker or input
+    if (hourPicker) {
+        finalTime = hourPicker.value || '';
+    } else if (timeInput) {
+        finalTime = timeInput.value || '';
+    }
+    
+    // Update the main form fields
+    const mainDateInput = document.getElementById('editTaskDateOnly');
+    const mainTimeInput = document.getElementById('editTaskTimeOnly');
+    
+    if (mainDateInput && finalDate) mainDateInput.value = finalDate;
+    if (mainTimeInput) mainTimeInput.value = finalTime;
+    
+    // Update display
+    updateDateTimeDisplay();
     
     closeDateTimeModal();
 }
@@ -2573,11 +2676,40 @@ function applyDesktopDateTime() {
 }
 
 function updateDateTimeDisplay() {
-    // Update the modal display
-    const display = document.getElementById('desktopSelectedDisplay') || document.getElementById('mobileSelectedDisplay');
-    if (display) {
-        display.textContent = 'Date and time selected';
+    const dateField = document.getElementById('editTaskDateOnly');
+    const timeField = document.getElementById('editTaskTimeOnly');
+    const display = document.getElementById('dateTimeDisplay');
+    
+    if (!display) return;
+    
+    const dateValue = dateField?.value;
+    const timeValue = timeField?.value;
+    
+    if (!dateValue) {
+        display.textContent = 'Select date & time...';
+        return;
     }
+    
+    // Format the date nicely
+    const date = new Date(dateValue);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    
+    let dateText = '';
+    if (dateValue === getLocalDateString(today)) {
+        dateText = 'Today';
+    } else if (dateValue === getLocalDateString(tomorrow)) {
+        dateText = 'Tomorrow';
+    } else {
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        dateText = date.toLocaleDateString('en-US', options);
+    }
+    
+    // Format the time
+    const timeText = timeValue ? timeValue : 'No specific time';
+    
+    display.textContent = `${dateText}, ${timeText}`;
 }
 
 // Today view template filtering
@@ -2657,17 +2789,49 @@ async function handleTimeSlotDrop(e, targetTime) {
 }
 
 function toggleAllSections() {
-    console.log('Toggling all sections...');
+    console.log('🔄 TOGGLE ALL: Starting, current view:', window.currentView);
     
     try {
-        // Find all section containers - Lists view uses .list-section
-        const sections = document.querySelectorAll('.list-section');
-        const arrows = document.querySelectorAll('.list-section-header span');
+        // Check which view we're in and find appropriate sections
+        const listSections = document.querySelectorAll('.list-section');
+        const timeBlocks = document.querySelectorAll('.time-block');
         
-        if (sections.length === 0) {
-            console.warn('No sections found to toggle');
+        console.log(`🔄 TOGGLE ALL: Found ${listSections.length} list sections, ${timeBlocks.length} time blocks`);
+        
+        if (listSections.length > 0) {
+            // Lists view - toggle list sections
+            console.log('🔄 TOGGLE ALL: Using list sections');
+            toggleAllListSections(listSections);
+        } else if (timeBlocks.length > 0) {
+            // Today view - toggle time blocks
+            console.log('🔄 TOGGLE ALL: Using time blocks');
+            toggleAllTimeBlocks(timeBlocks);
+        } else {
+            // No sections found - try again after a brief delay in case view is still rendering
+            console.log('🔄 TOGGLE ALL: No sections found, retrying in 100ms...');
+            setTimeout(() => {
+                const retryListSections = document.querySelectorAll('.list-section');
+                const retryTimeBlocks = document.querySelectorAll('.time-block');
+                
+                console.log(`🔄 TOGGLE ALL RETRY: Found ${retryListSections.length} list sections, ${retryTimeBlocks.length} time blocks`);
+                
+                if (retryListSections.length > 0) {
+                    toggleAllListSections(retryListSections);
+                } else if (retryTimeBlocks.length > 0) {
+                    toggleAllTimeBlocks(retryTimeBlocks);
+                } else {
+                    console.warn('🔄 TOGGLE ALL: No sections found to toggle after retry');
+                }
+            }, 100);
             return;
         }
+    } catch (error) {
+        console.error('Error in toggleAllSections:', error);
+    }
+}
+
+function toggleAllListSections(sections) {
+    const arrows = document.querySelectorAll('.list-section-header span');
         
         // Check if any sections are visible
         let anyVisible = false;
@@ -2703,9 +2867,49 @@ function toggleAllSections() {
         }
         
         console.log(`✅ Toggled ${sections.length} sections - ${anyVisible ? 'collapsed' : 'expanded'} all`);
+}
+
+function toggleAllTimeBlocks(timeBlocks) {
+    console.log('Toggling all time blocks...');
+    
+    try {
+        // Get current collapse states from localStorage
+        const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
         
+        // Check if any time blocks are visible
+        let anyVisible = false;
+        timeBlocks.forEach(block => {
+            const header = block.querySelector('.time-block-header');
+            if (header) {
+                const timeKey = header.textContent.includes('No Specific Time') ? 'untimed' : 
+                               header.textContent.match(/\d{1,2}:\d{2}/)?.[0]?.replace(':', '');
+                if (timeKey && collapseStates[timeKey] !== true) {
+                    anyVisible = true;
+                }
+            }
+        });
+        
+        // Toggle all time blocks
+        timeBlocks.forEach(block => {
+            const header = block.querySelector('.time-block-header');
+            if (header) {
+                const timeKey = header.textContent.includes('No Specific Time') ? 'untimed' : 
+                               header.textContent.match(/\d{1,2}:\d{2}/)?.[0]?.replace(':', '');
+                if (timeKey && typeof toggleTimeBlock === 'function') {
+                    const shouldCollapse = anyVisible;
+                    const currentlyCollapsed = collapseStates[timeKey] === true;
+                    
+                    // Only toggle if state needs to change
+                    if (currentlyCollapsed !== shouldCollapse) {
+                        toggleTimeBlock(timeKey);
+                    }
+                }
+            }
+        });
+        
+        console.log(`✅ Toggled ${timeBlocks.length} time blocks - ${anyVisible ? 'collapsed' : 'expanded'} all`);
     } catch (error) {
-        console.error('Error in toggleAllSections:', error);
+        console.error('Error toggling time blocks:', error);
     }
 }
 
@@ -3005,6 +3209,9 @@ window.updateSyncPeriod = updateSyncPeriod;
 window.openSettings = openSettings;
 window.openCreateSectionModal = openCreateSectionModal;
 window.toggleAllSections = toggleAllSections;
+window.updateDesktopDateTime = updateDesktopDateTime;
+window.initializeDateTimePickers = initializeDateTimePickers;
+window.populateDayPicker = populateDayPicker;
 window.showListSelectionForTXTImport = showListSelectionForTXTImport;
 window.downloadTodayHtml = downloadTodayHtml;
 window.exportRepeatHtml = exportRepeatHtml;

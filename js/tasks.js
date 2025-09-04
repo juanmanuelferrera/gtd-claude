@@ -1057,6 +1057,9 @@ function openAddTaskModal(dateStr) {
     if (dateField) dateField.value = targetDate;
     if (timeField) timeField.value = '';
     
+    // Update the date/time display button
+    updateDateTimeDisplay();
+    
     // Set modal title for adding
     const modalTitle = document.querySelector('#taskModal h3');
     if (modalTitle) {

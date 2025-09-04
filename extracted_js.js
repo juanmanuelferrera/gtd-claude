@@ -10720,7 +10720,23 @@
         function loadListSections() {
             try {
                 const saved = localStorage.getItem('gtd_list_sections');
-                listSections = saved ? JSON.parse(saved) : [];
+                const loadedSections = saved ? JSON.parse(saved) : [];
+                
+                // Preserve existing collapsed states when reloading
+                if (listSections && listSections.length > 0) {
+                    const currentStates = new Map();
+                    listSections.forEach(section => {
+                        currentStates.set(section.id, section.collapsed);
+                    });
+                    
+                    // Update with fresh data but keep collapsed states
+                    listSections = loadedSections.map(section => ({
+                        ...section,
+                        collapsed: currentStates.has(section.id) ? currentStates.get(section.id) : section.collapsed
+                    }));
+                } else {
+                    listSections = loadedSections;
+                }
             } catch (error) {
                 console.error('Error loading list sections:', error);
                 listSections = [];
@@ -10909,26 +10925,117 @@
         }
         
         async function toggleAllSections() {
-            console.log('🔄 toggleAllSections called');
+            console.log('🔄 TOGGLE ALL (extracted_js): Starting, current view:', window.currentView);
             
-            // Use global scope
-            const sections = window.listSections || listSections;
-            if (!sections) {
-                console.warn('No listSections found in toggleAllSections');
-                return;
+            try {
+                // Check which view we're in and find appropriate sections
+                const listSections = document.querySelectorAll('.list-section');
+                const timeBlocks = document.querySelectorAll('.time-block');
+                
+                console.log(`🔄 TOGGLE ALL (extracted_js): Found ${listSections.length} list sections, ${timeBlocks.length} time blocks`);
+                
+                if (listSections.length > 0) {
+                    // Lists view - use data-driven approach
+                    const sections = window.listSections || [];
+                    if (sections.length === 0) {
+                        console.warn('No listSections data found');
+                        return;
+                    }
+                    
+                    // Check if all sections are collapsed
+                    const allCollapsed = sections.every(section => section.collapsed);
+                    
+                    // Toggle all sections to the opposite state
+                    sections.forEach(section => {
+                        section.collapsed = !allCollapsed;
+                    });
+                    
+                    // Save and refresh
+                    await saveListSections();
+                    renderListsView();
+                    
+                    console.log(`✅ Toggled ${sections.length} list sections - ${allCollapsed ? 'expanded' : 'collapsed'} all`);
+                    
+                } else if (timeBlocks.length > 0) {
+                    // Today view - use time block approach
+                    console.log('🔄 TOGGLE ALL (extracted_js): Using time blocks');
+                    
+                    // Get current collapse states from localStorage
+                    const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
+                    
+                    // Check if any time blocks are visible
+                    let anyVisible = false;
+                    timeBlocks.forEach(block => {
+                        const header = block.querySelector('.time-block-header');
+                        if (header) {
+                            const timeKey = header.textContent.includes('No Specific Time') ? 'untimed' : 
+                                           header.textContent.match(/\d{1,2}:\d{2}/)?.[0]?.replace(':', '');
+                            if (timeKey && collapseStates[timeKey] !== true) {
+                                anyVisible = true;
+                            }
+                        }
+                    });
+                    
+                    // Toggle all time blocks
+                    timeBlocks.forEach(block => {
+                        const header = block.querySelector('.time-block-header');
+                        if (header) {
+                            const timeKey = header.textContent.includes('No Specific Time') ? 'untimed' : 
+                                           header.textContent.match(/\d{1,2}:\d{2}/)?.[0]?.replace(':', '');
+                            if (timeKey && typeof toggleTimeBlock === 'function') {
+                                const shouldCollapse = anyVisible;
+                                const currentlyCollapsed = collapseStates[timeKey] === true;
+                                
+                                // Only toggle if state needs to change
+                                if (currentlyCollapsed !== shouldCollapse) {
+                                    toggleTimeBlock(timeKey);
+                                }
+                            }
+                        }
+                    });
+                    
+                    console.log(`✅ Toggled ${timeBlocks.length} time blocks - ${anyVisible ? 'collapsed' : 'expanded'} all`);
+                    
+                } else {
+                    // No sections found - try again after a brief delay
+                    console.log('🔄 TOGGLE ALL (extracted_js): No sections found, retrying in 100ms...');
+                    setTimeout(async () => {
+                        const retryListSections = document.querySelectorAll('.list-section');
+                        const retryTimeBlocks = document.querySelectorAll('.time-block');
+                        
+                        if (retryListSections.length > 0) {
+                            // Retry with list sections
+                            const sections = window.listSections || [];
+                            if (sections.length > 0) {
+                                const allCollapsed = sections.every(section => section.collapsed);
+                                sections.forEach(section => {
+                                    section.collapsed = !allCollapsed;
+                                });
+                                await saveListSections();
+                                renderListsView();
+                            }
+                        } else if (retryTimeBlocks.length > 0) {
+                            // Call the time block function if available
+                            if (typeof toggleTimeBlock === 'function') {
+                                retryTimeBlocks.forEach(block => {
+                                    const header = block.querySelector('.time-block-header');
+                                    if (header) {
+                                        const timeKey = header.textContent.includes('No Specific Time') ? 'untimed' : 
+                                                       header.textContent.match(/\d{1,2}:\d{2}/)?.[0]?.replace(':', '');
+                                        if (timeKey) {
+                                            toggleTimeBlock(timeKey);
+                                        }
+                                    }
+                                });
+                            }
+                        } else {
+                            console.warn('🔄 TOGGLE ALL (extracted_js): No sections found after retry');
+                        }
+                    }, 100);
+                }
+            } catch (error) {
+                console.error('Error in toggleAllSections (extracted_js):', error);
             }
-            
-            // Check if all sections are collapsed
-            const allCollapsed = sections.every(section => section.collapsed);
-            
-            // Toggle all sections to the opposite state
-            sections.forEach(section => {
-                section.collapsed = !allCollapsed;
-            });
-            
-            // Save and refresh
-            await saveListSections();
-            renderListsView();
         }
         
         // Open create section modal
@@ -20894,16 +21001,23 @@
             
             // Render tasks without specific time
             if (noTimeSlot.length > 0) {
+                // Check collapse state from localStorage
+                const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
+                const isCollapsed = collapseStates['untimed'] === true;
+                
                 html += `
                     <div class="time-block" 
                          ondragover="handleTodayDragOver(event)" 
                          ondrop="handleTodayDrop(event)" 
                          ondragleave="handleTodayDragLeave(event)"
                          data-time-slot="no-time">
-                        <div class="time-block-header">
+                        <div class="time-block-header" onclick="toggleTimeBlock('untimed')" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                            <span id="arrow-untimed" style="font-size: 12px; transition: transform 0.2s ease;" aria-expanded="${!isCollapsed}" aria-label="${isCollapsed ? 'Expand' : 'Collapse'} No Specific Time section">${isCollapsed ? '▶' : '▼'}</span>
                             <span>📋 No Specific Time</span>
                         </div>
                         <div class="time-block-content" 
+                             id="content-untimed"
+                             style="display: ${isCollapsed ? 'none' : 'block'}"
                              ondragover="handleTodayDragOver(event)" 
                              ondrop="handleTodayDrop(event)" 
                              ondragleave="handleTodayDragLeave(event)"

@@ -1606,6 +1606,18 @@ function loadListSections() {
         // Don't overwrite if window.listSections already has data from sync
         if (!window.listSections || window.listSections.length === 0) {
             window.listSections = loadedSections;
+        } else {
+            // Preserve existing collapsed states when reloading
+            const currentStates = new Map();
+            window.listSections.forEach(section => {
+                currentStates.set(section.id, section.collapsed);
+            });
+            
+            // Update with fresh data but keep collapsed states
+            window.listSections = loadedSections.map(section => ({
+                ...section,
+                collapsed: currentStates.has(section.id) ? currentStates.get(section.id) : section.collapsed
+            }));
         }
         
         console.log('📋 loadListSections - localStorage:', loadedSections.length, 'window:', window.listSections?.length || 0);
