@@ -829,7 +829,7 @@ function groupTasksByDate(tasksArray) {
  * Render individual task card
  */
 function renderTaskCard(task) {
-    const isOverdue = task.dueDate && task.dueDate < getLocalDateString() && task.status === 'pending';
+    const isOverdue = window.isTaskOverdue ? window.isTaskOverdue(task) : (task.dueDate && task.dueDate < getLocalDateString() && task.status === 'pending');
     const isEvent = task.isEvent;
     let cardClass = `task-card ${task.status}`;
     

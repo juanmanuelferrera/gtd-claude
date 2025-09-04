@@ -416,6 +416,8 @@ function renderTemplateButtonsSection() {
 function toggleTimeBlock(timeKey) {
     if (!timeKey) return;
     
+    console.log(`🔄 toggleTimeBlock called for: ${timeKey} - Call stack:`, new Error().stack);
+    
     // Rapid-click protection
     const currentTime = Date.now();
     if (!window.toggleTimeBlockLastClick) window.toggleTimeBlockLastClick = {};
@@ -3212,6 +3214,17 @@ window.toggleAllSections = toggleAllSections;
 window.updateDesktopDateTime = updateDesktopDateTime;
 window.initializeDateTimePickers = initializeDateTimePickers;
 window.populateDayPicker = populateDayPicker;
+
+// Standardized overdue check - use this everywhere to ensure consistency
+function isTaskOverdue(task) {
+    // Consistent logic: pending status, has due date, date is in past, not an event
+    if (!task.dueDate || task.status !== 'pending' || task.isEvent) {
+        return false;
+    }
+    const today = getLocalDateString(new Date());
+    return task.dueDate < today;
+}
+window.isTaskOverdue = isTaskOverdue;
 window.showListSelectionForTXTImport = showListSelectionForTXTImport;
 window.downloadTodayHtml = downloadTodayHtml;
 window.exportRepeatHtml = exportRepeatHtml;

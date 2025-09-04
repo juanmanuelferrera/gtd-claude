@@ -10284,7 +10284,7 @@
                 const dateStr = task.dueDate ? formatDate(new Date(task.dueDate)) : 'No date';
                 const timeStr = task.dueTime ? ` at ${formatTime(task.dueTime)}` : '';
                 const isCompleted = task.status === 'completed';
-                const isOverdue = task.dueDate && task.dueDate < today && !isCompleted;
+                const isOverdue = task.status === 'pending' && task.dueDate && task.dueDate < today && !task.isEvent;
                 const isToday = task.dueDate === today;
                 
                 let statusStyle = 'background: #e8f5e8; color: #2e7d32;'; // Default pending
@@ -12684,7 +12684,7 @@
         }
         // Render individual task card
         function renderTaskCard(task) {
-            const isOverdue = task.dueDate && task.dueDate < getLocalDateString() && task.status === 'pending';
+            const isOverdue = window.isTaskOverdue ? window.isTaskOverdue(task) : (task.dueDate && task.dueDate < getLocalDateString() && task.status === 'pending');
             const isEvent = task.isEvent;
             let cardClass = `task-card ${task.status}`;
             
@@ -14236,19 +14236,17 @@
                 repeatDropdown.style.opacity = '1';
             }
             
-            // Set date and time inputs
-            if (task.dueDate) {
-                document.getElementById('editTaskDateOnly').value = task.dueDate;
-                document.getElementById('editTaskTimeOnly').value = task.dueTime || '';
-            } else {
-                document.getElementById('editTaskDateOnly').value = '';
-                document.getElementById('editTaskTimeOnly').value = '';
-            }
+            // Set date and time inputs - default to today if no date set
+            const defaultDate = task.dueDate || getLocalDateString(new Date());
+            document.getElementById('editTaskDateOnly').value = defaultDate;
+            document.getElementById('editTaskTimeOnly').value = task.dueTime || '';
             
-            // Update display and hidden fields
-            updateDateTimeDisplay();
-            document.getElementById('editTaskDate').value = task.dueDate || '';
+            // Also update the main date/time fields
+            document.getElementById('editTaskDate').value = defaultDate;
             document.getElementById('editTaskTime').value = task.dueTime || '';
+            
+            // Update display
+            updateDateTimeDisplay();
             
             // Set modal title for editing
             const modalTitle = document.querySelector('#taskModal h3');
@@ -18703,7 +18701,7 @@
         function renderSelectableTaskCard(task) {
             const isEvent = task.isEvent;
             const isCompleted = task.status === 'completed';
-            const isOverdue = task.status === 'pending' && task.dueDate && task.dueDate < getLocalDateString();
+            const isOverdue = window.isTaskOverdue ? window.isTaskOverdue(task) : (task.status === 'pending' && task.dueDate && task.dueDate < getLocalDateString());
             const isSelected = selectedTasks.has(task.id);
             
             const cardClass = `task-card task-card-selectable ${isEvent ? 'event' : ''} ${isCompleted ? 'completed' : ''} ${isOverdue ? 'overdue' : ''} ${isSelected ? 'selected' : ''}`;
@@ -21004,6 +21002,7 @@
                 // Check collapse state from localStorage
                 const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
                 const isCollapsed = collapseStates['untimed'] === true;
+                console.log('🔄 No Specific Time section - reading collapse state:', isCollapsed, 'from localStorage:', collapseStates);
                 
                 html += `
                     <div class="time-block" 
