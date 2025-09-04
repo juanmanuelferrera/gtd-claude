@@ -5514,5 +5514,248 @@
         +
     </button>
 
+    <!-- Modern Floating Selection Toolbar -->
+    <div id="floatingSelectionToolbar" style="
+        position: fixed;
+        bottom: -200px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 32px);
+        max-width: 600px;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border-radius: 24px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.04);
+        padding: 16px;
+        z-index: 10000;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        display: none;
+        flex-direction: column;
+        gap: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    ">
+        <!-- Selection Count Badge -->
+        <div style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 4px;
+        ">
+            <div id="selectionCountBadge" style="
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 6px 16px;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+            ">
+                0 selected
+            </div>
+        </div>
+
+        <!-- Action Buttons Row -->
+        <div style="
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 8px;
+        ">
+            <!-- Complete Button -->
+            <button onclick="completeSelectedTasks()" class="selection-toolbar-btn" style="
+                flex: 1;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                padding: 12px;
+                border-radius: 16px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+                min-height: 64px;
+                justify-content: center;
+            ">
+                <div style="font-size: 20px;">✓</div>
+                <span style="font-size: 11px;">Complete</span>
+            </button>
+
+            <!-- Delay 1 Day Button -->
+            <button onclick="delaySelectedTasks(1)" class="selection-toolbar-btn" style="
+                flex: 1;
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+                border: none;
+                padding: 12px;
+                border-radius: 16px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                box-shadow: 0 2px 8px rgba(240, 147, 251, 0.3);
+                min-height: 64px;
+                justify-content: center;
+            ">
+                <div style="font-size: 20px;">+1</div>
+                <span style="font-size: 11px;">Tomorrow</span>
+            </button>
+
+            <!-- Delay 1 Week Button -->
+            <button onclick="delaySelectedTasks(7)" class="selection-toolbar-btn" style="
+                flex: 1;
+                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                color: white;
+                border: none;
+                padding: 12px;
+                border-radius: 16px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                box-shadow: 0 2px 8px rgba(250, 112, 154, 0.3);
+                min-height: 64px;
+                justify-content: center;
+            ">
+                <div style="font-size: 20px;">+7</div>
+                <span style="font-size: 11px;">Next Week</span>
+            </button>
+
+            <!-- Delete Button -->
+            <button onclick="deleteSelectedTasks()" class="selection-toolbar-btn" style="
+                flex: 1;
+                background: linear-gradient(135deg, #f77062 0%, #fe5196 100%);
+                color: white;
+                border: none;
+                padding: 12px;
+                border-radius: 16px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                box-shadow: 0 2px 8px rgba(247, 112, 98, 0.3);
+                min-height: 64px;
+                justify-content: center;
+            ">
+                <div style="font-size: 20px;">🗑</div>
+                <span style="font-size: 11px;">Delete</span>
+            </button>
+
+            <!-- More Actions Button -->
+            <button onclick="showMoreSelectionActions()" class="selection-toolbar-btn" style="
+                flex: 1;
+                background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+                color: white;
+                border: none;
+                padding: 12px;
+                border-radius: 16px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                box-shadow: 0 2px 8px rgba(102, 166, 255, 0.3);
+                min-height: 64px;
+                justify-content: center;
+            ">
+                <div style="font-size: 20px;">⋯</div>
+                <span style="font-size: 11px;">More</span>
+            </button>
+        </div>
+
+        <!-- Close Handle -->
+        <div onclick="hideFloatingSelectionToolbar()" style="
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 36px;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 2px;
+            cursor: pointer;
+        "></div>
+    </div>
+
+    <style>
+        /* Hover effects for selection toolbar buttons */
+        .selection-toolbar-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .selection-toolbar-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Safe area padding for mobile */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            #floatingSelectionToolbar {
+                padding-bottom: calc(16px + env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            #floatingSelectionToolbar {
+                background: rgba(30, 30, 30, 0.92);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        /* Animation keyframes */
+        @keyframes slideUpToolbar {
+            from {
+                bottom: -200px;
+                opacity: 0;
+            }
+            to {
+                bottom: 16px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideDownToolbar {
+            from {
+                bottom: 16px;
+                opacity: 1;
+            }
+            to {
+                bottom: -200px;
+                opacity: 0;
+            }
+        }
+
+        /* Show/hide animations */
+        #floatingSelectionToolbar.showing {
+            animation: slideUpToolbar 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        #floatingSelectionToolbar.hiding {
+            animation: slideDownToolbar 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+    </style>
+
 </body>
 </html>

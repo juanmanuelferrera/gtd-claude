@@ -18834,6 +18834,10 @@
             const deleteBtn = document.getElementById('deleteSelectedBtn');
             const countDisplay = document.getElementById('selectedCount');
             
+            // Modern floating toolbar
+            const floatingToolbar = document.getElementById('floatingSelectionToolbar');
+            const selectionBadge = document.getElementById('selectionCountBadge');
+            
             // Today view buttons
             const todayBatchOperations = document.getElementById('todayBatchOperations');
             const todayDeleteBtn = document.getElementById('todayDeleteSelectedBtn');
@@ -18866,7 +18870,20 @@
             const delayMonthBtn = document.getElementById('delaySelectedMonthBtn');
             
             if (selectedCount > 0) {
-                // All Tasks view buttons
+                // Show modern floating toolbar
+                if (floatingToolbar) {
+                    floatingToolbar.style.display = 'flex';
+                    floatingToolbar.classList.remove('hiding');
+                    floatingToolbar.classList.add('showing');
+                    
+                    // Update selection count badge
+                    if (selectionBadge) {
+                        const taskText = selectedCount === 1 ? 'task' : 'tasks';
+                        selectionBadge.textContent = `${selectedCount} ${taskText} selected`;
+                    }
+                }
+                
+                // All Tasks view buttons (kept for backwards compatibility)
                 if (deleteBtn) deleteBtn.style.display = 'inline-block';
                 if (delayDayBtn) delayDayBtn.style.display = 'inline-block';
                 if (delayWeekBtn) delayWeekBtn.style.display = 'inline-block';
@@ -18937,6 +18954,15 @@
                     `;
                 }
             } else {
+                // Hide modern floating toolbar
+                if (floatingToolbar && floatingToolbar.classList.contains('showing')) {
+                    floatingToolbar.classList.remove('showing');
+                    floatingToolbar.classList.add('hiding');
+                    setTimeout(() => {
+                        floatingToolbar.style.display = 'none';
+                    }, 300);
+                }
+                
                 // All Tasks view buttons
                 if (deleteBtn) deleteBtn.style.display = 'none';
                 if (delayDayBtn) delayDayBtn.style.display = 'none';
@@ -18997,6 +19023,53 @@
         // Helper function to get selected task IDs for bulk operations
         function getSelectedTaskIds() {
             return Array.from(selectedTasks);
+        }
+        
+        // Complete all selected tasks
+        function completeSelectedTasks() {
+            const taskIds = Array.from(selectedTasks);
+            if (taskIds.length === 0) return;
+            
+            taskIds.forEach(taskId => {
+                const task = tasks.find(t => t.id === taskId);
+                if (task && task.status !== 'completed') {
+                    task.status = 'completed';
+                    task.completedAt = new Date().toISOString();
+                }
+            });
+            
+            saveTasksToLocalStorage();
+            renderCurrentView();
+            clearAllSelections();
+            showInlineNotification(`✅ Completed ${taskIds.length} task${taskIds.length > 1 ? 's' : ''}`, 'success');
+        }
+        
+        // Hide the floating selection toolbar
+        function hideFloatingSelectionToolbar() {
+            const toolbar = document.getElementById('floatingSelectionToolbar');
+            if (toolbar) {
+                toolbar.classList.remove('showing');
+                toolbar.classList.add('hiding');
+                setTimeout(() => {
+                    toolbar.style.display = 'none';
+                }, 300);
+                clearAllSelections();
+            }
+        }
+        
+        // Show more selection actions menu
+        function showMoreSelectionActions() {
+            // Create a modal or dropdown for additional actions
+            const moreActions = [
+                { label: 'Set Time', icon: '🕐', action: () => openTimeDropdownForSelectedTasks() },
+                { label: 'Move to List', icon: '📋', action: () => moveSelectedToList() },
+                { label: 'Add Template', icon: '🏷', action: () => addTemplateToSelected() },
+                { label: 'Duplicate', icon: '📑', action: () => duplicateSelectedTasks() },
+                { label: 'Export', icon: '📤', action: () => exportSelectedTasks() }
+            ];
+            
+            // For now, just show an alert with options
+            showInlineNotification('More actions coming soon!', 'info');
         }
         
         // Helper function to clear all task selections
@@ -25832,4 +25905,9 @@
                 }
             }, 10000); // Wait 10 seconds to ensure everything is loaded
         });
+        
+        // Export floating toolbar functions globally
+        window.completeSelectedTasks = completeSelectedTasks;
+        window.hideFloatingSelectionToolbar = hideFloatingSelectionToolbar;
+        window.showMoreSelectionActions = showMoreSelectionActions;
     
