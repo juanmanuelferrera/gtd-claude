@@ -15419,16 +15419,19 @@
                             // Template is already in the title, no need to do anything special
                         }
                     }
-                }, 1500); // 1.5s delay to let user finish typing
+                }, 500); // 0.5s delay for responsive parsing
             });
             
             // Add blur event to clean up title when user finishes typing
             newInput.addEventListener('blur', function(event) {
                 const input = event.target.value;
                 const parsed = parseNaturalLanguage(input);
-                if (parsed) {
-                    // Only update title when user finishes editing, and add space for continued typing
-                    event.target.value = parsed.title + ' ';
+                if (parsed && parsed.title) {
+                    // Only update title if we have a valid title (not empty from standalone time)
+                    // Keep the original if it's just a time pattern like "at 8am"
+                    if (parsed.title.trim() !== '') {
+                        event.target.value = parsed.title + ' ';
+                    }
                 }
             });
             
