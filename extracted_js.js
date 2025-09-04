@@ -10783,7 +10783,7 @@
                          ondragover="handleSectionDragOver(event)"
                          ondrop="handleSectionDrop(event, ${index})">
                         <div class="list-section-drag-handle">⋮⋮</div>
-                        <div class="list-section-header" onclick="toggleListSection('${section.id}')">
+                        <div class="list-section-header" onclick="${typeof toggleListSection === 'function' ? `toggleListSection('${section.id}')` : 'console.warn(\"toggleListSection not available\")'}">
                             <div class="list-section-title">
                                 <span>${isCollapsed ? '📁' : '📂'}</span>
                                 ${section.name}
