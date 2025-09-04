@@ -15579,6 +15579,21 @@
             
             // Patterns for different natural language formats
             const patterns = [
+                // Standalone time pattern: "at 8am" or "at 3:30pm"
+                {
+                    regex: /^at\s+(.+)$/i,
+                    parser: (match) => {
+                        const timeResult = normalizeTime(match[1]);
+                        if (timeResult) {
+                            return {
+                                title: '',  // Empty title for standalone time
+                                date: getLocalDateString(new Date()),  // Default to today
+                                time: timeResult
+                            };
+                        }
+                        return null;
+                    }
+                },
                 // Standard order: "task tomorrow at 6pm" or "task today at 6:30"
                 {
                     regex: /^(.+?)\s+(today|tomorrow)\s+at\s+(.+)$/i,
@@ -15681,7 +15696,7 @@
                     parser: (match) => ({
                         title: match[1].trim(),
                         date: getDateForRelative(match[2]),
-                        time: '06:00'
+                        time: null
                     })
                 },
                 // Reverse order: "tomorrow task"
@@ -15690,7 +15705,7 @@
                     parser: (match) => ({
                         title: match[2].trim(),
                         date: getDateForRelative(match[1]),
-                        time: '06:00'
+                        time: null
                     })
                 },
                 // Standard order: "task on monday" or "task on friday"
@@ -15699,7 +15714,7 @@
                     parser: (match) => ({
                         title: match[1].trim(),
                         date: getDateForWeekday(match[2]),
-                        time: '06:00'
+                        time: null
                     })
                 },
                 // Reverse order: "on monday task"
@@ -15708,7 +15723,7 @@
                     parser: (match) => ({
                         title: match[2].trim(),
                         date: getDateForWeekday(match[1]),
-                        time: '06:00'
+                        time: null
                     })
                 },
                 // Standard order with relative periods and time: "task in 3 weeks at 6pm"
@@ -15813,7 +15828,7 @@
                     parser: (match) => ({
                         title: match[1].trim(),
                         date: getDateForRelativePeriod(match[2], match[3]),
-                        time: '06:00'
+                        time: null
                     })
                 },
                 // Standard order with "in a" only: "task in a month"
@@ -15822,7 +15837,7 @@
                     parser: (match) => ({
                         title: match[1].trim(),
                         date: getDateForRelativePeriod('a', match[2]),
-                        time: '06:00'
+                        time: null
                     })
                 },
                 // Reverse order with relative periods only: "in 3 weeks task"
@@ -15831,7 +15846,7 @@
                     parser: (match) => ({
                         title: match[3].trim(),
                         date: getDateForRelativePeriod(match[1], match[2]),
-                        time: '06:00'
+                        time: null
                     })
                 },
                 // Reverse order with "in a" only: "in a month task"
@@ -15840,7 +15855,7 @@
                     parser: (match) => ({
                         title: match[2].trim(),
                         date: getDateForRelativePeriod('a', match[1]),
-                        time: '06:00'
+                        time: null
                     })
                 },
                 // Standard order: "task at 6pm" (for today)
