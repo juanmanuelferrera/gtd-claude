@@ -12779,26 +12779,7 @@
                     <div class="mobile-task-actions">
                         <button class="mobile-task-action-btn" 
                                 onclick="handleMobileTaskAction('${task.id}', event)"
-                                style="
-                                    width: 100%;
-                                    height: 48px;
-                                    background: ${task.status === 'completed' ? 
-                                        'linear-gradient(135deg, #28a745 0%, #20c997 100%)' : 
-                                        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
-                                    color: white;
-                                    border: none;
-                                    border-radius: 12px;
-                                    font-size: 16px;
-                                    font-weight: 600;
-                                    cursor: pointer;
-                                    margin-top: 12px;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    gap: 8px;
-                                    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-                                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                                ">
+                                style="width: 100%; height: 48px; background: ${task.status === 'completed' ? 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);">
                             <span>${task.status === 'completed' ? '↩️' : '✓'}</span>
                             <span>${task.status === 'completed' ? 'Undo Complete' : 'Mark Complete'}</span>
                         </button>
