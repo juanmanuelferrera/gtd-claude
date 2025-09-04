@@ -4667,7 +4667,7 @@
                             style="width: 100%; padding: 12px 0; font-size: 17px; border: none; background: transparent; outline: none; font-weight: 400; margin-bottom: 15px; color: #000; line-height: 1.3; border-bottom: 1px solid #e5e5ea;"
                             placeholder="Título de la tarea">
                         
-                        <textarea id="mobileEditNotes" placeholder="Notas" 
+                        <textarea id="mobileEditNotes" placeholder="Notas" maxlength="30000"
                             oninput="autoSaveMobileTaskEdit('${taskId}')"
                             onfocus="clearMobileEditAutoClose()"
                             onblur="saveMobileTaskEdit('${taskId}'); setMobileEditAutoClose()"
@@ -21831,7 +21831,7 @@
                             style="width: 100%; padding: 12px 0; font-size: 17px; border: none; background: transparent; outline: none; font-weight: 400; margin-bottom: 15px; color: #000; line-height: 1.3; border-bottom: 1px solid #e5e5ea;"
                             placeholder="Nueva tarea">
                         
-                        <textarea id="mobileNewNotes" placeholder="Notas" 
+                        <textarea id="mobileNewNotes" placeholder="Notas" maxlength="30000"
                             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
                             style="width: 100%; padding: 12px 0; font-size: 15px; border: none; background: transparent; outline: none; resize: none; height: 80px; color: #8e8e93; line-height: 1.4; border-bottom: 1px solid #e5e5ea;"></textarea>
                     </div>
