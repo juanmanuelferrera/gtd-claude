@@ -2263,15 +2263,34 @@ function initializeUI() {
     console.log('✅ UI module initialized');
 }
 
-// List management functions
+// List management functions  
 async function toggleListSection(sectionId) {
+    console.log('🔄 toggleListSection (ui.js) called with ID:', sectionId);
+    console.log('📋 Available listSections:', window.listSections?.map(s => ({id: s.id, name: s.name, collapsed: s.collapsed})));
+    
+    if (!window.listSections) {
+        console.error('❌ window.listSections is not defined!');
+        return;
+    }
+    
     const section = window.listSections.find(s => s.id === sectionId);
     if (section) {
+        console.log('📁 Found section:', section.name, 'current collapsed state:', section.collapsed);
         section.collapsed = !section.collapsed;
+        console.log('📁 New collapsed state:', section.collapsed);
+        
         if (typeof saveListSections === 'function') {
+            console.log('💾 Calling saveListSections...');
             await saveListSections();
+        } else {
+            console.warn('⚠️ saveListSections function not available');
         }
+        
+        console.log('🎨 Calling renderListsView to update UI...');
         renderListsView();
+    } else {
+        console.error('❌ Section not found with ID:', sectionId);
+        console.log('Available section IDs:', window.listSections.map(s => s.id));
     }
 }
 
