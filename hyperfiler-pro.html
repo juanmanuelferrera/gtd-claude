@@ -3016,6 +3016,25 @@
                 display: flex !important;
             }
             
+            /* FORCE show mobile task actions with highest specificity */
+            .mobile-task-actions {
+                display: block !important;
+                visibility: visible !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+            
+            /* Hide desktop task actions on mobile */
+            .desktop-task-actions {
+                display: none !important;
+            }
+            
+            /* FORCE show modern mobile header */
+            .modern-app-header.mobile-only {
+                display: block !important;
+                visibility: visible !important;
+            }
+            
             /* Mobile time-slot-task styling - iOS Standards */
             .time-slot-task {
                 background: white !important;
@@ -3695,6 +3714,14 @@
         }
         
         /* Mobile Task Actions - Simplified Single Button */
+        .mobile-task-actions {
+            display: none; /* Hidden by default */
+        }
+        
+        .desktop-task-actions {
+            display: block; /* Shown by default */
+        }
+        
         @media (max-width: 768px) {
             /* Hide desktop task actions on mobile */
             .desktop-task-actions {
@@ -3710,6 +3737,14 @@
             .mobile-task-action-btn:active {
                 transform: scale(0.98);
                 box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+            }
+            
+            /* Override any existing mobile-task-actions hiding */
+            .mobile-task-actions {
+                display: block !important;
+                visibility: visible !important;
+                height: auto !important;
+                overflow: visible !important;
             }
         }
         
@@ -3728,7 +3763,7 @@
 </head>
 <body>
     <!-- Modern Mobile App Header with Gradient & Glass Morphism -->
-    <div class="modern-app-header" id="modernAppHeader">
+    <div class="modern-app-header mobile-only" id="modernAppHeader">
         <!-- Gradient Background -->
         <div class="header-gradient-bg"></div>
         
