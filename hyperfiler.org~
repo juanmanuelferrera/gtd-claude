@@ -146,6 +146,118 @@ npm run deploy           # Deploy to production
 wrangler deploy         # Alternative deployment
 #+END_SRC
 
+** Synchronization System
+
+*** Overview
+HyperFiler Pro uses a "Complete State Replacement" synchronization strategy, ensuring data consistency across devices without complex conflict resolution.
+
+*** Sync Architecture
+
+**** Client-Side (js/sync.js)
+- **Sync Lock System**: Global promise prevents race conditions during concurrent sync operations
+- **Event-Driven Triggers**: 
+  - Page visibility changes (when tab becomes active)
+  - Window focus events (when app regains focus)
+  - Manual save operations
+  - Periodic background sync (every 30 seconds when active)
+- **Debouncing**: Prevents excessive sync requests (10-second minimum between syncs)
+- **Stale Browser Detection**: Protects against overwriting newer server data
+
+**** Server-Side (worker.js & lists-sync.js)
+- **Complete Replacement Strategy**: DELETE all → INSERT all pattern
+- **Atomic Operations**: All-or-nothing database transactions
+- **JWT Authentication**: Every sync request verified with token
+- **User Isolation**: Strict user_id filtering on all queries
+
+*** Data Flow
+
+#+BEGIN_EXAMPLE
+1. CLIENT UPLOAD (Every change)
+   Browser → POST /tasks/sync → Delete all user tasks → Insert all tasks
+   
+2. CLIENT DOWNLOAD (On focus/visibility)
+   Browser ← GET /tasks/{userId} ← Fetch all user tasks from D1
+   
+3. LISTS & TEMPLATES SYNC
+   Same pattern for /lists/sync and /templates/sync endpoints
+#+END_EXAMPLE
+
+*** Sync Triggers
+
+**** Immediate Sync
+- Task creation/modification/deletion
+- List updates
+- Template changes
+- Manual save button
+
+**** Periodic Sync
+- Every 30 seconds (when app is active)
+- On tab visibility change
+- On window focus
+- On user login
+
+**** Smart Download
+- Fetches only when needed
+- Checks timestamps to avoid unnecessary downloads
+- Handles offline gracefully
+
+*** Conflict Resolution
+- **Strategy**: Last-Write-Wins (LWW)
+- **Implementation**: Complete state replacement eliminates merge conflicts
+- **Protection**: Stale browser detection prevents accidental data loss
+- **Backup**: User can restore from automatic backups if needed
+
+*** Data Integrity
+
+**** Client-Side Protection
+#+BEGIN_SRC javascript
+// Stale browser detection (sync.js:25-35)
+if (window.staleBrowserDetected || window.skipInitialUpload) {
+    console.log('🔒 STALE BROWSER: Sync postponed');
+    return;
+}
+#+END_SRC
+
+**** Server-Side Validation
+#+BEGIN_SRC javascript
+// User isolation (lists-sync.js:26-32)
+if (userId !== payload.userId) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 403
+    });
+}
+#+END_SRC
+
+*** Performance Optimizations
+- **Batch Operations**: All tasks synced in single request
+- **JSON Storage**: Lists stored as JSON blobs for faster retrieval
+- **Indexed Queries**: Database indexes on user_id for quick lookups
+- **Rate Limiting**: 500 requests/minute for sync endpoints
+
+*** Sync Endpoints
+
+| Endpoint | Method | Purpose | Rate Limit |
+|----------|--------|---------|------------|
+| /tasks/sync | POST | Upload all tasks | 500/min |
+| /tasks/{userId} | GET | Download all tasks | 500/min |
+| /lists/sync | POST | Upload all lists | 500/min |
+| /lists/{userId} | GET | Download all lists | 500/min |
+| /templates/sync | POST | Upload all templates | 500/min |
+| /templates/{userId} | GET | Download all templates | 500/min |
+
+*** Error Handling
+- **Automatic Retry**: Failed syncs retry after 5 seconds
+- **Offline Queue**: Changes stored locally until connection restored
+- **User Feedback**: Visual indicators for sync status
+- **Logging**: Detailed console logs for debugging
+
+*** Security Measures
+- **JWT Tokens**: All sync requests authenticated
+- **HTTPS Only**: Encrypted data transmission
+- **User Scoping**: Users can only access their own data
+- **Input Sanitization**: All data sanitized before storage
+- **Rate Limiting**: Prevents abuse and DDoS
+
 ** API Endpoints
 The worker.js handles all API routes with comprehensive security checks and rate limiting.
 
