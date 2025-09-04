@@ -416,8 +416,6 @@ function renderTemplateButtonsSection() {
 function toggleTimeBlock(timeKey) {
     if (!timeKey) return;
     
-    console.log(`🔄 toggleTimeBlock called for: ${timeKey} - Call stack:`, new Error().stack);
-    
     // Rapid-click protection
     const currentTime = Date.now();
     if (!window.toggleTimeBlockLastClick) window.toggleTimeBlockLastClick = {};

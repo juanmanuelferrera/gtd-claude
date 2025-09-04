@@ -1298,13 +1298,18 @@ function renderTodayView() {
     
     // Render untimed tasks
     if (untimedTasks.length > 0) {
+        // Check collapse state from localStorage
+        const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
+        const isCollapsed = collapseStates['untimed'] === true;
+        console.log('🔄 ui.js - No Specific Time section - reading collapse state:', isCollapsed, 'from localStorage:', collapseStates);
+        
         html += `
             <div class="time-block">
                 <div class="time-block-header" onclick="toggleTimeBlock('untimed')" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                    <span id="arrow-untimed" class="group-arrow">▶</span>
+                    <span id="arrow-untimed" class="group-arrow" aria-expanded="${!isCollapsed}" aria-label="${isCollapsed ? 'Expand' : 'Collapse'} No Specific Time section">${isCollapsed ? '▶' : '▼'}</span>
                     📋 No Specific Time
                 </div>
-                <div class="time-block-content" id="content-untimed" style="display: none;">`;
+                <div class="time-block-content" id="content-untimed" style="display: ${isCollapsed ? 'none' : 'block'};">`;
         
         untimedTasks.forEach(task => {
             html += renderTaskCard(task);
