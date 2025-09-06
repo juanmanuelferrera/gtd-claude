@@ -20994,9 +20994,6 @@
                 mobileHtml += '</select>';
                 mobileHtml += '</div>';
                 
-                // Add debug info
-                mobileHtml += `<div style="font-size: 11px; color: #666; margin-top: 5px;">Tasks: ${todayTasks.length} | Templates: ${sortedTemplates.join(', ') || 'none'}</div>`;
-                
                 mobileContainer.innerHTML = mobileHtml;
             }
             
