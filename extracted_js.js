@@ -5067,8 +5067,10 @@
                     
                     // Show action hint
                     if (deltaX > 30) {
+                        // Right swipe - yellow for "move to tomorrow"
                         currentSwipeElement.style.background = 'rgba(255, 193, 7, 0.15)';
                     } else if (deltaX < -30) {
+                        // Left swipe - red for "delete"
                         currentSwipeElement.style.background = 'rgba(220, 53, 69, 0.15)';
                     } else {
                         currentSwipeElement.style.background = '';
@@ -5094,8 +5096,9 @@
             if (isSwipeInProgress && Math.abs(deltaX) > 60 && swipeTime < 1000) {
                 setTimeout(() => {
                     if (deltaX > 0) {
-                        // Swipe right - open delay modal
-                        toggleMobileTimeDropdown(taskId, event);
+                        // Swipe right - move task to next day
+                        delayTask(taskId, 1, event);
+                        showInlineNotification('📅 Task moved to tomorrow', 'success');
                     } else {
                         // Swipe left - delete task
                         quickDeleteTask(taskId, event);
