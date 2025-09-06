@@ -26181,6 +26181,8 @@
         window.handleTaskCardClick = handleTaskCardClick;
         window.handleTaskTouchStart = handleTaskTouchStart;
         window.handleTaskTouchEnd = handleTaskTouchEnd;
+        window.renderTodayTemplateFilters = renderTodayTemplateFilters;
+        window.handleMobileTemplateFilter = handleMobileTemplateFilter;
         window.openIOSStyleDateTimePicker = openIOSStyleDateTimePicker;
         window.closeIOSDateTimePicker = closeIOSDateTimePicker;
         window.setQuickTime = setQuickTime;
