@@ -5952,8 +5952,8 @@
                     }
                 }
                 
-                // Refresh UI
-                renderCurrentView();
+                // Refresh UI - TEMPORARILY DISABLED FOR SWIPE DEBUG
+                // renderCurrentView();
                 
                 return;
                 
@@ -6223,8 +6223,8 @@
                 console.log('📥 Falling back to full sync');
                 await downloadAllTasks();
             } else {
-                // Delta sync succeeded, refresh UI
-                renderCurrentView();
+                // Delta sync succeeded, refresh UI - TEMPORARILY DISABLED FOR SWIPE DEBUG
+                // renderCurrentView();
                 
                 // Update sync timestamp
                 localStorage.setItem('lastSyncTime', Date.now().toString());

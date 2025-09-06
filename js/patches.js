@@ -44,11 +44,11 @@ window.addEventListener('load', async () => {
         }
     };
     
-    // Initial render
-    setTimeout(forceRender, 100);
-    setTimeout(forceRender, 500);
-    setTimeout(forceRender, 2000);
-    setTimeout(forceRender, 4000);
+    // Initial render - DISABLED TO FIX SWIPE ISSUE
+    // setTimeout(forceRender, 100);
+    // setTimeout(forceRender, 500);
+    // setTimeout(forceRender, 2000);
+    // setTimeout(forceRender, 4000);
     
     // Listen for download completion and force render
     const originalDownloadAllTasks = window.downloadAllTasks;
