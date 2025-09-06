@@ -5230,7 +5230,7 @@
         }
         // Hide modal when clicking outside
         document.addEventListener('click', function(event) {
-            if (!event.target.closest('.mobile-task-actions') && !event.target.closest('#mobileTaskModal')) {
+            if (!event.target.closest('#mobileTaskModal')) {
                 hideMobileTaskModal();
             }
         });
@@ -12773,16 +12773,6 @@
                                     style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;" 
                                     title="Delete task">🗑️</button>
                         </div>
-                    </div>
-                    
-                    <!-- Mobile Single Action Button -->
-                    <div class="mobile-task-actions">
-                        <button class="mobile-task-action-btn" 
-                                onclick="handleMobileTaskAction('${task.id}', event)"
-                                style="width: 100%; height: 48px; background: ${task.status === 'completed' ? 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);">
-                            <span>${task.status === 'completed' ? '↩️' : '✓'}</span>
-                            <span>${task.status === 'completed' ? 'Undo Complete' : 'Mark Complete'}</span>
-                        </button>
                     </div>
                     
                 </div>
@@ -25969,29 +25959,6 @@
         });
         
         // Handle mobile task action - single frictionless button
-        function handleMobileTaskAction(taskId, event) {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            
-            const task = tasks.find(t => t.id === taskId);
-            if (!task) return;
-            
-            // Simple toggle: complete if pending, uncomplete if completed
-            if (task.status === 'completed') {
-                task.status = 'pending';
-                task.completedAt = null;
-                showInlineNotification('↩️ Task restored', 'info');
-            } else {
-                task.status = 'completed';
-                task.completedAt = new Date().toISOString();
-                showInlineNotification('✅ Task completed!', 'success');
-            }
-            
-            saveTasksToLocalStorage();
-            renderCurrentView();
-        }
         
         // Touch handling for mobile task cards
         let touchTimer;
@@ -26030,7 +25997,6 @@
         window.completeSelectedTasks = completeSelectedTasks;
         window.hideFloatingSelectionToolbar = hideFloatingSelectionToolbar;
         window.showMoreSelectionActions = showMoreSelectionActions;
-        window.handleMobileTaskAction = handleMobileTaskAction;
         window.handleTaskCardClick = handleTaskCardClick;
         window.handleTaskTouchStart = handleTaskTouchStart;
         window.handleTaskTouchEnd = handleTaskTouchEnd;

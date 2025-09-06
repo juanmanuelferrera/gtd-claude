@@ -2971,12 +2971,6 @@
             
             /* Hide mobile task actions on desktop only - more specific */
             @media (min-width: 769px) {
-                .mobile-task-actions {
-                    display: none !important;
-                    visibility: hidden !important;
-                    height: 0 !important;
-                    overflow: hidden !important;
-                }
             }
             
             /* Force show desktop task actions */
@@ -3017,12 +3011,6 @@
             }
             
             /* FORCE show mobile task actions with highest specificity */
-            .mobile-task-actions {
-                display: block !important;
-                visibility: visible !important;
-                height: auto !important;
-                overflow: visible !important;
-            }
             
             /* Hide desktop task actions on mobile */
             .desktop-task-actions {
@@ -3111,16 +3099,6 @@
                 display: none !important;
             }
             
-            /* Show mobile task actions dropdown - ensure visibility */
-            .mobile-task-actions {
-                display: block !important;
-                position: relative !important;
-                visibility: visible !important;
-                height: auto !important;
-                overflow: visible !important;
-                opacity: 1 !important;
-                z-index: 10 !important;
-            }
             
             .mobile-task-more-btn {
                 background: #667eea !important;
@@ -3714,9 +3692,6 @@
         }
         
         /* Mobile Task Actions - Simplified Single Button */
-        .mobile-task-actions {
-            display: none; /* Hidden by default */
-        }
         
         .desktop-task-actions {
             display: block; /* Shown by default */
@@ -3728,31 +3703,9 @@
                 display: none !important;
             }
             
-            /* Show mobile single action */
-            .mobile-task-actions {
-                display: block !important;
-            }
             
-            /* Mobile task action button hover/active states */
-            .mobile-task-action-btn:active {
-                transform: scale(0.98);
-                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-            }
-            
-            /* Override any existing mobile-task-actions hiding */
-            .mobile-task-actions {
-                display: block !important;
-                visibility: visible !important;
-                height: auto !important;
-                overflow: visible !important;
-            }
         }
         
-        /* Desktop - Hide mobile actions */
-        @media (min-width: 769px) {
-            .mobile-task-actions {
-                display: none !important;
-            }
             
             .desktop-task-actions {
                 display: block !important;
