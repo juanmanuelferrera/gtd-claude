@@ -5032,6 +5032,9 @@
         let swipeStartTime = 0;
         
         function handleTaskTouchStart(event) {
+            console.log('🔥 TOUCH START CALLED!', event.touches?.length);
+            alert('TOUCH START CALLED!'); // Very visible debug
+            
             if (event.touches.length !== 1) return;
             
             touchStartX = event.touches[0].clientX;
