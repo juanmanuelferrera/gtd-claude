@@ -20983,21 +20983,19 @@
             
             // Populate mobile version with dropdown-style filters
             if (mobileContainer) {
-                let mobileHtml = '';
+                console.log('📱 Mobile container found, templates:', sortedTemplates.length);
                 
-                // Always show the dropdown
-                mobileHtml = '<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
+                // ALWAYS populate the mobile container
+                let mobileHtml = '<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
                 mobileHtml += '<select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">';
                 mobileHtml += '<option value="">All tasks</option>';
                 
-                if (sortedTemplates.length > 0) {
-                    // Add each template as an option
-                    sortedTemplates.forEach(template => {
-                        const displayName = template; // e.g., "@casa" or "#urgent"
-                        const escapedTemplate = template.replace(/'/g, "\\'"); // Escape single quotes
-                        mobileHtml += `<option value="${escapedTemplate}">${displayName}</option>`;
-                    });
-                }
+                // Add templates to dropdown
+                sortedTemplates.forEach(template => {
+                    const displayName = template; // e.g., "@casa" or "#urgent"
+                    const escapedTemplate = template.replace(/'/g, "\\'"); // Escape single quotes
+                    mobileHtml += `<option value="${escapedTemplate}">${displayName}</option>`;
+                });
                 
                 mobileHtml += '</select>';
                 
@@ -21007,14 +21005,15 @@
                 
                 mobileHtml += '</div>';
                 
-                // Show template count
-                if (sortedTemplates.length > 0) {
-                    mobileHtml += `<div style="font-size: 11px; color: #666; margin-top: 4px;">Found ${sortedTemplates.length} templates: ${sortedTemplates.join(', ')}</div>`;
-                } else {
-                    mobileHtml += '<div style="font-size: 11px; color: #999; margin-top: 4px;">No @tags or #tags found in today\'s tasks</div>';
-                }
+                // Always show debug info
+                mobileHtml += `<div style="font-size: 11px; color: #666; margin-top: 4px;">Tasks: ${todayTasks.length}, Templates: ${sortedTemplates.length ? sortedTemplates.join(', ') : 'none'}</div>`;
                 
+                // FORCE the container to update
                 mobileContainer.innerHTML = mobileHtml;
+                mobileContainer.style.display = 'block';
+                console.log('📱 Mobile container updated with', sortedTemplates.length, 'templates');
+            } else {
+                console.log('📱 Mobile container NOT FOUND!');
             }
             
             // Restore active filter button state after re-rendering
