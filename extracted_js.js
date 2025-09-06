@@ -20925,19 +20925,12 @@
         }
         // Generate dynamic template filter buttons for Today view
         function renderTodayTemplateFilters(todayTasks) {
-            showInlineNotification('🎯 renderTodayTemplateFilters ENTERED!', 'success');
-            
             const container = document.getElementById('todayTemplateFilters');
             const mobileContainer = document.getElementById('todayTemplateFiltersMobile');
             
-            // Ensure mobile container is visible with bright debug styling
+            // Ensure mobile container is visible
             if (mobileContainer) {
-                showInlineNotification('✅ Mobile container FOUND!', 'success');
                 mobileContainer.style.display = 'block';
-                mobileContainer.style.background = 'yellow';
-                mobileContainer.style.padding = '10px';
-                mobileContainer.style.border = '2px solid red';
-                mobileContainer.innerHTML = '<div style="color: red; font-weight: bold;">LOADING FILTERS...</div>';
             }
             
             console.log('🔍 MOBILE FILTER DEBUG: containers found:', !!container, !!mobileContainer);
@@ -20957,9 +20950,6 @@
             
             // Convert to sorted array
             const sortedTemplates = Array.from(templatesInUse).sort();
-            console.log('🔍 MOBILE FILTER DEBUG: todayTasks count:', todayTasks.length, 'templates found:', sortedTemplates);
-            
-            // Debug text will be added later with the dropdown
             
             let html = '';
             if (sortedTemplates.length > 0) {
@@ -20984,13 +20974,10 @@
             
             // Populate mobile version with dropdown-style filters
             if (mobileContainer) {
-                // Always show debug info
-                const debugText = `🔍 ${todayTasks.length} tasks | ${sortedTemplates.length} @templates found: ${sortedTemplates.join(', ') || 'none'}`;
-                let mobileHtml = `<div style="color: blue; font-size: 12px; margin-bottom: 5px;">${debugText}</div>`;
+                let mobileHtml = '';
                 
                 if (sortedTemplates.length > 0) {
-                    console.log('🔍 MOBILE FILTER DEBUG: Rendering mobile dropdown with templates:', sortedTemplates);
-                    mobileHtml += '<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
+                    mobileHtml = '<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
                 mobileHtml += '<select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: transparent; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">';
                 mobileHtml += '<option value="">All tasks</option>';
                 
@@ -21001,14 +20988,13 @@
                 });
                 
                     mobileHtml += '</select>';
-                    mobileHtml += `<button class="filter-btn filter-no-filter" onclick="showTodayNoFilterTasks()" title="Exit filter mode and return to normal view" style="font-size: 12px; padding: 6px 8px; white-space: nowrap;">➡️ ${translateText('Exit Filters')}</button>`;
                     mobileHtml += '</div>';
+                    
+                    mobileContainer.innerHTML = mobileHtml;
                 } else {
-                    mobileHtml += '<div style="color: #666; font-size: 14px;">No @templates in today\'s tasks. Add @tags to tasks to enable filters.</div>';
+                    // Don't show anything if no templates
+                    mobileContainer.innerHTML = '';
                 }
-                
-                mobileContainer.innerHTML = mobileHtml;
-                console.log('🔍 MOBILE FILTER DEBUG: Mobile container populated');
             }
             
             // Restore active filter button state after re-rendering
@@ -21200,10 +21186,7 @@
         }
         // Render Today View with time blocks
         function renderTodayView() {
-            // VISIBLE DEBUG - Show alert to confirm function is called
-            showInlineNotification('🔥 renderTodayView CALLED!', 'info');
-            
-            console.log('📱 MOBILE DEBUG: renderTodayView called, tasks.length:', tasks.length);
+            console.log('📱 renderTodayView called, tasks.length:', tasks.length);
             console.log('Current view:', currentView);
             const container = document.getElementById('todaySchedule');
             console.log('📱 MOBILE DEBUG: Container found:', !!container);
@@ -21253,7 +21236,6 @@
             })));;
             
             // Generate dynamic template filter buttons based on today's tasks
-            showInlineNotification(`📊 Calling renderTodayTemplateFilters with ${todayTasks.length} tasks`, 'info');
             renderTodayTemplateFilters(todayTasks);
             
             if (todayTasks.length === 0 && tasks.length > 0) {
