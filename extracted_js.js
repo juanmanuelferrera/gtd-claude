@@ -21001,8 +21001,9 @@
                 
                 mobileHtml += '</select>';
                 
-                // Add a refresh button to re-scan templates
-                mobileHtml += '<button onclick="renderTodayView()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">🔄</button>';
+                // Add clear and refresh buttons
+                mobileHtml += '<button onclick="clearTodayTemplateFilter()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px; margin-left: 4px;">✖ Clear</button>';
+                mobileHtml += '<button onclick="renderTodayView()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px; margin-left: 4px;">🔄</button>';
                 
                 mobileHtml += '</div>';
                 
@@ -26199,6 +26200,7 @@
         window.handleTaskTouchEnd = handleTaskTouchEnd;
         window.renderTodayTemplateFilters = renderTodayTemplateFilters;
         window.handleMobileTemplateFilter = handleMobileTemplateFilter;
+        window.clearTodayTemplateFilter = clearTodayTemplateFilter;
         window.openIOSStyleDateTimePicker = openIOSStyleDateTimePicker;
         window.closeIOSDateTimePicker = closeIOSDateTimePicker;
         window.setQuickTime = setQuickTime;
