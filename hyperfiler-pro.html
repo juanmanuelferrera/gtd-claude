@@ -5991,23 +5991,38 @@
         }
     </style>
     
-    <!-- Force mobile filter update after everything loads -->
+    <!-- Force mobile filter update multiple times -->
     <script>
-        setTimeout(function() {
+        function forceMobileUpdate() {
             if (window.innerWidth <= 768) {
-                // Try to populate the mobile filter dropdown
-                try {
-                    if (typeof renderTodayTemplateFilters === 'function' && window.tasks) {
-                        const today = new Date();
-                        const todayStr = today.toISOString().split('T')[0];
-                        const todayTasks = window.tasks.filter(t => t.dueDate === todayStr || (t.dueDate && t.dueDate < todayStr && t.status === 'pending'));
-                        renderTodayTemplateFilters(todayTasks);
-                    }
-                } catch(e) {
-                    console.log('Could not update mobile filters:', e);
+                console.log('🔄 Attempting mobile filter update...');
+                
+                const container = document.getElementById('todayTemplateFiltersMobile');
+                if (!container) {
+                    console.log('❌ Mobile container not found');
+                    return;
                 }
+                
+                // Force immediate update with basic dropdown
+                container.innerHTML = `
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">
+                            <option value="">All tasks</option>
+                            <option value="@test">@test</option>
+                        </select>
+                        <button onclick="alert('Clear clicked')" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">✖</button>
+                        <button onclick="alert('Refresh clicked')" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">🔄</button>
+                    </div>
+                    <div style="font-size: 11px; color: #666; margin-top: 4px;">Force updated at ` + new Date().toLocaleTimeString() + `</div>
+                `;
+                console.log('✅ Force updated mobile filter');
             }
-        }, 2500);
+        }
+        
+        // Try multiple times
+        setTimeout(forceMobileUpdate, 1000);
+        setTimeout(forceMobileUpdate, 3000);
+        setTimeout(forceMobileUpdate, 5000);
     </script>
 
 </body>
