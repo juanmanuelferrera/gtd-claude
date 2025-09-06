@@ -5952,8 +5952,10 @@
                     }
                 }
                 
-                // Refresh UI - TEMPORARILY DISABLED FOR SWIPE DEBUG
-                // renderCurrentView();
+                // Refresh UI - delayed to preserve touch handlers
+                setTimeout(() => {
+                    renderCurrentView();
+                }, 100);
                 
                 return;
                 
@@ -6223,8 +6225,10 @@
                 console.log('📥 Falling back to full sync');
                 await downloadAllTasks();
             } else {
-                // Delta sync succeeded, refresh UI - TEMPORARILY DISABLED FOR SWIPE DEBUG
-                // renderCurrentView();
+                // Delta sync succeeded, refresh UI - delayed to preserve touch handlers
+                setTimeout(() => {
+                    renderCurrentView();
+                }, 100);
                 
                 // Update sync timestamp
                 localStorage.setItem('lastSyncTime', Date.now().toString());
@@ -20924,9 +20928,13 @@
             const container = document.getElementById('todayTemplateFilters');
             const mobileContainer = document.getElementById('todayTemplateFiltersMobile');
             
-            // Ensure mobile container is visible
+            // Ensure mobile container is visible with bright debug styling
             if (mobileContainer) {
                 mobileContainer.style.display = 'block';
+                mobileContainer.style.background = 'yellow';
+                mobileContainer.style.padding = '10px';
+                mobileContainer.style.border = '2px solid red';
+                mobileContainer.innerHTML = '<div style="color: red; font-weight: bold;">LOADING FILTERS...</div>';
             }
             
             console.log('🔍 MOBILE FILTER DEBUG: containers found:', !!container, !!mobileContainer);
