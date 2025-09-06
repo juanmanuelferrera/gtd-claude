@@ -3100,21 +3100,6 @@
             }
             
             
-            .mobile-task-more-btn {
-                background: #667eea !important;
-                color: white !important;
-                border: none !important;
-                padding: 8px 12px !important;
-                border-radius: 6px !important;
-                font-size: 16px !important;
-                font-weight: bold !important;
-                cursor: pointer !important;
-                min-height: 44px !important;
-                min-width: 44px !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-            }
             
             .mobile-task-dropdown {
                 position: fixed !important;
@@ -3165,23 +3150,6 @@
                 border-bottom: 1px solid #eee !important;
             }
             
-            .mobile-task-dropdown-buttons {
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 8px !important;
-                margin-top: 8px !important;
-            }
-            
-            .mobile-task-dropdown button {
-                padding: 12px !important;
-                border: none !important;
-                border-radius: 8px !important;
-                font-size: 13px !important;
-                font-weight: 500 !important;
-                cursor: pointer !important;
-                text-align: center !important;
-                background: #f8f9fa !important;
-                color: #333 !important;
                 transition: all 0.2s ease !important;
                 height: 60px !important;
                 width: 100% !important;
@@ -3699,7 +3667,8 @@
         
         @media (max-width: 768px) {
             /* Hide desktop task actions on mobile */
-            .desktop-task-actions {
+            .desktop-task-actions,
+            .action-buttons {
                 display: none !important;
             }
             
