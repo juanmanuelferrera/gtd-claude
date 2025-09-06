@@ -20948,6 +20948,15 @@
                 }
             });
             
+            // Also check for hashtag patterns (#word) as templates
+            todayTasks.forEach(task => {
+                const text = `${task.title || ''} ${task.notes || ''}`;
+                const hashtagMatches = text.match(/#\w+/g);
+                if (hashtagMatches) {
+                    hashtagMatches.forEach(tag => templatesInUse.add(tag));
+                }
+            });
+            
             // Convert to sorted array
             const sortedTemplates = Array.from(templatesInUse).sort();
             
@@ -20976,23 +20985,33 @@
             if (mobileContainer) {
                 let mobileHtml = '';
                 
-                // Always show the dropdown, even if empty
+                // Always show the dropdown
                 mobileHtml = '<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
                 mobileHtml += '<select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">';
                 mobileHtml += '<option value="">All tasks</option>';
                 
                 if (sortedTemplates.length > 0) {
+                    // Add each template as an option
                     sortedTemplates.forEach(template => {
-                        const displayName = template; // e.g., "@casa"
+                        const displayName = template; // e.g., "@casa" or "#urgent"
                         const escapedTemplate = template.replace(/'/g, "\\'"); // Escape single quotes
                         mobileHtml += `<option value="${escapedTemplate}">${displayName}</option>`;
                     });
-                } else {
-                    mobileHtml += '<option value="" disabled>No @tags found</option>';
                 }
                 
                 mobileHtml += '</select>';
+                
+                // Add a refresh button to re-scan templates
+                mobileHtml += '<button onclick="renderTodayView()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">🔄</button>';
+                
                 mobileHtml += '</div>';
+                
+                // Show template count
+                if (sortedTemplates.length > 0) {
+                    mobileHtml += `<div style="font-size: 11px; color: #666; margin-top: 4px;">Found ${sortedTemplates.length} templates: ${sortedTemplates.join(', ')}</div>`;
+                } else {
+                    mobileHtml += '<div style="font-size: 11px; color: #999; margin-top: 4px;">No @tags or #tags found in today\'s tasks</div>';
+                }
                 
                 mobileContainer.innerHTML = mobileHtml;
             }

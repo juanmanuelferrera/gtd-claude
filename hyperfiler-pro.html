@@ -3997,15 +3997,8 @@
             
             <!-- Mobile filter controls -->
             <div id="todayTemplateFiltersMobile" class="mobile-only" style="margin-bottom: 15px; padding: 8px; margin-top: 5px; background: #f9f9f9; border: 1px solid #ddd; min-height: 40px; border-radius: 8px;">
-                <!-- Fallback dropdown if JS doesn't populate -->
-                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                    <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">
-                        <option value="">All tasks</option>
-                        <option value="@casa">@casa</option>
-                        <option value="@work">@work</option>
-                        <option value="@urgent">@urgent</option>
-                    </select>
-                </div>
+                <!-- Dynamic template filters will be generated here for mobile -->
+                <div style="color: #999; font-size: 13px;">Loading templates...</div>
             </div>
             
             <!-- Auto-Print Settings - COMMENTED OUT -->
