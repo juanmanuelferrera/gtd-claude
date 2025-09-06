@@ -20976,25 +20976,28 @@
             if (mobileContainer) {
                 let mobileHtml = '';
                 
-                if (sortedTemplates.length > 0) {
-                    mobileHtml = '<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
-                mobileHtml += '<select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: transparent; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">';
+                // Always show the dropdown, even if empty
+                mobileHtml = '<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
+                mobileHtml += '<select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">';
                 mobileHtml += '<option value="">All tasks</option>';
                 
-                sortedTemplates.forEach(template => {
-                    const displayName = template; // e.g., "@casa"
-                    const escapedTemplate = template.replace(/'/g, "\\'"); // Escape single quotes
-                    mobileHtml += `<option value="${escapedTemplate}">${displayName}</option>`;
-                });
-                
-                    mobileHtml += '</select>';
-                    mobileHtml += '</div>';
-                    
-                    mobileContainer.innerHTML = mobileHtml;
+                if (sortedTemplates.length > 0) {
+                    sortedTemplates.forEach(template => {
+                        const displayName = template; // e.g., "@casa"
+                        const escapedTemplate = template.replace(/'/g, "\\'"); // Escape single quotes
+                        mobileHtml += `<option value="${escapedTemplate}">${displayName}</option>`;
+                    });
                 } else {
-                    // Don't show anything if no templates
-                    mobileContainer.innerHTML = '';
+                    mobileHtml += '<option value="" disabled>No @tags found</option>';
                 }
+                
+                mobileHtml += '</select>';
+                mobileHtml += '</div>';
+                
+                // Add debug info
+                mobileHtml += `<div style="font-size: 11px; color: #666; margin-top: 5px;">Tasks: ${todayTasks.length} | Templates: ${sortedTemplates.join(', ') || 'none'}</div>`;
+                
+                mobileContainer.innerHTML = mobileHtml;
             }
             
             // Restore active filter button state after re-rendering
