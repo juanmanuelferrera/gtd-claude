@@ -5070,8 +5070,8 @@
                         // Right swipe - yellow for "move to tomorrow"
                         currentSwipeElement.style.background = 'rgba(255, 193, 7, 0.15)';
                     } else if (deltaX < -30) {
-                        // Left swipe - red for "delete"
-                        currentSwipeElement.style.background = 'rgba(220, 53, 69, 0.15)';
+                        // Left swipe - blue for "set date/time"
+                        currentSwipeElement.style.background = 'rgba(0, 123, 255, 0.15)';
                     } else {
                         currentSwipeElement.style.background = '';
                     }
@@ -5100,8 +5100,8 @@
                         delayTask(taskId, 1, event);
                         showInlineNotification('📅 Task moved to tomorrow', 'success');
                     } else {
-                        // Swipe left - delete task
-                        quickDeleteTask(taskId, event);
+                        // Swipe left - open iOS-style date/time picker
+                        openIOSStyleDateTimePicker(taskId);
                     }
                 }, 100);
             }
@@ -5110,6 +5110,305 @@
             currentSwipeElement = null;
             isSwipeInProgress = false;
             swipeStartTime = 0;
+        }
+        
+        // iOS-style date/time picker modal
+        function openIOSStyleDateTimePicker(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            // Create modal overlay
+            const modal = document.createElement('div');
+            modal.id = 'iosDateTimeModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.4);
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                z-index: 10000;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            
+            // Get current date and time
+            const currentDate = task.dueDate || new Date().toISOString().split('T')[0];
+            const currentTime = task.dueTime || '';
+            
+            // Create picker content
+            modal.innerHTML = \`
+                <div style="
+                    background: #f8f9fa;
+                    border-radius: 16px 16px 0 0;
+                    width: 100%;
+                    max-width: 100%;
+                    padding: 0;
+                    transform: translateY(100%);
+                    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                ">
+                    <!-- Header -->
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 16px 20px;
+                        border-bottom: 1px solid #e9ecef;
+                        background: #ffffff;
+                        border-radius: 16px 16px 0 0;
+                    ">
+                        <button onclick="closeIOSDateTimePicker()" style="
+                            background: none;
+                            border: none;
+                            color: #007AFF;
+                            font-size: 17px;
+                            font-weight: 400;
+                            cursor: pointer;
+                            padding: 8px;
+                        ">Cancel</button>
+                        <h3 style="
+                            margin: 0;
+                            font-size: 17px;
+                            font-weight: 600;
+                            color: #1c1c1e;
+                        ">Set Date & Time</h3>
+                        <button onclick="saveIOSDateTime('\${taskId}')" style="
+                            background: none;
+                            border: none;
+                            color: #007AFF;
+                            font-size: 17px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            padding: 8px;
+                        ">Done</button>
+                    </div>
+                    
+                    <!-- Date Input -->
+                    <div style="background: #ffffff; padding: 16px 20px; border-bottom: 1px solid #e9ecef;">
+                        <label style="
+                            display: block;
+                            font-size: 15px;
+                            font-weight: 600;
+                            color: #1c1c1e;
+                            margin-bottom: 8px;
+                        ">Date</label>
+                        <input type="date" id="iosDateInput" value="\${currentDate}" style="
+                            width: 100%;
+                            padding: 12px 16px;
+                            border: 1px solid #d1d5db;
+                            border-radius: 10px;
+                            font-size: 16px;
+                            background: #f8f9fa;
+                            color: #1c1c1e;
+                            outline: none;
+                        ">
+                    </div>
+                    
+                    <!-- Time Input -->
+                    <div style="background: #ffffff; padding: 16px 20px; border-bottom: 1px solid #e9ecef;">
+                        <label style="
+                            display: block;
+                            font-size: 15px;
+                            font-weight: 600;
+                            color: #1c1c1e;
+                            margin-bottom: 8px;
+                        ">Time</label>
+                        <input type="time" id="iosTimeInput" value="\${currentTime}" style="
+                            width: 100%;
+                            padding: 12px 16px;
+                            border: 1px solid #d1d5db;
+                            border-radius: 10px;
+                            font-size: 16px;
+                            background: #f8f9fa;
+                            color: #1c1c1e;
+                            outline: none;
+                        ">
+                        <div style="
+                            display: flex;
+                            gap: 8px;
+                            margin-top: 12px;
+                            flex-wrap: wrap;
+                        ">
+                            <button onclick="setQuickTime('09:00')" style="
+                                background: #e9ecef;
+                                border: none;
+                                padding: 8px 12px;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                color: #495057;
+                                cursor: pointer;
+                            ">9:00 AM</button>
+                            <button onclick="setQuickTime('12:00')" style="
+                                background: #e9ecef;
+                                border: none;
+                                padding: 8px 12px;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                color: #495057;
+                                cursor: pointer;
+                            ">12:00 PM</button>
+                            <button onclick="setQuickTime('15:00')" style="
+                                background: #e9ecef;
+                                border: none;
+                                padding: 8px 12px;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                color: #495057;
+                                cursor: pointer;
+                            ">3:00 PM</button>
+                            <button onclick="setQuickTime('18:00')" style="
+                                background: #e9ecef;
+                                border: none;
+                                padding: 8px 12px;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                color: #495057;
+                                cursor: pointer;
+                            ">6:00 PM</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div style="background: #ffffff; padding: 16px 20px;">
+                        <div style="
+                            display: flex;
+                            gap: 8px;
+                            flex-wrap: wrap;
+                        ">
+                            <button onclick="setQuickDate('today')" style="
+                                background: #007AFF;
+                                color: white;
+                                border: none;
+                                padding: 10px 16px;
+                                border-radius: 8px;
+                                font-size: 15px;
+                                font-weight: 500;
+                                cursor: pointer;
+                                flex: 1;
+                                min-width: 70px;
+                            ">Today</button>
+                            <button onclick="setQuickDate('tomorrow')" style="
+                                background: #34C759;
+                                color: white;
+                                border: none;
+                                padding: 10px 16px;
+                                border-radius: 8px;
+                                font-size: 15px;
+                                font-weight: 500;
+                                cursor: pointer;
+                                flex: 1;
+                                min-width: 70px;
+                            ">Tomorrow</button>
+                            <button onclick="setQuickDate('nextweek')" style="
+                                background: #FF9500;
+                                color: white;
+                                border: none;
+                                padding: 10px 16px;
+                                border-radius: 8px;
+                                font-size: 15px;
+                                font-weight: 500;
+                                cursor: pointer;
+                                flex: 1;
+                                min-width: 70px;
+                            ">Next Week</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Safe area padding for iOS -->
+                    <div style="height: env(safe-area-inset-bottom, 20px);"></div>
+                </div>
+            \`;
+            
+            document.body.appendChild(modal);
+            
+            // Animate in
+            setTimeout(() => {
+                modal.style.opacity = '1';
+                const content = modal.querySelector('div');
+                content.style.transform = 'translateY(0)';
+            }, 50);
+            
+            // Close on backdrop click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeIOSDateTimePicker();
+                }
+            });
+        }
+        
+        function closeIOSDateTimePicker() {
+            const modal = document.getElementById('iosDateTimeModal');
+            if (modal) {
+                modal.style.opacity = '0';
+                const content = modal.querySelector('div');
+                content.style.transform = 'translateY(100%)';
+                setTimeout(() => {
+                    modal.remove();
+                }, 300);
+            }
+        }
+        
+        function setQuickTime(time) {
+            const timeInput = document.getElementById('iosTimeInput');
+            if (timeInput) {
+                timeInput.value = time;
+            }
+        }
+        
+        function setQuickDate(type) {
+            const dateInput = document.getElementById('iosDateInput');
+            if (!dateInput) return;
+            
+            const today = new Date();
+            let targetDate;
+            
+            switch(type) {
+                case 'today':
+                    targetDate = today;
+                    break;
+                case 'tomorrow':
+                    targetDate = new Date(today);
+                    targetDate.setDate(today.getDate() + 1);
+                    break;
+                case 'nextweek':
+                    targetDate = new Date(today);
+                    targetDate.setDate(today.getDate() + 7);
+                    break;
+                default:
+                    targetDate = today;
+            }
+            
+            dateInput.value = targetDate.toISOString().split('T')[0];
+        }
+        
+        function saveIOSDateTime(taskId) {
+            const dateInput = document.getElementById('iosDateInput');
+            const timeInput = document.getElementById('iosTimeInput');
+            
+            if (!dateInput || !timeInput) return;
+            
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            // Update task
+            task.dueDate = dateInput.value;
+            task.dueTime = timeInput.value;
+            task.updatedAt = new Date().toISOString();
+            
+            // Save and refresh
+            saveTasksToLocalStorage();
+            saveTasksToServer();
+            renderCurrentView();
+            
+            // Show success message
+            const timeDisplay = timeInput.value ? \` at \${formatTime(timeInput.value)}\` : '';
+            showInlineNotification(\`📅 Task scheduled for \${formatDateForDisplay(dateInput.value)}\${timeDisplay}\`, 'success');
+            
+            // Close modal
+            closeIOSDateTimePicker();
         }
         // Hide modal when clicking outside
         document.addEventListener('click', function(event) {
@@ -25868,4 +26167,9 @@
         window.handleTaskCardClick = handleTaskCardClick;
         window.handleTaskTouchStart = handleTaskTouchStart;
         window.handleTaskTouchEnd = handleTaskTouchEnd;
+        window.openIOSStyleDateTimePicker = openIOSStyleDateTimePicker;
+        window.closeIOSDateTimePicker = closeIOSDateTimePicker;
+        window.setQuickTime = setQuickTime;
+        window.setQuickDate = setQuickDate;
+        window.saveIOSDateTime = saveIOSDateTime;
     
