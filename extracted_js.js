@@ -13,8 +13,8 @@
         document.addEventListener('touchmove', function(e) {
             if (e.touches.length > 1) return; // Allow multi-touch gestures
             
-            // Check if we're scrolling inside a scrollable element
-            let scrollable = e.target.closest('#todaySchedule, #weekSchedule, #monthSchedule, #listsContainer, #allTasks, #searchResults, #statsContainer, #settingsContainer, #repeatContainer, .modal-content');
+            // Check if we're scrolling inside a scrollable element or touching a task for swiping
+            let scrollable = e.target.closest('#todaySchedule, #weekSchedule, #monthSchedule, #listsContainer, #allTasks, #searchResults, #statsContainer, #settingsContainer, #repeatContainer, .modal-content, .task-card, .task-item, #repeatTasksList, #listItemsContainer, [data-task-id]');
             
             if (!scrollable) {
                 e.preventDefault();
