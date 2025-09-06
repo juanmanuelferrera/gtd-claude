@@ -6031,7 +6031,39 @@
                 
                 container.innerHTML = `
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="if(this.value===''){document.querySelectorAll('.time-slot-task').forEach(el=>el.style.display='block')}else{document.querySelectorAll('.time-slot-task').forEach(el=>{const task=window.tasks.find(t=>t.id==el.dataset.taskId);el.style.display=(task&&((task.title||'')+' '+(task.notes||'')).toLowerCase().includes(this.value.toLowerCase()))?'block':'none'})}">
+                        <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="
+                            const selectedTemplate = this.value;
+                            const allTasks = document.querySelectorAll('.time-slot-task, [data-task-id]');
+                            let visibleCount = 0;
+                            
+                            allTasks.forEach(taskEl => {
+                                if (!selectedTemplate) {
+                                    // Show all tasks
+                                    taskEl.style.display = 'block';
+                                    visibleCount++;
+                                } else {
+                                    // Find the task data
+                                    const taskId = taskEl.dataset.taskId || taskEl.getAttribute('data-task-id');
+                                    if (taskId && window.tasks) {
+                                        const task = window.tasks.find(t => t.id == taskId);
+                                        if (task) {
+                                            const taskText = ((task.title || '') + ' ' + (task.notes || '')).toLowerCase();
+                                            const hasTemplate = taskText.includes(selectedTemplate.toLowerCase());
+                                            taskEl.style.display = hasTemplate ? 'block' : 'none';
+                                            if (hasTemplate) visibleCount++;
+                                        }
+                                    }
+                                }
+                            });
+                            
+                            // Update status text
+                            const statusDiv = document.querySelector('#todayTemplateFiltersMobile div:last-child');
+                            if (statusDiv) {
+                                statusDiv.textContent = selectedTemplate ? 
+                                    'Filtering by ' + selectedTemplate + ' (' + visibleCount + ' tasks shown)' : 
+                                    'Found ' + ` + templates.size + ` + ' templates: ' + ` + (templates.size > 0 ? Array.from(templates).join(', ') : 'none') + `;
+                            }
+                        ">
                             ` + optionsHtml + `
                         </select>
                         <button onclick="document.getElementById('todayMobileFilter').value='';document.querySelectorAll('.time-slot-task').forEach(el=>el.style.display='block')" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">✖</button>
