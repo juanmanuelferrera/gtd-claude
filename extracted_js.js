@@ -20923,6 +20923,13 @@
         function renderTodayTemplateFilters(todayTasks) {
             const container = document.getElementById('todayTemplateFilters');
             const mobileContainer = document.getElementById('todayTemplateFiltersMobile');
+            
+            // Ensure mobile container is visible
+            if (mobileContainer) {
+                mobileContainer.style.display = 'block';
+            }
+            
+            console.log('🔍 MOBILE FILTER DEBUG: containers found:', !!container, !!mobileContainer);
             if (!container && !mobileContainer) return;
             
             // Extract all templates used in today's tasks
@@ -20939,6 +20946,9 @@
             
             // Convert to sorted array
             const sortedTemplates = Array.from(templatesInUse).sort();
+            console.log('🔍 MOBILE FILTER DEBUG: todayTasks count:', todayTasks.length, 'templates found:', sortedTemplates);
+            
+            // Debug text will be added later with the dropdown
             
             let html = '';
             if (sortedTemplates.length > 0) {
@@ -20962,8 +20972,14 @@
             }
             
             // Populate mobile version with dropdown-style filters
-            if (mobileContainer && sortedTemplates.length > 0) {
-                let mobileHtml = '<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
+            if (mobileContainer) {
+                // Always show debug info
+                const debugText = `🔍 ${todayTasks.length} tasks | ${sortedTemplates.length} @templates found: ${sortedTemplates.join(', ') || 'none'}`;
+                let mobileHtml = `<div style="color: blue; font-size: 12px; margin-bottom: 5px;">${debugText}</div>`;
+                
+                if (sortedTemplates.length > 0) {
+                    console.log('🔍 MOBILE FILTER DEBUG: Rendering mobile dropdown with templates:', sortedTemplates);
+                    mobileHtml += '<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
                 mobileHtml += '<select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: transparent; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">';
                 mobileHtml += '<option value="">All tasks</option>';
                 
@@ -20973,13 +20989,15 @@
                     mobileHtml += `<option value="${escapedTemplate}">${displayName}</option>`;
                 });
                 
-                mobileHtml += '</select>';
-                mobileHtml += `<button class="filter-btn filter-no-filter" onclick="showTodayNoFilterTasks()" title="Exit filter mode and return to normal view" style="font-size: 12px; padding: 6px 8px; white-space: nowrap;">➡️ ${translateText('Exit Filters')}</button>`;
-                mobileHtml += '</div>';
+                    mobileHtml += '</select>';
+                    mobileHtml += `<button class="filter-btn filter-no-filter" onclick="showTodayNoFilterTasks()" title="Exit filter mode and return to normal view" style="font-size: 12px; padding: 6px 8px; white-space: nowrap;">➡️ ${translateText('Exit Filters')}</button>`;
+                    mobileHtml += '</div>';
+                } else {
+                    mobileHtml += '<div style="color: #666; font-size: 14px;">No @templates in today\'s tasks. Add @tags to tasks to enable filters.</div>';
+                }
                 
                 mobileContainer.innerHTML = mobileHtml;
-            } else if (mobileContainer) {
-                mobileContainer.innerHTML = '';
+                console.log('🔍 MOBILE FILTER DEBUG: Mobile container populated');
             }
             
             // Restore active filter button state after re-rendering
