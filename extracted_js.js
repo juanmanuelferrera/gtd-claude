@@ -19109,20 +19109,6 @@
             }
         }
         
-        // Show more selection actions menu
-        function showMoreSelectionActions() {
-            // Create a modal or dropdown for additional actions
-            const moreActions = [
-                { label: 'Set Time', icon: '🕐', action: () => openTimeDropdownForSelectedTasks() },
-                { label: 'Move to List', icon: '📋', action: () => moveSelectedToList() },
-                { label: 'Add Template', icon: '🏷', action: () => addTemplateToSelected() },
-                { label: 'Duplicate', icon: '📑', action: () => duplicateSelectedTasks() },
-                { label: 'Export', icon: '📤', action: () => exportSelectedTasks() }
-            ];
-            
-            // For now, just show an alert with options
-            showInlineNotification('More actions coming soon!', 'info');
-        }
         
         // Helper function to clear all task selections
         function clearAllSelections() {
@@ -25996,7 +25982,6 @@
         // Export mobile and toolbar functions globally
         window.completeSelectedTasks = completeSelectedTasks;
         window.hideFloatingSelectionToolbar = hideFloatingSelectionToolbar;
-        window.showMoreSelectionActions = showMoreSelectionActions;
         window.handleTaskCardClick = handleTaskCardClick;
         window.handleTaskTouchStart = handleTaskTouchStart;
         window.handleTaskTouchEnd = handleTaskTouchEnd;
