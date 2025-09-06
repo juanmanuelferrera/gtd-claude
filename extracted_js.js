@@ -20925,11 +20925,14 @@
         }
         // Generate dynamic template filter buttons for Today view
         function renderTodayTemplateFilters(todayTasks) {
+            showInlineNotification('🎯 renderTodayTemplateFilters ENTERED!', 'success');
+            
             const container = document.getElementById('todayTemplateFilters');
             const mobileContainer = document.getElementById('todayTemplateFiltersMobile');
             
             // Ensure mobile container is visible with bright debug styling
             if (mobileContainer) {
+                showInlineNotification('✅ Mobile container FOUND!', 'success');
                 mobileContainer.style.display = 'block';
                 mobileContainer.style.background = 'yellow';
                 mobileContainer.style.padding = '10px';
@@ -21197,6 +21200,9 @@
         }
         // Render Today View with time blocks
         function renderTodayView() {
+            // VISIBLE DEBUG - Show alert to confirm function is called
+            showInlineNotification('🔥 renderTodayView CALLED!', 'info');
+            
             console.log('📱 MOBILE DEBUG: renderTodayView called, tasks.length:', tasks.length);
             console.log('Current view:', currentView);
             const container = document.getElementById('todaySchedule');
@@ -21247,6 +21253,7 @@
             })));;
             
             // Generate dynamic template filter buttons based on today's tasks
+            showInlineNotification(`📊 Calling renderTodayTemplateFilters with ${todayTasks.length} tasks`, 'info');
             renderTodayTemplateFilters(todayTasks);
             
             if (todayTasks.length === 0 && tasks.length > 0) {
