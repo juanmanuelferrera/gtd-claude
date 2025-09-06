@@ -5034,6 +5034,7 @@
         function handleTaskTouchStart(event) {
             if (event.touches.length !== 1) return;
             
+            console.log('🔄 Touch start detected');
             touchStartX = event.touches[0].clientX;
             touchStartY = event.touches[0].clientY;
             currentSwipeElement = event.currentTarget;
@@ -5082,10 +5083,13 @@
         function handleTaskTouchEnd(event) {
             if (!currentSwipeElement) return;
             
+            console.log('🔄 Touch end detected');
             const touchX = event.changedTouches[0].clientX;
             const deltaX = touchX - touchStartX;
             const taskId = currentSwipeElement.dataset.taskId;
             const swipeTime = Date.now() - swipeStartTime;
+            
+            console.log(`📱 Swipe details: deltaX=${deltaX}, swipeTime=${swipeTime}, isSwipeInProgress=${isSwipeInProgress}`);
             
             // Reset styles with smooth transition
             currentSwipeElement.style.transition = 'transform 0.3s ease, background 0.3s ease';
@@ -5094,16 +5098,21 @@
             
             // Only trigger if it was a real swipe (not just a tap)
             if (isSwipeInProgress && Math.abs(deltaX) > 60 && swipeTime < 1000) {
+                console.log(`🚀 Swipe action triggered: ${deltaX > 0 ? 'RIGHT' : 'LEFT'}`);
                 setTimeout(() => {
                     if (deltaX > 0) {
                         // Swipe right - move task to next day
+                        console.log('➡️ Moving task to tomorrow');
                         delayTask(taskId, 1, event);
                         showInlineNotification('📅 Task moved to tomorrow', 'success');
                     } else {
                         // Swipe left - open iOS-style date/time picker
+                        console.log('⬅️ Opening date/time picker');
                         openIOSStyleDateTimePicker(taskId);
                     }
                 }, 100);
+            } else {
+                console.log('❌ Swipe conditions not met - no action taken');
             }
             
             // Reset swipe state
@@ -12922,8 +12931,9 @@
                 <div class="${cardClass}" 
                      onclick="handleTaskCardClick('${task.id}', event)" 
                      oncontextmenu="editTask('${task.id}', event); return false;"
-                     ontouchstart="handleTaskTouchStart('${task.id}', event)"
-                     ontouchend="handleTaskTouchEnd('${task.id}', event)"
+                     ontouchstart="handleTaskTouchStart(event)"
+                     ontouchmove="handleTaskTouchMove(event)"
+                     ontouchend="handleTaskTouchEnd(event)"
                      data-task-id="${task.id}">
                     <div class="task-header">
                         <div class="task-title">${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}</div>
