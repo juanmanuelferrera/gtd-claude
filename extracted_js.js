@@ -26132,26 +26132,7 @@
         let touchTimer;
         let touchStartTime;
         
-        function handleTaskTouchStart(taskId, event) {
-            touchStartTime = Date.now();
-            touchTimer = setTimeout(() => {
-                // Long press detected - show edit modal
-                navigator.vibrate && navigator.vibrate(50); // Haptic feedback
-                editTask(taskId, event);
-            }, 500); // 500ms long press
-        }
         
-        function handleTaskTouchEnd(taskId, event) {
-            if (touchTimer) {
-                clearTimeout(touchTimer);
-                touchTimer = null;
-            }
-            
-            const touchDuration = Date.now() - touchStartTime;
-            if (touchDuration < 500) {
-                // Short tap - do nothing, let the action button handle it
-            }
-        }
         
         function handleTaskCardClick(taskId, event) {
             // On desktop, edit task immediately
