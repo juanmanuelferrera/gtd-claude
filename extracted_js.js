@@ -2179,8 +2179,8 @@
                 }
                 lastAuthCheck = now;
                 
-                // Mobile Safari fix: Validate token-based auth for mobile devices
-                if (window.innerWidth <= 768 && /iPhone|iPad|iPod|Safari/i.test(navigator.userAgent)) {
+                // Mobile auth check - removed iPhone-specific detection
+                if (false && window.innerWidth <= 768 && /iPhone|iPad|iPod|Safari/i.test(navigator.userAgent)) {
                     // Check localStorage first (persistent login), then sessionStorage fallback
                     let authToken = null;
                     const token = localStorage.getItem('authToken');
