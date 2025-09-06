@@ -5034,12 +5034,16 @@
         function handleTaskTouchStart(event) {
             if (event.touches.length !== 1) return;
             
-            console.log('🔄 Touch start detected');
             touchStartX = event.touches[0].clientX;
             touchStartY = event.touches[0].clientY;
             currentSwipeElement = event.currentTarget;
             isSwipeInProgress = false;
             swipeStartTime = Date.now();
+            
+            // Visual feedback that touch started
+            if (currentSwipeElement) {
+                currentSwipeElement.style.background = 'rgba(0, 123, 255, 0.05)';
+            }
         }
         
         function handleTaskTouchMove(event) {
@@ -5083,36 +5087,37 @@
         function handleTaskTouchEnd(event) {
             if (!currentSwipeElement) return;
             
-            console.log('🔄 Touch end detected');
             const touchX = event.changedTouches[0].clientX;
             const deltaX = touchX - touchStartX;
             const taskId = currentSwipeElement.dataset.taskId;
             const swipeTime = Date.now() - swipeStartTime;
-            
-            console.log(`📱 Swipe details: deltaX=${deltaX}, swipeTime=${swipeTime}, isSwipeInProgress=${isSwipeInProgress}`);
             
             // Reset styles with smooth transition
             currentSwipeElement.style.transition = 'transform 0.3s ease, background 0.3s ease';
             currentSwipeElement.style.transform = '';
             currentSwipeElement.style.background = '';
             
-            // Only trigger if it was a real swipe (not just a tap)
-            if (isSwipeInProgress && Math.abs(deltaX) > 60 && swipeTime < 1000) {
-                console.log(`🚀 Swipe action triggered: ${deltaX > 0 ? 'RIGHT' : 'LEFT'}`);
+            // Much simpler swipe detection - just need minimum distance
+            if (Math.abs(deltaX) > 50) {
+                // Show immediate visual feedback
+                const direction = deltaX > 0 ? 'RIGHT' : 'LEFT';
+                showInlineNotification(`🔄 SWIPE ${direction} DETECTED!`, 'info');
+                
                 setTimeout(() => {
                     if (deltaX > 0) {
                         // Swipe right - move task to next day
-                        console.log('➡️ Moving task to tomorrow');
                         delayTask(taskId, 1, event);
                         showInlineNotification('📅 Task moved to tomorrow', 'success');
                     } else {
                         // Swipe left - open iOS-style date/time picker
-                        console.log('⬅️ Opening date/time picker');
                         openIOSStyleDateTimePicker(taskId);
                     }
-                }, 100);
+                }, 500);
             } else {
-                console.log('❌ Swipe conditions not met - no action taken');
+                // Show debug info if no swipe detected
+                if (Math.abs(deltaX) > 10) {
+                    showInlineNotification(`🤏 Small movement detected: ${Math.round(deltaX)}px`, 'info');
+                }
             }
             
             // Reset swipe state
