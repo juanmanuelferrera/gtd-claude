@@ -656,8 +656,42 @@ function autoExpandSectionsWithResults(filteredTasks) {
 }
 
 function performMobileSearch(value) {
-    // Mobile search functionality
-    performSearch();
+    // Dynamic mobile search functionality based on current view
+    const currentView = window.currentView || 'today';
+    const searchTerm = value.toLowerCase();
+    
+    if (!searchTerm) {
+        // Clear search - show all tasks
+        document.querySelectorAll('.time-slot-task, .task-item, .week-task-item, .calendar-task-item, [data-task-id]').forEach(el => {
+            el.style.display = 'block';
+        });
+        return;
+    }
+    
+    // Search and filter tasks based on current view
+    if (currentView === 'today') {
+        searchCurrentViewTasks(searchTerm, '.time-slot-task, [data-task-id]');
+    } else if (currentView === 'week') {
+        searchCurrentViewTasks(searchTerm, '.week-task-item, .task-item');
+    } else if (currentView === 'calendar') {
+        searchCurrentViewTasks(searchTerm, '.calendar-task-item, .task-item');
+    } else if (currentView === 'all') {
+        searchCurrentViewTasks(searchTerm, '.task-item, [data-task-id]');
+    } else {
+        // Default search for any view
+        searchCurrentViewTasks(searchTerm, '.time-slot-task, .task-item, .week-task-item, .calendar-task-item, [data-task-id]');
+    }
+}
+
+function searchCurrentViewTasks(searchTerm, selector) {
+    document.querySelectorAll(selector).forEach(taskElement => {
+        const taskText = taskElement.textContent.toLowerCase();
+        if (taskText.includes(searchTerm)) {
+            taskElement.style.display = 'block';
+        } else {
+            taskElement.style.display = 'none';
+        }
+    });
 }
 
 function quickSearch(term) {

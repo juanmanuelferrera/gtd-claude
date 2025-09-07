@@ -3999,10 +3999,10 @@
             <div id="todayTemplateFiltersMobile" class="mobile-only" style="margin-bottom: 15px; padding: 8px; margin-top: 5px; background: #f9f9f9; border: 1px solid #ddd; min-height: 40px; border-radius: 8px;">
                 <!-- Dynamic template filters will be generated here for mobile -->
                 <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                    <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">
+                    <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="var sel=this.value; document.querySelectorAll('.time-slot-task,[data-task-id]').forEach(function(el){if(!sel){el.style.display='block'}else{el.style.display=el.textContent.toLowerCase().includes(sel.toLowerCase())?'block':'none'}});">
                         <option value="">All tasks</option>
                     </select>
-                    <button onclick="clearTodayTemplateFilter()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">✖ Clear</button>
+                    <button onclick="document.getElementById('todayMobileFilter').value=''; document.querySelectorAll('.time-slot-task,[data-task-id]').forEach(function(el){el.style.display='block'});" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">✖ Clear</button>
                     <button onclick="renderTodayView()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">🔄</button>
                 </div>
                 <div style="font-size: 11px; color: #999; margin-top: 4px;">Waiting for tasks to load...</div>
@@ -6031,45 +6031,11 @@
                 
                 container.innerHTML = `
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="
-                            const selectedTemplate = this.value;
-                            const allTasks = document.querySelectorAll('.time-slot-task, [data-task-id]');
-                            let visibleCount = 0;
-                            
-                            allTasks.forEach(taskEl => {
-                                if (!selectedTemplate) {
-                                    // Show all tasks
-                                    taskEl.style.display = 'block';
-                                    visibleCount++;
-                                } else {
-                                    // Find the task data
-                                    const taskId = taskEl.dataset.taskId || taskEl.getAttribute('data-task-id');
-                                    if (taskId && window.tasks) {
-                                        const task = window.tasks.find(t => t.id == taskId);
-                                        if (task) {
-                                            const taskText = ((task.title || '') + ' ' + (task.notes || '')).toLowerCase();
-                                            const hasTemplate = taskText.includes(selectedTemplate.toLowerCase());
-                                            taskEl.style.display = hasTemplate ? 'block' : 'none';
-                                            if (hasTemplate) visibleCount++;
-                                        }
-                                    }
-                                }
-                            });
-                            
-                            // Update status text
-                            const statusDiv = document.querySelector('#todayTemplateFiltersMobile div:last-child');
-                            if (statusDiv) {
-                                statusDiv.textContent = selectedTemplate ? 
-                                    'Filtering by ' + selectedTemplate + ' (' + visibleCount + ' tasks shown)' : 
-                                    'Found ' + ` + templates.size + ` + ' templates: ' + ` + (templates.size > 0 ? Array.from(templates).join(', ') : 'none') + `;
-                            }
-                        ">
+                        <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="var sel=this.value; document.querySelectorAll('.time-slot-task,[data-task-id]').forEach(function(el){if(!sel){el.style.display='block'}else{el.style.display=el.textContent.toLowerCase().includes(sel.toLowerCase())?'block':'none'}});">
                             ` + optionsHtml + `
                         </select>
-                        <button onclick="document.getElementById('todayMobileFilter').value='';document.querySelectorAll('.time-slot-task').forEach(el=>el.style.display='block')" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">✖</button>
-                        <button onclick="location.reload()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">🔄</button>
+                        <button onclick="document.getElementById('todayMobileFilter').value=''; document.querySelectorAll('.time-slot-task,[data-task-id]').forEach(function(el){el.style.display='block'});" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">Clear All</button>
                     </div>
-                    <div style="font-size: 11px; color: #666; margin-top: 4px;">Found ` + templates.size + ` templates: ` + (templates.size > 0 ? Array.from(templates).join(', ') : 'none') + `</div>
                 `;
                 console.log('✅ Force updated mobile filter');
             }
