@@ -365,20 +365,42 @@
             // Update date field
             if (parsed.date) {
                 const dateInput = document.getElementById('taskDueDate') || 
-                                document.getElementById('editTaskDueDate');
+                                document.getElementById('editTaskDate') ||
+                                document.getElementById('editTaskDateOnly');
                 console.log('🔍 NL Debug: Date input found:', !!dateInput, 'Setting date:', parsed.date);
                 if (dateInput) {
                     dateInput.value = parsed.date;
+                }
+                // Also update the separate DateOnly field for edit modal
+                const dateOnlyInput = document.getElementById('editTaskDateOnly');
+                if (dateOnlyInput) {
+                    dateOnlyInput.value = parsed.date;
+                }
+                
+                // Update the display button to show the new date/time
+                if (typeof updateDateTimeDisplay === 'function') {
+                    updateDateTimeDisplay();
                 }
             }
             
             // Update time field
             if (parsed.time) {
                 const timeInput = document.getElementById('taskDueTime') || 
-                                document.getElementById('editTaskDueTime');
+                                document.getElementById('editTaskTime') ||
+                                document.getElementById('editTaskTimeOnly');
                 console.log('🔍 NL Debug: Time input found:', !!timeInput, 'Setting time:', parsed.time);
                 if (timeInput) {
                     timeInput.value = parsed.time;
+                }
+                // Also update the separate TimeOnly field for edit modal
+                const timeOnlyInput = document.getElementById('editTaskTimeOnly');
+                if (timeOnlyInput) {
+                    timeOnlyInput.value = parsed.time;
+                }
+                
+                // Update the display button to show the new date/time
+                if (typeof updateDateTimeDisplay === 'function') {
+                    updateDateTimeDisplay();
                 }
             }
             
