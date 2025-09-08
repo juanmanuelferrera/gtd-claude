@@ -93,26 +93,31 @@
         function normalizeTime(timeStr) {
             if (!timeStr) return null;
             
-            // Handle formats like "6pm", "6:30pm", "18:00", "6:30"
+            console.log('🔍 NL Debug: Normalizing time:', timeStr);
+            
+            // Handle formats like "6pm", "6:30pm", "18:00", "6:30", "9am"
             const pmMatch = timeStr.match(/^(\d{1,2})(?::(\d{2}))?\s*pm$/i);
             const amMatch = timeStr.match(/^(\d{1,2})(?::(\d{2}))?\s*am$/i);
             const is24Hour = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+            
+            let result = null;
             
             if (pmMatch) {
                 let hour = parseInt(pmMatch[1]);
                 const minute = pmMatch[2] || '00';
                 if (hour !== 12) hour += 12; // Convert PM to 24-hour
-                return `${hour.toString().padStart(2, '0')}:${minute}`;
+                result = `${hour.toString().padStart(2, '0')}:${minute}`;
             } else if (amMatch) {
                 let hour = parseInt(amMatch[1]);
                 const minute = amMatch[2] || '00';
                 if (hour === 12) hour = 0; // Convert 12 AM to 00
-                return `${hour.toString().padStart(2, '0')}:${minute}`;
+                result = `${hour.toString().padStart(2, '0')}:${minute}`;
             } else if (is24Hour) {
-                return timeStr;
+                result = timeStr;
             }
             
-            return null;
+            console.log('🔍 NL Debug: Normalized time result:', result);
+            return result;
         }
         
         // Helper function for getLocalDateString compatibility
@@ -156,6 +161,22 @@
         
         // Patterns for different natural language formats
         const patterns = [
+            // Simple "task at time" pattern: "limpiar ombligo at 9am"
+            {
+                regex: /^(.+?)\s+at\s+(\d{1,2}(?::\d{2})?(?:am|pm)?)$/i,
+                parser: (match) => {
+                    const timeResult = normalizeTime(match[2]);
+                    if (timeResult) {
+                        return {
+                            title: match[1].trim(),
+                            date: getLocalDateString(new Date()), // Today by default
+                            time: timeResult
+                        };
+                    }
+                    return null;
+                }
+            },
+            
             // Standalone time pattern: "at 8am" or "at 3:30pm"
             {
                 regex: /^at\s+(.+)$/i,
@@ -266,10 +287,14 @@
         ];
         
         // Try each pattern
-        for (const pattern of patterns) {
+        for (let i = 0; i < patterns.length; i++) {
+            const pattern = patterns[i];
+            console.log(`🔍 NL Debug: Testing pattern ${i + 1}:`, pattern.regex);
             const match = original.match(pattern.regex);
             if (match) {
+                console.log(`🔍 NL Debug: Pattern ${i + 1} matched:`, match);
                 const parsed = pattern.parser(match);
+                console.log(`🔍 NL Debug: Pattern ${i + 1} parsed result:`, parsed);
                 if (parsed && parsed.title !== undefined) {
                     // Extract metadata from title
                     const metadata = extractMetadata(parsed.title);
