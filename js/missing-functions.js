@@ -3439,78 +3439,27 @@ function exportTasksJSON() {
 }
 window.exportTasksJSON = exportTasksJSON;
 
-// Save list sections to server - Updated 2025-01-08 with auth fix
+// Save list sections - restored from v2.0.7 working version
 async function saveListSections() {
-    console.log('🚀 saveListSections called - version 2025-01-08');
     try {
-        const userId = window.getCurrentUserId ? window.getCurrentUserId() : 'demo_user';
-        
-        if (!window.listSections) {
-            console.warn('No listSections to save');
-            return;
-        }
-        
-        // Get auth token (note: auth.js uses 'authToken' not 'auth_token')
-        const authToken = localStorage.getItem('authToken');
-        const authTokenExpiry = localStorage.getItem('authTokenExpiry');
-        
-        console.log('🔍 Lists sync debug - authToken:', !!authToken, 'expiry:', authTokenExpiry);
-        console.log('🔍 Lists sync debug - current time:', Date.now(), 'expiry time:', authTokenExpiry ? parseInt(authTokenExpiry) : 'none');
-        
-        // Check if token exists and is not expired
-        if (!authToken || (authTokenExpiry && Date.now() >= parseInt(authTokenExpiry))) {
-            console.warn('❌ No valid auth token found for lists sync - saving to localStorage only');
-            localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
-            return;
-        }
-        
-        console.log('✅ Valid auth token found for lists sync - syncing to server...');
-        
-        // Define API_BASE if not already defined
-        const API_BASE = window.API_BASE || (window.location.hostname.includes('localhost') 
-            ? 'http://localhost:8787' 
-            : 'https://hyperfiler-fresh-api.joanmanelferrera-400.workers.dev');
-        
-        // Use getAuthHeaders if available, otherwise use direct token
-        const headers = window.getAuthHeaders ? window.getAuthHeaders() : {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
-        };
-        
-        const response = await fetch(`${API_BASE}/lists/sync`, {
-            method: 'POST',
-            headers: headers,
-            credentials: 'include',
-            body: JSON.stringify({
-                userId: userId,
-                listSections: window.listSections
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        console.log('✅ Lists synced to server:', data.synced, 'sections');
-        
-        // Also save to localStorage for consistency
         localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
         
-        return data;
-    } catch (error) {
-        console.error('❌ Failed to sync lists to server:', error);
+        // Set flag to prevent downloads from overwriting changes
+        window.justModifiedLists = true;
         
-        // Save to localStorage as fallback
-        try {
-            localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
-            console.log('💾 Lists saved to localStorage as fallback');
-        } catch (localError) {
-            console.error('❌ Failed to save to localStorage:', localError);
+        // Upload to server
+        if (typeof uploadAllLists === 'function') {
+            await uploadAllLists();
         }
         
-        // Don't throw the error to prevent breaking the UI
-        // throw error;
+        // Clear flag after successful upload
+        setTimeout(() => {
+            window.justModifiedLists = false;
+            console.log('🔓 Cleared justModifiedLists flag');
+        }, 5000); // 5 seconds for reliable cross-browser sync
+        
+    } catch (error) {
+        console.error('Error saving list sections:', error);
     }
 }
 
