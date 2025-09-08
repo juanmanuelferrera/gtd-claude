@@ -311,6 +311,7 @@
         
         function handleInput() {
             const value = titleInput.value;
+            console.log('🔍 NL Debug: Input value:', value);
             if (!value || value.length < 3) return;
             
             // Clear previous debounce
@@ -318,7 +319,9 @@
             
             // Debounce parsing to avoid excessive processing
             debounceTimer = setTimeout(() => {
+                console.log('🔍 NL Debug: Parsing:', value);
                 const parsed = parseNaturalLanguage(value);
+                console.log('🔍 NL Debug: Parsed result:', parsed);
                 if (parsed) {
                     applyParsedData(parsed, titleInput);
                 }
@@ -326,8 +329,11 @@
         }
         
         function applyParsedData(parsed, titleElement) {
+            console.log('🔍 NL Debug: Applying parsed data:', parsed);
+            
             // Update title field
             if (parsed.title && parsed.title !== parsed.originalInput) {
+                console.log('🔍 NL Debug: Updating title from', titleElement.value, 'to', parsed.title);
                 titleElement.value = parsed.title;
             }
             
@@ -335,6 +341,7 @@
             if (parsed.date) {
                 const dateInput = document.getElementById('taskDueDate') || 
                                 document.getElementById('editTaskDueDate');
+                console.log('🔍 NL Debug: Date input found:', !!dateInput, 'Setting date:', parsed.date);
                 if (dateInput) {
                     dateInput.value = parsed.date;
                 }
@@ -344,6 +351,7 @@
             if (parsed.time) {
                 const timeInput = document.getElementById('taskDueTime') || 
                                 document.getElementById('editTaskDueTime');
+                console.log('🔍 NL Debug: Time input found:', !!timeInput, 'Setting time:', parsed.time);
                 if (timeInput) {
                     timeInput.value = parsed.time;
                 }
@@ -388,16 +396,25 @@
     
     // Auto-initialize on DOM ready
     function initializeNaturalLanguage() {
+        console.log('🔍 NL Debug: Initializing natural language processing');
+        
         // Look for task input fields
         const titleInputs = [
             document.getElementById('taskTitle'),
             document.getElementById('editTaskTitle'),
             document.querySelector('input[placeholder*="task"]'),
-            document.querySelector('input[name="title"]')
+            document.querySelector('input[name="title"]'),
+            // Also look for inputs in modals
+            document.querySelector('.modal input[type="text"]'),
+            document.querySelector('#editTaskModal input[type="text"]'),
+            document.querySelector('#addTaskModal input[type="text"]')
         ].filter(el => el);
+        
+        console.log('🔍 NL Debug: Found title inputs:', titleInputs.map(el => el ? el.id || el.tagName : 'null'));
         
         titleInputs.forEach(input => {
             if (input && !input.hasAttribute('data-nl-initialized')) {
+                console.log('🔍 NL Debug: Setting up NL for input:', input.id || input.tagName);
                 setupNaturalLanguageInput(input);
                 input.setAttribute('data-nl-initialized', 'true');
             }
