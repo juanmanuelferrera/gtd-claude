@@ -22,20 +22,30 @@
         }
 
         .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 50px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 440px;
             width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 35px 90px rgba(0, 0, 0, 0.2);
         }
 
         h1 {
             text-align: center;
             color: #333;
-            margin-bottom: 30px;
-            font-size: 2.2em;
+            margin-bottom: 40px;
+            font-size: clamp(1.8em, 4vw, 2.5em);
             line-height: 1.1;
+            font-weight: 900;
+            letter-spacing: -0.02em;
         }
 
         .trial-badge {
@@ -62,12 +72,19 @@
 
         input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            padding: 16px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
             font-size: 16px;
             box-sizing: border-box;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        input:hover {
+            border-color: rgba(14, 165, 233, 0.3);
+            background: rgba(255, 255, 255, 0.9);
         }
 
         input:focus {
@@ -78,10 +95,13 @@
         button {
             background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
             color: white;
-            padding: 15px 30px;
+            padding: 18px 36px;
             border: none;
             border-radius: 50px;
             font-size: 1.1em;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
             font-weight: 600;
             width: 100%;
             cursor: pointer;
@@ -89,8 +109,12 @@
         }
 
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(14, 165, 233, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(-1px) scale(0.98);
         }
 
         button:disabled {
