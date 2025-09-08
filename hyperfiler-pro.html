@@ -5752,6 +5752,42 @@
     <script src="js/natural-language.js?v=1736362446"></script>
     <script src="js/patches.js?v=1736362446"></script>
 
+    <!-- CACHE BYPASS: Inline fixed saveListSections function -->
+    <script>
+    // Override the broken saveListSections function - v2.0.7 working version
+    window.saveListSections = async function() {
+        console.log('🚀 INLINE saveListSections called - bypassing cache');
+        console.log('📋 Saving', window.listSections?.length || 0, 'list sections');
+        try {
+            localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
+            console.log('💾 Saved to localStorage');
+            
+            // Set flag to prevent downloads from overwriting changes
+            window.justModifiedLists = true;
+            console.log('🔒 Set justModifiedLists flag');
+            
+            // Upload to server
+            if (typeof uploadAllLists === 'function') {
+                console.log('📤 Calling uploadAllLists...');
+                await uploadAllLists();
+                console.log('✅ uploadAllLists completed');
+            } else {
+                console.error('❌ uploadAllLists function not found!');
+            }
+            
+            // Clear flag after successful upload
+            setTimeout(() => {
+                window.justModifiedLists = false;
+                console.log('🔓 Cleared justModifiedLists flag');
+            }, 5000);
+            
+        } catch (error) {
+            console.error('❌ Error saving list sections:', error);
+        }
+    };
+    console.log('✅ Inline saveListSections override loaded');
+    </script>
+
     <!-- Floating Action Button (FAB) for Quick Add Task -->
     <button id="fabAddTask" onclick="openAddTaskModal()" class="floating-add-btn" style="
         position: fixed;
