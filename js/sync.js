@@ -40,6 +40,11 @@ async function withSyncLock(syncFunction, ...args) {
 // Sync status tracking
 let lastVisibilitySync = 0;
 let lastFocusRefresh = 0;
+let syncEventListenersInitialized = false;
+
+// Store event listener references for cleanup
+let visibilityChangeHandler = null;
+let focusHandler = null;
 
 /**
  * Initialize the sync system
@@ -87,47 +92,89 @@ function initializeSimpleSync() {
 }
 
 /**
- * Setup event listeners for sync triggers
+ * Setup event listeners for sync triggers (with race condition prevention)
  */
 function setupSyncEventListeners() {
-    // Debounced sync on page visibility change (max once per minute)
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden && window.currentUser) {
-            const now = Date.now();
-            if (now - lastVisibilitySync > 10000) { // 10 seconds minimum
-                console.log('📥 Visibility sync - performing comprehensive sync...');
-                lastVisibilitySync = now;
-                performComprehensiveSync().catch(error => {
-                    console.warn('📥 Visibility comprehensive sync failed:', error);
-                });
-                downloadAllTemplates().catch(error => {
-                    console.warn('📥 Visibility templates download failed:', error);
-                });
-            }
-        }
-    });
+    // Prevent duplicate event listener registration
+    if (syncEventListenersInitialized) {
+        console.log('⚠️ Sync event listeners already initialized, skipping...');
+        return;
+    }
     
-    // Debounced window focus handler (max once per minute)  
-    window.addEventListener('focus', () => {
-        if (window.currentUser) {
-            // Check if backup restore is in progress
-            if (window.backupRestoreInProgress || window.justRestoredBackup || window.skipNextDownload) {
-                console.log('🔒 FOCUS SYNC: Blocked - backup restore in progress');
-                return;
-            }
+    // Unified debounce timing for both visibility and focus events
+    let lastUnifiedSync = 0;
+    const SYNC_DEBOUNCE_MS = 10000; // 10 seconds minimum between syncs
+    
+    /**
+     * Unified sync handler for both visibility and focus events
+     * Prevents race conditions by using single timing mechanism
+     */
+    const performUnifiedSync = (eventType) => {
+        if (!window.currentUser) {
+            console.log(`🔒 ${eventType} sync blocked - no user authenticated`);
+            return;
+        }
+        
+        // Check if backup restore is in progress
+        if (window.backupRestoreInProgress || window.justRestoredBackup || window.skipNextDownload) {
+            console.log(`🔒 ${eventType} sync blocked - backup restore in progress`);
+            return;
+        }
+        
+        const now = Date.now();
+        if (now - lastUnifiedSync > SYNC_DEBOUNCE_MS) {
+            console.log(`📥 ${eventType} sync - performing comprehensive sync...`);
+            lastUnifiedSync = now;
             
-            const now = Date.now();
-            if (now - lastFocusRefresh > 10000) { // 10 seconds minimum
-                console.log('📥 Focus sync - performing comprehensive sync...');
-                lastFocusRefresh = now;
-                performComprehensiveSync().catch(error => {
-                    console.warn('📥 Focus comprehensive sync failed:', error);
-                });
-            }
+            // Update both tracking variables for backward compatibility
+            lastVisibilitySync = now;
+            lastFocusRefresh = now;
+            
+            performComprehensiveSync().catch(error => {
+                console.warn(`📥 ${eventType} comprehensive sync failed:`, error);
+            });
+        } else {
+            console.log(`🔒 ${eventType} sync skipped - within debounce period`);
         }
-    });
+    };
     
-    console.log('✅ Immediate sync events registered (focus + visibility)');
+    // Create event handlers with proper cleanup references
+    visibilityChangeHandler = () => {
+        if (!document.hidden) {
+            performUnifiedSync('VISIBILITY');
+        }
+    };
+    
+    focusHandler = () => {
+        performUnifiedSync('FOCUS');
+    };
+    
+    // Register event listeners
+    document.addEventListener('visibilitychange', visibilityChangeHandler);
+    window.addEventListener('focus', focusHandler);
+    
+    // Mark as initialized to prevent duplicates
+    syncEventListenersInitialized = true;
+    
+    console.log('✅ Unified sync event listeners registered (focus + visibility with race condition prevention)');
+}
+
+/**
+ * Cleanup sync event listeners (for testing or re-initialization)
+ */
+function cleanupSyncEventListeners() {
+    if (visibilityChangeHandler) {
+        document.removeEventListener('visibilitychange', visibilityChangeHandler);
+        visibilityChangeHandler = null;
+    }
+    
+    if (focusHandler) {
+        window.removeEventListener('focus', focusHandler);
+        focusHandler = null;
+    }
+    
+    syncEventListenersInitialized = false;
+    console.log('🧹 Sync event listeners cleaned up');
 }
 
 /**
