@@ -934,9 +934,11 @@
         }
         
         // CRITICAL: Define authentication functions FIRST before any other code
-        const API_BASE = window.location.hostname.includes('localhost') 
-            ? 'http://localhost:8787' 
-            : 'https://hyperfiler-fresh-api.joanmanelferrera-400.workers.dev';
+        if (typeof window.API_BASE === 'undefined') {
+            window.API_BASE = window.location.hostname.includes('localhost') 
+                ? 'http://localhost:8787' 
+                : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
+        }
         // Helper function to clear authentication data
         function clearAuthData() {
             // Clear BOTH localStorage and sessionStorage to be thorough
@@ -2205,7 +2207,7 @@
                     if (authToken) {
                         // Actually validate the token instead of just checking existence
                         try {
-                            const response = await authenticatedFetch(`${API_BASE}/auth/me`, {
+                            const response = await authenticatedFetch(`${window.API_BASE}/auth/me`, {
                                 method: 'GET'
                             });
                             
@@ -2240,7 +2242,7 @@
                 
                 for (let attempt = 1; attempt <= 3; attempt++) {
                     try {
-                        response = await authenticatedFetch(`${API_BASE}/auth/me`, {
+                        response = await authenticatedFetch(`${window.API_BASE}/auth/me`, {
                             method: 'GET'
                         });
                         
@@ -2615,7 +2617,7 @@
             try {
                 console.log('🔐 Attempting login with inline form');
                 
-                const response = await fetch(`${API_BASE}/auth/login`, {
+                const response = await fetch(`${window.API_BASE}/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2720,7 +2722,7 @@
         async function logout() {
             try {
                 // Call backend logout endpoint to clear httpOnly cookie
-                await authenticatedFetch(`${API_BASE}/auth/logout`, {
+                await authenticatedFetch(`${window.API_BASE}/auth/logout`, {
                     method: 'POST'
                 });
             } catch (error) {
@@ -3099,7 +3101,7 @@
         // Upgrade to Pro function
         async function upgradeToPro() {
             try {
-                const response = await authenticatedFetch(`${API_BASE}/payments/create-checkout-session`, {
+                const response = await authenticatedFetch(`${window.API_BASE}/payments/create-checkout-session`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -3271,7 +3273,7 @@
                     throw new Error('No authentication');
                 }
                 
-                const response = await fetch(`${API_BASE}/tasks/${taskId}`, {
+                const response = await fetch(`${window.API_BASE}/tasks/${taskId}`, {
                     method: 'DELETE',
                     mode: 'cors',
                     headers: getAuthHeaders()
@@ -4275,7 +4277,7 @@
         window.testSimpleSync = async function() {
             try {
                 // Get fresh token
-                const loginResponse = await fetch(`${API_BASE}/auth/login`, {
+                const loginResponse = await fetch(`${window.API_BASE}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
@@ -5537,7 +5539,7 @@
                     userId: window.currentUser.user.id
                 };
                 
-                const response = await fetch(`${API_BASE}/lists/sync`, {
+                const response = await fetch(`${window.API_BASE}/lists/sync`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -5598,7 +5600,7 @@
                     userId: window.currentUser.user.id
                 };
                 
-                const response = await fetch(`${API_BASE}/tasks/sync`, {
+                const response = await fetch(`${window.API_BASE}/tasks/sync`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -5652,7 +5654,7 @@
             }
             
             try {
-                const response = await fetch(`${API_BASE}/lists/${window.currentUser.user.id}`, {
+                const response = await fetch(`${window.API_BASE}/lists/${window.currentUser.user.id}`, {
                     headers: getAuthHeaders()
                 });
                 if (response.ok) {
@@ -5727,7 +5729,7 @@
                 // Use the current customTemplates variable (which should be in sync with localStorage)
                 const templatesArray = customTemplates || [];
                 
-                const response = await fetch(`${API_BASE}/templates/sync`, {
+                const response = await fetch(`${window.API_BASE}/templates/sync`, {
                     method: 'POST',
                     headers: getAuthHeaders(),
                     body: JSON.stringify({
@@ -5764,7 +5766,7 @@
             }
             
             try {
-                const response = await fetch(`${API_BASE}/templates/${window.currentUser.user.id}`, {
+                const response = await fetch(`${window.API_BASE}/templates/${window.currentUser.user.id}`, {
                     headers: getAuthHeaders()
                 });
                 if (response.ok) {
@@ -5838,7 +5840,7 @@
             try {
                 console.log('📥 Downloading tasks from server...');
                 
-                const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
+                const response = await fetch(`${window.API_BASE}/tasks/${window.currentUser.user.id}`, {
                     headers: {
                         'Authorization': `Bearer ${authToken}`,
                         'Content-Type': 'application/json'
@@ -5996,7 +5998,7 @@
             try {
                 console.log(`📥 DELTA SYNC: Getting changes since ${new Date(parseInt(lastSyncTime)).toISOString()}`);
                 
-                const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}/changes?since=${lastSyncTime}`, {
+                const response = await fetch(`${window.API_BASE}/tasks/${window.currentUser.user.id}/changes?since=${lastSyncTime}`, {
                     headers: {
                         'Authorization': `Bearer ${authToken}`,
                         'Content-Type': 'application/json'
@@ -6068,7 +6070,7 @@
             }
             try {
                 console.log(`📤 DELTA UPLOAD: Sending ${(localChanges.created || []).length} created, ${(localChanges.updated || []).length} updated, ${(localChanges.deleted || []).length} deleted`);
-                const response = await fetch(`${API_BASE}/tasks/delta`, {
+                const response = await fetch(`${window.API_BASE}/tasks/delta`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${authToken}`,
@@ -6254,7 +6256,7 @@
                 const syncPeriod = getSyncPeriod();
                 
                 // Build URL with selective sync parameter for new devices
-                let apiUrl = `${API_BASE}/tasks/${window.currentUser.user.id}`;
+                let apiUrl = `${window.API_BASE}/tasks/${window.currentUser.user.id}`;
                 if (isNewDevice && syncPeriod !== 'all') {
                     const cutoffDate = new Date();
                     cutoffDate.setDate(cutoffDate.getDate() - parseInt(syncPeriod));
@@ -6596,9 +6598,9 @@
                 
                 console.log('🔑 Using httpOnly cookie authentication');
                 console.log('👤 User ID:', window.currentUser?.user?.id);
-                console.log('🌐 API URL:', `${API_BASE}/tasks/${window.currentUser.user.id}`);
+                console.log('🌐 API URL:', `${window.API_BASE}/tasks/${window.currentUser.user.id}`);
                 
-                const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
+                const response = await fetch(`${window.API_BASE}/tasks/${window.currentUser.user.id}`, {
                     headers: getAuthHeaders()
                 });
                 
@@ -6715,7 +6717,7 @@
             
             try {
                 
-                const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
+                const response = await fetch(`${window.API_BASE}/tasks/${window.currentUser.user.id}`, {
                     headers: getAuthHeaders()
                 });
                 
@@ -20350,7 +20352,7 @@
                             console.log('💪 BACKUP RESTORE: Adding force overwrite flags to upload');
                         }
                         
-                        const tasksResponse = await fetch(`${API_BASE}/tasks/sync`, {
+                        const tasksResponse = await fetch(`${window.API_BASE}/tasks/sync`, {
                             method: 'POST',
                             headers: getAuthHeaders(),
                             body: JSON.stringify(uploadPayload)
