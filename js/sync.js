@@ -3,6 +3,11 @@
  * Handles cloud sync for tasks, lists, and templates
  */
 
+// Ensure API_BASE is available
+const API_BASE = window.API_BASE || (window.location.hostname.includes('localhost') 
+    ? 'http://localhost:8787' 
+    : 'https://hyperfiler-fresh-api.joanmanelferrera-400.workers.dev');
+
 // Global sync lock to prevent race conditions
 let syncPromise = null;
 

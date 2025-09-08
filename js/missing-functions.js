@@ -3457,6 +3457,11 @@ async function saveListSections() {
             return;
         }
         
+        // Define API_BASE if not already defined
+        const API_BASE = window.API_BASE || (window.location.hostname.includes('localhost') 
+            ? 'http://localhost:8787' 
+            : 'https://hyperfiler-fresh-api.joanmanelferrera-400.workers.dev');
+        
         const response = await fetch(`${API_BASE}/lists/sync`, {
             method: 'POST',
             headers: {

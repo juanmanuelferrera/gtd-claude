@@ -27,6 +27,9 @@ const API_BASE = window.location.hostname.includes('localhost')
     ? 'http://localhost:8787' 
     : 'https://hyperfiler-fresh-api.joanmanelferrera-400.workers.dev';
 
+// Export API_BASE to window for use in other scripts
+window.API_BASE = API_BASE;
+
 // SECURITY: Client-side input validation functions
 function sanitizeInput(input) {
     if (typeof input !== 'string') return input;
