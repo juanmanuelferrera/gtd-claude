@@ -6098,35 +6098,15 @@
                         (t.dueDate && t.dueDate < today && t.status === 'pending')
                     );
                     
-                    console.log('🔍 DEBUG: Scanning tasks for patterns:', {
-                        totalTasks: window.tasks.length,
-                        todayTasks: todayTasks.length,
-                        today: today
-                    });
-                    
                     todayTasks.forEach(task => {
                         const text = (task.title || '') + ' ' + (task.notes || '');
                         // Find @templates and #hashtags
                         const matches = text.match(/[@#]\w+/g);
                         if (matches) {
-                            matches.forEach(match => {
-                                templates.add(match);
-                                // Debug logging to track where #model comes from
-                                if (match === '#model') {
-                                    console.log('🔍 #model found in task:', {
-                                        taskId: task.id,
-                                        title: task.title,
-                                        notes: task.notes,
-                                        fullText: text
-                                    });
-                                }
-                            });
+                            matches.forEach(match => templates.add(match));
                         }
                     });
                 }
-                
-                // Debug: Log all found patterns
-                console.log('🔍 DEBUG: All patterns found:', Array.from(templates).sort());
                 
                 // Build dropdown with real templates
                 let optionsHtml = '<option value="">All tasks</option>';
