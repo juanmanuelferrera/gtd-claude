@@ -26,78 +26,360 @@
             text-align: center;
         }
 
-        .hero {
+        /* Award-Winning Hero Section */
+        .hero-premium {
+            position: relative;
+            padding: 80px 0 120px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .floating-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: floatParticle 8s ease-in-out infinite;
+        }
+
+        .floating-particle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+        .floating-particle:nth-child(2) { top: 60%; left: 80%; animation-delay: 2s; }
+        .floating-particle:nth-child(3) { top: 40%; left: 20%; animation-delay: 4s; }
+        .floating-particle:nth-child(4) { top: 80%; left: 70%; animation-delay: 6s; }
+
+        @keyframes floatParticle {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+            50% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+        }
+
+        .hero-gradient-orb {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: orbPulse 6s ease-in-out infinite;
+        }
+
+        @keyframes orbPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .brand-lockup {
+            position: relative;
             margin-bottom: 60px;
         }
 
-        .hero h1 {
-            font-size: clamp(4em, 10vw, 8em);
+        .brand-spark {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3em;
+            animation: sparkPulse 3s ease-in-out infinite;
+            filter: drop-shadow(0 4px 12px rgba(255, 255, 0, 0.4));
+        }
+
+        .brand-rocket {
+            position: absolute;
+            top: -20px;
+            right: -60px;
+            font-size: 2.5em;
+            animation: rocketFloat 4s ease-in-out infinite;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+        }
+
+        @keyframes sparkPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); filter: drop-shadow(0 4px 12px rgba(255, 255, 0, 0.4)); }
+            50% { transform: translateX(-50%) scale(1.15); filter: drop-shadow(0 6px 20px rgba(255, 255, 0, 0.8)); }
+        }
+
+        @keyframes rocketFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        .hero-title {
+            font-size: clamp(2.5em, 6vw, 5.5em);
             font-weight: 900;
-            margin-bottom: 40px;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin: 0 auto 50px;
+            max-width: 1000px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .title-line-1 {
+            opacity: 0.9;
+            font-weight: 700;
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .title-line-2 {
+            font-weight: 900;
+            background: linear-gradient(45deg, #ffffff, #e0f2fe, #b3e5fc);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .flows-emphasis {
+            position: relative;
+            font-style: italic;
+            color: #60a5fa;
+            text-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
+        }
+
+        .flows-emphasis::after {
+            content: '～';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.5em;
+            animation: flowWave 2s ease-in-out infinite;
+        }
+
+        @keyframes flowWave {
+            0%, 100% { transform: translateX(-50%) scaleX(1); }
+            50% { transform: translateX(-50%) scaleX(1.2); }
+        }
+
+        .title-line-3 {
+            font-size: 0.8em;
+            font-weight: 600;
+            opacity: 0.95;
+        }
+
+        .natural-emphasis {
+            color: #6bcf7f;
+            text-shadow: 0 2px 8px rgba(107, 207, 127, 0.3);
+        }
+
+        .social-proof-cluster {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin-bottom: 60px;
+            flex-wrap: wrap;
+        }
+
+        .social-stat {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 20px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .social-stat:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: 900;
+            color: #60a5fa;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        .scarcity-badge {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            padding: 15px 25px;
+            border-radius: 25px;
             display: flex;
             align-items: center;
+            gap: 10px;
+            animation: scarcityPulse 3s ease-in-out infinite;
+            box-shadow: 0 8px 30px rgba(255, 107, 107, 0.3);
+        }
+
+        @keyframes scarcityPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 8px 30px rgba(255, 107, 107, 0.3); }
+            50% { transform: scale(1.02); box-shadow: 0 12px 40px rgba(255, 107, 107, 0.5); }
+        }
+
+        .scarcity-icon {
+            font-size: 1.2em;
+        }
+
+        .scarcity-text {
+            font-weight: 700;
+            font-size: 0.95em;
+        }
+
+        .cta-orchestration {
+            display: flex;
             justify-content: center;
-            gap: 25px;
-            letter-spacing: -0.03em;
-            line-height: 1.0;
-            text-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            align-items: flex-start;
+            gap: 40px;
+            flex-wrap: wrap;
         }
 
-        .hero p {
-            font-size: clamp(1.4em, 4vw, 2.2em);
-            margin-bottom: 60px;
-            opacity: 0.95;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.5;
-            font-weight: 500;
-            text-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        .primary-cta-container, .secondary-cta-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
         }
 
-        .cta-buttons {
-            margin-bottom: 60px;
-        }
-
-        .social-proof {
-            margin-top: 30px;
-            margin-bottom: 20px;
-        }
-
-        .user-count {
-            font-size: 1.1em;
-            opacity: 0.9;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 12px 24px;
-            border-radius: 25px;
-            display: inline-block;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 15px;
-        }
-        
-        .scarcity-indicator {
-            font-size: 0.95em;
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        .cta-primary {
+            background: linear-gradient(45deg, #0ea5e9, #0284c7);
             color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            display: inline-block;
-            font-weight: 600;
-            animation: pulse 2s infinite;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+            padding: 22px 45px;
+            border-radius: 50px;
+            font-size: 1.3em;
+            font-weight: 700;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            justify-content: center;
+            box-shadow: 0 15px 40px rgba(14, 165, 233, 0.3);
         }
 
-        .trial-details {
-            margin-top: 15px;
-            font-size: 0.95em;
+        .cta-primary:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 25px 60px rgba(14, 165, 233, 0.4);
+        }
+
+        .cta-shimmer {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .cta-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 18px 35px;
+            border-radius: 45px;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .cta-secondary:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .trial-benefits {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
             opacity: 0.8;
-            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .benefit {
+            font-weight: 500;
+        }
+
+        .benefit-separator {
+            opacity: 0.5;
+        }
+
+        .demo-preview {
+            font-size: 0.85em;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        @media (max-width: 1200px) {
+            .hero-title {
+                text-align: center;
+            }
+            
+            .brand-rocket {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-premium {
+                padding: 60px 0 80px;
+            }
+            
+            .social-proof-cluster {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .cta-orchestration {
+                flex-direction: column;
+                gap: 30px;
+            }
+            
+            .cta-primary {
+                min-width: 280px;
+                padding: 20px 35px;
+                font-size: 1.2em;
+            }
+            
+            .hero-title {
+                font-size: clamp(2em, 8vw, 3.5em);
+            }
         }
 
         .demo-section {
@@ -918,19 +1200,65 @@
         </div>
     </nav>
     <div class="container">
-        <div class="hero">
-            <h1><span>⚡</span> HyperFiler Pro <span>🚀</span></h1>
-            <p class="value-prop">The only task manager where every task flows like your thoughts - no rigid schedules, just natural productivity.</p>
-            <div class="social-proof">
-                <div class="user-count">🔥 Join 2,847+ organized professionals</div>
-                <div class="scarcity-indicator">⚡ Limited spots: Only 153 trial slots remaining this month</div>
+        <!-- Award-Winning Hero Section -->
+        <div class="hero-premium">
+            <div class="hero-background">
+                <div class="floating-particle" data-speed="1"></div>
+                <div class="floating-particle" data-speed="2"></div>
+                <div class="floating-particle" data-speed="0.8"></div>
+                <div class="floating-particle" data-speed="1.5"></div>
+                <div class="hero-gradient-orb"></div>
             </div>
-        </div>
+            
+            <div class="hero-content">
+                <div class="brand-lockup">
+                    <span class="brand-spark">⚡</span>
+                    <h1 class="hero-title">
+                        <span class="title-line-1">The only task manager where</span>
+                        <span class="title-line-2">every task <em class="flows-emphasis">flows like your thoughts</em></span>
+                        <span class="title-line-3">No rigid schedules, just <strong class="natural-emphasis">natural productivity</strong></span>
+                    </h1>
+                    <span class="brand-rocket">🚀</span>
+                </div>
 
-        <div class="cta-buttons">
-            <a href="./register.html" class="btn btn-primary">🚀 Start 60-Day Free Trial</a>
-            <div class="trial-details">No credit card • Full access • Cancel anytime</div>
-            <a href="#demo" class="btn btn-secondary">👀 See How It Works</a>
+                <div class="social-proof-cluster">
+                    <div class="social-stat">
+                        <span class="stat-number">2,847+</span>
+                        <span class="stat-label">Organized Professionals</span>
+                    </div>
+                    <div class="scarcity-badge">
+                        <span class="scarcity-icon">⚡</span>
+                        <span class="scarcity-text">Only 153 trial slots left this month</span>
+                    </div>
+                </div>
+
+                <div class="cta-orchestration">
+                    <div class="primary-cta-container">
+                        <a href="./register.html" class="cta-primary">
+                            <span class="cta-icon">🚀</span>
+                            <span class="cta-text">Start 60-Day Free Trial</span>
+                            <div class="cta-shimmer"></div>
+                        </a>
+                        <div class="trial-benefits">
+                            <span class="benefit">No credit card</span>
+                            <span class="benefit-separator">•</span>
+                            <span class="benefit">Full access</span>
+                            <span class="benefit-separator">•</span>
+                            <span class="benefit">Cancel anytime</span>
+                        </div>
+                    </div>
+                    
+                    <div class="secondary-cta-container">
+                        <a href="#demo" class="cta-secondary">
+                            <span class="cta-icon">👀</span>
+                            <span class="cta-text">See How It Works</span>
+                        </a>
+                        <div class="demo-preview">
+                            <span class="preview-text">3-minute interactive demo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Interactive Demo Section -->
