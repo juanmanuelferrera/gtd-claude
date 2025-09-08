@@ -44,6 +44,11 @@
     });
     </script>
     
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="styles/main.css?v=1736363200">
+    <link rel="stylesheet" href="styles/components.css?v=1736363200">
+    
+    <!-- Remove this once external CSS is verified working:
     <style>
         * {
             margin: 0;
@@ -3758,7 +3763,7 @@
             }
         }
         
-    </style>
+    </style> -->
 </head>
 <body>
     <!-- Modern Mobile App Header with Gradient & Glass Morphism -->
@@ -6012,69 +6017,69 @@
             width: 36px;
             height: 4px;
             background: rgba(0, 0, 0, 0.2);
-            border-radius: 2px;
-            cursor: pointer;
-        "></div>
-    </div>
-
-    <style>
-        /* Hover effects for selection toolbar buttons */
-        .selection-toolbar-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-        }
-
-        .selection-toolbar-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Safe area padding for mobile */
-        @supports (padding-bottom: env(safe-area-inset-bottom)) {
-            #floatingSelectionToolbar {
-                padding-bottom: calc(16px + env(safe-area-inset-bottom));
-            }
-        }
-
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            #floatingSelectionToolbar {
-                background: rgba(30, 30, 30, 0.92);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-            }
-        }
-
-        /* Animation keyframes */
-        @keyframes slideUpToolbar {
-            from {
-                bottom: -200px;
-                opacity: 0;
-            }
-            to {
-                bottom: 16px;
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideDownToolbar {
-            from {
-                bottom: 16px;
-                opacity: 1;
-            }
-            to {
-                bottom: -200px;
-                opacity: 0;
-            }
-        }
-
-        /* Show/hide animations */
-        #floatingSelectionToolbar.showing {
-            animation: slideUpToolbar 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
-
-        #floatingSelectionToolbar.hiding {
-            animation: slideDownToolbar 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
-    </style>
+<!--             border-radius: 2px;
+<!--             cursor: pointer;
+<!--         "></div>
+<!--     </div>
+<!-- 
+<!--     <style>
+<!--         /* Hover effects for selection toolbar buttons */
+<!--         .selection-toolbar-btn:hover {
+<!--             transform: scale(1.05);
+<!--             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+<!--         }
+<!-- 
+<!--         .selection-toolbar-btn:active {
+<!--             transform: scale(0.98);
+<!--         }
+<!-- 
+<!--         /* Safe area padding for mobile */
+<!--         @supports (padding-bottom: env(safe-area-inset-bottom)) {
+<!--             #floatingSelectionToolbar {
+<!--                 padding-bottom: calc(16px + env(safe-area-inset-bottom));
+<!--             }
+<!--         }
+<!-- 
+<!--         /* Dark mode support */
+<!--         @media (prefers-color-scheme: dark) {
+<!--             #floatingSelectionToolbar {
+<!--                 background: rgba(30, 30, 30, 0.92);
+<!--                 border: 1px solid rgba(255, 255, 255, 0.1);
+<!--             }
+<!--         }
+<!-- 
+<!--         /* Animation keyframes */
+<!--         @keyframes slideUpToolbar {
+<!--             from {
+<!--                 bottom: -200px;
+<!--                 opacity: 0;
+<!--             }
+<!--             to {
+<!--                 bottom: 16px;
+<!--                 opacity: 1;
+<!--             }
+<!--         }
+<!-- 
+<!--         @keyframes slideDownToolbar {
+<!--             from {
+<!--                 bottom: 16px;
+<!--                 opacity: 1;
+<!--             }
+<!--             to {
+<!--                 bottom: -200px;
+<!--                 opacity: 0;
+<!--             }
+<!--         }
+<!-- 
+<!--         /* Show/hide animations */
+<!--         #floatingSelectionToolbar.showing {
+<!--             animation: slideUpToolbar 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+<!--         }
+<!-- 
+<!--         #floatingSelectionToolbar.hiding {
+<!--             animation: slideDownToolbar 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+<!--         }
+<!--     </style> -->
     
     <!-- Mobile filter update -->
     <script>
