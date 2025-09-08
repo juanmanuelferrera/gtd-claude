@@ -215,20 +215,47 @@ async function checkAuthentication() {
         
         const userInfo = await response.json();
         
-        // Check subscription status - TEMPORARILY DISABLED FOR TESTING
-        // if (!userInfo.subscription || userInfo.subscription.plan_name === 'free') {
-        //     showAccessDenied('subscription');
-        //     return false;
-        // }
+        // Check subscription status - RE-ENABLED FOR SECURITY
+        if (!userInfo.subscription) {
+            console.error('🚫 AUTH: No subscription data found');
+            showAccessDenied('subscription');
+            return false;
+        }
         
-        // Subscription expired check - TEMPORARILY DISABLED FOR TESTING
-        // if (userInfo.subscription.current_period_end) {
-        //     const expiryDate = new Date(userInfo.subscription.current_period_end);
-        //     if (expiryDate < new Date()) {
-        //         showAccessDenied('expired');
-        //         return false;
-        //     }
-        // }
+        const planName = userInfo.subscription.plan_name;
+        const subscriptionStatus = userInfo.subscription.status;
+        
+        // Block free users and invalid plans
+        if (planName === 'free' || !planName) {
+            console.error('🚫 AUTH: Free or invalid plan detected:', planName);
+            showAccessDenied('subscription');
+            return false;
+        }
+        
+        // Block inactive subscriptions
+        if (subscriptionStatus !== 'active') {
+            console.error('🚫 AUTH: Inactive subscription status:', subscriptionStatus);
+            showAccessDenied('subscription');
+            return false;
+        }
+        
+        // Subscription expiration check - RE-ENABLED FOR SECURITY
+        if (userInfo.subscription.current_period_end) {
+            const expiryDate = new Date(userInfo.subscription.current_period_end);
+            const now = new Date();
+            if (expiryDate < now) {
+                console.error('🚫 AUTH: Subscription expired:', expiryDate.toISOString());
+                showAccessDenied('expired');
+                return false;
+            }
+            
+            // Log remaining time for valid subscriptions
+            const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+            console.log(`✅ AUTH: Valid subscription - Plan: ${planName}, Days left: ${daysLeft}`);
+        } else {
+            // No expiration date - assume lifetime (pro users with one-time payment)
+            console.log(`✅ AUTH: Valid subscription - Plan: ${planName}, Type: Lifetime`);
+        }
         
         // Store user info for app use
         window.currentUser = userInfo;
