@@ -15,7 +15,6 @@ let syncPromise = null;
 async function withSyncLock(syncFunction, ...args) {
     // If sync is already running, wait for it to complete
     if (syncPromise) {
-        console.log('🔒 Sync already in progress, waiting...');
         await syncPromise;
     }
     
@@ -47,13 +46,12 @@ let focusHandler = null;
  * Initialize the sync system
  */
 function initializeSimpleSync() {
-    // MOBILE FIX: Try to restore currentUser from localStorage if not set
+    // Restore currentUser from localStorage if not set
     if (!window.currentUser) {
         const storedUser = localStorage.getItem('currentUser');
         if (storedUser) {
             try {
                 window.currentUser = JSON.parse(storedUser);
-                console.log('✅ Restored currentUser from localStorage for mobile sync');
             } catch (e) {
                 console.warn('⚠️ Failed to parse currentUser from localStorage:', e);
             }
@@ -69,27 +67,24 @@ function initializeSimpleSync() {
     
     // Check for stale browser protection flags before sync
     if (window.staleBrowserDetected || window.skipInitialUpload) {
-        console.log('🔒 STALE BROWSER: Sync initialization postponed until stale browser download completes');
         // Schedule retry after stale browser handling completes
         setTimeout(() => {
             if (!window.staleBrowserDetected && !window.skipInitialUpload) {
-                console.log('🔓 STALE BROWSER: Retrying sync initialization');
                 initializeSimpleSync();
             }
-        }, 7000); // 7 seconds after stale browser detection
+        }, 7000);
         return;
     }
     
     // IMMEDIATE SYNC: Download tasks, lists, and templates on startup
-    console.log('📥 Starting immediate smart download on sync init...');
     smartDownloadTasks().catch(error => {
-        console.warn('📥 Initial smart download failed:', error);
+        console.warn('Initial smart download failed:', error);
     });
     downloadAllLists().catch(error => {
-        console.warn('📥 Initial lists download failed:', error);
+        console.warn('Initial lists download failed:', error);
     });
     downloadAllTemplates().catch(error => {
-        console.warn('📥 Initial templates download failed:', error);
+        console.warn('Initial templates download failed:', error);
     });
     
     // Setup event listeners for sync triggers
@@ -97,8 +92,6 @@ function initializeSimpleSync() {
     
     // Setup periodic backup sync
     setupPeriodicSync();
-    
-    console.log('✅ Simple sync system initialized with immediate sync pattern');
 }
 
 /**
@@ -107,7 +100,6 @@ function initializeSimpleSync() {
 function setupSyncEventListeners() {
     // Prevent duplicate event listener registration
     if (syncEventListenersInitialized) {
-        console.log('⚠️ Sync event listeners already initialized, skipping...');
         return;
     }
     
@@ -120,21 +112,18 @@ function setupSyncEventListeners() {
      * Prevents race conditions by using single timing mechanism
      */
     const performUnifiedSync = (eventType) => {
-        // MOBILE FIX: Ensure currentUser is loaded before checking
+        // Ensure currentUser is loaded before checking
         if (!ensureCurrentUserLoaded()) {
-            console.log(`🔒 ${eventType} sync blocked - no user authenticated`);
             return;
         }
         
         // Check if backup restore is in progress
         if (window.backupRestoreInProgress || window.justRestoredBackup || window.skipNextDownload) {
-            console.log(`🔒 ${eventType} sync blocked - backup restore in progress`);
             return;
         }
         
         const now = Date.now();
         if (now - lastUnifiedSync > SYNC_DEBOUNCE_MS) {
-            console.log(`📥 ${eventType} sync - performing comprehensive sync...`);
             lastUnifiedSync = now;
             
             // Update both tracking variables for backward compatibility
@@ -142,10 +131,8 @@ function setupSyncEventListeners() {
             lastFocusRefresh = now;
             
             performComprehensiveSync().catch(error => {
-                console.warn(`📥 ${eventType} comprehensive sync failed:`, error);
+                console.warn(`${eventType} comprehensive sync failed:`, error);
             });
-        } else {
-            console.log(`🔒 ${eventType} sync skipped - within debounce period`);
         }
     };
     
@@ -166,8 +153,6 @@ function setupSyncEventListeners() {
     
     // Mark as initialized to prevent duplicates
     syncEventListenersInitialized = true;
-    
-    console.log('✅ Unified sync event listeners registered (focus + visibility with race condition prevention)');
 }
 
 /**
@@ -185,7 +170,6 @@ function cleanupSyncEventListeners() {
     }
     
     syncEventListenersInitialized = false;
-    console.log('🧹 Sync event listeners cleaned up');
 }
 
 /**
@@ -194,15 +178,14 @@ function cleanupSyncEventListeners() {
 function setupPeriodicSync() {
     setInterval(() => {
         if (navigator.onLine && window.currentUser) {
-            console.log('📥 Backup periodic sync...');
             pullLatestFromCloud(false).catch(error => {
-                console.warn('📥 Backup tasks sync failed:', error);
+                console.warn('Backup tasks sync failed:', error);
             });
             downloadAllLists().catch(error => {
-                console.warn('📥 Backup lists sync failed:', error);
+                console.warn('Backup lists sync failed:', error);
             });
             downloadAllTemplates().catch(error => {
-                console.warn('📥 Backup templates sync failed:', error);
+                console.warn('Backup templates sync failed:', error);
             });
         }
     }, 60000); // 1 minute intervals
@@ -226,9 +209,8 @@ async function _uploadAllTasksInternal() {
         }
     }
     
-    // MOBILE FIX: Ensure currentUser is loaded
+    // Ensure currentUser is loaded
     if (!ensureCurrentUserLoaded() || !window.currentUser?.user?.id) {
-        console.log('⚠️ No user ID available for tasks upload');
         return;
     }
     
@@ -243,7 +225,6 @@ async function _uploadAllTasksInternal() {
         });
         
         if (response.ok) {
-            console.log('✅ Tasks synced to server successfully');
             // Update last sync timestamp
             localStorage.setItem('lastSyncTime', Date.now().toString());
         } else {
@@ -267,9 +248,8 @@ async function uploadAllTasks() {
  * Download all tasks from server (internal implementation)
  */
 async function _downloadAllTasksInternal() {
-    // MOBILE FIX: Ensure currentUser is loaded
+    // Ensure currentUser is loaded
     if (!ensureCurrentUserLoaded() || !window.currentUser?.user?.id) {
-        console.log('⚠️ No user ID available for download');
         return;
     }
     
@@ -288,13 +268,11 @@ async function _downloadAllTasksInternal() {
     } else {
         // BACKUP RESTORE PROTECTION - highest priority
         if (window.justRestoredBackup || window.skipNextDownload || window.backupRestoreInProgress) {
-            console.log('🔒 BLOCKED: Download skipped - backup restore in progress');
             return;
         }
         
         // Download protection - skip if just modified tasks
         if (window.justModifiedTasks) {
-            console.log('📥 Skipping download - just modified tasks');
             return;
         }
     }
@@ -302,12 +280,10 @@ async function _downloadAllTasksInternal() {
     // Get auth token with fallback
     const authToken = window.currentUser?.token || localStorage.getItem('authToken');
     if (!authToken) {
-        console.log('⚠️ No auth token available for download');
         return;
     }
     
     try {
-        console.log('📥 Downloading tasks from server...');
         
         const response = await fetch(`${window.API_BASE}/tasks/${window.currentUser.user.id}`, {
             headers: {
@@ -322,8 +298,6 @@ async function _downloadAllTasksInternal() {
         
         const data = await response.json();
         const serverTasks = data.tasks || [];
-        
-        console.log('📥 Downloaded', serverTasks.length, 'tasks from server');
         
         // MANDATORY REFRESH: Direct replacement with server data
         if (window.forceMandatoryRefresh || window.staleBrowserMode) {
@@ -896,7 +870,6 @@ function ensureCurrentUserLoaded() {
         if (storedUser) {
             try {
                 window.currentUser = JSON.parse(storedUser);
-                console.log('✅ Restored currentUser from localStorage');
                 return true;
             } catch (e) {
                 console.warn('⚠️ Failed to parse currentUser from localStorage:', e);
