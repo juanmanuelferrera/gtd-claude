@@ -752,12 +752,10 @@ async function saveTaskEdit() {
         if (typeof parseNaturalLanguage === 'function') {
             const parsed = parseNaturalLanguage(title);
             if (parsed) {
-                console.log('💾 Final parsing cleanup:', parsed);
                 title = parsed.title;
             }
         }
         
-        console.log('💾 Form data collected:', {title, notes, isEvent, repeatType});
         
         if (!title) {
             console.log('❌ No title provided');
