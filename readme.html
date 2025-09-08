@@ -786,20 +786,27 @@
             const resultsDiv = document.getElementById('searchResults');
             const clearBtn = document.getElementById('clearSearchBtn');
             
-            if (query.length < 2) {
+            if (!query || query.length < 2) {
                 clearSearch();
                 return;
             }
             
             clearSearchHighlights();
             
-            const searchTerms = query.toLowerCase().split(' ').filter(term => term.length >= 2);
+            const searchTerms = query.toLowerCase().trim().split(' ').filter(term => term.length >= 2);
             const faqContainers = document.querySelectorAll('.faq-container');
             let matchCount = 0;
             
             faqContainers.forEach(container => {
-                const question = container.querySelector('.faq-question').textContent.toLowerCase();
-                const answer = container.querySelector('.faq-content').textContent.toLowerCase();
+                const questionElement = container.querySelector('.faq-question');
+                const contentElement = container.querySelector('.faq-content');
+                
+                if (!questionElement || !contentElement) {
+                    return;
+                }
+                
+                const question = questionElement.textContent.toLowerCase();
+                const answer = contentElement.textContent.toLowerCase();
                 const hasMatch = searchTerms.some(term => 
                     question.includes(term) || answer.includes(term)
                 );
@@ -809,24 +816,34 @@
                     matchCount++;
                     
                     // Highlight matching text
-                    const contentElement = container.querySelector('.faq-content');
-                    highlightText(contentElement, searchTerms);
+                    try {
+                        highlightText(contentElement, searchTerms);
+                    } catch (e) {
+                        console.log('Highlighting error:', e);
+                    }
                     
                     // Auto-expand matching FAQs
                     const answerElement = container.querySelector('.faq-answer');
-                    if (!answerElement.classList.contains('active')) {
-                        container.querySelector('.faq-question').click();
+                    if (answerElement && !answerElement.classList.contains('active')) {
+                        questionElement.click();
                     }
+                } else {
+                    container.classList.remove('search-matched');
                 }
             });
             
-            resultsDiv.innerHTML = matchCount > 0 ? 
-                `✨ Found ${matchCount} matching section${matchCount > 1 ? 's' : ''} ✨` : 
-                '❌ No matches found - try different terms';
-            resultsDiv.style.opacity = '1';
-            resultsDiv.style.fontWeight = '600';
+            // Update results display
+            if (resultsDiv) {
+                resultsDiv.innerHTML = matchCount > 0 ? 
+                    `✨ Found ${matchCount} matching section${matchCount > 1 ? 's' : ''} ✨` : 
+                    '❌ No matches found - try different terms';
+                resultsDiv.style.opacity = '1';
+                resultsDiv.style.fontWeight = '600';
+            }
             
-            clearBtn.style.opacity = '1';
+            if (clearBtn) {
+                clearBtn.style.opacity = '1';
+            }
         }
 
         function highlightText(element, searchTerms) {
