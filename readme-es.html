@@ -76,31 +76,33 @@
             margin: 0 auto;
         }
 
-        .header h1 {
-            font-size: clamp(2.5em, 6vw, 4.5em);
-            font-weight: 900;
-            margin-bottom: 15px;
+        .header .brand-small {
+            font-size: clamp(1.2em, 3vw, 1.6em);
+            font-weight: 700;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            gap: 10px;
+            opacity: 0.8;
+            letter-spacing: 0.01em;
+        }
+
+        .header h1 {
+            font-size: clamp(3em, 8vw, 5.5em);
+            font-weight: 900;
+            margin-bottom: 15px;
             text-shadow: 0 4px 12px rgba(0,0,0,0.4);
             letter-spacing: -0.02em;
             line-height: 1.1;
         }
 
-        .header .subtitle {
-            font-size: 1.5em;
-            margin-bottom: 10px;
-            opacity: 0.95;
-            font-weight: 600;
-        }
-
         .header .tagline {
-            font-size: 1.2em;
+            font-size: clamp(1.1em, 2.5vw, 1.4em);
             opacity: 0.85;
             max-width: 600px;
             margin: 0 auto 25px auto;
+            font-weight: 500;
         }
 
         .container {
@@ -280,8 +282,8 @@
             </a>
         </div>
         <div class="header-content">
-            <h1><span>⚡</span> HyperFiler Pro <span>🚀</span></h1>
-            <p class="subtitle">Documentación</p>
+            <div class="brand-small"><span>⚡</span> HyperFiler Pro <span>🚀</span></div>
+            <h1>Documentación</h1>
             <p class="tagline">Todo lo que necesitas para dominar el sistema HyperFiler</p>
             
             <!-- Search Box -->
