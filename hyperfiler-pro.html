@@ -7,7 +7,42 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>⚡ HyperFiler Pro 🚀 - v3.5.3-CACHE-BYPASS</title>
     
-    <script>console.log('🔥 HTML FILE LOADED - VERSION WITH INLINE FIX');</script>
+    <script>
+    console.log('🔥 HTML FILE LOADED - VERSION WITH INLINE FIX');
+    // Emergency fix - run after page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            console.log('🚨 EMERGENCY: Applying Lists sync fix...');
+            window.saveListSections = async function() {
+                console.log('🚀 FIXED saveListSections called');
+                try {
+                    localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
+                    console.log('💾 Saved to localStorage');
+                    
+                    window.justModifiedLists = true;
+                    console.log('🔒 Set justModifiedLists flag');
+                    
+                    if (typeof uploadAllLists === 'function') {
+                        console.log('📤 Calling uploadAllLists...');
+                        await uploadAllLists();
+                        console.log('✅ uploadAllLists completed');
+                    } else {
+                        console.error('❌ uploadAllLists function not found!');
+                    }
+                    
+                    setTimeout(() => {
+                        window.justModifiedLists = false;
+                        console.log('🔓 Cleared justModifiedLists flag');
+                    }, 5000);
+                    
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                }
+            };
+            console.log('✅ Emergency Lists sync fix applied');
+        }, 2000); // Wait 2 seconds for everything to load
+    });
+    </script>
     
     <style>
         * {
