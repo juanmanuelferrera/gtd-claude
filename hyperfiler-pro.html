@@ -2508,7 +2508,7 @@
 
         .list-section-header {
             background: linear-gradient(135deg, #B22222 0%, #CD5C5C 100%);
-            color: white;
+            color: white !important;
             padding: 18px 24px;
             cursor: pointer;
             display: flex;
@@ -2516,6 +2516,10 @@
             align-items: center;
             transition: all 0.3s ease;
             user-select: none;
+        }
+        
+        .list-section-header * {
+            color: white !important;
         }
 
         .list-section-header:hover {
@@ -2528,6 +2532,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            color: white !important;
         }
 
         .list-section-meta {
