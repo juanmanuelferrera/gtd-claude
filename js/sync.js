@@ -3,13 +3,12 @@
  * Handles cloud sync for tasks, lists, and templates
  */
 
-// Ensure API_BASE is available - use existing or fallback
-if (typeof API_BASE === 'undefined') {
-    window.API_BASE = window.location.hostname.includes('localhost') 
+// Ensure window.API_BASE is available - use existing or fallback
+if (typeof window.window.API_BASE === 'undefined') {
+    window.window.API_BASE = window.location.hostname.includes('localhost') 
         ? 'http://localhost:8787' 
         : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
 }
-const API_BASE = window.API_BASE;
 
 // Global sync lock to prevent race conditions
 let syncPromise = null;
@@ -239,7 +238,7 @@ async function _uploadAllTasksInternal() {
     }
     
     try {
-        const response = await fetch(`${API_BASE}/tasks/sync`, {
+        const response = await fetch(`${window.window.API_BASE}/tasks/sync`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify({
@@ -315,7 +314,7 @@ async function _downloadAllTasksInternal() {
     try {
         console.log('📥 Downloading tasks from server...');
         
-        const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
+        const response = await fetch(`${window.window.API_BASE}/tasks/${window.currentUser.user.id}`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`,
                 'Content-Type': 'application/json'
@@ -484,7 +483,7 @@ async function _uploadAllListsInternal() {
     try {
         const listsToUpload = window.listSections || [];
         
-        const response = await fetch(`${API_BASE}/lists/sync`, {
+        const response = await fetch(`${window.API_BASE}/lists/sync`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify({
@@ -544,7 +543,7 @@ async function _downloadAllListsInternal() {
     }
     
     try {
-        const response = await fetch(`${API_BASE}/lists/${window.currentUser.user.id}`, {
+        const response = await fetch(`${window.API_BASE}/lists/${window.currentUser.user.id}`, {
             headers: getAuthHeaders()
         });
         
@@ -636,7 +635,7 @@ async function _uploadAllTemplatesInternal() {
     try {
         const templatesArray = typeof customTemplates !== 'undefined' ? customTemplates : [];
         
-        const response = await fetch(`${API_BASE}/templates/sync`, {
+        const response = await fetch(`${window.API_BASE}/templates/sync`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify({
@@ -686,7 +685,7 @@ async function _downloadAllTemplatesInternal() {
     }
     
     try {
-        const response = await fetch(`${API_BASE}/templates/${window.currentUser.user.id}`, {
+        const response = await fetch(`${window.API_BASE}/templates/${window.currentUser.user.id}`, {
             headers: getAuthHeaders()
         });
         
@@ -804,7 +803,7 @@ async function deleteTaskFromCloud(taskId) {
     try {
         console.log(`🗑️ Deleting task ${taskId} from cloud...`);
         
-        const response = await fetch(`${API_BASE}/tasks/${taskId}`, {
+        const response = await fetch(`${window.API_BASE}/tasks/${taskId}`, {
             method: 'DELETE',
             mode: 'cors',
             headers: getAuthHeaders()

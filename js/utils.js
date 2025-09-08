@@ -28,7 +28,6 @@ if (typeof window.API_BASE === 'undefined') {
         ? 'http://localhost:8787' 
         : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
 }
-const API_BASE = window.API_BASE;
 
 // SECURITY: Client-side input validation functions
 function sanitizeInput(input) {
