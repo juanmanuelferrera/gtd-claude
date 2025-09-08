@@ -643,20 +643,9 @@
 
         // Search functionality
         function searchDocumentation(query) {
-            console.log('Search triggered with query:', query);
-            // Test alert to confirm function is called
-            if (query === 'test') {
-                alert('Search function is working!');
-            }
             const searchInput = document.getElementById('docSearch');
             const resultsDiv = document.getElementById('searchResults');
             const clearBtn = document.getElementById('clearSearchBtn');
-            
-            console.log('Elements found:', {
-                searchInput: !!searchInput,
-                resultsDiv: !!resultsDiv,
-                clearBtn: !!clearBtn
-            });
             
             if (query.length < 2) {
                 clearSearch();
@@ -693,8 +682,10 @@
             });
             
             resultsDiv.innerHTML = matchCount > 0 ? 
-                `Se encontraron ${matchCount} sección${matchCount > 1 ? 'es' : ''} que coinciden` : 
-                'No se encontraron coincidencias';
+                `✨ Se encontraron ${matchCount} sección${matchCount > 1 ? 'es' : ''} que coinciden ✨` : 
+                '❌ No se encontraron coincidencias - intenta otros términos';
+            resultsDiv.style.opacity = '1';
+            resultsDiv.style.fontWeight = '600';
             
             clearBtn.style.opacity = '1';
         }
@@ -762,6 +753,8 @@
             
             searchInput.value = '';
             resultsDiv.innerHTML = '';
+            resultsDiv.style.opacity = '0.8';
+            resultsDiv.style.fontWeight = 'normal';
             clearBtn.style.opacity = '0';
             clearSearchHighlights();
             
