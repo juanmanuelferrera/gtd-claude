@@ -16,7 +16,100 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 80px 20px 20px;
+        }
+        
+        /* Navigation */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(37, 99, 235, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-bolt {
+            display: inline-block;
+            animation: energyPulse 2s ease-in-out infinite;
+        }
+        
+        .logo-rocket {
+            display: inline-block;
+            animation: rocketFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes energyPulse {
+            0%, 100% { 
+                transform: scale(1);
+                filter: drop-shadow(0 0 5px rgba(255, 255, 0, 0.3));
+            }
+            50% { 
+                transform: scale(1.1);
+                filter: drop-shadow(0 0 10px rgba(255, 255, 0, 0.6));
+            }
+        }
+        
+        @keyframes rocketFloat {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg);
+            }
+            50% { 
+                transform: translateY(-2px) rotate(5deg);
+            }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .nav-cta {
+            background: linear-gradient(45deg, #0ea5e9, #0284c7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
         }
 
         .container {
@@ -462,6 +555,20 @@
     </style>
 </head>
 <body>
+    <nav class="nav-header">
+        <div class="nav-container">
+            <a href="./index.html" class="nav-logo">
+                <span class="logo-bolt">⚡</span> HyperFiler Pro <span class="logo-rocket">🚀</span>
+            </a>
+            <div class="nav-links">
+                <a href="./index.html">🏠 Home</a>
+                <a href="./readme.html">📚 Docs</a>
+                <a href="./upgrade-compare.html">💎 Pricing</a>
+                <a href="./login.html">🔐 Login</a>
+                <a href="./register.html" class="nav-cta">Start Free Trial</a>
+            </div>
+        </div>
+    </nav>
     <div class="container">
         <!-- Header -->
         <div class="header">
