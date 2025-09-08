@@ -22,7 +22,7 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 120px 20px 40px;
             text-align: center;
         }
 
@@ -55,6 +55,161 @@
 
         .cta-buttons {
             margin-bottom: 60px;
+        }
+
+        .social-proof {
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+
+        .user-count {
+            font-size: 1.1em;
+            opacity: 0.9;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 24px;
+            border-radius: 25px;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .trial-details {
+            margin-top: 15px;
+            font-size: 0.95em;
+            opacity: 0.8;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .demo-section {
+            margin: 80px 0;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .demo-section h2 {
+            font-size: clamp(1.8em, 4vw, 2.5em);
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        .demo-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1000px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .demo-step {
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+            padding: 30px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #0ea5e9, #0284c7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin: 0 auto 20px auto;
+        }
+
+        .demo-input, .demo-output, .demo-calendar {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 0.9em;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .demo-arrow {
+            font-size: 2em;
+            color: rgba(255, 255, 255, 0.6);
+            margin: 0 10px;
+        }
+
+        @media (max-width: 768px) {
+            .demo-container {
+                flex-direction: column;
+            }
+            .demo-arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        /* Navigation */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(37, 99, 235, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .nav-cta {
+            background: linear-gradient(45deg, #0ea5e9, #0284c7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
         }
 
         .btn {
@@ -180,16 +335,57 @@
     </style>
 </head>
 <body>
-    <a href="./login.html" class="login-link">🔐 Login</a>
+    <nav class="nav-header">
+        <div class="nav-container">
+            <a href="./index.html" class="nav-logo">⚡ HyperFiler Pro</a>
+            <div class="nav-links">
+                <a href="./readme.html">📚 Docs</a>
+                <a href="./upgrade-compare.html">💎 Pricing</a>
+                <a href="./login.html">🔐 Login</a>
+                <a href="./register.html" class="nav-cta">Start Free Trial</a>
+            </div>
+        </div>
+    </nav>
     <div class="container">
         <div class="hero">
             <h1><span>⚡</span> HyperFiler Pro <span>🚀</span></h1>
-            <p>43 Folders methodology digitally supercharged</p>
+            <p class="value-prop">The only task manager where every task flows like your thoughts - no rigid schedules, just natural productivity.</p>
+            <div class="social-proof">
+                <div class="user-count">✨ Join 2,847+ organized professionals</div>
+            </div>
         </div>
 
         <div class="cta-buttons">
-            <a href="./register.html" class="btn btn-primary">🔄 Start Trial</a>
-            <a href="./upgrade-compare.html" class="btn btn-secondary">💳 Purchase License</a>
+            <a href="./register.html" class="btn btn-primary">🚀 Start 60-Day Free Trial</a>
+            <div class="trial-details">No credit card • Full access • Cancel anytime</div>
+            <a href="#demo" class="btn btn-secondary">👀 See How It Works</a>
+        </div>
+
+        <!-- Interactive Demo Section -->
+        <div id="demo" class="demo-section">
+            <h2>See Time-Fluid Task Management in Action</h2>
+            <div class="demo-container">
+                <div class="demo-step">
+                    <div class="step-number">1</div>
+                    <h3>Think Naturally</h3>
+                    <div class="demo-input">"Call dentist tomorrow 2pm @health"</div>
+                    <p>Type tasks exactly how you think them</p>
+                </div>
+                <div class="demo-arrow">→</div>
+                <div class="demo-step">
+                    <div class="step-number">2</div>
+                    <h3>Auto-Scheduled</h3>
+                    <div class="demo-output">📅 Tomorrow 2:00 PM<br>🦷 Call dentist<br>🏷️ @health</div>
+                    <p>Instantly organized and categorized</p>
+                </div>
+                <div class="demo-arrow">→</div>
+                <div class="demo-step">
+                    <div class="step-number">3</div>
+                    <h3>Disappears Until Needed</h3>
+                    <div class="demo-calendar">📋 Clear mind today<br>⏰ Appears tomorrow</div>
+                    <p>Strategic invisibility at work</p>
+                </div>
+            </div>
         </div>
 
         <div class="features">
