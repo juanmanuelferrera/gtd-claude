@@ -11,6 +11,32 @@ const API_BASE = window.API_BASE || (window.location.hostname.includes('localhos
 // Global sync lock to prevent race conditions
 let syncPromise = null;
 
+/**
+ * Wrapper function to ensure only one sync operation at a time
+ * Prevents race conditions by queuing sync operations
+ */
+async function withSyncLock(syncFunction, ...args) {
+    // If sync is already running, wait for it to complete
+    if (syncPromise) {
+        console.log('🔒 Sync already in progress, waiting...');
+        await syncPromise;
+    }
+    
+    // Start new sync operation
+    syncPromise = syncFunction(...args);
+    
+    try {
+        const result = await syncPromise;
+        return result;
+    } catch (error) {
+        console.error('❌ Sync operation failed:', error);
+        throw error;
+    } finally {
+        // Always clear the lock when done
+        syncPromise = null;
+    }
+}
+
 // Sync status tracking
 let lastVisibilitySync = 0;
 let lastFocusRefresh = 0;
@@ -69,13 +95,10 @@ function setupSyncEventListeners() {
         if (!document.hidden && window.currentUser) {
             const now = Date.now();
             if (now - lastVisibilitySync > 10000) { // 10 seconds minimum
-                console.log('📥 Visibility sync - smart downloading tasks, lists, and templates...');
+                console.log('📥 Visibility sync - performing comprehensive sync...');
                 lastVisibilitySync = now;
-                downloadTasksFromCloud().catch(error => {
-                    console.warn('📥 Visibility tasks download failed:', error);
-                });
-                downloadAllLists().catch(error => {
-                    console.warn('📥 Visibility lists download failed:', error);
+                performComprehensiveSync().catch(error => {
+                    console.warn('📥 Visibility comprehensive sync failed:', error);
                 });
                 downloadAllTemplates().catch(error => {
                     console.warn('📥 Visibility templates download failed:', error);
@@ -95,13 +118,10 @@ function setupSyncEventListeners() {
             
             const now = Date.now();
             if (now - lastFocusRefresh > 10000) { // 10 seconds minimum
-                console.log('📥 Focus sync - smart downloading tasks and lists...');
+                console.log('📥 Focus sync - performing comprehensive sync...');
                 lastFocusRefresh = now;
-                downloadTasksFromCloud().catch(error => {
-                    console.warn('📥 Focus tasks download failed:', error);
-                });
-                downloadAllLists().catch(error => {
-                    console.warn('📥 Focus lists download failed:', error);
+                performComprehensiveSync().catch(error => {
+                    console.warn('📥 Focus comprehensive sync failed:', error);
                 });
             }
         }
@@ -131,9 +151,9 @@ function setupPeriodicSync() {
 }
 
 /**
- * Upload all tasks to the server
+ * Upload all tasks to the server (internal implementation)
  */
-async function uploadAllTasks() {
+async function _uploadAllTasksInternal() {
     console.log('🔄 uploadAllTasks called - using simple sync pattern');
     
     // CRITICAL STALE BROWSER PROTECTION: Check flags first
@@ -178,9 +198,16 @@ async function uploadAllTasks() {
 }
 
 /**
- * Download all tasks from server
+ * Upload all tasks to the server (with sync lock)
  */
-async function downloadAllTasks() {
+async function uploadAllTasks() {
+    return withSyncLock(_uploadAllTasksInternal);
+}
+
+/**
+ * Download all tasks from server (internal implementation)
+ */
+async function _downloadAllTasksInternal() {
     if (!window.currentUser?.user?.id) {
         console.log('⚠️ No user ID available for download');
         return;
@@ -278,6 +305,13 @@ async function downloadAllTasks() {
 }
 
 /**
+ * Download all tasks from server (with sync lock)
+ */
+async function downloadAllTasks() {
+    return withSyncLock(_downloadAllTasksInternal);
+}
+
+/**
  * Smart download tasks with additional logic
  */
 async function smartDownloadTasks() {
@@ -360,9 +394,9 @@ async function mergeTasksWithConflictResolution(serverTasks) {
 }
 
 /**
- * Upload all lists to the server
+ * Upload all lists to the server (internal implementation)
  */
-async function uploadAllLists() {
+async function _uploadAllListsInternal() {
     console.log('🔄 uploadAllLists called - using simple sync pattern');
     
     // CRITICAL STALE BROWSER PROTECTION: Check flags first
@@ -406,9 +440,16 @@ async function uploadAllLists() {
 }
 
 /**
- * Download all lists from server
+ * Upload all lists to the server (with sync lock)
  */
-async function downloadAllLists() {
+async function uploadAllLists() {
+    return withSyncLock(_uploadAllListsInternal);
+}
+
+/**
+ * Download all lists from server (internal implementation)
+ */
+async function _downloadAllListsInternal() {
     if (!window.currentUser?.user?.id) return;
     
     // FRESH BROWSER: Override protection for fresh browsers
@@ -485,6 +526,37 @@ async function downloadAllLists() {
     } catch (error) {
         console.log('📥 LISTS SYNC: Download error:', error);
     }
+}
+
+/**
+ * Download all lists from server (with sync lock)
+ */
+async function downloadAllLists() {
+    return withSyncLock(_downloadAllListsInternal);
+}
+
+/**
+ * Perform comprehensive sync - upload and download all data types
+ * Uses sync lock to prevent race conditions
+ */
+async function performComprehensiveSync() {
+    return withSyncLock(async () => {
+        console.log('🔄 Starting comprehensive sync...');
+        try {
+            // Upload local changes first
+            await _uploadAllTasksInternal();
+            await _uploadAllListsInternal();
+            
+            // Then download latest data
+            await _downloadAllTasksInternal();
+            await _downloadAllListsInternal();
+            
+            console.log('✅ Comprehensive sync completed successfully');
+        } catch (error) {
+            console.error('❌ Comprehensive sync failed:', error);
+            throw error;
+        }
+    });
 }
 
 /**
