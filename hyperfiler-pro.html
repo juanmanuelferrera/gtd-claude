@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>⚡ HyperFiler Pro 🚀 - v3.5.3-CACHE-BYPASS</title>
+    <title>⚡ HyperFiler Pro 🚀 - v3.5.4-LIST-HEADER-FIX</title>
     
     <script>
     console.log('🔥 HTML FILE LOADED - VERSION WITH INLINE FIX');
@@ -3490,13 +3490,19 @@
             border-radius: 0 0 10px 10px;
         }
         
-        /* Fix any transparent elements inside lists */
-        .list-section * {
-            background-color: inherit;
+        /* Preserve proper list section header styling */
+        .list-section-header {
+            background: linear-gradient(135deg, #B22222 0%, #CD5C5C 100%) !important;
+            color: white !important;
+            border-radius: 10px 10px 0 0 !important;
         }
         
-        .list-section-header {
-            border-radius: 10px 10px 0 0 !important;
+        .list-section-header * {
+            color: white !important;
+        }
+        
+        .list-section-title {
+            color: white !important;
         }
         
         /* Modern Mobile App Header Styles */
