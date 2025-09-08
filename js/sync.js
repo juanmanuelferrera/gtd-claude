@@ -50,6 +50,19 @@ let focusHandler = null;
  * Initialize the sync system
  */
 function initializeSimpleSync() {
+    // MOBILE FIX: Try to restore currentUser from localStorage if not set
+    if (!window.currentUser) {
+        const storedUser = localStorage.getItem('currentUser');
+        if (storedUser) {
+            try {
+                window.currentUser = JSON.parse(storedUser);
+                console.log('✅ Restored currentUser from localStorage for mobile sync');
+            } catch (e) {
+                console.warn('⚠️ Failed to parse currentUser from localStorage:', e);
+            }
+        }
+    }
+    
     if (!window.currentUser?.user?.id) {
         console.log('⚠️ Cannot initialize sync - no user credentials');
         return;
@@ -110,7 +123,8 @@ function setupSyncEventListeners() {
      * Prevents race conditions by using single timing mechanism
      */
     const performUnifiedSync = (eventType) => {
-        if (!window.currentUser) {
+        // MOBILE FIX: Ensure currentUser is loaded before checking
+        if (!ensureCurrentUserLoaded()) {
             console.log(`🔒 ${eventType} sync blocked - no user authenticated`);
             return;
         }
@@ -215,7 +229,8 @@ async function _uploadAllTasksInternal() {
         }
     }
     
-    if (!window.currentUser?.user?.id) {
+    // MOBILE FIX: Ensure currentUser is loaded
+    if (!ensureCurrentUserLoaded() || !window.currentUser?.user?.id) {
         console.log('⚠️ No user ID available for tasks upload');
         return;
     }
@@ -255,7 +270,8 @@ async function uploadAllTasks() {
  * Download all tasks from server (internal implementation)
  */
 async function _downloadAllTasksInternal() {
-    if (!window.currentUser?.user?.id) {
+    // MOBILE FIX: Ensure currentUser is loaded
+    if (!ensureCurrentUserLoaded() || !window.currentUser?.user?.id) {
         console.log('⚠️ No user ID available for download');
         return;
     }
@@ -875,9 +891,31 @@ async function forceResync() {
 }
 
 /**
+ * Ensure currentUser is loaded from localStorage if needed (mobile fix)
+ */
+function ensureCurrentUserLoaded() {
+    if (!window.currentUser) {
+        const storedUser = localStorage.getItem('currentUser');
+        if (storedUser) {
+            try {
+                window.currentUser = JSON.parse(storedUser);
+                console.log('✅ Restored currentUser from localStorage');
+                return true;
+            } catch (e) {
+                console.warn('⚠️ Failed to parse currentUser from localStorage:', e);
+            }
+        }
+    }
+    return !!window.currentUser;
+}
+
+/**
  * Initialize sync system if needed
  */
 function ensureSyncInitialized() {
+    // Ensure currentUser is loaded first
+    ensureCurrentUserLoaded();
+    
     if (!window.syncInitialized && window.currentUser?.user?.id) {
         initializeSimpleSync();
         window.syncInitialized = true;
