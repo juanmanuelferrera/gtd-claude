@@ -382,7 +382,7 @@ async function uploadAllLists() {
     }
     
     try {
-        const listsToUpload = typeof listSections !== 'undefined' ? listSections : [];
+        const listsToUpload = window.listSections || [];
         
         const response = await fetch(`${API_BASE}/lists/sync`, {
             method: 'POST',
