@@ -48,12 +48,16 @@
             const results = document.getElementById('results');
             let output = '';
             
+            // Show loading
+            results.innerHTML = '<div class="info">⏳ Checking...</div>';
+            
             // Check device info
             output += '<div class="info">';
             output += '<h3>📱 Device Info:</h3>';
             output += 'User Agent: ' + navigator.userAgent.substring(0, 50) + '...<br>';
             output += 'Screen: ' + screen.width + 'x' + screen.height + '<br>';
             output += 'Is Mobile: ' + (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) + '<br>';
+            output += 'Time: ' + new Date().toLocaleTimeString() + '<br>';
             output += '</div>';
             
             // Check API endpoint
@@ -104,16 +108,25 @@
             
             results.innerHTML = output;
             
-            // Test cloud connection
+            // Test cloud connection with timeout
             if (authToken) {
                 const user = JSON.parse(currentUser || '{}');
                 if (user.user?.id) {
+                    // Add timeout to prevent hanging
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+                    
                     fetch(`${API_BASE}/tasks/${user.user.id}`, {
                         headers: {
                             'Authorization': `Bearer ${authToken}`
-                        }
+                        },
+                        signal: controller.signal
                     })
-                    .then(r => r.json())
+                    .then(r => {
+                        clearTimeout(timeoutId);
+                        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                        return r.json();
+                    })
                     .then(data => {
                         const cloudStatus = document.getElementById('cloudStatus');
                         if (data.tasks) {
@@ -125,8 +138,12 @@
                         }
                     })
                     .catch(error => {
-                        document.getElementById('cloudStatus').innerHTML = 
-                            '<span class="error">❌ Connection failed: ' + error.message + '</span>';
+                        const cloudStatus = document.getElementById('cloudStatus');
+                        if (error.name === 'AbortError') {
+                            cloudStatus.innerHTML = '<span class="error">❌ Connection timeout (5s)</span>';
+                        } else {
+                            cloudStatus.innerHTML = '<span class="error">❌ Connection failed: ' + error.message + '</span>';
+                        }
                     });
                 }
             } else {
