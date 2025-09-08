@@ -643,9 +643,20 @@
 
         // Search functionality
         function searchDocumentation(query) {
+            console.log('Search triggered with query:', query);
+            // Test alert to confirm function is called
+            if (query === 'test') {
+                alert('Search function is working!');
+            }
             const searchInput = document.getElementById('docSearch');
             const resultsDiv = document.getElementById('searchResults');
             const clearBtn = document.getElementById('clearSearchBtn');
+            
+            console.log('Elements found:', {
+                searchInput: !!searchInput,
+                resultsDiv: !!resultsDiv,
+                clearBtn: !!clearBtn
+            });
             
             if (query.length < 2) {
                 clearSearch();
