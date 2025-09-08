@@ -586,6 +586,40 @@
             : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
         const STRIPE_PUBLISHABLE_KEY = 'pk_live_51QcWyCBMBEnwG8p0gIrjYnhgc69OsEVCMKhN9NWPPwbXGz6PBhz2wOBqBRGlnYzKKqPE0Ox66lpOA1WQGWEHdKCp007wJRaykm';
 
+        // Test API connectivity on page load
+        async function testAPIConnection() {
+            try {
+                console.log('🔍 Testing API connectivity to:', API_BASE);
+                const testResponse = await fetch(`${API_BASE}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                console.log('🔍 Health check status:', testResponse.status);
+                if (testResponse.ok) {
+                    const healthData = await testResponse.json();
+                    console.log('✅ API is reachable:', healthData);
+                } else {
+                    console.warn('⚠️ API health check failed with status:', testResponse.status);
+                }
+            } catch (error) {
+                console.error('❌ API connectivity test failed:', error);
+                console.log('🔍 Trying alternative endpoint check...');
+                
+                // Try a simple fetch to see if the domain resolves
+                try {
+                    const domainTest = await fetch(API_BASE, { method: 'HEAD' });
+                    console.log('🔍 Domain resolves but may not have expected endpoints');
+                } catch (domainError) {
+                    console.error('❌ Domain unreachable:', domainError);
+                }
+            }
+        }
+
+        // Run API test when page loads
+        document.addEventListener('DOMContentLoaded', testAPIConnection);
+
 
         // DOM elements
         const checkoutButton = document.getElementById('checkout-button');
@@ -757,7 +791,25 @@
                 
                 // Show detailed error to help with debugging
                 let errorMessage = 'Payment system error: ' + error.message;
-                if (error.message.includes('HTTP 404')) {
+                
+                // Check for CORS error specifically
+                const errorString = error.toString() + ' ' + (error.stack || '');
+                const isCORSError = errorString.includes('CORS') || 
+                                   errorString.includes('Access-Control-Allow-Origin') ||
+                                   (error.message.includes('Failed to fetch') && !navigator.onLine === false);
+                
+                if (isCORSError) {
+                    errorMessage = `
+                        <div style="text-align: left;">
+                            <strong>⚠️ Payment System Configuration Issue</strong><br><br>
+                            The payment server needs to be updated to allow secure payments from this domain.<br><br>
+                            <strong>Temporary Solutions:</strong><br>
+                            • Use the promo codes below for immediate access<br>
+                            • Contact support with error code: CORS-001<br><br>
+                            <small>This is a server configuration issue, not a problem with your device or connection.</small>
+                        </div>
+                    `;
+                } else if (error.message.includes('HTTP 404')) {
                     errorMessage = 'Payment endpoint not found. Please contact support.';
                 } else if (error.message.includes('HTTP 500')) {
                     errorMessage = 'Payment server error. Please try again or contact support.';
@@ -765,7 +817,7 @@
                     errorMessage = 'Connection error. Please check your internet connection and try again.';
                 }
                 
-                showError(errorMessage + ' Please try the promo codes below or contact support.');
+                showError(errorMessage);
             } finally {
                 checkoutButton.disabled = false;
                 loading.style.display = 'none';

@@ -25,7 +25,7 @@ document.addEventListener('touchmove', function(e) {
 // Configuration
 const API_BASE = window.location.hostname.includes('localhost') 
     ? 'http://localhost:8787' 
-    : 'https://hyperfiler-fresh-api.joanmanelferrera-400.workers.dev';
+    : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
 
 // Export API_BASE to window for use in other scripts
 window.API_BASE = API_BASE;
