@@ -463,6 +463,178 @@
             }
         }
 
+        /* Interface Showcase */
+        .interface-showcase {
+            margin: 120px 0;
+            padding: 80px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+        }
+
+        .interface-showcase .showcase-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .interface-showcase .showcase-title {
+            font-size: clamp(2.5em, 6vw, 4em);
+            font-weight: 800;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ffffff, #e0f2fe, #b3e5fc);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .interface-showcase .showcase-subtitle {
+            font-size: clamp(1.2em, 3vw, 1.8em);
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .view-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+
+        .view-tab {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .view-tab:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .view-tab.active {
+            background: linear-gradient(45deg, #0ea5e9, #0284c7);
+            border-color: #0ea5e9;
+            color: white;
+            box-shadow: 0 8px 25px rgba(14, 165, 233, 0.3);
+        }
+
+        .view-showcase {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .view-content {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            animation: viewFadeIn 0.5s ease-in-out;
+        }
+
+        .view-content.active {
+            display: grid;
+        }
+
+        @keyframes viewFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .view-image {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+        }
+
+        .view-image:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        .view-description {
+            padding: 20px 0;
+        }
+
+        .view-description h3 {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .view-description p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .view-description ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .view-description li {
+            font-size: 1.1em;
+            margin-bottom: 12px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            border-left: 4px solid #0ea5e9;
+            transition: all 0.3s ease;
+        }
+
+        .view-description li:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateX(5px);
+        }
+
+        .showcase-cta {
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 1024px) {
+            .view-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                text-align: center;
+            }
+            
+            .view-content:nth-child(even) {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .interface-showcase {
+                margin: 80px 0;
+                padding: 60px 20px;
+            }
+            
+            .view-tabs {
+                gap: 4px;
+            }
+            
+            .view-tab {
+                padding: 10px 16px;
+                font-size: 0.9em;
+            }
+        }
+
         /* Navigation */
         .nav-header {
             position: fixed;
@@ -1288,6 +1460,91 @@
             </div>
         </div>
 
+        <!-- Interface Showcase -->
+        <div class="interface-showcase">
+            <div class="showcase-header">
+                <h2 class="showcase-title">Three Powerful Views</h2>
+                <p class="showcase-subtitle">Time flows naturally across Today, Week, Month, and Lists - choose what works for your mind</p>
+            </div>
+
+            <div class="view-tabs">
+                <button class="view-tab active" data-view="today">📅 Today</button>
+                <button class="view-tab" data-view="week">📊 Week</button>
+                <button class="view-tab" data-view="month">🗓️ Month</button>
+                <button class="view-tab" data-view="lists">📋 Lists</button>
+            </div>
+
+            <div class="view-showcase">
+                <div class="view-content active" data-view="today">
+                    <div class="view-image">
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="Today View - Time-based task scheduling" style="width: 100%; height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; object-fit: cover;">
+                    </div>
+                    <div class="view-description">
+                        <h3>⚡ Today View</h3>
+                        <p>See only what matters RIGHT NOW. Tasks appear exactly when needed with smart time scheduling and contextual tags.</p>
+                        <ul>
+                            <li>🎯 Time-based task organization</li>
+                            <li>🏷️ Smart context tags (@casa, @project)</li>
+                            <li>⚡ Instant task actions (+1D, +1W, +1M)</li>
+                            <li>🔴 Overdue highlighting</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="view-content" data-view="week">
+                    <div class="view-image">
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="Week View - 7-day planning grid" style="width: 100%; height: 400px; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); border-radius: 12px; object-fit: cover;">
+                    </div>
+                    <div class="view-description">
+                        <h3>📊 Week View</h3>
+                        <p>Strategic 7-day overview with visual task distribution. Perfect for weekly planning and workload balancing.</p>
+                        <ul>
+                            <li>📅 Visual weekly calendar grid</li>
+                            <li>🎨 Color-coded task categories</li>
+                            <li>⚖️ Workload distribution insights</li>
+                            <li>🔄 Drag & drop rescheduling</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="view-content" data-view="month">
+                    <div class="view-image">
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="Month View - Full calendar planning" style="width: 100%; height: 400px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-radius: 12px; object-fit: cover;">
+                    </div>
+                    <div class="view-description">
+                        <h3>🗓️ Month View</h3>
+                        <p>Big picture monthly planning with full calendar visualization. Ideal for long-term goal tracking and deadline management.</p>
+                        <ul>
+                            <li>📈 Full month calendar layout</li>
+                            <li>🎯 Long-term planning perspective</li>
+                            <li>📍 Deadline and event tracking</li>
+                            <li>🔍 Month-to-month navigation</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="view-content" data-view="lists">
+                    <div class="view-image">
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="Lists View - Project and category management" style="width: 100%; height: 400px; background: linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%); border-radius: 12px; object-fit: cover;">
+                    </div>
+                    <div class="view-description">
+                        <h3>📋 Lists View</h3>
+                        <p>Organize tasks by context, project, or category. Perfect for GTD-style workflow with shopping lists, projects, and reading lists.</p>
+                        <ul>
+                            <li>🛍️ Shopping & grocery lists</li>
+                            <li>📚 Project categorization</li>
+                            <li>📈 Progress tracking</li>
+                            <li>🎨 Custom list organization</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="showcase-cta">
+                <a href="./register.html" class="btn btn-primary">Experience All Views - Start Free Trial</a>
+            </div>
+        </div>
+
         <!-- Trust Signals & Testimonials -->
         <div class="testimonials">
             <h2 class="testimonials-title">Trusted by Productivity Experts</h2>
@@ -1466,5 +1723,42 @@
             <a href="./login.html">🔐 Login</a>
         </div>
     </div>
+
+    <script>
+        // Interface Showcase Tab Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.view-tab');
+            const contents = document.querySelectorAll('.view-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetView = this.getAttribute('data-view');
+                    
+                    // Remove active class from all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Hide all content
+                    contents.forEach(c => {
+                        c.classList.remove('active');
+                        c.style.display = 'none';
+                    });
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Show target content with animation
+                    const targetContent = document.querySelector(`.view-content[data-view="${targetView}"]`);
+                    if (targetContent) {
+                        setTimeout(() => {
+                            targetContent.style.display = 'grid';
+                            setTimeout(() => {
+                                targetContent.classList.add('active');
+                            }, 50);
+                        }, 50);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
