@@ -11,6 +11,45 @@ window.accessDeniedShown = false;
 let redirectTimeout = null;
 
 /**
+ * Security Functions - XSS Prevention
+ */
+
+/**
+ * Escape HTML to prevent XSS attacks
+ * @param {string} text - Text to escape
+ * @returns {string} - Escaped HTML
+ */
+function escapeHtml(text) {
+    if (typeof text !== 'string') return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
+ * Safely set innerHTML with HTML escaping
+ * @param {Element} element - Element to set content
+ * @param {string} html - HTML template with placeholders
+ * @param {Object} data - Data to substitute, will be escaped
+ */
+function safeSetInnerHTML(element, html, data = {}) {
+    // Escape all data values
+    const escapedData = {};
+    for (const [key, value] of Object.entries(data)) {
+        escapedData[key] = escapeHtml(String(value));
+    }
+    
+    // Replace placeholders in template
+    let result = html;
+    for (const [key, value] of Object.entries(escapedData)) {
+        const placeholder = new RegExp(`\\$\\{${key}\\}`, 'g');
+        result = result.replace(placeholder, value);
+    }
+    
+    element.innerHTML = result;
+}
+
+/**
  * Clear all authentication data from storage
  */
 function clearAuthData() {
@@ -373,7 +412,8 @@ function showAccessDenied(reason) {
     
     const config = messages[reason] || messages.login;
     
-    document.body.innerHTML = `
+    // SECURITY FIX: Use safe HTML template to prevent XSS
+    const template = `
         <div style="
             position: fixed;
             top: 0;
@@ -397,10 +437,10 @@ function showAccessDenied(reason) {
                 margin: 20px;
                 box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             ">
-                <div style="font-size: 48px; margin-bottom: 20px;">${config.title.split(' ')[0]}</div>
-                <h2 style="color: #2c3e50; margin: 0 0 15px 0; font-weight: 600;">${config.title.substring(2)}</h2>
-                <p style="color: #7f8c8d; margin-bottom: 30px; line-height: 1.5;">${config.message}</p>
-                <a href="${config.url}" style="
+                <div style="font-size: 48px; margin-bottom: 20px;">\${titleEmoji}</div>
+                <h2 style="color: #2c3e50; margin: 0 0 15px 0; font-weight: 600;">\${titleText}</h2>
+                <p style="color: #7f8c8d; margin-bottom: 30px; line-height: 1.5;">\${message}</p>
+                <a href="\${url}" style="
                     display: inline-block;
                     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                     color: white;
@@ -409,10 +449,19 @@ function showAccessDenied(reason) {
                     border-radius: 8px;
                     font-weight: 600;
                     transition: transform 0.2s ease;
-                " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">${config.action}</a>
+                " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">\${action}</a>
             </div>
         </div>
     `;
+    
+    // SECURITY: Safely set innerHTML with escaped data
+    safeSetInnerHTML(document.body, template, {
+        titleEmoji: config.title.split(' ')[0],
+        titleText: config.title.substring(2),
+        message: config.message,
+        url: config.url,
+        action: config.action
+    });
     
     // Auto-redirect after 5 seconds for error cases
     if (reason === 'error') {
@@ -438,10 +487,10 @@ function getUserStatusIcon(userInfo) {
 function showUserInfo(userInfo) {
     if (!userInfo || !userInfo.user) return;
     
-    // Update header user info
+    // Update header user info - SECURITY FIX: Escape user email
     const headerUserInfo = document.getElementById('headerUserInfo');
     if (headerUserInfo) {
-        headerUserInfo.innerHTML = `
+        const headerTemplate = `
             <div style="
                 font-size: 11px;
                 text-align: right;
@@ -450,15 +499,24 @@ function showUserInfo(userInfo) {
                 color: #666;
                 margin-top: 5px;
             ">
-                Welcome, ${userInfo.user.email} <a href="/upgrade-compare.html" style="color: #28a745; text-decoration: none; margin-left: 8px;" title="Upgrade to Pro">🐷</a> ${getUserStatusIcon(userInfo)} | 
+                Welcome, \${email} <a href="/upgrade-compare.html" style="color: #28a745; text-decoration: none; margin-left: 8px;" title="Upgrade to Pro">🐷</a> \${statusIcon} | 
                 <a href="#" onclick="logout()" style="color: #dc3545; text-decoration: none;">Logout</a>
             </div>
         `;
         
-        // Update sidebar user info
+        safeSetInnerHTML(headerUserInfo, headerTemplate, {
+            email: userInfo.user.email,
+            statusIcon: getUserStatusIcon(userInfo)
+        });
+        
+        // Update sidebar user info - SECURITY FIX: Escape user email
         const sidebarUserInfo = document.getElementById('sidebarUserInfo');
         if (sidebarUserInfo) {
-            sidebarUserInfo.innerHTML = `Welcome, ${userInfo.user.email} ${getUserStatusIcon(userInfo)} | <a href="#" onclick="logout()" style="color: var(--things-danger);">Logout</a>`;
+            const sidebarTemplate = `Welcome, \${email} \${statusIcon} | <a href="#" onclick="logout()" style="color: var(--things-danger);">Logout</a>`;
+            safeSetInnerHTML(sidebarUserInfo, sidebarTemplate, {
+                email: userInfo.user.email,
+                statusIcon: getUserStatusIcon(userInfo)
+            });
             sidebarUserInfo.style.display = 'block';
         }
     }
@@ -529,10 +587,10 @@ function showSubtleReminder() {
     const usageText = daysSinceInstall > 0 ? `${daysSinceInstall} days` : 'today';
     
     const reminder = document.createElement('div');
-    reminder.innerHTML = `
+    const reminderTemplate = `
         <div style="margin-bottom: 10px;">
             <div style="font-size: 16px; margin-bottom: 5px;">💎 Support HyperFiler Pro</div>
-            <div style="font-size: 12px; opacity: 0.8;">You've been using the app for ${usageText}</div>
+            <div style="font-size: 12px; opacity: 0.8;">You've been using the app for \${usageText}</div>
         </div>
         <div style="display: flex; gap: 8px;">
             <button onclick="upgradeToPro()" style="
@@ -557,6 +615,11 @@ function showSubtleReminder() {
             ">Close</button>
         </div>
     `;
+    
+    // SECURITY: Use safe innerHTML with escaped data
+    safeSetInnerHTML(reminder, reminderTemplate, {
+        usageText: usageText
+    });
     
     reminder.style.cssText = `
         position: fixed;
