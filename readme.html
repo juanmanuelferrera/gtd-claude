@@ -374,6 +374,21 @@
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
         }
+
+        /* Search highlighting */
+        .search-highlight {
+            background: linear-gradient(45deg, #ffd93d, #ff9800);
+            color: #333;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(255, 217, 61, 0.3);
+        }
+
+        .search-matched {
+            border: 2px solid #4CAF50 !important;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.3) !important;
+        }
     </style>
 </head>
 <body>
@@ -803,6 +818,7 @@
                 const contentElement = container.querySelector('.faq-content');
                 
                 if (!questionElement || !contentElement) {
+                    console.log('Missing elements in container:', container);
                     return;
                 }
                 
@@ -814,11 +830,13 @@
                 
                 if (hasMatch) {
                     container.classList.add('search-matched');
+                    container.style.display = 'block';
                     matchCount++;
                     
                     // Highlight matching text
                     try {
                         highlightText(contentElement, searchTerms);
+                        highlightText(questionElement, searchTerms);
                     } catch (e) {
                         console.log('Highlighting error:', e);
                     }
@@ -830,6 +848,7 @@
                     }
                 } else {
                     container.classList.remove('search-matched');
+                    container.style.display = query.length >= 2 ? 'none' : 'block';
                 }
             });
             
@@ -908,18 +927,28 @@
             const resultsDiv = document.getElementById('searchResults');
             const clearBtn = document.getElementById('clearSearchBtn');
             
-            searchInput.value = '';
-            resultsDiv.innerHTML = '';
-            resultsDiv.style.opacity = '0.8';
-            resultsDiv.style.fontWeight = 'normal';
-            clearBtn.style.opacity = '0';
+            if (searchInput) searchInput.value = '';
+            if (resultsDiv) {
+                resultsDiv.innerHTML = '';
+                resultsDiv.style.opacity = '0';
+                resultsDiv.style.fontWeight = 'normal';
+            }
+            if (clearBtn) clearBtn.style.opacity = '0';
+            
             clearSearchHighlights();
+            
+            // Show all FAQ containers and remove search highlighting
+            const faqContainers = document.querySelectorAll('.faq-container');
+            faqContainers.forEach(container => {
+                container.classList.remove('search-matched');
+                container.style.display = 'block';
+            });
             
             // Close all expanded FAQs
             const openAnswers = document.querySelectorAll('.faq-answer.active');
             openAnswers.forEach(answer => {
                 const question = answer.previousElementSibling;
-                question.click();
+                if (question) question.click();
             });
         }
 
