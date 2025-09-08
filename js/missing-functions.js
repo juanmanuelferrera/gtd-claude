@@ -3439,17 +3439,25 @@ function exportTasksJSON() {
 }
 window.exportTasksJSON = exportTasksJSON;
 
-// Save list sections - restored from v2.0.7 working version
+// Save list sections - restored from v2.0.7 working version with debug logging
 async function saveListSections() {
+    console.log('🚀 saveListSections called - v2.0.7 style');
+    console.log('📋 Saving', window.listSections?.length || 0, 'list sections');
     try {
         localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
+        console.log('💾 Saved to localStorage');
         
         // Set flag to prevent downloads from overwriting changes
         window.justModifiedLists = true;
+        console.log('🔒 Set justModifiedLists flag');
         
         // Upload to server
         if (typeof uploadAllLists === 'function') {
+            console.log('📤 Calling uploadAllLists...');
             await uploadAllLists();
+            console.log('✅ uploadAllLists completed');
+        } else {
+            console.error('❌ uploadAllLists function not found!');
         }
         
         // Clear flag after successful upload
@@ -3459,7 +3467,7 @@ async function saveListSections() {
         }, 5000); // 5 seconds for reliable cross-browser sync
         
     } catch (error) {
-        console.error('Error saving list sections:', error);
+        console.error('❌ Error saving list sections:', error);
     }
 }
 
