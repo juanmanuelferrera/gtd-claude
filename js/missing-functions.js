@@ -3439,8 +3439,9 @@ function exportTasksJSON() {
 }
 window.exportTasksJSON = exportTasksJSON;
 
-// Save list sections to server
+// Save list sections to server - Updated 2025-01-08 with auth fix
 async function saveListSections() {
+    console.log('🚀 saveListSections called - version 2025-01-08');
     try {
         const userId = window.getCurrentUserId ? window.getCurrentUserId() : 'demo_user';
         
