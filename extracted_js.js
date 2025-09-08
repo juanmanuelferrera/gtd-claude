@@ -933,12 +933,7 @@
             // Don't translate immediately - wait for DOM to be ready
         }
         
-        // CRITICAL: Define authentication functions FIRST before any other code
-        if (typeof window.API_BASE === 'undefined') {
-            window.API_BASE = window.location.hostname.includes('localhost') 
-                ? 'http://localhost:8787' 
-                : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
-        }
+        // API_BASE is defined by utils.js - no redeclaration needed
         // Helper function to clear authentication data
         function clearAuthData() {
             // Clear BOTH localStorage and sessionStorage to be thorough

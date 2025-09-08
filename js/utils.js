@@ -22,12 +22,10 @@ document.addEventListener('touchmove', function(e) {
     }
 }, { passive: false });
 
-// Configuration - avoid redeclaration conflicts
-if (typeof window.API_BASE === 'undefined') {
-    window.API_BASE = window.location.hostname.includes('localhost') 
-        ? 'http://localhost:8787' 
-        : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
-}
+// Configuration - Primary API_BASE definition
+window.API_BASE = window.API_BASE || (window.location.hostname.includes('localhost') 
+    ? 'http://localhost:8787' 
+    : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev');
 
 // SECURITY: Client-side input validation functions
 function sanitizeInput(input) {

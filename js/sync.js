@@ -3,12 +3,7 @@
  * Handles cloud sync for tasks, lists, and templates
  */
 
-// Ensure window.API_BASE is available - use existing or fallback
-if (typeof window.window.API_BASE === 'undefined') {
-    window.window.API_BASE = window.location.hostname.includes('localhost') 
-        ? 'http://localhost:8787' 
-        : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
-}
+// API_BASE is defined by utils.js - no redeclaration needed here
 
 // Global sync lock to prevent race conditions
 let syncPromise = null;
@@ -238,7 +233,7 @@ async function _uploadAllTasksInternal() {
     }
     
     try {
-        const response = await fetch(`${window.window.API_BASE}/tasks/sync`, {
+        const response = await fetch(`${window.API_BASE}/tasks/sync`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify({
@@ -314,7 +309,7 @@ async function _downloadAllTasksInternal() {
     try {
         console.log('📥 Downloading tasks from server...');
         
-        const response = await fetch(`${window.window.API_BASE}/tasks/${window.currentUser.user.id}`, {
+        const response = await fetch(`${window.API_BASE}/tasks/${window.currentUser.user.id}`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`,
                 'Content-Type': 'application/json'
