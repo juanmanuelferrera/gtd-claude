@@ -709,6 +709,9 @@
                     requestBody.email = customerEmail.trim();
                 }
 
+                console.log('🔄 Making payment request to:', `${API_BASE}/payments/create-checkout-session`);
+                console.log('📤 Request body:', JSON.stringify(requestBody, null, 2));
+                
                 const response = await fetch(`${API_BASE}/payments/create-checkout-session`, {
                     method: 'POST',
                     headers: {
@@ -717,8 +720,17 @@
                     body: JSON.stringify(requestBody)
                 });
 
+                console.log('📨 Response status:', response.status, response.statusText);
+                console.log('📨 Response headers:', Object.fromEntries(response.headers.entries()));
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ HTTP Error Response:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}. ${errorText}`);
+                }
+
                 const result = await response.json();
-                console.log('API Response:', JSON.stringify(result, null, 2));
+                console.log('✅ API Response:', JSON.stringify(result, null, 2));
 
                 if (result.error) {
                     throw new Error(result.error);
@@ -740,8 +752,20 @@
                 throw new Error('No valid payment URL received');
 
             } catch (error) {
-                console.error('Payment error:', error);
-                showError('Payment system error. Please try the promo codes below or contact support.');
+                console.error('❌ Payment error:', error);
+                console.error('❌ Error stack:', error.stack);
+                
+                // Show detailed error to help with debugging
+                let errorMessage = 'Payment system error: ' + error.message;
+                if (error.message.includes('HTTP 404')) {
+                    errorMessage = 'Payment endpoint not found. Please contact support.';
+                } else if (error.message.includes('HTTP 500')) {
+                    errorMessage = 'Payment server error. Please try again or contact support.';
+                } else if (error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Connection error. Please check your internet connection and try again.';
+                }
+                
+                showError(errorMessage + ' Please try the promo codes below or contact support.');
             } finally {
                 checkoutButton.disabled = false;
                 loading.style.display = 'none';
