@@ -834,3 +834,6 @@ function initializePremiumFeatures() {
         enableCollaboration();
     }
 }
+
+// Export functions for use in other modules
+window.getAuthHeaders = getAuthHeaders;

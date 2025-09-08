@@ -3449,10 +3449,13 @@ async function saveListSections() {
             return;
         }
         
-        // Get auth token
-        const authToken = localStorage.getItem('auth_token');
-        if (!authToken) {
-            console.warn('No auth token found for lists sync - saving to localStorage only');
+        // Get auth token (note: auth.js uses 'authToken' not 'auth_token')
+        const authToken = localStorage.getItem('authToken');
+        const authTokenExpiry = localStorage.getItem('authTokenExpiry');
+        
+        // Check if token exists and is not expired
+        if (!authToken || (authTokenExpiry && Date.now() >= parseInt(authTokenExpiry))) {
+            console.warn('No valid auth token found for lists sync - saving to localStorage only');
             localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
             return;
         }
@@ -3462,12 +3465,15 @@ async function saveListSections() {
             ? 'http://localhost:8787' 
             : 'https://hyperfiler-fresh-api.joanmanelferrera-400.workers.dev');
         
+        // Use getAuthHeaders if available, otherwise use direct token
+        const headers = window.getAuthHeaders ? window.getAuthHeaders() : {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+        };
+        
         const response = await fetch(`${API_BASE}/lists/sync`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
+            headers: headers,
             credentials: 'include',
             body: JSON.stringify({
                 userId: userId,
