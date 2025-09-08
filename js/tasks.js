@@ -455,10 +455,7 @@ function duplicateTask(taskId, event) {
     
     // Sync to cloud in background
     if (typeof uploadAllTasks === 'function') {
-        uploadAllTasks([{
-            type: 'create',
-            task: cleanTaskForStorage(newTask)
-        }]).catch(error => {
+        uploadAllTasks().catch(error => {
             console.error('Background sync failed for duplicated task:', error);
         });
     }

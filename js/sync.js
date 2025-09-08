@@ -546,10 +546,12 @@ async function performComprehensiveSync() {
             // Upload local changes first
             await _uploadAllTasksInternal();
             await _uploadAllListsInternal();
+            await _uploadAllTemplatesInternal();
             
             // Then download latest data
             await _downloadAllTasksInternal();
             await _downloadAllListsInternal();
+            await _downloadAllTemplatesInternal();
             
             console.log('✅ Comprehensive sync completed successfully');
         } catch (error) {
@@ -560,9 +562,9 @@ async function performComprehensiveSync() {
 }
 
 /**
- * Upload all templates to the server
+ * Upload all templates to the server (internal implementation)  
  */
-async function uploadAllTemplates() {
+async function _uploadAllTemplatesInternal() {
     if (!window.currentUser?.user?.id) return;
     
     try {
@@ -588,9 +590,16 @@ async function uploadAllTemplates() {
 }
 
 /**
- * Download all templates from server
+ * Upload all templates to the server (with sync lock)
  */
-async function downloadAllTemplates() {
+async function uploadAllTemplates() {
+    return withSyncLock(_uploadAllTemplatesInternal);
+}
+
+/**
+ * Download all templates from server (internal implementation)
+ */
+async function _downloadAllTemplatesInternal() {
     if (!window.currentUser?.user?.id) return;
     
     // MANDATORY REFRESH: Override protection for stale browser
@@ -649,6 +658,34 @@ async function downloadAllTemplates() {
     } catch (error) {
         console.log('📥 TEMPLATES SYNC: Download error:', error);
     }
+}
+
+/**
+ * Download all templates from server (with sync lock)
+ */
+async function downloadAllTemplates() {
+    return withSyncLock(_downloadAllTemplatesInternal);
+}
+
+/**
+ * Perform stale browser recovery - download all data without uploads
+ * Uses sync lock to prevent race conditions
+ */
+async function performStaleBrowserRecovery() {
+    return withSyncLock(async () => {
+        console.log('🔄 Starting stale browser recovery...');
+        try {
+            // Only download for stale browser recovery - no uploads
+            await _downloadAllTasksInternal();
+            await _downloadAllListsInternal();
+            await _downloadAllTemplatesInternal();
+            
+            console.log('✅ Stale browser recovery completed successfully');
+        } catch (error) {
+            console.error('❌ Stale browser recovery failed:', error);
+            throw error;
+        }
+    });
 }
 
 /**

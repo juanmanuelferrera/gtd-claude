@@ -263,9 +263,15 @@ async function checkAuthentication() {
                     console.log('📥 STALE BROWSER: Starting forced download...');
                     window.forceMandatoryRefresh = true; // Override all protection flags
                     
-                    if (typeof downloadAllTasks === 'function') await downloadAllTasks();
-                    if (typeof downloadAllLists === 'function') await downloadAllLists();
-                    if (typeof downloadAllTemplates === 'function') await downloadAllTemplates();
+                    // Use the new stale browser recovery function for better sync coordination
+                    if (typeof performStaleBrowserRecovery === 'function') {
+                        await performStaleBrowserRecovery();
+                    } else {
+                        // Fallback to individual downloads if function not available
+                        if (typeof downloadAllTasks === 'function') await downloadAllTasks();
+                        if (typeof downloadAllLists === 'function') await downloadAllLists();
+                        if (typeof downloadAllTemplates === 'function') await downloadAllTemplates();
+                    }
                     
                     window.forceMandatoryRefresh = false;
                     window.staleBrowserDetected = false;
