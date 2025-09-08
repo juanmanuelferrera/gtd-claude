@@ -307,8 +307,7 @@ async function checkAuthentication() {
         
         // Detect stale browser session
         if (!lastSyncTime || parseInt(lastSyncTime) < oneDayAgo) {
-            console.warn('🚨 STALE BROWSER DETECTED: Last sync was more than 24 hours ago or never');
-            console.warn('📥 Forcing download from cloud to prevent overwriting fresh data');
+            console.warn('Stale browser detected - refreshing data from server');
             
             // Set flags to prevent upload until download completes
             window.staleBrowserDetected = true;
@@ -320,13 +319,10 @@ async function checkAuthentication() {
             // Force immediate download from cloud
             setTimeout(async () => {
                 try {
-                    // 🔒 CRITICAL: Check if backup restore is in progress
+                    // Check if backup restore is in progress
                     if (window.backupRestoreInProgress || window.justRestoredBackup) {
-                        console.log('🔒 STALE BROWSER: Download cancelled - backup restore in progress');
                         return;
                     }
-                    
-                    console.log('📥 STALE BROWSER: Starting forced download...');
                     window.forceMandatoryRefresh = true; // Override all protection flags
                     
                     // Use the new stale browser recovery function for better sync coordination
@@ -342,9 +338,8 @@ async function checkAuthentication() {
                     window.forceMandatoryRefresh = false;
                     window.staleBrowserDetected = false;
                     localStorage.setItem('lastSyncTime', currentTime.toString());
-                    console.log('✅ STALE BROWSER: Forced download completed');
                 } catch (error) {
-                    console.error('❌ STALE BROWSER: Forced download failed:', error);
+                    console.error('Stale browser recovery failed:', error);
                 }
             }, 1000); // Small delay to let UI load
         }
