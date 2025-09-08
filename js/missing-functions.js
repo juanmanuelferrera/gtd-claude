@@ -3453,12 +3453,17 @@ async function saveListSections() {
         const authToken = localStorage.getItem('authToken');
         const authTokenExpiry = localStorage.getItem('authTokenExpiry');
         
+        console.log('🔍 Lists sync debug - authToken:', !!authToken, 'expiry:', authTokenExpiry);
+        console.log('🔍 Lists sync debug - current time:', Date.now(), 'expiry time:', authTokenExpiry ? parseInt(authTokenExpiry) : 'none');
+        
         // Check if token exists and is not expired
         if (!authToken || (authTokenExpiry && Date.now() >= parseInt(authTokenExpiry))) {
-            console.warn('No valid auth token found for lists sync - saving to localStorage only');
+            console.warn('❌ No valid auth token found for lists sync - saving to localStorage only');
             localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
             return;
         }
+        
+        console.log('✅ Valid auth token found for lists sync - syncing to server...');
         
         // Define API_BASE if not already defined
         const API_BASE = window.API_BASE || (window.location.hostname.includes('localhost') 
