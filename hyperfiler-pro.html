@@ -6116,13 +6116,70 @@
                 
                 container.innerHTML = `
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="var sel=this.value; document.querySelectorAll('.time-slot-task,[data-task-id]').forEach(function(el){if(!sel){el.style.display='block'}else{el.style.display=el.textContent.toLowerCase().includes(sel.toLowerCase())?'block':'none'}});">
+                        <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="filterTimeSlotsByPattern(this.value);">
                             ` + optionsHtml + `
                         </select>
-                        <button onclick="document.getElementById('todayMobileFilter').value=''; document.querySelectorAll('.time-slot-task,[data-task-id]').forEach(function(el){el.style.display='block'});" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">Clear All</button>
+                        <button onclick="clearPatternFilter();" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">Clear All</button>
                     </div>
                 `;
             }
+        }
+        
+        // Pattern filtering functions for time slots
+        function filterTimeSlotsByPattern(selectedPattern) {
+            if (!selectedPattern) {
+                clearPatternFilter();
+                return;
+            }
+            
+            // Find all time slot containers (they contain time slot headers and tasks)
+            const timeSlots = document.querySelectorAll('.time-slot, [class*="time-slot"], .schedule-section');
+            
+            timeSlots.forEach(function(timeSlot) {
+                // Check if this time slot contains any tasks with the selected pattern
+                const tasks = timeSlot.querySelectorAll('.time-slot-task, [data-task-id], .task');
+                let hasMatchingTask = false;
+                
+                tasks.forEach(function(task) {
+                    const taskText = task.textContent.toLowerCase();
+                    if (taskText.includes(selectedPattern.toLowerCase())) {
+                        hasMatchingTask = true;
+                        task.style.display = 'block';
+                    } else {
+                        task.style.display = 'none';
+                    }
+                });
+                
+                // Show/hide the entire time slot based on whether it has matching tasks
+                if (hasMatchingTask) {
+                    timeSlot.style.display = 'block';
+                } else {
+                    timeSlot.style.display = 'none';
+                }
+            });
+            
+            // Also handle standalone tasks not in time slots
+            const standaloneTasks = document.querySelectorAll('.time-slot-task:not(.time-slot .time-slot-task), [data-task-id]:not(.time-slot [data-task-id])');
+            standaloneTasks.forEach(function(task) {
+                const taskText = task.textContent.toLowerCase();
+                task.style.display = taskText.includes(selectedPattern.toLowerCase()) ? 'block' : 'none';
+            });
+        }
+        
+        function clearPatternFilter() {
+            document.getElementById('todayMobileFilter').value = '';
+            
+            // Show all time slots
+            const timeSlots = document.querySelectorAll('.time-slot, [class*="time-slot"], .schedule-section');
+            timeSlots.forEach(function(timeSlot) {
+                timeSlot.style.display = 'block';
+            });
+            
+            // Show all tasks
+            const allTasks = document.querySelectorAll('.time-slot-task, [data-task-id], .task');
+            allTasks.forEach(function(task) {
+                task.style.display = 'block';
+            });
         }
         
         // Initialize mobile filter
