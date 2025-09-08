@@ -1148,7 +1148,6 @@ function renderTodayTemplateFilters(todayTasks) {
  * Basic renderTodayView function
  */
 function renderTodayView() {
-    console.log('📱 MOBILE DEBUG: renderTodayView called, tasks.length:', tasks.length);
     
     // Update the date display
     updateCurrentTodayDisplay();
@@ -1193,7 +1192,6 @@ function renderTodayView() {
     // Render template filter buttons first
     renderTodayTemplateFilters(todayTasks);
     
-    console.log('DEBUG: todayTasks after filter:', todayTasks.length, 'activeTodayTemplateFilter:', window.activeTodayTemplateFilter);
     
     if (todayTasks.length === 0) {
         const message = window.activeTodayTemplateFilter 
@@ -1333,9 +1331,8 @@ function renderWeekView() {
     
     if (!grid || !weekTitle) return;
     
-    // DEBUG: Clear any active template filter to test
+    // Clear any active template filter
     window.activeWeekTemplateFilter = null;
-    console.log('DEBUG: Cleared week template filter');
     
     // Update the week display
     updateCurrentWeekDisplay();
@@ -1347,16 +1344,13 @@ function renderWeekView() {
     weekEnd.setDate(weekStart.getDate() + 6);
     
     const weekTasks = [];
-    console.log('DEBUG: Week view - Total tasks available:', (window.tasks || []).length);
     for (let i = 0; i < 7; i++) {
         const date = new Date(weekStart);
         date.setDate(weekStart.getDate() + i);
         const dateStr = getLocalDateString(date);
         const dayTasks = (window.tasks || []).filter(task => task.dueDate === dateStr && task.status !== 'deleted');
-        console.log(`DEBUG: Week day ${i} (${dateStr}): found ${dayTasks.length} tasks`);
         weekTasks.push(...dayTasks);
     }
-    console.log('DEBUG: Week view - Total week tasks found:', weekTasks.length);
     
     // Render template filter buttons
     renderWeekTemplateFilters(weekTasks);
@@ -1417,16 +1411,13 @@ function renderWeekView() {
         let dayTasks = typeof getTasksForDate === 'function' ? getTasksForDate(dateStr) : 
                         (window.tasks || []).filter(task => task.dueDate === dateStr && task.status !== 'deleted');
         
-        console.log(`DEBUG: Week day rendering ${dateStr}: found ${dayTasks.length} tasks before filter`);
         
         // Apply template filter if active
         if (window.activeWeekTemplateFilter) {
-            console.log(`DEBUG: Active week template filter: "${window.activeWeekTemplateFilter}"`);
             dayTasks = dayTasks.filter(task => {
                 const text = `${task.title || ''} ${task.notes || ''}`;
                 return text.includes(window.activeWeekTemplateFilter);
             });
-            console.log(`DEBUG: Week day ${dateStr}: after template filter ${dayTasks.length} tasks`);
         }
         
         if (dayTasks.length > 0) {

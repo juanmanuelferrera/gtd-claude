@@ -5991,17 +5991,12 @@
         }
     </style>
     
-    <!-- Force mobile filter update multiple times -->
+    <!-- Mobile filter update -->
     <script>
         function forceMobileUpdate() {
             if (window.innerWidth <= 768) {
-                console.log('🔄 Attempting mobile filter update...');
-                
                 const container = document.getElementById('todayTemplateFiltersMobile');
-                if (!container) {
-                    console.log('❌ Mobile container not found');
-                    return;
-                }
+                if (!container) return;
                 
                 // Scan actual tasks for templates
                 let templates = new Set();
@@ -6037,11 +6032,10 @@
                         <button onclick="document.getElementById('todayMobileFilter').value=''; document.querySelectorAll('.time-slot-task,[data-task-id]').forEach(function(el){el.style.display='block'});" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">Clear All</button>
                     </div>
                 `;
-                console.log('✅ Force updated mobile filter');
             }
         }
         
-        // Try multiple times
+        // Initialize mobile filter
         setTimeout(forceMobileUpdate, 1000);
         setTimeout(forceMobileUpdate, 3000);
         setTimeout(forceMobileUpdate, 5000);

@@ -2359,9 +2359,6 @@ async function deleteList(sectionId, listId) {
 
 // Open list modal to view/edit list items
 function openListModal(sectionId, listId) {
-    console.log('🔍 CLICK DEBUG: Opening list modal for:', sectionId, listId);
-    console.log('🔍 CLICK DEBUG: listSections available:', !!window.listSections);
-    console.log('🔍 CLICK DEBUG: listSections content:', window.listSections);
     
     const section = window.listSections?.find(s => s.id == sectionId);
     if (!section) {
