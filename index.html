@@ -1561,6 +1561,169 @@
                 padding: 20px;
             }
         }
+        /* Quick Add Modal Styles */
+        .quick-add-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .quick-add-modal.active {
+            display: flex;
+            opacity: 1;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-add-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        .quick-add-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .quick-add-header {
+            margin-bottom: 20px;
+        }
+
+        .quick-add-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 8px;
+        }
+
+        .quick-add-hint {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .quick-add-input-container {
+            margin-bottom: 20px;
+        }
+
+        .quick-add-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1.1em;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .quick-add-input:focus {
+            border-color: #2563eb;
+        }
+
+        .quick-add-suggestions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .suggestion-tag {
+            background: #f3f4f6;
+            color: #6b7280;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestion-tag:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .quick-add-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .quick-add-shortcuts {
+            font-size: 0.8em;
+            color: #6b7280;
+        }
+
+        .quick-add-shortcuts kbd {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75em;
+        }
+
+        .quick-add-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .quick-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .quick-btn-cancel:hover {
+            background: #e5e7eb;
+        }
+
+        .quick-btn-save {
+            background: #2563eb;
+            color: white;
+        }
+
+        .quick-btn-save:hover {
+            background: #1d4ed8;
+        }
+
+        .quick-add-demo-note {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 8px;
+            font-size: 0.85em;
+            color: #2563eb;
+        }
     </style>
 </head>
 <body>
@@ -2167,11 +2330,6 @@
                         <div class="stat-number">1.2MB</div>
                         <div class="stat-label">Bundle Size</div>
                         <div class="stat-subtitle">3x smaller per feature</div>
-                    </div>
-                    <div class="stat-card best">
-                        <div class="stat-number">0.526</div>
-                        <div class="stat-label">Efficiency Score</div>
-                        <div class="stat-subtitle">2x more efficient</div>
                     </div>
                 </div>
                 <p class="efficiency-note">
