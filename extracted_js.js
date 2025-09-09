@@ -9,6 +9,15 @@
             console.error('❌ UNHANDLED PROMISE REJECTION:', e.reason);
         });
         
+        // Utility function to get local date string consistently (avoids timezone issues)
+        // Defined early to avoid hoisting issues
+        function getLocalDateString(date = new Date()) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
         // Prevent mobile bounce/pull-to-refresh
         document.addEventListener('touchmove', function(e) {
             if (e.touches.length > 1) return; // Allow multi-touch gestures
@@ -13322,7 +13331,9 @@
             for (let i = 0; i < 42; i++) {
                 const date = new Date(startDate);
                 date.setDate(startDate.getDate() + i);
-                const dateStr = getLocalDateString(date);
+                const dateStr = (typeof getLocalDateString === 'function') 
+                    ? getLocalDateString(date)
+                    : date.toISOString().split('T')[0]; // Fallback if function not yet defined
                 
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day';
@@ -15983,13 +15994,6 @@
         function formatTime(timeStr) {
             if (!timeStr) return '';
             return timeStr; // Display in 24-hour format
-        }
-        // Utility function to get local date string consistently (avoids timezone issues)
-        function getLocalDateString(date = new Date()) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
         }
         // Initialize natural language processing event listeners
         function initializeNaturalLanguageProcessing() {
