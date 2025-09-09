@@ -2576,50 +2576,8 @@ async function deleteTemplate(template) {
 }
 
 // Open Add Task Modal
-function openAddTaskModal(dateStr) {
-    // Clear the form for new task
-    const titleInput = document.getElementById('editTaskTitle');
-    const notesInput = document.getElementById('editTaskNotes');
-    const eventCheckbox = document.getElementById('editTaskIsEvent');
-    
-    if (titleInput) titleInput.value = '';
-    if (notesInput) notesInput.value = '';
-    if (eventCheckbox) eventCheckbox.checked = false;
-    
-    // Set the date
-    const now = new Date();
-    const currentDate = now.toISOString().split('T')[0];
-    const dateToUse = dateStr || currentDate;
-    
-    const dateInput = document.getElementById('editTaskDate');
-    const timeInput = document.getElementById('editTaskTime');
-    
-    if (dateInput) dateInput.value = dateToUse;
-    if (timeInput) timeInput.value = '';
-    
-    // Change modal title
-    const modalTitle = document.querySelector('#taskModal h3');
-    if (modalTitle) {
-        modalTitle.textContent = '➕ Add New Task';
-    }
-    
-    // Set global variable to indicate we're adding, not editing
-    window.currentEditTaskId = null;
-    
-    // Render template buttons
-    renderTemplateButtons();
-    
-    // Show the modal
-    const modal = document.getElementById('taskModal');
-    if (modal) {
-        modal.style.display = 'block';
-        
-        // Focus on title input
-        setTimeout(() => {
-            if (titleInput) titleInput.focus();
-        }, 100);
-    }
-}
+// Note: openAddTaskModal function consolidated - now using the better version from tasks.js
+// This removes duplicate code and ensures consistent behavior
 
 // Date/Time Modal Functions
 function populateDateTimeModal(currentDate, currentTime) {
