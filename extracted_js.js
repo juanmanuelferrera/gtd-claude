@@ -1,5 +1,4 @@
 
-(function() {
         console.log('🚀 HyperFiler Pro v3.5 - Starting initialization...');
         window.addEventListener('error', function(e) {
             console.error('❌ UNCAUGHT ERROR:', e.message, 'at line', e.lineno, 'column', e.colno);
@@ -26096,8 +26095,6 @@
         });
     
 
-    // Wrap remaining code in proper scope
-    document.addEventListener('DOMContentLoaded', function() {
         // Weekly Support Reminder System
         function checkSupportReminder() {
             try {
@@ -26204,5 +26201,28 @@
         window.setQuickTime = setQuickTime;
         window.setQuickDate = setQuickDate;
         window.saveIOSDateTime = saveIOSDateTime;
-    });
-})();
+        
+        // Define missing initializeUI function
+        function initializeUI() {
+            console.log('🎹 initializeUI called - setting up UI components');
+            
+            // Initialize keyboard navigation if the function exists
+            if (typeof initializeKeyboardNavigation === 'function') {
+                initializeKeyboardNavigation();
+                console.log('⌨️ Keyboard navigation initialized');
+            } else {
+                console.warn('⚠️ initializeKeyboardNavigation function not found');
+            }
+            
+            // Initialize mobile components if needed
+            if (typeof setupMobileNavGestures === 'function') {
+                setupMobileNavGestures();
+                console.log('📱 Mobile navigation setup completed');
+            }
+            
+            // Set up any other UI initialization
+            console.log('✅ UI initialization complete');
+        }
+        
+        // Export initializeUI globally
+        window.initializeUI = initializeUI;
