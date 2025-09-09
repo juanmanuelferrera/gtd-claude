@@ -5541,7 +5541,11 @@
         // Hide modal when clicking outside
         document.addEventListener('click', function(event) {
             if (!event.target.closest('#mobileTaskModal')) {
-                hideMobileTaskModal();
+                if (typeof hideMobileTaskModal === 'function') {
+                    hideMobileTaskModal();
+                } else {
+                    console.warn('⚠️ hideMobileTaskModal not yet defined');
+                }
             }
         });
         // Hide mobile more menu when clicking outside
@@ -9314,7 +9318,11 @@
                     console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
                 }
             } else if (viewName === 'week') {
-                renderWeekView();
+                if (typeof renderWeekView === 'function') {
+                    renderWeekView();
+                } else {
+                    console.warn('⚠️ renderWeekView not yet defined');
+                }
                 if (typeof highlightCurrentDay === 'function') {
                 highlightCurrentDay();
             } else {
@@ -9409,7 +9417,11 @@
                     console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
                 }
             } else if (currentView === 'week') {
-                renderWeekView();
+                if (typeof renderWeekView === 'function') {
+                    renderWeekView();
+                } else {
+                    console.warn('⚠️ renderWeekView not yet defined');
+                }
                 if (typeof highlightCurrentDay === 'function') {
                 highlightCurrentDay();
             } else {
