@@ -4127,9 +4127,21 @@
                 console.log('📱 MOBILE DEBUG: showView completed, currentView:', currentView);
                 
                 // Force update all displays immediately to prevent "Loading..." states
-                updateCurrentTodayDisplay();
-                updateCurrentWeekDisplay();
-                updateCurrentMonthDisplay();
+                if (typeof updateCurrentTodayDisplay === 'function') {
+                    updateCurrentTodayDisplay();
+                } else {
+                    console.warn('⚠️ updateCurrentTodayDisplay not yet defined');
+                }
+                if (typeof updateCurrentWeekDisplay === 'function') {
+                    updateCurrentWeekDisplay();
+                } else {
+                    console.warn('⚠️ updateCurrentWeekDisplay not yet defined');
+                }
+                if (typeof updateCurrentMonthDisplay === 'function') {
+                    updateCurrentMonthDisplay();
+                } else {
+                    console.warn('⚠️ updateCurrentMonthDisplay not yet defined');
+                }
                 
                 // Defer non-critical backup operations
                 setTimeout(() => {
@@ -4211,10 +4223,18 @@
                 }, 2000);
                 
                 // Initialize natural language parsing for task input
-                initializeNaturalLanguageProcessing();
+                if (typeof initializeNaturalLanguageProcessing === 'function') {
+                    initializeNaturalLanguageProcessing();
+                } else {
+                    console.warn('⚠️ initializeNaturalLanguageProcessing not yet defined');
+                }
                 
                 // Initialize keyboard-only mode from saved state
-                initializeKeyboardOnlyMode();
+                if (typeof initializeKeyboardOnlyMode === 'function') {
+                    initializeKeyboardOnlyMode();
+                } else {
+                    console.warn('⚠️ initializeKeyboardOnlyMode not yet defined');
+                }
                 
             } catch (error) {
                 console.error('Error during app initialization:', error);
