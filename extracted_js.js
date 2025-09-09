@@ -4947,8 +4947,8 @@
             tomorrow.setDate(tomorrow.getDate() + 1);
             
             // Format dates for display
-            const todayStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(today);
-            const tomorrowStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(tomorrow);
+            const todayStr = getLocalDateString(today);
+            const tomorrowStr = getLocalDateString(tomorrow);
             
             modalButtons.innerHTML = `
                 <div style="background: #2c2c2e; width: 100%; border-radius: 12px; overflow: hidden; max-width: 280px; margin: 0 auto;">
@@ -5000,9 +5000,9 @@
             
             // Generate 5 weeks (35 days) for more compact display
             for (let i = 0; i < 35; i++) {
-                const dateStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(date);
+                const dateStr = getLocalDateString(date);
                 const isCurrentMonth = date.getMonth() === currentDate.getMonth();
-                const isToday = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(date) === (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(today);
+                const isToday = getLocalDateString(date) === getLocalDateString(today);
                 const dayNumber = date.getDate();
                 
                 const style = `
@@ -6387,7 +6387,7 @@
                 if (isNewDevice && syncPeriod !== 'all') {
                     const cutoffDate = new Date();
                     cutoffDate.setDate(cutoffDate.getDate() - parseInt(syncPeriod));
-                    const cutoffDateString = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(cutoffDate);
+                    const cutoffDateString = getLocalDateString(cutoffDate);
                     apiUrl += `?since=${cutoffDateString}`;
                     console.log(`📱 NEW DEVICE: Only syncing tasks from ${cutoffDateString} onwards (${syncPeriod} days)`);
                 } else if (isNewDevice) {
@@ -9006,7 +9006,7 @@
                     break;
             }
             
-            selectedDate = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(targetDate);
+            selectedDate = getLocalDateString(targetDate);
         }
         
         function selectQuickTime(time) {
@@ -9043,7 +9043,7 @@
                     date.setDate(today.getDate() + i);
                     const option = document.createElement('option');
                     option.value = date.getDate();
-                    option.setAttribute('data-full-date', (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(date));
+                    option.setAttribute('data-full-date', getLocalDateString(date));
                     
                     if (i === 0) option.textContent = `${date.getDate()} (Today)`;
                     else if (i === 1) option.textContent = `${date.getDate()} (Tomorrow)`;
@@ -9075,7 +9075,7 @@
                     date.setDate(today.getDate() + i);
                     const option = document.createElement('option');
                     option.value = date.getDate();
-                    option.setAttribute('data-full-date', (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(date));
+                    option.setAttribute('data-full-date', getLocalDateString(date));
                     
                     if (i === 0) option.textContent = `${date.getDate()} (Today)`;
                     else if (i === 1) option.textContent = `${date.getDate()} (Tomorrow)`;
@@ -9473,7 +9473,7 @@
             });
             // Process each series to get stable representative data
             const seriesList = Object.values(seriesMap);
-            const today = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])();
+            const today = getLocalDateString();
             
             seriesList.forEach(series => {
                 // Sort tasks to get consistent representative
@@ -9689,7 +9689,7 @@
                 groupedByTitle[title].push(task);
             });
             const representativeTasks = [];
-            const today = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])();
+            const today = getLocalDateString();
             
             Object.keys(groupedByTitle).forEach(title => {
                 const tasksInGroup = groupedByTitle[title];
@@ -9777,7 +9777,7 @@
             if (!searchInputElement) return;
             
             const searchTerm = searchInputElement.value.toLowerCase();
-            const todayDate = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(currentTodayDate);
+            const todayDate = getLocalDateString(currentTodayDate);
             
             if (!searchTerm.trim()) {
                 // If search is empty, show all tasks for today
@@ -9806,7 +9806,7 @@
             const container = document.getElementById('todaySchedule');
             if (!container) return;
             
-            const todayDate = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(currentTodayDate);
+            const todayDate = getLocalDateString(currentTodayDate);
             const todayTasks = tasksToShow.filter(task => task.dueDate === todayDate);
             
             if (todayTasks.length === 0) {
@@ -10037,7 +10037,7 @@
             
             // Get today's tasks using the same logic as other Today functions
             const today = new Date(currentTodayDate);
-            const todayStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(today);
+            const todayStr = getLocalDateString(today);
             const originalTasks = [...tasks];
             const tasksToday = originalTasks.filter(task => task.dueDate === todayStr);
             
@@ -10583,7 +10583,7 @@
                 return;
             }
             // Determine which view to switch to based on task date
-            const today = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])();
+            const today = getLocalDateString();
             const taskDate = task.dueDate;
             
             if (!taskDate) {
@@ -10708,7 +10708,7 @@
             showRepeatSeriesModal(taskTitle, allTasksWithTitle, representativeTask);
         }
         function showRepeatSeriesModal(title, seriesTasks, representativeTask) {
-            const today = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])();
+            const today = getLocalDateString();
             const repeatType = representativeTask.repeat || representativeTask.repeatType || 'Unknown';
             
             // Calculate stats
@@ -10828,7 +10828,7 @@
                 // Add a paused flag to all tasks in the series
                 allTasksWithTitle.forEach(task => {
                     task.repeatPaused = true;
-                    task.repeatPausedDate = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])();
+                    task.repeatPausedDate = getLocalDateString();
                 });
                 
                 alert(`✅ Series "${taskTitle}" has been paused.\n\nNo new instances will be generated until you resume it.`);
@@ -10862,7 +10862,7 @@
             if (!representativeTask) return;
             
             const taskTitle = representativeTask.title;
-            const today = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])();
+            const today = getLocalDateString();
             
             // Find the next pending instance
             const allTasksWithTitle = tasks.filter(task => task.title === taskTitle);
@@ -13205,7 +13205,7 @@
         }
         // Render individual task card
         function renderTaskCard(task) {
-            const isOverdue = window.isTaskOverdue ? window.isTaskOverdue(task) : (task.dueDate && task.dueDate < (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])() && task.status === 'pending');
+            const isOverdue = window.isTaskOverdue ? window.isTaskOverdue(task) : (task.dueDate && task.dueDate < getLocalDateString() && task.status === 'pending');
             const isEvent = task.isEvent;
             let cardClass = `task-card ${task.status}`;
             
@@ -13315,14 +13315,14 @@
             
             const today = new Date();
             const todayStr = (typeof getLocalDateString === 'function') 
-                ? (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(today)
+                ? getLocalDateString(today)
                 : today.toISOString().split('T')[0]; // Fallback to basic date string
             
             // Generate calendar days
             for (let i = 0; i < 42; i++) {
                 const date = new Date(startDate);
                 date.setDate(startDate.getDate() + i);
-                const dateStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(date);
+                const dateStr = getLocalDateString(date);
                 
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day';
@@ -13457,7 +13457,7 @@
             renderMonthTemplateFilters(monthTasks);
             
             // Ensure the current day has the day cursor, or find first day with tasks
-            const currentDateISO = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(currentCalendarDate);
+            const currentDateISO = getLocalDateString(currentCalendarDate);
             let currentDayElement = grid.querySelector(`.calendar-day[data-date="${currentDateISO}"]`);
             
             // If current day exists and has tasks, use it
@@ -13530,7 +13530,7 @@
             const regularTasks = monthTasks.filter(t => !t.isEvent);
             const completed = monthTasks.filter(t => t.status === 'completed');
             const overdue = monthTasks.filter(t => {
-                const today = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(new Date());
+                const today = getLocalDateString(new Date());
                 return t.dueDate < today && t.status === 'pending';
             });
             
@@ -13618,7 +13618,7 @@
             grid.innerHTML = '';
             
             const today = new Date();
-            const todayStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(today);
+            const todayStr = getLocalDateString(today);
             
             // Generate 7 days starting from Monday
             const dayNames = [
@@ -13634,7 +13634,7 @@
             for (let i = 0; i < 7; i++) {
                 const date = new Date(monday);
                 date.setDate(monday.getDate() + i);
-                const dateStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(date);
+                const dateStr = getLocalDateString(date);
                 
                 const dayElement = document.createElement('div');
                 dayElement.className = 'week-day';
@@ -13766,7 +13766,7 @@
             renderWeekTemplateFilters(weekTasks);
             
             // Ensure the current day has the day cursor, or find first day with tasks
-            const currentDateISO = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(currentWeekDate);
+            const currentDateISO = getLocalDateString(currentWeekDate);
             let currentDayElement = grid.querySelector(`.week-day[data-date="${currentDateISO}"]`);
             
             // If current day exists and has tasks, use it
@@ -13810,7 +13810,7 @@
             const regularTasks = weekTasks.filter(t => !t.isEvent);
             const completed = weekTasks.filter(t => t.status === 'completed');
             const overdue = weekTasks.filter(t => {
-                const today = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(new Date());
+                const today = getLocalDateString(new Date());
                 return t.dueDate < today && t.status === 'pending';
             });
             
@@ -13903,7 +13903,7 @@
                 searchDate.setDate(searchDate.getDate() - 1);
                 maxDays--;
                 
-                const searchDateString = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(searchDate);
+                const searchDateString = getLocalDateString(searchDate);
                 const tasksForDate = tasks.filter(task => task.dueDate === searchDateString);
                 
                 if (tasksForDate.length > 0) {
@@ -13926,7 +13926,7 @@
             searchDate = new Date(currentTodayDate);
             searchDate.setDate(searchDate.getDate() - 1);
             currentTodayDate = searchDate;
-            console.log('⬅️ No previous day with tasks found, going to previous day:', (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(searchDate));
+            console.log('⬅️ No previous day with tasks found, going to previous day:', getLocalDateString(searchDate));
             if (typeof renderTodayView === 'function') {
                 renderTodayView();
             } else {
@@ -13943,7 +13943,7 @@
                 searchDate.setDate(searchDate.getDate() + 1);
                 maxDays--;
                 
-                const searchDateString = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(searchDate);
+                const searchDateString = getLocalDateString(searchDate);
                 const tasksForDate = tasks.filter(task => task.dueDate === searchDateString);
                 
                 if (tasksForDate.length > 0) {
@@ -13966,7 +13966,7 @@
             searchDate = new Date(currentTodayDate);
             searchDate.setDate(searchDate.getDate() + 1);
             currentTodayDate = searchDate;
-            console.log('➡️ No next day with tasks found, going to next day:', (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(searchDate));
+            console.log('➡️ No next day with tasks found, going to next day:', getLocalDateString(searchDate));
             if (typeof renderTodayView === 'function') {
                 renderTodayView();
             } else {
@@ -13996,7 +13996,7 @@
                 
                 if (weekTasks.length > 0) {
                     currentWeekDate = new Date(searchDate);
-                    console.log('⬅️ Found previous week with tasks:', (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(monday), `(${weekTasks.length} tasks)`);
+                    console.log('⬅️ Found previous week with tasks:', getLocalDateString(monday), `(${weekTasks.length} tasks)`);
                     renderWeekView();
                     return;
                 }
@@ -14027,7 +14027,7 @@
                 
                 if (weekTasks.length > 0) {
                     currentWeekDate = new Date(searchDate);
-                    console.log('➡️ Found next week with tasks:', (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(monday), `(${weekTasks.length} tasks)`);
+                    console.log('➡️ Found next week with tasks:', getLocalDateString(monday), `(${weekTasks.length} tasks)`);
                     renderWeekView();
                     return;
                 }
@@ -14133,8 +14133,8 @@
             }
             
             // Check if we're viewing the actual current day  
-            const todayStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(currentTodayDate);
-            const actualTodayStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(new Date());
+            const todayStr = getLocalDateString(currentTodayDate);
+            const actualTodayStr = getLocalDateString(new Date());
             const isActualToday = todayStr === actualTodayStr;
             
             // Apply different styling based on whether it's the actual current day
@@ -14394,7 +14394,7 @@
                 }
                 
                 // Update task
-                task.dueDate = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(newDate);
+                task.dueDate = getLocalDateString(newDate);
                 task.updatedAt = new Date().toISOString();
                 
                 // **EXACT LISTS PATTERN:**
@@ -14621,7 +14621,7 @@
                 
                 currentDateTime.setHours(currentDateTime.getHours() + hours);
                 
-                task.dueDate = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(currentDateTime);
+                task.dueDate = getLocalDateString(currentDateTime);
                 task.dueTime = currentDateTime.toTimeString().slice(0, 5);
                 task.updatedAt = new Date().toISOString();
                 
@@ -14838,7 +14838,7 @@
             }
             
             // Set date and time inputs - default to today if no date set
-            const defaultDate = task.dueDate || (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(new Date());
+            const defaultDate = task.dueDate || getLocalDateString(new Date());
             document.getElementById('editTaskDateOnly').value = defaultDate;
             document.getElementById('editTaskTimeOnly').value = task.dueTime || '';
             
@@ -15249,7 +15249,7 @@
                                 title: title,
                                 notes: notes,
                                 images: images,
-                                dueDate: (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(currentDate),
+                                dueDate: getLocalDateString(currentDate),
                                 dueTime: dueTime,
                                 isEvent: isEvent,
                                 status: 'pending',
@@ -15931,11 +15931,11 @@
             const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
             const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
             
-            if (dateStr === (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(today)) {
+            if (dateStr === getLocalDateString(today)) {
                 return currentLanguage === 'es' ? 'Hoy' : 'Today';
-            } else if (dateStr === (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(tomorrow)) {
+            } else if (dateStr === getLocalDateString(tomorrow)) {
                 return currentLanguage === 'es' ? 'Mañana' : 'Tomorrow';
-            } else if (dateStr === (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(yesterday)) {
+            } else if (dateStr === getLocalDateString(yesterday)) {
                 return currentLanguage === 'es' ? 'Ayer' : 'Yesterday';
             } else {
                 if (currentLanguage === 'es') {
@@ -15958,9 +15958,9 @@
             const today = new Date();
             const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
             
-            if (dateStr === (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(today)) {
+            if (dateStr === getLocalDateString(today)) {
                 return currentLanguage === 'es' ? 'Hoy' : 'Today';
-            } else if (dateStr === (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(tomorrow)) {
+            } else if (dateStr === getLocalDateString(tomorrow)) {
                 return currentLanguage === 'es' ? 'Mañana' : 'Tomorrow';
             } else {
                 if (currentLanguage === 'es') {
@@ -15985,7 +15985,7 @@
             return timeStr; // Display in 24-hour format
         }
         // Utility function to get local date string consistently (avoids timezone issues)
-        function (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(date = new Date()) {
+        function getLocalDateString(date = new Date()) {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
@@ -16102,9 +16102,9 @@
                 
                 switch (relative.toLowerCase()) {
                     case 'today':
-                        return (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(today);
+                        return getLocalDateString(today);
                     case 'tomorrow':
-                        return (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(tomorrow);
+                        return getLocalDateString(tomorrow);
                     default:
                         return null;
                 }
@@ -16127,7 +16127,7 @@
                 }
                 
                 const targetDate = new Date(today.getTime() + daysUntilTarget * 24 * 60 * 60 * 1000);
-                return (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(targetDate);
+                return getLocalDateString(targetDate);
             }
             
             // Helper function to get date string for relative periods
@@ -16168,7 +16168,7 @@
                         return null;
                 }
                 
-                return (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(targetDate);
+                return getLocalDateString(targetDate);
             }
             
             // Helper function to normalize time format
@@ -16207,7 +16207,7 @@
                         if (timeResult) {
                             return {
                                 title: '',  // Empty title for standalone time
-                                date: (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(new Date()),  // Default to today
+                                date: getLocalDateString(new Date()),  // Default to today
                                 time: timeResult
                             };
                         }
@@ -16483,7 +16483,7 @@
                     regex: /^(.+?)\s+at\s+(.+)$/i,
                     parser: (match) => ({
                         title: match[1].trim(),
-                        date: (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(new Date()), // today
+                        date: getLocalDateString(new Date()), // today
                         time: normalizeTime(match[2])
                     })
                 },
@@ -16492,7 +16492,7 @@
                     regex: /^at\s+(.+?)\s+(.+)$/i,
                     parser: (match) => ({
                         title: match[2].trim(),
-                        date: (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(new Date()), // today
+                        date: getLocalDateString(new Date()), // today
                         time: normalizeTime(match[1])
                     })
                 }
@@ -16560,7 +16560,7 @@
             const completed = tasks.filter(t => t.status === 'completed').length;
             const pending = total - completed;
             
-            const today = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])();
+            const today = getLocalDateString();
             const todayTasks = tasks.filter(t => t.dueDate === today).length;
             const overdue = tasks.filter(t => 
                 t.dueDate && t.dueDate < today && t.status === 'pending'
@@ -18746,7 +18746,7 @@
                 
                 // Get today's date for new tasks
                 const today = new Date();
-                const todayStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(today);
+                const todayStr = getLocalDateString(today);
                 
                 // Process each line as a task
                 let addedCount = 0;
@@ -18821,7 +18821,7 @@
             
             let movedCount = 0;
             const today = new Date();
-            const todayStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(today); // Use the same date function as everywhere else
+            const todayStr = getLocalDateString(today); // Use the same date function as everywhere else
             
             console.log('📅 Debug - Today date string:', todayStr);
             console.log('📅 Debug - Total tasks:', tasks.length);
@@ -19068,7 +19068,7 @@
             
             // Business rule: No tasks from previous days should exist
             // Auto-move any past tasks to today before filtering
-            const today = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(new Date());
+            const today = getLocalDateString(new Date());
             const updatedTasks = tasks.map(task => {
                 if (task.dueDate && task.dueDate < today && task.status === 'pending') {
                     console.log(`📅 Auto-moving past task to today: "${task.title}" from ${task.dueDate} to ${today}`);
@@ -19381,7 +19381,7 @@
         function renderSelectableTaskCard(task) {
             const isEvent = task.isEvent;
             const isCompleted = task.status === 'completed';
-            const isOverdue = window.isTaskOverdue ? window.isTaskOverdue(task) : (task.status === 'pending' && task.dueDate && task.dueDate < (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])());
+            const isOverdue = window.isTaskOverdue ? window.isTaskOverdue(task) : (task.status === 'pending' && task.dueDate && task.dueDate < getLocalDateString());
             const isSelected = selectedTasks.has(task.id);
             
             const cardClass = `task-card task-card-selectable ${isEvent ? 'event' : ''} ${isCompleted ? 'completed' : ''} ${isOverdue ? 'overdue' : ''} ${isSelected ? 'selected' : ''}`;
@@ -19856,7 +19856,7 @@
                         // Calculate new date
                         const currentDate = task.dueDate ? new Date(task.dueDate + 'T00:00:00') : new Date();
                         currentDate.setDate(currentDate.getDate() + days);
-                        const newDateStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(currentDate);
+                        const newDateStr = getLocalDateString(currentDate);
                         
                         // Update task optimistically
                         task.dueDate = newDateStr;
@@ -21075,7 +21075,7 @@
             let filteredTasks = [];
             
             if (viewType === 'today') {
-                const today = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])();
+                const today = getLocalDateString();
                 filteredTasks = tasks.filter(task => task.dueDate === today);
             } else if (viewType === 'week') {
                 const today = new Date();
@@ -21084,8 +21084,8 @@
                 const weekEnd = new Date(weekStart);
                 weekEnd.setDate(weekStart.getDate() + 6);
                 
-                const weekStartStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(weekStart);
-                const weekEndStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(weekEnd);
+                const weekStartStr = getLocalDateString(weekStart);
+                const weekEndStr = getLocalDateString(weekEnd);
                 
                 filteredTasks = tasks.filter(task => {
                     return task.dueDate && task.dueDate >= weekStartStr && task.dueDate <= weekEndStr;
@@ -21612,11 +21612,11 @@
             const container = document.getElementById('todaySchedule');
             console.log('📱 MOBILE DEBUG: Container found:', !!container);
             const today = new Date(currentTodayDate);
-            const todayStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(today);
+            const todayStr = getLocalDateString(today);
             
             // Update mobile header date
             updateMobileDateHeader();
-            const isToday = todayStr === (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(new Date());
+            const isToday = todayStr === getLocalDateString(new Date());
             
             console.log('🔍 Debug currentTodayDate:', currentTodayDate);
             console.log('🔍 Debug today (copy):', today);
@@ -21822,7 +21822,7 @@
         }
         // Render individual task in time slot
         function renderTimeSlotTask(task) {
-            const overdue = task.status === 'pending' && task.dueDate < (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])();
+            const overdue = task.status === 'pending' && task.dueDate < getLocalDateString();
             const isMovedFromPast = task.isOverdue && task.originalDueDate;
             const hasImages = taskHasImages(task);
             const classes = [
@@ -22680,7 +22680,7 @@
                 id: generateId(),
                 title: title,
                 notes: notes || '',
-                dueDate: dateStr || (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(currentTodayDate),
+                dueDate: dateStr || getLocalDateString(currentTodayDate),
                 dueTime: '',
                 status: 'pending',
                 isEvent: false,
@@ -23087,7 +23087,7 @@
                 return;
             }
             const searchTerm = document.getElementById('searchInput').value;
-            const timestamp = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])();
+            const timestamp = getLocalDateString();
             const formattedDate = new Date().toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -23663,7 +23663,7 @@
                 return;
             }
             const searchTerm = window.currentTodaySearchTerm || '';
-            const todayDate = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(currentDisplayDate);
+            const todayDate = getLocalDateString(currentDisplayDate);
             const filteredTasks = window.currentTodayFilteredTasks;
             // Create HTML content similar to downloadTodayHtml but for filtered results
             const htmlContent = `
@@ -24844,7 +24844,7 @@
                 // Import each line as a task
                 let importedCount = 0;
                 const today = new Date();
-                const todayStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(today);
+                const todayStr = getLocalDateString(today);
                 
                 lines.forEach(line => {
                     const taskTitle = line.trim();
@@ -25014,7 +25014,7 @@
             const completed = tasks.filter(t => t.status === 'completed').length;
             const pending = tasks.filter(t => t.status === 'pending').length;
             const overdue = tasks.filter(t => t.status === 'pending' && t.dueDate && new Date(t.dueDate) < new Date()).length;
-            const today = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])();
+            const today = getLocalDateString();
             const todayTasks = tasks.filter(t => t.dueDate === today).length;
             // Get backup information
             const backupSettings = getBackupSettings();
@@ -25288,7 +25288,7 @@
                     const calendarView = document.getElementById('calendar-view');
                     if (weekView && !weekView.classList.contains('hidden')) {
                         // Highlight current day in week view
-                        const currentDateISO = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(currentWeekDate);
+                        const currentDateISO = getLocalDateString(currentWeekDate);
                         const dayElements = weekView.querySelectorAll('.week-day');
                         
                         dayElements.forEach(dayCell => {
@@ -25300,7 +25300,7 @@
                         });
                     } else if (calendarView && !calendarView.classList.contains('hidden')) {
                         // Highlight current day in calendar view
-                        const currentDateISO = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(currentCalendarDate);
+                        const currentDateISO = getLocalDateString(currentCalendarDate);
                         const dayElements = calendarView.querySelectorAll('.calendar-day');
                         
                         dayElements.forEach(dayCell => {
@@ -25332,7 +25332,7 @@
                 }
                 
                 // Fallback to current date
-                const currentDateISO = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(currentCalendarDate);
+                const currentDateISO = getLocalDateString(currentCalendarDate);
                 const selectedDayElement = calendarView.querySelector(`.calendar-day[data-date="${currentDateISO}"]`);
                 if (selectedDayElement) {
                     // If no cursor is set, set it now
@@ -25423,7 +25423,7 @@
         }
         // Set day cursor to specific date in specific view
         function setDayCursor(date, view) {
-            const dateStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(date);
+            const dateStr = getLocalDateString(date);
             
             // Remove existing cursors
             view.querySelectorAll('.day-cursor').forEach(el => {
@@ -25852,7 +25852,7 @@
                         const testDate = new Date(startDate);
                         testDate.setDate(startDate.getDate() + (direction * i));
                         
-                        const dateStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(testDate);
+                        const dateStr = getLocalDateString(testDate);
                         const dayTasks = tasks.filter(task => task.dueDate === dateStr);
                         
                         if (dayTasks.length > 0) {
@@ -25867,7 +25867,7 @@
                         const testDate = new Date(startDate);
                         testDate.setDate(startDate.getDate() + (direction * i));
                         
-                        const dateStr = (typeof getLocalDateString === 'function' ? getLocalDateString : (date = new Date()) => date.toISOString().split('T')[0])(testDate);
+                        const dateStr = getLocalDateString(testDate);
                         const dayTasks = tasks.filter(task => task.dueDate === dateStr);
                         
                         if (dayTasks.length > 0) {
