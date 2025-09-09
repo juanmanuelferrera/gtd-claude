@@ -839,7 +839,11 @@
                 }
             });
             // Update Today view date display to reflect new language
-            updateCurrentTodayDisplay();
+            if (typeof updateCurrentTodayDisplay === 'function') {
+                updateCurrentTodayDisplay();
+            } else {
+                console.warn('⚠️ updateCurrentTodayDisplay not yet defined');
+            }
             
             // Force restore ALL mobile nav emojis after translations
             restoreMobileNavEmojis();
@@ -4106,7 +4110,11 @@
                 }
                 
                 // Load other data
-                loadTrash();
+                if (typeof loadTrash === 'function') {
+                    loadTrash();
+                } else {
+                    console.warn('⚠️ loadTrash not yet defined');
+                }
                 
                 // Set initial view immediately after loading tasks
                 const savedView = localStorage.getItem('currentView') || 'today';
@@ -7960,23 +7968,35 @@
                 
                 // Check and move incomplete tasks after view is rendered - non-blocking
                 setTimeout(() => {
-                    checkAndMoveIncompleteTasks().catch(err => 
+                    if (typeof checkAndMoveIncompleteTasks === 'function') {
+                        checkAndMoveIncompleteTasks().catch(err => 
                         console.log('Task move check failed (non-critical):', err.message)
-                    );
+                        );
+                    } else {
+                        console.warn('⚠️ checkAndMoveIncompleteTasks not yet defined');
+                    }
                 }, 50); // Reduced from 500ms
                 // Option 1: Timer-based automatic task movement (every 1 hour)
                 setInterval(() => {
-                    checkAndMoveIncompleteTasks().catch(err => 
+                    if (typeof checkAndMoveIncompleteTasks === 'function') {
+                        checkAndMoveIncompleteTasks().catch(err => 
                         console.log('Scheduled task move check failed (non-critical):', err.message)
-                    );
+                        );
+                    } else {
+                        console.warn('⚠️ checkAndMoveIncompleteTasks not yet defined');
+                    }
                 }, 60 * 60 * 1000); // 1 hour = 60 minutes * 60 seconds * 1000 milliseconds
                 // Option 2: Focus/visibility detection for immediate task movement
                 document.addEventListener('visibilitychange', () => {
                     if (!document.hidden) {
                         // User returned to app - check if day changed and move tasks if needed
-                        checkAndMoveIncompleteTasks().catch(err => 
-                            console.log('Focus-triggered task move check failed (non-critical):', err.message)
-                        );
+                        if (typeof checkAndMoveIncompleteTasks === 'function') {
+                            checkAndMoveIncompleteTasks().catch(err => 
+                                console.log('Focus-triggered task move check failed (non-critical):', err.message)
+                            );
+                        } else {
+                            console.warn('⚠️ checkAndMoveIncompleteTasks not yet defined');
+                        }
                     }
                 });
                 
