@@ -6162,5 +6162,469 @@
         setTimeout(forceMobileUpdate, 5000);
     </script>
 
+    <!-- Trial Email Capture Modal -->
+    <div id="trialEmailModal" class="trial-modal-overlay" style="display: none;">
+        <div class="trial-modal">
+            <div class="trial-modal-header">
+                <div class="trial-logo">
+                    <span>⚡</span>
+                    <h2>Welcome to HyperFiler Pro</h2>
+                    <span>🚀</span>
+                </div>
+                <p class="trial-subtitle">Start your free trial - just enter your email to get started</p>
+            </div>
+            
+            <div class="trial-modal-body">
+                <div class="trial-benefits">
+                    <div class="benefit-item">✅ Full access to all features</div>
+                    <div class="benefit-item">✅ 60-day free trial</div>
+                    <div class="benefit-item">✅ No credit card required</div>
+                    <div class="benefit-item">✅ Cancel anytime</div>
+                </div>
+                
+                <form id="trialEmailForm" class="trial-form">
+                    <div class="trial-input-group">
+                        <input type="email" 
+                               id="trialEmail" 
+                               class="trial-email-input" 
+                               placeholder="Enter your email address" 
+                               required>
+                        <button type="submit" class="trial-submit-btn">
+                            <span>Start My Free Trial</span>
+                            <span class="btn-arrow">→</span>
+                        </button>
+                    </div>
+                    <p class="trial-privacy">We respect your privacy. No spam, ever.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onboarding Tour Modal -->
+    <div id="onboardingModal" class="onboarding-overlay" style="display: none;">
+        <div class="onboarding-modal">
+            <div class="onboarding-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="onboardingProgress"></div>
+                </div>
+                <span class="progress-text">Step <span id="currentStep">1</span> of 4</span>
+            </div>
+            
+            <div class="onboarding-content" id="onboardingContent">
+                <!-- Content will be dynamically loaded -->
+            </div>
+            
+            <div class="onboarding-actions">
+                <button id="skipOnboarding" class="onboarding-btn secondary">Skip</button>
+                <button id="nextOnboarding" class="onboarding-btn primary">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    /* Trial Email Modal Styles */
+    .trial-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .trial-modal {
+        background: linear-gradient(145deg, #ffffff, #f8f9fa);
+        border-radius: 24px;
+        padding: 40px;
+        max-width: 480px;
+        width: 90%;
+        box-shadow: 0 30px 80px rgba(37, 99, 235, 0.15);
+        border: 1px solid rgba(37, 99, 235, 0.1);
+        position: relative;
+        animation: slideUp 0.4s ease;
+    }
+
+    .trial-modal-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .trial-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .trial-logo span {
+        font-size: 1.5em;
+    }
+
+    .trial-logo h2 {
+        font-size: 1.8em;
+        font-weight: 700;
+        color: #1d1d1f;
+        margin: 0;
+    }
+
+    .trial-subtitle {
+        color: #666;
+        font-size: 1.1em;
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    .trial-benefits {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 30px;
+    }
+
+    .benefit-item {
+        font-size: 0.9em;
+        color: #2563eb;
+        font-weight: 500;
+    }
+
+    .trial-input-group {
+        position: relative;
+        margin-bottom: 16px;
+    }
+
+    .trial-email-input {
+        width: 100%;
+        padding: 16px 20px;
+        border: 2px solid #e5e5e7;
+        border-radius: 12px;
+        font-size: 1.1em;
+        background: white;
+        transition: all 0.2s ease;
+        margin-bottom: 16px;
+    }
+
+    .trial-email-input:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .trial-submit-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        border: none;
+        padding: 16px 24px;
+        border-radius: 12px;
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .trial-submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+    }
+
+    .trial-privacy {
+        text-align: center;
+        font-size: 0.85em;
+        color: #8e8e93;
+        margin: 0;
+    }
+
+    /* Onboarding Modal Styles */
+    .onboarding-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .onboarding-modal {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        animation: slideUp 0.4s ease;
+    }
+
+    .onboarding-progress {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .progress-bar {
+        flex: 1;
+        height: 4px;
+        background: #e5e5e7;
+        border-radius: 2px;
+        margin-right: 16px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #2563eb, #1d4ed8);
+        border-radius: 2px;
+        transition: width 0.3s ease;
+        width: 25%;
+    }
+
+    .progress-text {
+        font-size: 0.9em;
+        color: #666;
+        white-space: nowrap;
+    }
+
+    .onboarding-content {
+        min-height: 200px;
+        margin-bottom: 30px;
+    }
+
+    .onboarding-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+
+    .onboarding-btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .onboarding-btn.secondary {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+    .onboarding-btn.primary {
+        background: #2563eb;
+        color: white;
+    }
+
+    .onboarding-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 640px) {
+        .trial-modal, .onboarding-modal {
+            margin: 20px;
+            padding: 30px 24px;
+        }
+        
+        .trial-benefits {
+            grid-template-columns: 1fr;
+        }
+    }
+    </style>
+
+    <script>
+    // Trial and Onboarding System
+    (function() {
+        // Check URL parameters for trial or demo mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const isTrial = urlParams.get('trial') === 'true';
+        const isDemo = urlParams.get('demo') === 'true';
+        
+        // Check if user has already provided email
+        const trialEmail = localStorage.getItem('hyperfiler_trial_email');
+        
+        // Show appropriate modal based on context
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isTrial && !trialEmail) {
+                setTimeout(() => showTrialEmailModal(), 500);
+            } else if (isDemo || (isTrial && trialEmail)) {
+                setTimeout(() => showOnboarding(), 800);
+            }
+        });
+        
+        function showTrialEmailModal() {
+            document.getElementById('trialEmailModal').style.display = 'flex';
+            document.getElementById('trialEmail').focus();
+        }
+        
+        function hideTrialEmailModal() {
+            document.getElementById('trialEmailModal').style.display = 'none';
+        }
+        
+        function showOnboarding() {
+            document.getElementById('onboardingModal').style.display = 'flex';
+            startOnboardingTour();
+        }
+        
+        function hideOnboarding() {
+            document.getElementById('onboardingModal').style.display = 'none';
+        }
+        
+        // Handle trial email form submission
+        document.getElementById('trialEmailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('trialEmail').value;
+            
+            if (email) {
+                // Save email to localStorage
+                localStorage.setItem('hyperfiler_trial_email', email);
+                localStorage.setItem('hyperfiler_trial_start', Date.now().toString());
+                
+                // Hide email modal and start onboarding
+                hideTrialEmailModal();
+                setTimeout(() => showOnboarding(), 300);
+            }
+        });
+        
+        // Onboarding tour system
+        let currentOnboardingStep = 1;
+        const totalSteps = 4;
+        
+        const onboardingSteps = [
+            {
+                title: "🗣️ Talk Naturally",
+                content: `
+                    <h3 style="margin-bottom: 16px;">Type tasks exactly how you think them</h3>
+                    <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; margin: 16px 0; border-left: 4px solid #2563eb;">
+                        <div style="font-family: monospace; color: #2563eb;">"Call dentist tomorrow 2pm"</div>
+                    </div>
+                    <p style="color: #666; line-height: 1.5;">HyperFiler Pro automatically understands dates, times, and contexts. No complicated forms or dropdowns.</p>
+                `,
+                action: "Try typing a task in natural language!"
+            },
+            {
+                title: "📅 Visual Planning",
+                content: `
+                    <h3 style="margin-bottom: 16px;">See your tasks across Today, Week, and Month</h3>
+                    <p style="color: #666; line-height: 1.5; margin-bottom: 16px;">Switch between different views to plan your time effectively:</p>
+                    <ul style="color: #666; line-height: 1.8;">
+                        <li><strong>Today</strong> - Focus on what matters now</li>
+                        <li><strong>Week</strong> - Plan your weekly schedule</li>
+                        <li><strong>Month</strong> - See the big picture</li>
+                    </ul>
+                `,
+                action: "Use the view tabs at the bottom to explore!"
+            },
+            {
+                title: "🎯 Time Blocking",
+                content: `
+                    <h3 style="margin-bottom: 16px;">Drag tasks to perfect time slots</h3>
+                    <p style="color: #666; line-height: 1.5; margin-bottom: 16px;">Simply drag and drop tasks to reschedule them. HyperFiler Pro makes time management visual and intuitive.</p>
+                    <div style="background: #f0f9ff; padding: 16px; border-radius: 12px; margin: 16px 0;">
+                        <div style="font-size: 0.9em; color: #0369a1;">💡 <strong>Pro Tip:</strong> Tasks automatically flow to their optimal time slots based on your patterns.</div>
+                    </div>
+                `,
+                action: "Try dragging a task to a different time!"
+            },
+            {
+                title: "🚀 You're Ready!",
+                content: `
+                    <h3 style="margin-bottom: 16px;">Start managing your tasks like a pro</h3>
+                    <p style="color: #666; line-height: 1.5; margin-bottom: 16px;">You now have full access to HyperFiler Pro for 60 days. Here's what you can do:</p>
+                    <ul style="color: #666; line-height: 1.8;">
+                        <li>Create unlimited tasks and projects</li>
+                        <li>Use natural language processing</li>
+                        <li>Export your data anytime</li>
+                        <li>Enjoy distraction-free productivity</li>
+                    </ul>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div style="font-size: 1.1em; color: #2563eb; font-weight: 600;">Happy organizing! ⚡</div>
+                    </div>
+                `,
+                action: "Close this guide and start being productive!"
+            }
+        ];
+        
+        function startOnboardingTour() {
+            updateOnboardingStep();
+        }
+        
+        function updateOnboardingStep() {
+            const step = onboardingSteps[currentOnboardingStep - 1];
+            const content = document.getElementById('onboardingContent');
+            const progress = document.getElementById('onboardingProgress');
+            const currentStepEl = document.getElementById('currentStep');
+            const nextBtn = document.getElementById('nextOnboarding');
+            
+            content.innerHTML = `
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 2em; margin-bottom: 8px;">${step.title.split(' ')[0]}</div>
+                    <h2 style="color: #1d1d1f; margin: 0;">${step.title.substring(2)}</h2>
+                </div>
+                ${step.content}
+            `;
+            
+            progress.style.width = `${(currentOnboardingStep / totalSteps) * 100}%`;
+            currentStepEl.textContent = currentOnboardingStep;
+            
+            nextBtn.textContent = currentOnboardingStep === totalSteps ? 'Get Started!' : 'Next';
+        }
+        
+        // Onboarding navigation
+        document.getElementById('nextOnboarding').addEventListener('click', function() {
+            if (currentOnboardingStep < totalSteps) {
+                currentOnboardingStep++;
+                updateOnboardingStep();
+            } else {
+                hideOnboarding();
+            }
+        });
+        
+        document.getElementById('skipOnboarding').addEventListener('click', function() {
+            hideOnboarding();
+        });
+        
+        // Close modals on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideTrialEmailModal();
+                hideOnboarding();
+            }
+        });
+        
+    })();
+    </script>
+
 </body>
 </html>
