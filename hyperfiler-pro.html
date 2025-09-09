@@ -9,6 +9,12 @@
     <title>⚡ HyperFiler Pro 🚀 - v4.1.6-PAYMENT-DEBUG-FIX</title>
     
     <script>
+    // Configure API base URL for authentication
+    window.API_BASE = window.location.hostname.includes('localhost') 
+        ? 'http://localhost:8787' 
+        : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
+    console.log('🌐 API_BASE configured:', window.API_BASE);
+    
     console.log('🔥 HTML FILE LOADED - VERSION WITH INLINE FIX');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
