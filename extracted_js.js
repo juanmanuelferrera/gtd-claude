@@ -9307,10 +9307,17 @@
             // Update view
             if (viewName === 'today') {
                 if (typeof renderTodayView === 'function') {
-                renderTodayView();
-            } else {
-                console.warn('⚠️ renderTodayView not yet defined');
-            }
+                    renderTodayView();
+                } else {
+                    console.warn('⚠️ renderTodayView not yet defined, will retry');
+                    // Retry after a delay to allow function to load
+                    setTimeout(() => {
+                        if (typeof renderTodayView === 'function') {
+                            console.log('✅ renderTodayView now available, rendering tasks');
+                            renderTodayView();
+                        }
+                    }, 1000); // Retry after 1 second
+                }
                 // Restore persistent highlighting after render
                 if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
                     PERSISTENT_TASK_SELECTION.restoreAfterRender();
@@ -9406,10 +9413,17 @@
             
             if (currentView === 'today') {
                 if (typeof renderTodayView === 'function') {
-                renderTodayView();
-            } else {
-                console.warn('⚠️ renderTodayView not yet defined');
-            }
+                    renderTodayView();
+                } else {
+                    console.warn('⚠️ renderTodayView not yet defined, will retry');
+                    // Retry after a delay to allow function to load
+                    setTimeout(() => {
+                        if (typeof renderTodayView === 'function') {
+                            console.log('✅ renderTodayView now available, rendering tasks');
+                            renderTodayView();
+                        }
+                    }, 1000); // Retry after 1 second
+                }
                 // Restore persistent highlighting after render
                 if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
                     PERSISTENT_TASK_SELECTION.restoreAfterRender();
@@ -22607,10 +22621,17 @@
             // Refresh the view to update the dropdown
             if (currentView === 'today') {
                 if (typeof renderTodayView === 'function') {
-                renderTodayView();
-            } else {
-                console.warn('⚠️ renderTodayView not yet defined');
-            }
+                    renderTodayView();
+                } else {
+                    console.warn('⚠️ renderTodayView not yet defined, will retry');
+                    // Retry after a delay to allow function to load
+                    setTimeout(() => {
+                        if (typeof renderTodayView === 'function') {
+                            console.log('✅ renderTodayView now available, rendering tasks');
+                            renderTodayView();
+                        }
+                    }, 1000); // Retry after 1 second
+                }
             }
         }
         // Mobile-specific add task function with Things-style interface
