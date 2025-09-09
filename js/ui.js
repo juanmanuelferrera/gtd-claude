@@ -777,7 +777,11 @@ function initializeKeyboardNavigation() {
                 // N key - Quick add task (New task)
                 e.preventDefault();
                 if (typeof openAddTaskModal === 'function') {
-                    openAddTaskModal();
+                    // Pass today's date explicitly
+                    const todayStr = typeof getLocalDateString === 'function' ? 
+                        getLocalDateString(new Date()) : 
+                        new Date().toISOString().split('T')[0];
+                    openAddTaskModal(todayStr);
                     // Show a quick feedback to indicate N key worked
                     showInlineNotification('⚡ Quick add activated!', 'success');
                 } else {
