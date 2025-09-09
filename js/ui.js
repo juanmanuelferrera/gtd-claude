@@ -758,6 +758,17 @@ function initializeKeyboardNavigation() {
                 e.preventDefault();
                 showView('search');
                 break;
+            case ' ':
+                // Space key - Quick add task
+                e.preventDefault();
+                if (typeof openAddTaskModal === 'function') {
+                    openAddTaskModal();
+                    // Show a quick feedback to indicate space worked
+                    showInlineNotification('⚡ Quick add activated!', 'success');
+                } else {
+                    showInlineNotification('Add task function not available', 'error');
+                }
+                break;
             case 'Escape':
                 // Close any open modals
                 const openModals = document.querySelectorAll('[style*="display: block"]');

@@ -1724,6 +1724,53 @@
         </div>
     </div>
 
+    <!-- Quick Add Task Modal -->
+    <div id="quickAddModal" class="quick-add-modal">
+        <div class="quick-add-backdrop"></div>
+        <div class="quick-add-container">
+            <div class="quick-add-header">
+                <div class="quick-add-title">
+                    <span class="quick-icon">⚡</span>
+                    <span>Quick Add Task</span>
+                </div>
+                <div class="quick-add-hint">
+                    Type naturally: "Call dentist tomorrow 2pm"
+                </div>
+            </div>
+            <div class="quick-add-input-container">
+                <input type="text" id="quickAddInput" class="quick-add-input" 
+                       placeholder="What needs to be done?" 
+                       autocomplete="off" spellcheck="true">
+                <div class="quick-add-suggestions">
+                    <span class="suggestion-tag">@home</span>
+                    <span class="suggestion-tag">@work</span>
+                    <span class="suggestion-tag">@calls</span>
+                    <span class="suggestion-tag">tomorrow</span>
+                </div>
+            </div>
+            <div class="quick-add-actions">
+                <div class="quick-add-shortcuts">
+                    <span class="shortcut-hint">
+                        <kbd>Enter</kbd> to save • <kbd>Esc</kbd> to cancel • <kbd>Space</kbd> again for another
+                    </span>
+                </div>
+                <div class="quick-add-buttons">
+                    <button type="button" class="quick-btn quick-btn-cancel" onclick="closeQuickAdd()">
+                        Cancel
+                    </button>
+                    <button type="button" class="quick-btn quick-btn-save" onclick="saveQuickTask()">
+                        <span class="save-icon">✓</span>
+                        Add Task
+                    </button>
+                </div>
+            </div>
+            <div class="quick-add-demo-note">
+                <span class="demo-icon">🎯</span>
+                <span>Demo mode - tasks are simulated for preview</span>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Interface Showcase Tab Functionality
         document.addEventListener('DOMContentLoaded', function() {
