@@ -26226,3 +26226,5 @@
         
         // Export initializeUI globally
         window.initializeUI = initializeUI;
+    } // Close the unclosed block scope
+} // Close any additional nested scope
