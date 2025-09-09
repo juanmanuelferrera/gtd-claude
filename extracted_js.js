@@ -13347,7 +13347,9 @@
                     dayElement.classList.add('today');
                 }
                 
-                const dayTasks = getTasksForDate(dateStr);
+                const dayTasks = (typeof getTasksForDate === 'function') 
+                    ? getTasksForDate(dateStr) 
+                    : []; // Return empty array if function not yet defined
                 if (dayTasks.length > 0) {
                     dayElement.classList.add('has-tasks');
                     
@@ -13657,7 +13659,9 @@
                 }
                 
                 // Check for tasks on this date
-                const dayTasks = getTasksForDate(dateStr);
+                const dayTasks = (typeof getTasksForDate === 'function')
+                    ? getTasksForDate(dateStr)
+                    : []; // Return empty array if function not yet defined
                 if (dayTasks.length > 0) {
                     dayElement.classList.add('has-tasks');
                 }
