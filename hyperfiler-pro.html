@@ -40,6 +40,14 @@
                 }
             };
             console.log('✅ Emergency Lists sync fix applied');
+            
+            // Initialize UI components including keyboard navigation
+            if (typeof initializeUI === 'function') {
+                initializeUI();
+                console.log('🎹 UI initialized with keyboard navigation');
+            } else {
+                console.error('❌ initializeUI function not found');
+            }
         }, 2000); // Wait 2 seconds for everything to load
     });
     </script>

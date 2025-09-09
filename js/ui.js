@@ -729,9 +729,23 @@ function showOptimisticFeedback(message, type = 'info', duration = 3000) {
  * Keyboard navigation support
  */
 function initializeKeyboardNavigation() {
+    console.log('🎹 Initializing keyboard navigation...');
     document.addEventListener('keydown', (e) => {
+        // Debug logging
+        if (e.key === 'n' || e.key === 'N') {
+            console.log('🔥 N key pressed!', {
+                key: e.key,
+                target: e.target,
+                tagName: e.target.tagName,
+                activeElement: document.activeElement
+            });
+        }
+        
         // Only handle keyboard shortcuts when not typing in inputs
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            if (e.key === 'n' || e.key === 'N') {
+                console.log('⚠️ N key blocked - currently in input field');
+            }
             return;
         }
         
