@@ -162,6 +162,16 @@
         // Patterns for different natural language formats
         // IMPORTANT: More specific patterns must come BEFORE general ones!
         const patterns = [
+            // Relative periods with time: "task in 3 days at 6pm", "task in a week at 9am"
+            {
+                regex: /^(.+?)\s+in\s+(\d+|a|an)\s+(day|days|week|weeks|month|months|year|years)\s+at\s+(.+)$/i,
+                parser: (match) => ({
+                    title: match[1].trim(),
+                    date: getDateForRelativePeriod(match[2], match[3]),
+                    time: normalizeTime(match[4])
+                })
+            },
+            
             // Standard order: "task tomorrow at 6pm" or "task today at 6:30"
             {
                 regex: /^(.+?)\s+(today|tomorrow)\s+at\s+(.+)$/i,
@@ -214,6 +224,16 @@
                 })
             },
             
+            // Just temporal part with relative period: "in 3 days at 6am" (no task yet)
+            {
+                regex: /^in\s+(\d+|a|an)\s+(day|days|week|weeks|month|months|year|years)\s+at\s+(\d{1,2}(?::\d{2})?(?:am|pm)?)$/i,
+                parser: (match) => ({
+                    title: '', // No task title yet
+                    date: getDateForRelativePeriod(match[1], match[2]),
+                    time: normalizeTime(match[3])
+                })
+            },
+            
             // Just temporal part: "tomorrow at 6am" (no task yet)
             {
                 regex: /^(today|tomorrow)\s+at\s+(\d{1,2}(?::\d{2})?(?:am|pm)?)$/i,
@@ -221,6 +241,16 @@
                     title: '', // No task title yet
                     date: getDateForRelative(match[1]),
                     time: normalizeTime(match[2])
+                })
+            },
+            
+            // Just relative period: "in 3 days" (no task yet)
+            {
+                regex: /^in\s+(\d+|a|an)\s+(day|days|week|weeks|month|months|year|years)$/i,
+                parser: (match) => ({
+                    title: '', // No task title yet
+                    date: getDateForRelativePeriod(match[1], match[2]),
+                    time: null
                 })
             },
             
