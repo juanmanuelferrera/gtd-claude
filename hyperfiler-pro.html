@@ -4,10 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>⚡ HyperFiler Pro 🚀 - v4.1.6-PAYMENT-DEBUG-FIX</title>
     
     <script>
+    // Configure API base URL for authentication
+    window.API_BASE = window.location.hostname.includes('localhost') 
+        ? 'http://localhost:8787' 
+        : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
+    console.log('🌐 API_BASE configured:', window.API_BASE);
+    
     console.log('🔥 HTML FILE LOADED - VERSION WITH INLINE FIX');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
@@ -64,33 +71,46 @@
             box-sizing: border-box;
         }
 
-        /* ========== THINGS APP DESIGN SYSTEM ========== */
+        /* ========== HYPERFILER PRO DESIGN SYSTEM ========== */
         :root {
-            /* Things-inspired Color Palette */
-            --things-bg: #ffffff;
-            --things-surface: #f8f9fa;
-            --things-border: #e5e5e7;
-            --things-text: #1d1d1f;
-            --things-text-secondary: #666666;
-            --things-text-tertiary: #8e8e93;
-            --things-accent: #007aff;
-            --things-success: #34c759;
-            --things-warning: #ff9500;
-            --things-danger: #ff3b30;
-            --things-shadow: rgba(0, 0, 0, 0.05);
-            --things-shadow-elevated: rgba(0, 0, 0, 0.1);
+            /* HyperFiler Pro Color Palette - Matching Website */
+            --hyperfiler-primary: #2563eb;
+            --hyperfiler-primary-dark: #1e40af;
+            --hyperfiler-accent: #0ea5e9;
+            --hyperfiler-accent-dark: #0284c7;
+            
+            --things-bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --things-surface: rgba(255, 255, 255, 0.9);
+            --things-border: rgba(37, 99, 235, 0.1);
+            --things-text: #1e293b;
+            --things-text-secondary: #475569;
+            --things-text-tertiary: #64748b;
+            --things-accent: var(--hyperfiler-primary);
+            --things-success: #10b981;
+            --things-warning: #f59e0b;
+            --things-danger: #ef4444;
+            --things-shadow: rgba(37, 99, 235, 0.08);
+            --things-shadow-elevated: rgba(37, 99, 235, 0.15);
+            
+            /* Gradient backgrounds */
+            --gradient-primary: linear-gradient(135deg, var(--hyperfiler-primary) 0%, var(--hyperfiler-primary-dark) 100%);
+            --gradient-accent: linear-gradient(45deg, var(--hyperfiler-accent), var(--hyperfiler-accent-dark));
+            --gradient-surface: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --things-bg: #000000;
-                --things-surface: #1c1c1e;
-                --things-border: #2c2c2e;
-                --things-text: #ffffff;
-                --things-text-secondary: #98989d;
-                --things-text-tertiary: #636366;
-                --things-shadow: rgba(0, 0, 0, 0.3);
-                --things-shadow-elevated: rgba(0, 0, 0, 0.5);
+                --things-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                --things-surface: rgba(30, 41, 59, 0.9);
+                --things-border: rgba(37, 99, 235, 0.2);
+                --things-text: #f8fafc;
+                --things-text-secondary: #cbd5e1;
+                --things-text-tertiary: #94a3b8;
+                --things-shadow: rgba(37, 99, 235, 0.12);
+                --things-shadow-elevated: rgba(37, 99, 235, 0.25);
+                
+                /* Dark mode gradients */
+                --gradient-surface: linear-gradient(145deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.9));
             }
         }
 
@@ -205,8 +225,11 @@
         }
 
         .header-section {
-            background: inherit;
-            padding: 2px 0;
+            background: var(--gradient-surface);
+            padding: 20px 0;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--things-border);
+            box-shadow: 0 4px 20px var(--things-shadow);
         }
         
         .container {
@@ -223,34 +246,38 @@
                 justify-content: flex-start;
                 width: 100%;
                 background: transparent !important;
-                color: #2d3748 !important;
+                color: var(--things-text) !important;
                 font-weight: 500;
                 padding: 14px 20px;
-                border-radius: 8px;
+                border-radius: 12px;
                 font-size: 15px;
-                margin-bottom: 3px;
+                margin-bottom: 6px;
                 flex: unset;
                 text-align: left;
                 min-height: 44px;
                 border: none !important;
-                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 position: relative;
+                backdrop-filter: blur(10px);
             }
             
             .nav-btn:hover {
-                background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%) !important;
+                background: var(--gradient-surface) !important;
+                transform: translateX(4px);
+                box-shadow: 0 8px 25px var(--things-shadow-elevated);
                 color: #1a202c !important;
                 transform: translateX(2px);
                 box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
             }
             
             .nav-btn.active {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+                background: var(--gradient-primary) !important;
                 color: white !important;
                 font-weight: 600;
-                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25) !important;
+                box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3) !important;
                 border: none !important;
                 padding-left: 20px;
+                transform: translateX(4px);
             }
             
             .nav-btn.active::before {
@@ -1249,15 +1276,17 @@
         }
 
         .task-card {
-            border-left: 4px solid var(--things-border);
-            padding: 16px 20px; /* Things generous padding */
-            border-bottom: 1px solid var(--things-border);
-            background: var(--things-bg);
-            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring easing */
+            border-left: 4px solid var(--hyperfiler-accent);
+            padding: 16px 20px;
+            border-bottom: none;
+            background: var(--gradient-surface);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--things-border);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             cursor: pointer;
-            margin-bottom: 8px; /* Things rhythm spacing */
-            border-radius: 8px; /* Soft corners like Things */
-            box-shadow: 0 1px 3px var(--things-shadow);
+            margin-bottom: 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px var(--things-shadow);
         }
 
         .task-card:last-child {
@@ -1265,9 +1294,10 @@
         }
 
         .task-card:hover {
-            background: var(--things-surface);
-            transform: translateY(-1px); /* Subtle lift like Things */
-            box-shadow: 0 4px 12px var(--things-shadow-elevated);
+            background: var(--gradient-surface);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px var(--things-shadow-elevated);
+            border-color: var(--hyperfiler-accent);
         }
 
         .task-card.completed {
@@ -3537,7 +3567,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient-primary);
             opacity: 1;
         }
         
@@ -3665,7 +3695,7 @@
         /* Dark mode support */
         @media (prefers-color-scheme: dark) {
             .header-gradient-bg {
-                background: linear-gradient(135deg, #4c5fd5 0%, #5a3e8a 100%);
+                background: var(--gradient-primary);
             }
             
             .header-search-input {

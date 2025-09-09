@@ -1450,6 +1450,208 @@
             font-weight: 500;
         }
 
+        /* Post-Comparison CTA Styles */
+        .post-comparison-cta {
+            position: relative;
+            margin: 80px 0;
+            padding: 60px 20px;
+            background: linear-gradient(145deg, rgba(37, 99, 235, 0.95), rgba(29, 78, 216, 0.95));
+            border-radius: 24px;
+            overflow: hidden;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.1;
+        }
+
+        .cta-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+        }
+
+        .cta-header h3 {
+            font-size: clamp(1.8em, 4vw, 2.5em);
+            font-weight: 800;
+            margin-bottom: 16px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .cta-header p {
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .cta-benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin: 40px 0;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-benefit {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 16px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .benefit-icon {
+            font-size: 1.5em;
+            flex-shrink: 0;
+        }
+
+        .benefit-text {
+            font-size: 0.95em;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .cta-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+            margin: 40px 0 30px 0;
+        }
+
+        .cta-primary-large {
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            color: #2563eb;
+            text-decoration: none;
+            padding: 24px 40px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .cta-primary-large:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #ffffff, #ffffff);
+        }
+
+        .cta-main-text {
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cta-sub-text {
+            font-size: 0.85em;
+            opacity: 0.7;
+            font-weight: 500;
+        }
+
+        .cta-secondary-large {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .cta-secondary-large:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .cta-urgency {
+            margin-top: 20px;
+        }
+
+        .urgency-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+            color: #fbbf24;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.1; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.2; }
+        }
+
+        @media (max-width: 768px) {
+            .post-comparison-cta {
+                margin: 60px 20px;
+                padding: 40px 20px;
+            }
+
+            .cta-benefits-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .cta-benefit {
+                padding: 12px;
+            }
+
+            .cta-actions {
+                gap: 12px;
+            }
+
+            .cta-primary-large {
+                padding: 20px 24px;
+                max-width: none;
+            }
+
+            .cta-main-text {
+                font-size: 1.1em;
+            }
+        }
+
         .efficiency-stats {
             margin-top: 60px;
             text-align: center;
@@ -2290,6 +2492,57 @@
                         <div class="feature-value">💰 Subscription</div>
                         <div class="feature-value">✅ Free</div>
                         <div class="feature-value">✅ Free</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post-Comparison Trial CTA -->
+            <div class="post-comparison-cta">
+                <div class="cta-background">
+                    <div class="cta-glow"></div>
+                </div>
+                <div class="cta-content">
+                    <div class="cta-header">
+                        <h3>Ready to experience the difference?</h3>
+                        <p>Join 2,847+ professionals who chose HyperFiler Pro over the competition</p>
+                    </div>
+                    
+                    <div class="cta-benefits-grid">
+                        <div class="cta-benefit">
+                            <div class="benefit-icon">⚡</div>
+                            <div class="benefit-text">Natural language processing</div>
+                        </div>
+                        <div class="cta-benefit">
+                            <div class="benefit-icon">💰</div>
+                            <div class="benefit-text">One-time payment (no subscription)</div>
+                        </div>
+                        <div class="cta-benefit">
+                            <div class="benefit-icon">🔒</div>
+                            <div class="benefit-text">Your data stays private</div>
+                        </div>
+                        <div class="cta-benefit">
+                            <div class="benefit-icon">🎯</div>
+                            <div class="benefit-text">Perfect time blocking</div>
+                        </div>
+                    </div>
+                    
+                    <div class="cta-actions">
+                        <a href="./upgrade-compare.html" class="cta-primary-large">
+                            <span class="cta-icon">🚀</span>
+                            <span class="cta-main-text">Start Your 60-Day Free Trial</span>
+                            <span class="cta-sub-text">No credit card • Full access • Cancel anytime</span>
+                        </a>
+                        <a href="./hyperfiler-pro.html?demo=true" class="cta-secondary-large">
+                            <span class="cta-icon">👀</span>
+                            <span class="cta-text">Try Interactive Demo</span>
+                        </a>
+                    </div>
+                    
+                    <div class="cta-urgency">
+                        <div class="urgency-badge">
+                            <span class="urgency-icon">⏱️</span>
+                            <span class="urgency-text">Only 153 trial slots remaining this month</span>
+                        </div>
                     </div>
                 </div>
             </div>
