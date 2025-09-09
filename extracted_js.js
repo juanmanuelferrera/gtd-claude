@@ -13777,10 +13777,9 @@
         function updateCurrentTodayDisplay() {
             const displayElement = document.getElementById('currentTodayDate');
             if (displayElement) {
-                // Desktop red strip: Show full date format (e.g., "Monday, October 21, 2024")
+                // Desktop red strip: Show date format without year (e.g., "Monday, October 21")
                 const fullOptions = { 
                     weekday: 'long', 
-                    year: 'numeric', 
                     month: 'long', 
                     day: 'numeric' 
                 };
