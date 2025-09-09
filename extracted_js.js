@@ -9312,7 +9312,7 @@
                     console.warn('⚠️ renderTodayView not yet defined, will retry');
                     // Multiple retry attempts with increasing delays
                     let retryCount = 0;
-                    const maxRetries = 10;
+                    const maxRetries = 60; // Increased to 30 seconds total
                     const retryInterval = setInterval(() => {
                         retryCount++;
                         if (typeof renderTodayView === 'function') {
@@ -9320,10 +9320,17 @@
                             renderTodayView();
                             clearInterval(retryInterval);
                         } else if (retryCount >= maxRetries) {
-                            console.error('❌ renderTodayView still not available after ' + maxRetries + ' retries');
+                            console.error('❌ renderTodayView still not available after ' + maxRetries + ' retries (30 seconds)');
                             clearInterval(retryInterval);
+                            // Last resort: wait for window load event
+                            window.addEventListener('load', () => {
+                                if (typeof renderTodayView === 'function') {
+                                    console.log('✅ renderTodayView available after window load');
+                                    renderTodayView();
+                                }
+                            });
                         }
-                    }, 500); // Retry every 500ms up to 10 times (5 seconds total)
+                    }, 500); // Retry every 500ms up to 60 times (30 seconds total)
                 }
                 // Restore persistent highlighting after render
                 if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
@@ -9425,7 +9432,7 @@
                     console.warn('⚠️ renderTodayView not yet defined, will retry');
                     // Multiple retry attempts with increasing delays
                     let retryCount = 0;
-                    const maxRetries = 10;
+                    const maxRetries = 60; // Increased to 30 seconds total
                     const retryInterval = setInterval(() => {
                         retryCount++;
                         if (typeof renderTodayView === 'function') {
@@ -9433,10 +9440,17 @@
                             renderTodayView();
                             clearInterval(retryInterval);
                         } else if (retryCount >= maxRetries) {
-                            console.error('❌ renderTodayView still not available after ' + maxRetries + ' retries');
+                            console.error('❌ renderTodayView still not available after ' + maxRetries + ' retries (30 seconds)');
                             clearInterval(retryInterval);
+                            // Last resort: wait for window load event
+                            window.addEventListener('load', () => {
+                                if (typeof renderTodayView === 'function') {
+                                    console.log('✅ renderTodayView available after window load');
+                                    renderTodayView();
+                                }
+                            });
                         }
-                    }, 500); // Retry every 500ms up to 10 times (5 seconds total)
+                    }, 500); // Retry every 500ms up to 60 times (30 seconds total)
                 }
                 // Restore persistent highlighting after render
                 if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
@@ -22640,7 +22654,7 @@
                     console.warn('⚠️ renderTodayView not yet defined, will retry');
                     // Multiple retry attempts with increasing delays
                     let retryCount = 0;
-                    const maxRetries = 10;
+                    const maxRetries = 60; // Increased to 30 seconds total
                     const retryInterval = setInterval(() => {
                         retryCount++;
                         if (typeof renderTodayView === 'function') {
@@ -22648,10 +22662,17 @@
                             renderTodayView();
                             clearInterval(retryInterval);
                         } else if (retryCount >= maxRetries) {
-                            console.error('❌ renderTodayView still not available after ' + maxRetries + ' retries');
+                            console.error('❌ renderTodayView still not available after ' + maxRetries + ' retries (30 seconds)');
                             clearInterval(retryInterval);
+                            // Last resort: wait for window load event
+                            window.addEventListener('load', () => {
+                                if (typeof renderTodayView === 'function') {
+                                    console.log('✅ renderTodayView available after window load');
+                                    renderTodayView();
+                                }
+                            });
                         }
-                    }, 500); // Retry every 500ms up to 10 times (5 seconds total)
+                    }, 500); // Retry every 500ms up to 60 times (30 seconds total)
                 }
             }
         }
@@ -26789,3 +26810,28 @@ function initializeUI() {
 
 // Export initializeUI globally
 window.initializeUI = initializeUI;
+
+// Add a final render check when everything is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        console.log('🔄 DOMContentLoaded - checking if renderTodayView is available');
+        if (typeof renderTodayView === 'function' && currentView === 'today') {
+            console.log('✅ Final check: rendering today view');
+            renderTodayView();
+        }
+    }, 1000);
+});
+
+// Also check when window fully loads
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        console.log('🔄 Window load complete - final renderTodayView check');
+        if (typeof renderTodayView === 'function' && currentView === 'today') {
+            console.log('✅ Window load: rendering today view');
+            renderTodayView();
+        }
+    }, 500);
+});
+
+// Close the main execution block
+})();
