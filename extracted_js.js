@@ -4036,11 +4036,19 @@
                     console.warn('quickDateTimeInput not found');
                 }
                 
-                // Initialize backup settings
-                loadBackupSettings();
+                // Initialize backup settings (check if function exists)
+                if (typeof loadBackupSettings === 'function') {
+                    loadBackupSettings();
+                } else {
+                    console.warn('⚠️ loadBackupSettings not yet defined, will load later');
+                }
                 
-                // Load auto print time settings
-                loadAutoPrintTime();
+                // Load auto print time settings (check if function exists)
+                if (typeof loadAutoPrintTime === 'function') {
+                    loadAutoPrintTime();
+                } else {
+                    console.warn('⚠️ loadAutoPrintTime not yet defined, will load later');
+                }
                 
                 // Load tasks from localStorage immediately to prevent empty state
                 console.log('📱 DEBUG: About to load tasks from localStorage');
