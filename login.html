@@ -535,7 +535,7 @@
         // Configuration
         const API_BASE = window.location.hostname.includes('localhost') 
             ? 'http://localhost:8787' 
-            : 'https://hyperfiler-fresh-api.joanmanelferrera-400.workers.dev';
+            : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
 
         // DOM elements
         const loginForm = document.getElementById('login-form');
@@ -675,12 +675,22 @@
                         localStorage.setItem('authTokenExpiry', Date.now() + (90 * 24 * 60 * 60 * 1000)); // 3 months
                         localStorage.setItem('userEmail', result.user.email);
                         localStorage.setItem('userId', result.user.id);
+                        
+                        // CRITICAL: Store currentUser object needed for sync operations
+                        const currentUser = {
+                            token: result.token,
+                            user: result.user
+                        };
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        console.log('💾 Stored currentUser object for sync operations');
+                        
                         console.log('💾 Stored persistent login data in localStorage for 3 months');
                         
                         // Also store in sessionStorage as backup
                         sessionStorage.setItem('authToken', result.token);
                         sessionStorage.setItem('userEmail', result.user.email);
                         sessionStorage.setItem('userId', result.user.id);
+                        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
                     }
 
                     showMessage(successMessage, '✅ Login successful! Redirecting...');
@@ -808,6 +818,7 @@
                     localStorage.removeItem('authTokenExpiry');
                     localStorage.removeItem('userEmail');
                     localStorage.removeItem('userId');
+                    localStorage.removeItem('currentUser');
                     return null;
                 }
             }
@@ -846,10 +857,12 @@
                         localStorage.removeItem('authTokenExpiry');
                         localStorage.removeItem('userEmail');
                         localStorage.removeItem('userId');
+                        localStorage.removeItem('currentUser');
                     } else {
                         sessionStorage.removeItem('authToken');
                         sessionStorage.removeItem('userEmail');
                         sessionStorage.removeItem('userId');
+                        sessionStorage.removeItem('currentUser');
                     }
                 }
             }).catch(error => {
@@ -859,10 +872,12 @@
                     localStorage.removeItem('authTokenExpiry');
                     localStorage.removeItem('userEmail');  
                     localStorage.removeItem('userId');
+                    localStorage.removeItem('currentUser');
                 } else {
                     sessionStorage.removeItem('authToken');
                     sessionStorage.removeItem('userEmail');  
                     sessionStorage.removeItem('userId');
+                    sessionStorage.removeItem('currentUser');
                 }
             });
         }

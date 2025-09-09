@@ -99,7 +99,7 @@
         }
 
         .page-footer a {
-            color: #0ea5e9;
+            color: #2563eb;
             text-decoration: none;
             margin: 0 15px;
             font-weight: 500;
@@ -112,7 +112,7 @@
         .header {
             background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
             color: white;
-            padding: 4rem 2rem;
+            padding: 2.5rem 2rem 1.5rem;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -166,58 +166,84 @@
             margin: 0 auto;
         }
 
-        .header h1 {
-            font-size: 3.5em;
-            font-weight: 900;
-            margin-bottom: 20px;
+        .header .brand-small {
+            font-size: clamp(1.2em, 3vw, 1.6em);
+            font-weight: 700;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
-            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            gap: 10px;
+            opacity: 0.8;
+            letter-spacing: 0.01em;
         }
 
-        .header .subtitle {
-            font-size: 1.5em;
+        .header h1 {
+            font-size: clamp(3em, 8vw, 5.5em);
+            font-weight: 900;
             margin-bottom: 15px;
-            opacity: 0.95;
-            font-weight: 600;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            letter-spacing: -0.02em;
+            line-height: 1.1;
         }
 
         .header .tagline {
-            font-size: 1.2em;
+            font-size: clamp(1.1em, 2.5vw, 1.4em);
             opacity: 0.85;
             max-width: 600px;
-            margin: 0 auto 40px auto;
+            margin: 0 auto 25px auto;
+            font-weight: 500;
         }
 
         .container {
             max-width: 1000px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 20px 20px 40px;
+            margin-top: 20px;
         }
 
         /* FAQ Dropdown Styles */
         .faq-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             overflow: hidden;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .faq-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.12);
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
         .faq-question {
             background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
             color: white;
-            padding: 25px 30px;
+            padding: 30px 35px;
             cursor: pointer;
-            font-size: 1.3em;
+            font-size: clamp(1.1em, 2.5vw, 1.4em);
             font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: all 0.3s ease;
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .faq-question::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
         }
 
         .faq-question:hover {
@@ -336,6 +362,122 @@
             border-left: 4px solid #ffeb3b;
             box-shadow: 0 0 15px rgba(255, 235, 59, 0.3);
         }
+
+        /* Navigation */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(37, 99, 235, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .nav-cta {
+            background: linear-gradient(45deg, #0ea5e9, #0284c7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 15px;
+            }
+            .nav-links a {
+                font-size: 0.9em;
+            }
+        }
+
+        /* Back to top button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(45deg, #0ea5e9, #0284c7);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 1.2em;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+        }
+
+        /* Search highlighting */
+        .search-highlight {
+            background: linear-gradient(45deg, #ffd93d, #ff9800);
+            color: #333;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(255, 217, 61, 0.3);
+        }
+
+        .search-matched {
+            border: 2px solid #4CAF50 !important;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.3) !important;
+        }
     </style>
 </head>
 <body>
@@ -358,20 +500,20 @@
             </a>
         </div>
         <div class="header-content">
-            <h1><span>⚡</span> HyperFiler Pro <span>🚀</span></h1>
-            <p class="subtitle">Documentation</p>
+            <div class="brand-small"><span>⚡</span> HyperFiler Pro <span>🚀</span></div>
+            <h1>Documentation</h1>
             <p class="tagline">Everything you need to master the HyperFiler system</p>
             
             <!-- Search Box -->
-            <div style="margin-top: 30px; max-width: 500px; margin-left: auto; margin-right: auto;">
+            <div style="margin-top: 20px; max-width: 500px; margin-left: auto; margin-right: auto;">
                 <div style="position: relative;">
                     <input type="text" id="docSearch" placeholder="🔍 Search documentation..." 
-                           style="width: 100%; padding: 15px 50px 15px 20px; border: none; border-radius: 25px; 
-                                  font-size: 16px; background: rgba(255,255,255,0.9); box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                                  outline: none; transition: all 0.3s ease;"
+                           style="width: 100%; padding: 18px 60px 18px 24px; border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; 
+                                  font-size: 16px; background: rgba(255,255,255,0.15); box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                                  outline: none; transition: all 0.3s ease; backdrop-filter: blur(20px); color: white;"
                            onkeyup="searchDocumentation(this.value)"
-                           onfocus="this.style.background='white'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.15)'"
-                           onblur="this.style.background='rgba(255,255,255,0.9)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)'">
+                           onfocus="this.style.background='rgba(255,255,255,0.25)'; this.style.boxShadow='0 12px 40px rgba(0,0,0,0.2)'; this.style.borderColor='rgba(255,255,255,0.4)'"
+                           onblur="this.style.background='rgba(255,255,255,0.15)'; this.style.boxShadow='0 8px 32px rgba(0,0,0,0.1)'; this.style.borderColor='rgba(255,255,255,0.3)'">
                     <button onclick="clearSearch()" 
                             style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); 
                                    background: none; border: none; font-size: 18px; cursor: pointer; color: #666;
@@ -402,7 +544,9 @@
                     
                     <h3>⚡ Digital Superpowers</h3>
                     <ul>
+                        <li><strong>Time-Fluid Flexibility:</strong> Every task movable with drag-and-drop, keyboard shortcuts, or natural language</li>
                         <li><strong>Natural Language Processing:</strong> Type "Call John tomorrow 2pm" - instant scheduling</li>
+                        <li><strong>Multiple Rescheduling Methods:</strong> 6 different ways to move tasks through time</li>
                         <li><strong>Instant Access:</strong> Add tasks in 2 seconds with keyboard shortcuts</li>
                         <li><strong>Smart Recurring:</strong> Automatically handle repeating tasks</li>
                         <li><strong>Cross-Device Sync:</strong> Real-time sync across all devices</li>
@@ -446,6 +590,7 @@
 
                     <h3>Step 4: Keyboard Mastery</h3>
                     <ul>
+                        <li><strong>⚡ Quick Add:</strong> Press <code>N</code> to instantly create new tasks</li>
                         <li><code>Ctrl+T</code> (Today), <code>Ctrl+W</code> (Week), <code>Ctrl+M</code> (Month)</li>
                         <li>Navigate with arrow keys, edit with <code>Enter</code></li>
                         <li>Use lightning-fast action buttons: delay 1 day, 1 week, 1 month, or delete</li>
@@ -498,13 +643,24 @@
                         </tbody>
                     </table>
 
-                    <h3>⚡ Instant Capture & Natural Language</h3>
+                    <h3>⚡ Time-Fluid Task Management</h3>
+                    <p><strong>Every task is movable in time</strong> - the core philosophy that sets HyperFiler Pro apart. Tasks flow like your thoughts, not trapped in rigid schedules.</p>
+                    
+                    <h4>Multiple Ways to Move Tasks:</h4>
+                    <ul>
+                        <li><strong>Natural Language:</strong> "Call John next Tuesday" auto-schedules</li>
+                        <li><strong>Drag & Drop:</strong> Visually reschedule by dragging tasks between time slots</li>
+                        <li><strong>Lightning Buttons:</strong> One-click delay (1 day, 1 week, 1 month)</li>
+                        <li><strong>Keyboard Navigation:</strong> Use ←→ arrows to move between days, select and reschedule</li>
+                        <li><strong>Direct Edit:</strong> Click any task, change the date/time inline</li>
+                        <li><strong>Bulk Operations:</strong> Select multiple tasks, move all at once</li>
+                    </ul>
+                    
+                    <h4>Instant Task Capture:</h4>
                     <ul>
                         <li>Add tasks in under 2 seconds with <code>Ctrl+N</code></li>
-                        <li>Natural language processing: "Call John next Tuesday" auto-schedules</li>
                         <li>Smart text entry: "Meeting with client tomorrow 3pm @work" creates perfectly scheduled task</li>
-                        <li>Drag and drop to reschedule tasks visually</li>
-                        <li>Lightning-fast action buttons: delay 1 day, 1 week, 1 month, or delete</li>
+                        <li>Immediate rescheduling available on any task, anytime</li>
                     </ul>
 
                     <h3>🔄 Recurring Tasks & Rich Text</h3>
@@ -578,9 +734,9 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td><code>Ctrl+N</code></td>
-                                <td>Add new task</td>
-                                <td>Works even when editing other tasks</td>
+                                <td><code>N</code></td>
+                                <td>⚡ Quick add task</td>
+                                <td>Lightning-fast single key - perfect for brain dumps!</td>
                             </tr>
                             <tr>
                                 <td><code>Ctrl+T</code></td>
@@ -736,45 +892,68 @@
             const resultsDiv = document.getElementById('searchResults');
             const clearBtn = document.getElementById('clearSearchBtn');
             
-            if (query.length < 2) {
+            if (!query || query.length < 2) {
                 clearSearch();
                 return;
             }
             
             clearSearchHighlights();
             
-            const searchTerms = query.toLowerCase().split(' ').filter(term => term.length >= 2);
+            const searchTerms = query.toLowerCase().trim().split(' ').filter(term => term.length >= 2);
             const faqContainers = document.querySelectorAll('.faq-container');
             let matchCount = 0;
             
             faqContainers.forEach(container => {
-                const question = container.querySelector('.faq-question').textContent.toLowerCase();
-                const answer = container.querySelector('.faq-content').textContent.toLowerCase();
+                const questionElement = container.querySelector('.faq-question');
+                const contentElement = container.querySelector('.faq-content');
+                
+                if (!questionElement || !contentElement) {
+                    console.log('Missing elements in container:', container);
+                    return;
+                }
+                
+                const question = questionElement.textContent.toLowerCase();
+                const answer = contentElement.textContent.toLowerCase();
                 const hasMatch = searchTerms.some(term => 
                     question.includes(term) || answer.includes(term)
                 );
                 
                 if (hasMatch) {
                     container.classList.add('search-matched');
+                    container.style.display = 'block';
                     matchCount++;
                     
                     // Highlight matching text
-                    const contentElement = container.querySelector('.faq-content');
-                    highlightText(contentElement, searchTerms);
+                    try {
+                        highlightText(contentElement, searchTerms);
+                        highlightText(questionElement, searchTerms);
+                    } catch (e) {
+                        console.log('Highlighting error:', e);
+                    }
                     
                     // Auto-expand matching FAQs
                     const answerElement = container.querySelector('.faq-answer');
-                    if (!answerElement.classList.contains('active')) {
-                        container.querySelector('.faq-question').click();
+                    if (answerElement && !answerElement.classList.contains('active')) {
+                        questionElement.click();
                     }
+                } else {
+                    container.classList.remove('search-matched');
+                    container.style.display = query.length >= 2 ? 'none' : 'block';
                 }
             });
             
-            resultsDiv.innerHTML = matchCount > 0 ? 
-                `Found ${matchCount} matching section${matchCount > 1 ? 's' : ''}` : 
-                'No matches found';
+            // Update results display
+            if (resultsDiv) {
+                resultsDiv.innerHTML = matchCount > 0 ? 
+                    `✨ Found ${matchCount} matching section${matchCount > 1 ? 's' : ''} ✨` : 
+                    '❌ No matches found - try different terms';
+                resultsDiv.style.opacity = '1';
+                resultsDiv.style.fontWeight = '600';
+            }
             
-            clearBtn.style.opacity = '1';
+            if (clearBtn) {
+                clearBtn.style.opacity = '1';
+            }
         }
 
         function highlightText(element, searchTerms) {
@@ -838,16 +1017,28 @@
             const resultsDiv = document.getElementById('searchResults');
             const clearBtn = document.getElementById('clearSearchBtn');
             
-            searchInput.value = '';
-            resultsDiv.innerHTML = '';
-            clearBtn.style.opacity = '0';
+            if (searchInput) searchInput.value = '';
+            if (resultsDiv) {
+                resultsDiv.innerHTML = '';
+                resultsDiv.style.opacity = '0';
+                resultsDiv.style.fontWeight = 'normal';
+            }
+            if (clearBtn) clearBtn.style.opacity = '0';
+            
             clearSearchHighlights();
+            
+            // Show all FAQ containers and remove search highlighting
+            const faqContainers = document.querySelectorAll('.faq-container');
+            faqContainers.forEach(container => {
+                container.classList.remove('search-matched');
+                container.style.display = 'block';
+            });
             
             // Close all expanded FAQs
             const openAnswers = document.querySelectorAll('.faq-answer.active');
             openAnswers.forEach(answer => {
                 const question = answer.previousElementSibling;
-                question.click();
+                if (question) question.click();
             });
         }
 
@@ -883,5 +1074,29 @@
         <a href="./index.html">🏠 Home</a>
         <a href="./login.html">🔐 Login</a>
     </div>
+
+    <!-- Back to top button -->
+    <a href="#" class="back-to-top" id="backToTop">↑</a>
+
+    <script>
+        // Back to top functionality
+        const backToTop = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+        
+        backToTop.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
 </body>
 </html>

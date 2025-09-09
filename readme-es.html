@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚡ HyperFiler Pro</title>
-    <meta name="description" content="Guía completa de HyperFiler Pro - el sistema digital GTD de 43 carpetas. Domina cada función y transforma tu productividad.">
+    <meta name="description" content="Guía completa de HyperFiler Pro - el sistema digital 43 carpetas GTD. Domina todas las funciones y transforma tu productividad.">
     <style>
         * {
             margin: 0;
@@ -99,7 +99,7 @@
         }
 
         .page-footer a {
-            color: #0ea5e9;
+            color: #2563eb;
             text-decoration: none;
             margin: 0 15px;
             font-weight: 500;
@@ -111,8 +111,14 @@
 
         .header {
             background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+
             color: white;
-            padding: 4rem 2rem;
+            padding: 2.5rem 2rem 1.5rem;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -166,62 +172,94 @@
             margin: 0 auto;
         }
 
-        .header h1 {
-            font-size: 3.5em;
-            font-weight: 900;
-            margin-bottom: 20px;
+        .header .brand-small {
+            font-size: clamp(1.2em, 3vw, 1.6em);
+            font-weight: 700;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
-            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            gap: 10px;
+            opacity: 0.8;
+            letter-spacing: 0.01em;
         }
 
-        .header .subtitle {
-            font-size: 1.5em;
+        .header h1 {
+            font-size: clamp(3em, 8vw, 5.5em);
+            font-weight: 900;
             margin-bottom: 15px;
-            opacity: 0.95;
-            font-weight: 600;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            letter-spacing: -0.02em;
+            line-height: 1.1;
         }
 
         .header .tagline {
-            font-size: 1.2em;
+            font-size: clamp(1.1em, 2.5vw, 1.4em);
             opacity: 0.85;
             max-width: 600px;
-            margin: 0 auto 40px auto;
+            margin: 0 auto 25px auto;
+            font-weight: 500;
         }
 
         .container {
             max-width: 1000px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 20px 20px 40px;
+            margin-top: 20px;
         }
 
         /* FAQ Dropdown Styles */
         .faq-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             overflow: hidden;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .faq-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.12);
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
         .faq-question {
             background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+
             color: white;
-            padding: 25px 30px;
+            padding: 30px 35px;
             cursor: pointer;
-            font-size: 1.3em;
+            font-size: clamp(1.1em, 2.5vw, 1.4em);
             font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: all 0.3s ease;
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .faq-question::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
         }
 
         .faq-question:hover {
             background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+
+            background: linear-gradient(135deg, #1e40af 0%, #0369a1 100%);
+
             transform: translateY(-2px);
         }
 
@@ -259,6 +297,9 @@
 
         .faq-content h3 {
             color: #2563eb;
+
+            color: #2563eb;
+
             margin-top: 25px;
             margin-bottom: 15px;
             font-size: 1.4em;
@@ -267,6 +308,9 @@
 
         .faq-content h4 {
             color: #1d4ed8;
+
+            color: #1e40af;
+
             margin-top: 20px;
             margin-bottom: 10px;
             font-size: 1.2em;
@@ -299,6 +343,9 @@
 
         .faq-content th {
             background: #2563eb;
+
+            background: #2563eb;
+
             color: white;
             font-weight: 600;
         }
@@ -336,6 +383,21 @@
             border-left: 4px solid #ffeb3b;
             box-shadow: 0 0 15px rgba(255, 235, 59, 0.3);
         }
+
+        /* Search highlighting */
+        .search-highlight {
+            background: linear-gradient(45deg, #ffd93d, #ff9800);
+            color: #333;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(255, 217, 61, 0.3);
+        }
+
+        .search-matched {
+            border: 2px solid #4CAF50 !important;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.3) !important;
+        }
     </style>
 </head>
 <body>
@@ -358,20 +420,20 @@
             </a>
         </div>
         <div class="header-content">
-            <h1><span>⚡</span> HyperFiler Pro <span>🚀</span></h1>
-            <p class="subtitle">Documentación</p>
+            <div class="brand-small"><span>⚡</span> HyperFiler Pro <span>🚀</span></div>
+            <h1>Documentación</h1>
             <p class="tagline">Todo lo que necesitas para dominar el sistema HyperFiler</p>
             
             <!-- Search Box -->
-            <div style="margin-top: 30px; max-width: 500px; margin-left: auto; margin-right: auto;">
+            <div style="margin-top: 20px; max-width: 500px; margin-left: auto; margin-right: auto;">
                 <div style="position: relative;">
                     <input type="text" id="docSearch" placeholder="🔍 Buscar en la documentación..." 
-                           style="width: 100%; padding: 15px 50px 15px 20px; border: none; border-radius: 25px; 
-                                  font-size: 16px; background: rgba(255,255,255,0.9); box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                                  outline: none; transition: all 0.3s ease;"
+                           style="width: 100%; padding: 18px 60px 18px 24px; border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; 
+                                  font-size: 16px; background: rgba(255,255,255,0.15); box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                                  outline: none; transition: all 0.3s ease; backdrop-filter: blur(20px); color: white;"
                            onkeyup="searchDocumentation(this.value)"
-                           onfocus="this.style.background='white'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.15)'"
-                           onblur="this.style.background='rgba(255,255,255,0.9)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)'">
+                           onfocus="this.style.background='rgba(255,255,255,0.25)'; this.style.boxShadow='0 12px 40px rgba(0,0,0,0.2)'; this.style.borderColor='rgba(255,255,255,0.4)'"
+                           onblur="this.style.background='rgba(255,255,255,0.15)'; this.style.boxShadow='0 8px 32px rgba(0,0,0,0.1)'; this.style.borderColor='rgba(255,255,255,0.3)'">
                     <button onclick="clearSearch()" 
                             style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); 
                                    background: none; border: none; font-size: 18px; cursor: pointer; color: #666;
@@ -402,7 +464,9 @@
                     
                     <h3>⚡ Superpoderes Digitales</h3>
                     <ul>
+                        <li><strong>Flexibilidad Temporal Fluida:</strong> Cada tarea es movible con arrastrar-y-soltar, atajos de teclado o lenguaje natural</li>
                         <li><strong>Procesamiento de Lenguaje Natural:</strong> Escribe "Llamar a Juan mañana 2pm" - programación instantánea</li>
+                        <li><strong>Múltiples Métodos de Reprogramación:</strong> 6 formas diferentes de mover tareas a través del tiempo</li>
                         <li><strong>Acceso Instantáneo:</strong> Añadir tareas en 2 segundos con atajos de teclado</li>
                         <li><strong>Recurrencia Inteligente:</strong> Maneja automáticamente tareas repetitivas</li>
                         <li><strong>Sincronización Multi-dispositivo:</strong> Sincronización en tiempo real en todos los dispositivos</li>
@@ -446,6 +510,7 @@
 
                     <h3>Paso 4: Dominio del Teclado</h3>
                     <ul>
+                        <li><strong>⚡ Añadir Rápido:</strong> Presiona <code>N</code> para crear tareas al instante</li>
                         <li><code>Ctrl+T</code> (Hoy), <code>Ctrl+W</code> (Semana), <code>Ctrl+M</code> (Mes)</li>
                         <li>Navega con las teclas de flecha, edita con <code>Enter</code></li>
                         <li>Usa botones de acción súper rápidos: retrasar 1 día, 1 semana, 1 mes, o eliminar</li>
@@ -498,13 +563,24 @@
                         </tbody>
                     </table>
 
-                    <h3>⚡ Captura Instantánea y Lenguaje Natural</h3>
+                    <h3>⚡ Gestión Temporal Fluida de Tareas</h3>
+                    <p><strong>Cada tarea es movible en el tiempo</strong> - la filosofía central que distingue a HyperFiler Pro. Las tareas fluyen como tus pensamientos, no atrapadas en horarios rígidos.</p>
+                    
+                    <h4>Múltiples Formas de Mover Tareas:</h4>
+                    <ul>
+                        <li><strong>Lenguaje Natural:</strong> "Llamar a Juan el martes que viene" se programa automáticamente</li>
+                        <li><strong>Arrastrar y Soltar:</strong> Reprograma visualmente arrastrando tareas entre franjas horarias</li>
+                        <li><strong>Botones Relámpago:</strong> Retraso de un clic (1 día, 1 semana, 1 mes)</li>
+                        <li><strong>Navegación por Teclado:</strong> Usa las flechas ←→ para moverte entre días, selecciona y reprograma</li>
+                        <li><strong>Edición Directa:</strong> Haz clic en cualquier tarea, cambia la fecha/hora en línea</li>
+                        <li><strong>Operaciones Masivas:</strong> Selecciona múltiples tareas, mueve todas a la vez</li>
+                    </ul>
+                    
+                    <h4>Captura Instantánea de Tareas:</h4>
                     <ul>
                         <li>Añade tareas en menos de 2 segundos con <code>Ctrl+N</code></li>
-                        <li>Procesamiento de lenguaje natural: "Llamar a Juan el próximo martes" se programa automáticamente</li>
                         <li>Entrada de texto inteligente: "Reunión con cliente mañana 3pm @trabajo" crea una tarea perfectamente programada</li>
-                        <li>Arrastra y suelta para reprogramar tareas visualmente</li>
-                        <li>Botones de acción súper rápidos: retrasar 1 día, 1 semana, 1 mes, o eliminar</li>
+                        <li>Reprogramación inmediata disponible en cualquier tarea, en cualquier momento</li>
                     </ul>
 
                     <h3>🔄 Tareas Recurrentes y Texto Enriquecido</h3>
@@ -578,9 +654,9 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td><code>Ctrl+N</code></td>
-                                <td>Añadir nueva tarea</td>
-                                <td>Funciona incluso al editar otras tareas</td>
+                                <td><code>N</code></td>
+                                <td>⚡ Añadir tarea rápido</td>
+                                <td>¡Una sola tecla súper rápida - perfecta para volcado mental!</td>
                             </tr>
                             <tr>
                                 <td><code>Ctrl+T</code></td>
@@ -736,45 +812,68 @@
             const resultsDiv = document.getElementById('searchResults');
             const clearBtn = document.getElementById('clearSearchBtn');
             
-            if (query.length < 2) {
+            if (!query || query.length < 2) {
                 clearSearch();
                 return;
             }
             
             clearSearchHighlights();
             
-            const searchTerms = query.toLowerCase().split(' ').filter(term => term.length >= 2);
+            const searchTerms = query.toLowerCase().trim().split(' ').filter(term => term.length >= 2);
             const faqContainers = document.querySelectorAll('.faq-container');
             let matchCount = 0;
             
             faqContainers.forEach(container => {
-                const question = container.querySelector('.faq-question').textContent.toLowerCase();
-                const answer = container.querySelector('.faq-content').textContent.toLowerCase();
+                const questionElement = container.querySelector('.faq-question');
+                const contentElement = container.querySelector('.faq-content');
+                
+                if (!questionElement || !contentElement) {
+                    console.log('Missing elements in container:', container);
+                    return;
+                }
+                
+                const question = questionElement.textContent.toLowerCase();
+                const answer = contentElement.textContent.toLowerCase();
                 const hasMatch = searchTerms.some(term => 
                     question.includes(term) || answer.includes(term)
                 );
                 
                 if (hasMatch) {
                     container.classList.add('search-matched');
+                    container.style.display = 'block';
                     matchCount++;
                     
                     // Highlight matching text
-                    const contentElement = container.querySelector('.faq-content');
-                    highlightText(contentElement, searchTerms);
+                    try {
+                        highlightText(contentElement, searchTerms);
+                        highlightText(questionElement, searchTerms);
+                    } catch (e) {
+                        console.log('Highlighting error:', e);
+                    }
                     
                     // Auto-expand matching FAQs
                     const answerElement = container.querySelector('.faq-answer');
-                    if (!answerElement.classList.contains('active')) {
-                        container.querySelector('.faq-question').click();
+                    if (answerElement && !answerElement.classList.contains('active')) {
+                        questionElement.click();
                     }
+                } else {
+                    container.classList.remove('search-matched');
+                    container.style.display = query.length >= 2 ? 'none' : 'block';
                 }
             });
             
-            resultsDiv.innerHTML = matchCount > 0 ? 
-                `Se encontraron ${matchCount} sección${matchCount > 1 ? 'es' : ''} que coinciden` : 
-                'No se encontraron coincidencias';
+            // Update results display
+            if (resultsDiv) {
+                resultsDiv.innerHTML = matchCount > 0 ? 
+                    `✨ Se encontraron ${matchCount} sección${matchCount > 1 ? 'es' : ''} ✨` : 
+                    '❌ No se encontraron coincidencias - intenta con otros términos';
+                resultsDiv.style.opacity = '1';
+                resultsDiv.style.fontWeight = '600';
+            }
             
-            clearBtn.style.opacity = '1';
+            if (clearBtn) {
+                clearBtn.style.opacity = '1';
+            }
         }
 
         function highlightText(element, searchTerms) {
@@ -838,16 +937,28 @@
             const resultsDiv = document.getElementById('searchResults');
             const clearBtn = document.getElementById('clearSearchBtn');
             
-            searchInput.value = '';
-            resultsDiv.innerHTML = '';
-            clearBtn.style.opacity = '0';
+            if (searchInput) searchInput.value = '';
+            if (resultsDiv) {
+                resultsDiv.innerHTML = '';
+                resultsDiv.style.opacity = '0';
+                resultsDiv.style.fontWeight = 'normal';
+            }
+            if (clearBtn) clearBtn.style.opacity = '0';
+            
             clearSearchHighlights();
+            
+            // Show all FAQ containers and remove search highlighting
+            const faqContainers = document.querySelectorAll('.faq-container');
+            faqContainers.forEach(container => {
+                container.classList.remove('search-matched');
+                container.style.display = 'block';
+            });
             
             // Close all expanded FAQs
             const openAnswers = document.querySelectorAll('.faq-answer.active');
             openAnswers.forEach(answer => {
                 const question = answer.previousElementSibling;
-                question.click();
+                if (question) question.click();
             });
         }
 
@@ -865,6 +976,9 @@
     
     <!-- Gentle Purchase Call-to-Action Footer -->
     <div style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; text-align: center; padding: 40px 20px; margin-top: 40px;">
+
+    <div style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; text-align: center; padding: 40px 20px; margin-top: 40px;">
+
         <div style="max-width: 600px; margin: 0 auto;">
             <h3 style="margin: 0 0 15px 0; font-size: 1.5em; color: white;">✨ ¿Listo para Poseer HyperFiler Pro?</h3>
             <p style="margin: 0 0 25px 0; opacity: 0.9; font-size: 1.1em; line-height: 1.6;">Has aprendido sobre todas las características poderosas. Experiméntalas con acceso de prueba ilimitado, luego compra tu licencia profesional cuando estés listo.</p>

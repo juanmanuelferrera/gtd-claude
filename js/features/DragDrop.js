@@ -243,11 +243,14 @@ class DragDropManager {
         if (typeof saveTasksToLocalStorage === 'function') {
             saveTasksToLocalStorage();
         }
-        if (typeof uploadAllTasks === 'function') {
-            await uploadAllTasks();
-        }
         if (typeof sortTasks === 'function') {
             sortTasks();
+        }
+        // Sync to cloud in background - don't wait for it
+        if (typeof uploadAllTasks === 'function') {
+            uploadAllTasks().catch(error => {
+                console.error('Background sync failed during drag and drop:', error);
+            });
         }
     }
 

@@ -4,10 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>⚡ HyperFiler Pro 🚀 - v4.1</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.1.6-PAYMENT-DEBUG-FIX</title>
     
     <script>
+    // Configure API base URL for authentication
+    window.API_BASE = window.location.hostname.includes('localhost') 
+        ? 'http://localhost:8787' 
+        : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
+    console.log('🌐 API_BASE configured:', window.API_BASE);
+    
     console.log('🔥 HTML FILE LOADED - VERSION WITH INLINE FIX');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
@@ -40,10 +47,23 @@
                 }
             };
             console.log('✅ Emergency Lists sync fix applied');
+            
+            // Initialize UI components including keyboard navigation
+            if (typeof initializeUI === 'function') {
+                initializeUI();
+                console.log('🎹 UI initialized with keyboard navigation');
+            } else {
+                console.error('❌ initializeUI function not found');
+            }
         }, 2000); // Wait 2 seconds for everything to load
     });
     </script>
     
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="styles/main.css?v=1736363200">
+    <link rel="stylesheet" href="styles/components.css?v=1736363200">
+    
+    <!-- Remove this once external CSS is verified working:
     <style>
         * {
             margin: 0;
@@ -51,33 +71,46 @@
             box-sizing: border-box;
         }
 
-        /* ========== THINGS APP DESIGN SYSTEM ========== */
+        /* ========== HYPERFILER PRO DESIGN SYSTEM ========== */
         :root {
-            /* Things-inspired Color Palette */
-            --things-bg: #ffffff;
-            --things-surface: #f8f9fa;
-            --things-border: #e5e5e7;
-            --things-text: #1d1d1f;
-            --things-text-secondary: #666666;
-            --things-text-tertiary: #8e8e93;
-            --things-accent: #007aff;
-            --things-success: #34c759;
-            --things-warning: #ff9500;
-            --things-danger: #ff3b30;
-            --things-shadow: rgba(0, 0, 0, 0.05);
-            --things-shadow-elevated: rgba(0, 0, 0, 0.1);
+            /* HyperFiler Pro Color Palette - Matching Website */
+            --hyperfiler-primary: #2563eb;
+            --hyperfiler-primary-dark: #1e40af;
+            --hyperfiler-accent: #0ea5e9;
+            --hyperfiler-accent-dark: #0284c7;
+            
+            --things-bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --things-surface: rgba(255, 255, 255, 0.9);
+            --things-border: rgba(37, 99, 235, 0.1);
+            --things-text: #1e293b;
+            --things-text-secondary: #475569;
+            --things-text-tertiary: #64748b;
+            --things-accent: var(--hyperfiler-primary);
+            --things-success: #10b981;
+            --things-warning: #f59e0b;
+            --things-danger: #ef4444;
+            --things-shadow: rgba(37, 99, 235, 0.08);
+            --things-shadow-elevated: rgba(37, 99, 235, 0.15);
+            
+            /* Gradient backgrounds */
+            --gradient-primary: linear-gradient(135deg, var(--hyperfiler-primary) 0%, var(--hyperfiler-primary-dark) 100%);
+            --gradient-accent: linear-gradient(45deg, var(--hyperfiler-accent), var(--hyperfiler-accent-dark));
+            --gradient-surface: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --things-bg: #000000;
-                --things-surface: #1c1c1e;
-                --things-border: #2c2c2e;
-                --things-text: #ffffff;
-                --things-text-secondary: #98989d;
-                --things-text-tertiary: #636366;
-                --things-shadow: rgba(0, 0, 0, 0.3);
-                --things-shadow-elevated: rgba(0, 0, 0, 0.5);
+                --things-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                --things-surface: rgba(30, 41, 59, 0.9);
+                --things-border: rgba(37, 99, 235, 0.2);
+                --things-text: #f8fafc;
+                --things-text-secondary: #cbd5e1;
+                --things-text-tertiary: #94a3b8;
+                --things-shadow: rgba(37, 99, 235, 0.12);
+                --things-shadow-elevated: rgba(37, 99, 235, 0.25);
+                
+                /* Dark mode gradients */
+                --gradient-surface: linear-gradient(145deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.9));
             }
         }
 
@@ -192,8 +225,11 @@
         }
 
         .header-section {
-            background: inherit;
-            padding: 2px 0;
+            background: var(--gradient-surface);
+            padding: 20px 0;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--things-border);
+            box-shadow: 0 4px 20px var(--things-shadow);
         }
         
         .container {
@@ -210,34 +246,38 @@
                 justify-content: flex-start;
                 width: 100%;
                 background: transparent !important;
-                color: #2d3748 !important;
+                color: var(--things-text) !important;
                 font-weight: 500;
                 padding: 14px 20px;
-                border-radius: 8px;
+                border-radius: 12px;
                 font-size: 15px;
-                margin-bottom: 3px;
+                margin-bottom: 6px;
                 flex: unset;
                 text-align: left;
                 min-height: 44px;
                 border: none !important;
-                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 position: relative;
+                backdrop-filter: blur(10px);
             }
             
             .nav-btn:hover {
-                background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%) !important;
+                background: var(--gradient-surface) !important;
+                transform: translateX(4px);
+                box-shadow: 0 8px 25px var(--things-shadow-elevated);
                 color: #1a202c !important;
                 transform: translateX(2px);
                 box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
             }
             
             .nav-btn.active {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+                background: var(--gradient-primary) !important;
                 color: white !important;
                 font-weight: 600;
-                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25) !important;
+                box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3) !important;
                 border: none !important;
                 padding-left: 20px;
+                transform: translateX(4px);
             }
             
             .nav-btn.active::before {
@@ -1236,15 +1276,17 @@
         }
 
         .task-card {
-            border-left: 4px solid var(--things-border);
-            padding: 16px 20px; /* Things generous padding */
-            border-bottom: 1px solid var(--things-border);
-            background: var(--things-bg);
-            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring easing */
+            border-left: 4px solid var(--hyperfiler-accent);
+            padding: 16px 20px;
+            border-bottom: none;
+            background: var(--gradient-surface);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--things-border);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             cursor: pointer;
-            margin-bottom: 8px; /* Things rhythm spacing */
-            border-radius: 8px; /* Soft corners like Things */
-            box-shadow: 0 1px 3px var(--things-shadow);
+            margin-bottom: 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px var(--things-shadow);
         }
 
         .task-card:last-child {
@@ -1252,9 +1294,10 @@
         }
 
         .task-card:hover {
-            background: var(--things-surface);
-            transform: translateY(-1px); /* Subtle lift like Things */
-            box-shadow: 0 4px 12px var(--things-shadow-elevated);
+            background: var(--gradient-surface);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px var(--things-shadow-elevated);
+            border-color: var(--hyperfiler-accent);
         }
 
         .task-card.completed {
@@ -3524,7 +3567,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient-primary);
             opacity: 1;
         }
         
@@ -3652,7 +3695,7 @@
         /* Dark mode support */
         @media (prefers-color-scheme: dark) {
             .header-gradient-bg {
-                background: linear-gradient(135deg, #4c5fd5 0%, #5a3e8a 100%);
+                background: var(--gradient-primary);
             }
             
             .header-search-input {
@@ -3758,7 +3801,7 @@
             }
         }
         
-    </style>
+    </style> -->
 </head>
 <body>
     <!-- Modern Mobile App Header with Gradient & Glass Morphism -->
@@ -5521,6 +5564,10 @@
                                     <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+N</kbd>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="font-size: 13px; color: #495057;">⚡ Quick add task</span>
+                                    <kbd style="background: #28a745; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: 600;">N</kbd>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <span style="font-size: 13px; color: #495057;">Save task (in modal)</span>
                                     <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Enter</kbd>
                                 </div>
@@ -5783,53 +5830,15 @@
     <script src="js/core/DateUtils.js?v=20250108-2"></script>
     <script src="js/core/TaskUtils.js?v=20250108-2"></script>
     <script src="js/core/TemplateProcessor.js?v=20250108-2"></script>
+    <script src="js/core/ModalManager.js?v=20250108-2"></script>
+    <script src="js/core/StateManager.js?v=20250108-2"></script>
     
-    <!-- Original modules -->
-    <script src="js/globals.js?v=1736362446"></script>
-    <script src="js/utils.js?v=1736362446"></script>
-    <script src="js/auth.js?v=1736362446"></script>
-    <script src="js/tasks.js?v=1736362446"></script>
-    <script src="js/ui.js?v=1736362446"></script>
-    <script src="js/sync.js?v=1736362446"></script>
-    <script src="js/missing-functions.js?v=1736362446"></script>
-    <script src="js/natural-language.js?v=1736362446"></script>
-    <script src="js/patches.js?v=1736362446"></script>
+    <!-- Complete application implementation -->
+    <script src="extracted_js.js?v=20250109"></script>
+    
+    <!-- Enhanced features (load after core implementation) -->
+    <script src="js/features/DragDrop.js?v=20250109"></script>
 
-    <!-- CACHE BYPASS: Inline fixed saveListSections function -->
-    <script>
-    // Override the broken saveListSections function - v2.0.7 working version
-    window.saveListSections = async function() {
-        console.log('🚀 INLINE saveListSections called - bypassing cache');
-        console.log('📋 Saving', window.listSections?.length || 0, 'list sections');
-        try {
-            localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
-            console.log('💾 Saved to localStorage');
-            
-            // Set flag to prevent downloads from overwriting changes
-            window.justModifiedLists = true;
-            console.log('🔒 Set justModifiedLists flag');
-            
-            // Upload to server
-            if (typeof uploadAllLists === 'function') {
-                console.log('📤 Calling uploadAllLists...');
-                await uploadAllLists();
-                console.log('✅ uploadAllLists completed');
-            } else {
-                console.error('❌ uploadAllLists function not found!');
-            }
-            
-            // Clear flag after successful upload
-            setTimeout(() => {
-                window.justModifiedLists = false;
-                console.log('🔓 Cleared justModifiedLists flag');
-            }, 5000);
-            
-        } catch (error) {
-            console.error('❌ Error saving list sections:', error);
-        }
-    };
-    console.log('✅ Inline saveListSections override loaded');
-    </script>
 
     <!-- Floating Action Button (FAB) for Quick Add Task -->
     <button id="fabAddTask" onclick="openAddTaskModal()" class="floating-add-btn" style="
@@ -6012,69 +6021,69 @@
             width: 36px;
             height: 4px;
             background: rgba(0, 0, 0, 0.2);
-            border-radius: 2px;
-            cursor: pointer;
-        "></div>
-    </div>
-
-    <style>
-        /* Hover effects for selection toolbar buttons */
-        .selection-toolbar-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-        }
-
-        .selection-toolbar-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Safe area padding for mobile */
-        @supports (padding-bottom: env(safe-area-inset-bottom)) {
-            #floatingSelectionToolbar {
-                padding-bottom: calc(16px + env(safe-area-inset-bottom));
-            }
-        }
-
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            #floatingSelectionToolbar {
-                background: rgba(30, 30, 30, 0.92);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-            }
-        }
-
-        /* Animation keyframes */
-        @keyframes slideUpToolbar {
-            from {
-                bottom: -200px;
-                opacity: 0;
-            }
-            to {
-                bottom: 16px;
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideDownToolbar {
-            from {
-                bottom: 16px;
-                opacity: 1;
-            }
-            to {
-                bottom: -200px;
-                opacity: 0;
-            }
-        }
-
-        /* Show/hide animations */
-        #floatingSelectionToolbar.showing {
-            animation: slideUpToolbar 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
-
-        #floatingSelectionToolbar.hiding {
-            animation: slideDownToolbar 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
-    </style>
+<!--             border-radius: 2px;
+<!--             cursor: pointer;
+<!--         "></div>
+<!--     </div>
+<!-- 
+<!--     <style>
+<!--         /* Hover effects for selection toolbar buttons */
+<!--         .selection-toolbar-btn:hover {
+<!--             transform: scale(1.05);
+<!--             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+<!--         }
+<!-- 
+<!--         .selection-toolbar-btn:active {
+<!--             transform: scale(0.98);
+<!--         }
+<!-- 
+<!--         /* Safe area padding for mobile */
+<!--         @supports (padding-bottom: env(safe-area-inset-bottom)) {
+<!--             #floatingSelectionToolbar {
+<!--                 padding-bottom: calc(16px + env(safe-area-inset-bottom));
+<!--             }
+<!--         }
+<!-- 
+<!--         /* Dark mode support */
+<!--         @media (prefers-color-scheme: dark) {
+<!--             #floatingSelectionToolbar {
+<!--                 background: rgba(30, 30, 30, 0.92);
+<!--                 border: 1px solid rgba(255, 255, 255, 0.1);
+<!--             }
+<!--         }
+<!-- 
+<!--         /* Animation keyframes */
+<!--         @keyframes slideUpToolbar {
+<!--             from {
+<!--                 bottom: -200px;
+<!--                 opacity: 0;
+<!--             }
+<!--             to {
+<!--                 bottom: 16px;
+<!--                 opacity: 1;
+<!--             }
+<!--         }
+<!-- 
+<!--         @keyframes slideDownToolbar {
+<!--             from {
+<!--                 bottom: 16px;
+<!--                 opacity: 1;
+<!--             }
+<!--             to {
+<!--                 bottom: -200px;
+<!--                 opacity: 0;
+<!--             }
+<!--         }
+<!-- 
+<!--         /* Show/hide animations */
+<!--         #floatingSelectionToolbar.showing {
+<!--             animation: slideUpToolbar 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+<!--         }
+<!-- 
+<!--         #floatingSelectionToolbar.hiding {
+<!--             animation: slideDownToolbar 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+<!--         }
+<!--     </style> -->
     
     <!-- Mobile filter update -->
     <script>
@@ -6111,19 +6120,540 @@
                 
                 container.innerHTML = `
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="var sel=this.value; document.querySelectorAll('.time-slot-task,[data-task-id]').forEach(function(el){if(!sel){el.style.display='block'}else{el.style.display=el.textContent.toLowerCase().includes(sel.toLowerCase())?'block':'none'}});">
+                        <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="filterTimeSlotsByPattern(this.value);">
                             ` + optionsHtml + `
                         </select>
-                        <button onclick="document.getElementById('todayMobileFilter').value=''; document.querySelectorAll('.time-slot-task,[data-task-id]').forEach(function(el){el.style.display='block'});" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">Clear All</button>
+                        <button onclick="clearPatternFilter();" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">Clear All</button>
                     </div>
                 `;
             }
+        }
+        
+        // Pattern filtering functions for time slots
+        function filterTimeSlotsByPattern(selectedPattern) {
+            if (!selectedPattern) {
+                clearPatternFilter();
+                return;
+            }
+            
+            // Find all time slot containers (they contain time slot headers and tasks)
+            const timeSlots = document.querySelectorAll('.time-slot, [class*="time-slot"], .schedule-section');
+            
+            timeSlots.forEach(function(timeSlot) {
+                // Check if this time slot contains any tasks with the selected pattern
+                const tasks = timeSlot.querySelectorAll('.time-slot-task, [data-task-id], .task');
+                let hasMatchingTask = false;
+                
+                tasks.forEach(function(task) {
+                    const taskText = task.textContent.toLowerCase();
+                    if (taskText.includes(selectedPattern.toLowerCase())) {
+                        hasMatchingTask = true;
+                        task.style.display = 'block';
+                    } else {
+                        task.style.display = 'none';
+                    }
+                });
+                
+                // Show/hide the entire time slot based on whether it has matching tasks
+                if (hasMatchingTask) {
+                    timeSlot.style.display = 'block';
+                } else {
+                    timeSlot.style.display = 'none';
+                }
+            });
+            
+            // Also handle standalone tasks not in time slots
+            const standaloneTasks = document.querySelectorAll('.time-slot-task:not(.time-slot .time-slot-task), [data-task-id]:not(.time-slot [data-task-id])');
+            standaloneTasks.forEach(function(task) {
+                const taskText = task.textContent.toLowerCase();
+                task.style.display = taskText.includes(selectedPattern.toLowerCase()) ? 'block' : 'none';
+            });
+        }
+        
+        function clearPatternFilter() {
+            document.getElementById('todayMobileFilter').value = '';
+            
+            // Show all time slots
+            const timeSlots = document.querySelectorAll('.time-slot, [class*="time-slot"], .schedule-section');
+            timeSlots.forEach(function(timeSlot) {
+                timeSlot.style.display = 'block';
+            });
+            
+            // Show all tasks
+            const allTasks = document.querySelectorAll('.time-slot-task, [data-task-id], .task');
+            allTasks.forEach(function(task) {
+                task.style.display = 'block';
+            });
         }
         
         // Initialize mobile filter
         setTimeout(forceMobileUpdate, 1000);
         setTimeout(forceMobileUpdate, 3000);
         setTimeout(forceMobileUpdate, 5000);
+    </script>
+
+    <!-- Trial Email Capture Modal -->
+    <div id="trialEmailModal" class="trial-modal-overlay" style="display: none;">
+        <div class="trial-modal">
+            <div class="trial-modal-header">
+                <div class="trial-logo">
+                    <span>⚡</span>
+                    <h2>Welcome to HyperFiler Pro</h2>
+                    <span>🚀</span>
+                </div>
+                <p class="trial-subtitle">Start your free trial - just enter your email to get started</p>
+            </div>
+            
+            <div class="trial-modal-body">
+                <div class="trial-benefits">
+                    <div class="benefit-item">✅ Full access to all features</div>
+                    <div class="benefit-item">✅ 60-day free trial</div>
+                    <div class="benefit-item">✅ No credit card required</div>
+                    <div class="benefit-item">✅ Cancel anytime</div>
+                </div>
+                
+                <form id="trialEmailForm" class="trial-form">
+                    <div class="trial-input-group">
+                        <input type="email" 
+                               id="trialEmail" 
+                               class="trial-email-input" 
+                               placeholder="Enter your email address" 
+                               required>
+                        <button type="submit" class="trial-submit-btn">
+                            <span>Start My Free Trial</span>
+                            <span class="btn-arrow">→</span>
+                        </button>
+                    </div>
+                    <p class="trial-privacy">We respect your privacy. No spam, ever.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onboarding Tour Modal -->
+    <div id="onboardingModal" class="onboarding-overlay" style="display: none;">
+        <div class="onboarding-modal">
+            <div class="onboarding-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="onboardingProgress"></div>
+                </div>
+                <span class="progress-text">Step <span id="currentStep">1</span> of 4</span>
+            </div>
+            
+            <div class="onboarding-content" id="onboardingContent">
+                <!-- Content will be dynamically loaded -->
+            </div>
+            
+            <div class="onboarding-actions">
+                <button id="skipOnboarding" class="onboarding-btn secondary">Skip</button>
+                <button id="nextOnboarding" class="onboarding-btn primary">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    /* Trial Email Modal Styles */
+    .trial-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .trial-modal {
+        background: linear-gradient(145deg, #ffffff, #f8f9fa);
+        border-radius: 24px;
+        padding: 40px;
+        max-width: 480px;
+        width: 90%;
+        box-shadow: 0 30px 80px rgba(37, 99, 235, 0.15);
+        border: 1px solid rgba(37, 99, 235, 0.1);
+        position: relative;
+        animation: slideUp 0.4s ease;
+    }
+
+    .trial-modal-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .trial-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .trial-logo span {
+        font-size: 1.5em;
+    }
+
+    .trial-logo h2 {
+        font-size: 1.8em;
+        font-weight: 700;
+        color: #1d1d1f;
+        margin: 0;
+    }
+
+    .trial-subtitle {
+        color: #666;
+        font-size: 1.1em;
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    .trial-benefits {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 30px;
+    }
+
+    .benefit-item {
+        font-size: 0.9em;
+        color: #2563eb;
+        font-weight: 500;
+    }
+
+    .trial-input-group {
+        position: relative;
+        margin-bottom: 16px;
+    }
+
+    .trial-email-input {
+        width: 100%;
+        padding: 16px 20px;
+        border: 2px solid #e5e5e7;
+        border-radius: 12px;
+        font-size: 1.1em;
+        background: white;
+        transition: all 0.2s ease;
+        margin-bottom: 16px;
+    }
+
+    .trial-email-input:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .trial-submit-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        border: none;
+        padding: 16px 24px;
+        border-radius: 12px;
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .trial-submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+    }
+
+    .trial-privacy {
+        text-align: center;
+        font-size: 0.85em;
+        color: #8e8e93;
+        margin: 0;
+    }
+
+    /* Onboarding Modal Styles */
+    .onboarding-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .onboarding-modal {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        animation: slideUp 0.4s ease;
+    }
+
+    .onboarding-progress {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .progress-bar {
+        flex: 1;
+        height: 4px;
+        background: #e5e5e7;
+        border-radius: 2px;
+        margin-right: 16px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #2563eb, #1d4ed8);
+        border-radius: 2px;
+        transition: width 0.3s ease;
+        width: 25%;
+    }
+
+    .progress-text {
+        font-size: 0.9em;
+        color: #666;
+        white-space: nowrap;
+    }
+
+    .onboarding-content {
+        min-height: 200px;
+        margin-bottom: 30px;
+    }
+
+    .onboarding-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+
+    .onboarding-btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .onboarding-btn.secondary {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+    .onboarding-btn.primary {
+        background: #2563eb;
+        color: white;
+    }
+
+    .onboarding-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 640px) {
+        .trial-modal, .onboarding-modal {
+            margin: 20px;
+            padding: 30px 24px;
+        }
+        
+        .trial-benefits {
+            grid-template-columns: 1fr;
+        }
+    }
+    </style>
+
+    <script>
+    // Trial and Onboarding System
+    (function() {
+        // Check URL parameters for trial or demo mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const isTrial = urlParams.get('trial') === 'true';
+        const isDemo = urlParams.get('demo') === 'true';
+        
+        // Check if user has already provided email
+        const trialEmail = localStorage.getItem('hyperfiler_trial_email');
+        
+        // Show appropriate modal based on context
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isTrial && !trialEmail) {
+                setTimeout(() => showTrialEmailModal(), 500);
+            } else if (isDemo || (isTrial && trialEmail)) {
+                setTimeout(() => showOnboarding(), 800);
+            }
+        });
+        
+        function showTrialEmailModal() {
+            document.getElementById('trialEmailModal').style.display = 'flex';
+            document.getElementById('trialEmail').focus();
+        }
+        
+        function hideTrialEmailModal() {
+            document.getElementById('trialEmailModal').style.display = 'none';
+        }
+        
+        function showOnboarding() {
+            document.getElementById('onboardingModal').style.display = 'flex';
+            startOnboardingTour();
+        }
+        
+        function hideOnboarding() {
+            document.getElementById('onboardingModal').style.display = 'none';
+        }
+        
+        // Handle trial email form submission
+        document.getElementById('trialEmailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('trialEmail').value;
+            
+            if (email) {
+                // Save email to localStorage
+                localStorage.setItem('hyperfiler_trial_email', email);
+                localStorage.setItem('hyperfiler_trial_start', Date.now().toString());
+                
+                // Hide email modal and start onboarding
+                hideTrialEmailModal();
+                setTimeout(() => showOnboarding(), 300);
+            }
+        });
+        
+        // Onboarding tour system
+        let currentOnboardingStep = 1;
+        const totalSteps = 4;
+        
+        const onboardingSteps = [
+            {
+                title: "🗣️ Talk Naturally",
+                content: `
+                    <h3 style="margin-bottom: 16px;">Type tasks exactly how you think them</h3>
+                    <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; margin: 16px 0; border-left: 4px solid #2563eb;">
+                        <div style="font-family: monospace; color: #2563eb;">"Call dentist tomorrow 2pm"</div>
+                    </div>
+                    <p style="color: #666; line-height: 1.5;">HyperFiler Pro automatically understands dates, times, and contexts. No complicated forms or dropdowns.</p>
+                `,
+                action: "Try typing a task in natural language!"
+            },
+            {
+                title: "📅 Visual Planning",
+                content: `
+                    <h3 style="margin-bottom: 16px;">See your tasks across Today, Week, and Month</h3>
+                    <p style="color: #666; line-height: 1.5; margin-bottom: 16px;">Switch between different views to plan your time effectively:</p>
+                    <ul style="color: #666; line-height: 1.8;">
+                        <li><strong>Today</strong> - Focus on what matters now</li>
+                        <li><strong>Week</strong> - Plan your weekly schedule</li>
+                        <li><strong>Month</strong> - See the big picture</li>
+                    </ul>
+                `,
+                action: "Use the view tabs at the bottom to explore!"
+            },
+            {
+                title: "🎯 Time Blocking",
+                content: `
+                    <h3 style="margin-bottom: 16px;">Drag tasks to perfect time slots</h3>
+                    <p style="color: #666; line-height: 1.5; margin-bottom: 16px;">Simply drag and drop tasks to reschedule them. HyperFiler Pro makes time management visual and intuitive.</p>
+                    <div style="background: #f0f9ff; padding: 16px; border-radius: 12px; margin: 16px 0;">
+                        <div style="font-size: 0.9em; color: #0369a1;">💡 <strong>Pro Tip:</strong> Tasks automatically flow to their optimal time slots based on your patterns.</div>
+                    </div>
+                `,
+                action: "Try dragging a task to a different time!"
+            },
+            {
+                title: "🚀 You're Ready!",
+                content: `
+                    <h3 style="margin-bottom: 16px;">Start managing your tasks like a pro</h3>
+                    <p style="color: #666; line-height: 1.5; margin-bottom: 16px;">You now have full access to HyperFiler Pro for 60 days. Here's what you can do:</p>
+                    <ul style="color: #666; line-height: 1.8;">
+                        <li>Create unlimited tasks and projects</li>
+                        <li>Use natural language processing</li>
+                        <li>Export your data anytime</li>
+                        <li>Enjoy distraction-free productivity</li>
+                    </ul>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div style="font-size: 1.1em; color: #2563eb; font-weight: 600;">Happy organizing! ⚡</div>
+                    </div>
+                `,
+                action: "Close this guide and start being productive!"
+            }
+        ];
+        
+        function startOnboardingTour() {
+            updateOnboardingStep();
+        }
+        
+        function updateOnboardingStep() {
+            const step = onboardingSteps[currentOnboardingStep - 1];
+            const content = document.getElementById('onboardingContent');
+            const progress = document.getElementById('onboardingProgress');
+            const currentStepEl = document.getElementById('currentStep');
+            const nextBtn = document.getElementById('nextOnboarding');
+            
+            content.innerHTML = `
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 2em; margin-bottom: 8px;">${step.title.split(' ')[0]}</div>
+                    <h2 style="color: #1d1d1f; margin: 0;">${step.title.substring(2)}</h2>
+                </div>
+                ${step.content}
+            `;
+            
+            progress.style.width = `${(currentOnboardingStep / totalSteps) * 100}%`;
+            currentStepEl.textContent = currentOnboardingStep;
+            
+            nextBtn.textContent = currentOnboardingStep === totalSteps ? 'Get Started!' : 'Next';
+        }
+        
+        // Onboarding navigation
+        document.getElementById('nextOnboarding').addEventListener('click', function() {
+            if (currentOnboardingStep < totalSteps) {
+                currentOnboardingStep++;
+                updateOnboardingStep();
+            } else {
+                hideOnboarding();
+            }
+        });
+        
+        document.getElementById('skipOnboarding').addEventListener('click', function() {
+            hideOnboarding();
+        });
+        
+        // Close modals on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideTrialEmailModal();
+                hideOnboarding();
+            }
+        });
+        
+    })();
     </script>
 
 </body>
