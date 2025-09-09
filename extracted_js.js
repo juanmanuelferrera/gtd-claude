@@ -40,7 +40,7 @@
             
             // Remove dangerous characters and scripts
             return input
-                .replace(/)<[^<]*)*<\/script>/gi, '')
+                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
                 .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
                 .replace(/javascript:/gi, '')
                 .replace(/on\w+\s*=/gi, '')
