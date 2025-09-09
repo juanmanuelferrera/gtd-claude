@@ -1096,7 +1096,6 @@ function updateCurrentTodayDisplay() {
     if (displayElement) {
         const fullOptions = {
             weekday: 'long',
-            year: 'numeric',
             month: 'long',
             day: 'numeric'
         };
