@@ -342,15 +342,23 @@
             // Clear previous debounce
             clearTimeout(debounceTimer);
             
-            // Debounce parsing to avoid excessive processing
+            // First pass: Quick date/time extraction without modifying text (100ms)
+            setTimeout(() => {
+                const parsed = parseNaturalLanguage(value);
+                if (parsed) {
+                    applyParsedData(parsed, titleInput, true); // Real-time mode - no title changes
+                }
+            }, 100);
+            
+            // Second pass: Full processing with title cleanup after user stops typing (1.5s)
             debounceTimer = setTimeout(() => {
-                console.log('🔍 NL Debug: Parsing:', value);
+                console.log('🔍 NL Debug: Full parsing after delay:', value);
                 const parsed = parseNaturalLanguage(value);
                 console.log('🔍 NL Debug: Parsed result:', parsed);
                 if (parsed) {
-                    applyParsedData(parsed, titleInput);
+                    applyParsedData(parsed, titleInput, false); // Allow title updates
                 }
-            }, 300);
+            }, 1500);
         }
         
         function applyParsedData(parsed, titleElement, isRealtimeTyping = true) {
@@ -432,22 +440,9 @@
             }, 1000);
         }
         
-        // Handle final cleanup when user finishes typing
-        function handleBlur() {
-            const value = titleInput.value;
-            if (!value || value.length < 3) return;
-            
-            console.log('🔍 NL Debug: Blur - final cleanup:', value);
-            const parsed = parseNaturalLanguage(value);
-            if (parsed) {
-                applyParsedData(parsed, titleInput, false); // Not real-time, allow title updates
-            }
-        }
-        
         // Attach event listeners
         titleInput.addEventListener('input', handleInput);
         titleInput.addEventListener('paste', () => setTimeout(handleInput, 10));
-        titleInput.addEventListener('blur', handleBlur);
         
         // Add placeholder hint
         const originalPlaceholder = titleInput.placeholder;
