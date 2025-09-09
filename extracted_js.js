@@ -3494,20 +3494,40 @@
                     }
                     break;
                 case 'week':
-                    renderWeekView();
+                    if (typeof renderWeekView === 'function') {
+                        renderWeekView();
+                    } else {
+                        console.warn('⚠️ renderWeekView not yet defined');
+                    }
                     break;
                 case 'repeat':
-                    renderRepeatView();
+                    if (typeof renderRepeatView === 'function') {
+                        renderRepeatView();
+                    } else {
+                        console.warn('⚠️ renderRepeatView not yet defined');
+                    }
                     break;
                 case 'tasks':
-                    showView('tasks');
+                    if (typeof showView === 'function') {
+                        showView('tasks');
+                    } else {
+                        console.warn('⚠️ showView not yet defined');
+                    }
                     break;
                 case 'lists':
-                    renderListsView();
+                    if (typeof renderListsView === 'function') {
+                        renderListsView();
+                    } else {
+                        console.warn('⚠️ renderListsView not yet defined');
+                    }
                     break;
                 default:
                     // Default to today view
-                    showView('today');
+                    if (typeof showView === 'function') {
+                        showView('today');
+                    } else {
+                        console.warn('⚠️ showView not yet defined');
+                    }
             }
         }
         // Setup mobile touch events for better focus behavior
@@ -3952,7 +3972,11 @@
                 }
                 if (event.ctrlKey && event.key === 'w') {
                     event.preventDefault();
-                    showView('week');
+                    if (typeof showView === 'function') {
+                        showView('week');
+                    } else {
+                        console.warn('⚠️ showView not yet defined');
+                    }
                 }
                 if (event.ctrlKey && event.key === 'm') {
                     event.preventDefault();
@@ -3975,7 +3999,11 @@
                 if (event.ctrlKey && event.key === 't') {
                     event.preventDefault();
                     goToToday(); // Reset to today's date
-                    showView('today');
+                    if (typeof showView === 'function') {
+                        showView('today');
+                    } else {
+                        console.warn('⚠️ showView not yet defined');
+                    }
                 }
                 if (event.ctrlKey && event.key === 'y') {
                     event.preventDefault();
@@ -4060,7 +4088,11 @@
                 
                 // Load tasks from localStorage immediately to prevent empty state
                 console.log('📱 DEBUG: About to load tasks from localStorage');
-                loadTasksFromLocalStorage();
+                if (typeof loadTasksFromLocalStorage === 'function') {
+                    loadTasksFromLocalStorage();
+                } else {
+                    console.warn('⚠️ loadTasksFromLocalStorage not yet defined');
+                }
                 console.log('📱 DEBUG: After loadTasksFromLocalStorage, tasks.length:', tasks.length);
                 
                 // IMMEDIATE TOMBSTONE FILTERING - Prevent brief appearance of deleted tasks
@@ -4079,7 +4111,11 @@
                 // Set initial view immediately after loading tasks
                 const savedView = localStorage.getItem('currentView') || 'today';
                 console.log('📱 MOBILE DEBUG: About to call showView with:', savedView, 'Tasks loaded:', tasks.length);
-                showView(savedView); // Initialize the view properly
+                if (typeof showView === 'function') {
+                    showView(savedView);
+                } else {
+                    console.warn('⚠️ showView not yet defined');
+                } // Initialize the view properly
                 console.log('📱 MOBILE DEBUG: showView completed, currentView:', currentView);
                 
                 // Force update all displays immediately to prevent "Loading..." states
@@ -4096,14 +4132,22 @@
                 try {
                     renderCalendar();
                     renderWeekView();
-                    highlightCurrentDay();
+                    if (typeof highlightCurrentDay === 'function') {
+                highlightCurrentDay();
+            } else {
+                console.warn('⚠️ highlightCurrentDay not yet defined');
+            }
                 } catch (calendarError) {
                     console.error('Error rendering calendar/week:', calendarError);
                 }
                 
                 // Show initial view
                 try {
-                    showView('today');
+                    if (typeof showView === 'function') {
+                        showView('today');
+                    } else {
+                        console.warn('⚠️ showView not yet defined');
+                    }
                 } catch (viewError) {
                     console.error('Error setting initial view:', viewError);
                 }
@@ -4473,7 +4517,11 @@
                     searchInput.focus();
                 }
             };
-            showView('all');
+            if (typeof showView === 'function') {
+                showView('all');
+            } else {
+                console.warn('⚠️ showView not yet defined');
+            }
             setTimeout(() => {
                 const searchInput = document.getElementById('allTasksSearchInput');
                 if (searchInput) {
@@ -9178,7 +9226,11 @@
                 }
             } else if (viewName === 'week') {
                 renderWeekView();
+                if (typeof highlightCurrentDay === 'function') {
                 highlightCurrentDay();
+            } else {
+                console.warn('⚠️ highlightCurrentDay not yet defined');
+            }
                 // Restore persistent highlighting after render
                 if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
                     PERSISTENT_TASK_SELECTION.restoreAfterRender();
@@ -9187,7 +9239,11 @@
                 }
             } else if (viewName === 'calendar') {
                 renderCalendar();
+                if (typeof highlightCurrentDay === 'function') {
                 highlightCurrentDay();
+            } else {
+                console.warn('⚠️ highlightCurrentDay not yet defined');
+            }
                 // Restore persistent highlighting after render
                 if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
                     PERSISTENT_TASK_SELECTION.restoreAfterRender();
@@ -9265,7 +9321,11 @@
                 }
             } else if (currentView === 'week') {
                 renderWeekView();
+                if (typeof highlightCurrentDay === 'function') {
                 highlightCurrentDay();
+            } else {
+                console.warn('⚠️ highlightCurrentDay not yet defined');
+            }
                 // Restore persistent highlighting after render
                 if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
                     PERSISTENT_TASK_SELECTION.restoreAfterRender();
@@ -9274,7 +9334,11 @@
                 }
             } else if (currentView === 'calendar') {
                 renderCalendar();
+                if (typeof highlightCurrentDay === 'function') {
                 highlightCurrentDay();
+            } else {
+                console.warn('⚠️ highlightCurrentDay not yet defined');
+            }
                 // Restore persistent highlighting after render
                 if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
                     PERSISTENT_TASK_SELECTION.restoreAfterRender();
@@ -10470,7 +10534,11 @@
                 
                 if (taskDateObj >= startOfWeek && taskDateObj <= endOfWeek) {
                     // This week's task
-                    showView('week');
+                    if (typeof showView === 'function') {
+                        showView('week');
+                    } else {
+                        console.warn('⚠️ showView not yet defined');
+                    }
                 } else {
                     // Other date - go to calendar view
                     showView('calendar');
@@ -11108,7 +11176,11 @@
         
         // Render Lists view
         function renderListsView() {
-            loadListSections();
+            if (typeof loadListSections === 'function') {
+                loadListSections();
+            } else {
+                console.warn('⚠️ loadListSections not yet defined');
+            }
             const container = document.getElementById('listsContainer');
             const emptyState = document.getElementById('noListSections');
             
@@ -12980,7 +13052,11 @@
         
         // Initialize lists on page load
         document.addEventListener('DOMContentLoaded', function() {
-            loadListSections();
+            if (typeof loadListSections === 'function') {
+                loadListSections();
+            } else {
+                console.warn('⚠️ loadListSections not yet defined');
+            }
         });
         
         // Ensure tab display mode is applied correctly on page load
@@ -15353,7 +15429,11 @@
         // Show All Tasks view filtered by specific date
         function showAllTasksForDate(dateStr) {
             // Switch to All Tasks view
-            showView('all');
+            if (typeof showView === 'function') {
+                showView('all');
+            } else {
+                console.warn('⚠️ showView not yet defined');
+            }
             
             // Set search input to the date to filter tasks (use YYYY-MM-DD format for search)
             const searchInput = document.getElementById('allTasksSearchInput');
@@ -18861,7 +18941,11 @@
         let selectedTasks = new Set();
         let currentFilteredTasks = []; // Store currently filtered tasks for printing
         function renderAllTasksView() {
-            showView('all');
+            if (typeof showView === 'function') {
+                showView('all');
+            } else {
+                console.warn('⚠️ showView not yet defined');
+            }
             performAllTasksSearch();
         }
         function performAllTasksSearch() {
@@ -22099,7 +22183,11 @@
                     break;
                 default:
                     // For views without search, go to All Tasks
-                    showView('all');
+                    if (typeof showView === 'function') {
+                showView('all');
+            } else {
+                console.warn('⚠️ showView not yet defined');
+            }
                     setTimeout(() => {
                         searchField = document.getElementById('allTasksSearchInput');
                         if (searchField) {
@@ -22136,7 +22224,11 @@
         // Go to All Tasks and focus search (Ctrl+A enhanced)
         function goToAllTasksSearch() {
             console.log('🔍 Navigating to All Tasks with search focus');
-            showView('all');
+            if (typeof showView === 'function') {
+                showView('all');
+            } else {
+                console.warn('⚠️ showView not yet defined');
+            }
             
             setTimeout(() => {
                 const searchField = document.getElementById('allTasksSearchInput');
@@ -25939,7 +26031,11 @@
                 event.preventDefault(); // Prevent browser select all
                 
                 // Switch to All Tasks view
+                if (typeof showView === 'function') {
                 showView('all');
+            } else {
+                console.warn('⚠️ showView not yet defined');
+            }
                 
                 // Focus the search field with a small delay to ensure view switch completes
                 setTimeout(() => {
