@@ -4164,7 +4164,11 @@
                 // Initialize calendar and week view
                 try {
                     renderCalendar();
-                    renderWeekView();
+                    if (typeof renderWeekView === 'function') {
+                        renderWeekView();
+                    } else {
+                        console.warn('⚠️ renderWeekView not yet defined');
+                    }
                     if (typeof highlightCurrentDay === 'function') {
                 highlightCurrentDay();
             } else {
