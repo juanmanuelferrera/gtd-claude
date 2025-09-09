@@ -1154,7 +1154,7 @@
             
             // Remove dangerous content
             const cleaned = input
-                .replace(/)<[^<]*)*<\/script>/gi, '')
+                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
                 .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
                 .replace(/javascript:/gi, '')
                 .replace(/on\w+\s*=/gi, '')
@@ -1178,7 +1178,7 @@
             
             // Remove dangerous content but don't limit length here
             const cleaned = notes
-                .replace(/)<[^<]*)*<\/script>/gi, '')
+                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
                 .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
                 .replace(/javascript:/gi, '')
                 .replace(/on\w+\s*=/gi, '')
