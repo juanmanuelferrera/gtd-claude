@@ -3488,11 +3488,7 @@
             switch (currentView) {
                 case 'today':
                     if (typeof renderTodayView === 'function') {
-                        if (typeof renderTodayView === 'function') {
-                renderTodayView();
-            } else {
-                console.warn('⚠️ renderTodayView not yet defined');
-            }
+                        renderTodayView();
                     } else {
                         console.warn('⚠️ renderTodayView not yet defined');
                     }
@@ -24442,7 +24438,11 @@
                 console.log('Loading settings values...');
                 
                 // First, load backup settings explicitly
-                loadBackupSettings();
+                if (typeof loadBackupSettings === 'function') {
+                    loadBackupSettings();
+                } else {
+                    console.warn('⚠️ loadBackupSettings not yet defined');
+                }
                 
                 // Load date format
                 const dateFormat = localStorage.getItem('dateFormat') || 'default';
@@ -25166,7 +25166,11 @@
                 const taskId = selectedTaskElement.getAttribute('data-task-id');
                 if (taskId) {
                     // Activate the bulletproof highlighting system
-                    PERSISTENT_TASK_SELECTION.activate(taskId, selectedTaskElement);
+                    if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                        PERSISTENT_TASK_SELECTION.activate(taskId, selectedTaskElement);
+                    } else {
+                        console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                    }
                     
                     // Start 500ms timer for amplifier (responsive)
                     TaskAmplifier.startShowTimer(selectedTaskElement);
@@ -25326,7 +25330,11 @@
             selectedTaskElement = null;
             
             // Deactivate the bulletproof highlighting system
-            PERSISTENT_TASK_SELECTION.deactivate();
+            if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                PERSISTENT_TASK_SELECTION.deactivate();
+            } else {
+                console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+            }
             
             // Hide the task amplifier and clear timers
             TaskAmplifier.hide();
@@ -26341,7 +26349,11 @@
                             // Activate persistent selection for the new task
                             const newTaskId = selectedTaskElement?.getAttribute('data-task-id');
                             if (newTaskId) {
-                                PERSISTENT_TASK_SELECTION.activate(newTaskId, selectedTaskElement);
+                                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                                    PERSISTENT_TASK_SELECTION.activate(newTaskId, selectedTaskElement);
+                                } else {
+                                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                                }
                             }
                         }
                     }
