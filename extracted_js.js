@@ -4141,8 +4141,16 @@
                 
                 // Defer non-critical backup operations
                 setTimeout(() => {
-                    scheduleBackupChecks();
-                    checkAllBackups();
+                    if (typeof scheduleBackupChecks === 'function') {
+                        scheduleBackupChecks();
+                    } else {
+                        console.warn('⚠️ scheduleBackupChecks not yet defined');
+                    }
+                    if (typeof checkAllBackups === 'function') {
+                        checkAllBackups();
+                    } else {
+                        console.warn('⚠️ checkAllBackups not yet defined');
+                    }
                 }, 100); // Quick defer for backups - reduced from 5000ms
                 // Initialize calendar and week view
                 try {
@@ -4241,7 +4249,11 @@
                     translateUI();
                     console.log('✅ UI translated to:', currentLanguage);
                     // Ensure keyboard-only mode is properly initialized after UI is ready
-                    initializeKeyboardOnlyMode();
+                    if (typeof initializeKeyboardOnlyMode === 'function') {
+                        initializeKeyboardOnlyMode();
+                    } else {
+                        console.warn('⚠️ initializeKeyboardOnlyMode not yet defined');
+                    }
                     // Update header buttons
                     updateHeaderLanguageButton();
                     updateHeaderKeyboardButton();
@@ -5863,16 +5875,24 @@
                     // MANDATORY REFRESH: Direct replacement with server data
                     if (window.forceMandatoryRefresh || window.staleBrowserMode) {
                         console.log('🚨 MANDATORY REFRESH: Directly replacing templates with server data');
-                        customTemplates = serverTemplates; // Update the variable
+                        if (typeof customTemplates !== 'undefined') {
+                            customTemplates = serverTemplates; // Update the variable
+                        } else {
+                            window.customTemplates = serverTemplates; // Initialize if undefined
+                        }
                         localStorage.setItem('gtdTemplates', JSON.stringify(serverTemplates)); // Update localStorage
                         renderTemplateButtons(); // Always refresh template buttons when data changes
                     } else {
                         // Normal sync: Compare with current customTemplates variable
-                        const localTemplates = customTemplates || [];
+                        const localTemplates = (typeof customTemplates !== 'undefined' ? customTemplates : []);
                         
                         // Simple comparison: if different, replace everything
                         if (JSON.stringify(serverTemplates) !== JSON.stringify(localTemplates)) {
-                            customTemplates = serverTemplates; // Update the variable
+                            if (typeof customTemplates !== 'undefined') {
+                                customTemplates = serverTemplates; // Update the variable
+                            } else {
+                                window.customTemplates = serverTemplates; // Initialize if undefined
+                            }
                             localStorage.setItem('gtdTemplates', JSON.stringify(serverTemplates)); // Update localStorage
                             renderTemplateButtons(); // Always refresh template buttons when data changes
                         }
@@ -6925,7 +6945,7 @@
                             userId: window.currentUser?.user?.id,
                             data: {
                                 tasks: JSON.parse(JSON.stringify(tasks)),
-                                templates: JSON.parse(JSON.stringify(customTemplates || [])),
+                                templates: JSON.parse(JSON.stringify(typeof customTemplates !== 'undefined' ? customTemplates : [])),
                                 listSections: JSON.parse(JSON.stringify(listSections || [])),
                                 settings: {
                                     language: localStorage.getItem('language') || 'en',
@@ -13228,7 +13248,11 @@
             if (!grid || !monthTitle) return;
             
             // Update the month display
-            updateCurrentMonthDisplay();
+            if (typeof updateCurrentMonthDisplay === 'function') {
+                updateCurrentMonthDisplay();
+            } else {
+                console.warn('⚠️ updateCurrentMonthDisplay not yet defined');
+            }
             
             const year = currentCalendarDate.getFullYear();
             const month = currentCalendarDate.getMonth();
