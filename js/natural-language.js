@@ -353,11 +353,12 @@
             }, 300);
         }
         
-        function applyParsedData(parsed, titleElement) {
+        function applyParsedData(parsed, titleElement, isRealtimeTyping = true) {
             console.log('🔍 NL Debug: Applying parsed data:', parsed);
             
-            // Update title field
-            if (parsed.title && parsed.title !== parsed.originalInput) {
+            // Don't update title field while actively typing to avoid interrupting user
+            // Only apply date/time parsing during real-time typing
+            if (!isRealtimeTyping && parsed.title && parsed.title !== parsed.originalInput) {
                 console.log('🔍 NL Debug: Updating title from', titleElement.value, 'to', parsed.title);
                 titleElement.value = parsed.title;
             }
@@ -431,9 +432,22 @@
             }, 1000);
         }
         
+        // Handle final cleanup when user finishes typing
+        function handleBlur() {
+            const value = titleInput.value;
+            if (!value || value.length < 3) return;
+            
+            console.log('🔍 NL Debug: Blur - final cleanup:', value);
+            const parsed = parseNaturalLanguage(value);
+            if (parsed) {
+                applyParsedData(parsed, titleInput, false); // Not real-time, allow title updates
+            }
+        }
+        
         // Attach event listeners
         titleInput.addEventListener('input', handleInput);
         titleInput.addEventListener('paste', () => setTimeout(handleInput, 10));
+        titleInput.addEventListener('blur', handleBlur);
         
         // Add placeholder hint
         const originalPlaceholder = titleInput.placeholder;
