@@ -754,9 +754,13 @@
 
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
             gap: 30px;
             margin-bottom: 60px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .feature {
@@ -1255,6 +1259,12 @@
 
             .concept-card, .pain-point, .benefit {
                 font-size: 1.1em;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+                max-width: 500px;
             }
 
             .metric-circle {
