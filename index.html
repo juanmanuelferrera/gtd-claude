@@ -1384,16 +1384,16 @@
 
         .table-header {
             display: grid;
-            grid-template-columns: 120px repeat(7, 1fr);
+            grid-template-columns: minmax(120px, auto) repeat(8, minmax(100px, 1fr));
             background: rgba(255, 255, 255, 0.15);
             border-bottom: 2px solid rgba(255, 255, 255, 0.2);
             font-weight: 700;
-            font-size: 0.85em;
+            font-size: 0.8em;
         }
 
         .table-row {
             display: grid;
-            grid-template-columns: 120px repeat(7, 1fr);
+            grid-template-columns: minmax(120px, auto) repeat(8, minmax(100px, 1fr));
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
@@ -1411,7 +1411,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.85em;
+            font-size: 0.8em;
+            line-height: 1.2;
         }
 
         .feature-col, .app-col {
