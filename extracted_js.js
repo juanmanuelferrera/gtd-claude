@@ -26213,17 +26213,37 @@
     } // Close the unclosed block scope
 } // Close any additional nested scope
 
+// Define keyboard navigation function
+function initializeKeyboardNavigation() {
+    console.log('⌨️ Setting up keyboard navigation');
+    
+    // Add N key for quick task entry
+    document.addEventListener('keydown', function(e) {
+        if ((e.key === 'n' || e.key === 'N') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            // Don't trigger if typing in input/textarea
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            e.preventDefault();
+            if (typeof openAddTaskModal === 'function') {
+                const todayStr = new Date().toISOString().split('T')[0];
+                openAddTaskModal(todayStr);
+                console.log('⚡ Quick add task activated with N key!');
+            }
+        }
+    });
+    
+    console.log('✅ Keyboard navigation ready - Press N for quick task entry');
+}
+
 // Define initializeUI function globally (outside any block scope)
 function initializeUI() {
     console.log('🎹 initializeUI called - setting up UI components');
     
-    // Initialize keyboard navigation if the function exists
-    if (typeof initializeKeyboardNavigation === 'function') {
-        initializeKeyboardNavigation();
-        console.log('⌨️ Keyboard navigation initialized');
-    } else {
-        console.warn('⚠️ initializeKeyboardNavigation function not found');
-    }
+    // Initialize keyboard navigation
+    initializeKeyboardNavigation();
+    console.log('⌨️ Keyboard navigation initialized');
     
     // Initialize mobile components if needed
     if (typeof setupMobileNavGestures === 'function') {
