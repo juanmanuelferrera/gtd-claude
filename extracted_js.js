@@ -9171,17 +9171,29 @@
                 console.warn('⚠️ renderTodayView not yet defined');
             }
                 // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
             } else if (viewName === 'week') {
                 renderWeekView();
                 highlightCurrentDay();
                 // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
             } else if (viewName === 'calendar') {
                 renderCalendar();
                 highlightCurrentDay();
                 // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
             } else if (viewName === 'stats') {
                 renderStats();
             } else if (viewName === 'lists') {
@@ -9246,17 +9258,29 @@
                 console.warn('⚠️ renderTodayView not yet defined');
             }
                 // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
             } else if (currentView === 'week') {
                 renderWeekView();
                 highlightCurrentDay();
                 // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
             } else if (currentView === 'calendar') {
                 renderCalendar();
                 highlightCurrentDay();
                 // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
             } else if (currentView === 'repeat') {
                 renderRepeatView();
             } else if (currentView === 'undo') {
@@ -14180,7 +14204,11 @@
                 console.log('🎯 Delaying task at index:', originalTaskIndex, 'ID:', originalTaskId);
                 
                 // CRITICAL: Deactivate persistent task selection to prevent restoring old selection
-                PERSISTENT_TASK_SELECTION.deactivate();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.deactivate();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
                 console.log('🎯 Deactivated persistent selection for delayed task');
                 
                 // OPTIMIZATION: Show immediate visual feedback (only if event has a button target)
@@ -14322,7 +14350,15 @@
                                         // Activate persistent selection for the new task
                                         const newTaskId = selectedTaskElement.getAttribute('data-task-id');
                                         if (newTaskId) {
+                                            if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                                                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
                                             PERSISTENT_TASK_SELECTION.activate(newTaskId, selectedTaskElement);
+                                        } else {
+                                            console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                                        }
+                                            } else {
+                                                console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                                            }
                                             console.log(`✅ Focus moved to next task at index ${targetIndex}, ID: ${newTaskId}`);
                                         } else {
                                             console.warn('⚠️ Selected element has no task ID');
@@ -14374,7 +14410,11 @@
                                     
                                     const newTaskId = selectedTaskElement?.getAttribute('data-task-id');
                                     if (newTaskId) {
-                                        PERSISTENT_TASK_SELECTION.activate(newTaskId, selectedTaskElement);
+                                        if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                                            PERSISTENT_TASK_SELECTION.activate(newTaskId, selectedTaskElement);
+                                        } else {
+                                            console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                                        }
                                     }
                                 } else {
                                     selectedTaskElement = null;
@@ -25824,7 +25864,11 @@
             clearSelection() {
                 selectedTaskIndex = -1;
                 selectedTaskElement = null;
-                PERSISTENT_TASK_SELECTION.deactivate();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.deactivate();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
             },
             
             // Enhanced task finding with better accuracy
