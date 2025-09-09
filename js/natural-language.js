@@ -213,6 +213,26 @@
                 })
             },
             
+            // Just temporal part: "tomorrow at 6am" (no task yet)
+            {
+                regex: /^(today|tomorrow)\s+at\s+(\d{1,2}(?::\d{2})?(?:am|pm)?)$/i,
+                parser: (match) => ({
+                    title: '', // No task title yet
+                    date: getDateForRelative(match[1]),
+                    time: normalizeTime(match[2])
+                })
+            },
+            
+            // Just date: "tomorrow" or "today" (no task yet)
+            {
+                regex: /^(today|tomorrow)$/i,
+                parser: (match) => ({
+                    title: '', // No task title yet
+                    date: getDateForRelative(match[1]),
+                    time: null
+                })
+            },
+            
             // Standard order without "at": "task tomorrow 6pm"
             {
                 regex: /^(.+?)\s+(today|tomorrow)\s+(\d{1,2}(?::\d{2})?(?:am|pm)?)$/i,
