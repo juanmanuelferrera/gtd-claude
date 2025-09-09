@@ -116,10 +116,6 @@
             50% { transform: translateX(-50%) scale(1.15); filter: drop-shadow(0 6px 20px rgba(255, 255, 0, 0.8)); }
         }
 
-        @keyframes rocketFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(5deg); }
-        }
 
         .hero-title {
             font-size: clamp(2.5em, 6vw, 5.5em);
@@ -657,44 +653,16 @@
         }
 
         .nav-logo {
-            font-size: 1.2em;
-            font-weight: 700;
-            color: white;
+            font-size: 1.5em;
+            font-weight: 900;
+            color: #2563eb;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         
-        .logo-bolt {
-            display: inline-block;
-            animation: energyPulse 2s ease-in-out infinite;
-        }
         
-        .logo-rocket {
-            display: inline-block;
-            animation: rocketFloat 3s ease-in-out infinite;
-        }
-        
-        @keyframes energyPulse {
-            0%, 100% { 
-                transform: scale(1);
-                filter: drop-shadow(0 0 5px rgba(255, 255, 0, 0.3));
-            }
-            50% { 
-                transform: scale(1.1);
-                filter: drop-shadow(0 0 10px rgba(255, 255, 0, 0.6));
-            }
-        }
-        
-        @keyframes rocketFloat {
-            0%, 100% { 
-                transform: translateY(0) rotate(0deg);
-            }
-            50% { 
-                transform: translateY(-2px) rotate(5deg);
-            }
-        }
 
         .nav-links {
             display: flex;
@@ -1932,7 +1900,7 @@
     <nav class="nav-header">
         <div class="nav-container">
             <a href="./index.html" class="nav-logo">
-                <span class="logo-bolt">⚡</span> HyperFiler Pro <span class="logo-rocket">🚀</span>
+                <span>⚡</span> HyperFiler Pro <span>🚀</span>
             </a>
             <div class="nav-links">
                 <a href="./readme.html">📚 Docs</a>
