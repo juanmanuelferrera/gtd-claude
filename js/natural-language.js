@@ -160,8 +160,19 @@
         }
         
         // Patterns for different natural language formats
+        // IMPORTANT: More specific patterns must come BEFORE general ones!
         const patterns = [
-            // Simple "task at time" pattern: "limpiar ombligo at 9am"
+            // Standard order: "task tomorrow at 6pm" or "task today at 6:30"
+            {
+                regex: /^(.+?)\s+(today|tomorrow)\s+at\s+(.+)$/i,
+                parser: (match) => ({
+                    title: match[1].trim(),
+                    date: getDateForRelative(match[2]),
+                    time: normalizeTime(match[3])
+                })
+            },
+            
+            // Simple "task at time" pattern: "limpiar ombligo at 9am" (for TODAY only)
             {
                 regex: /^(.+?)\s+at\s+(\d{1,2}(?::\d{2})?(?:am|pm)?)$/i,
                 parser: (match) => {
@@ -191,16 +202,6 @@
                     }
                     return null;
                 }
-            },
-            
-            // Standard order: "task tomorrow at 6pm" or "task today at 6:30"
-            {
-                regex: /^(.+?)\s+(today|tomorrow)\s+at\s+(.+)$/i,
-                parser: (match) => ({
-                    title: match[1].trim(),
-                    date: getDateForRelative(match[2]),
-                    time: normalizeTime(match[3])
-                })
             },
             
             // Reverse order: "tomorrow at 6pm task"
