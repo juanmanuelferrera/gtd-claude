@@ -9,14 +9,7 @@
             console.error('❌ UNHANDLED PROMISE REJECTION:', e.reason);
         });
         
-        // Utility function to get local date string consistently (avoids timezone issues)
-        // Defined early to avoid hoisting issues
-        function getLocalDateString(date = new Date()) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
+        
         
         // Prevent mobile bounce/pull-to-refresh
         document.addEventListener('touchmove', function(e) {
