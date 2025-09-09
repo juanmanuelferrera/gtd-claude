@@ -9310,13 +9310,20 @@
                     renderTodayView();
                 } else {
                     console.warn('⚠️ renderTodayView not yet defined, will retry');
-                    // Retry after a delay to allow function to load
-                    setTimeout(() => {
+                    // Multiple retry attempts with increasing delays
+                    let retryCount = 0;
+                    const maxRetries = 10;
+                    const retryInterval = setInterval(() => {
+                        retryCount++;
                         if (typeof renderTodayView === 'function') {
-                            console.log('✅ renderTodayView now available, rendering tasks');
+                            console.log('✅ renderTodayView now available, rendering tasks (retry ' + retryCount + ')');
                             renderTodayView();
+                            clearInterval(retryInterval);
+                        } else if (retryCount >= maxRetries) {
+                            console.error('❌ renderTodayView still not available after ' + maxRetries + ' retries');
+                            clearInterval(retryInterval);
                         }
-                    }, 1000); // Retry after 1 second
+                    }, 500); // Retry every 500ms up to 10 times (5 seconds total)
                 }
                 // Restore persistent highlighting after render
                 if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
@@ -9416,13 +9423,20 @@
                     renderTodayView();
                 } else {
                     console.warn('⚠️ renderTodayView not yet defined, will retry');
-                    // Retry after a delay to allow function to load
-                    setTimeout(() => {
+                    // Multiple retry attempts with increasing delays
+                    let retryCount = 0;
+                    const maxRetries = 10;
+                    const retryInterval = setInterval(() => {
+                        retryCount++;
                         if (typeof renderTodayView === 'function') {
-                            console.log('✅ renderTodayView now available, rendering tasks');
+                            console.log('✅ renderTodayView now available, rendering tasks (retry ' + retryCount + ')');
                             renderTodayView();
+                            clearInterval(retryInterval);
+                        } else if (retryCount >= maxRetries) {
+                            console.error('❌ renderTodayView still not available after ' + maxRetries + ' retries');
+                            clearInterval(retryInterval);
                         }
-                    }, 1000); // Retry after 1 second
+                    }, 500); // Retry every 500ms up to 10 times (5 seconds total)
                 }
                 // Restore persistent highlighting after render
                 if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
@@ -22624,13 +22638,20 @@
                     renderTodayView();
                 } else {
                     console.warn('⚠️ renderTodayView not yet defined, will retry');
-                    // Retry after a delay to allow function to load
-                    setTimeout(() => {
+                    // Multiple retry attempts with increasing delays
+                    let retryCount = 0;
+                    const maxRetries = 10;
+                    const retryInterval = setInterval(() => {
+                        retryCount++;
                         if (typeof renderTodayView === 'function') {
-                            console.log('✅ renderTodayView now available, rendering tasks');
+                            console.log('✅ renderTodayView now available, rendering tasks (retry ' + retryCount + ')');
                             renderTodayView();
+                            clearInterval(retryInterval);
+                        } else if (retryCount >= maxRetries) {
+                            console.error('❌ renderTodayView still not available after ' + maxRetries + ' retries');
+                            clearInterval(retryInterval);
                         }
-                    }, 1000); // Retry after 1 second
+                    }, 500); // Retry every 500ms up to 10 times (5 seconds total)
                 }
             }
         }
@@ -26751,6 +26772,18 @@ function initializeUI() {
     }
     
     // Set up any other UI initialization
+    
+    // Ensure tasks are rendered after UI is fully initialized
+    setTimeout(() => {
+        if (currentView === 'today' && typeof renderTodayView === 'function') {
+            console.log('🎯 Forcing renderTodayView after UI initialization');
+            renderTodayView();
+        } else if (currentView === 'week' && typeof renderWeekView === 'function') {
+            console.log('🎯 Forcing renderWeekView after UI initialization');
+            renderWeekView();
+        }
+    }, 100);
+    
     console.log('✅ UI initialization complete');
 }
 
