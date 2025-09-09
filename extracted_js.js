@@ -1,4 +1,5 @@
 
+(function() {
         console.log('🚀 HyperFiler Pro v3.5 - Starting initialization...');
         window.addEventListener('error', function(e) {
             console.error('❌ UNCAUGHT ERROR:', e.message, 'at line', e.lineno, 'column', e.colno);
@@ -26095,6 +26096,8 @@
         });
     
 
+    // Wrap remaining code in proper scope
+    document.addEventListener('DOMContentLoaded', function() {
         // Weekly Support Reminder System
         function checkSupportReminder() {
             try {
@@ -26201,4 +26204,5 @@
         window.setQuickTime = setQuickTime;
         window.setQuickDate = setQuickDate;
         window.saveIOSDateTime = saveIOSDateTime;
-    }
+    });
+})();
