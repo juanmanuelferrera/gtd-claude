@@ -26808,8 +26808,14 @@ function initializeUI() {
     console.log('✅ UI initialization complete');
 }
 
-// Export initializeUI globally
+// Export initializeUI globally immediately after definition
 window.initializeUI = initializeUI;
+console.log('🔗 initializeUI exported to window object');
+
+// Also make it available directly on the global scope
+if (typeof global !== 'undefined') {
+    global.initializeUI = initializeUI;
+}
 
 // Add a final render check when everything is loaded
 document.addEventListener('DOMContentLoaded', () => {
@@ -26832,6 +26838,3 @@ window.addEventListener('load', () => {
         }
     }, 500);
 });
-
-// Close the main execution block
-})();
