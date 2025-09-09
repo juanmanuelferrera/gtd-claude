@@ -9,6 +9,8 @@
             console.error('❌ UNHANDLED PROMISE REJECTION:', e.reason);
         });
         
+        
+        
         // Prevent mobile bounce/pull-to-refresh
         document.addEventListener('touchmove', function(e) {
             if (e.touches.length > 1) return; // Allow multi-touch gestures
@@ -839,7 +841,11 @@
                 }
             });
             // Update Today view date display to reflect new language
-            updateCurrentTodayDisplay();
+            if (typeof updateCurrentTodayDisplay === 'function') {
+                updateCurrentTodayDisplay();
+            } else {
+                console.warn('⚠️ updateCurrentTodayDisplay not yet defined');
+            }
             
             // Force restore ALL mobile nav emojis after translations
             restoreMobileNavEmojis();
@@ -3483,23 +3489,47 @@
             // Refresh the current view to ensure data is up to date
             switch (currentView) {
                 case 'today':
-                    renderTodayView();
+                    if (typeof renderTodayView === 'function') {
+                        renderTodayView();
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    }
                     break;
                 case 'week':
-                    renderWeekView();
+                    if (typeof renderWeekView === 'function') {
+                        renderWeekView();
+                    } else {
+                        console.warn('⚠️ renderWeekView not yet defined');
+                    }
                     break;
                 case 'repeat':
-                    renderRepeatView();
+                    if (typeof renderRepeatView === 'function') {
+                        renderRepeatView();
+                    } else {
+                        console.warn('⚠️ renderRepeatView not yet defined');
+                    }
                     break;
                 case 'tasks':
-                    showView('tasks');
+                    if (typeof showView === 'function') {
+                        showView('tasks');
+                    } else {
+                        console.warn('⚠️ showView not yet defined');
+                    }
                     break;
                 case 'lists':
-                    renderListsView();
+                    if (typeof renderListsView === 'function') {
+                        renderListsView();
+                    } else {
+                        console.warn('⚠️ renderListsView not yet defined');
+                    }
                     break;
                 default:
                     // Default to today view
-                    showView('today');
+                    if (typeof showView === 'function') {
+                        showView('today');
+                    } else {
+                        console.warn('⚠️ showView not yet defined');
+                    }
             }
         }
         // Setup mobile touch events for better focus behavior
@@ -3826,8 +3856,12 @@
                 // Continue with initialization but log the error
             }
             
-            // Initialize TaskAmplifier
-            TaskAmplifier.init();
+            // Initialize TaskAmplifier (check if defined)
+            if (typeof TaskAmplifier !== 'undefined') {
+                TaskAmplifier.init();
+            } else {
+                console.warn('⚠️ TaskAmplifier not yet defined, will initialize later');
+            }
             
             // Setup mobile touch events for Add Task buttons
             setupMobileTouchEvents();
@@ -3940,7 +3974,11 @@
                 }
                 if (event.ctrlKey && event.key === 'w') {
                     event.preventDefault();
-                    showView('week');
+                    if (typeof showView === 'function') {
+                        showView('week');
+                    } else {
+                        console.warn('⚠️ showView not yet defined');
+                    }
                 }
                 if (event.ctrlKey && event.key === 'm') {
                     event.preventDefault();
@@ -3963,7 +4001,11 @@
                 if (event.ctrlKey && event.key === 't') {
                     event.preventDefault();
                     goToToday(); // Reset to today's date
-                    showView('today');
+                    if (typeof showView === 'function') {
+                        showView('today');
+                    } else {
+                        console.warn('⚠️ showView not yet defined');
+                    }
                 }
                 if (event.ctrlKey && event.key === 'y') {
                     event.preventDefault();
@@ -4032,15 +4074,27 @@
                     console.warn('quickDateTimeInput not found');
                 }
                 
-                // Initialize backup settings
-                loadBackupSettings();
+                // Initialize backup settings (check if function exists)
+                if (typeof loadBackupSettings === 'function') {
+                    loadBackupSettings();
+                } else {
+                    console.warn('⚠️ loadBackupSettings not yet defined, will load later');
+                }
                 
-                // Load auto print time settings
-                loadAutoPrintTime();
+                // Load auto print time settings (check if function exists)
+                if (typeof loadAutoPrintTime === 'function') {
+                    loadAutoPrintTime();
+                } else {
+                    console.warn('⚠️ loadAutoPrintTime not yet defined, will load later');
+                }
                 
                 // Load tasks from localStorage immediately to prevent empty state
                 console.log('📱 DEBUG: About to load tasks from localStorage');
-                loadTasksFromLocalStorage();
+                if (typeof loadTasksFromLocalStorage === 'function') {
+                    loadTasksFromLocalStorage();
+                } else {
+                    console.warn('⚠️ loadTasksFromLocalStorage not yet defined');
+                }
                 console.log('📱 DEBUG: After loadTasksFromLocalStorage, tasks.length:', tasks.length);
                 
                 // IMMEDIATE TOMBSTONE FILTERING - Prevent brief appearance of deleted tasks
@@ -4054,36 +4108,76 @@
                 }
                 
                 // Load other data
-                loadTrash();
+                if (typeof loadTrash === 'function') {
+                    loadTrash();
+                } else {
+                    console.warn('⚠️ loadTrash not yet defined');
+                }
                 
                 // Set initial view immediately after loading tasks
                 const savedView = localStorage.getItem('currentView') || 'today';
                 console.log('📱 MOBILE DEBUG: About to call showView with:', savedView, 'Tasks loaded:', tasks.length);
-                showView(savedView); // Initialize the view properly
+                if (typeof showView === 'function') {
+                    showView(savedView);
+                } else {
+                    console.warn('⚠️ showView not yet defined');
+                } // Initialize the view properly
                 console.log('📱 MOBILE DEBUG: showView completed, currentView:', currentView);
                 
                 // Force update all displays immediately to prevent "Loading..." states
-                updateCurrentTodayDisplay();
-                updateCurrentWeekDisplay();
-                updateCurrentMonthDisplay();
+                if (typeof updateCurrentTodayDisplay === 'function') {
+                    updateCurrentTodayDisplay();
+                } else {
+                    console.warn('⚠️ updateCurrentTodayDisplay not yet defined');
+                }
+                if (typeof updateCurrentWeekDisplay === 'function') {
+                    updateCurrentWeekDisplay();
+                } else {
+                    console.warn('⚠️ updateCurrentWeekDisplay not yet defined');
+                }
+                if (typeof updateCurrentMonthDisplay === 'function') {
+                    updateCurrentMonthDisplay();
+                } else {
+                    console.warn('⚠️ updateCurrentMonthDisplay not yet defined');
+                }
                 
                 // Defer non-critical backup operations
                 setTimeout(() => {
-                    scheduleBackupChecks();
-                    checkAllBackups();
+                    if (typeof scheduleBackupChecks === 'function') {
+                        scheduleBackupChecks();
+                    } else {
+                        console.warn('⚠️ scheduleBackupChecks not yet defined');
+                    }
+                    if (typeof checkAllBackups === 'function') {
+                        checkAllBackups();
+                    } else {
+                        console.warn('⚠️ checkAllBackups not yet defined');
+                    }
                 }, 100); // Quick defer for backups - reduced from 5000ms
                 // Initialize calendar and week view
                 try {
                     renderCalendar();
-                    renderWeekView();
-                    highlightCurrentDay();
+                    if (typeof renderWeekView === 'function') {
+                        renderWeekView();
+                    } else {
+                        console.warn('⚠️ renderWeekView not yet defined');
+                    }
+                    if (typeof highlightCurrentDay === 'function') {
+                highlightCurrentDay();
+            } else {
+                console.warn('⚠️ highlightCurrentDay not yet defined');
+            }
                 } catch (calendarError) {
                     console.error('Error rendering calendar/week:', calendarError);
                 }
                 
                 // Show initial view
                 try {
-                    showView('today');
+                    if (typeof showView === 'function') {
+                        showView('today');
+                    } else {
+                        console.warn('⚠️ showView not yet defined');
+                    }
                 } catch (viewError) {
                     console.error('Error setting initial view:', viewError);
                 }
@@ -4139,10 +4233,18 @@
                 }, 2000);
                 
                 // Initialize natural language parsing for task input
-                initializeNaturalLanguageProcessing();
+                if (typeof initializeNaturalLanguageProcessing === 'function') {
+                    initializeNaturalLanguageProcessing();
+                } else {
+                    console.warn('⚠️ initializeNaturalLanguageProcessing not yet defined');
+                }
                 
                 // Initialize keyboard-only mode from saved state
-                initializeKeyboardOnlyMode();
+                if (typeof initializeKeyboardOnlyMode === 'function') {
+                    initializeKeyboardOnlyMode();
+                } else {
+                    console.warn('⚠️ initializeKeyboardOnlyMode not yet defined');
+                }
                 
             } catch (error) {
                 console.error('Error during app initialization:', error);
@@ -4153,7 +4255,11 @@
                     translateUI();
                     console.log('✅ UI translated to:', currentLanguage);
                     // Ensure keyboard-only mode is properly initialized after UI is ready
-                    initializeKeyboardOnlyMode();
+                    if (typeof initializeKeyboardOnlyMode === 'function') {
+                        initializeKeyboardOnlyMode();
+                    } else {
+                        console.warn('⚠️ initializeKeyboardOnlyMode not yet defined');
+                    }
                     // Update header buttons
                     updateHeaderLanguageButton();
                     updateHeaderKeyboardButton();
@@ -4453,7 +4559,11 @@
                     searchInput.focus();
                 }
             };
-            showView('all');
+            if (typeof showView === 'function') {
+                showView('all');
+            } else {
+                console.warn('⚠️ showView not yet defined');
+            }
             setTimeout(() => {
                 const searchInput = document.getElementById('allTasksSearchInput');
                 if (searchInput) {
@@ -5151,7 +5261,7 @@
             const currentTime = task.dueTime || '';
             
             // Create picker content
-            modal.innerHTML = \`
+            modal.innerHTML = `
                 <div style="
                     background: #f8f9fa;
                     border-radius: 16px 16px 0 0;
@@ -5331,7 +5441,7 @@
                     <!-- Safe area padding for iOS -->
                     <div style="height: env(safe-area-inset-bottom, 20px);"></div>
                 </div>
-            \`;
+            `;
             
             document.body.appendChild(modal);
             
@@ -5415,8 +5525,8 @@
             renderCurrentView();
             
             // Show success message
-            const timeDisplay = timeInput.value ? \` at \${formatTime(timeInput.value)}\` : '';
-            showInlineNotification(\`📅 Task scheduled for \${formatDateForDisplay(dateInput.value)}\${timeDisplay}\`, 'success');
+            const timeDisplay = timeInput.value ? ` at ${formatTime(timeInput.value)}` : '';
+            showInlineNotification(`📅 Task scheduled for ${formatDateForDisplay(dateInput.value)}${timeDisplay}`, 'success');
             
             // Close modal
             closeIOSDateTimePicker();
@@ -5424,7 +5534,11 @@
         // Hide modal when clicking outside
         document.addEventListener('click', function(event) {
             if (!event.target.closest('#mobileTaskModal')) {
-                hideMobileTaskModal();
+                if (typeof hideMobileTaskModal === 'function') {
+                    hideMobileTaskModal();
+                } else {
+                    console.warn('⚠️ hideMobileTaskModal not yet defined');
+                }
             }
         });
         // Hide mobile more menu when clicking outside
@@ -5771,18 +5885,46 @@
                     // MANDATORY REFRESH: Direct replacement with server data
                     if (window.forceMandatoryRefresh || window.staleBrowserMode) {
                         console.log('🚨 MANDATORY REFRESH: Directly replacing templates with server data');
-                        customTemplates = serverTemplates; // Update the variable
+                        if (typeof customTemplates !== 'undefined') {
+                            customTemplates = serverTemplates; // Update the variable
+                        } else {
+                            window.customTemplates = serverTemplates; // Initialize if undefined
+                        }
                         localStorage.setItem('gtdTemplates', JSON.stringify(serverTemplates)); // Update localStorage
-                        renderTemplateButtons(); // Always refresh template buttons when data changes
+                        if (typeof renderTemplateButtons === 'function') {
+                        if (typeof renderTemplateButtons === 'function') {
+                renderTemplateButtons();
+            } else {
+                console.warn('⚠️ renderTemplateButtons not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTemplateButtons not yet defined');
+                    } // Always refresh template buttons when data changes
                     } else {
                         // Normal sync: Compare with current customTemplates variable
-                        const localTemplates = customTemplates || [];
+                        const localTemplates = (typeof customTemplates !== 'undefined' ? customTemplates : []);
                         
                         // Simple comparison: if different, replace everything
                         if (JSON.stringify(serverTemplates) !== JSON.stringify(localTemplates)) {
-                            customTemplates = serverTemplates; // Update the variable
+                            if (typeof customTemplates !== 'undefined') {
+                                customTemplates = serverTemplates; // Update the variable
+                            } else {
+                                window.customTemplates = serverTemplates; // Initialize if undefined
+                            }
                             localStorage.setItem('gtdTemplates', JSON.stringify(serverTemplates)); // Update localStorage
-                            renderTemplateButtons(); // Always refresh template buttons when data changes
+                            if (typeof renderTemplateButtons === 'function') {
+                                if (typeof renderTemplateButtons === 'function') {
+                        if (typeof renderTemplateButtons === 'function') {
+                renderTemplateButtons();
+            } else {
+                console.warn('⚠️ renderTemplateButtons not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTemplateButtons not yet defined');
+                    } // Always refresh template buttons when data changes
+                            } else {
+                                console.warn('⚠️ renderTemplateButtons not yet defined');
+                            }
                         }
                     }
                 } else {
@@ -6833,7 +6975,7 @@
                             userId: window.currentUser?.user?.id,
                             data: {
                                 tasks: JSON.parse(JSON.stringify(tasks)),
-                                templates: JSON.parse(JSON.stringify(customTemplates || [])),
+                                templates: JSON.parse(JSON.stringify(typeof customTemplates !== 'undefined' ? customTemplates : [])),
                                 listSections: JSON.parse(JSON.stringify(listSections || [])),
                                 settings: {
                                     language: localStorage.getItem('language') || 'en',
@@ -7892,23 +8034,35 @@
                 
                 // Check and move incomplete tasks after view is rendered - non-blocking
                 setTimeout(() => {
-                    checkAndMoveIncompleteTasks().catch(err => 
+                    if (typeof checkAndMoveIncompleteTasks === 'function') {
+                        checkAndMoveIncompleteTasks().catch(err => 
                         console.log('Task move check failed (non-critical):', err.message)
-                    );
+                        );
+                    } else {
+                        console.warn('⚠️ checkAndMoveIncompleteTasks not yet defined');
+                    }
                 }, 50); // Reduced from 500ms
                 // Option 1: Timer-based automatic task movement (every 1 hour)
                 setInterval(() => {
-                    checkAndMoveIncompleteTasks().catch(err => 
+                    if (typeof checkAndMoveIncompleteTasks === 'function') {
+                        checkAndMoveIncompleteTasks().catch(err => 
                         console.log('Scheduled task move check failed (non-critical):', err.message)
-                    );
+                        );
+                    } else {
+                        console.warn('⚠️ checkAndMoveIncompleteTasks not yet defined');
+                    }
                 }, 60 * 60 * 1000); // 1 hour = 60 minutes * 60 seconds * 1000 milliseconds
                 // Option 2: Focus/visibility detection for immediate task movement
                 document.addEventListener('visibilitychange', () => {
                     if (!document.hidden) {
                         // User returned to app - check if day changed and move tasks if needed
-                        checkAndMoveIncompleteTasks().catch(err => 
-                            console.log('Focus-triggered task move check failed (non-critical):', err.message)
-                        );
+                        if (typeof checkAndMoveIncompleteTasks === 'function') {
+                            checkAndMoveIncompleteTasks().catch(err => 
+                                console.log('Focus-triggered task move check failed (non-critical):', err.message)
+                            );
+                        } else {
+                            console.warn('⚠️ checkAndMoveIncompleteTasks not yet defined');
+                        }
                     }
                 });
                 
@@ -8730,7 +8884,11 @@
                 showView('today', true); // preserveDate = true
                 
                 // Refresh the Today view to show the selected date
+                if (typeof renderTodayView === 'function') {
                 renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
             }
             
             generateCalendar(); // Refresh to show selection
@@ -9141,19 +9299,68 @@
             
             // Update view
             if (viewName === 'today') {
-                renderTodayView();
+                if (typeof renderTodayView === 'function') {
+                    renderTodayView();
+                } else {
+                    console.warn('⚠️ renderTodayView not yet defined, will retry');
+                    // Multiple retry attempts with increasing delays
+                    let retryCount = 0;
+                    const maxRetries = 60; // Increased to 30 seconds total
+                    const retryInterval = setInterval(() => {
+                        retryCount++;
+                        if (typeof renderTodayView === 'function') {
+                            console.log('✅ renderTodayView now available, rendering tasks (retry ' + retryCount + ')');
+                            renderTodayView();
+                            clearInterval(retryInterval);
+                        } else if (retryCount >= maxRetries) {
+                            console.error('❌ renderTodayView still not available after ' + maxRetries + ' retries (30 seconds)');
+                            clearInterval(retryInterval);
+                            // Last resort: wait for window load event
+                            window.addEventListener('load', () => {
+                                if (typeof renderTodayView === 'function') {
+                                    console.log('✅ renderTodayView available after window load');
+                                    renderTodayView();
+                                }
+                            });
+                        }
+                    }, 500); // Retry every 500ms up to 60 times (30 seconds total)
+                }
                 // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
             } else if (viewName === 'week') {
-                renderWeekView();
+                if (typeof renderWeekView === 'function') {
+                    renderWeekView();
+                } else {
+                    console.warn('⚠️ renderWeekView not yet defined');
+                }
+                if (typeof highlightCurrentDay === 'function') {
                 highlightCurrentDay();
+            } else {
+                console.warn('⚠️ highlightCurrentDay not yet defined');
+            }
                 // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
             } else if (viewName === 'calendar') {
                 renderCalendar();
+                if (typeof highlightCurrentDay === 'function') {
                 highlightCurrentDay();
+            } else {
+                console.warn('⚠️ highlightCurrentDay not yet defined');
+            }
                 // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
             } else if (viewName === 'stats') {
                 renderStats();
             } else if (viewName === 'lists') {
@@ -9212,19 +9419,68 @@
             // }
             
             if (currentView === 'today') {
-                renderTodayView();
+                if (typeof renderTodayView === 'function') {
+                    renderTodayView();
+                } else {
+                    console.warn('⚠️ renderTodayView not yet defined, will retry');
+                    // Multiple retry attempts with increasing delays
+                    let retryCount = 0;
+                    const maxRetries = 60; // Increased to 30 seconds total
+                    const retryInterval = setInterval(() => {
+                        retryCount++;
+                        if (typeof renderTodayView === 'function') {
+                            console.log('✅ renderTodayView now available, rendering tasks (retry ' + retryCount + ')');
+                            renderTodayView();
+                            clearInterval(retryInterval);
+                        } else if (retryCount >= maxRetries) {
+                            console.error('❌ renderTodayView still not available after ' + maxRetries + ' retries (30 seconds)');
+                            clearInterval(retryInterval);
+                            // Last resort: wait for window load event
+                            window.addEventListener('load', () => {
+                                if (typeof renderTodayView === 'function') {
+                                    console.log('✅ renderTodayView available after window load');
+                                    renderTodayView();
+                                }
+                            });
+                        }
+                    }, 500); // Retry every 500ms up to 60 times (30 seconds total)
+                }
                 // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
             } else if (currentView === 'week') {
-                renderWeekView();
+                if (typeof renderWeekView === 'function') {
+                    renderWeekView();
+                } else {
+                    console.warn('⚠️ renderWeekView not yet defined');
+                }
+                if (typeof highlightCurrentDay === 'function') {
                 highlightCurrentDay();
+            } else {
+                console.warn('⚠️ highlightCurrentDay not yet defined');
+            }
                 // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
             } else if (currentView === 'calendar') {
                 renderCalendar();
+                if (typeof highlightCurrentDay === 'function') {
                 highlightCurrentDay();
+            } else {
+                console.warn('⚠️ highlightCurrentDay not yet defined');
+            }
                 // Restore persistent highlighting after render
-                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.restoreAfterRender();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
             } else if (currentView === 'repeat') {
                 renderRepeatView();
             } else if (currentView === 'undo') {
@@ -9585,7 +9841,11 @@
             
             if (!searchTerm.trim()) {
                 // If search is empty, show all tasks for today
+                if (typeof renderTodayView === 'function') {
                 renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
                 return;
             }
             
@@ -9617,7 +9877,11 @@
             // Use existing renderTodaySchedule logic but with filtered tasks
             const tempTasks = tasks;
             tasks = todayTasks;
-            renderTodayView();
+            if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
             tasks = tempTasks;
         }
         // Mobile search function - searches current view dynamically
@@ -9637,7 +9901,15 @@
                 // Clear all filters - restore original view
                 switch(currentView) {
                     case 'today':
-                        renderTodayView();
+                        if (typeof renderTodayView === 'function') {
+                        if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    }
                         break;
                     case 'week':
                         renderWeekView();
@@ -9649,7 +9921,15 @@
                         renderListView();
                         break;
                     default:
-                        renderTodayView();
+                        if (typeof renderTodayView === 'function') {
+                        if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    }
                         break;
                 }
                 return;
@@ -9682,7 +9962,15 @@
             
             switch(currentView) {
                 case 'today':
-                    renderTodayView();
+                    if (typeof renderTodayView === 'function') {
+                        if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    }
                     break;
                 case 'week':
                     renderWeekView();
@@ -9694,7 +9982,15 @@
                     renderListView();
                     break;
                 default:
-                    renderTodayView();
+                    if (typeof renderTodayView === 'function') {
+                        if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    }
                     break;
             }
             
@@ -9781,7 +10077,11 @@
             clearBtn.style.display = 'none';
             invertBtn.classList.remove('active'); // Clear invert button state
             window.currentTodayFilteredTasks = null;
-            renderTodayView();
+            if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
         }
         
         // Invert Today search - show tasks NOT matching current search
@@ -9825,7 +10125,11 @@
             // Temporarily replace tasks array for rendering (like Week/Month implementations)
             const tempTasks = tasks;
             tasks = filteredTasks; // Don't modify due dates - they're already today's tasks
-            renderTodayView();
+            if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
             tasks = tempTasks; // Restore original tasks
             
             exportBtn.style.display = filteredTasks.length > 0 ? 'inline-block' : 'none';
@@ -10366,7 +10670,11 @@
                 
                 if (taskDateObj >= startOfWeek && taskDateObj <= endOfWeek) {
                     // This week's task
-                    showView('week');
+                    if (typeof showView === 'function') {
+                        showView('week');
+                    } else {
+                        console.warn('⚠️ showView not yet defined');
+                    }
                 } else {
                     // Other date - go to calendar view
                     showView('calendar');
@@ -11004,7 +11312,11 @@
         
         // Render Lists view
         function renderListsView() {
-            loadListSections();
+            if (typeof loadListSections === 'function') {
+                loadListSections();
+            } else {
+                console.warn('⚠️ loadListSections not yet defined');
+            }
             const container = document.getElementById('listsContainer');
             const emptyState = document.getElementById('noListSections');
             
@@ -11903,7 +12215,15 @@
                 
                 // Refresh current view if it shows tasks
                 if (currentView === 'today') {
-                    renderTodayView();
+                    if (typeof renderTodayView === 'function') {
+                        if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    }
                 } else if (currentView === 'week') {
                     renderWeekView();
                 } else if (currentView === 'calendar') {
@@ -12005,7 +12325,15 @@
                 
                 // Refresh current view if it shows tasks
                 if (currentView === 'today') {
-                    renderTodayView();
+                    if (typeof renderTodayView === 'function') {
+                        if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    }
                 } else if (currentView === 'week') {
                     renderWeekView();
                 } else if (currentView === 'calendar') {
@@ -12074,7 +12402,15 @@
                 
                 // Refresh current view if it shows tasks
                 if (currentView === 'today') {
-                    renderTodayView();
+                    if (typeof renderTodayView === 'function') {
+                        if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    }
                 } else if (currentView === 'week') {
                     renderWeekView();
                 } else if (currentView === 'calendar') {
@@ -12852,7 +13188,11 @@
         
         // Initialize lists on page load
         document.addEventListener('DOMContentLoaded', function() {
-            loadListSections();
+            if (typeof loadListSections === 'function') {
+                loadListSections();
+            } else {
+                console.warn('⚠️ loadListSections not yet defined');
+            }
         });
         
         // Ensure tab display mode is applied correctly on page load
@@ -12860,7 +13200,11 @@
             setTimeout(() => {
                 const tabDisplayMode = localStorage.getItem('tabDisplayMode') || 'both';
                 console.log('🎨 Extra tab display mode application:', tabDisplayMode);
-                applyTabDisplayMode(tabDisplayMode);
+                if (typeof applyTabDisplayMode === 'function') {
+                    applyTabDisplayMode(tabDisplayMode);
+                } else {
+                    console.warn('⚠️ applyTabDisplayMode not yet defined');
+                }
             }, 200);
         });
         // Group tasks by date
@@ -12984,7 +13328,11 @@
             if (!grid || !monthTitle) return;
             
             // Update the month display
-            updateCurrentMonthDisplay();
+            if (typeof updateCurrentMonthDisplay === 'function') {
+                updateCurrentMonthDisplay();
+            } else {
+                console.warn('⚠️ updateCurrentMonthDisplay not yet defined');
+            }
             
             const year = currentCalendarDate.getFullYear();
             const month = currentCalendarDate.getMonth();
@@ -13026,13 +13374,17 @@
             startDate.setDate(startDate.getDate() - daysToSubtract);
             
             const today = new Date();
-            const todayStr = getLocalDateString(today);
+            const todayStr = (typeof getLocalDateString === 'function') 
+                ? getLocalDateString(today)
+                : today.toISOString().split('T')[0]; // Fallback to basic date string
             
             // Generate calendar days
             for (let i = 0; i < 42; i++) {
                 const date = new Date(startDate);
                 date.setDate(startDate.getDate() + i);
-                const dateStr = getLocalDateString(date);
+                const dateStr = (typeof getLocalDateString === 'function') 
+                    ? getLocalDateString(date)
+                    : date.toISOString().split('T')[0]; // Fallback if function not yet defined
                 
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day';
@@ -13046,7 +13398,9 @@
                     dayElement.classList.add('today');
                 }
                 
-                const dayTasks = getTasksForDate(dateStr);
+                const dayTasks = (typeof getTasksForDate === 'function') 
+                    ? getTasksForDate(dateStr) 
+                    : []; // Return empty array if function not yet defined
                 if (dayTasks.length > 0) {
                     dayElement.classList.add('has-tasks');
                     
@@ -13074,7 +13428,15 @@
                     selectedDate = dateStr;
                     currentTodayDate = new Date(date);
                     showView('today', true); // preserveDate = true
-                    renderTodayView(); // Refresh to show the selected date
+                    if (typeof renderTodayView === 'function') {
+                        if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    } // Refresh to show the selected date
                 };
                 dayElement.appendChild(dayNumber);
                 
@@ -13348,7 +13710,9 @@
                 }
                 
                 // Check for tasks on this date
-                const dayTasks = getTasksForDate(dateStr);
+                const dayTasks = (typeof getTasksForDate === 'function')
+                    ? getTasksForDate(dateStr)
+                    : []; // Return empty array if function not yet defined
                 if (dayTasks.length > 0) {
                     dayElement.classList.add('has-tasks');
                 }
@@ -13368,7 +13732,15 @@
                     selectedDate = dateStr;
                     currentTodayDate = new Date(date);
                     showView('today', true); // preserveDate = true
-                    renderTodayView(); // Refresh to show the selected date
+                    if (typeof renderTodayView === 'function') {
+                        if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    } // Refresh to show the selected date
                 };
                 
                 const dayNumber = document.createElement('div');
@@ -13603,7 +13975,15 @@
                 if (tasksForDate.length > 0) {
                     currentTodayDate = new Date(searchDate);
                     console.log('⬅️ Found previous day with tasks:', searchDateString, `(${tasksForDate.length} tasks)`);
-                    renderTodayView();
+                    if (typeof renderTodayView === 'function') {
+                        if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    }
                     return;
                 }
             } while (maxDays > 0);
@@ -13613,7 +13993,11 @@
             searchDate.setDate(searchDate.getDate() - 1);
             currentTodayDate = searchDate;
             console.log('⬅️ No previous day with tasks found, going to previous day:', getLocalDateString(searchDate));
-            renderTodayView();
+            if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
         }
         function nextDay() {
             // TODAY VIEW: Find next day with tasks
@@ -13631,7 +14015,15 @@
                 if (tasksForDate.length > 0) {
                     currentTodayDate = new Date(searchDate);
                     console.log('➡️ Found next day with tasks:', searchDateString, `(${tasksForDate.length} tasks)`);
-                    renderTodayView();
+                    if (typeof renderTodayView === 'function') {
+                        if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    }
                     return;
                 }
             } while (maxDays > 0);
@@ -13641,7 +14033,11 @@
             searchDate.setDate(searchDate.getDate() + 1);
             currentTodayDate = searchDate;
             console.log('➡️ No next day with tasks found, going to next day:', getLocalDateString(searchDate));
-            renderTodayView();
+            if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
         }
         // WEEK VIEW: Smart week navigation functions
         function previousWeekSmart() {
@@ -13769,7 +14165,11 @@
         }
         function goToToday() {
             currentTodayDate = new Date();
-            renderTodayView();
+            if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
         }
         function updateCurrentTodayDisplay() {
             const displayElement = document.getElementById('currentTodayDate');
@@ -14028,7 +14428,11 @@
                 console.log('🎯 Delaying task at index:', originalTaskIndex, 'ID:', originalTaskId);
                 
                 // CRITICAL: Deactivate persistent task selection to prevent restoring old selection
-                PERSISTENT_TASK_SELECTION.deactivate();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.deactivate();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
                 console.log('🎯 Deactivated persistent selection for delayed task');
                 
                 // OPTIMIZATION: Show immediate visual feedback (only if event has a button target)
@@ -14170,7 +14574,15 @@
                                         // Activate persistent selection for the new task
                                         const newTaskId = selectedTaskElement.getAttribute('data-task-id');
                                         if (newTaskId) {
+                                            if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                                                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
                                             PERSISTENT_TASK_SELECTION.activate(newTaskId, selectedTaskElement);
+                                        } else {
+                                            console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                                        }
+                                            } else {
+                                                console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                                            }
                                             console.log(`✅ Focus moved to next task at index ${targetIndex}, ID: ${newTaskId}`);
                                         } else {
                                             console.warn('⚠️ Selected element has no task ID');
@@ -14222,7 +14634,11 @@
                                     
                                     const newTaskId = selectedTaskElement?.getAttribute('data-task-id');
                                     if (newTaskId) {
-                                        PERSISTENT_TASK_SELECTION.activate(newTaskId, selectedTaskElement);
+                                        if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                                            PERSISTENT_TASK_SELECTION.activate(newTaskId, selectedTaskElement);
+                                        } else {
+                                            console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                                        }
                                     }
                                 } else {
                                     selectedTaskElement = null;
@@ -14368,7 +14784,15 @@
                     // Clear templates/lists
                     customTemplates = ['@casa', '@recados', '@vedicvault', '@facebook', '@theonething']; // Reset to defaults
                     await saveTemplates();
-                    renderTemplateButtons();
+                    if (typeof renderTemplateButtons === 'function') {
+                        if (typeof renderTemplateButtons === 'function') {
+                renderTemplateButtons();
+            } else {
+                console.warn('⚠️ renderTemplateButtons not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTemplateButtons not yet defined');
+                    }
                     populateTemplateFilter();
                     populateMobileTemplateFilter();
                     
@@ -14501,7 +14925,11 @@
             }
             
             // Load and render templates
-            renderTemplateButtons();
+            if (typeof renderTemplateButtons === 'function') {
+                renderTemplateButtons();
+            } else {
+                console.warn('⚠️ renderTemplateButtons not yet defined');
+            }
             
             // Only prepopulate when adding new task (not editing)
             if (!currentEditTaskId) {
@@ -15161,7 +15589,11 @@
         // Show All Tasks view filtered by specific date
         function showAllTasksForDate(dateStr) {
             // Switch to All Tasks view
-            showView('all');
+            if (typeof showView === 'function') {
+                showView('all');
+            } else {
+                console.warn('⚠️ showView not yet defined');
+            }
             
             // Set search input to the date to filter tasks (use YYYY-MM-DD format for search)
             const searchInput = document.getElementById('allTasksSearchInput');
@@ -15490,7 +15922,15 @@
                 
                 // Refresh views based on current view
                 if (currentView === 'today') {
-                    renderTodayView();
+                    if (typeof renderTodayView === 'function') {
+                        if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    }
                 } else if (currentView === 'week') {
                     renderWeekView();
                 } else if (currentView === 'calendar') {
@@ -15609,13 +16049,6 @@
         function formatTime(timeStr) {
             if (!timeStr) return '';
             return timeStr; // Display in 24-hour format
-        }
-        // Utility function to get local date string consistently (avoids timezone issues)
-        function getLocalDateString(date = new Date()) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
         }
         // Initialize natural language processing event listeners
         function initializeNaturalLanguageProcessing() {
@@ -17467,7 +17900,15 @@
                 const currentView = localStorage.getItem('currentView') || 'today';
                 switch(currentView) {
                     case 'today':
-                        renderTodayView();
+                        if (typeof renderTodayView === 'function') {
+                        if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    }
                         break;
                     case 'week':
                         renderWeekView();
@@ -17497,7 +17938,15 @@
                         }
                         break;
                     default:
-                        renderTodayView();
+                        if (typeof renderTodayView === 'function') {
+                        if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTodayView not yet defined');
+                    }
                 }
                 
             }
@@ -18270,7 +18719,15 @@
                         }
                         if (addedTemplates > 0) {
                             await saveTemplates();
-                            renderTemplateButtons();
+                            if (typeof renderTemplateButtons === 'function') {
+                        if (typeof renderTemplateButtons === 'function') {
+                renderTemplateButtons();
+            } else {
+                console.warn('⚠️ renderTemplateButtons not yet defined');
+            }
+                    } else {
+                        console.warn('⚠️ renderTemplateButtons not yet defined');
+                    }
                             populateTemplateFilter();
                         }
                     }
@@ -18645,7 +19102,11 @@
         let selectedTasks = new Set();
         let currentFilteredTasks = []; // Store currently filtered tasks for printing
         function renderAllTasksView() {
-            showView('all');
+            if (typeof showView === 'function') {
+                showView('all');
+            } else {
+                console.warn('⚠️ showView not yet defined');
+            }
             performAllTasksSearch();
         }
         function performAllTasksSearch() {
@@ -20904,7 +21365,11 @@
             window.currentTodaySearchTerm = null;
             
             // Re-render today view to normal state
-            renderTodayView();
+            if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
         }
         
         // Hide time blocks that have no visible tasks
@@ -21879,7 +22344,11 @@
                     break;
                 default:
                     // For views without search, go to All Tasks
-                    showView('all');
+                    if (typeof showView === 'function') {
+                showView('all');
+            } else {
+                console.warn('⚠️ showView not yet defined');
+            }
                     setTimeout(() => {
                         searchField = document.getElementById('allTasksSearchInput');
                         if (searchField) {
@@ -21916,7 +22385,11 @@
         // Go to All Tasks and focus search (Ctrl+A enhanced)
         function goToAllTasksSearch() {
             console.log('🔍 Navigating to All Tasks with search focus');
-            showView('all');
+            if (typeof showView === 'function') {
+                showView('all');
+            } else {
+                console.warn('⚠️ showView not yet defined');
+            }
             
             setTimeout(() => {
                 const searchField = document.getElementById('allTasksSearchInput');
@@ -22168,7 +22641,32 @@
             
             // Refresh the view to update the dropdown
             if (currentView === 'today') {
-                renderTodayView();
+                if (typeof renderTodayView === 'function') {
+                    renderTodayView();
+                } else {
+                    console.warn('⚠️ renderTodayView not yet defined, will retry');
+                    // Multiple retry attempts with increasing delays
+                    let retryCount = 0;
+                    const maxRetries = 60; // Increased to 30 seconds total
+                    const retryInterval = setInterval(() => {
+                        retryCount++;
+                        if (typeof renderTodayView === 'function') {
+                            console.log('✅ renderTodayView now available, rendering tasks (retry ' + retryCount + ')');
+                            renderTodayView();
+                            clearInterval(retryInterval);
+                        } else if (retryCount >= maxRetries) {
+                            console.error('❌ renderTodayView still not available after ' + maxRetries + ' retries (30 seconds)');
+                            clearInterval(retryInterval);
+                            // Last resort: wait for window load event
+                            window.addEventListener('load', () => {
+                                if (typeof renderTodayView === 'function') {
+                                    console.log('✅ renderTodayView available after window load');
+                                    renderTodayView();
+                                }
+                            });
+                        }
+                    }, 500); // Retry every 500ms up to 60 times (30 seconds total)
+                }
             }
         }
         // Mobile-specific add task function with Things-style interface
@@ -22394,7 +22892,11 @@
             modalElement.addEventListener('keydown', handleEnterKey);
             
             // Load and render templates
-            renderTemplateButtons();
+            if (typeof renderTemplateButtons === 'function') {
+                renderTemplateButtons();
+            } else {
+                console.warn('⚠️ renderTemplateButtons not yet defined');
+            }
             
             // Auto-focus for desktop (mobile uses separate function)
             setTimeout(() => {
@@ -22418,7 +22920,11 @@
                 // Default templates
                 customTemplates = ['@casa', '@recados', '@vedicvault', '@facebook', '@theonething'];
             }
-            renderTemplateButtons();
+            if (typeof renderTemplateButtons === 'function') {
+                renderTemplateButtons();
+            } else {
+                console.warn('⚠️ renderTemplateButtons not yet defined');
+            }
         }
         // Save templates to localStorage
         async function saveTemplates() {
@@ -22542,7 +23048,11 @@
             // Add template
             customTemplates.push(template);
             await saveTemplates();
-            renderTemplateButtons();
+            if (typeof renderTemplateButtons === 'function') {
+                renderTemplateButtons();
+            } else {
+                console.warn('⚠️ renderTemplateButtons not yet defined');
+            }
             
             // Clear input
             input.value = '';
@@ -22553,7 +23063,11 @@
             if (confirm(`Delete template "${template}"?`)) {
                 customTemplates = customTemplates.filter(t => t !== template);
                 await saveTemplates();
+                if (typeof renderTemplateButtons === 'function') {
                 renderTemplateButtons();
+            } else {
+                console.warn('⚠️ renderTemplateButtons not yet defined');
+            }
                 
                 // Also update search filter buttons if they exist
                 updateSearchFilterButtons();
@@ -23850,7 +24364,11 @@
                 });
                 
                 // Refresh the today view
+                if (typeof renderTodayView === 'function') {
                 renderTodayView();
+            } else {
+                console.warn('⚠️ renderTodayView not yet defined');
+            }
                 
                 console.log(`✅ Task time updated successfully to ${timeSlot || 'no time'}`);
                 
@@ -24082,7 +24600,11 @@
                 console.log('Loading settings values...');
                 
                 // First, load backup settings explicitly
-                loadBackupSettings();
+                if (typeof loadBackupSettings === 'function') {
+                    loadBackupSettings();
+                } else {
+                    console.warn('⚠️ loadBackupSettings not yet defined');
+                }
                 
                 // Load date format
                 const dateFormat = localStorage.getItem('dateFormat') || 'default';
@@ -24806,7 +25328,11 @@
                 const taskId = selectedTaskElement.getAttribute('data-task-id');
                 if (taskId) {
                     // Activate the bulletproof highlighting system
-                    PERSISTENT_TASK_SELECTION.activate(taskId, selectedTaskElement);
+                    if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                        PERSISTENT_TASK_SELECTION.activate(taskId, selectedTaskElement);
+                    } else {
+                        console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                    }
                     
                     // Start 500ms timer for amplifier (responsive)
                     TaskAmplifier.startShowTimer(selectedTaskElement);
@@ -24966,7 +25492,11 @@
             selectedTaskElement = null;
             
             // Deactivate the bulletproof highlighting system
-            PERSISTENT_TASK_SELECTION.deactivate();
+            if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                PERSISTENT_TASK_SELECTION.deactivate();
+            } else {
+                console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+            }
             
             // Hide the task amplifier and clear timers
             TaskAmplifier.hide();
@@ -25636,7 +26166,11 @@
             clearSelection() {
                 selectedTaskIndex = -1;
                 selectedTaskElement = null;
-                PERSISTENT_TASK_SELECTION.deactivate();
+                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                    PERSISTENT_TASK_SELECTION.deactivate();
+                } else {
+                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                }
             },
             
             // Enhanced task finding with better accuracy
@@ -25707,7 +26241,11 @@
                 event.preventDefault(); // Prevent browser select all
                 
                 // Switch to All Tasks view
+                if (typeof showView === 'function') {
                 showView('all');
+            } else {
+                console.warn('⚠️ showView not yet defined');
+            }
                 
                 // Focus the search field with a small delay to ensure view switch completes
                 setTimeout(() => {
@@ -25973,7 +26511,11 @@
                             // Activate persistent selection for the new task
                             const newTaskId = selectedTaskElement?.getAttribute('data-task-id');
                             if (newTaskId) {
-                                PERSISTENT_TASK_SELECTION.activate(newTaskId, selectedTaskElement);
+                                if (typeof PERSISTENT_TASK_SELECTION !== 'undefined') {
+                                    PERSISTENT_TASK_SELECTION.activate(newTaskId, selectedTaskElement);
+                                } else {
+                                    console.warn('⚠️ PERSISTENT_TASK_SELECTION not yet defined');
+                                }
                             }
                         }
                     }
@@ -26201,4 +26743,91 @@
         window.setQuickTime = setQuickTime;
         window.setQuickDate = setQuickDate;
         window.saveIOSDateTime = saveIOSDateTime;
+        
+    } // Close the unclosed block scope
+} // Close any additional nested scope
+
+// Define keyboard navigation function
+function initializeKeyboardNavigation() {
+    console.log('⌨️ Setting up keyboard navigation');
     
+    // Add N key for quick task entry
+    document.addEventListener('keydown', function(e) {
+        if ((e.key === 'n' || e.key === 'N') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            // Don't trigger if typing in input/textarea
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            e.preventDefault();
+            if (typeof openAddTaskModal === 'function') {
+                const todayStr = new Date().toISOString().split('T')[0];
+                openAddTaskModal(todayStr);
+                console.log('⚡ Quick add task activated with N key!');
+            }
+        }
+    });
+    
+    console.log('✅ Keyboard navigation ready - Press N for quick task entry');
+}
+
+// Define initializeUI function globally (outside any block scope)
+function initializeUI() {
+    console.log('🎹 initializeUI called - setting up UI components');
+    
+    // Initialize keyboard navigation
+    initializeKeyboardNavigation();
+    console.log('⌨️ Keyboard navigation initialized');
+    
+    // Initialize mobile components if needed
+    if (typeof setupMobileNavGestures === 'function') {
+        setupMobileNavGestures();
+        console.log('📱 Mobile navigation setup completed');
+    }
+    
+    // Set up any other UI initialization
+    
+    // Ensure tasks are rendered after UI is fully initialized
+    setTimeout(() => {
+        if (currentView === 'today' && typeof renderTodayView === 'function') {
+            console.log('🎯 Forcing renderTodayView after UI initialization');
+            renderTodayView();
+        } else if (currentView === 'week' && typeof renderWeekView === 'function') {
+            console.log('🎯 Forcing renderWeekView after UI initialization');
+            renderWeekView();
+        }
+    }, 100);
+    
+    console.log('✅ UI initialization complete');
+}
+
+// Export initializeUI globally immediately after definition
+window.initializeUI = initializeUI;
+console.log('🔗 initializeUI exported to window object');
+
+// Also make it available directly on the global scope
+if (typeof global !== 'undefined') {
+    global.initializeUI = initializeUI;
+}
+
+// Add a final render check when everything is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        console.log('🔄 DOMContentLoaded - checking if renderTodayView is available');
+        if (typeof renderTodayView === 'function' && currentView === 'today') {
+            console.log('✅ Final check: rendering today view');
+            renderTodayView();
+        }
+    }, 1000);
+});
+
+// Also check when window fully loads
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        console.log('🔄 Window load complete - final renderTodayView check');
+        if (typeof renderTodayView === 'function' && currentView === 'today') {
+            console.log('✅ Window load: rendering today view');
+            renderTodayView();
+        }
+    }, 500);
+});
