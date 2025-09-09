@@ -758,12 +758,13 @@ function initializeKeyboardNavigation() {
                 e.preventDefault();
                 showView('search');
                 break;
-            case ' ':
-                // Space key - Quick add task
+            case 'n':
+            case 'N':
+                // N key - Quick add task (New task)
                 e.preventDefault();
                 if (typeof openAddTaskModal === 'function') {
                     openAddTaskModal();
-                    // Show a quick feedback to indicate space worked
+                    // Show a quick feedback to indicate N key worked
                     showInlineNotification('⚡ Quick add activated!', 'success');
                 } else {
                     showInlineNotification('Add task function not available', 'error');
