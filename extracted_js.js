@@ -3826,8 +3826,12 @@
                 // Continue with initialization but log the error
             }
             
-            // Initialize TaskAmplifier
-            TaskAmplifier.init();
+            // Initialize TaskAmplifier (check if defined)
+            if (typeof TaskAmplifier !== 'undefined') {
+                TaskAmplifier.init();
+            } else {
+                console.warn('⚠️ TaskAmplifier not yet defined, will initialize later');
+            }
             
             // Setup mobile touch events for Add Task buttons
             setupMobileTouchEvents();
@@ -12860,7 +12864,11 @@
             setTimeout(() => {
                 const tabDisplayMode = localStorage.getItem('tabDisplayMode') || 'both';
                 console.log('🎨 Extra tab display mode application:', tabDisplayMode);
-                applyTabDisplayMode(tabDisplayMode);
+                if (typeof applyTabDisplayMode === 'function') {
+                    applyTabDisplayMode(tabDisplayMode);
+                } else {
+                    console.warn('⚠️ applyTabDisplayMode not yet defined');
+                }
             }, 200);
         });
         // Group tasks by date
@@ -26202,29 +26210,30 @@
         window.setQuickDate = setQuickDate;
         window.saveIOSDateTime = saveIOSDateTime;
         
-        // Define missing initializeUI function
-        function initializeUI() {
-            console.log('🎹 initializeUI called - setting up UI components');
-            
-            // Initialize keyboard navigation if the function exists
-            if (typeof initializeKeyboardNavigation === 'function') {
-                initializeKeyboardNavigation();
-                console.log('⌨️ Keyboard navigation initialized');
-            } else {
-                console.warn('⚠️ initializeKeyboardNavigation function not found');
-            }
-            
-            // Initialize mobile components if needed
-            if (typeof setupMobileNavGestures === 'function') {
-                setupMobileNavGestures();
-                console.log('📱 Mobile navigation setup completed');
-            }
-            
-            // Set up any other UI initialization
-            console.log('✅ UI initialization complete');
-        }
-        
-        // Export initializeUI globally
-        window.initializeUI = initializeUI;
     } // Close the unclosed block scope
 } // Close any additional nested scope
+
+// Define initializeUI function globally (outside any block scope)
+function initializeUI() {
+    console.log('🎹 initializeUI called - setting up UI components');
+    
+    // Initialize keyboard navigation if the function exists
+    if (typeof initializeKeyboardNavigation === 'function') {
+        initializeKeyboardNavigation();
+        console.log('⌨️ Keyboard navigation initialized');
+    } else {
+        console.warn('⚠️ initializeKeyboardNavigation function not found');
+    }
+    
+    // Initialize mobile components if needed
+    if (typeof setupMobileNavGestures === 'function') {
+        setupMobileNavGestures();
+        console.log('📱 Mobile navigation setup completed');
+    }
+    
+    // Set up any other UI initialization
+    console.log('✅ UI initialization complete');
+}
+
+// Export initializeUI globally
+window.initializeUI = initializeUI;
