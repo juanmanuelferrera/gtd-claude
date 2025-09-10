@@ -245,6 +245,51 @@
             gap: 10px;
             perspective: 1000px;
             transform-style: preserve-3d;
+            position: relative;
+        }
+        
+        /* Tactical Emoji Positioning */
+        .emoji-overlay {
+            position: absolute;
+            font-size: 0.8em;
+            z-index: 10;
+            animation: emojiFloat 4s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            transform-style: preserve-3d;
+        }
+        
+        .emoji-overlay.thunderbolt {
+            top: -0.1em;
+            left: 8.2em; /* Perfect spot after "only" */
+            color: #FFD700;
+            animation-delay: 0s;
+        }
+        
+        .emoji-overlay.rocket {
+            top: 2.2em;
+            right: -0.3em; /* Perfect spot after "productivity" */
+            color: #FF6B35;
+            animation-delay: 1s;
+        }
+        
+        @keyframes emojiFloat {
+            0%, 100% {
+                transform: translateY(0) scale(1) rotate(0deg);
+                text-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3);
+            }
+            25% {
+                transform: translateY(-8px) scale(1.1) rotate(5deg);
+                text-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 215, 0, 0.4);
+            }
+            50% {
+                transform: translateY(-12px) scale(1.05) rotate(-3deg);
+                text-shadow: 0 0 30px rgba(255, 215, 0, 0.7), 0 0 60px rgba(255, 215, 0, 0.35);
+            }
+            75% {
+                transform: translateY(-5px) scale(1.08) rotate(2deg);
+                text-shadow: 0 0 22px rgba(255, 215, 0, 0.9), 0 0 45px rgba(255, 215, 0, 0.45);
+            }
         }
 
         .title-line-1 {
@@ -888,9 +933,13 @@
         <div class="hero-content">
             <div class="brand-lockup">
                 <h1 class="hero-title">
-                    <div class="title-line-1">The only ⚡ task manager where</div>
+                    <div class="title-line-1">The only task manager where</div>
                     <div class="title-line-2">every task <em class="flows-emphasis">flows like your thoughts</em></div>
-                    <div class="title-line-3">No rigid schedules, just <strong class="natural-emphasis">natural productivity</strong> 🚀</div>
+                    <div class="title-line-3">No rigid schedules, just <strong class="natural-emphasis">natural productivity</strong></div>
+                    
+                    <!-- Tactical Emoji Overlays -->
+                    <div class="emoji-overlay thunderbolt">⚡</div>
+                    <div class="emoji-overlay rocket">🚀</div>
                 </h1>
             </div>
 
@@ -1164,9 +1213,9 @@
 
         <!-- Final CTA Section -->
         <div class="cta-container" style="margin: 80px auto;">
-            <h2 class="cta-headline">Ready to Transform Your Productivity?</h2>
+            <h2 class="cta-headline">The last task manager you'll ever need to try.</h2>
             <p class="cta-description">
-                The last task manager you'll ever need to try.
+                Ready to transform your productivity?
             </p>
             <a href="register.html" class="cta-button">Start Free Trial Now</a>
         </div>
