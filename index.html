@@ -91,31 +91,31 @@
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
-        /* Language Flag in Navigation */
-        .language-flag {
-            background: transparent !important;
-            border: none !important;
-            padding: 8px 12px !important;
-            font-size: 28px !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            transition: transform 0.1s ease, opacity 0.1s ease !important;
-            text-decoration: none !important;
+        /* Language Flag in Navigation - Proper Specificity Approach */
+        .nav-container .nav-links .language-flag {
+            background: transparent;
+            border: none;
+            padding: 8px 12px;
+            font-size: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s ease, opacity 0.1s ease;
+            text-decoration: none;
             opacity: 0.9;
             will-change: transform, opacity;
             contain: layout style paint;
         }
 
-        .language-flag:hover {
-            transform: translateY(-2px) !important;
+        .nav-container .nav-links .language-flag:hover {
+            transform: translateY(-2px);
             opacity: 1;
-            background: transparent !important;
+            background: transparent;
         }
         
-        .language-flag:active {
-            transform: translateY(0) !important;
-            transition: none !important;
+        .nav-container .nav-links .language-flag:active {
+            transform: translateY(0);
+            transition: none;
         }
 
         /* Award-Winning Hero Section */
