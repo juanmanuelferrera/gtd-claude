@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro - Register</title>
+    <title>⚡ HyperFiler Pro - Registrarse</title>
     <style>
         * {
             margin: 0;
@@ -435,43 +435,43 @@
 <body>
     <nav class="nav-header">
         <div class="nav-container">
-            <a href="./index.html" class="nav-logo">
+            <a href="./index-es.html" class="nav-logo">
                 <span>⚡</span> HyperFiler Pro <span>🚀</span>
             </a>
             <div class="nav-links">
-                <a href="./login.html">🔐 Login</a>
-                <a href="./upgrade-compare.html">💎 Pricing</a>
-                <a href="./upgrade-compare.html" class="nav-cta">Start Free Trial</a>
+                <a href="./login-es.html">🔐 Iniciar Sesión</a>
+                <a href="./upgrade-compare-es.html">💎 Precios</a>
+                <a href="./upgrade-compare-es.html" class="nav-cta">Comenzar Prueba Gratis</a>
             </div>
         </div>
     </nav>
     <div class="container">
         <div class="language-switcher">
-            <a href="register-es.html" class="language-flag" title="Ver en Español">
-                🇪🇸 ES
+            <a href="register.html" class="language-flag" title="View in English">
+                🇺🇸 EN
             </a>
         </div>
         <h1>⚡ HyperFiler Pro 🚀</h1>
         
         <div class="trial-badge">
-            💎 Premium Software
+            💎 Software Premium
         </div>
 
         <form id="register-form">
             <div class="form-group">
-                <label for="email">Email Address</label>
+                <label for="email">Dirección de Email</label>
                 <input 
                     type="email" 
                     id="email" 
                     name="email" 
                     required 
-                    placeholder="Enter your email address"
+                    placeholder="Introduce tu dirección de email"
                     autocomplete="email"
                 >
             </div>
 
             <button type="submit" id="register-button">
-                Free Trial
+                Prueba Gratis
             </button>
         </form>
 
@@ -481,23 +481,23 @@
 
         <div id="loading" class="loading">
             <div class="spinner"></div>
-            <p>Creating your account...</p>
+            <p>Creando tu cuenta...</p>
         </div>
 
         <div class="features">
-            <strong>Premium features you'll experience:</strong>
+            <strong>Características premium que experimentarás:</strong>
             <ul>
-                <li>💎 Professional task management system</li>
-                <li>🚀 Advanced @project methodology</li>
-                <li>☁️ Enterprise-grade cloud sync</li>
-                <li>🧠 Smart natural language processing</li>
-                <li>📧 Priority support & updates</li>
-                <li>💳 Only €49 to own forever after trial</li>
+                <li>💎 Sistema profesional de gestión de tareas</li>
+                <li>🚀 Metodología avanzada @proyecto</li>
+                <li>☁️ Sincronización en la nube de nivel empresarial</li>
+                <li>🧠 Procesamiento inteligente de lenguaje natural</li>
+                <li>📧 Soporte prioritario y actualizaciones</li>
+                <li>💳 Solo €49 para poseer para siempre después de la prueba</li>
             </ul>
         </div>
 
         <div class="login-link">
-            Already have an account? <a href="login.html">Login here</a>
+            ¿Ya tienes una cuenta? <a href="login-es.html">Inicia sesión aquí</a>
         </div>
     </div>
 
@@ -548,7 +548,7 @@
             const email = emailInput.value.trim();
 
             if (!email) {
-                showMessage(errorMessage, 'Please enter your email address');
+                showMessage(errorMessage, 'Por favor introduce tu dirección de email');
                 return;
             }
 
@@ -573,9 +573,9 @@
                     localStorage.setItem('userId', data.user.id);
                     
                     if (data.password) {
-                        showMessage(successMessage, `Account created successfully! Your password is: ${data.password}. Check your email for login details. Redirecting to HyperFiler Pro...`);
+                        showMessage(successMessage, `¡Cuenta creada exitosamente! Tu contraseña es: ${data.password}. Revisa tu email para los detalles de acceso. Redirigiendo a HyperFiler Pro...`);
                     } else {
-                        showMessage(successMessage, 'Account created successfully! Check your email for login details. Redirecting to HyperFiler Pro...');
+                        showMessage(successMessage, '¡Cuenta creada exitosamente! Revisa tu email para los detalles de acceso. Redirigiendo a HyperFiler Pro...');
                     }
                     
                     // Redirect to the main app after a short delay
@@ -584,12 +584,12 @@
                     }, 4000);
                     
                 } else {
-                    showMessage(errorMessage, data.error || 'Registration failed. Please try again.');
+                    showMessage(errorMessage, data.error || 'Registro fallido. Por favor inténtalo de nuevo.');
                 }
                 
             } catch (error) {
                 console.error('Registration error:', error);
-                showMessage(errorMessage, 'Network error. Please check your connection and try again.');
+                showMessage(errorMessage, 'Error de red. Por favor verifica tu conexión e inténtalo de nuevo.');
             }
         });
 
@@ -601,19 +601,19 @@
     <div class="footer">
         <div class="footer-content">
             <h3>⚡ HyperFiler Pro 🚀</h3>
-            <p>Transform your productivity today</p>
+            <p>Transforma tu productividad hoy</p>
             <div class="footer-links">
-                <a href="readme.html">📚 User Guide</a>
-                <a href="upgrade-compare.html">💎 Pricing</a>
-                <a href="mailto:support@hyperfiler.pro">📧 Support</a>
-                <a href="register.html">🚀 Start Trial</a>
+                <a href="readme-es.html">📚 Guía de Usuario</a>
+                <a href="upgrade-compare-es.html">💎 Precios</a>
+                <a href="mailto:support@hyperfiler.pro">📧 Soporte</a>
+                <a href="register-es.html">🚀 Comenzar Prueba</a>
             </div>
-            <p>© 2025 HyperFiler Pro. Professional productivity software.</p>
+            <p>© 2025 HyperFiler Pro. Software de productividad profesional.</p>
         </div>
     </div>
 
     <!-- Custom Chat Button -->
-    <button class="custom-chat-button" onclick="Tawk_API.toggle();" title="Chat with support">
+    <button class="custom-chat-button" onclick="Tawk_API.toggle();" title="Chatear con soporte">
         💬
     </button>
 

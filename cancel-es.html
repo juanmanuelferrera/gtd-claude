@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cancel Subscription - ⚡ HyperFiler Pro 🚀</title>
+    <title>Cancelar Suscripción - ⚡ HyperFiler Pro 🚀</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -174,6 +174,7 @@
             transform: translateY(-2px);
             color: #2563eb;
         }
+
         h1 {
             color: #2563eb;
             margin-bottom: 30px;
@@ -346,48 +347,48 @@
 <body>
     <nav class="nav-header">
         <div class="nav-container">
-            <a href="./index.html" class="nav-logo">
+            <a href="./index-es.html" class="nav-logo">
                 <span>⚡</span> HyperFiler Pro <span>🚀</span>
             </a>
             <div class="nav-links">
-                <a href="./login.html">🔐 Login</a>
-                <a href="./upgrade-compare.html">💎 Pricing</a>
-                <a href="./upgrade-compare.html" class="nav-cta">Start Free Trial</a>
+                <a href="./login-es.html">🔐 Iniciar Sesión</a>
+                <a href="./upgrade-compare-es.html">💎 Precios</a>
+                <a href="./upgrade-compare-es.html" class="nav-cta">Comenzar Prueba Gratis</a>
             </div>
         </div>
     </nav>
     <div class="container">
         <div class="language-switcher">
-            <a href="cancel-es.html" class="language-flag" title="Ver en Español">
-                🇪🇸 ES
+            <a href="cancel.html" class="language-flag" title="View in English">
+                🇺🇸 EN
             </a>
         </div>
-        <h1>✨ HyperFiler Pro Access</h1>
+        <h1>✨ Acceso HyperFiler Pro</h1>
         
         <div class="cancel-form">
             <div class="form-group">
-                <label for="email">Email Address:</label>
-                <input type="email" id="email" placeholder="Enter your email to check Pro access" required>
+                <label for="email">Dirección de Email:</label>
+                <input type="email" id="email" placeholder="Introduce tu email para verificar el acceso Pro" required>
             </div>
             
             <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #155724; margin-bottom: 15px;">🎉 You Have Lifetime Pro Access!</h3>
-                <p style="color: #155724; margin: 0;">Your one-time payment of €49 gives you permanent access to all Pro features. No subscriptions, no monthly charges!</p>
+                <h3 style="color: #155724; margin-bottom: 15px;">🎉 ¡Tienes Acceso Pro de Por Vida!</h3>
+                <p style="color: #155724; margin: 0;">Tu pago único de €49 te da acceso permanente a todas las funciones Pro. ¡Sin suscripciones, sin cargos mensuales!</p>
             </div>
             
             <div class="feedback">
-                <label for="feedback-text"><strong>Any feedback? (Optional)</strong></label>
-                <textarea id="feedback-text" placeholder="Help us improve HyperFiler..."></textarea>
+                <label for="feedback-text"><strong>¿Algún comentario? (Opcional)</strong></label>
+                <textarea id="feedback-text" placeholder="Ayúdanos a mejorar HyperFiler..."></textarea>
             </div>
             
-            <button class="btn secondary" onclick="window.close()">Close Window</button>
+            <button class="btn secondary" onclick="window.close()">Cerrar Ventana</button>
         </div>
         
         <div class="status" id="status"></div>
         
         <p style="color: #666; font-size: 14px; margin-top: 30px;">
-            <strong>Lifetime Access:</strong> Your one-time €49 payment gives you permanent Pro features. 
-            No recurring charges, no expiration date.
+            <strong>Acceso de Por Vida:</strong> Tu pago único de €49 te da funciones Pro permanentes. 
+            Sin cargos recurrentes, sin fecha de vencimiento.
         </p>
     </div>
 
@@ -405,14 +406,14 @@
             const email = emailInput.value.trim();
             
             if (!email) {
-                showStatus('error', 'Please enter your email address');
+                showStatus('error', 'Por favor introduce tu dirección de email');
                 return;
             }
             
             // Show retention offer first time
             if (!showedRetentionOffer) {
                 retentionOffer.style.display = 'block';
-                cancelBtn.textContent = 'I Still Want to Cancel';
+                cancelBtn.textContent = 'Aún Quiero Cancelar';
                 showedRetentionOffer = true;
                 return;
             }
@@ -435,13 +436,13 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    showStatus('success', '🎉 Discount applied! You\'ll pay just $1/month for the next 3 months.');
+                    showStatus('success', '🎉 ¡Descuento aplicado! Pagarás solo €1/mes durante los próximos 3 meses.');
                     setTimeout(() => window.close(), 3000);
                 } else {
-                    showStatus('error', 'Error applying discount. Please contact support.');
+                    showStatus('error', 'Error aplicando descuento. Por favor contacta soporte.');
                 }
             } catch (error) {
-                showStatus('error', 'Error applying discount. Please contact support.');
+                showStatus('error', 'Error aplicando descuento. Por favor contacta soporte.');
             }
         });
         
@@ -452,7 +453,7 @@
         async function processCancellation() {
             try {
                 cancelBtn.disabled = true;
-                cancelBtn.textContent = 'Processing...';
+                cancelBtn.textContent = 'Procesando...';
                 
                 const response = await fetch('/cancel-subscription', {
                     method: 'POST',
@@ -467,16 +468,16 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    showStatus('success', '✅ Subscription canceled successfully. You\'ll have access until ' + result.periodEnd);
+                    showStatus('success', '✅ Suscripción cancelada exitosamente. Tendrás acceso hasta ' + result.periodEnd);
                 } else {
-                    showStatus('error', result.error || 'Error canceling subscription');
+                    showStatus('error', result.error || 'Error cancelando suscripción');
                 }
                 
             } catch (error) {
-                showStatus('error', 'Error processing cancellation. Please contact support.');
+                showStatus('error', 'Error procesando cancelación. Por favor contacta soporte.');
             } finally {
                 cancelBtn.disabled = false;
-                cancelBtn.textContent = 'Cancel My Subscription';
+                cancelBtn.textContent = 'Cancelar Mi Suscripción';
             }
         }
         
@@ -491,19 +492,19 @@
     <div class="footer">
         <div class="footer-content">
             <h3>⚡ HyperFiler Pro 🚀</h3>
-            <p>Transform your productivity today</p>
+            <p>Transforma tu productividad hoy</p>
             <div class="footer-links">
-                <a href="readme.html">📚 User Guide</a>
-                <a href="upgrade-compare.html">💎 Pricing</a>
-                <a href="mailto:support@hyperfiler.pro">📧 Support</a>
-                <a href="register.html">🚀 Start Trial</a>
+                <a href="readme-es.html">📚 Guía de Usuario</a>
+                <a href="upgrade-compare-es.html">💎 Precios</a>
+                <a href="mailto:support@hyperfiler.pro">📧 Soporte</a>
+                <a href="register-es.html">🚀 Comenzar Prueba</a>
             </div>
-            <p>© 2025 HyperFiler Pro. Professional productivity software.</p>
+            <p>© 2025 HyperFiler Pro. Software de productividad profesional.</p>
         </div>
     </div>
 
     <!-- Custom Chat Button -->
-    <button class="custom-chat-button" onclick="Tawk_API.toggle();" title="Chat with support">
+    <button class="custom-chat-button" onclick="Tawk_API.toggle();" title="Chatear con soporte">
         💬
     </button>
 

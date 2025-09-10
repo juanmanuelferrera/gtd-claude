@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - ⚡ HyperFiler Pro 🚀</title>
+    <title>Iniciar Sesión - ⚡ HyperFiler Pro 🚀</title>
     <style>
         * {
             margin: 0;
@@ -492,12 +492,12 @@
         <!-- Header -->
         <div class="header">
             <div class="language-switcher">
-                <a href="login-es.html" class="language-flag" title="Ver en Español">
-                    🇪🇸 ES
+                <a href="login.html" class="language-flag" title="View in English">
+                    🇺🇸 EN
                 </a>
             </div>
             <h1><span>⚡</span> HyperFiler Pro <span>🚀</span></h1>
-            <p>Sign in to your account</p>
+            <p>Inicia sesión en tu cuenta</p>
         </div>
 
         <!-- Login Form -->
@@ -508,42 +508,42 @@
             
             <div id="loading" class="loading">
                 <div class="spinner"></div>
-                <p style="margin-top: 10px;">Signing in...</p>
+                <p style="margin-top: 10px;">Iniciando sesión...</p>
             </div>
 
             <form id="login-form">
                 <div class="form-group">
-                    <label for="email">Email Address</label>
+                    <label for="email">Dirección de Email</label>
                     <input 
                         type="email" 
                         id="email" 
                         name="email" 
                         required 
-                        placeholder="Enter your email"
+                        placeholder="Introduce tu email"
                         autocomplete="email"
                     >
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="password">Contraseña</label>
                     <input 
                         type="password" 
                         id="password" 
                         name="password" 
                         required 
-                        placeholder="Enter your password"
+                        placeholder="Introduce tu contraseña"
                         autocomplete="current-password"
                     >
                 </div>
 
                 <button type="submit" id="login-button" class="login-button">
-                    Sign In
+                    Iniciar Sesión
                 </button>
             </form>
 
             <div class="links">
-                <a href="#" id="forgot-password-link">Forgot Password?</a>
-                <a href="register.html">Start Trial</a>
+                <a href="#" id="forgot-password-link">¿Olvidaste tu Contraseña?</a>
+                <a href="register-es.html">Comenzar Prueba</a>
             </div>
         </div>
     </div>
@@ -553,31 +553,31 @@
         <div class="modal-content">
             <div class="modal-header">
                 <span class="close">&times;</span>
-                <h2>🔐 Reset Password</h2>
-                <p>Enter your email to receive a new password</p>
+                <h2>🔐 Restablecer Contraseña</h2>
+                <p>Introduce tu email para recibir una nueva contraseña</p>
             </div>
             <div class="modal-body">
                 <div id="modal-success-message" class="status-message success"></div>
                 <div id="modal-error-message" class="status-message error"></div>
                 <div id="modal-loading" class="loading">
                     <div class="spinner"></div>
-                    <p style="margin-top: 10px;">Sending reset email...</p>
+                    <p style="margin-top: 10px;">Enviando email de restablecimiento...</p>
                 </div>
                 <div class="form-group">
-                    <label for="modal-email">Email Address</label>
+                    <label for="modal-email">Dirección de Email</label>
                     <input 
                         type="email" 
                         id="modal-email" 
                         name="modal-email" 
                         required 
-                        placeholder="Enter your email address"
+                        placeholder="Introduce tu dirección de email"
                         autocomplete="email"
                     >
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="modal-button secondary" id="modal-cancel">Cancel</button>
-                <button type="button" class="modal-button primary" id="modal-reset">Reset Password</button>
+                <button type="button" class="modal-button secondary" id="modal-cancel">Cancelar</button>
+                <button type="button" class="modal-button primary" id="modal-reset">Restablecer Contraseña</button>
             </div>
         </div>
     </div>
@@ -673,9 +673,9 @@
         // Check URL parameters for messages
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('registered') === 'true') {
-            showMessage(successMessage, '✅ Account created successfully! Please sign in.');
+            showMessage(successMessage, '✅ ¡Cuenta creada exitosamente! Por favor inicia sesión.');
         } else if (urlParams.get('reset') === 'true') {
-            showMessage(infoMessage, '🔐 Password reset sent! Check your email for the new password.');
+            showMessage(infoMessage, '🔐 ¡Restablecimiento de contraseña enviado! Revisa tu email para la nueva contraseña.');
         }
 
         // Handle login form submission
@@ -686,7 +686,7 @@
             const password = passwordInput.value;
 
             if (!email || !password) {
-                showMessage(errorMessage, 'Please enter both email and password.');
+                showMessage(errorMessage, 'Por favor introduce tanto el email como la contraseña.');
                 return;
             }
 
@@ -744,7 +744,7 @@
                         sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
                     }
 
-                    showMessage(successMessage, '✅ Login successful! Redirecting...');
+                    showMessage(successMessage, '✅ ¡Inicio de sesión exitoso! Redirigiendo...');
 
                     // SECURITY: Wait a bit longer to ensure cookie is properly set
                     setTimeout(() => {
@@ -758,12 +758,12 @@
                         statusText: response.statusText,
                         result: result
                     });
-                    showMessage(errorMessage, result.message || result.error || 'Login failed. Please try again.');
+                    showMessage(errorMessage, result.message || result.error || 'Inicio de sesión fallido. Por favor inténtalo de nuevo.');
                 }
 
             } catch (error) {
                 console.error('Login error:', error);
-                showMessage(errorMessage, 'Network error. Please check your connection and try again.');
+                showMessage(errorMessage, 'Error de red. Por favor verifica tu conexión e inténtalo de nuevo.');
             }
         });
 
@@ -789,7 +789,7 @@
             const email = modalEmailInput.value.trim();
             
             if (!email) {
-                showModalMessage(modalErrorMessage, 'Please enter your email address.');
+                showModalMessage(modalErrorMessage, 'Por favor introduce tu dirección de email.');
                 modalEmailInput.focus();
                 return;
             }
@@ -813,28 +813,28 @@
                     // Show temporary password in development
                     if (result.tempPassword) {
                         setTimeout(() => {
-                            showModalMessage(modalSuccessMessage, `New password: ${result.tempPassword}`);
+                            showModalMessage(modalSuccessMessage, `Nueva contraseña: ${result.tempPassword}`);
                         }, 2000);
                     }
 
                     // Auto-close modal after success
                     setTimeout(() => {
                         hideModal();
-                        showMessage(successMessage, 'Password reset email sent! Check your email.');
+                        showMessage(successMessage, '¡Email de restablecimiento de contraseña enviado! Revisa tu email.');
                     }, 3000);
 
                 } else {
                     // Handle 404 (no account found) and other errors
                     if (response.status === 404) {
-                        showModalMessage(modalErrorMessage, result.error || 'No account found with that email address.');
+                        showModalMessage(modalErrorMessage, result.error || 'No se encontró cuenta con esa dirección de email.');
                     } else {
-                        showModalMessage(modalErrorMessage, result.error || 'Failed to send password reset.');
+                        showModalMessage(modalErrorMessage, result.error || 'Falló el envío del restablecimiento de contraseña.');
                     }
                 }
 
             } catch (error) {
                 console.error('Forgot password error:', error);
-                showModalMessage(modalErrorMessage, 'Network error. Please try again.');
+                showModalMessage(modalErrorMessage, 'Error de red. Por favor inténtalo de nuevo.');
             }
         });
 
@@ -897,7 +897,7 @@
                 }
             }).then(response => {
                 if (response.ok) {
-                    showMessage(infoMessage, 'You are already logged in. Redirecting...');
+                    showMessage(infoMessage, 'Ya tienes sesión iniciada. Redirigiendo...');
                     setTimeout(() => {
                         window.location.href = '/hyperfiler-pro.html';
                     }, 500);
@@ -938,19 +938,19 @@
     <div class="footer">
         <div class="footer-content">
             <h3>⚡ HyperFiler Pro 🚀</h3>
-            <p>Transform your productivity today</p>
+            <p>Transforma tu productividad hoy</p>
             <div class="footer-links">
-                <a href="readme.html">📚 User Guide</a>
-                <a href="upgrade-compare.html">💎 Pricing</a>
-                <a href="mailto:support@hyperfiler.pro">📧 Support</a>
-                <a href="register.html">🚀 Start Trial</a>
+                <a href="readme-es.html">📚 Guía de Usuario</a>
+                <a href="upgrade-compare-es.html">💎 Precios</a>
+                <a href="mailto:support@hyperfiler.pro">📧 Soporte</a>
+                <a href="register-es.html">🚀 Comenzar Prueba</a>
             </div>
-            <p>© 2025 HyperFiler Pro. Professional productivity software.</p>
+            <p>© 2025 HyperFiler Pro. Software de productividad profesional.</p>
         </div>
     </div>
 
     <!-- Custom Chat Button -->
-    <button class="custom-chat-button" onclick="Tawk_API.toggle();" title="Chat with support">
+    <button class="custom-chat-button" onclick="Tawk_API.toggle();" title="Chatear con soporte">
         💬
     </button>
 
