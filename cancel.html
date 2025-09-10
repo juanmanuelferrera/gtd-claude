@@ -7,9 +7,105 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f0f2f5;
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
+            padding-top: 90px;
             margin: 0;
+        }
+        
+        /* Header Navigation */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(37, 99, 235, 0.1);
+            z-index: 1000;
+            padding: 15px 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .nav-logo {
+            font-size: 1.5em;
+            font-weight: 900;
+            color: #2563eb;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+        }
+
+        .nav-cta {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+            color: white !important;
+            font-weight: 600 !important;
+        }
+
+        .nav-cta:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        /* Footer */
+        .page-footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .page-footer p {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .page-footer a {
+            color: #2563eb;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+        }
+
+        .page-footer a:hover {
+            text-decoration: underline;
         }
         .container {
             max-width: 600px;
@@ -21,7 +117,7 @@
             text-align: center;
         }
         h1 {
-            color: #1877f2;
+            color: #2563eb;
             margin-bottom: 30px;
         }
         .cancel-form {
@@ -123,6 +219,18 @@
     </style>
 </head>
 <body>
+    <nav class="nav-header">
+        <div class="nav-container">
+            <a href="./index.html" class="nav-logo">
+                <span>⚡</span> HyperFiler Pro <span>🚀</span>
+            </a>
+            <div class="nav-links">
+                <a href="./login.html">🔐 Login</a>
+                <a href="./upgrade-compare.html">💎 Pricing</a>
+                <a href="./upgrade-compare.html" class="nav-cta">Start Free Trial</a>
+            </div>
+        </div>
+    </nav>
     <div class="container">
         <h1>✨ HyperFiler Pro Access</h1>
         
@@ -148,7 +256,7 @@
         <div class="status" id="status"></div>
         
         <p style="color: #666; font-size: 14px; margin-top: 30px;">
-                            <strong>Lifetime Access:</strong> Your one-time €49 payment gives you permanent Pro features. 
+            <strong>Lifetime Access:</strong> Your one-time €49 payment gives you permanent Pro features. 
             No recurring charges, no expiration date.
         </p>
     </div>
@@ -248,5 +356,13 @@
             status.style.display = 'block';
         }
     </script>
+    
+    <!-- Footer -->
+    <div class="page-footer">
+        <p><strong>HyperFiler Pro</strong> - Transform your productivity today</p>
+        <a href="mailto:support@hyperfiler.pro">📧 Contact Support</a>
+        <a href="readme.html">📚 User Guide</a>
+        <a href="./index.html">🏠 Home</a>
+    </div>
 </body>
 </html>
