@@ -22,164 +22,564 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 120px 20px 40px;
             text-align: center;
         }
 
-        .hero {
-            margin-bottom: 60px;
+        /* Header Navigation */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(37, 99, 235, 0.1);
+            z-index: 1000;
+            padding: 20px 0;
         }
 
-        .hero h1 {
-            font-size: 4em;
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            height: 60px;
+        }
+
+        .nav-logo {
+            font-size: 1.5em;
             font-weight: 900;
-            margin-bottom: 20px;
+            color: #2563eb;
+            text-decoration: none;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
+        }
+
+        .nav-links {
+            display: flex;
             gap: 20px;
+            align-items: center;
         }
 
-        .hero p {
-            font-size: 1.5em;
-            margin-bottom: 30px;
-            opacity: 0.9;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .cta-buttons {
-            margin-bottom: 60px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 15px 30px;
-            margin: 10px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.1em;
-            font-weight: 700;
+        .nav-links a {
+            color: #374151;
             text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
         }
 
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        .nav-links a:hover {
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
         }
 
-        .btn-primary {
-            background: linear-gradient(45deg, #0ea5e9, #0284c7);
-            color: white;
+        .nav-cta {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+            color: white !important;
+            font-weight: 600 !important;
         }
 
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+        .nav-cta:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 60px;
+        /* Award-Winning Hero Section */
+        .hero-premium {
+            position: relative;
+            padding: 80px 0 120px;
+            text-align: center;
+            overflow: hidden;
         }
 
-        .feature {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-        }
-
-        .feature h3 {
-            font-size: 1.5em;
-            margin-bottom: 15px;
-        }
-
-        .links {
-            margin-top: 40px;
-        }
-
-        .links a {
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            margin: 0 15px;
-            transition: color 0.3s ease;
-        }
-
-        .login-link {
+        .hero-background {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
         }
 
-        .login-link:hover {
+        .floating-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: floatParticle 8s ease-in-out infinite;
+        }
+
+        .floating-particle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+        .floating-particle:nth-child(2) { top: 60%; left: 80%; animation-delay: 2s; }
+        .floating-particle:nth-child(3) { top: 40%; left: 20%; animation-delay: 4s; }
+        .floating-particle:nth-child(4) { top: 80%; left: 70%; animation-delay: 6s; }
+
+        @keyframes floatParticle {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+            50% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+        }
+
+        .hero-gradient-orb {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: orbPulse 6s ease-in-out infinite;
+        }
+
+        @keyframes orbPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .brand-lockup {
+            position: relative;
+            margin-bottom: 60px;
+        }
+
+        .brand-spark {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3em;
+            animation: sparkPulse 3s ease-in-out infinite;
+            filter: drop-shadow(0 4px 12px rgba(255, 255, 0, 0.4));
+        }
+
+        .brand-rocket {
+            position: absolute;
+            top: -20px;
+            right: -60px;
+            font-size: 2.5em;
+            animation: rocketFloat 4s ease-in-out infinite;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+        }
+
+        @keyframes sparkPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); filter: drop-shadow(0 4px 12px rgba(255, 255, 0, 0.4)); }
+            50% { transform: translateX(-50%) scale(1.15); filter: drop-shadow(0 6px 20px rgba(255, 255, 0, 0.8)); }
+        }
+        
+        @keyframes rocketFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        .hero-title {
+            font-size: clamp(3.5em, 8vw, 7.5em);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin: 0 auto 50px;
+            max-width: 1000px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .title-line-1 {
+            opacity: 0.9;
+            font-weight: 700;
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .title-line-2 {
+            font-weight: 900;
+            background: linear-gradient(45deg, #ffffff, #e0f2fe, #b3e5fc);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .hero-subtitle {
+            font-size: 1.4em;
+            opacity: 0.85;
+            font-weight: 400;
+            line-height: 1.6;
+            margin: 0 auto 60px;
+            max-width: 600px;
+        }
+
+        /* Social Share Buttons */
+        .social-share {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            text-decoration: none;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .social-btn:hover {
             background: rgba(255, 255, 255, 0.2);
             transform: translateY(-2px);
         }
 
-        .links a:hover {
-            color: white;
+        .social-btn.twitter { color: #1DA1F2; }
+        .social-btn.linkedin { color: #0077B5; }
+        .social-btn.facebook { color: #1877F2; }
+
+        /* Clean CTA Section */
+        .cta-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 60px 40px;
+            margin: 0 auto 80px;
+            max-width: 800px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
 
+        .cta-headline {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 30px;
+            line-height: 1.2;
+        }
+
+        .cta-description {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #2563eb;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Features Grid */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 80px;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .feature h3 {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .feature p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* Social Proof */
+        .social-proof {
+            text-align: center;
+            margin: 80px 0;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .social-proof h2 {
+            font-size: 2.5em;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ffffff, #e0f2fe);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .social-proof p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            margin-top: 100px;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer h3 {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            opacity: 0.8;
+        }
+
+        .footer p {
+            opacity: 0.7;
+            margin-top: 20px;
+        }
+
+        /* Mobile Responsiveness */
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5em;
-                flex-direction: column;
+            .nav-container {
+                padding: 0 15px;
+            }
+            
+            .nav-links {
                 gap: 10px;
             }
             
-            .hero p {
-                font-size: 1.2em;
+            .nav-links a {
+                padding: 6px 12px;
+                font-size: 0.9em;
+            }
+
+            .hero-title {
+                text-align: center;
+                font-size: clamp(2.5em, 8vw, 4em);
+            }
+
+            .brand-rocket {
+                display: none;
+            }
+
+            .cta-container {
+                padding: 40px 20px;
+                margin: 0 20px 60px;
+            }
+
+            .cta-headline {
+                font-size: 2em;
+            }
+
+            .social-share {
+                gap: 10px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 15px;
             }
         }
     </style>
 </head>
 <body>
-    <a href="./login.html" class="login-link">🔐 Login</a>
+    <!-- Navigation -->
+    <nav class="nav-header">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <span>⚡</span> HyperFiler Pro <span>🚀</span>
+            </a>
+            <div class="nav-links">
+                <a href="readme.html">📚 User Guide</a>
+                <a href="upgrade-compare.html">💎 Pricing</a>
+                <a href="register.html" class="nav-cta">Start Free Trial</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-premium">
+        <div class="hero-background">
+            <div class="floating-particle"></div>
+            <div class="floating-particle"></div>
+            <div class="floating-particle"></div>
+            <div class="floating-particle"></div>
+            <div class="hero-gradient-orb"></div>
+        </div>
+
+        <div class="hero-content">
+            <div class="brand-lockup">
+                <div class="brand-spark">⚡</div>
+                <h1 class="hero-title">
+                    <div class="title-line-1">Professional GTD System</div>
+                    <div class="title-line-2">HyperFiler Pro</div>
+                </h1>
+                <div class="brand-rocket">🚀</div>
+            </div>
+
+            <p class="hero-subtitle">
+                Transform your productivity with the digital GTD system trusted by 500 executives who switched from Todoist
+            </p>
+
+            <!-- Social Share Buttons -->
+            <div class="social-share">
+                <a href="https://twitter.com/intent/tweet?text=Discovered%20HyperFiler%20Pro%20-%20amazing%20GTD%20system!&url=https://hyperfiler.pro" target="_blank" class="social-btn twitter">🐦</a>
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://hyperfiler.pro" target="_blank" class="social-btn linkedin">💼</a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=https://hyperfiler.pro" target="_blank" class="social-btn facebook">📘</a>
+            </div>
+
+            <!-- Clean CTA -->
+            <div class="cta-container">
+                <h2 class="cta-headline">Ready to Unlock Your Productivity Potential?</h2>
+                <p class="cta-description">
+                    Join thousands of professionals who've transformed their workflow with HyperFiler Pro's advanced GTD methodology.
+                </p>
+                <a href="register.html" class="cta-button">Start Free Trial</a>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
-        <div class="hero">
-            <h1><span>⚡</span> HyperFiler Pro <span>🚀</span></h1>
-            <p>43 Folders methodology digitally supercharged</p>
-        </div>
-
-        <div class="cta-buttons">
-            <a href="./register.html" class="btn btn-primary">🔄 Start Trial</a>
-            <a href="./upgrade-compare.html" class="btn btn-secondary">💳 Purchase License</a>
-        </div>
-
+        <!-- Features Section -->
         <div class="features">
             <div class="feature">
-                <h3>🧠 Mental Clarity</h3>
-                <p>Tasks disappear until exactly when you need them. Your mind stays clear and focused on what matters right now.</p>
+                <span class="feature-icon">🧠</span>
+                <h3>Smart GTD System</h3>
+                <p>Advanced Getting Things Done methodology with natural language processing for effortless task capture and organization.</p>
             </div>
+
             <div class="feature">
-                <h3>⚡ Digital Superpowers</h3>
-                <p>Natural language processing, instant access, smart recurring tasks, and unlimited organization possibilities.</p>
+                <span class="feature-icon">🚀</span>
+                <h3>@project Methodology</h3>
+                <p>Revolutionary project management with @project tags that automatically organize and prioritize your work streams.</p>
             </div>
+
             <div class="feature">
-                <h3>📱 Cross-Device Sync</h3>
-                <p>Real-time synchronization across all devices with enterprise-grade security and intelligent data conflict resolution.</p>
+                <span class="feature-icon">☁️</span>
+                <h3>Enterprise Cloud Sync</h3>
+                <p>Seamless synchronization across all devices with enterprise-grade security and offline-first architecture.</p>
+            </div>
+
+            <div class="feature">
+                <span class="feature-icon">📊</span>
+                <h3>Advanced Analytics</h3>
+                <p>Comprehensive productivity insights and performance metrics to optimize your workflow and time management.</p>
+            </div>
+
+            <div class="feature">
+                <span class="feature-icon">🎯</span>
+                <h3>Context Switching</h3>
+                <p>Intelligent context awareness that helps you focus on the right tasks at the right time and location.</p>
+            </div>
+
+            <div class="feature">
+                <span class="feature-icon">⚡</span>
+                <h3>Lightning Fast</h3>
+                <p>Blazing-fast performance with instant search, real-time updates, and responsive interface design.</p>
             </div>
         </div>
 
-        <div class="links">
-            <a href="./readme.html">📚 Complete Documentation</a>
-            <a href="./upgrade-compare.html">💳 Get Pro Access</a>
-            <a href="./login.html">🔐 Login</a>
+        <!-- Social Proof -->
+        <div class="social-proof">
+            <h2>500 Executives Switched from Todoist</h2>
+            <p>
+                "HyperFiler Pro's @project methodology revolutionized how I manage complex workflows. 
+                The natural language processing saves me hours every week." - Fortune 500 Executive
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-content">
+                <h3>⚡ HyperFiler Pro 🚀</h3>
+                <p>Transform your productivity today</p>
+                <div class="footer-links">
+                    <a href="readme.html">📚 User Guide</a>
+                    <a href="upgrade-compare.html">💎 Pricing</a>
+                    <a href="mailto:support@hyperfiler.pro">📧 Support</a>
+                    <a href="register.html">🚀 Start Trial</a>
+                </div>
+                <p>© 2025 HyperFiler Pro. Professional productivity software.</p>
+            </div>
         </div>
     </div>
 </body>
