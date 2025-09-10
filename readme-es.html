@@ -387,6 +387,46 @@
             opacity: 0.7;
             margin-top: 20px;
         }
+
+        /* Custom Chat Button */
+        .custom-chat-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 24px;
+        }
+
+        .custom-chat-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(37, 99, 235, 0.4);
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+        }
+
+        .custom-chat-button:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .custom-chat-button {
+                width: 50px;
+                height: 50px;
+                bottom: 20px;
+                right: 20px;
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -966,5 +1006,30 @@
                 <p>© 2025 HyperFiler Pro. Professional productivity software.</p>
             </div>
         </div>
+
+    <!-- Custom Chat Button -->
+    <button class="custom-chat-button" onclick="Tawk_API.toggle();" title="Chat with support">
+        💬
+    </button>
+
+    <!-- Tawk.to Chat Widget -->
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/6754b2f12480f5b4f59f0123/1ieh40k9f';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+    })();
+
+    // Hide default Tawk.to widget and use custom button
+    Tawk_API = Tawk_API || {};
+    Tawk_API.onLoad = function(){
+        // Hide the default widget
+        Tawk_API.hideWidget();
+    };
+    </script>
 </body>
 </html> 
