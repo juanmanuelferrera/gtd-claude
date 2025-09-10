@@ -38,30 +38,22 @@
             z-index: 10;
         }
 
+        /* Language Flag in Navigation */
         .language-flag {
-            background: rgba(37, 99, 235, 0.9);
-            border: 2px solid rgba(37, 99, 235, 1);
-            border-radius: 16px;
-            padding: 12px 20px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-decoration: none;
-            color: white;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
-            backdrop-filter: blur(10px);
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+            color: white !important;
+            font-weight: 600 !important;
+            border-radius: 8px !important;
+            padding: 8px 12px !important;
+            font-size: 14px !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
         }
 
         .language-flag:hover {
-            background: rgba(29, 78, 216, 0.95);
-            border-color: rgba(29, 78, 216, 1);
-            transform: translateY(-3px);
-            color: white;
-            box-shadow: 0 8px 30px rgba(37, 99, 235, 0.4);
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+            color: white !important;
         }
 
         .header::before {
@@ -467,19 +459,14 @@
                 <span>⚡</span> HyperFiler Pro <span>🚀</span>
             </a>
             <div class="nav-links">
-                <a href="./readme.html">🇺🇸 English</a>
-                <a href="./upgrade-compare.html">💎 Precios</a>
-                <a href="./register.html" class="nav-cta">Prueba Gratis</a>
+                <a href="./upgrade-compare-es.html">💎 Precios</a>
+                <a href="./readme.html" class="language-flag">🇺🇸 EN</a>
+                <a href="./register-es.html" class="nav-cta">Prueba Gratis</a>
             </div>
         </div>
     </nav>
     
     <div class="header">
-        <div class="language-switcher">
-            <a href="readme.html" class="language-flag" title="View in English">
-                🇺🇸 EN
-            </a>
-        </div>
         <div class="header-content">
             <h1><span>⚡</span> HyperFiler Pro <span>🚀</span></h1>
             <p class="subtitle">Documentación</p>
