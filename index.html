@@ -218,34 +218,19 @@
             margin-bottom: 60px;
         }
 
-        .brand-spark {
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 3em;
-            animation: sparkPulse 3s ease-in-out infinite;
-            filter: drop-shadow(0 4px 12px rgba(255, 255, 0, 0.4));
+        .hero-title .title-line-1,
+        .hero-title .title-line-3 {
+            position: relative;
         }
 
-        .brand-rocket {
-            position: absolute;
-            top: -20px;
-            right: -60px;
-            font-size: 2.5em;
-            animation: rocketFloat 4s ease-in-out infinite;
-            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+        .hero-title .title-line-1 {
+            animation: subtleGlow 4s ease-in-out infinite alternate;
         }
 
-        @keyframes sparkPulse {
-            0%, 100% { transform: translateX(-50%) scale(1); filter: drop-shadow(0 4px 12px rgba(255, 255, 0, 0.4)); }
-            50% { transform: translateX(-50%) scale(1.15); filter: drop-shadow(0 6px 20px rgba(255, 255, 0, 0.8)); }
+        .hero-title .title-line-3 {
+            animation: subtleGlow 5s ease-in-out infinite alternate;
         }
-        
-        @keyframes rocketFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(5deg); }
-        }
+
 
         .hero-title {
             font-size: clamp(3.5em, 8vw, 7.5em);
@@ -902,13 +887,11 @@
 
         <div class="hero-content">
             <div class="brand-lockup">
-                <div class="brand-spark">⚡</div>
                 <h1 class="hero-title">
-                    <div class="title-line-1">The only task manager where</div>
+                    <div class="title-line-1">The only ⚡ task manager where</div>
                     <div class="title-line-2">every task <em class="flows-emphasis">flows like your thoughts</em></div>
-                    <div class="title-line-3">No rigid schedules, just <strong class="natural-emphasis">natural productivity</strong></div>
+                    <div class="title-line-3">No rigid schedules, just <strong class="natural-emphasis">natural productivity</strong> 🚀</div>
                 </h1>
-                <div class="brand-rocket">🚀</div>
             </div>
 
 
