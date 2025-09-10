@@ -798,17 +798,26 @@
             }
         }
 
-        /* Footer */
+        /* Full-Width Footer */
         .footer {
             text-align: center;
-            padding: 60px 20px;
-            background: rgba(0, 0, 0, 0.2);
+            padding: 60px 0;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(30, 64, 175, 0.2) 100%);
             margin-top: 100px;
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
         }
 
         .footer-content {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 0 20px;
         }
 
         .footer h3 {
@@ -1220,7 +1229,9 @@
             <a href="register.html" class="cta-button">Start Free Trial Now</a>
         </div>
 
-        <!-- Footer -->
+        </div>
+        
+        <!-- Full-Width Footer -->
         <div class="footer">
             <div class="footer-content">
                 <h3>⚡ HyperFiler Pro 🚀</h3>
@@ -1234,6 +1245,5 @@
                 <p>© 2025 HyperFiler Pro. Professional productivity software.</p>
             </div>
         </div>
-    </div>
 </body>
 </html>

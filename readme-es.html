@@ -335,6 +335,58 @@
                 font-size: 0.9em;
             }
         }
+
+        /* Full-Width Footer */
+        .footer {
+            text-align: center;
+            padding: 60px 0;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(30, 64, 175, 0.2) 100%);
+            margin-top: 100px;
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer h3 {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            opacity: 0.8;
+        }
+
+        .footer p {
+            opacity: 0.7;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -900,17 +952,19 @@
         });
     </script>
     
-    <!-- Gentle Purchase Call-to-Action Footer -->
-    <div style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; text-align: center; padding: 40px 20px; margin-top: 40px;">
-        <div style="max-width: 600px; margin: 0 auto;">
-            <h3 style="margin: 0 0 15px 0; font-size: 1.5em; color: white;">✨ ¿Listo para Poseer HyperFiler Pro?</h3>
-            <p style="margin: 0 0 25px 0; opacity: 0.9; font-size: 1.1em; line-height: 1.6;">Has aprendido sobre todas las características poderosas. Experiméntalas con acceso de prueba ilimitado, luego compra tu licencia profesional cuando estés listo.</p>
-            <div style="margin-bottom: 20px;">
-                <a href="https://hyperfiler.pro/register.html" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; text-decoration: none; border-radius: 25px; font-weight: 600; margin: 0 10px; border: 1px solid rgba(255,255,255,0.3); transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'">🚀 Comenzar Prueba</a>
-                <a href="https://hyperfiler.pro/upgrade-compare.html" style="background: linear-gradient(45deg, #FFD700, #FFA500); color: #333; padding: 12px 24px; text-decoration: none; border-radius: 25px; font-weight: 600; margin: 0 10px; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">💳 Comprar Licencia</a>
+        <!-- Full-Width Footer -->
+        <div class="footer">
+            <div class="footer-content">
+                <h3>⚡ HyperFiler Pro 🚀</h3>
+                <p>Transform your productivity today</p>
+                <div class="footer-links">
+                    <a href="readme.html">📚 User Guide</a>
+                    <a href="upgrade-compare.html">💎 Pricing</a>
+                    <a href="mailto:support@hyperfiler.pro">📧 Support</a>
+                    <a href="register.html">🚀 Start Trial</a>
+                </div>
+                <p>© 2025 HyperFiler Pro. Professional productivity software.</p>
             </div>
-                            <p style="margin: 0; font-size: 0.9em; opacity: 0.7;">Software de productividad profesional • €49 pago único</p>
         </div>
-    </div>
 </body>
 </html> 

@@ -86,30 +86,56 @@
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
         
-        /* Footer */
+        /* Full-Width Footer */
         .footer {
-            background: #333;
-            color: white;
             text-align: center;
-            padding: 40px 20px;
-            width: 100%;
-            margin-top: auto;
+            padding: 60px 0;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(30, 64, 175, 0.2) 100%);
+            margin-top: 100px;
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer h3 {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            opacity: 0.8;
         }
 
         .footer p {
-            margin-bottom: 20px;
-            font-size: 1.1em;
-        }
-
-        .footer a {
-            color: #2563eb;
-            text-decoration: none;
-            margin: 0 15px;
-            font-weight: 500;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
+            opacity: 0.7;
+            margin-top: 20px;
         }
 
         .container {
@@ -467,12 +493,19 @@
         emailInput.focus();
     </script>
     
-    <!-- Footer -->
+    <!-- Full-Width Footer -->
     <div class="footer">
-        <p><strong>HyperFiler Pro</strong> - Transform your productivity today</p>
-        <a href="mailto:support@hyperfiler.pro">📧 Contact Support</a>
-        <a href="readme.html">📚 User Guide</a>
-        <a href="./index.html">🏠 Home</a>
+        <div class="footer-content">
+            <h3>⚡ HyperFiler Pro 🚀</h3>
+            <p>Transform your productivity today</p>
+            <div class="footer-links">
+                <a href="readme.html">📚 User Guide</a>
+                <a href="upgrade-compare.html">💎 Pricing</a>
+                <a href="mailto:support@hyperfiler.pro">📧 Support</a>
+                <a href="register.html">🚀 Start Trial</a>
+            </div>
+            <p>© 2025 HyperFiler Pro. Professional productivity software.</p>
+        </div>
     </div>
 </body>
 </html>
