@@ -96,30 +96,33 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            z-index: 10;
+            z-index: 1001;
         }
 
         .language-flag {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid rgba(37, 99, 235, 0.3);
+            border-radius: 12px;
+            padding: 10px 16px;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            color: white;
-            font-size: 18px;
+            color: #2563eb;
+            font-size: 16px;
             display: flex;
             align-items: center;
             gap: 8px;
             font-weight: 600;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
         }
 
         .language-flag:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(37, 99, 235, 0.5);
             transform: translateY(-2px);
-            color: white;
+            color: #1d4ed8;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
         }
 
         /* Award-Winning Hero Section */
@@ -298,8 +301,8 @@
         }
         
         .emoji-overlay.rocket {
-            top: 2.2em;
-            right: -0.3em; /* Perfect spot after "productivity" */
+            top: 2.15em;
+            right: -0.8em; /* Perfect spot after "productivity" */
             color: #FF6B35;
             animation-delay: 1s;
         }
