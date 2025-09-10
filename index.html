@@ -110,38 +110,99 @@
 
         .floating-particle {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.6);
             border-radius: 50%;
-            animation: floatParticle 8s ease-in-out infinite;
+            animation: advancedFloat 12s ease-in-out infinite;
+            filter: blur(0.5px);
         }
 
-        .floating-particle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
-        .floating-particle:nth-child(2) { top: 60%; left: 80%; animation-delay: 2s; }
-        .floating-particle:nth-child(3) { top: 40%; left: 20%; animation-delay: 4s; }
-        .floating-particle:nth-child(4) { top: 80%; left: 70%; animation-delay: 6s; }
+        .floating-particle:nth-child(1) { 
+            width: 6px; height: 6px; 
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(179, 229, 252, 0.6) 50%, transparent 100%);
+            top: 15%; left: 8%; animation-delay: 0s; 
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        .floating-particle:nth-child(2) { 
+            width: 4px; height: 4px; 
+            background: radial-gradient(circle, rgba(224, 242, 254, 0.8) 0%, rgba(255,255,255,0.4) 70%, transparent 100%);
+            top: 65%; left: 85%; animation-delay: 2s; 
+            box-shadow: 0 0 15px rgba(179, 229, 252, 0.4);
+        }
+        .floating-particle:nth-child(3) { 
+            width: 5px; height: 5px; 
+            background: radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(179, 229, 252, 0.5) 60%, transparent 100%);
+            top: 35%; left: 15%; animation-delay: 4s; 
+            box-shadow: 0 0 18px rgba(255, 255, 255, 0.25);
+        }
+        .floating-particle:nth-child(4) { 
+            width: 3px; height: 3px; 
+            background: radial-gradient(circle, rgba(224, 242, 254, 0.9) 0%, transparent 70%);
+            top: 75%; left: 75%; animation-delay: 6s; 
+            box-shadow: 0 0 12px rgba(179, 229, 252, 0.3);
+        }
+        .floating-particle:nth-child(5) { 
+            width: 7px; height: 7px; 
+            background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(179, 229, 252, 0.4) 40%, transparent 80%);
+            top: 25%; left: 70%; animation-delay: 3s; 
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+        }
+        .floating-particle:nth-child(6) { 
+            width: 4px; height: 4px; 
+            background: radial-gradient(circle, rgba(224, 242, 254, 0.7) 0%, rgba(255,255,255,0.3) 60%, transparent 90%);
+            top: 55%; left: 25%; animation-delay: 5s; 
+            box-shadow: 0 0 16px rgba(179, 229, 252, 0.35);
+        }
 
-        @keyframes floatParticle {
-            0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
-            50% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+        @keyframes advancedFloat {
+            0%, 100% { 
+                transform: translateY(0) translateX(0) scale(1) rotate(0deg); 
+                opacity: 0.6; 
+            }
+            25% { 
+                transform: translateY(-15px) translateX(5px) scale(1.3) rotate(90deg); 
+                opacity: 1; 
+            }
+            50% { 
+                transform: translateY(-25px) translateX(10px) scale(1.1) rotate(180deg); 
+                opacity: 0.8; 
+            }
+            75% { 
+                transform: translateY(-10px) translateX(-5px) scale(1.2) rotate(270deg); 
+                opacity: 0.9; 
+            }
         }
 
         .hero-gradient-orb {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(14, 165, 233, 0.1) 0%, transparent 70%);
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, 
+                rgba(179, 229, 252, 0.15) 0%, 
+                rgba(224, 242, 254, 0.1) 30%,
+                rgba(14, 165, 233, 0.08) 50%,
+                rgba(255, 255, 255, 0.05) 70%,
+                transparent 85%);
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            animation: orbPulse 6s ease-in-out infinite;
+            animation: advancedOrbPulse 8s ease-in-out infinite;
+            filter: blur(1px);
+            mix-blend-mode: screen;
         }
 
-        @keyframes orbPulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.1); }
+        @keyframes advancedOrbPulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1) rotate(0deg); 
+                filter: blur(1px) brightness(1);
+            }
+            33% { 
+                transform: translate(-50%, -50%) scale(1.15) rotate(120deg); 
+                filter: blur(0.5px) brightness(1.1);
+            }
+            66% { 
+                transform: translate(-50%, -50%) scale(0.95) rotate(240deg); 
+                filter: blur(1.5px) brightness(0.9);
+            }
         }
 
         .hero-content {
@@ -197,53 +258,153 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            perspective: 1000px;
+            transform-style: preserve-3d;
         }
 
         .title-line-1 {
-            opacity: 0.9;
-            font-weight: 700;
-            font-size: 0.7em;
+            font-weight: 600;
+            font-size: 0.65em;
             text-transform: uppercase;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.15em;
+            background: linear-gradient(90deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.7) 100%);
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmerText 3s ease-in-out infinite;
+            position: relative;
+            transform: translateZ(20px);
+        }
+
+        @keyframes shimmerText {
+            0%, 100% { background-position: -200% 0; }
+            50% { background-position: 200% 0; }
         }
 
         .title-line-2 {
             font-weight: 900;
-            background: linear-gradient(45deg, #ffffff, #e0f2fe, #b3e5fc);
+            background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 25%, #b3e5fc 50%, rgba(255,255,255,0.9) 75%, rgba(255,255,255,0.6) 100%);
+            background-size: 400% 400%;
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+            animation: gradientShift 4s ease-in-out infinite;
+            position: relative;
+            transform: translateZ(30px);
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         .title-line-3 {
             font-weight: 700;
             font-size: 0.8em;
-            opacity: 0.9;
+            background: linear-gradient(45deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.9) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateZ(15px);
+            animation: subtleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes subtleGlow {
+            0% { filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2)); }
+            100% { filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.4)); }
         }
 
         .flows-emphasis {
             font-style: italic;
-            background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.9) 30%, rgba(255,255,255,0.7) 60%, rgba(255,255,255,0.3) 100%);
+            font-weight: 800;
+            background: linear-gradient(135deg, 
+                #ffffff 0%, 
+                rgba(224, 242, 254, 0.95) 15%,
+                rgba(179, 229, 252, 0.9) 30%,
+                rgba(255,255,255,0.8) 50%,
+                rgba(255,255,255,0.6) 70%,
+                rgba(255,255,255,0.3) 85%,
+                rgba(255,255,255,0.1) 100%);
+            background-size: 300% 100%;
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4)) 
+                    drop-shadow(0 0 30px rgba(179, 229, 252, 0.3))
+                    drop-shadow(0 0 60px rgba(255, 255, 255, 0.2));
+            animation: flowAnimation 5s ease-in-out infinite;
+            position: relative;
+            transform: translateZ(40px) rotateX(5deg);
+        }
+
+        @keyframes flowAnimation {
+            0%, 100% { 
+                background-position: 0% 0%;
+                transform: translateZ(40px) rotateX(5deg) scale(1);
+            }
+            33% { 
+                background-position: 50% 0%;
+                transform: translateZ(45px) rotateX(3deg) scale(1.02);
+            }
+            66% { 
+                background-position: 100% 0%;
+                transform: translateZ(35px) rotateX(7deg) scale(0.98);
+            }
         }
 
         .natural-emphasis {
             font-weight: 900;
-            color: rgba(255, 255, 255, 0.95);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,1) 0%, 
+                rgba(255,255,255,0.95) 30%,
+                rgba(224, 242, 254, 0.9) 50%,
+                rgba(255,255,255,0.95) 70%,
+                rgba(255,255,255,1) 100%);
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
+            animation: naturalPulse 4s ease-in-out infinite;
+            position: relative;
+            transform: translateZ(25px);
+        }
+
+        @keyframes naturalPulse {
+            0%, 100% { 
+                background-position: 0% 50%;
+                filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
+            }
+            50% { 
+                background-position: 100% 50%;
+                filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.6));
+            }
         }
 
         .hero-subtitle {
             font-size: 1.4em;
-            opacity: 0.85;
             font-weight: 400;
             line-height: 1.6;
             margin: 0 auto 60px;
             max-width: 600px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.8) 100%);
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: subtleShimmer 6s ease-in-out infinite;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+            position: relative;
+            transform: translateZ(10px);
+        }
+
+        @keyframes subtleShimmer {
+            0%, 100% { background-position: -100% 0; }
+            50% { background-position: 200% 0; }
         }
 
         /* Social Share Buttons */
@@ -500,6 +661,8 @@
     <!-- Hero Section -->
     <div class="hero-premium">
         <div class="hero-background">
+            <div class="floating-particle"></div>
+            <div class="floating-particle"></div>
             <div class="floating-particle"></div>
             <div class="floating-particle"></div>
             <div class="floating-particle"></div>
