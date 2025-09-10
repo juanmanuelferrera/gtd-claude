@@ -635,7 +635,12 @@
             const clearBtn = document.getElementById('clearSearchBtn');
             
             if (query.length < 2) {
-                clearSearch();
+                // Just clear results, don't clear the input field
+                const resultsDiv = document.getElementById('searchResults');
+                const clearBtn = document.getElementById('clearSearchBtn');
+                if (resultsDiv) resultsDiv.innerHTML = '';
+                if (clearBtn) clearBtn.style.opacity = '0';
+                clearSearchHighlights();
                 return;
             }
             
@@ -736,9 +741,10 @@
             const resultsDiv = document.getElementById('searchResults');
             const clearBtn = document.getElementById('clearSearchBtn');
             
-            searchInput.value = '';
-            resultsDiv.innerHTML = '';
-            clearBtn.style.opacity = '0';
+            // Only clear the input if it exists
+            if (searchInput) searchInput.value = '';
+            if (resultsDiv) resultsDiv.innerHTML = '';
+            if (clearBtn) clearBtn.style.opacity = '0';
             clearSearchHighlights();
             
             // Close all expanded FAQs
@@ -767,9 +773,14 @@
             clearTimeout(searchTimeout);
             console.log('Search input:', inputValue);
             
+            // Don't interfere with typing - only search if user pauses
             searchTimeout = setTimeout(() => {
-                searchDocumentation(inputValue);
-            }, 300);
+                // Only search if the input still has the same value
+                const currentInput = document.getElementById('docSearch');
+                if (currentInput && currentInput.value === inputValue) {
+                    searchDocumentation(inputValue);
+                }
+            }, 500);
         }
 
         // Simple search setup
