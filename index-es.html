@@ -281,14 +281,14 @@
         
         .emoji-overlay.thunderbolt {
             top: -0.1em;
-            left: 8.2em; /* After "tareas" in "El único gestor de tareas donde" */
+            left: 10.8em; /* After "donde" in "El único gestor de tareas donde" */
             color: #FFD700;
             animation-delay: 0s;
         }
         
         .emoji-overlay.rocket {
             top: 2.15em;
-            right: -0.8em; /* After "productividad" */
+            right: -9.5em; /* After "pensamientos" in "fluye como tus pensamientos" */
             color: #FF6B35;
             animation-delay: 1s;
         }
@@ -405,7 +405,10 @@
             background-size: 400% 400%;
             background-clip: text;
             -webkit-background-clip: text;
+            -moz-background-clip: text;
             -webkit-text-fill-color: transparent;
+            -moz-text-fill-color: transparent;
+            color: transparent;
             filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
             animation: gradientShift 4s ease-in-out infinite;
             position: relative;
@@ -423,7 +426,10 @@
             background: linear-gradient(45deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.9) 100%);
             background-clip: text;
             -webkit-background-clip: text;
+            -moz-background-clip: text;
             -webkit-text-fill-color: transparent;
+            -moz-text-fill-color: transparent;
+            color: transparent;
             text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             transform: translateZ(15px);
             animation: subtleGlow 3s ease-in-out infinite alternate;
@@ -448,7 +454,10 @@
             background-size: 300% 100%;
             background-clip: text;
             -webkit-background-clip: text;
+            -moz-background-clip: text;
             -webkit-text-fill-color: transparent;
+            -moz-text-fill-color: transparent;
+            color: transparent;
             filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4)) 
                     drop-shadow(0 0 30px rgba(179, 229, 252, 0.3))
                     drop-shadow(0 0 60px rgba(255, 255, 255, 0.2));
@@ -483,7 +492,10 @@
             background-size: 200% 100%;
             background-clip: text;
             -webkit-background-clip: text;
+            -moz-background-clip: text;
             -webkit-text-fill-color: transparent;
+            -moz-text-fill-color: transparent;
+            color: transparent;
             text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
             animation: naturalPulse 4s ease-in-out infinite;
@@ -499,6 +511,41 @@
             50% { 
                 background-position: 100% 50%;
                 filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.6));
+            }
+        }
+
+        /* Firefox fallbacks for gradient text effects */
+        @-moz-document url-prefix() {
+            .title-line-2 {
+                background: none;
+                color: rgba(255, 255, 255, 0.95);
+                text-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.3);
+                -webkit-text-fill-color: unset;
+                -moz-text-fill-color: unset;
+            }
+            
+            .title-line-3 {
+                background: none;
+                color: rgba(255, 255, 255, 0.9);
+                text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                -webkit-text-fill-color: unset;
+                -moz-text-fill-color: unset;
+            }
+            
+            .flows-emphasis {
+                background: none;
+                color: rgba(255, 255, 255, 0.95);
+                text-shadow: 0 0 30px rgba(179, 229, 252, 0.8), 0 4px 8px rgba(0, 0, 0, 0.4);
+                -webkit-text-fill-color: unset;
+                -moz-text-fill-color: unset;
+            }
+            
+            .natural-emphasis {
+                background: none;
+                color: rgba(255, 255, 255, 0.95);
+                text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 255, 255, 0.4);
+                -webkit-text-fill-color: unset;
+                -moz-text-fill-color: unset;
             }
         }
 
