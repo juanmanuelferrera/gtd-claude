@@ -40,24 +40,22 @@
 
         /* Language Flag in Navigation */
         .language-flag {
-            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
-            color: white !important;
-            font-weight: 600 !important;
-            border-radius: 8px !important;
-            padding: 8px 16px !important;
-            font-size: 18px !important;
-            border: 1px solid rgba(255, 255, 255, 0.2) !important;
-            min-width: auto !important;
+            background: transparent !important;
+            border: none !important;
+            padding: 8px 12px !important;
+            font-size: 20px !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
+            transition: all 0.2s ease !important;
+            text-decoration: none !important;
+            opacity: 0.9;
         }
 
         .language-flag:hover {
-            background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
-            transform: translateY(-1px) !important;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
-            color: white !important;
+            transform: translateY(-2px) !important;
+            opacity: 1;
+            background: transparent !important;
         }
 
         .header::before {
