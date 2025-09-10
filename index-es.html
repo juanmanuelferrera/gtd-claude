@@ -514,6 +514,8 @@
             }
         }
 
+        /* Cross-browser compatibility fixes */
+        
         /* Firefox fallbacks for gradient text effects */
         @-moz-document url-prefix() {
             .title-line-2 {
@@ -547,6 +549,46 @@
                 -webkit-text-fill-color: unset;
                 -moz-text-fill-color: unset;
             }
+        }
+        
+        /* Edge legacy fallback for backdrop-filter */
+        @supports not (backdrop-filter: blur(10px)) {
+            .custom-chat-button,
+            .navigation,
+            .social-btn,
+            .cta-container,
+            .testimonial-card,
+            .comparison-table-container {
+                backdrop-filter: none;
+                background: rgba(255, 255, 255, 0.95);
+            }
+            
+            .hero-gradient-orb {
+                mix-blend-mode: normal;
+                opacity: 0.3;
+            }
+        }
+        
+        /* Ensure consistent transform behavior across browsers */
+        .hero-title {
+            -webkit-perspective: 1000px;
+            -moz-perspective: 1000px;
+            perspective: 1000px;
+        }
+        
+        .emoji-overlay {
+            -webkit-transform-style: preserve-3d;
+            -moz-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+        }
+        
+        /* Enhanced text rendering for all browsers */
+        .hero-title,
+        .flows-emphasis,
+        .natural-emphasis {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         .hero-subtitle {
