@@ -4663,7 +4663,7 @@ async function handleCreateCheckoutSession(request, env, corsHeaders) {
               name: 'HyperFiler Pro (Lifetime)',
               description: 'One-time payment for lifetime Pro access'
             },
-            unit_amount: 4998, // €49.98 in cents
+            unit_amount: 4900, // €49 in cents
           },
           quantity: 1,
         },
