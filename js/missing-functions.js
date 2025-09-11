@@ -3325,6 +3325,12 @@ function moveAllTasksToCurrentTime() {
     );
     console.log('📅 Found', todayTasks.length, 'tasks for today', todayStr);
     
+    // Debug each today's task to see why they're not considered "timed"
+    console.log('🔍 Analyzing today\'s tasks:');
+    todayTasks.forEach((task, i) => {
+        console.log(`Task ${i+1}: "${task.title}" | time: "${task.time}" | isEvent: ${task.isEvent} | status: ${task.status}`);
+    });
+    
     const timedTasks = todayTasks.filter(task => task.time && task.time.trim() !== '' && !task.isEvent);
     console.log('⏰ Found', timedTasks.length, 'timed tasks (excluding events)');
     
