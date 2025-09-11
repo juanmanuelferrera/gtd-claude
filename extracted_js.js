@@ -3913,7 +3913,10 @@
             
             // Add keyboard shortcuts
             console.log('🔍 Adding keydown event listener');
-            document.addEventListener('keydown', function(event) {
+            console.log('🔍 Document ready state:', document.readyState);
+            console.log('🔍 Document element:', document.documentElement ? 'exists' : 'missing');
+            
+            const keyHandler = function(event) {
                 // Debug ALL key presses
                 console.log('🔍 Key Debug: Key pressed:', event.key, 'Ctrl:', event.ctrlKey, 'Alt:', event.altKey, 'Meta:', event.metaKey);
                 
@@ -4042,7 +4045,16 @@
                     event.preventDefault();
                     event.target.click();
                 }
-            });
+            };
+            
+            document.addEventListener('keydown', keyHandler);
+            console.log('🔍 Keydown event listener registered successfully');
+            
+            // Test if event listeners are working
+            setTimeout(() => {
+                console.log('🔍 Testing event listener in 2 seconds...');
+                document.dispatchEvent(new KeyboardEvent('keydown', { key: 'TEST' }));
+            }, 2000);
             
             try {
                 // Set default date and time to now
