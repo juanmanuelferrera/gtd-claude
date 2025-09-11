@@ -5203,6 +5203,64 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Import/Export Section -->
+            <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
+                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">📥📤 Import/Export</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <button onclick="exportTasks()" style="background: #28a745; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
+                        📤 Export Tasks
+                    </button>
+                    <button onclick="importTasks()" style="background: #007bff; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#0056b3'" onmouseout="this.style.background='#007bff'">
+                        📥 Import Tasks
+                    </button>
+                    <button onclick="exportTodayFiltered()" style="background: #6f42c1; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#5a2d91'" onmouseout="this.style.background='#6f42c1'">
+                        🌅 Export Today HTML
+                    </button>
+                    <button onclick="exportWeekHtml()" style="background: #fd7e14; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#e8650e'" onmouseout="this.style.background='#fd7e14'">
+                        📅 Export Week HTML
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Keyboard & Advanced Settings -->
+            <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
+                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">⌨️ Keyboard & Advanced</h4>
+                
+                <!-- Keyboard-Only Mode -->
+                <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #dc3545;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <div>
+                            <span style="font-size: 14px; font-weight: 500; color: #495057;">Keyboard-Only Mode</span>
+                            <div style="font-size: 12px; color: #6c757d; margin-top: 2px;">Hide mouse buttons, show only keyboard shortcuts</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+K</kbd>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="keyboardOnlyMode" onchange="toggleKeyboardOnlyMode()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Advanced Functions -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <button onclick="toggleMobileUIVersion()" style="background: #17a2b8; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#138496'" onmouseout="this.style.background='#17a2b8'">
+                        📱 Switch Mobile UI
+                    </button>
+                    <button onclick="saveBackupSettings()" style="background: #28a745; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
+                        💾 Save Backup Settings
+                    </button>
+                    <button onclick="importTasksFromTextarea()" style="background: #6f42c1; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#5a2d91'" onmouseout="this.style.background='#6f42c1'">
+                        📋 Bulk Import
+                    </button>
+                    <button onclick="exportMonthHtml()" style="background: #fd7e14; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#e8650e'" onmouseout="this.style.background='#fd7e14'">
+                        🗓️ Export Month HTML
+                    </button>
+                </div>
+            </div>
+            
         </div>
     </div>
 
