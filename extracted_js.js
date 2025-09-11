@@ -3653,12 +3653,22 @@
         let initializationInProgress = false;
         
         document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🔥 DOMContentLoaded fired!');
+            
             if (initializationInProgress) {
                 console.log('Initialization already in progress, preventing duplicate');
                 return;
             }
             
             initializationInProgress = true;
+            
+            // IMMEDIATE N KEY TEST - Add this first thing
+            console.log('🔥 Adding IMMEDIATE N key test listener');
+            document.addEventListener('keydown', function(event) {
+                if (event.key.toLowerCase() === 'n') {
+                    console.log('🎯🎯🎯 IMMEDIATE N KEY TEST DETECTED!');
+                }
+            });
             
             // CRITICAL: Ensure mobile nav emojis are present on page load
             setTimeout(() => {
@@ -3916,6 +3926,7 @@
             console.log('🔍 Document ready state:', document.readyState);
             console.log('🔍 Document element:', document.documentElement ? 'exists' : 'missing');
             
+            try {
             const keyHandler = function(event) {
                 // Debug ALL key presses
                 console.log('🔍 Key Debug: Key pressed:', event.key, 'Ctrl:', event.ctrlKey, 'Alt:', event.altKey, 'Meta:', event.metaKey);
@@ -4055,6 +4066,10 @@
                 console.log('🔍 Testing event listener in 2 seconds...');
                 document.dispatchEvent(new KeyboardEvent('keydown', { key: 'TEST' }));
             }, 2000);
+            
+            } catch (error) {
+                console.error('🔥 ERROR in keyboard handler setup:', error);
+            }
             
             try {
                 // Set default date and time to now
