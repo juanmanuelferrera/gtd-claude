@@ -3425,12 +3425,17 @@ function moveAllTasksToCurrentTime() {
     // CRITICAL: Force upload to server IMMEDIATELY before any sync can overwrite
     // Use await to ensure upload completes before continuing
     const uploadPromise = (async () => {
+        // Small delay to ensure localStorage and memory are fully updated
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
         if (typeof uploadAllTasks === 'function') {
             console.log('📤 Force uploading moved tasks to server...');
+            console.log(`📊 Uploading ${movedCount} tasks with time ${currentTimeStr}`);
             await uploadAllTasks();
             console.log('✅ Upload completed successfully');
         } else if (window.uploadAllTasks) {
             console.log('📤 Force uploading moved tasks to server (window)...');
+            console.log(`📊 Uploading ${movedCount} tasks with time ${currentTimeStr}`);
             await window.uploadAllTasks();
             console.log('✅ Upload completed successfully');
         }
@@ -3451,10 +3456,13 @@ function moveAllTasksToCurrentTime() {
     localStorage.setItem('timeblock_collapse_states', JSON.stringify(collapseStates));
     console.log(`🔄 Forced ${currentTimeStr} time block to expand`);
     
-    // Force complete UI refresh
+    // CRITICAL: Force complete UI refresh to create the new time slot
+    // The time slot MUST exist before tasks can be displayed in it
+    console.log(`🏗️ Creating time slot for ${currentTimeStr}...`);
+    
     if (typeof renderTodayView === 'function') {
         renderTodayView();
-        console.log('✅ renderTodayView called successfully');
+        console.log('✅ renderTodayView called - time slot should now exist');
     } else {
         console.error('❌ renderTodayView function not found');
         // Try alternative rendering methods
@@ -3463,6 +3471,16 @@ function moveAllTasksToCurrentTime() {
             console.log('✅ window.renderTodayView called as fallback');
         }
     }
+    
+    // Double-render to ensure the time slot is created with the updated tasks
+    setTimeout(() => {
+        console.log(`🔄 Second render to ensure ${currentTimeStr} slot is populated`);
+        if (typeof renderTodayView === 'function') {
+            renderTodayView();
+        } else if (typeof window.renderTodayView === 'function') {
+            window.renderTodayView();
+        }
+    }, 100);
     
     // Force re-render after a short delay to ensure DOM updates
     setTimeout(() => {
