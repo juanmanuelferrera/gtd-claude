@@ -3249,7 +3249,9 @@ window.resetTaskTitle = resetTaskTitle;
 
 // Move all tasks to current time block
 function moveAllTasksToCurrentTime() {
-    console.log('🕐 Moving all tasks to current time block...');
+    console.log('🕐 Move button clicked! Starting function...');
+    console.log('🔍 Debug - tasks array:', window.tasks ? window.tasks.length + ' tasks' : 'tasks array not found');
+    console.log('🔍 Debug - currentTodayDate:', window.currentTodayDate);
     
     // Get current time rounded to 30-minute interval
     const now = new Date();
@@ -3271,9 +3273,12 @@ function moveAllTasksToCurrentTime() {
                     String(today.getMonth() + 1).padStart(2, '0') + '-' + 
                     String(today.getDate()).padStart(2, '0');
     
-    // Find all today's tasks that have a specific time (exclude untimed tasks and events)
+    // Find all today's tasks that have a specific time (exclude untimed tasks and events)  
+    const tasksArray = window.tasks || tasks || [];
+    console.log('🔍 Working with', tasksArray.length, 'total tasks');
+    
     let movedCount = 0;
-    const updatedTasks = tasks.map(task => {
+    const updatedTasks = tasksArray.map(task => {
         if (task.dueDate && task.dueDate.startsWith(todayStr) && 
             task.status !== 'deleted' && task.status !== 'completed' && 
             task.time && task.time.trim() !== '' && // Only tasks with specific times
@@ -3294,14 +3299,25 @@ function moveAllTasksToCurrentTime() {
     });
     
     // Update global tasks array
-    tasks = updatedTasks;
+    window.tasks = updatedTasks;
+    tasks = updatedTasks;  // Keep both for compatibility
     
     // Save to localStorage
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+    console.log('💾 Saved', updatedTasks.length, 'tasks to localStorage');
     
     // Re-render today view
+    console.log('🔄 Attempting to re-render Today view...');
     if (typeof renderTodayView === 'function') {
         renderTodayView();
+        console.log('✅ renderTodayView called successfully');
+    } else {
+        console.error('❌ renderTodayView function not found');
+        // Try alternative rendering methods
+        if (typeof window.renderTodayView === 'function') {
+            window.renderTodayView();
+            console.log('✅ window.renderTodayView called as fallback');
+        }
     }
     
     // Show confirmation
