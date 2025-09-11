@@ -466,7 +466,9 @@
                 'nav-all': { icon: '🔍', key: 'Search' },
                 'nav-lists': { icon: '📝', key: 'Lists' },
                 'nav-repeat': { icon: '🔄', key: 'Repeat' },
-                'nav-undo': { icon: '↶', key: 'Undo' }
+                'nav-undo': { icon: '↩️', key: 'Undo' },
+                'nav-trash': { icon: '🗑️', key: 'Trash' },
+                'nav-settings': { icon: '⚙️', key: 'Settings' }
             };
             // Get current tab display mode to respect user preference
             const currentTabDisplayMode = localStorage.getItem('tabDisplayMode') || 'both';
@@ -9145,7 +9147,7 @@
                     'repeat': 'Recurring',
                     'lists': 'Lists',
                     'stats': 'Statistics',
-                    'undo': 'History'
+                    'undo': currentLanguage === 'es' ? 'Historial' : 'History'
                 };
                 
                 modernHeaderTitle.classList.add('animating');
@@ -15156,7 +15158,7 @@
             console.log('🎯 performUndo called, undo stack length:', undoStack.length);
             if (undoStack.length === 0) {
                 console.log('❌ No undo actions available');
-                alert('Nothing to undo');
+                alert(translateText('No Actions to Undo'));
                 return;
             }
             const lastState = undoStack.pop();
@@ -17022,7 +17024,10 @@
             const undoCount = undoStack.length - targetIndex;
             const targetState = undoStack[targetIndex];
             
-            if (!confirm(`Undo ${undoCount} action(s) back to: "${targetState.action}"?\n\nThis will undo all changes after that point.`)) {
+            const undoConfirm = currentLanguage === 'es' ? 
+                `¿Deshacer ${undoCount} acción(es) hasta: "${targetState.action}"?\n\nEsto deshará todos los cambios después de ese punto.` :
+                `Undo ${undoCount} action(s) back to: "${targetState.action}"?\n\nThis will undo all changes after that point.`;
+            if (!confirm(undoConfirm)) {
                 return;
             }
             
@@ -26317,6 +26322,7 @@
         window.renderTrash = renderTrash;
         window.refreshUndoView = refreshUndoView;
         window.undoToPoint = undoToPoint;
+        window.performUndo = performUndo;
         window.restoreTask = restoreTask;
         window.deleteForever = deleteForever;
         window.restoreAllTasks = restoreAllTasks;
