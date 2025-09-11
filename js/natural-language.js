@@ -161,31 +161,19 @@
         
         // Patterns for different natural language formats
         const patterns = [
-            // Simple "task at time" pattern: "limpiar ombligo at 9am"
+            // Relative periods with time: "task in 2 days at 7am" or "task 2 days at 7am" - MUST BE FIRST!
             {
-                regex: /^(.+?)\s+at\s+(\d{1,2}(?::\d{2})?(?:am|pm)?)$/i,
+                regex: /^(.+?)\s+(?:in\s+)?(\d+|a|an)\s+(day|days|week|weeks|month|months|year|years)\s+at\s+(.+)$/i,
                 parser: (match) => {
-                    const timeResult = normalizeTime(match[2]);
+                    console.log('🔍 NL Debug: Relative period with time match:', match);
+                    const timeResult = normalizeTime(match[4]);
+                    const dateResult = getDateForRelativePeriod(match[2], match[3]);
+                    console.log('🔍 NL Debug: Time result:', timeResult);
+                    console.log('🔍 NL Debug: Date result:', dateResult);
                     if (timeResult) {
                         return {
                             title: match[1].trim(),
-                            date: getLocalDateString(new Date()), // Today by default
-                            time: timeResult
-                        };
-                    }
-                    return null;
-                }
-            },
-            
-            // Standalone time pattern: "at 8am" or "at 3:30pm"
-            {
-                regex: /^at\s+(.+)$/i,
-                parser: (match) => {
-                    const timeResult = normalizeTime(match[1]);
-                    if (timeResult) {
-                        return {
-                            title: '',
-                            date: getLocalDateString(new Date()),
+                            date: dateResult,
                             time: timeResult
                         };
                     }
@@ -213,6 +201,16 @@
                 })
             },
             
+            // Standard order: "task on monday at 6pm"
+            {
+                regex: /^(.+?)\s+on\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s+at\s+(.+)$/i,
+                parser: (match) => ({
+                    title: match[1].trim(),
+                    date: getDateForWeekday(match[2]),
+                    time: normalizeTime(match[3])
+                })
+            },
+            
             // Standard order without "at": "task tomorrow 6pm"
             {
                 regex: /^(.+?)\s+(today|tomorrow)\s+(\d{1,2}(?::\d{2})?(?:am|pm)?)$/i,
@@ -227,16 +225,6 @@
                     }
                     return null;
                 }
-            },
-            
-            // Standard order: "task on monday at 6pm"
-            {
-                regex: /^(.+?)\s+on\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s+at\s+(.+)$/i,
-                parser: (match) => ({
-                    title: match[1].trim(),
-                    date: getDateForWeekday(match[2]),
-                    time: normalizeTime(match[3])
-                })
             },
             
             // Weekday without "on": "task monday 6pm"
@@ -255,19 +243,31 @@
                 }
             },
             
-            // Relative periods with time: "task in 2 days at 7am" or "task 2 days at 7am"
+            // Simple "task at time" pattern: "limpiar ombligo at 9am" - MOVED TO LATER!
             {
-                regex: /^(.+?)\s+(?:in\s+)?(\d+|a|an)\s+(day|days|week|weeks|month|months|year|years)\s+at\s+(.+)$/i,
+                regex: /^(.+?)\s+at\s+(\d{1,2}(?::\d{2})?(?:am|pm)?)$/i,
                 parser: (match) => {
-                    console.log('🔍 NL Debug: Relative period with time match:', match);
-                    const timeResult = normalizeTime(match[4]);
-                    const dateResult = getDateForRelativePeriod(match[2], match[3]);
-                    console.log('🔍 NL Debug: Time result:', timeResult);
-                    console.log('🔍 NL Debug: Date result:', dateResult);
+                    const timeResult = normalizeTime(match[2]);
                     if (timeResult) {
                         return {
                             title: match[1].trim(),
-                            date: dateResult,
+                            date: getLocalDateString(new Date()), // Today by default
+                            time: timeResult
+                        };
+                    }
+                    return null;
+                }
+            },
+            
+            // Standalone time pattern: "at 8am" or "at 3:30pm"
+            {
+                regex: /^at\s+(.+)$/i,
+                parser: (match) => {
+                    const timeResult = normalizeTime(match[1]);
+                    if (timeResult) {
+                        return {
+                            title: '',
+                            date: getLocalDateString(new Date()),
                             time: timeResult
                         };
                     }
