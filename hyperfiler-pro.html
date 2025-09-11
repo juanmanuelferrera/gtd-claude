@@ -5996,6 +5996,9 @@
 
     <!-- Tawk.to Live Chat Integration -->
     <script type="text/javascript">
+    // NOTE: There seems to be another Tawk.to script loading with ID: 6754b2f12480f5b4f59f0123
+    // Commenting out our script to avoid conflicts. Uncomment and update ID if needed.
+    /*
     var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
     (function(){
         // IMPORTANT: Replace 'your_property_id' and 'default' with your actual Tawk.to IDs
@@ -6006,6 +6009,7 @@
         s1.charset='UTF-8';
         s1.setAttribute('crossorigin','*');
         s0.parentNode.insertBefore(s1,s0);
+    */
         
         // Optional: Customize Tawk.to appearance and behavior
         window.Tawk_API = window.Tawk_API || {};
@@ -6046,36 +6050,59 @@
         // Add custom launcher button (optional)
         window.openTawkChat = function() {
             console.log('💬 openTawkChat called');
-            if (typeof Tawk_API !== 'undefined') {
-                console.log('✅ Tawk_API is available');
-                if (Tawk_API.maximize) {
-                    console.log('✅ Calling Tawk_API.maximize()');
-                    Tawk_API.maximize();
-                } else if (Tawk_API.toggle) {
-                    console.log('✅ Calling Tawk_API.toggle()');
-                    Tawk_API.toggle();
-                } else {
-                    console.log('⚠️ Tawk_API methods not available yet');
-                    // Try to show the widget first, then maximize
-                    if (Tawk_API.showWidget) {
+            console.log('Tawk_API object:', typeof Tawk_API !== 'undefined' ? Tawk_API : 'Not loaded');
+            
+            // Check if there's a chat widget iframe directly
+            var tawkFrame = document.querySelector('iframe[title*="chat"]') || 
+                          document.querySelector('iframe[src*="tawk"]') ||
+                          document.querySelector('.widget-visible');
+            
+            if (tawkFrame) {
+                console.log('📱 Found Tawk iframe, trying to show it');
+                tawkFrame.style.display = 'block';
+                if (tawkFrame.contentWindow && tawkFrame.contentWindow.postMessage) {
+                    tawkFrame.contentWindow.postMessage('maximize', '*');
+                }
+            }
+            
+            if (typeof Tawk_API !== 'undefined' && Tawk_API !== null) {
+                console.log('✅ Tawk_API is available, methods:', Object.keys(Tawk_API || {}));
+                
+                // Try different methods to open the chat
+                try {
+                    if (typeof Tawk_API.maximize === 'function') {
+                        console.log('✅ Calling Tawk_API.maximize()');
+                        Tawk_API.maximize();
+                    } else if (typeof Tawk_API.toggle === 'function') {
+                        console.log('✅ Calling Tawk_API.toggle()');
+                        Tawk_API.toggle();
+                    } else if (typeof Tawk_API.popup === 'function') {
+                        console.log('✅ Calling Tawk_API.popup()');
+                        Tawk_API.popup();
+                    } else if (typeof Tawk_API.showWidget === 'function') {
+                        console.log('✅ Calling Tawk_API.showWidget()');
                         Tawk_API.showWidget();
+                    } else {
+                        console.log('⚠️ No known Tawk_API methods available');
+                        console.log('Available methods:', Object.keys(Tawk_API));
                     }
-                    setTimeout(function() {
-                        if (Tawk_API.maximize) {
-                            Tawk_API.maximize();
-                        }
-                    }, 500);
+                } catch (error) {
+                    console.error('❌ Error calling Tawk_API:', error);
                 }
             } else {
-                console.log('❌ Tawk_API not loaded yet. Trying again in 1 second...');
-                // If Tawk.to hasn't loaded yet, try again in a moment
-                setTimeout(function() {
-                    if (typeof Tawk_API !== 'undefined' && Tawk_API.maximize) {
-                        Tawk_API.maximize();
-                    } else {
-                        alert('Chat is still loading. Please try again in a moment.');
-                    }
-                }, 1000);
+                console.log('❌ Tawk_API not loaded. Checking for other chat widgets...');
+                
+                // Fallback: Try to find and click the chat widget button directly
+                var chatButton = document.querySelector('[class*="tawk-button"]') || 
+                               document.querySelector('[class*="chat-button"]') ||
+                               document.querySelector('.widget-container button');
+                               
+                if (chatButton) {
+                    console.log('📱 Found chat button, clicking it');
+                    chatButton.click();
+                } else {
+                    alert('Chat widget is not available. Please refresh the page and try again.');
+                }
             }
         };
         
@@ -6088,7 +6115,7 @@
                 });
             }
         };
-    })();
+    //})();
     </script>
 
     <!-- N KEY & ENTER KEY HANDLERS -->
