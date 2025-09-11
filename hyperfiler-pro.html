@@ -3979,7 +3979,7 @@
                        onmouseout="this.style.background='linear-gradient(to right, rgba(255, 214, 10, 0.1), transparent)'">
                         💾 Quick Backup
                     </button>
-                    <button onclick="openTawkChat()" class="action-btn" style="
+                    <button onclick="openTawkChat()" id="tawkChatBtn" class="action-btn" style="
                         all: unset;
                         display: flex;
                         align-items: center;
@@ -6008,8 +6008,10 @@
         s0.parentNode.insertBefore(s1,s0);
         
         // Optional: Customize Tawk.to appearance and behavior
+        window.Tawk_API = window.Tawk_API || {};
         window.Tawk_API.onLoad = function(){
             console.log('📱 Tawk.to chat loaded successfully');
+            window.tawkLoaded = true;
             
             // Set visitor name and email if user is logged in
             if (window.currentUser) {
@@ -6043,8 +6045,37 @@
         
         // Add custom launcher button (optional)
         window.openTawkChat = function() {
-            if (typeof Tawk_API !== 'undefined' && Tawk_API.maximize) {
-                Tawk_API.maximize();
+            console.log('💬 openTawkChat called');
+            if (typeof Tawk_API !== 'undefined') {
+                console.log('✅ Tawk_API is available');
+                if (Tawk_API.maximize) {
+                    console.log('✅ Calling Tawk_API.maximize()');
+                    Tawk_API.maximize();
+                } else if (Tawk_API.toggle) {
+                    console.log('✅ Calling Tawk_API.toggle()');
+                    Tawk_API.toggle();
+                } else {
+                    console.log('⚠️ Tawk_API methods not available yet');
+                    // Try to show the widget first, then maximize
+                    if (Tawk_API.showWidget) {
+                        Tawk_API.showWidget();
+                    }
+                    setTimeout(function() {
+                        if (Tawk_API.maximize) {
+                            Tawk_API.maximize();
+                        }
+                    }, 500);
+                }
+            } else {
+                console.log('❌ Tawk_API not loaded yet. Trying again in 1 second...');
+                // If Tawk.to hasn't loaded yet, try again in a moment
+                setTimeout(function() {
+                    if (typeof Tawk_API !== 'undefined' && Tawk_API.maximize) {
+                        Tawk_API.maximize();
+                    } else {
+                        alert('Chat is still loading. Please try again in a moment.');
+                    }
+                }, 1000);
             }
         };
         
