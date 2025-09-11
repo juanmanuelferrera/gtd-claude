@@ -200,6 +200,25 @@
                 'Select All': 'Seleccionar Todo',
                 'Print Results': 'Imprimir Resultados',
                 'Trash': 'Papelera',
+                'Trash is empty': 'La papelera está vacía',
+                'deleted task': 'tarea eliminada',
+                'deleted tasks': 'tareas eliminadas',
+                'Restore All': 'Restaurar Todo',
+                'Empty Trash': 'Vaciar Papelera',
+                'Permanently delete': 'Eliminar permanentemente',
+                'This cannot be undone.': 'Esto no se puede deshacer.',
+                'Restore': 'Restaurar',
+                'Delete Forever': 'Eliminar Para Siempre',
+                'Deleted': 'Eliminada',
+                'Due': 'Vence',
+                'No date': 'Sin fecha',
+                'Showing': 'Mostrando',
+                'of': 'de',
+                'items': 'elementos',
+                'Prev': 'Anterior',
+                'Next': 'Siguiente',
+                'Page': 'Página',
+                'Are you sure you want to permanently delete all items in trash?': '¿Estás seguro de que quieres eliminar permanentemente todos los elementos de la papelera?',
                 
                 // Settings UI
                 'Settings / Ajustes': 'Ajustes / Settings',
@@ -19876,7 +19895,8 @@
             const restoreAllBtn = document.getElementById('restoreAllBtn');
             const emptyTrashBtn = document.getElementById('emptyTrashBtn');
             
-            stats.textContent = `${trash.length} deleted task${trash.length !== 1 ? 's' : ''}`;
+            const deletedTaskText = trash.length === 1 ? translateText('deleted task') : translateText('deleted tasks');
+            stats.textContent = `${trash.length} ${deletedTaskText}`;
             
             // Check for trash warning
             checkTrashWarning();
@@ -19885,7 +19905,7 @@
                 container.innerHTML = `
                     <div style="text-align: center; color: #666; padding: 40px;">
                         <div style="font-size: 48px; margin-bottom: 16px;">🗑️</div>
-                        <p>Trash is empty</p>
+                        <p>${translateText('Trash is empty')}</p>
                     </div>
                 `;
                 restoreAllBtn.style.display = 'none';
@@ -19906,12 +19926,12 @@
             if (trash.length > itemsPerPage) {
                 const paginationHtml = `
                     <div style="padding: 15px; border-bottom: 1px solid #eee; text-align: center;">
-                        <span style="color: #666; margin-right: 15px;">Showing ${startIndex + 1}-${Math.min(endIndex, trash.length)} of ${trash.length} items</span>
+                        <span style="color: #666; margin-right: 15px;">${translateText('Showing')} ${startIndex + 1}-${Math.min(endIndex, trash.length)} ${translateText('of')} ${trash.length} ${translateText('items')}</span>
                         <button onclick="changeTrashPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} 
-                                style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ddd; background: transparent; cursor: ${currentPage === 1 ? 'default' : 'pointer'};">← Prev</button>
-                        <span style="margin: 0 10px;">Page ${currentPage} of ${totalPages}</span>
+                                style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ddd; background: transparent; cursor: ${currentPage === 1 ? 'default' : 'pointer'};">← ${translateText('Prev')}</button>
+                        <span style="margin: 0 10px;">${translateText('Page')} ${currentPage} ${translateText('of')} ${totalPages}</span>
                         <button onclick="changeTrashPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} 
-                                style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ddd; background: transparent; cursor: ${currentPage === totalPages ? 'default' : 'pointer'};">Next →</button>
+                                style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ddd; background: transparent; cursor: ${currentPage === totalPages ? 'default' : 'pointer'};">${translateText('Next')} →</button>
                     </div>
                 `;
                 container.innerHTML = paginationHtml;
@@ -19927,16 +19947,16 @@
                             <div style="flex: 1;">
                                 <div style="font-weight: 600; margin-bottom: 5px; ${item.isEvent ? 'color: #dc3545;' : ''}">${item.isEvent ? '🔴 ' : ''}${item.title}</div>
                                 <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
-                                    Deleted: ${deleteDate} | Due: ${item.dueDate || 'No date'}
+                                    ${translateText('Deleted')}: ${deleteDate} | ${translateText('Due')}: ${item.dueDate || translateText('No date')}
                                 </div>
                                 ${item.notes ? `<div style="font-size: 13px; color: #555;">${item.notes}</div>` : ''}
                             </div>
                             <div style="display: flex; gap: 8px; margin-left: 15px;">
                                 <button onclick="restoreTask('${item.trashId}')" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;">
-                                    ↪ Restore
+                                    ↪ ${translateText('Restore')}
                                 </button>
                                 <button onclick="deleteForever('${item.trashId}')" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;">
-                                    ❌ Delete Forever
+                                    ❌ ${translateText('Delete Forever')}
                                 </button>
                             </div>
                         </div>
@@ -19989,7 +20009,7 @@
             const index = trash.findIndex(item => item.trashId === trashId);
             if (index === -1) return;
             const task = trash[index];
-            if (confirm(`Permanently delete "${task.title}"? This cannot be undone.`)) {
+            if (confirm(`${translateText('Permanently delete')} "${task.title}"? ${translateText('This cannot be undone.')}`)) {
                 trash.splice(index, 1);
                 localStorage.setItem('gtd_trash', JSON.stringify(trash));
                 updateTrashCounter();
@@ -19999,7 +20019,7 @@
         async function restoreAllTasks() {
             if (trash.length === 0) return;
             
-            if (confirm(`Restore all ${trash.length} tasks from trash?`)) {
+            if (confirm(`${translateText('Restore All')} ${trash.length} ${trash.length === 1 ? translateText('deleted task') : translateText('deleted tasks')}?`)) {
                 try {
                     for (const item of trash) {
                         const task = {...item};
@@ -24038,7 +24058,7 @@
         }
         
         function clearTrashModal() {
-            if (confirm('Are you sure you want to permanently delete all items in trash? This cannot be undone.')) {
+            if (confirm(`${translateText('Are you sure you want to permanently delete all items in trash?')} ${translateText('This cannot be undone.')}`)) {
                 trash.length = 0; // Clear the trash array
                 localStorage.setItem('trash', JSON.stringify(trash));
                 loadModalTrash(); // Refresh the display
@@ -26297,5 +26317,10 @@
         window.renderTrash = renderTrash;
         window.refreshUndoView = refreshUndoView;
         window.undoToPoint = undoToPoint;
+        window.restoreTask = restoreTask;
+        window.deleteForever = deleteForever;
+        window.restoreAllTasks = restoreAllTasks;
+        window.clearTrashModal = clearTrashModal;
+        window.changeTrashPage = changeTrashPage;
         window.saveTabDisplayMode = saveTabDisplayMode;
     
