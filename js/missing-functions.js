@@ -3283,6 +3283,11 @@ function moveAllTasksToCurrentTime() {
     console.log('🔍 Debug - tasks array:', window.tasks ? window.tasks.length + ' tasks' : 'tasks array not found');
     console.log('🔍 Debug - currentTodayDate:', window.currentTodayDate);
     
+    // Temporarily disable sync to prevent overwriting our changes
+    const originalSyncEnabled = window.syncEnabled;
+    window.syncEnabled = false;
+    console.log('🔒 Temporarily disabled sync during task move');
+    
     // Get current time rounded to 30-minute interval
     const now = new Date();
     const minutes = now.getMinutes();
@@ -3446,7 +3451,8 @@ function moveAllTasksToCurrentTime() {
     
     // Give UI time to render, then check if 16:00 block has our tasks
     setTimeout(() => {
-        const timeBlock = document.querySelector('[data-time="16:00"], [id*="16:00"], .time-block-header:contains("16:00")');
+        const timeBlock = document.querySelector('[data-time="16:00"], [id*="16:00"]') || 
+                          Array.from(document.querySelectorAll('.time-block-header')).find(el => el.textContent.includes('16:00'));
         if (timeBlock) {
             console.log('✅ Found 16:00 time block in DOM after render');
         } else {
