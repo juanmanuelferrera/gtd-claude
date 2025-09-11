@@ -26340,4 +26340,6 @@
         window.changeTrashPage = changeTrashPage;
         window.saveTabDisplayMode = saveTabDisplayMode;
     
-// Deploy fix
+    }); // Close DOMContentLoaded event listener
+    
+})(); // Close the main IIFE (Immediately Invoked Function Expression)
