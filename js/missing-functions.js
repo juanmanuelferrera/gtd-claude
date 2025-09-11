@@ -3297,16 +3297,43 @@ function moveAllTasksToCurrentTime() {
     
     console.log('🎯 Target time:', currentTimeStr);
     
-    // Get today's date string
-    const today = currentTodayDate || new Date();
+    // Get today's date string - fix currentTodayDate if it's a DOM element
+    let today;
+    if (window.currentTodayDate && typeof window.currentTodayDate.getFullYear === 'function') {
+        today = window.currentTodayDate;
+    } else if (typeof currentTodayDate !== 'undefined' && typeof currentTodayDate.getFullYear === 'function') {
+        today = currentTodayDate;
+    } else {
+        today = new Date(); // Fallback to current date
+        console.log('⚠️ Using current date as fallback, currentTodayDate was:', typeof currentTodayDate, currentTodayDate);
+    }
+    
     const todayStr = today.getFullYear() + '-' + 
                     String(today.getMonth() + 1).padStart(2, '0') + '-' + 
                     String(today.getDate()).padStart(2, '0');
+    
+    console.log('📅 Working with date:', todayStr, 'from', today);
     
     // Find all today's tasks that have a specific time (exclude untimed tasks and events)  
     const tasksArray = window.tasks || tasks || [];
     console.log('🔍 Working with', tasksArray.length, 'total tasks');
     
+    // First, let's see what today's tasks we have
+    const todayTasks = tasksArray.filter(task => 
+        task.dueDate && task.dueDate.startsWith(todayStr) && 
+        task.status !== 'deleted' && task.status !== 'completed'
+    );
+    console.log('📅 Found', todayTasks.length, 'tasks for today', todayStr);
+    
+    const timedTasks = todayTasks.filter(task => task.time && task.time.trim() !== '' && !task.isEvent);
+    console.log('⏰ Found', timedTasks.length, 'timed tasks (excluding events)');
+    
+    timedTasks.forEach(task => {
+        const taskTime = parseTime(task.time);
+        const currentTime = parseTime(currentTimeStr);
+        console.log('🔍 Task:', task.title, '| Time:', task.time, '| Parsed:', taskTime, '| Current:', currentTime, '| Before current?', taskTime < currentTime);
+    });
+
     let movedCount = 0;
     const updatedTasks = tasksArray.map(task => {
         if (task.dueDate && task.dueDate.startsWith(todayStr) && 
@@ -3331,7 +3358,7 @@ function moveAllTasksToCurrentTime() {
                 console.log('📋 Moved task:', task.title, 'from', task.time, 'to', currentTimeStr, '(was before current time)');
                 return updatedTask;
             } else {
-                console.log('⏭️ Skipped task:', task.title, 'at', task.time, '(is after current time)');
+                console.log('⏭️ Skipped task:', task.title, 'at', task.time, '(is after current time or parsing failed)');
             }
         }
         return task;
