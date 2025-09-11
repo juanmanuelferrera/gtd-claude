@@ -5796,15 +5796,34 @@
     <script src="js/patches.js?v=1736363000"></script>
     <script src="extracted_js.js?v=1736363000"></script>
 
-    <!-- URGENT N KEY TEST -->
+    <!-- N KEY HANDLER -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚨 URGENT N KEY TEST LOADED');
+        console.log('🚨 HTML N KEY HANDLER LOADED');
         document.addEventListener('keydown', function(event) {
-            console.log('🚨 ANY KEY PRESSED:', event.key);
-            if (event.key.toLowerCase() === 'n') {
-                console.log('🚨🚨🚨 N KEY DETECTED IN HTML!!!');
-                alert('N KEY WORKS!');
+            if (event.key.toLowerCase() === 'n' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+                // Only trigger if not typing in an input field
+                const activeElement = document.activeElement;
+                const isTyping = activeElement && (
+                    activeElement.tagName === 'INPUT' || 
+                    activeElement.tagName === 'TEXTAREA' || 
+                    activeElement.contentEditable === 'true'
+                );
+                
+                if (!isTyping) {
+                    console.log('🚨 N KEY: Opening add task modal from HTML handler');
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    // Call the openAddTaskModal function if it exists
+                    if (typeof openAddTaskModal === 'function') {
+                        openAddTaskModal();
+                    } else {
+                        console.log('🚨 openAddTaskModal function not found');
+                    }
+                } else {
+                    console.log('🚨 N KEY: Blocked - user typing in:', activeElement?.tagName);
+                }
             }
         });
     });
