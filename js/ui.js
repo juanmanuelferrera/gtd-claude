@@ -1266,6 +1266,12 @@ function renderTodayView() {
     const isViewingToday = todayStr === getLocalDateString(new Date());
     const sortedTimes = Object.keys(timeSlots).sort();
     
+    console.log('🕐 UI Current Time Indicator Debug:', {
+        currentTime,
+        isViewingToday,
+        sortedTimes
+    });
+    
     // Render time slots
     sortedTimes.forEach(time => {
         // Sort tasks within this time slot (pending first, completed last)
@@ -1279,6 +1285,10 @@ function renderTodayView() {
         // Check if this is the current time slot
         const isCurrentTime = isViewingToday && time <= currentTime && 
             (sortedTimes[sortedTimes.indexOf(time) + 1] || '23:59') > currentTime;
+            
+        if (isCurrentTime) {
+            console.log('🕐 Found current time slot:', time);
+        }
         
         html += `
             <div class="time-block" 
