@@ -3331,12 +3331,24 @@ function moveAllTasksToCurrentTime() {
     todayDate.setHours(0, 0, 0, 0); // Start of today
     
     // First, let's see what timed tasks we have
+    console.log('🔍 Sample of ALL tasks (first 10):');
+    tasksArray.slice(0, 10).forEach((task, i) => {
+        console.log(`Task ${i+1}: "${task.title}" | dueDate: "${task.dueDate}" | time: "${task.time}" | isEvent: ${task.isEvent} | status: ${task.status}`);
+    });
+    
     const timedTasks = tasksArray.filter(task => {
         return task.time && task.time.trim() !== '' && task.time !== 'undefined' && task.status !== 'deleted';
     });
     console.log('⏰ Found', timedTasks.length, 'timed tasks total:');
     timedTasks.slice(0, 5).forEach((task, i) => {
         console.log(`Timed ${i+1}: "${task.title}" | dueDate: "${task.dueDate}" | time: "${task.time}" | isEvent: ${task.isEvent} | status: ${task.status}`);
+    });
+    
+    // Check if there are any tasks with time properties that are not "undefined"
+    const anyTimeProperty = tasksArray.filter(task => task.time !== 'undefined' && task.time !== undefined && task.time);
+    console.log('🕐 Tasks with any time property (not "undefined"):', anyTimeProperty.length);
+    anyTimeProperty.slice(0, 3).forEach((task, i) => {
+        console.log(`Time property ${i+1}: "${task.title}" | time: "${task.time}" | typeof: ${typeof task.time}`);
     });
 
     const overdueTasks = tasksArray.filter(task => {
