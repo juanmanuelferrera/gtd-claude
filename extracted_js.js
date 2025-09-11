@@ -3917,12 +3917,18 @@
                 // Debug ALL key presses
                 console.log('🔍 Key Debug: Key pressed:', event.key, 'Ctrl:', event.ctrlKey, 'Alt:', event.altKey, 'Meta:', event.metaKey);
                 
+                // Special debugging for 'n' key
+                if (event.key.toLowerCase() === 'n') {
+                    console.log('🎯 N KEY DETECTED! Target:', event.target.tagName, 'ActiveElement:', document.activeElement?.tagName);
+                }
+                
                 // Debug Ctrl+L capture
                 if (event.ctrlKey && event.key === 'l') {
                     console.log('🔥 Ctrl+L captured at top level - first handler');
                 }
                 
-                if (event.key === 'n' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+                if ((event.key === 'n' || event.key === 'N') && !event.ctrlKey && !event.metaKey && !event.altKey) {
+                    console.log('🎯 N KEY HANDLER REACHED!');
                     // Only trigger if not typing in an input field
                     const activeElement = document.activeElement;
                     const isTyping = activeElement && (
@@ -3931,15 +3937,17 @@
                         activeElement.contentEditable === 'true'
                     );
                     
-                    console.log('🔍 N Key Debug: activeElement:', activeElement);
+                    console.log('🔍 N Key Debug: activeElement:', activeElement?.tagName, activeElement);
                     console.log('🔍 N Key Debug: isTyping:', isTyping);
+                    console.log('🔍 N Key Debug: contentEditable:', activeElement?.contentEditable);
                     
                     if (!isTyping) {
                         console.log('🔍 N Key Debug: Opening add task modal');
                         event.preventDefault();
+                        event.stopPropagation();
                         openAddTaskModal();
                     } else {
-                        console.log('🔍 N Key Debug: Blocked - user is typing');
+                        console.log('🔍 N Key Debug: Blocked - user is typing in:', activeElement?.tagName);
                     }
                 }
                 if (event.ctrlKey && event.key === 'z') {
