@@ -26202,4 +26202,26 @@
         window.setQuickTime = setQuickTime;
         window.setQuickDate = setQuickDate;
         window.saveIOSDateTime = saveIOSDateTime;
+        
+        // Export UI functions that are referenced in HTML
+        window.toggleMobileUIVersion = toggleMobileUIVersion;
+        window.applyMobileUIVersion = applyMobileUIVersion;
+        window.applyTabDisplayMode = applyTabDisplayMode;
+        window.switchToMobileView = switchToMobileView;
+        window.toggleMobileMoreMenu = toggleMobileMoreMenu;
+        window.hideMobileMoreMenu = hideMobileMoreMenu;
+        window.closeSettings = closeSettings;
+        window.saveAllSettings = saveAllSettings;
+        window.loadSettingsValues = loadSettingsValues;
+        window.saveAutoPrintTime = saveAutoPrintTime;
+        window.updateSyncPeriod = updateSyncPeriod;
+        window.saveBackupSettings = saveBackupSettings;
+        window.toggleImportDropdown = toggleImportDropdown;
+        window.toggleExportDropdown = toggleExportDropdown;
+        window.selectImportFormat = selectImportFormat;
+        window.selectExportFormat = selectExportFormat;
+        window.toggleAutoPrint = toggleAutoPrint;
+        window.activateCurrentTime = activateCurrentTime;
+        window.toggleKeyboardOnlyMode = toggleKeyboardOnlyMode;
+        window.saveTabDisplayMode = saveTabDisplayMode;
     
