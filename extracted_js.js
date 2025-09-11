@@ -21430,6 +21430,13 @@
             const actualCurrentTime = now.toTimeString().slice(0, 5); // HH:MM format
             const isViewingToday = todayStr === getLocalDateString(now);
             
+            console.log('🕐 Current Time Debug:');
+            console.log('  - actualCurrentTime:', actualCurrentTime);
+            console.log('  - todayStr:', todayStr);
+            console.log('  - getLocalDateString(now):', getLocalDateString(now));
+            console.log('  - isViewingToday:', isViewingToday);
+            console.log('  - sortedTimeSlots:', sortedTimeSlots);
+            
             let html = '';
             
             // Render Events section at the top (if any events exist)
@@ -21451,6 +21458,8 @@
                 // Only highlight current time when viewing today
                 const isCurrentTime = isViewingToday && time <= actualCurrentTime && 
                     (sortedTimeSlots[sortedTimeSlots.indexOf(time) + 1] || '23:59') > actualCurrentTime;
+                
+                console.log(`🕐 Time slot ${time}: isCurrentTime=${isCurrentTime} (${time} <= ${actualCurrentTime} && next > ${actualCurrentTime})`);
                 
                 html += `
                     <div class="time-block" 
@@ -21484,6 +21493,8 @@
                 // This happens when viewing today AND current time is after all timed slots
                 const isNoTimeCurrentTime = isViewingToday && sortedTimeSlots.length > 0 && 
                     actualCurrentTime > sortedTimeSlots[sortedTimeSlots.length - 1];
+                
+                console.log(`🕐 No Time section: isNoTimeCurrentTime=${isNoTimeCurrentTime} (isViewingToday=${isViewingToday} && ${actualCurrentTime} > ${sortedTimeSlots[sortedTimeSlots.length - 1]})`);
                 
                 html += `
                     <div class="time-block" 
