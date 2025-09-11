@@ -4,4 +4,6 @@
 - never deploy to hyperfiler-fresh... always deploy to hyperfiler project
 
 ## Deployment
-- If changes don't appear on the live site after git push, manually deploy with: wrangler pages deploy . --project-name=hyperfiler
+- ALWAYS deploy after committing changes: wrangler pages deploy . --project-name=hyperfiler
+- Deploy automatically after every commit to ensure changes are live
+- Never deploy to hyperfiler-fresh, always use hyperfiler project
