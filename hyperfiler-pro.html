@@ -6012,6 +6012,16 @@
             console.log('📱 Tawk.to chat loaded successfully');
             window.tawkLoaded = true;
             
+            // Auto-detect and set language
+            autoDetectAndSetTawkLanguage();
+            
+            // If there was a pending language setting, apply it
+            if (window.pendingTawkLanguage) {
+                Tawk_API.setLocale(window.pendingTawkLanguage);
+                console.log('🌐 Applied pending Tawk.to language:', window.pendingTawkLanguage);
+                delete window.pendingTawkLanguage;
+            }
+            
             // Set visitor name and email if user is logged in
             if (window.currentUser) {
                 Tawk_API.setAttributes({
@@ -6033,12 +6043,58 @@
             }
         };
         
-        // Handle language switching for Tawk.to
+        // Auto-detect and set Tawk.to language based on current page
+        function autoDetectAndSetTawkLanguage() {
+            let detectedLang = 'en'; // default
+            
+            // Method 1: Check URL for -es suffix
+            if (window.location.pathname.includes('-es.html') || 
+                window.location.pathname.includes('/es/')) {
+                detectedLang = 'es';
+            }
+            
+            // Method 2: Check if this is the main app with saved language preference
+            if (window.location.pathname.includes('hyperfiler-pro.html')) {
+                const savedLang = localStorage.getItem('language');
+                if (savedLang === 'es') {
+                    detectedLang = 'es';
+                }
+            }
+            
+            // Method 3: Check HTML lang attribute
+            const htmlLang = document.documentElement.lang;
+            if (htmlLang === 'es' || htmlLang === 'es-ES') {
+                detectedLang = 'es';
+            }
+            
+            // Method 4: Check for Spanish content indicators
+            const title = document.title.toLowerCase();
+            const bodyText = document.body.textContent.toLowerCase();
+            if (title.includes('español') || title.includes('registro') || 
+                title.includes('iniciar sesión') || title.includes('cancelar') ||
+                bodyText.includes('iniciar sesión') || bodyText.includes('registro') ||
+                bodyText.includes('cancelar suscripción')) {
+                detectedLang = 'es';
+            }
+            
+            // Set Tawk.to language
+            if (typeof Tawk_API !== 'undefined' && Tawk_API.setLocale) {
+                Tawk_API.setLocale(detectedLang);
+                console.log('🌐 Auto-detected Tawk.to language:', detectedLang, 'for page:', window.location.pathname);
+            } else {
+                // Store for later when Tawk loads
+                window.pendingTawkLanguage = detectedLang;
+            }
+            
+            return detectedLang;
+        }
+        
+        // Handle manual language switching for Tawk.to (for main app)
         window.updateTawkLanguage = function(lang) {
             if (typeof Tawk_API !== 'undefined' && Tawk_API.setLocale) {
                 const tawkLocale = lang === 'es' ? 'es' : 'en';
                 Tawk_API.setLocale(tawkLocale);
-                console.log('🌐 Tawk.to language set to:', tawkLocale);
+                console.log('🌐 Tawk.to language manually set to:', tawkLocale);
             }
         };
         
