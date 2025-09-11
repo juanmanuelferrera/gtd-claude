@@ -3419,6 +3419,19 @@ function moveAllTasksToCurrentTime() {
     
     // Re-render today view
     console.log('🔄 Attempting to re-render Today view...');
+    
+    // Check if tasks were actually updated in memory
+    const fbTask = window.tasks.find(t => t.title && t.title.includes('Facebook @project'));
+    if (fbTask) {
+        console.log('🔍 Facebook task after update:', fbTask.title, '| dueDate:', fbTask.dueDate, '| time:', fbTask.time);
+    }
+    
+    // Force clear any time block collapse states to ensure 16:00 block shows
+    const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
+    collapseStates['16:00'] = false; // Ensure 16:00 block is expanded
+    localStorage.setItem('timeblock_collapse_states', JSON.stringify(collapseStates));
+    console.log('🔄 Forced 16:00 time block to expand');
+    
     if (typeof renderTodayView === 'function') {
         renderTodayView();
         console.log('✅ renderTodayView called successfully');
@@ -3430,6 +3443,16 @@ function moveAllTasksToCurrentTime() {
             console.log('✅ window.renderTodayView called as fallback');
         }
     }
+    
+    // Give UI time to render, then check if 16:00 block has our tasks
+    setTimeout(() => {
+        const timeBlock = document.querySelector('[data-time="16:00"], [id*="16:00"], .time-block-header:contains("16:00")');
+        if (timeBlock) {
+            console.log('✅ Found 16:00 time block in DOM after render');
+        } else {
+            console.log('❌ Could not find 16:00 time block in DOM - may need page refresh');
+        }
+    }, 1000);
     
     // Show confirmation
     const message = movedCount > 0 
