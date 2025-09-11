@@ -3979,6 +3979,23 @@
                        onmouseout="this.style.background='linear-gradient(to right, rgba(255, 214, 10, 0.1), transparent)'">
                         💾 Quick Backup
                     </button>
+                    <button onclick="openTawkChat()" class="action-btn" style="
+                        all: unset;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        padding: 10px 14px;
+                        background: linear-gradient(to right, rgba(34, 197, 94, 0.1), transparent);
+                        border-left: 3px solid #22C55E;
+                        border-radius: 6px;
+                        color: var(--things-text-secondary);
+                        cursor: pointer;
+                        font-size: 14px;
+                        transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                    " onmouseover="this.style.background='linear-gradient(to right, rgba(34, 197, 94, 0.15), transparent)'" 
+                       onmouseout="this.style.background='linear-gradient(to right, rgba(34, 197, 94, 0.1), transparent)'">
+                        💬 Live Support
+                    </button>
                     <button onclick="document.getElementById('jsonImportFile2').click()" class="action-btn" style="
                         all: unset;
                         display: flex;
@@ -5976,6 +5993,72 @@
     <script src="js/natural-language.js?v=1736363000"></script>
     <script src="js/patches.js?v=1736363000"></script>
     <script src="extracted_js.js?v=1736363001"></script>
+
+    <!-- Tawk.to Live Chat Integration -->
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+        // IMPORTANT: Replace 'your_property_id' and 'default' with your actual Tawk.to IDs
+        // You can get these from your Tawk.to dashboard at https://dashboard.tawk.to
+        var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+        s1.async=true;
+        s1.src='https://embed.tawk.to/YOUR_PROPERTY_ID/default';
+        s1.charset='UTF-8';
+        s1.setAttribute('crossorigin','*');
+        s0.parentNode.insertBefore(s1,s0);
+        
+        // Optional: Customize Tawk.to appearance and behavior
+        window.Tawk_API.onLoad = function(){
+            console.log('📱 Tawk.to chat loaded successfully');
+            
+            // Set visitor name and email if user is logged in
+            if (window.currentUser) {
+                Tawk_API.setAttributes({
+                    'name': window.currentUser.name || 'User',
+                    'email': window.currentUser.email || '',
+                    'id': window.currentUser.id || ''
+                }, function(error){
+                    if (!error) {
+                        console.log('✅ Tawk.to visitor attributes set');
+                    }
+                });
+            }
+            
+            // Hide chat widget on certain pages if needed
+            const currentView = window.currentView || 'today';
+            if (currentView === 'settings' || currentView === 'stats') {
+                // Optionally hide on certain views
+                // Tawk_API.hideWidget();
+            }
+        };
+        
+        // Handle language switching for Tawk.to
+        window.updateTawkLanguage = function(lang) {
+            if (typeof Tawk_API !== 'undefined' && Tawk_API.setLocale) {
+                const tawkLocale = lang === 'es' ? 'es' : 'en';
+                Tawk_API.setLocale(tawkLocale);
+                console.log('🌐 Tawk.to language set to:', tawkLocale);
+            }
+        };
+        
+        // Add custom launcher button (optional)
+        window.openTawkChat = function() {
+            if (typeof Tawk_API !== 'undefined' && Tawk_API.maximize) {
+                Tawk_API.maximize();
+            }
+        };
+        
+        // Track page views in Tawk.to
+        window.trackTawkPageView = function(pageName) {
+            if (typeof Tawk_API !== 'undefined' && Tawk_API.addEvent) {
+                Tawk_API.addEvent('Page View', {
+                    'page': pageName,
+                    'timestamp': new Date().toISOString()
+                });
+            }
+        };
+    })();
+    </script>
 
     <!-- N KEY & ENTER KEY HANDLERS -->
     <script>

@@ -408,6 +408,11 @@
             setTimeout(() => {
                 restoreMobileNavEmojis();
             }, 100);
+            
+            // Update Tawk.to chat language
+            if (typeof updateTawkLanguage === 'function') {
+                updateTawkLanguage(lang);
+            }
         }
         
         function toggleLanguageHeader() {
@@ -9134,6 +9139,11 @@
         // Navigation and view management
         function showView(viewName, preserveDate = false) {
             currentView = viewName;
+            
+            // Track page view in Tawk.to
+            if (typeof trackTawkPageView === 'function') {
+                trackTawkPageView(viewName);
+            }
             
             // Update modern header title
             const modernHeaderTitle = document.getElementById('dynamicHeaderTitle');
