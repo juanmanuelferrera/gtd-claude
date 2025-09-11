@@ -1548,20 +1548,32 @@ function resetTaskTitle() {
 
 // Settings and language functions
 function switchLanguage(lang) {
+    console.log('🔧 switchLanguage called with:', lang);
     currentLanguage = lang;
     localStorage.setItem('preferredLanguage', lang);
     
     if (typeof translateUI === 'function') {
+        console.log('🔧 Calling translateUI...');
         translateUI();
-    }
-    if (typeof updateLanguageButtonStyles === 'function') {
-        updateLanguageButtonStyles();
-    }
-    if (typeof updateHeaderLanguageButton === 'function') {
-        updateHeaderLanguageButton();
+    } else {
+        console.error('❌ translateUI function not found');
     }
     
-    console.log('Language switched to:', lang);
+    if (typeof updateLanguageButtonStyles === 'function') {
+        console.log('🔧 Calling updateLanguageButtonStyles...');
+        updateLanguageButtonStyles();
+    } else {
+        console.log('⚠️ updateLanguageButtonStyles function not found (optional)');
+    }
+    
+    if (typeof updateHeaderLanguageButton === 'function') {
+        console.log('🔧 Calling updateHeaderLanguageButton...');
+        updateHeaderLanguageButton();
+    } else {
+        console.log('⚠️ updateHeaderLanguageButton function not found (optional)');
+    }
+    
+    console.log('✅ Language switched to:', lang);
 }
 
 function saveAutoPrintTime() {
@@ -3234,7 +3246,15 @@ window.triggerImageUpload = triggerImageUpload;
 window.handleImageUpload = handleImageUpload;
 window.addNewTemplate = addNewTemplate;
 window.resetTaskTitle = resetTaskTitle;
+// Debug function for testing Settings buttons
+function testSettingsButton(message) {
+    console.log('🔧 Settings button test:', message);
+    alert('Settings button works: ' + message);
+}
+
+// Expose functions globally
 window.switchLanguage = switchLanguage;
+window.testSettingsButton = testSettingsButton;
 window.saveAutoPrintTime = saveAutoPrintTime;
 window.updateSyncPeriod = updateSyncPeriod;
 window.openSettings = openSettings;
