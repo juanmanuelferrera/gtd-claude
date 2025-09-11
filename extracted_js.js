@@ -15989,9 +15989,9 @@
                         time: null
                     })
                 },
-                // Standard order with relative periods and time: "task in 3 weeks at 6pm"
+                // Standard order with relative periods and time: "task in 3 weeks at 6pm" or "task 3 weeks at 6pm"
                 {
-                    regex: /^(.+?)\s+in\s+(\d+)\s+(days?|weeks?|months?|years?)\s+at\s+(.+)$/i,
+                    regex: /^(.+?)\s+(?:in\s+)?(\d+|a|an)\s+(days?|weeks?|months?|years?)\s+at\s+(.+)$/i,
                     parser: (match) => ({
                         title: match[1].trim(),
                         date: getDateForRelativePeriod(match[2], match[3]),
