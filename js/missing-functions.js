@@ -3437,6 +3437,7 @@ function moveAllTasksToCurrentTime() {
     localStorage.setItem('timeblock_collapse_states', JSON.stringify(collapseStates));
     console.log('🔄 Forced 16:00 time block to expand');
     
+    // Force complete UI refresh
     if (typeof renderTodayView === 'function') {
         renderTodayView();
         console.log('✅ renderTodayView called successfully');
@@ -3448,6 +3449,23 @@ function moveAllTasksToCurrentTime() {
             console.log('✅ window.renderTodayView called as fallback');
         }
     }
+    
+    // Force re-render after a short delay to ensure DOM updates
+    setTimeout(() => {
+        console.log('🔄 Force refresh after delay...');
+        if (typeof renderTodayView === 'function') {
+            renderTodayView();
+        } else if (typeof window.renderTodayView === 'function') {
+            window.renderTodayView();
+        }
+        
+        // Also try to trigger the Today tab refresh
+        const todayTab = document.querySelector('[data-tab="today"], .tab[onclick*="showToday"]');
+        if (todayTab) {
+            todayTab.click();
+            console.log('✅ Clicked Today tab to refresh view');
+        }
+    }, 500);
     
     // Give UI time to render, then check if 16:00 block has our tasks
     setTimeout(() => {
@@ -3483,6 +3501,12 @@ function moveAllTasksToCurrentTime() {
             }, 2000);
         }
     }
+    
+    // Re-enable sync after UI updates
+    setTimeout(() => {
+        window.syncEnabled = originalSyncEnabled;
+        console.log('🔓 Re-enabled sync after task move completion');
+    }, 1500);
 }
 
 // Expose functions globally
