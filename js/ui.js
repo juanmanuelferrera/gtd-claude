@@ -1348,7 +1348,29 @@ function renderWeekView() {
         const date = new Date(weekStart);
         date.setDate(weekStart.getDate() + i);
         const dateStr = getLocalDateString(date);
-        const dayTasks = (window.tasks || []).filter(task => task.dueDate === dateStr && task.status !== 'deleted');
+        const dayTasks = (window.tasks || []).filter(task => {
+            // Exclude deleted tasks
+            if (task.status === 'deleted') return false;
+            
+            // Only show tasks for this specific date
+            if (task.dueDate !== dateStr) return false;
+            
+            // Events always show at their original date
+            if (task.isEvent) return true;
+            
+            // For regular tasks: hide both completed AND pending tasks from past dates
+            // (pending tasks will appear in Today view as overdue)
+            const taskDate = new Date(dateStr);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            taskDate.setHours(0, 0, 0, 0);
+            
+            if (taskDate < today) {
+                return false; // Hide all regular tasks from past dates
+            }
+            
+            return true; // Show tasks for today and future dates
+        });
         weekTasks.push(...dayTasks);
     }
     
@@ -1963,9 +1985,29 @@ function renderCalendar() {
     const month = currentCalendarDate.getMonth();
     console.log(`DEBUG: Month view ${year}-${month}: Total tasks available:`, (window.tasks || []).length);
     const monthTasks = (window.tasks || []).filter(task => {
+        // Exclude deleted tasks or tasks without dates
         if (!task.dueDate || task.status === 'deleted') return false;
+        
         const taskDate = new Date(task.dueDate);
-        return taskDate.getFullYear() === year && taskDate.getMonth() === month;
+        
+        // Only show tasks for this month
+        if (taskDate.getFullYear() !== year || taskDate.getMonth() !== month) return false;
+        
+        // Events always show at their original date
+        if (task.isEvent) return true;
+        
+        // For regular tasks: hide both completed AND pending tasks from past dates
+        // (pending tasks will appear in Today view as overdue)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const taskDateOnly = new Date(task.dueDate);
+        taskDateOnly.setHours(0, 0, 0, 0);
+        
+        if (taskDateOnly < today) {
+            return false; // Hide all regular tasks from past dates
+        }
+        
+        return true; // Show tasks for today and future dates
     });
     console.log(`DEBUG: Month view ${year}-${month}: Found ${monthTasks.length} tasks for month`);
     
@@ -2053,7 +2095,29 @@ function renderCalendar() {
         }
         
         let dayTasks = typeof getTasksForDate === 'function' ? getTasksForDate(dateStr) : 
-                        (window.tasks || []).filter(task => task.dueDate === dateStr && task.status !== 'deleted');
+                        (window.tasks || []).filter(task => {
+                            // Exclude deleted tasks
+                            if (task.status === 'deleted') return false;
+                            
+                            // Only show tasks for this specific date
+                            if (task.dueDate !== dateStr) return false;
+                            
+                            // Events always show at their original date
+                            if (task.isEvent) return true;
+                            
+                            // For regular tasks: hide both completed AND pending tasks from past dates
+                            // (pending tasks will appear in Today view as overdue)
+                            const taskDate = new Date(dateStr);
+                            const currentDate = new Date();
+                            currentDate.setHours(0, 0, 0, 0);
+                            taskDate.setHours(0, 0, 0, 0);
+                            
+                            if (taskDate < currentDate) {
+                                return false; // Hide all regular tasks from past dates
+                            }
+                            
+                            return true; // Show tasks for today and future dates
+                        });
         
         // Apply template filter if active
         if (window.activeMonthTemplateFilter) {
