@@ -5246,7 +5246,7 @@
             const currentTime = task.dueTime || '';
             
             // Create picker content
-            modal.innerHTML = \`
+            modal.innerHTML = `
                 <div style="
                     background: #f8f9fa;
                     border-radius: 16px 16px 0 0;
@@ -5426,7 +5426,7 @@
                     <!-- Safe area padding for iOS -->
                     <div style="height: env(safe-area-inset-bottom, 20px);"></div>
                 </div>
-            \`;
+            `;
             
             document.body.appendChild(modal);
             
@@ -5510,8 +5510,8 @@
             renderCurrentView();
             
             // Show success message
-            const timeDisplay = timeInput.value ? \` at \${formatTime(timeInput.value)}\` : '';
-            showInlineNotification(\`📅 Task scheduled for \${formatDateForDisplay(dateInput.value)}\${timeDisplay}\`, 'success');
+            const timeDisplay = timeInput.value ? ` at ${formatTime(timeInput.value)}` : '';
+            showInlineNotification(`📅 Task scheduled for ${formatDateForDisplay(dateInput.value)}${timeDisplay}`, 'success');
             
             // Close modal
             closeIOSDateTimePicker();
