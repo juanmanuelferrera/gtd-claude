@@ -3919,8 +3919,18 @@
                 }
                 
                 if (event.key === 'n' && !event.ctrlKey && !event.metaKey && !event.altKey) {
-                    event.preventDefault();
-                    openAddTaskModal();
+                    // Only trigger if not typing in an input field
+                    const activeElement = document.activeElement;
+                    const isTyping = activeElement && (
+                        activeElement.tagName === 'INPUT' || 
+                        activeElement.tagName === 'TEXTAREA' || 
+                        activeElement.contentEditable === 'true'
+                    );
+                    
+                    if (!isTyping) {
+                        event.preventDefault();
+                        openAddTaskModal();
+                    }
                 }
                 if (event.ctrlKey && event.key === 'z') {
                     event.preventDefault();

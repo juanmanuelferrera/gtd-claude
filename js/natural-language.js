@@ -255,6 +255,22 @@
                 }
             },
             
+            // Relative periods with time: "task in 2 days at 7am" or "task 2 days at 7am"
+            {
+                regex: /^(.+?)\s+(?:in\s+)?(\d+|a|an)\s+(day|days|week|weeks|month|months|year|years)\s+at\s+(.+)$/i,
+                parser: (match) => {
+                    const timeResult = normalizeTime(match[4]);
+                    if (timeResult) {
+                        return {
+                            title: match[1].trim(),
+                            date: getDateForRelativePeriod(match[2], match[3]),
+                            time: timeResult
+                        };
+                    }
+                    return null;
+                }
+            },
+            
             // Relative periods: "task in 3 days", "task in a week"
             {
                 regex: /^(.+?)\s+in\s+(\d+|a|an)\s+(day|days|week|weeks|month|months|year|years)$/i,
