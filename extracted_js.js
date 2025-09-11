@@ -26330,3 +26330,4 @@
         window.changeTrashPage = changeTrashPage;
         window.saveTabDisplayMode = saveTabDisplayMode;
     
+// Deploy fix
