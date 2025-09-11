@@ -3296,6 +3296,9 @@ function moveAllTasksToCurrentTime() {
     });
     
     console.log('🎯 Target time:', currentTimeStr);
+    console.log('🔍 Testing parseTime with "12:00":', parseTime('12:00'));
+    console.log('🔍 Testing parseTime with current time:', parseTime(currentTimeStr));
+    console.log('🔍 Is 12:00 < current time?', parseTime('12:00') < parseTime(currentTimeStr));
     
     // Get today's date string - fix currentTodayDate if it's a DOM element
     let today;
@@ -3358,6 +3361,15 @@ function moveAllTasksToCurrentTime() {
         task.status !== 'deleted' && task.status !== 'completed'
     );
     console.log('📅 Found', todayTasks.length, 'tasks for today', todayStr, '(for reference)');
+    
+    // Check Facebook task specifically since it shows as timed in UI but untimed in console
+    const facebookTasks = tasksArray.filter(task => 
+        task.title && task.title.toLowerCase().includes('facebook')
+    );
+    console.log('📘 Found', facebookTasks.length, 'Facebook-related tasks:');
+    facebookTasks.forEach((task, i) => {
+        console.log(`Facebook ${i+1}: "${task.title}" | dueDate: "${task.dueDate}" | time: "${task.time}" | isEvent: ${task.isEvent} | status: ${task.status}`);
+    });
     
     // Also check tasks that might match your cleaning task specifically
     const cleaningTasks = tasksArray.filter(task => 
