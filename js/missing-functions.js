@@ -3337,18 +3337,18 @@ function moveAllTasksToCurrentTime() {
     });
     
     const timedTasks = tasksArray.filter(task => {
-        return task.time && task.time.trim() !== '' && task.time !== 'undefined' && task.status !== 'deleted';
+        return task.dueTime && task.dueTime.trim() !== '' && task.dueTime !== 'undefined' && task.status !== 'deleted';
     });
-    console.log('⏰ Found', timedTasks.length, 'timed tasks total:');
+    console.log('⏰ Found', timedTasks.length, 'timed tasks total (using dueTime property):');
     timedTasks.slice(0, 5).forEach((task, i) => {
-        console.log(`Timed ${i+1}: "${task.title}" | dueDate: "${task.dueDate}" | time: "${task.time}" | isEvent: ${task.isEvent} | status: ${task.status}`);
+        console.log(`Timed ${i+1}: "${task.title}" | dueDate: "${task.dueDate}" | dueTime: "${task.dueTime}" | isEvent: ${task.isEvent} | status: ${task.status}`);
     });
     
     // Check if there are any tasks with time properties that are not "undefined"
-    const anyTimeProperty = tasksArray.filter(task => task.time !== 'undefined' && task.time !== undefined && task.time);
-    console.log('🕐 Tasks with any time property (not "undefined"):', anyTimeProperty.length);
+    const anyTimeProperty = tasksArray.filter(task => task.dueTime !== 'undefined' && task.dueTime !== undefined && task.dueTime);
+    console.log('🕐 Tasks with any dueTime property (not "undefined"):', anyTimeProperty.length);
     anyTimeProperty.slice(0, 3).forEach((task, i) => {
-        console.log(`Time property ${i+1}: "${task.title}" | time: "${task.time}" | typeof: ${typeof task.time}`);
+        console.log(`dueTime property ${i+1}: "${task.title}" | dueTime: "${task.dueTime}" | typeof: ${typeof task.dueTime}`);
     });
 
     const overdueTasks = tasksArray.filter(task => {
@@ -3357,7 +3357,7 @@ function moveAllTasksToCurrentTime() {
         }
         
         // EXCLUDE untimed tasks (as per your requirement: "not untimed")
-        if (!task.time || task.time.trim() === '' || task.time === 'undefined') {
+        if (!task.dueTime || task.dueTime.trim() === '' || task.dueTime === 'undefined') {
             return false;
         }
         
@@ -3370,7 +3370,7 @@ function moveAllTasksToCurrentTime() {
             return true;
         } else if (taskDate.getTime() === todayDate.getTime()) {
             // Today's timed tasks - only if before current time
-            const taskTime = parseTime(task.time);
+            const taskTime = parseTime(task.dueTime);
             const currentTime = parseTime(currentTimeStr);
             return taskTime && currentTime && taskTime < currentTime;
         }
@@ -3402,13 +3402,13 @@ function moveAllTasksToCurrentTime() {
     );
     console.log('🧹 Found', cleaningTasks.length, 'cleaning-related tasks:');
     cleaningTasks.forEach((task, i) => {
-        console.log(`Cleaning ${i+1}: "${task.title}" | dueDate: "${task.dueDate}" | time: "${task.time}" | isEvent: ${task.isEvent} | status: ${task.status}`);
+        console.log(`Cleaning ${i+1}: "${task.title}" | dueDate: "${task.dueDate}" | dueTime: "${task.dueTime}" | isEvent: ${task.isEvent} | status: ${task.status}`);
     });
     
     // Debug overdue tasks
     console.log('🔍 Analyzing overdue tasks:');
     overdueTasks.forEach((task, i) => {
-        console.log(`Overdue ${i+1}: "${task.title}" | dueDate: "${task.dueDate}" | time: "${task.time}" | status: ${task.status}`);
+        console.log(`Overdue ${i+1}: "${task.title}" | dueDate: "${task.dueDate}" | dueTime: "${task.dueTime}" | status: ${task.status}`);
     });
 
     let movedCount = 0;
@@ -3424,11 +3424,11 @@ function moveAllTasksToCurrentTime() {
             const updatedTask = {
                 ...task,
                 dueDate: todayStr,
-                time: currentTimeStr,
+                dueTime: currentTimeStr,
                 updatedAt: new Date().toISOString()
             };
             movedCount++;
-            console.log('📋 Moved overdue task:', task.title, 'from', task.dueDate, task.time || '(no time)', 'to', todayStr, currentTimeStr);
+            console.log('📋 Moved overdue task:', task.title, 'from', task.dueDate, task.dueTime || '(no time)', 'to', todayStr, currentTimeStr);
             return updatedTask;
         }
         return task;
@@ -3484,7 +3484,7 @@ function moveAllTasksToCurrentTime() {
     // Check if tasks were actually updated in memory
     const fbTask = window.tasks.find(t => t.title && t.title.includes('Facebook @project'));
     if (fbTask) {
-        console.log('🔍 Facebook task after update:', fbTask.title, '| dueDate:', fbTask.dueDate, '| time:', fbTask.time);
+        console.log('🔍 Facebook task after update:', fbTask.title, '| dueDate:', fbTask.dueDate, '| dueTime:', fbTask.dueTime);
     }
     
     // Force clear any time block collapse states to ensure the target time block shows
