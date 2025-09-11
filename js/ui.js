@@ -1274,6 +1274,23 @@ function renderTodayView() {
         isAfterAllSlots: currentTime > sortedTimes[sortedTimes.length - 1]
     });
     
+    // Find the most relevant time slot for current time
+    let currentTimeSlot = null;
+    if (isViewingToday && sortedTimes.length > 0) {
+        // Find the first slot that is >= current time (next upcoming slot)
+        const upcomingSlot = sortedTimes.find(slot => slot >= currentTime);
+        
+        if (upcomingSlot) {
+            // If there's an upcoming slot, use it
+            currentTimeSlot = upcomingSlot;
+            console.log(`🕐 Current time ${currentTime} -> highlighting upcoming slot: ${currentTimeSlot}`);
+        } else {
+            // If current time is after all slots, highlight the last slot
+            currentTimeSlot = sortedTimes[sortedTimes.length - 1];
+            console.log(`🕐 Current time ${currentTime} is after all slots -> highlighting last slot: ${currentTimeSlot}`);
+        }
+    }
+
     // Render time slots
     sortedTimes.forEach(time => {
         // Sort tasks within this time slot (pending first, completed last)
@@ -1285,10 +1302,9 @@ function renderTodayView() {
         });
         
         // Check if this is the current time slot
-        const nextSlot = sortedTimes[sortedTimes.indexOf(time) + 1] || '23:59';
-        const isCurrentTime = isViewingToday && time <= currentTime && nextSlot > currentTime;
+        const isCurrentTime = isViewingToday && time === currentTimeSlot;
             
-        console.log(`🕐 Checking slot ${time}: ${time} <= ${currentTime} && ${nextSlot} > ${currentTime} = ${isCurrentTime}`);
+        console.log(`🕐 Checking slot ${time}: isCurrentTime = ${isCurrentTime} (currentTimeSlot: ${currentTimeSlot})`);
         
         if (isCurrentTime) {
             console.log('🕐 ✅ HIGHLIGHTING current time slot:', time);
@@ -1326,9 +1342,8 @@ function renderTodayView() {
         console.log('🔄 ui.js - No Specific Time section - reading collapse state:', isCollapsed, 'from localStorage:', collapseStates);
         
         // Check if "No Specific Time" should be highlighted as current time
-        // This happens when viewing today AND (current time is after all timed slots OR before all timed slots)
-        const isNoTimeCurrentTime = isViewingToday && sortedTimes.length > 0 && 
-            (currentTime > sortedTimes[sortedTimes.length - 1] || currentTime < sortedTimes[0]);
+        // This only happens when viewing today AND there are no timed slots at all
+        const isNoTimeCurrentTime = isViewingToday && sortedTimes.length === 0;
             
         console.log('🕐 No Time section check:', {
             isNoTimeCurrentTime,
