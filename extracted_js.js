@@ -21430,12 +21430,6 @@
             const actualCurrentTime = now.toTimeString().slice(0, 5); // HH:MM format
             const isViewingToday = todayStr === getLocalDateString(now);
             
-            console.log('🕐 Current Time Debug:');
-            console.log('  - actualCurrentTime:', actualCurrentTime);
-            console.log('  - todayStr:', todayStr);
-            console.log('  - getLocalDateString(now):', getLocalDateString(now));
-            console.log('  - isViewingToday:', isViewingToday);
-            console.log('  - sortedTimeSlots:', sortedTimeSlots);
             
             let html = '';
             
@@ -21459,7 +21453,6 @@
                 const isCurrentTime = isViewingToday && time <= actualCurrentTime && 
                     (sortedTimeSlots[sortedTimeSlots.indexOf(time) + 1] || '23:59') > actualCurrentTime;
                 
-                console.log('🕐 Time slot ' + time + ': isCurrentTime=' + isCurrentTime + ' (' + time + ' <= ' + actualCurrentTime + ' && next > ' + actualCurrentTime + ')');
                 
                 html += `
                     <div class="time-block" 
@@ -21494,7 +21487,6 @@
                 const isNoTimeCurrentTime = isViewingToday && sortedTimeSlots.length > 0 && 
                     actualCurrentTime > sortedTimeSlots[sortedTimeSlots.length - 1];
                 
-                console.log('🕐 No Time section: isNoTimeCurrentTime=' + isNoTimeCurrentTime + ' (isViewingToday=' + isViewingToday + ' && ' + actualCurrentTime + ' > ' + (sortedTimeSlots[sortedTimeSlots.length - 1] || 'undefined') + ')');
                 
                 html += `
                     <div class="time-block" 
