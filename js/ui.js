@@ -1260,8 +1260,14 @@ function renderTodayView() {
             </div>`;
     }
     
+    // Get current time for highlighting
+    const now = new Date();
+    const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
+    const isViewingToday = todayStr === getLocalDateString(new Date());
+    const sortedTimes = Object.keys(timeSlots).sort();
+    
     // Render time slots
-    Object.keys(timeSlots).sort().forEach(time => {
+    sortedTimes.forEach(time => {
         // Sort tasks within this time slot (pending first, completed last)
         timeSlots[time].sort((a, b) => {
             if (a.status !== b.status) {
@@ -1269,6 +1275,10 @@ function renderTodayView() {
             }
             return 0;
         });
+        
+        // Check if this is the current time slot
+        const isCurrentTime = isViewingToday && time <= currentTime && 
+            (sortedTimes[sortedTimes.indexOf(time) + 1] || '23:59') > currentTime;
         
         html += `
             <div class="time-block" 
@@ -1278,9 +1288,10 @@ function renderTodayView() {
                  ondragenter="handleTimeSlotDragEnter(event)"
                  ondragleave="handleTimeSlotDragLeave(event)"
                  style="min-height: 60px; position: relative;">
-                <div class="time-block-header" onclick="toggleTimeBlock('${time}')" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <div class="time-block-header ${isCurrentTime ? 'current-time' : ''}" onclick="toggleTimeBlock('${time}')" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
                     <span id="arrow-${time}" class="group-arrow">▼</span>
                     🕐 ${time}
+                    ${isCurrentTime ? '<span style="margin-left: auto; font-size: 12px; padding-right: 8px;">← Current Time</span>' : ''}
                 </div>
                 <div class="time-block-content" id="content-${time}">`;
         
@@ -1300,11 +1311,17 @@ function renderTodayView() {
         const isCollapsed = collapseStates['untimed'] === true;
         console.log('🔄 ui.js - No Specific Time section - reading collapse state:', isCollapsed, 'from localStorage:', collapseStates);
         
+        // Check if "No Specific Time" should be highlighted as current time
+        // This happens when viewing today AND current time is after all timed slots
+        const isNoTimeCurrentTime = isViewingToday && sortedTimes.length > 0 && 
+            currentTime > sortedTimes[sortedTimes.length - 1];
+        
         html += `
             <div class="time-block">
-                <div class="time-block-header" onclick="toggleTimeBlock('untimed')" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <div class="time-block-header ${isNoTimeCurrentTime ? 'current-time' : ''}" onclick="toggleTimeBlock('untimed')" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
                     <span id="arrow-untimed" class="group-arrow" aria-expanded="${!isCollapsed}" aria-label="${isCollapsed ? 'Expand' : 'Collapse'} No Specific Time section">${isCollapsed ? '▶' : '▼'}</span>
                     📋 No Specific Time
+                    ${isNoTimeCurrentTime ? '<span style="margin-left: auto; font-size: 12px; padding-right: 8px;">← Current Time</span>' : ''}
                 </div>
                 <div class="time-block-content" id="content-untimed" style="display: ${isCollapsed ? 'none' : 'block'};">`;
         
