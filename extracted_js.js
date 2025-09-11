@@ -21424,7 +21424,11 @@
             
             // Sort time slots by time
             const sortedTimeSlots = Object.keys(timeSlots).sort();
-            const currentTime = today.toTimeString().slice(0, 5);
+            
+            // Get actual current time (only relevant when viewing today)
+            const now = new Date();
+            const actualCurrentTime = now.toTimeString().slice(0, 5); // HH:MM format
+            const isViewingToday = todayStr === getLocalDateString(now);
             
             let html = '';
             
@@ -21444,8 +21448,9 @@
             
             // Render time slots (only for times that have tasks)
             sortedTimeSlots.forEach(time => {
-                const isCurrentTime = time <= currentTime && 
-                    (sortedTimeSlots[sortedTimeSlots.indexOf(time) + 1] || '23:59') > currentTime;
+                // Only highlight current time when viewing today
+                const isCurrentTime = isViewingToday && time <= actualCurrentTime && 
+                    (sortedTimeSlots[sortedTimeSlots.indexOf(time) + 1] || '23:59') > actualCurrentTime;
                 
                 html += `
                     <div class="time-block" 
@@ -21475,15 +21480,21 @@
                 const isCollapsed = collapseStates['untimed'] === true;
                 console.log('🔄 No Specific Time section - reading collapse state:', isCollapsed, 'from localStorage:', collapseStates);
                 
+                // Check if "No Specific Time" should be highlighted as current time
+                // This happens when viewing today AND current time is after all timed slots
+                const isNoTimeCurrentTime = isViewingToday && sortedTimeSlots.length > 0 && 
+                    actualCurrentTime > sortedTimeSlots[sortedTimeSlots.length - 1];
+                
                 html += `
                     <div class="time-block" 
                          ondragover="handleTodayDragOver(event)" 
                          ondrop="handleTodayDrop(event)" 
                          ondragleave="handleTodayDragLeave(event)"
                          data-time-slot="no-time">
-                        <div class="time-block-header" onclick="toggleTimeBlock('untimed')" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <div class="time-block-header ${isNoTimeCurrentTime ? 'current-time' : ''}" onclick="toggleTimeBlock('untimed')" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
                             <span id="arrow-untimed" style="font-size: 12px; transition: transform 0.2s ease;" aria-expanded="${!isCollapsed}" aria-label="${isCollapsed ? 'Expand' : 'Collapse'} No Specific Time section">${isCollapsed ? '▶' : '▼'}</span>
-                            <span>📋 No Specific Time</span>
+                            <span>📋 ${translateText('No Specific Time')}</span>
+                            ${isNoTimeCurrentTime ? `<span style="margin-left: auto; font-size: 12px; padding-right: 8px;">← ${translateText('Current Time')}</span>` : ''}
                         </div>
                         <div class="time-block-content" 
                              id="content-untimed"
