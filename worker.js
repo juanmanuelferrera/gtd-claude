@@ -539,7 +539,7 @@ export default {
             v207_columns: columnChecks,
             v207_indexes: indexCheck.results?.map(r => r.name) || [],
             all_columns_present: Object.values(columnChecks).every(Boolean),
-            version: '2.0.7'
+            version: '1.0'
           }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
@@ -1675,7 +1675,7 @@ async function handleSyncInfo(userId, request, env, corsHeaders) {
       latestTimestamp,
       taskCount,
       serverTime: new Date().toISOString(),
-      syncVersion: '2.0.7',
+      syncVersion: '1.0',
       deviceStats
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -1716,7 +1716,7 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
     
     // v2.0.7 NEW: Extract sync headers for enhanced tracking
     const syncHeaders = {
-      syncVersion: request.headers.get('X-Sync-Version') || syncVersion || '2.0.6',
+      syncVersion: request.headers.get('X-Sync-Version') || syncVersion || '1.0',
       deviceId: request.headers.get('X-Device-Id') || deviceId,
       sessionId: request.headers.get('X-Session-Id') || sessionId,
       clientTimestamp: timestamp
@@ -2272,7 +2272,7 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
             task.deletedAt || task.deleted_at || null,
             task.deviceId || syncHeaders.deviceId || null,
             task.sessionId || syncHeaders.sessionId || null,
-            task.syncVersion || syncHeaders.syncVersion || '2.0.7'
+            task.syncVersion || syncHeaders.syncVersion || '1.0'
           ).run();
         } else {
           // Legacy v2.0.6 binding
@@ -2375,7 +2375,7 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
               backupTask.deleted_at || null,
               backupTask.device_id || null,
               backupTask.session_id || null,
-              backupTask.sync_version || '2.0.6'
+              backupTask.sync_version || '1.0'
             ).run();
           } else {
             await stmt.bind(
@@ -4477,7 +4477,7 @@ async function handleAdminMigrateDatabase(request, env, corsHeaders) {
       });
     } catch (error) {
       try {
-        const alterStmt = env.DB.prepare('ALTER TABLE user_tasks ADD COLUMN sync_version TEXT DEFAULT \'2.0.6\'');
+        const alterStmt = env.DB.prepare('ALTER TABLE user_tasks ADD COLUMN sync_version TEXT DEFAULT \'1.0\'');
         await alterStmt.run();
         migrationResults.push({
           migration: 'sync_version column (v2.0.7)',
@@ -4621,7 +4621,7 @@ async function handleAdminMigrateDatabase(request, env, corsHeaders) {
       message: 'Database migration completed (including v2.0.7 enhancements)',
       migrations: migrationResults,
       migrated_at: new Date().toISOString(),
-      version: '2.0.7'
+      version: '1.0'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });

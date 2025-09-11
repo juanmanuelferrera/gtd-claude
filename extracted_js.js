@@ -1,5 +1,5 @@
 
-        console.log('🚀 HyperFiler Pro v3.5 - Starting initialization...');
+        console.log('🚀 HyperFiler Pro v1.0 Stable - Starting initialization...');
         window.addEventListener('error', function(e) {
             console.error('❌ UNCAUGHT ERROR:', e.message, 'at line', e.lineno, 'column', e.colno);
             console.error('Stack:', e.error?.stack);
@@ -16385,7 +16385,7 @@
             try {
                 // Export both JSON (for compatibility) and SQLite database
                 const exportData = {
-                    version: '2.0', // Updated version for SQLite
+                    version: '1.0', // Stable version for SQLite
                     exportDate: new Date().toISOString(),
                     tasks: tasks,
                     templates: customTemplates, // Include templates in export

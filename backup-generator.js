@@ -25,7 +25,7 @@ const backupPath = path.join(backupDir, backupFilename);
 // Template for the backup structure
 const backupTemplate = {
     metadata: {
-        version: '4.0.0',
+        version: '1.0',
         backupDate: new Date().toISOString(),
         backupType: 'full',
         source: 'HyperFiler Pro',

@@ -978,7 +978,7 @@ function collapseAllGroups() {
 function exportTasks() {
     try {
         const exportData = {
-            version: '2.0',
+            version: '1.0',
             exportDate: new Date().toISOString(),
             tasks: tasks.map(task => ({
                 id: task.id,
