@@ -370,7 +370,7 @@
                 if (parsed) {
                     applyParsedData(parsed, titleInput);
                 }
-            }, 300);
+            }, 1500); // Increased delay to allow complete phrase typing
         }
         
         function applyParsedData(parsed, titleElement) {

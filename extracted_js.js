@@ -3913,6 +3913,9 @@
             
             // Add keyboard shortcuts
             document.addEventListener('keydown', function(event) {
+                // Debug ALL key presses
+                console.log('🔍 Key Debug: Key pressed:', event.key, 'Ctrl:', event.ctrlKey, 'Alt:', event.altKey, 'Meta:', event.metaKey);
+                
                 // Debug Ctrl+L capture
                 if (event.ctrlKey && event.key === 'l') {
                     console.log('🔥 Ctrl+L captured at top level - first handler');
