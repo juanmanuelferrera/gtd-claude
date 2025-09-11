@@ -3547,6 +3547,14 @@ function moveAllTasksToCurrentTime() {
             await uploadAllTasks();
             console.log('📤 Final upload to ensure server has latest data');
         }
+        
+        // If we moved tasks successfully, reload the page to show them
+        if (movedCount > 0) {
+            setTimeout(() => {
+                console.log('🔄 Reloading page to display moved tasks in their new time slot...');
+                window.location.reload();
+            }, 1000);
+        }
     }, 3000);  // Increased delay to ensure upload completes
 }
 
