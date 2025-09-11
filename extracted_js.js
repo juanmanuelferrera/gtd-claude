@@ -3912,6 +3912,7 @@
             updateMobileNavigation();
             
             // Add keyboard shortcuts
+            console.log('🔍 Adding keydown event listener');
             document.addEventListener('keydown', function(event) {
                 // Debug ALL key presses
                 console.log('🔍 Key Debug: Key pressed:', event.key, 'Ctrl:', event.ctrlKey, 'Alt:', event.altKey, 'Meta:', event.metaKey);
@@ -15682,7 +15683,7 @@
                             // Template is already in the title, no need to do anything special
                         }
                     }
-                }, 500); // 0.5s delay for responsive parsing
+                }, 1500); // 1.5s delay to allow complete phrase typing
             });
             
             // Add blur event to clean up title when user finishes typing
