@@ -3318,12 +3318,42 @@ function moveAllTasksToCurrentTime() {
     const tasksArray = window.tasks || tasks || [];
     console.log('🔍 Working with', tasksArray.length, 'total tasks');
     
-    // First, let's see what today's tasks we have
+    // Find overdue tasks (from previous dates) AND today's tasks before current time
+    const todayDate = new Date(today);
+    todayDate.setHours(0, 0, 0, 0); // Start of today
+    
+    const overdueTasks = tasksArray.filter(task => {
+        if (!task.dueDate || task.status === 'deleted' || task.status === 'completed' || task.isEvent) {
+            return false;
+        }
+        
+        const taskDate = new Date(task.dueDate);
+        taskDate.setHours(0, 0, 0, 0); // Start of task date
+        
+        // Include tasks from previous dates (overdue) OR today's tasks before current time
+        if (taskDate < todayDate) {
+            // Overdue task from previous date
+            return true;
+        } else if (taskDate.getTime() === todayDate.getTime()) {
+            // Today's task - only if it has time and is before current time
+            if (task.time && task.time.trim() !== '' && task.time !== 'undefined') {
+                const taskTime = parseTime(task.time);
+                const currentTime = parseTime(currentTimeStr);
+                return taskTime && currentTime && taskTime < currentTime;
+            }
+        }
+        
+        return false;
+    });
+    
+    console.log('📅 Found', overdueTasks.length, 'overdue tasks (from previous dates + today before', currentTimeStr + ')');
+    
+    // Also show today's tasks for reference
     const todayTasks = tasksArray.filter(task => 
         task.dueDate && task.dueDate.startsWith(todayStr) && 
         task.status !== 'deleted' && task.status !== 'completed'
     );
-    console.log('📅 Found', todayTasks.length, 'tasks for today', todayStr);
+    console.log('📅 Found', todayTasks.length, 'tasks for today', todayStr, '(for reference)');
     
     // Also check tasks that might match your cleaning task specifically
     const cleaningTasks = tasksArray.filter(task => 
@@ -3334,47 +3364,31 @@ function moveAllTasksToCurrentTime() {
         console.log(`Cleaning ${i+1}: "${task.title}" | dueDate: "${task.dueDate}" | time: "${task.time}" | isEvent: ${task.isEvent} | status: ${task.status}`);
     });
     
-    // Debug each today's task to see why they're not considered "timed"
-    console.log('🔍 Analyzing ALL today\'s tasks:');
-    todayTasks.forEach((task, i) => {
-        console.log(`Task ${i+1}: "${task.title}" | time: "${task.time}" | isEvent: ${task.isEvent} | status: ${task.status}`);
-    });
-    
-    const timedTasks = todayTasks.filter(task => task.time && task.time.trim() !== '' && !task.isEvent);
-    console.log('⏰ Found', timedTasks.length, 'timed tasks (excluding events)');
-    
-    timedTasks.forEach(task => {
-        const taskTime = parseTime(task.time);
-        const currentTime = parseTime(currentTimeStr);
-        console.log('🔍 Task:', task.title, '| Time:', task.time, '| Parsed:', taskTime, '| Current:', currentTime, '| Before current?', taskTime < currentTime);
+    // Debug overdue tasks
+    console.log('🔍 Analyzing overdue tasks:');
+    overdueTasks.forEach((task, i) => {
+        console.log(`Overdue ${i+1}: "${task.title}" | dueDate: "${task.dueDate}" | time: "${task.time}" | status: ${task.status}`);
     });
 
     let movedCount = 0;
     const updatedTasks = tasksArray.map(task => {
-        if (task.dueDate && task.dueDate.startsWith(todayStr) && 
-            task.status !== 'deleted' && task.status !== 'completed' && 
-            task.time && task.time.trim() !== '' && // Only tasks with specific times
-            !task.isEvent) { // Exclude events
-            
-            // Parse task time and current time for comparison
-            const taskTime = parseTime(task.time);
-            const currentTime = parseTime(currentTimeStr);
-            
-            // Only move tasks that are BEFORE current time
-            if (taskTime && currentTime && taskTime < currentTime) {
-                // Update task time to current time
-                const updatedTask = {
-                    ...task,
-                    dueDate: todayStr,
-                    time: currentTimeStr,
-                    updatedAt: new Date().toISOString()
-                };
-                movedCount++;
-                console.log('📋 Moved task:', task.title, 'from', task.time, 'to', currentTimeStr, '(was before current time)');
-                return updatedTask;
-            } else {
-                console.log('⏭️ Skipped task:', task.title, 'at', task.time, '(is after current time or parsing failed)');
-            }
+        // Check if this task is in our overdue tasks list
+        const isOverdue = overdueTasks.find(overdueTask => 
+            overdueTask.id === task.id || 
+            (overdueTask.title === task.title && overdueTask.dueDate === task.dueDate)
+        );
+        
+        if (isOverdue) {
+            // Move overdue task to current time and today's date
+            const updatedTask = {
+                ...task,
+                dueDate: todayStr,
+                time: currentTimeStr,
+                updatedAt: new Date().toISOString()
+            };
+            movedCount++;
+            console.log('📋 Moved overdue task:', task.title, 'from', task.dueDate, task.time || '(no time)', 'to', todayStr, currentTimeStr);
+            return updatedTask;
         }
         return task;
     });
