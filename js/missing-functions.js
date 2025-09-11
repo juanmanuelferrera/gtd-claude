@@ -3325,8 +3325,17 @@ function moveAllTasksToCurrentTime() {
     );
     console.log('📅 Found', todayTasks.length, 'tasks for today', todayStr);
     
+    // Also check tasks that might match your cleaning task specifically
+    const cleaningTasks = tasksArray.filter(task => 
+        task.title && task.title.toLowerCase().includes('cleaning')
+    );
+    console.log('🧹 Found', cleaningTasks.length, 'cleaning-related tasks:');
+    cleaningTasks.forEach((task, i) => {
+        console.log(`Cleaning ${i+1}: "${task.title}" | dueDate: "${task.dueDate}" | time: "${task.time}" | isEvent: ${task.isEvent} | status: ${task.status}`);
+    });
+    
     // Debug each today's task to see why they're not considered "timed"
-    console.log('🔍 Analyzing today\'s tasks:');
+    console.log('🔍 Analyzing ALL today\'s tasks:');
     todayTasks.forEach((task, i) => {
         console.log(`Task ${i+1}: "${task.title}" | time: "${task.time}" | isEvent: ${task.isEvent} | status: ${task.status}`);
     });
