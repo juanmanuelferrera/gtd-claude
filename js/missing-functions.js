@@ -3423,13 +3423,18 @@ function moveAllTasksToCurrentTime() {
     console.log('💾 Saved', updatedTasks.length, 'tasks to localStorage');
     
     // CRITICAL: Force upload to server IMMEDIATELY before any sync can overwrite
-    if (typeof uploadAllTasks === 'function') {
-        console.log('📤 Force uploading moved tasks to server...');
-        uploadAllTasks();
-    } else if (window.uploadAllTasks) {
-        console.log('📤 Force uploading moved tasks to server (window)...');
-        window.uploadAllTasks();
-    }
+    // Use await to ensure upload completes before continuing
+    const uploadPromise = (async () => {
+        if (typeof uploadAllTasks === 'function') {
+            console.log('📤 Force uploading moved tasks to server...');
+            await uploadAllTasks();
+            console.log('✅ Upload completed successfully');
+        } else if (window.uploadAllTasks) {
+            console.log('📤 Force uploading moved tasks to server (window)...');
+            await window.uploadAllTasks();
+            console.log('✅ Upload completed successfully');
+        }
+    })();
     
     // Re-render today view
     console.log('🔄 Attempting to re-render Today view...');
@@ -3440,11 +3445,11 @@ function moveAllTasksToCurrentTime() {
         console.log('🔍 Facebook task after update:', fbTask.title, '| dueDate:', fbTask.dueDate, '| time:', fbTask.time);
     }
     
-    // Force clear any time block collapse states to ensure 16:00 block shows
+    // Force clear any time block collapse states to ensure the target time block shows
     const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
-    collapseStates['16:00'] = false; // Ensure 16:00 block is expanded
+    collapseStates[currentTimeStr] = false; // Ensure target time block is expanded
     localStorage.setItem('timeblock_collapse_states', JSON.stringify(collapseStates));
-    console.log('🔄 Forced 16:00 time block to expand');
+    console.log(`🔄 Forced ${currentTimeStr} time block to expand`);
     
     // Force complete UI refresh
     if (typeof renderTodayView === 'function') {
@@ -3476,14 +3481,14 @@ function moveAllTasksToCurrentTime() {
         }
     }, 500);
     
-    // Give UI time to render, then check if 16:00 block has our tasks
+    // Give UI time to render, then check if the target time block has our tasks
     setTimeout(() => {
-        const timeBlock = document.querySelector('[data-time="16:00"], [id*="16:00"]') || 
-                          Array.from(document.querySelectorAll('.time-block-header')).find(el => el.textContent.includes('16:00'));
+        const timeBlock = document.querySelector(`[data-time="${currentTimeStr}"], [id*="${currentTimeStr}"]`) || 
+                          Array.from(document.querySelectorAll('.time-block-header')).find(el => el.textContent.includes(currentTimeStr));
         if (timeBlock) {
-            console.log('✅ Found 16:00 time block in DOM after render');
+            console.log(`✅ Found ${currentTimeStr} time block in DOM after render`);
         } else {
-            console.log('❌ Could not find 16:00 time block in DOM - may need page refresh');
+            console.log(`❌ Could not find ${currentTimeStr} time block in DOM - may need page refresh`);
         }
     }, 1000);
     
@@ -3512,13 +3517,16 @@ function moveAllTasksToCurrentTime() {
     }
     
     // Re-enable sync after upload completes (give more time for server sync)
-    setTimeout(() => {
+    setTimeout(async () => {
+        // Wait for initial upload to complete
+        await uploadPromise;
+        
         window.syncEnabled = originalSyncEnabled;
         console.log('🔓 Re-enabled sync after task move completion');
         
         // Force one more upload to be absolutely sure
         if (typeof uploadAllTasks === 'function') {
-            uploadAllTasks();
+            await uploadAllTasks();
             console.log('📤 Final upload to ensure server has latest data');
         }
     }, 3000);  // Increased delay to ensure upload completes
