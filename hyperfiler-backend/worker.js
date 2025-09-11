@@ -2216,7 +2216,7 @@ async function generatePromoEmailHTML(userEmail, password, promoCode, months, tr
             <h3>🚀 Quick Start Tips</h3>
             <ol>
                 <li>Open your HyperFiler Pro app</li>
-                <li>Use <code>Ctrl+N</code> to create your first task</li>
+                <li>Use <code>N</code> to create your first task</li>
                 <li>Try the Week view with <code>Ctrl+W</code></li>
                 <li>Use arrow keys to navigate like a pro</li>
                 <li>Press <code>Ctrl+I</code> for all shortcuts</li>
@@ -2365,7 +2365,7 @@ async function generatePromoEmailHTML(userEmail, password, promoCode, months, tr
             <h3>🚀 Quick Start Tips</h3>
             <ol>
                 <li>Click the login button above to access your Pro app</li>
-                <li>Use <code>Ctrl+N</code> to create your first task</li>
+                <li>Use <code>N</code> to create your first task</li>
                 <li>Try the Week view with <code>Ctrl+W</code></li>
                 <li>Use arrow keys to navigate like a pro</li>
                 <li>Press <code>Ctrl+I</code> for all shortcuts</li>

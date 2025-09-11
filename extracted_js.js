@@ -3918,7 +3918,7 @@
                     console.log('🔥 Ctrl+L captured at top level - first handler');
                 }
                 
-                if (event.ctrlKey && event.key === 'n') {
+                if (event.key === 'n' && !event.ctrlKey && !event.metaKey && !event.altKey) {
                     event.preventDefault();
                     openAddTaskModal();
                 }
@@ -4528,7 +4528,7 @@
             if (typeof showKeyboardShortcuts === 'function') {
                 showKeyboardShortcuts();
             } else {
-                alert('Keyboard Shortcuts:\n\nCtrl+N: Add new task\nCtrl+T: Today view\nCtrl+W: Week view\nCtrl+M: Month view\nCtrl+L: Lists view\nCtrl+R: Repeat view\nCtrl+U: Undo view\nCtrl+Y: Statistics view\nCtrl+S: Search\nCtrl+Z: Undo action\nCtrl+B: Create backup\n\nUse arrow keys to navigate tasks\nPress Enter to edit a task\nPress Space to delete selected task');
+                alert('Keyboard Shortcuts:\n\nN: Add new task\nCtrl+T: Today view\nCtrl+W: Week view\nCtrl+M: Month view\nCtrl+L: Lists view\nCtrl+R: Repeat view\nCtrl+U: Undo view\nCtrl+Y: Statistics view\nCtrl+S: Search\nCtrl+Z: Undo action\nCtrl+B: Create backup\n\nUse arrow keys to navigate tasks\nPress Enter to edit a task\nPress Space to delete selected task');
             }
         }
         // Mobile task actions dropdown functionality

@@ -110,7 +110,7 @@
 ## Keyboard Shortcuts Audit ✅
 
 ### Implemented Shortcuts
-- **Ctrl+N**: Add new task
+- **N**: Add new task
 - **Ctrl+T**: Today view
 - **Ctrl+W**: Week view
 - **Ctrl+M**: Month view
