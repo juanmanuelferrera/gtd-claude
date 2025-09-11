@@ -26277,5 +26277,6 @@
         window.toggleAutoPrint = toggleAutoPrint;
         window.activateCurrentTime = activateCurrentTime;
         window.toggleKeyboardOnlyMode = toggleKeyboardOnlyMode;
+        window.switchLanguage = switchLanguage;
         window.saveTabDisplayMode = saveTabDisplayMode;
     
