@@ -4093,7 +4093,7 @@
                         <button class="btn btn-small" onclick="previousDay()" style="padding: 8px 4px; font-size: 8px; flex-shrink: 0;">← Prev</button>
                         <button class="btn btn-primary btn-small" onclick="goToToday()" style="background: #dc3545; border-color: #dc3545; padding: 8px 12px; font-size: 10px; flex-shrink: 0;">🔥 Today</button>
                         <button class="btn btn-small" onclick="nextDay()" style="padding: 8px 4px; font-size: 8px; flex-shrink: 0;">Next →</button>
-                        <button class="export-btn" onclick="downloadTodayHtml()" title="Download today's schedule as HTML file" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0;">🖨️ Print</button>
+                        <button class="move-current-time-btn" onclick="moveAllTasksToCurrentTime()" title="Move all today's tasks to current time block" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">🕐 Now</button>
                     </div>
                 </div>
                 
@@ -5182,10 +5182,6 @@
             <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
                 <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">Language / Idioma</h4>
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button onclick="testSettingsButton('Test button works!')" 
-                            style="background: #28a745; color: white; border: none; font-size: 12px; cursor: pointer; padding: 6px 12px; border-radius: 4px; margin-bottom: 8px;">
-                        Test Button
-                    </button>
                     <button onclick="switchLanguage('en')" 
                             style="background: none; border: 2px solid #ddd; font-size: 14px; cursor: pointer; padding: 8px 16px; border-radius: 6px; transition: all 0.2s;"
                             id="lang-en-btn">

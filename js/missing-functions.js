@@ -3246,15 +3246,92 @@ window.triggerImageUpload = triggerImageUpload;
 window.handleImageUpload = handleImageUpload;
 window.addNewTemplate = addNewTemplate;
 window.resetTaskTitle = resetTaskTitle;
-// Debug function for testing Settings buttons
-function testSettingsButton(message) {
-    console.log('🔧 Settings button test:', message);
-    alert('Settings button works: ' + message);
+
+// Move all tasks to current time block
+function moveAllTasksToCurrentTime() {
+    console.log('🕐 Moving all tasks to current time block...');
+    
+    // Get current time rounded to 30-minute interval
+    const now = new Date();
+    const minutes = now.getMinutes();
+    const roundedMinutes = Math.ceil(minutes / 30) * 30;
+    now.setMinutes(roundedMinutes, 0, 0);
+    
+    const currentTimeStr = now.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        hour12: false 
+    });
+    
+    console.log('🎯 Target time:', currentTimeStr);
+    
+    // Get today's date string
+    const today = currentTodayDate || new Date();
+    const todayStr = today.getFullYear() + '-' + 
+                    String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                    String(today.getDate()).padStart(2, '0');
+    
+    // Find all today's tasks that have a specific time (exclude untimed tasks and events)
+    let movedCount = 0;
+    const updatedTasks = tasks.map(task => {
+        if (task.dueDate && task.dueDate.startsWith(todayStr) && 
+            task.status !== 'deleted' && task.status !== 'completed' && 
+            task.time && task.time.trim() !== '' && // Only tasks with specific times
+            !task.isEvent) { // Exclude events
+            
+            // Update task time to current time
+            const updatedTask = {
+                ...task,
+                dueDate: todayStr,
+                time: currentTimeStr,
+                updatedAt: new Date().toISOString()
+            };
+            movedCount++;
+            console.log('📋 Moved task:', task.title, 'from', task.time, 'to', currentTimeStr);
+            return updatedTask;
+        }
+        return task;
+    });
+    
+    // Update global tasks array
+    tasks = updatedTasks;
+    
+    // Save to localStorage
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+    
+    // Re-render today view
+    if (typeof renderTodayView === 'function') {
+        renderTodayView();
+    }
+    
+    // Show confirmation
+    const message = movedCount > 0 
+        ? `✅ Moved ${movedCount} timed tasks to ${currentTimeStr}` 
+        : `ℹ️ No timed tasks found to move (excludes untimed & events)`;
+    
+    console.log(message);
+    
+    // Show brief notification
+    if (typeof showNotification === 'function') {
+        showNotification(message, 'success');
+    } else {
+        // Fallback: temporary message in the button
+        const btn = document.querySelector('.move-current-time-btn');
+        if (btn) {
+            const originalText = btn.textContent;
+            btn.textContent = movedCount > 0 ? `✅ Moved ${movedCount}` : '✅ Done';
+            btn.style.background = '#28a745';
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '';
+            }, 2000);
+        }
+    }
 }
 
 // Expose functions globally
 window.switchLanguage = switchLanguage;
-window.testSettingsButton = testSettingsButton;
+window.moveAllTasksToCurrentTime = moveAllTasksToCurrentTime;
 window.saveAutoPrintTime = saveAutoPrintTime;
 window.updateSyncPeriod = updateSyncPeriod;
 window.openSettings = openSettings;
