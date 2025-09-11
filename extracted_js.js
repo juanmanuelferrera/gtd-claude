@@ -26278,5 +26278,10 @@
         window.activateCurrentTime = activateCurrentTime;
         window.toggleKeyboardOnlyMode = toggleKeyboardOnlyMode;
         window.switchLanguage = switchLanguage;
+        window.openTrash = openTrash;
+        window.closeTrash = closeTrash;
+        window.renderTrash = renderTrash;
+        window.refreshUndoView = refreshUndoView;
+        window.undoToPoint = undoToPoint;
         window.saveTabDisplayMode = saveTabDisplayMode;
     
