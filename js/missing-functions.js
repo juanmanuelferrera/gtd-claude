@@ -3335,24 +3335,23 @@ function moveAllTasksToCurrentTime() {
             return false;
         }
         
+        // EXCLUDE untimed tasks regardless of date
+        if (!task.time || task.time.trim() === '' || task.time === 'undefined') {
+            return false;
+        }
+        
         const taskDate = new Date(task.dueDate);
         taskDate.setHours(0, 0, 0, 0); // Start of task date
         
         // Include tasks from previous dates (overdue) OR today's tasks before current time
         if (taskDate < todayDate) {
-            // Overdue task from previous date
+            // Overdue task from previous date (but already filtered to have time)
             return true;
         } else if (taskDate.getTime() === todayDate.getTime()) {
-            // Today's task - include untimed tasks OR timed tasks before current time
-            if (!task.time || task.time.trim() === '' || task.time === 'undefined') {
-                // Untimed tasks from today are considered overdue
-                return true;
-            } else {
-                // Timed tasks - only if before current time
-                const taskTime = parseTime(task.time);
-                const currentTime = parseTime(currentTimeStr);
-                return taskTime && currentTime && taskTime < currentTime;
-            }
+            // Today's timed tasks - only if before current time
+            const taskTime = parseTime(task.time);
+            const currentTime = parseTime(currentTimeStr);
+            return taskTime && currentTime && taskTime < currentTime;
         }
         
         return false;
