@@ -26341,5 +26341,3 @@
         window.saveTabDisplayMode = saveTabDisplayMode;
     
     }); // Close DOMContentLoaded event listener
-    
-})(); // Close the main IIFE (Immediately Invoked Function Expression)
