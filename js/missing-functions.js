@@ -3422,30 +3422,39 @@ function moveAllTasksToCurrentTime() {
     localStorage.setItem('tasks', JSON.stringify(updatedTasks));
     console.log('💾 Saved', updatedTasks.length, 'tasks to localStorage');
     
-    // IMMEDIATELY render the view to create the time slot with updated tasks
-    // This MUST happen before any sync or upload to prevent data overwrite
-    console.log(`🏗️ Creating ${currentTimeStr} time slot with updated tasks...`);
+    // CRITICAL SEQUENCE:
+    // 1. Create the time slot FIRST by rendering with updated tasks
+    console.log(`🏗️ STEP 1: Creating ${currentTimeStr} time slot...`);
     if (typeof renderTodayView === 'function') {
         renderTodayView();
-        console.log(`✅ Time slot ${currentTimeStr} should now exist with ${movedCount} tasks`);
+        console.log(`✅ Time slot ${currentTimeStr} created and populated with ${movedCount} tasks`);
     }
     
-    // CRITICAL: Force upload to server IMMEDIATELY before any sync can overwrite
-    // Use await to ensure upload completes before continuing
+    // 2. Verify the slot exists in DOM
+    setTimeout(() => {
+        const slot = document.querySelector(`[data-time="${currentTimeStr}"]`) || 
+                     Array.from(document.querySelectorAll('.time-block-header')).find(el => el.textContent.includes(currentTimeStr));
+        if (slot) {
+            console.log(`✅ STEP 2: Verified ${currentTimeStr} slot exists in DOM`);
+        } else {
+            console.log(`⚠️ STEP 2: ${currentTimeStr} slot not found in DOM yet`);
+        }
+    }, 100);
+    
+    // 3. Upload to cloud AFTER slot is created and tasks are moved
     const uploadPromise = (async () => {
-        // Small delay to ensure localStorage and memory are fully updated
-        await new Promise(resolve => setTimeout(resolve, 200));
+        // Small delay to ensure DOM is ready
+        await new Promise(resolve => setTimeout(resolve, 300));
         
+        console.log(`📤 STEP 3: Uploading ${movedCount} moved tasks to cloud...`);
         if (typeof uploadAllTasks === 'function') {
-            console.log('📤 Force uploading moved tasks to server...');
-            console.log(`📊 Uploading ${movedCount} tasks with time ${currentTimeStr}`);
+            console.log(`📊 Uploading tasks with time ${currentTimeStr}`);
             await uploadAllTasks();
-            console.log('✅ Upload completed successfully');
+            console.log('✅ STEP 3: Upload completed successfully');
         } else if (window.uploadAllTasks) {
-            console.log('📤 Force uploading moved tasks to server (window)...');
-            console.log(`📊 Uploading ${movedCount} tasks with time ${currentTimeStr}`);
+            console.log(`📊 Uploading tasks with time ${currentTimeStr}`);
             await window.uploadAllTasks();
-            console.log('✅ Upload completed successfully');
+            console.log('✅ STEP 3: Upload completed successfully');
         }
     })();
     
