@@ -3330,12 +3330,21 @@ function moveAllTasksToCurrentTime() {
     const todayDate = new Date(today);
     todayDate.setHours(0, 0, 0, 0); // Start of today
     
+    // First, let's see what timed tasks we have
+    const timedTasks = tasksArray.filter(task => {
+        return task.time && task.time.trim() !== '' && task.time !== 'undefined' && task.status !== 'deleted';
+    });
+    console.log('⏰ Found', timedTasks.length, 'timed tasks total:');
+    timedTasks.slice(0, 5).forEach((task, i) => {
+        console.log(`Timed ${i+1}: "${task.title}" | dueDate: "${task.dueDate}" | time: "${task.time}" | isEvent: ${task.isEvent} | status: ${task.status}`);
+    });
+
     const overdueTasks = tasksArray.filter(task => {
         if (!task.dueDate || task.status === 'deleted' || task.status === 'completed' || task.isEvent) {
             return false;
         }
         
-        // EXCLUDE untimed tasks regardless of date
+        // EXCLUDE untimed tasks (as per your requirement: "not untimed")
         if (!task.time || task.time.trim() === '' || task.time === 'undefined') {
             return false;
         }
@@ -3345,7 +3354,7 @@ function moveAllTasksToCurrentTime() {
         
         // Include tasks from previous dates (overdue) OR today's tasks before current time
         if (taskDate < todayDate) {
-            // Overdue task from previous date (but already filtered to have time)
+            // Overdue timed task from previous date
             return true;
         } else if (taskDate.getTime() === todayDate.getTime()) {
             // Today's timed tasks - only if before current time
