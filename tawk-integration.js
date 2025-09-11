@@ -202,3 +202,69 @@ window.updateTawkLanguage = function(lang) {
         console.log('🌐 Tawk.to language manually set to:', tawkLocale);
     }
 };
+
+// Export function to open Tawk.to chat (for Live Support button)
+window.openTawkChat = function() {
+    console.log('💬 openTawkChat called');
+    console.log('Tawk_API object:', typeof Tawk_API !== 'undefined' ? Tawk_API : 'Not loaded');
+    
+    // Check if there's a chat widget iframe directly
+    var tawkFrame = document.querySelector('iframe[title*="chat"]') || 
+                  document.querySelector('iframe[src*="tawk"]') ||
+                  document.querySelector('.widget-visible');
+    
+    if (tawkFrame) {
+        console.log('📱 Found Tawk iframe, trying to show it');
+        tawkFrame.style.display = 'block';
+        if (tawkFrame.contentWindow && tawkFrame.contentWindow.postMessage) {
+            tawkFrame.contentWindow.postMessage('maximize', '*');
+        }
+    }
+    
+    if (typeof Tawk_API !== 'undefined' && Tawk_API !== null) {
+        console.log('✅ Tawk_API is available, methods:', Object.keys(Tawk_API || {}));
+        
+        // Try different methods to open the chat
+        try {
+            if (typeof Tawk_API.maximize === 'function') {
+                console.log('✅ Calling Tawk_API.maximize()');
+                Tawk_API.maximize();
+            } else if (typeof Tawk_API.toggle === 'function') {
+                console.log('✅ Calling Tawk_API.toggle()');
+                Tawk_API.toggle();
+            } else if (typeof Tawk_API.popup === 'function') {
+                console.log('✅ Calling Tawk_API.popup()');
+                Tawk_API.popup();
+            } else if (typeof Tawk_API.showWidget === 'function') {
+                console.log('✅ Calling Tawk_API.showWidget()');
+                Tawk_API.showWidget();
+            } else {
+                console.log('⚠️ No suitable Tawk_API method found. Available methods:', Object.keys(Tawk_API || {}));
+            }
+        } catch (error) {
+            console.error('❌ Error calling Tawk_API method:', error);
+        }
+    } else {
+        console.log('⚠️ Tawk_API not available yet');
+        
+        // Fallback: try to find and click the default Tawk widget
+        setTimeout(function() {
+            var widgets = document.querySelectorAll('div[id*="tawk"], .tawk-widget, iframe[src*="tawk"]');
+            console.log('🔍 Found', widgets.length, 'potential Tawk widgets');
+            if (widgets.length > 0) {
+                widgets[0].click();
+            }
+        }, 500);
+    }
+};
+
+// Track page views in Tawk.to
+window.trackTawkPageView = function(pageName) {
+    if (typeof Tawk_API !== 'undefined' && Tawk_API.addEvent) {
+        Tawk_API.addEvent('Page View', {
+            'page': pageName,
+            'timestamp': new Date().toISOString()
+        });
+        console.log('📊 Tracked Tawk.to page view:', pageName);
+    }
+};
