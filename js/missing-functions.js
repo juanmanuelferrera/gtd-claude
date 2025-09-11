@@ -3335,8 +3335,12 @@ function moveAllTasksToCurrentTime() {
             // Overdue task from previous date
             return true;
         } else if (taskDate.getTime() === todayDate.getTime()) {
-            // Today's task - only if it has time and is before current time
-            if (task.time && task.time.trim() !== '' && task.time !== 'undefined') {
+            // Today's task - include untimed tasks OR timed tasks before current time
+            if (!task.time || task.time.trim() === '' || task.time === 'undefined') {
+                // Untimed tasks from today are considered overdue
+                return true;
+            } else {
+                // Timed tasks - only if before current time
                 const taskTime = parseTime(task.time);
                 const currentTime = parseTime(currentTimeStr);
                 return taskTime && currentTime && taskTime < currentTime;
