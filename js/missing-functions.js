@@ -3422,6 +3422,15 @@ function moveAllTasksToCurrentTime() {
     localStorage.setItem('tasks', JSON.stringify(updatedTasks));
     console.log('💾 Saved', updatedTasks.length, 'tasks to localStorage');
     
+    // CRITICAL: Force upload to server IMMEDIATELY before any sync can overwrite
+    if (typeof uploadAllTasks === 'function') {
+        console.log('📤 Force uploading moved tasks to server...');
+        uploadAllTasks();
+    } else if (window.uploadAllTasks) {
+        console.log('📤 Force uploading moved tasks to server (window)...');
+        window.uploadAllTasks();
+    }
+    
     // Re-render today view
     console.log('🔄 Attempting to re-render Today view...');
     
@@ -3502,11 +3511,17 @@ function moveAllTasksToCurrentTime() {
         }
     }
     
-    // Re-enable sync after UI updates
+    // Re-enable sync after upload completes (give more time for server sync)
     setTimeout(() => {
         window.syncEnabled = originalSyncEnabled;
         console.log('🔓 Re-enabled sync after task move completion');
-    }, 1500);
+        
+        // Force one more upload to be absolutely sure
+        if (typeof uploadAllTasks === 'function') {
+            uploadAllTasks();
+            console.log('📤 Final upload to ensure server has latest data');
+        }
+    }, 3000);  // Increased delay to ensure upload completes
 }
 
 // Expose functions globally
