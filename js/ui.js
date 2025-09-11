@@ -1269,7 +1269,9 @@ function renderTodayView() {
     console.log('🕐 UI Current Time Indicator Debug:', {
         currentTime,
         isViewingToday,
-        sortedTimes
+        sortedTimes,
+        lastTimeSlot: sortedTimes[sortedTimes.length - 1],
+        isAfterAllSlots: currentTime > sortedTimes[sortedTimes.length - 1]
     });
     
     // Render time slots
@@ -1325,6 +1327,12 @@ function renderTodayView() {
         // This happens when viewing today AND current time is after all timed slots
         const isNoTimeCurrentTime = isViewingToday && sortedTimes.length > 0 && 
             currentTime > sortedTimes[sortedTimes.length - 1];
+            
+        console.log('🕐 No Time section check:', {
+            isNoTimeCurrentTime,
+            hasTimedSlots: sortedTimes.length > 0,
+            currentTimeAfterLast: currentTime > sortedTimes[sortedTimes.length - 1]
+        });
         
         html += `
             <div class="time-block">
