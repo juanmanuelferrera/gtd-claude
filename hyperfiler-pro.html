@@ -5796,6 +5796,20 @@
     <script src="js/patches.js?v=1736363000"></script>
     <script src="extracted_js.js?v=1736363000"></script>
 
+    <!-- URGENT N KEY TEST -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚨 URGENT N KEY TEST LOADED');
+        document.addEventListener('keydown', function(event) {
+            console.log('🚨 ANY KEY PRESSED:', event.key);
+            if (event.key.toLowerCase() === 'n') {
+                console.log('🚨🚨🚨 N KEY DETECTED IN HTML!!!');
+                alert('N KEY WORKS!');
+            }
+        });
+    });
+    </script>
+
     <!-- CACHE BYPASS: Inline fixed saveListSections function -->
     <script>
     // Override the broken saveListSections function - v2.0.7 working version
