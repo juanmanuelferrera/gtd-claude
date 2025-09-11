@@ -3670,6 +3670,20 @@
                 }
             });
             
+            // INITIALIZE LANGUAGE SYSTEM
+            console.log('🌐 Initializing language system...');
+            const savedLanguage = localStorage.getItem('preferredLanguage') || 'en';
+            currentLanguage = savedLanguage;
+            console.log('🌐 Restored language:', currentLanguage);
+            
+            // Apply translations immediately
+            setTimeout(() => {
+                translateUI();
+                updateLanguageButtonStyles();
+                updateHeaderLanguageButton();
+                console.log('🌐 Language system initialized and UI translated');
+            }, 50);
+            
             // CRITICAL: Ensure mobile nav emojis are present on page load
             setTimeout(() => {
                 restoreMobileNavEmojis();
