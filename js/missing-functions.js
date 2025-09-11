@@ -3247,6 +3247,36 @@ window.handleImageUpload = handleImageUpload;
 window.addNewTemplate = addNewTemplate;
 window.resetTaskTitle = resetTaskTitle;
 
+// Helper function to parse time strings for comparison
+function parseTime(timeStr) {
+    if (!timeStr) return null;
+    
+    try {
+        // Handle various time formats: "14:30", "2:30 PM", "14:30:00"
+        const timeMatch = timeStr.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*(AM|PM))?/i);
+        if (!timeMatch) return null;
+        
+        let hours = parseInt(timeMatch[1]);
+        const minutes = parseInt(timeMatch[2]);
+        const ampm = timeMatch[4];
+        
+        // Convert 12-hour to 24-hour format
+        if (ampm) {
+            if (ampm.toUpperCase() === 'PM' && hours !== 12) {
+                hours += 12;
+            } else if (ampm.toUpperCase() === 'AM' && hours === 12) {
+                hours = 0;
+            }
+        }
+        
+        // Return minutes since midnight for easy comparison
+        return hours * 60 + minutes;
+    } catch (error) {
+        console.warn('Could not parse time:', timeStr, error);
+        return null;
+    }
+}
+
 // Move all tasks to current time block
 function moveAllTasksToCurrentTime() {
     console.log('🕐 Move button clicked! Starting function...');
@@ -3284,16 +3314,25 @@ function moveAllTasksToCurrentTime() {
             task.time && task.time.trim() !== '' && // Only tasks with specific times
             !task.isEvent) { // Exclude events
             
-            // Update task time to current time
-            const updatedTask = {
-                ...task,
-                dueDate: todayStr,
-                time: currentTimeStr,
-                updatedAt: new Date().toISOString()
-            };
-            movedCount++;
-            console.log('📋 Moved task:', task.title, 'from', task.time, 'to', currentTimeStr);
-            return updatedTask;
+            // Parse task time and current time for comparison
+            const taskTime = parseTime(task.time);
+            const currentTime = parseTime(currentTimeStr);
+            
+            // Only move tasks that are BEFORE current time
+            if (taskTime && currentTime && taskTime < currentTime) {
+                // Update task time to current time
+                const updatedTask = {
+                    ...task,
+                    dueDate: todayStr,
+                    time: currentTimeStr,
+                    updatedAt: new Date().toISOString()
+                };
+                movedCount++;
+                console.log('📋 Moved task:', task.title, 'from', task.time, 'to', currentTimeStr, '(was before current time)');
+                return updatedTask;
+            } else {
+                console.log('⏭️ Skipped task:', task.title, 'at', task.time, '(is after current time)');
+            }
         }
         return task;
     });
@@ -3322,8 +3361,8 @@ function moveAllTasksToCurrentTime() {
     
     // Show confirmation
     const message = movedCount > 0 
-        ? `✅ Moved ${movedCount} timed tasks to ${currentTimeStr}` 
-        : `ℹ️ No timed tasks found to move (excludes untimed & events)`;
+        ? `✅ Moved ${movedCount} overdue tasks to ${currentTimeStr}` 
+        : `ℹ️ No overdue tasks to move (only moves tasks scheduled before ${currentTimeStr})`;
     
     console.log(message);
     
