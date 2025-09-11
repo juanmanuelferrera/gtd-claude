@@ -1064,13 +1064,12 @@ function renderTasksWithSelection(filteredTasks) {
 function updateCurrentTodayDisplay() {
     const displayElement = document.getElementById('currentTodayDate');
     if (displayElement) {
-        const fullOptions = {
+        const options = {
             weekday: 'long',
-            year: 'numeric',
             month: 'long',
             day: 'numeric'
         };
-        const formattedDate = currentTodayDate.toLocaleDateString('en-US', fullOptions);
+        const formattedDate = currentTodayDate.toLocaleDateString('en-US', options);
         displayElement.textContent = formattedDate;
     }
 }
