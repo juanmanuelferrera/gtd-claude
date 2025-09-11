@@ -3927,9 +3927,15 @@
                         activeElement.contentEditable === 'true'
                     );
                     
+                    console.log('🔍 N Key Debug: activeElement:', activeElement);
+                    console.log('🔍 N Key Debug: isTyping:', isTyping);
+                    
                     if (!isTyping) {
+                        console.log('🔍 N Key Debug: Opening add task modal');
                         event.preventDefault();
                         openAddTaskModal();
+                    } else {
+                        console.log('🔍 N Key Debug: Blocked - user is typing');
                     }
                 }
                 if (event.ctrlKey && event.key === 'z') {

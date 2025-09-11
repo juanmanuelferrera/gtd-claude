@@ -259,11 +259,15 @@
             {
                 regex: /^(.+?)\s+(?:in\s+)?(\d+|a|an)\s+(day|days|week|weeks|month|months|year|years)\s+at\s+(.+)$/i,
                 parser: (match) => {
+                    console.log('🔍 NL Debug: Relative period with time match:', match);
                     const timeResult = normalizeTime(match[4]);
+                    const dateResult = getDateForRelativePeriod(match[2], match[3]);
+                    console.log('🔍 NL Debug: Time result:', timeResult);
+                    console.log('🔍 NL Debug: Date result:', dateResult);
                     if (timeResult) {
                         return {
                             title: match[1].trim(),
-                            date: getDateForRelativePeriod(match[2], match[3]),
+                            date: dateResult,
                             time: timeResult
                         };
                     }
