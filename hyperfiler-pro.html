@@ -5796,10 +5796,12 @@
     <script src="js/patches.js?v=1736363000"></script>
     <script src="extracted_js.js?v=1736363000"></script>
 
-    <!-- N KEY HANDLER -->
+    <!-- N KEY & ENTER KEY HANDLERS -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚨 HTML N KEY HANDLER LOADED');
+        console.log('🚨 HTML KEYBOARD HANDLERS LOADED');
+        
+        // N Key handler
         document.addEventListener('keydown', function(event) {
             if (event.key.toLowerCase() === 'n' && !event.ctrlKey && !event.metaKey && !event.altKey) {
                 // Only trigger if not typing in an input field
@@ -5823,6 +5825,38 @@
                     }
                 } else {
                     console.log('🚨 N KEY: Blocked - user typing in:', activeElement?.tagName);
+                }
+            }
+            
+            // Enter key handler for modals
+            if (event.key === 'Enter' && !event.shiftKey) {
+                const taskModal = document.getElementById('taskModal');
+                const templateModal = document.getElementById('templateModal');
+                
+                // Check if task modal is open
+                if (taskModal && (taskModal.style.display === 'block' || taskModal.style.display === '')) {
+                    console.log('🚨 ENTER KEY: Task modal is open, attempting to save');
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    if (typeof saveTaskEdit === 'function') {
+                        saveTaskEdit();
+                    } else {
+                        console.log('🚨 saveTaskEdit function not found');
+                    }
+                }
+                
+                // Check if template modal is open
+                else if (templateModal && (templateModal.style.display === 'block' || templateModal.style.display === '')) {
+                    console.log('🚨 ENTER KEY: Template modal is open, attempting to save');
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    if (typeof saveTemplate === 'function') {
+                        saveTemplate();
+                    } else {
+                        console.log('🚨 saveTemplate function not found');
+                    }
                 }
             }
         });
