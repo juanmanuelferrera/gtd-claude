@@ -1326,14 +1326,17 @@ function renderTodayView() {
         console.log('🔄 ui.js - No Specific Time section - reading collapse state:', isCollapsed, 'from localStorage:', collapseStates);
         
         // Check if "No Specific Time" should be highlighted as current time
-        // This happens when viewing today AND current time is after all timed slots
+        // This happens when viewing today AND (current time is after all timed slots OR before all timed slots)
         const isNoTimeCurrentTime = isViewingToday && sortedTimes.length > 0 && 
-            currentTime > sortedTimes[sortedTimes.length - 1];
+            (currentTime > sortedTimes[sortedTimes.length - 1] || currentTime < sortedTimes[0]);
             
         console.log('🕐 No Time section check:', {
             isNoTimeCurrentTime,
             hasTimedSlots: sortedTimes.length > 0,
-            currentTimeAfterLast: currentTime > sortedTimes[sortedTimes.length - 1]
+            currentTimeAfterLast: currentTime > sortedTimes[sortedTimes.length - 1],
+            currentTimeBeforeFirst: currentTime < sortedTimes[0],
+            firstSlot: sortedTimes[0],
+            lastSlot: sortedTimes[sortedTimes.length - 1]
         });
         
         html += `
