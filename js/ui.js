@@ -1285,11 +1285,13 @@ function renderTodayView() {
         });
         
         // Check if this is the current time slot
-        const isCurrentTime = isViewingToday && time <= currentTime && 
-            (sortedTimes[sortedTimes.indexOf(time) + 1] || '23:59') > currentTime;
+        const nextSlot = sortedTimes[sortedTimes.indexOf(time) + 1] || '23:59';
+        const isCurrentTime = isViewingToday && time <= currentTime && nextSlot > currentTime;
             
+        console.log(`🕐 Checking slot ${time}: ${time} <= ${currentTime} && ${nextSlot} > ${currentTime} = ${isCurrentTime}`);
+        
         if (isCurrentTime) {
-            console.log('🕐 Found current time slot:', time);
+            console.log('🕐 ✅ HIGHLIGHTING current time slot:', time);
         }
         
         html += `
