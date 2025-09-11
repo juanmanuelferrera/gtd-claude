@@ -13829,7 +13829,7 @@
         function updateCurrentTodayDisplay() {
             const displayElement = document.getElementById('currentTodayDate');
             if (displayElement) {
-                // Desktop red strip: Show date format without year (e.g., "Monday, October 21")
+                // Desktop red strip: Show date format without year (e.g., "Monday, October 21") - FORCE UPDATE
                 const fullOptions = { 
                     weekday: 'long', 
                     month: 'long', 
