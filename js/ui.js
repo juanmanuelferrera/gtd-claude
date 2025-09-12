@@ -1130,119 +1130,204 @@ function generateTasksReview() {
         }
     });
     
-    // Generate report HTML
+    // Generate report HTML following GTD Weekly Review structure
     let reportHTML = `
-        <div style="max-width: 800px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-            <h1 style="text-align: center; color: #2563eb; margin-bottom: 30px;">📊 Tasks Review Report</h1>
+        <div style="max-width: 900px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <h1 style="text-align: center; color: #2563eb; margin-bottom: 30px;">🔄 GTD Weekly Review</h1>
             
-            <!-- Summary Statistics -->
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
-                <h2 style="margin-top: 0;">📈 Summary</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-                    <div><strong>Total Tasks:</strong> ${allTasks.length}</div>
-                    <div><strong>Today:</strong> ${timeGroups.today.length}</div>
-                    <div><strong>This Week:</strong> ${timeGroups.today.length + timeGroups.tomorrow.length + timeGroups.thisWeek.length}</div>
-                    <div><strong>Events:</strong> ${timeGroups.events.length}</div>
-                    <div><strong>Projects:</strong> ${Object.keys(projectGroups).length}</div>
-                    <div><strong>No Due Date:</strong> ${timeGroups.noDate.length}</div>
+            <!-- Overview Statistics -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; border-left: 5px solid #2563eb;">
+                <h2 style="margin-top: 0; color: #2563eb;">📋 Current Status Overview</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px;">
+                    <div><strong>Active Tasks:</strong> ${allTasks.filter(t => !t.isEvent).length}</div>
+                    <div><strong>Active Projects:</strong> ${Object.keys(projectGroups).filter(p => p !== 'No Project').length}</div>
+                    <div><strong>Upcoming Events:</strong> ${timeGroups.events.length}</div>
+                    <div><strong>Tasks Due This Week:</strong> ${timeGroups.today.length + timeGroups.tomorrow.length + timeGroups.thisWeek.length}</div>
+                    <div><strong>Needs Scheduling:</strong> ${timeGroups.noDate.length}</div>
+                    <div><strong>Total Commitments:</strong> ${allTasks.length}</div>
                 </div>
             </div>
     `;
     
-    // Time-based sections
-    const timeSections = [
-        { key: 'today', title: '🔥 Today', tasks: timeGroups.today, urgent: true },
-        { key: 'tomorrow', title: '📅 Tomorrow', tasks: timeGroups.tomorrow, urgent: false },
-        { key: 'thisWeek', title: '📋 This Week', tasks: timeGroups.thisWeek, urgent: false },
-        { key: 'nextWeek', title: '📆 Next Week', tasks: timeGroups.nextWeek, urgent: false },
-        { key: 'future', title: '🔮 Future', tasks: timeGroups.future, urgent: false },
-        { key: 'noDate', title: '❓ No Due Date', tasks: timeGroups.noDate, urgent: true }
-    ];
-    
-    timeSections.forEach(section => {
-        if (section.tasks.length > 0) {
+    // 1. COLLECT & PROCESS - Items that need attention first
+    if (timeGroups.noDate.length > 0) {
+        reportHTML += `
+            <div style="margin-bottom: 30px;">
+                <h2 style="color: #dc3545; border-bottom: 3px solid #dc3545; padding-bottom: 8px; display: flex; align-items: center;">
+                    <span style="margin-right: 10px;">🚨</span>
+                    1. COLLECT & PROCESS - Items Needing Scheduling (${timeGroups.noDate.length})
+                </h2>
+                <div style="background: #fff5f5; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="margin: 0; color: #721c24; font-style: italic;">
+                        ⚠️ These items need due dates assigned during your review process.
+                    </p>
+                </div>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+        `;
+        
+        timeGroups.noDate.forEach(task => {
+            const templates = TemplateProcessor.extractFromText(`${task.title || ''} ${task.notes || ''}`);
+            const projectBadges = templates.map(t => `<span style="background: #fee; color: #dc3545; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 5px; border: 1px solid #fecaca;">@${t}</span>`).join('');
+            
             reportHTML += `
-                <div style="margin-bottom: 25px;">
-                    <h2 style="color: ${section.urgent ? '#dc3545' : '#2563eb'}; border-bottom: 2px solid ${section.urgent ? '#dc3545' : '#2563eb'}; padding-bottom: 5px;">
-                        ${section.title} (${section.tasks.length})
-                    </h2>
-                    <ul style="margin: 10px 0; padding-left: 20px;">
+                <li style="margin: 8px 0; padding: 8px; background: #fff; border-left: 4px solid #dc3545; border-radius: 4px;">
+                    <strong>${task.title || 'Untitled'}</strong>
+                    ${projectBadges}
+                    ${task.notes ? `<br><span style="color: #666; font-size: 12px; margin-left: 10px;">${task.notes.substring(0, 100)}${task.notes.length > 100 ? '...' : ''}</span>` : ''}
+                </li>
             `;
-            
-            section.tasks.forEach(task => {
-                const templates = TemplateProcessor.extractFromText(`${task.title || ''} ${task.notes || ''}`);
-                const projectBadges = templates.map(t => `<span style="background: #e3f2fd; color: #1976d2; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 5px;">@${t}</span>`).join('');
-                
-                reportHTML += `
-                    <li style="margin: 5px 0; padding: 5px; ${section.urgent ? 'background: #fff5f5;' : ''} border-radius: 4px;">
-                        <strong>${task.title || 'Untitled'}</strong>
-                        ${task.dueDate ? `<em style="color: #666; margin-left: 10px;">${task.dueDate}</em>` : ''}
-                        ${task.dueTime ? `<span style="color: #007bff; margin-left: 5px;">${task.dueTime}</span>` : ''}
-                        ${projectBadges}
-                        ${task.notes ? `<br><span style="color: #666; font-size: 12px; margin-left: 10px;">${task.notes.substring(0, 100)}${task.notes.length > 100 ? '...' : ''}</span>` : ''}
-                    </li>
-                `;
-            });
-            
-            reportHTML += `</ul></div>`;
-        }
-    });
-    
-    // Events section
+        });
+        reportHTML += `</ul></div>`;
+    }
+
+    // 2. REVIEW CALENDAR - Past and upcoming events
     if (timeGroups.events.length > 0) {
         timeGroups.events.sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''));
         
         reportHTML += `
-            <div style="margin-bottom: 25px;">
-                <h2 style="color: #28a745; border-bottom: 2px solid #28a745; padding-bottom: 5px;">
-                    🎯 Events (${timeGroups.events.length})
+            <div style="margin-bottom: 30px;">
+                <h2 style="color: #28a745; border-bottom: 3px solid #28a745; padding-bottom: 8px; display: flex; align-items: center;">
+                    <span style="margin-right: 10px;">📅</span>
+                    2. REVIEW CALENDAR - Events & Appointments (${timeGroups.events.length})
                 </h2>
+                <div style="background: #f0fff4; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="margin: 0; color: #166534; font-style: italic;">
+                        📍 Review past and upcoming commitments for context and planning.
+                    </p>
+                </div>
                 <ul style="margin: 10px 0; padding-left: 20px;">
         `;
         
         timeGroups.events.forEach(event => {
+            const isPast = event.dueDate && event.dueDate < todayStr;
             reportHTML += `
-                <li style="margin: 5px 0; padding: 5px; background: #f0fff0; border-radius: 4px;">
-                    <strong>${event.title || 'Untitled Event'}</strong>
+                <li style="margin: 5px 0; padding: 8px; background: ${isPast ? '#f8f9fa' : '#f0fff4'}; border-radius: 4px; ${isPast ? 'opacity: 0.8;' : ''}">
+                    ${isPast ? '📋' : '⏰'} <strong>${event.title || 'Untitled Event'}</strong>
                     ${event.dueDate ? `<em style="color: #666; margin-left: 10px;">${event.dueDate}</em>` : ''}
                     ${event.dueTime ? `<span style="color: #28a745; margin-left: 5px;">${event.dueTime}</span>` : ''}
-                    ${event.notes ? `<br><span style="color: #666; font-size: 12px; margin-left: 10px;">${event.notes.substring(0, 100)}${event.notes.length > 100 ? '...' : ''}</span>` : ''}
+                    ${isPast ? '<span style="color: #6c757d; margin-left: 10px; font-size: 11px;">(Past)</span>' : ''}
+                    ${event.notes ? `<br><span style="color: #666; font-size: 12px; margin-left: 20px;">${event.notes.substring(0, 100)}${event.notes.length > 100 ? '...' : ''}</span>` : ''}
                 </li>
             `;
         });
         
         reportHTML += `</ul></div>`;
     }
-    
-    // Projects section
+
+    // 3. REVIEW NEXT ACTIONS - Immediate actionable items (Today + Tomorrow + This Week)
+    const nextActions = [...timeGroups.today, ...timeGroups.tomorrow, ...timeGroups.thisWeek];
+    if (nextActions.length > 0) {
+        reportHTML += `
+            <div style="margin-bottom: 30px;">
+                <h2 style="color: #ff6b35; border-bottom: 3px solid #ff6b35; padding-bottom: 8px; display: flex; align-items: center;">
+                    <span style="margin-right: 10px;">⚡</span>
+                    3. REVIEW NEXT ACTIONS - This Week's Focus (${nextActions.length})
+                </h2>
+                <div style="background: #fff8f0; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="margin: 0; color: #c2410c; font-style: italic;">
+                        🎯 These are your committed next actions for this week. Review for appropriate scope and energy.
+                    </p>
+                </div>
+        `;
+
+        // Group by time priority
+        const actionGroups = [
+            { title: '🔥 Today', tasks: timeGroups.today, urgent: true },
+            { title: '📅 Tomorrow', tasks: timeGroups.tomorrow, urgent: false },
+            { title: '📋 This Week', tasks: timeGroups.thisWeek, urgent: false }
+        ];
+
+        actionGroups.forEach(group => {
+            if (group.tasks.length > 0) {
+                reportHTML += `
+                    <h3 style="color: #ff6b35; margin: 20px 0 10px 0;">${group.title} (${group.tasks.length})</h3>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                `;
+                
+                group.tasks.forEach(task => {
+                    const templates = TemplateProcessor.extractFromText(`${task.title || ''} ${task.notes || ''}`);
+                    const projectBadges = templates.map(t => `<span style="background: #fed7aa; color: #c2410c; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 5px;">@${t}</span>`).join('');
+                    
+                    reportHTML += `
+                        <li style="margin: 5px 0; padding: 8px; ${group.urgent ? 'background: #fef2f2; border-left: 4px solid #dc2626;' : 'background: #fff;'} border-radius: 4px;">
+                            <strong>${task.title || 'Untitled'}</strong>
+                            ${task.dueDate ? `<em style="color: #666; margin-left: 10px;">${task.dueDate}</em>` : ''}
+                            ${task.dueTime ? `<span style="color: #007bff; margin-left: 5px;">${task.dueTime}</span>` : ''}
+                            ${projectBadges}
+                            ${task.notes ? `<br><span style="color: #666; font-size: 12px; margin-left: 10px;">${task.notes.substring(0, 100)}${task.notes.length > 100 ? '...' : ''}</span>` : ''}
+                        </li>
+                    `;
+                });
+                
+                reportHTML += `</ul>`;
+            }
+        });
+        reportHTML += `</div>`;
+    }
+
+    // 4. REVIEW PROJECTS - All active projects and their status
     if (Object.keys(projectGroups).length > 0) {
         reportHTML += `
-            <div style="margin-bottom: 25px;">
-                <h2 style="color: #6f42c1; border-bottom: 2px solid #6f42c1; padding-bottom: 5px;">
-                    🚀 Projects Overview (${Object.keys(projectGroups).length})
+            <div style="margin-bottom: 30px;">
+                <h2 style="color: #6f42c1; border-bottom: 3px solid #6f42c1; padding-bottom: 8px; display: flex; align-items: center;">
+                    <span style="margin-right: 10px;">🚀</span>
+                    4. REVIEW PROJECTS - Active Projects Status (${Object.keys(projectGroups).filter(p => p !== 'No Project').length})
                 </h2>
+                <div style="background: #f8f7ff; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="margin: 0; color: #553c9a; font-style: italic;">
+                        🎪 Review each project for completion status and ensure each has a clear next action.
+                    </p>
+                </div>
         `;
         
-        // Sort projects by task count (descending)
-        const sortedProjects = Object.entries(projectGroups).sort((a, b) => b[1].length - a[1].length);
+        // Sort projects by task count (descending) and priority
+        const sortedProjects = Object.entries(projectGroups)
+            .filter(([name]) => name !== 'No Project')
+            .sort((a, b) => b[1].length - a[1].length);
+        
+        // Add "No Project" items at the end
+        if (projectGroups['No Project']) {
+            sortedProjects.push(['No Project', projectGroups['No Project']]);
+        }
         
         sortedProjects.forEach(([projectName, projectTasks]) => {
+            const overdueTasks = projectTasks.filter(t => t.dueDate && t.dueDate < todayStr);
+            const todayTasks = projectTasks.filter(t => t.dueDate === todayStr);
+            const futureTasks = projectTasks.filter(t => !t.dueDate || t.dueDate > todayStr);
+            
             reportHTML += `
-                <div style="margin: 15px 0; padding: 15px; background: #fafafa; border-left: 4px solid #6f42c1; border-radius: 0 4px 4px 0;">
-                    <h3 style="margin: 0 0 10px 0; color: #6f42c1;">
-                        ${projectName === 'No Project' ? '📝 No Project' : `@${projectName}`} 
-                        <span style="color: #666; font-weight: normal;">(${projectTasks.length} tasks)</span>
+                <div style="margin: 20px 0; padding: 20px; background: #fff; border-left: 5px solid #6f42c1; border-radius: 0 8px 8px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="margin: 0 0 15px 0; color: #6f42c1; display: flex; align-items: center; justify-content: space-between;">
+                        <span>
+                            ${projectName === 'No Project' ? '📝 Miscellaneous Tasks' : `@${projectName}`}
+                        </span>
+                        <div style="font-size: 12px; color: #666;">
+                            <span style="background: #6f42c1; color: white; padding: 2px 8px; border-radius: 12px;">${projectTasks.length} tasks</span>
+                            ${overdueTasks.length > 0 ? `<span style="background: #dc3545; color: white; padding: 2px 8px; border-radius: 12px; margin-left: 5px;">${overdueTasks.length} overdue</span>` : ''}
+                            ${todayTasks.length > 0 ? `<span style="background: #ff6b35; color: white; padding: 2px 8px; border-radius: 12px; margin-left: 5px;">${todayTasks.length} due today</span>` : ''}
+                        </div>
                     </h3>
-                    <ul style="margin: 0; padding-left: 20px;">
+                    <ul style="margin: 0; padding-left: 20px; list-style-type: none;">
             `;
             
-            projectTasks.forEach(task => {
-                const isOverdue = task.dueDate && task.dueDate < todayStr;
-                const isToday = task.dueDate === todayStr;
+            // Sort tasks within project: overdue first, then today, then future
+            const sortedTasks = [
+                ...overdueTasks.map(t => ({...t, _priority: 'overdue'})),
+                ...todayTasks.map(t => ({...t, _priority: 'today'})),
+                ...futureTasks.map(t => ({...t, _priority: 'future'}))
+            ];
+            
+            sortedTasks.forEach(task => {
+                const priorityStyle = task._priority === 'overdue' ? 'color: #dc3545; font-weight: bold;' :
+                                   task._priority === 'today' ? 'color: #ff6b35; font-weight: bold;' : '';
+                const priorityIcon = task._priority === 'overdue' ? '🚨 ' :
+                                   task._priority === 'today' ? '⚡ ' : '📋 ';
                 
                 reportHTML += `
-                    <li style="margin: 3px 0; ${isOverdue ? 'color: #dc3545; font-weight: bold;' : isToday ? 'color: #ff6b35; font-weight: bold;' : ''}">
-                        ${task.title || 'Untitled'}
+                    <li style="margin: 8px 0; padding: 8px; background: ${task._priority === 'overdue' ? '#fef2f2' : task._priority === 'today' ? '#fff7ed' : '#fafafa'}; border-radius: 4px; border-left: 3px solid ${task._priority === 'overdue' ? '#dc3545' : task._priority === 'today' ? '#ff6b35' : '#e5e7eb'};">
+                        <span style="${priorityStyle}">
+                            ${priorityIcon}${task.title || 'Untitled'}
+                        </span>
                         ${task.dueDate ? `<span style="color: #666; margin-left: 8px; font-size: 11px;">${task.dueDate}</span>` : ''}
                         ${task.dueTime ? `<span style="color: #007bff; margin-left: 3px; font-size: 11px;">${task.dueTime}</span>` : ''}
                     </li>
@@ -1254,24 +1339,424 @@ function generateTasksReview() {
         
         reportHTML += `</div>`;
     }
+
+    // 5. FUTURE PLANNING - Longer term items (Someday/Maybe)
+    const futureItems = [...timeGroups.nextWeek, ...timeGroups.future];
+    if (futureItems.length > 0) {
+        reportHTML += `
+            <div style="margin-bottom: 30px;">
+                <h2 style="color: #17a2b8; border-bottom: 3px solid #17a2b8; padding-bottom: 8px; display: flex; align-items: center;">
+                    <span style="margin-right: 10px;">🔮</span>
+                    5. FUTURE PLANNING - Someday/Maybe (${futureItems.length})
+                </h2>
+                <div style="background: #f0fcff; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="margin: 0; color: #0c7489; font-style: italic;">
+                        🌅 These items are for future consideration. Review for potential scheduling or archiving.
+                    </p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        `;
+        
+        if (timeGroups.nextWeek.length > 0) {
+            reportHTML += `
+                <div>
+                    <h3 style="color: #17a2b8; margin-bottom: 10px;">📆 Next Week (${timeGroups.nextWeek.length})</h3>
+                    <ul style="margin: 0; padding-left: 20px;">
+            `;
+            timeGroups.nextWeek.forEach(task => {
+                const templates = TemplateProcessor.extractFromText(`${task.title || ''} ${task.notes || ''}`);
+                const projectBadges = templates.map(t => `<span style="background: #cff4fc; color: #0c7489; padding: 1px 4px; border-radius: 3px; font-size: 9px; margin-left: 3px;">@${t}</span>`).join('');
+                
+                reportHTML += `
+                    <li style="margin: 4px 0; padding: 6px; background: #f8fdff; border-radius: 3px; font-size: 13px;">
+                        ${task.title || 'Untitled'}
+                        ${task.dueDate ? `<span style="color: #666; margin-left: 6px; font-size: 10px;">${task.dueDate}</span>` : ''}
+                        ${projectBadges}
+                    </li>
+                `;
+            });
+            reportHTML += `</ul></div>`;
+        }
+        
+        if (timeGroups.future.length > 0) {
+            reportHTML += `
+                <div>
+                    <h3 style="color: #17a2b8; margin-bottom: 10px;">🚀 Future (${timeGroups.future.length})</h3>
+                    <ul style="margin: 0; padding-left: 20px;">
+            `;
+            timeGroups.future.forEach(task => {
+                const templates = TemplateProcessor.extractFromText(`${task.title || ''} ${task.notes || ''}`);
+                const projectBadges = templates.map(t => `<span style="background: #cff4fc; color: #0c7489; padding: 1px 4px; border-radius: 3px; font-size: 9px; margin-left: 3px;">@${t}</span>`).join('');
+                
+                reportHTML += `
+                    <li style="margin: 4px 0; padding: 6px; background: #f8fdff; border-radius: 3px; font-size: 13px;">
+                        ${task.title || 'Untitled'}
+                        ${task.dueDate ? `<span style="color: #666; margin-left: 6px; font-size: 10px;">${task.dueDate}</span>` : ''}
+                        ${projectBadges}
+                    </li>
+                `;
+            });
+            reportHTML += `</ul></div>`;
+        }
+        
+        reportHTML += `</div></div>`;
+    }
     
+    // Add conclusion and footer
     reportHTML += `
-            <div style="text-align: center; margin-top: 30px; padding: 15px; background: #e3f2fd; border-radius: 8px;">
-                <p style="margin: 0; color: #1976d2; font-style: italic;">
-                    📊 Generated on ${todayStr} at ${new Date().toLocaleTimeString()}
+            <div style="text-align: center; margin-top: 30px; padding: 20px; background: #e3f2fd; border-radius: 8px;">
+                <h2 style="color: #1976d2; margin-top: 0;">🎯 Review Complete</h2>
+                <p style="margin: 10px 0; color: #1976d2; font-style: italic;">
+                    Generated on ${todayStr} at ${new Date().toLocaleTimeString()}
+                </p>
+                <p style="margin: 0; color: #666; font-size: 14px;">
+                    Next review: Schedule your next weekly review for consistent GTD practice
                 </p>
             </div>
         </div>
     `;
+
+    // Generate different formats
+    const plainText = generatePlainTextReport(allTasks, timeGroups, projectGroups, todayStr);
+    const orgMode = generateOrgModeReport(allTasks, timeGroups, projectGroups, todayStr);
     
-    // Open in new window
+    // Show format selection dialog
+    const format = prompt('Choose export format:\n1. HTML (browser view)\n2. TXT (plain text)\n3. ORG (Org-mode)\n4. PDF (print-friendly)\n\nEnter number (1-4):', '1');
+    
+    switch(format) {
+        case '2':
+            downloadTextFile(plainText, `gtd-review-${todayStr}.txt`);
+            break;
+        case '3':
+            downloadTextFile(orgMode, `gtd-review-${todayStr}.org`);
+            break;
+        case '4':
+            openPrintableReport(reportHTML, todayStr);
+            break;
+        default:
+            openHTMLReport(reportHTML, todayStr);
+    }
+}
+
+/**
+ * Generate plain text report
+ */
+function generatePlainTextReport(allTasks, timeGroups, projectGroups, todayStr) {
+    let text = `GTD WEEKLY REVIEW\n`;
+    text += `Generated on ${todayStr} at ${new Date().toLocaleTimeString()}\n`;
+    text += `${'='.repeat(50)}\n\n`;
+    
+    // Overview
+    text += `CURRENT STATUS OVERVIEW\n`;
+    text += `- Active Tasks: ${allTasks.filter(t => !t.isEvent).length}\n`;
+    text += `- Active Projects: ${Object.keys(projectGroups).filter(p => p !== 'No Project').length}\n`;
+    text += `- Upcoming Events: ${timeGroups.events.length}\n`;
+    text += `- Tasks Due This Week: ${timeGroups.today.length + timeGroups.tomorrow.length + timeGroups.thisWeek.length}\n`;
+    text += `- Needs Scheduling: ${timeGroups.noDate.length}\n`;
+    text += `- Total Commitments: ${allTasks.length}\n\n`;
+    
+    // 1. Collect & Process
+    if (timeGroups.noDate.length > 0) {
+        text += `1. COLLECT & PROCESS - Items Needing Scheduling (${timeGroups.noDate.length})\n`;
+        text += `${'─'.repeat(40)}\n`;
+        timeGroups.noDate.forEach(task => {
+            text += `• ${task.title || 'Untitled'}\n`;
+            if (task.notes) text += `  Notes: ${task.notes.substring(0, 100)}${task.notes.length > 100 ? '...' : ''}\n`;
+        });
+        text += `\n`;
+    }
+    
+    // 2. Review Calendar
+    if (timeGroups.events.length > 0) {
+        text += `2. REVIEW CALENDAR - Events & Appointments (${timeGroups.events.length})\n`;
+        text += `${'─'.repeat(40)}\n`;
+        timeGroups.events.sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''));
+        timeGroups.events.forEach(event => {
+            const isPast = event.dueDate && event.dueDate < todayStr;
+            text += `${isPast ? '[PAST]' : '[UPCOMING]'} ${event.title || 'Untitled Event'}`;
+            if (event.dueDate) text += ` - ${event.dueDate}`;
+            if (event.dueTime) text += ` ${event.dueTime}`;
+            text += `\n`;
+        });
+        text += `\n`;
+    }
+    
+    // 3. Review Next Actions
+    const nextActions = [...timeGroups.today, ...timeGroups.tomorrow, ...timeGroups.thisWeek];
+    if (nextActions.length > 0) {
+        text += `3. REVIEW NEXT ACTIONS - This Week's Focus (${nextActions.length})\n`;
+        text += `${'─'.repeat(40)}\n`;
+        
+        if (timeGroups.today.length > 0) {
+            text += `TODAY (${timeGroups.today.length}):\n`;
+            timeGroups.today.forEach(task => {
+                text += `  • ${task.title || 'Untitled'}`;
+                if (task.dueTime) text += ` (${task.dueTime})`;
+                text += `\n`;
+            });
+            text += `\n`;
+        }
+        
+        if (timeGroups.tomorrow.length > 0) {
+            text += `TOMORROW (${timeGroups.tomorrow.length}):\n`;
+            timeGroups.tomorrow.forEach(task => {
+                text += `  • ${task.title || 'Untitled'}`;
+                if (task.dueTime) text += ` (${task.dueTime})`;
+                text += `\n`;
+            });
+            text += `\n`;
+        }
+        
+        if (timeGroups.thisWeek.length > 0) {
+            text += `THIS WEEK (${timeGroups.thisWeek.length}):\n`;
+            timeGroups.thisWeek.forEach(task => {
+                text += `  • ${task.title || 'Untitled'}`;
+                if (task.dueDate) text += ` - ${task.dueDate}`;
+                if (task.dueTime) text += ` (${task.dueTime})`;
+                text += `\n`;
+            });
+            text += `\n`;
+        }
+    }
+    
+    // 4. Review Projects
+    if (Object.keys(projectGroups).length > 0) {
+        text += `4. REVIEW PROJECTS - Active Projects Status\n`;
+        text += `${'─'.repeat(40)}\n`;
+        
+        const sortedProjects = Object.entries(projectGroups)
+            .filter(([name]) => name !== 'No Project')
+            .sort((a, b) => b[1].length - a[1].length);
+        
+        if (projectGroups['No Project']) {
+            sortedProjects.push(['No Project', projectGroups['No Project']]);
+        }
+        
+        sortedProjects.forEach(([projectName, projectTasks]) => {
+            const overdueTasks = projectTasks.filter(t => t.dueDate && t.dueDate < todayStr);
+            const todayTasks = projectTasks.filter(t => t.dueDate === todayStr);
+            
+            text += `\n${projectName === 'No Project' ? 'Miscellaneous Tasks' : `@${projectName}`} (${projectTasks.length} tasks)`;
+            if (overdueTasks.length > 0) text += ` - ${overdueTasks.length} OVERDUE`;
+            if (todayTasks.length > 0) text += ` - ${todayTasks.length} DUE TODAY`;
+            text += `:\n`;
+            
+            projectTasks.forEach(task => {
+                const isOverdue = task.dueDate && task.dueDate < todayStr;
+                const isToday = task.dueDate === todayStr;
+                const prefix = isOverdue ? '⚠️  ' : isToday ? '🔥 ' : '   ';
+                
+                text += `${prefix}• ${task.title || 'Untitled'}`;
+                if (task.dueDate) text += ` - ${task.dueDate}`;
+                if (task.dueTime) text += ` (${task.dueTime})`;
+                text += `\n`;
+            });
+        });
+        text += `\n`;
+    }
+    
+    // 5. Future Planning
+    const futureItems = [...timeGroups.nextWeek, ...timeGroups.future];
+    if (futureItems.length > 0) {
+        text += `5. FUTURE PLANNING - Someday/Maybe (${futureItems.length})\n`;
+        text += `${'─'.repeat(40)}\n`;
+        
+        if (timeGroups.nextWeek.length > 0) {
+            text += `NEXT WEEK (${timeGroups.nextWeek.length}):\n`;
+            timeGroups.nextWeek.forEach(task => {
+                text += `  • ${task.title || 'Untitled'}`;
+                if (task.dueDate) text += ` - ${task.dueDate}`;
+                text += `\n`;
+            });
+            text += `\n`;
+        }
+        
+        if (timeGroups.future.length > 0) {
+            text += `FUTURE (${timeGroups.future.length}):\n`;
+            timeGroups.future.forEach(task => {
+                text += `  • ${task.title || 'Untitled'}`;
+                if (task.dueDate) text += ` - ${task.dueDate}`;
+                text += `\n`;
+            });
+        }
+    }
+    
+    return text;
+}
+
+/**
+ * Generate Org-mode report
+ */
+function generateOrgModeReport(allTasks, timeGroups, projectGroups, todayStr) {
+    let org = `#+TITLE: GTD Weekly Review\n`;
+    org += `#+DATE: ${todayStr}\n`;
+    org += `#+AUTHOR: HyperFiler Pro\n`;
+    org += `#+STARTUP: overview\n\n`;
+    
+    // Overview
+    org += `* Current Status Overview\n`;
+    org += `- Active Tasks: ${allTasks.filter(t => !t.isEvent).length}\n`;
+    org += `- Active Projects: ${Object.keys(projectGroups).filter(p => p !== 'No Project').length}\n`;
+    org += `- Upcoming Events: ${timeGroups.events.length}\n`;
+    org += `- Tasks Due This Week: ${timeGroups.today.length + timeGroups.tomorrow.length + timeGroups.thisWeek.length}\n`;
+    org += `- Needs Scheduling: ${timeGroups.noDate.length}\n`;
+    org += `- Total Commitments: ${allTasks.length}\n\n`;
+    
+    // 1. Collect & Process
+    if (timeGroups.noDate.length > 0) {
+        org += `* 1. COLLECT & PROCESS - Items Needing Scheduling\n`;
+        timeGroups.noDate.forEach(task => {
+            org += `** TODO ${task.title || 'Untitled'}\n`;
+            if (task.notes) org += `   ${task.notes}\n`;
+        });
+        org += `\n`;
+    }
+    
+    // 2. Review Calendar
+    if (timeGroups.events.length > 0) {
+        org += `* 2. REVIEW CALENDAR - Events & Appointments\n`;
+        timeGroups.events.sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''));
+        timeGroups.events.forEach(event => {
+            const isPast = event.dueDate && event.dueDate < todayStr;
+            org += `** ${isPast ? 'DONE' : 'SCHEDULED'} ${event.title || 'Untitled Event'}\n`;
+            if (event.dueDate) {
+                if (event.dueTime) {
+                    org += `   SCHEDULED: <${event.dueDate} ${event.dueTime}>\n`;
+                } else {
+                    org += `   SCHEDULED: <${event.dueDate}>\n`;
+                }
+            }
+            if (event.notes) org += `   ${event.notes}\n`;
+        });
+        org += `\n`;
+    }
+    
+    // 3. Review Next Actions
+    const nextActions = [...timeGroups.today, ...timeGroups.tomorrow, ...timeGroups.thisWeek];
+    if (nextActions.length > 0) {
+        org += `* 3. REVIEW NEXT ACTIONS - This Week's Focus\n`;
+        
+        if (timeGroups.today.length > 0) {
+            org += `** Today (${timeGroups.today.length})\n`;
+            timeGroups.today.forEach(task => {
+                org += `*** TODO ${task.title || 'Untitled'}\n`;
+                org += `    DEADLINE: <${task.dueDate}${task.dueTime ? ' ' + task.dueTime : ''}>\n`;
+                if (task.notes) org += `    ${task.notes}\n`;
+            });
+        }
+        
+        if (timeGroups.tomorrow.length > 0) {
+            org += `** Tomorrow (${timeGroups.tomorrow.length})\n`;
+            timeGroups.tomorrow.forEach(task => {
+                org += `*** TODO ${task.title || 'Untitled'}\n`;
+                org += `    SCHEDULED: <${task.dueDate}${task.dueTime ? ' ' + task.dueTime : ''}>\n`;
+                if (task.notes) org += `    ${task.notes}\n`;
+            });
+        }
+        
+        if (timeGroups.thisWeek.length > 0) {
+            org += `** This Week (${timeGroups.thisWeek.length})\n`;
+            timeGroups.thisWeek.forEach(task => {
+                org += `*** TODO ${task.title || 'Untitled'}\n`;
+                org += `    SCHEDULED: <${task.dueDate}${task.dueTime ? ' ' + task.dueTime : ''}>\n`;
+                if (task.notes) org += `    ${task.notes}\n`;
+            });
+        }
+        org += `\n`;
+    }
+    
+    // 4. Review Projects
+    if (Object.keys(projectGroups).length > 0) {
+        org += `* 4. REVIEW PROJECTS - Active Projects Status\n`;
+        
+        const sortedProjects = Object.entries(projectGroups)
+            .filter(([name]) => name !== 'No Project')
+            .sort((a, b) => b[1].length - a[1].length);
+        
+        if (projectGroups['No Project']) {
+            sortedProjects.push(['No Project', projectGroups['No Project']]);
+        }
+        
+        sortedProjects.forEach(([projectName, projectTasks]) => {
+            const overdueTasks = projectTasks.filter(t => t.dueDate && t.dueDate < todayStr);
+            const todayTasks = projectTasks.filter(t => t.dueDate === todayStr);
+            
+            org += `** ${projectName === 'No Project' ? 'Miscellaneous Tasks' : `@${projectName}`} (${projectTasks.length} tasks)\n`;
+            if (overdueTasks.length > 0) org += `   - ${overdueTasks.length} OVERDUE tasks\n`;
+            if (todayTasks.length > 0) org += `   - ${todayTasks.length} DUE TODAY tasks\n`;
+            
+            projectTasks.forEach(task => {
+                const isOverdue = task.dueDate && task.dueDate < todayStr;
+                const isToday = task.dueDate === todayStr;
+                const priority = isOverdue ? '[#A]' : isToday ? '[#B]' : '[#C]';
+                
+                org += `*** TODO ${priority} ${task.title || 'Untitled'}\n`;
+                if (task.dueDate) {
+                    org += `    SCHEDULED: <${task.dueDate}${task.dueTime ? ' ' + task.dueTime : ''}>\n`;
+                }
+                if (task.notes) org += `    ${task.notes}\n`;
+            });
+        });
+        org += `\n`;
+    }
+    
+    // 5. Future Planning
+    const futureItems = [...timeGroups.nextWeek, ...timeGroups.future];
+    if (futureItems.length > 0) {
+        org += `* 5. FUTURE PLANNING - Someday/Maybe\n`;
+        
+        if (timeGroups.nextWeek.length > 0) {
+            org += `** Next Week (${timeGroups.nextWeek.length})\n`;
+            timeGroups.nextWeek.forEach(task => {
+                org += `*** SOMEDAY ${task.title || 'Untitled'}\n`;
+                if (task.dueDate) org += `    SCHEDULED: <${task.dueDate}>\n`;
+                if (task.notes) org += `    ${task.notes}\n`;
+            });
+        }
+        
+        if (timeGroups.future.length > 0) {
+            org += `** Future (${timeGroups.future.length})\n`;
+            timeGroups.future.forEach(task => {
+                org += `*** SOMEDAY ${task.title || 'Untitled'}\n`;
+                if (task.dueDate) org += `    SCHEDULED: <${task.dueDate}>\n`;
+                if (task.notes) org += `    ${task.notes}\n`;
+            });
+        }
+    }
+    
+    org += `\n* Review Complete\n`;
+    org += `Generated on ${todayStr} at ${new Date().toLocaleTimeString()}\n`;
+    org += `Next review: Schedule your next weekly review for consistent GTD practice\n`;
+    
+    return org;
+}
+
+/**
+ * Download text file
+ */
+function downloadTextFile(content, filename) {
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+}
+
+/**
+ * Open HTML report in new window
+ */
+function openHTMLReport(reportHTML, todayStr) {
     const newWindow = window.open('', '_blank');
     if (newWindow) {
         newWindow.document.write(`
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Tasks Review Report</title>
+                <title>GTD Weekly Review - ${todayStr}</title>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
@@ -1289,9 +1774,60 @@ function generateTasksReview() {
             </head>
             <body>
                 <div class="no-print" style="text-align: center; margin-bottom: 20px;">
-                    <button onclick="window.print()" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">🖨️ Print Report</button>
+                    <button onclick="window.print()" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">🖨️ Print/PDF</button>
                 </div>
                 ${reportHTML}
+            </body>
+            </html>
+        `);
+        newWindow.document.close();
+    } else {
+        alert('Please allow popups to view the report');
+    }
+}
+
+/**
+ * Open print-friendly report for PDF generation
+ */
+function openPrintableReport(reportHTML, todayStr) {
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+        newWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>GTD Weekly Review - ${todayStr}</title>
+                <meta charset="UTF-8">
+                <style>
+                    @media print {
+                        body { 
+                            margin: 15mm; 
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                            font-size: 12pt;
+                            line-height: 1.4;
+                            color: #333;
+                        }
+                        h1 { font-size: 18pt; margin-bottom: 20pt; }
+                        h2 { font-size: 14pt; margin: 15pt 0 8pt 0; page-break-after: avoid; }
+                        h3 { font-size: 12pt; margin: 10pt 0 5pt 0; }
+                        ul { margin: 5pt 0; padding-left: 15pt; }
+                        li { margin: 3pt 0; }
+                    }
+                    body { 
+                        margin: 20px; 
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        line-height: 1.4;
+                        color: #333;
+                    }
+                </style>
+            </head>
+            <body>
+                ${reportHTML}
+                <script>
+                    window.onload = function() {
+                        window.print();
+                    };
+                </script>
             </body>
             </html>
         `);
