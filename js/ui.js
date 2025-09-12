@@ -846,8 +846,11 @@ function renderTaskCard(task) {
              style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; min-height: 40px; cursor: move;">
             <div style="display: flex; align-items: center; flex: 1;">
                 <div style="margin-right: 8px; color: #ccc; cursor: grab;">⋮⋮</div>
-                <input type="checkbox" class="task-checkbox" 
-                       onclick="toggleTaskStatus('${task.id}', event)" style="margin-right: 10px;">
+                <input type="checkbox" class="task-selection-checkbox" 
+                       onclick="toggleTaskSelection('${task.id}', event)" 
+                       data-task-id="${task.id}"
+                       style="margin-right: 10px;"
+                       title="Select this task for bulk actions">
                 <div class="task-title" style="flex: 1;">
                     ${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}
                     ${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}
@@ -1040,6 +1043,9 @@ function performAllTasksSearch() {
     
     // Store filtered tasks for reference
     currentFilteredTasks = filteredTasks;
+    
+    // Clear previous selections when performing new search
+    selectedTaskIds.clear();
     
     renderTasksWithSelection(filteredTasks);
 }
@@ -2577,6 +2583,208 @@ function renderTasksWithSelection(filteredTasks) {
     }
     
     container.innerHTML = html;
+    
+    // Update bulk selection UI
+    updateBulkSelectionUI();
+}
+
+/**
+ * Bulk Selection Functions for All Tasks View
+ */
+
+// Track selected tasks
+let selectedTaskIds = new Set();
+
+/**
+ * Toggle individual task selection
+ */
+function toggleTaskSelection(taskId, event) {
+    event.stopPropagation(); // Prevent task edit dialog
+    
+    if (selectedTaskIds.has(taskId)) {
+        selectedTaskIds.delete(taskId);
+    } else {
+        selectedTaskIds.add(taskId);
+    }
+    
+    updateBulkSelectionUI();
+}
+
+/**
+ * Toggle select all tasks
+ */
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAllTasks');
+    const taskCheckboxes = document.querySelectorAll('.task-selection-checkbox');
+    
+    if (selectAllCheckbox.checked) {
+        // Select all visible tasks
+        taskCheckboxes.forEach(checkbox => {
+            const taskId = checkbox.getAttribute('data-task-id');
+            selectedTaskIds.add(taskId);
+            checkbox.checked = true;
+        });
+    } else {
+        // Deselect all tasks
+        selectedTaskIds.clear();
+        taskCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+    }
+    
+    updateBulkSelectionUI();
+}
+
+/**
+ * Update the bulk selection UI based on current selection
+ */
+function updateBulkSelectionUI() {
+    const selectAllCheckbox = document.getElementById('selectAllTasks');
+    const deleteButton = document.getElementById('deleteSelectedBtn');
+    const taskCheckboxes = document.querySelectorAll('.task-selection-checkbox');
+    
+    // Update individual checkboxes
+    taskCheckboxes.forEach(checkbox => {
+        const taskId = checkbox.getAttribute('data-task-id');
+        checkbox.checked = selectedTaskIds.has(taskId);
+    });
+    
+    // Update select all checkbox state
+    const totalVisible = taskCheckboxes.length;
+    const selectedVisible = Array.from(taskCheckboxes).filter(cb => cb.checked).length;
+    
+    if (selectedVisible === 0) {
+        selectAllCheckbox.indeterminate = false;
+        selectAllCheckbox.checked = false;
+    } else if (selectedVisible === totalVisible) {
+        selectAllCheckbox.indeterminate = false;
+        selectAllCheckbox.checked = true;
+    } else {
+        selectAllCheckbox.indeterminate = true;
+        selectAllCheckbox.checked = false;
+    }
+    
+    // Show/hide bulk action buttons and update count
+    const delayDayBtn = document.getElementById('delaySelectedDayBtn');
+    const delayWeekBtn = document.getElementById('delaySelectedWeekBtn');
+    
+    if (selectedTaskIds.size > 0) {
+        deleteButton.style.display = 'inline-block';
+        deleteButton.innerHTML = `🗑️ Delete (${selectedTaskIds.size})`;
+        
+        if (delayDayBtn) {
+            delayDayBtn.style.display = 'inline-block';
+            delayDayBtn.innerHTML = `📅 +1D (${selectedTaskIds.size})`;
+        }
+        
+        if (delayWeekBtn) {
+            delayWeekBtn.style.display = 'inline-block';
+            delayWeekBtn.innerHTML = `📅 +1W (${selectedTaskIds.size})`;
+        }
+    } else {
+        deleteButton.style.display = 'none';
+        if (delayDayBtn) delayDayBtn.style.display = 'none';
+        if (delayWeekBtn) delayWeekBtn.style.display = 'none';
+    }
+}
+
+/**
+ * Delete selected tasks in bulk
+ */
+function deleteSelectedTasks() {
+    if (selectedTaskIds.size === 0) return;
+    
+    const confirmMessage = `Are you sure you want to delete ${selectedTaskIds.size} selected task(s)? This action cannot be undone.`;
+    
+    if (confirm(confirmMessage)) {
+        let deletedCount = 0;
+        
+        // Delete each selected task
+        selectedTaskIds.forEach(taskId => {
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+            if (taskIndex !== -1) {
+                tasks[taskIndex].status = 'deleted';
+                deletedCount++;
+            }
+        });
+        
+        // Clear selection
+        selectedTaskIds.clear();
+        
+        // Save changes and refresh view
+        saveTasks();
+        
+        // Sync with server if available
+        if (typeof syncTasks === 'function') {
+            syncTasks();
+        }
+        
+        // Refresh the All Tasks view
+        performAllTasksSearch();
+        
+        // Show success message
+        showMessage(`Successfully deleted ${deletedCount} task(s)`, 'success');
+    }
+}
+
+/**
+ * Delay selected tasks by specified number of days
+ */
+function delaySelectedTasks(days) {
+    if (selectedTaskIds.size === 0) return;
+    
+    const timeLabel = days === 1 ? '1 day' : days === 7 ? '1 week' : `${days} days`;
+    const confirmMessage = `Are you sure you want to delay ${selectedTaskIds.size} selected task(s) by ${timeLabel}?`;
+    
+    if (confirm(confirmMessage)) {
+        let delayedCount = 0;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        selectedTaskIds.forEach(taskId => {
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+            if (taskIndex !== -1) {
+                const task = tasks[taskIndex];
+                
+                // Calculate new due date
+                let newDate;
+                if (task.dueDate) {
+                    newDate = new Date(task.dueDate);
+                } else {
+                    newDate = new Date(today);
+                }
+                
+                newDate.setDate(newDate.getDate() + days);
+                task.dueDate = getLocalDateString(newDate);
+                delayedCount++;
+            }
+        });
+        
+        // Clear selection
+        selectedTaskIds.clear();
+        
+        // Save changes and refresh view
+        saveTasks();
+        
+        // Sync with server if available
+        if (typeof syncTasks === 'function') {
+            syncTasks();
+        }
+        
+        // Refresh the All Tasks view
+        performAllTasksSearch();
+        
+        // Show success message
+        showMessage(`Successfully delayed ${delayedCount} task(s) by ${timeLabel}`, 'success');
+    }
+}
+
+/**
+ * Clear all task selections
+ */
+function clearAllSelections() {
+    selectedTaskIds.clear();
+    updateBulkSelectionUI();
 }
 
 /**
