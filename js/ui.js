@@ -995,8 +995,15 @@ function performAllTasksSearch() {
         // Exclude deleted tasks
         if (task.status === 'deleted') return false;
         
-        // Events always show at their original date (no matter when)
-        if (task.isEvent) return true;
+        // Events only show from today onward (consistent with other views)
+        if (task.isEvent) {
+            if (task.dueDate) {
+                const taskDate = new Date(task.dueDate);
+                taskDate.setHours(0, 0, 0, 0);
+                return taskDate >= today;
+            }
+            return true; // Undated events always show
+        }
         
         // Regular tasks only show from today onward (past ones are auto-migrated to today)
         if (task.dueDate) {
