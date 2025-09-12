@@ -843,7 +843,10 @@ function renderTaskCard(task) {
              draggable="true"
              ondragstart="handleDragStart(event)"
              ondragend="handleDragEnd(event)"
-             style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; min-height: 40px; cursor: move;">
+             ontouchstart="handleTouchStart(event, '${task.id}')"
+             ontouchmove="handleTouchMove(event, '${task.id}')"
+             ontouchend="handleTouchEnd(event, '${task.id}')"
+             style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; min-height: 40px; cursor: move; transition: transform 0.3s ease;">
             <div style="display: flex; align-items: center; flex: 1;">
                 <div style="margin-right: 8px; color: #ccc; cursor: grab;">⋮⋮</div>
                 <input type="checkbox" class="task-selection-checkbox" 
@@ -2785,6 +2788,103 @@ function delaySelectedTasks(days) {
 function clearAllSelections() {
     selectedTaskIds.clear();
     updateBulkSelectionUI();
+}
+
+/**
+ * Mobile Touch/Swipe Handling for Task Cards
+ */
+
+// Track touch state for swipe detection
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+let swipeThreshold = 100; // minimum distance for swipe
+let swipeTimeThreshold = 500; // maximum time for swipe (ms)
+
+function handleTouchStart(event, taskId) {
+    const touch = event.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    touchStartTime = Date.now();
+    
+    // Don't prevent default to allow other interactions
+}
+
+function handleTouchMove(event, taskId) {
+    if (!event.touches[0]) return;
+    
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - touchStartX;
+    const deltaY = touch.clientY - touchStartY;
+    
+    // Only handle horizontal swipes
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 20) {
+        event.preventDefault(); // Prevent scrolling when swiping horizontally
+        
+        const taskCard = event.currentTarget;
+        
+        // Visual feedback during swipe
+        if (deltaX > 0) {
+            // Swiping right - show right arrow and green background
+            taskCard.style.transform = `translateX(${Math.min(deltaX * 0.3, 50)}px)`;
+            taskCard.style.background = `linear-gradient(90deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.3) 100%)`;
+        } else {
+            // Swiping left - show date picker icon and blue background
+            taskCard.style.transform = `translateX(${Math.max(deltaX * 0.3, -50)}px)`;
+            taskCard.style.background = `linear-gradient(90deg, rgba(33, 150, 243, 0.3) 0%, rgba(33, 150, 243, 0.1) 100%)`;
+        }
+    }
+}
+
+function handleTouchEnd(event, taskId) {
+    const touchEndTime = Date.now();
+    const touchDuration = touchEndTime - touchStartTime;
+    
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - touchStartX;
+    const deltaY = touch.clientY - touchStartY;
+    
+    const taskCard = event.currentTarget;
+    
+    // Reset visual state
+    taskCard.style.transform = '';
+    taskCard.style.background = '';
+    
+    // Check if it's a valid swipe (horizontal, within time limit, sufficient distance)
+    if (touchDuration < swipeTimeThreshold && 
+        Math.abs(deltaX) > swipeThreshold && 
+        Math.abs(deltaX) > Math.abs(deltaY)) {
+        
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (deltaX > 0) {
+            // Swipe right - move task to next day
+            delayTask(taskId, 1, event);
+            
+            // Show feedback
+            taskCard.style.background = 'linear-gradient(90deg, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.1) 100%)';
+            setTimeout(() => {
+                taskCard.style.background = '';
+            }, 1000);
+            
+        } else {
+            // Swipe left - open date/time picker
+            const buttonElement = taskCard.querySelector('[onclick*="openIOSDateTimePicker"]');
+            if (buttonElement) {
+                const task = tasks.find(t => t.id === taskId);
+                if (task) {
+                    openIOSDateTimePicker(taskId, task.dueDate || '', task.dueTime || '', buttonElement);
+                    
+                    // Show feedback
+                    taskCard.style.background = 'linear-gradient(90deg, rgba(33, 150, 243, 0.2) 0%, rgba(33, 150, 243, 0.1) 100%)';
+                    setTimeout(() => {
+                        taskCard.style.background = '';
+                    }, 300);
+                }
+            }
+        }
+    }
 }
 
 /**

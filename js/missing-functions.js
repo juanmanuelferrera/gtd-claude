@@ -155,136 +155,156 @@ function openIOSDateTimePicker(taskId, currentDate, currentTime, buttonElement) 
     // Remove any existing picker
     if (window.currentIOSDatePicker) {
         document.body.removeChild(window.currentIOSDatePicker);
+        window.currentIOSDatePicker = null;
     }
     
-    // Get button position
-    const buttonRect = buttonElement.getBoundingClientRect();
-    
-    // Create overlay
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.style.cssText = `
         position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-        background: rgba(0,0,0,0.3); z-index: 10000;
+        background: rgba(0,0,0,0.4); z-index: 10000;
+        display: flex; align-items: center; justify-content: center;
+        backdrop-filter: blur(4px);
     `;
     
-    // Create picker
+    // Create simple iOS-style picker container
     const picker = document.createElement('div');
     picker.style.cssText = `
-        background: white; border-radius: 12px; width: 320px; 
-        padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        position: fixed; z-index: 10001;
-        left: ${Math.max(10, Math.min(buttonRect.left, window.innerWidth - 340))}px;
-        top: ${Math.max(10, Math.min(buttonRect.bottom + 10, window.innerHeight - 450))}px;
-        border: 1px solid #e0e0e0;
+        background: white; 
+        border-radius: 20px; 
+        width: 90%; 
+        max-width: 350px; 
+        padding: 0;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        overflow: hidden;
+        animation: modalSlideIn 0.3s ease-out;
     `;
     
-    // Get current date info
+    // Get current values
     const today = new Date();
-    const pickerDate = currentDate ? new Date(currentDate) : today;
-    const year = pickerDate.getFullYear();
-    const month = pickerDate.getMonth();
-    const selectedDay = pickerDate.getDate();
-    
-    // Generate calendar HTML
-    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-                       'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-    
-    // Calculate calendar grid
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const firstDayOfWeek = (firstDay.getDay() + 6) % 7; // Monday = 0
-    
-    let calendarHTML = '';
-    
-    // Empty cells before month starts
-    for (let i = 0; i < firstDayOfWeek; i++) {
-        calendarHTML += '<div></div>';
-    }
-    
-    // Days of month
-    for (let day = 1; day <= daysInMonth; day++) {
-        const isSelected = day === selectedDay;
-        const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
-        
-        let style = 'padding: 8px; cursor: pointer; border-radius: 50%; font-size: 14px; text-align: center;';
-        if (isSelected) {
-            style += ' background: #007AFF; color: white; font-weight: bold;';
-        } else if (isToday) {
-            style += ' background: #e0e0e0; color: #333;';
-        } else {
-            style += ' color: #333;';
-        }
-        
-        calendarHTML += `<div onclick="setPickerDate('${taskId}', ${year}, ${month}, ${day})" style="${style}">${day}</div>`;
-    }
+    const currentDateValue = currentDate || getLocalDateString(today);
+    const currentTimeValue = currentTime || '';
     
     picker.innerHTML = `
-        <div style="text-align: center; margin-bottom: 15px; font-size: 16px; font-weight: 600;">
-            ${monthNames[month]} ${year}
+        <div style="padding: 25px 20px 20px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
+            <h3 style="margin: 0; font-size: 18px; font-weight: 600;">📅 Set Date & Time</h3>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 10px; text-align: center; font-size: 12px; color: #666;">
-            <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
+        
+        <div style="padding: 30px 20px;">
+            <!-- Date Input -->
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px;">Date</label>
+                <input type="date" 
+                       id="picker-date-${taskId}" 
+                       value="${currentDateValue}" 
+                       style="width: 100%; padding: 12px 15px; border: 2px solid #e0e4e7; border-radius: 12px; font-size: 16px; background: #f8f9fa; transition: all 0.2s;"
+                       onchange="this.style.background='#e3f2fd'; this.style.borderColor='#2196f3';"
+                       onfocus="this.style.borderColor='#2196f3'; this.style.background='#f0f8ff';">
+            </div>
+            
+            <!-- Time Input -->
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px;">Time (Optional)</label>
+                <input type="time" 
+                       id="picker-time-${taskId}" 
+                       value="${currentTimeValue}" 
+                       style="width: 100%; padding: 12px 15px; border: 2px solid #e0e4e7; border-radius: 12px; font-size: 16px; background: #f8f9fa; transition: all 0.2s;"
+                       onchange="this.style.background='#e3f2fd'; this.style.borderColor='#2196f3';"
+                       onfocus="this.style.borderColor='#2196f3'; this.style.background='#f0f8ff';">
+            </div>
+            
+            <!-- Quick Actions -->
+            <div style="margin-bottom: 25px;">
+                <div style="font-weight: 600; color: #333; font-size: 14px; margin-bottom: 10px;">Quick Options</div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button onclick="setQuickDate('${taskId}', 0)" style="flex: 1; padding: 10px; background: #e3f2fd; color: #1976d2; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#bbdefb'" onmouseout="this.style.background='#e3f2fd'">Today</button>
+                    <button onclick="setQuickDate('${taskId}', 1)" style="flex: 1; padding: 10px; background: #fff3e0; color: #f57c00; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#ffe0b2'" onmouseout="this.style.background='#fff3e0'">Tomorrow</button>
+                    <button onclick="setQuickDate('${taskId}', 7)" style="flex: 1; padding: 10px; background: #e8f5e8; color: #388e3c; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#c8e6c9'" onmouseout="this.style.background='#e8f5e8'">Next Week</button>
+                </div>
+            </div>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;">
-            ${calendarHTML}
+        
+        <!-- Action Buttons -->
+        <div style="padding: 0 20px 20px 20px; display: flex; gap: 10px;">
+            <button onclick="closeDateTimePicker()" 
+                    style="flex: 1; padding: 14px; background: #f5f5f5; color: #666; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                    onmouseover="this.style.background='#eeeeee'" onmouseout="this.style.background='#f5f5f5'">
+                Cancel
+            </button>
+            <button onclick="applyDateTimeChange('${taskId}')" 
+                    style="flex: 2; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);"
+                    onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)'">
+                ✓ Save
+            </button>
         </div>
     `;
     
-    // Store references
-    window.currentIOSDatePicker = overlay;
-    window.currentTaskId = taskId;
+    // Add CSS animation
+    if (!document.getElementById('modal-animations')) {
+        const style = document.createElement('style');
+        style.id = 'modal-animations';
+        style.textContent = `
+            @keyframes modalSlideIn {
+                from { transform: scale(0.7) translateY(-50px); opacity: 0; }
+                to { transform: scale(1) translateY(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
     
-    overlay.appendChild(picker);
-    document.body.appendChild(overlay);
+    modal.appendChild(picker);
+    document.body.appendChild(modal);
+    window.currentIOSDatePicker = modal;
     
-    // Auto-close after 6 seconds
-    window.calendarAutoCloseTimer = setTimeout(() => {
-        closeTaskPicker();
-    }, 6000);
-    
-    // Close on backdrop click
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-            closeTaskPicker();
+    // Close on overlay click
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeDateTimePicker();
         }
     });
 }
 
-function closeTaskPicker() {
-    if (window.calendarAutoCloseTimer) {
-        clearTimeout(window.calendarAutoCloseTimer);
-        window.calendarAutoCloseTimer = null;
-    }
+// Helper function to set quick dates
+function setQuickDate(taskId, daysFromToday) {
+    const date = new Date();
+    date.setDate(date.getDate() + daysFromToday);
+    const dateString = getLocalDateString(date);
+    document.getElementById(`picker-date-${taskId}`).value = dateString;
+}
+
+// Close date time picker
+function closeDateTimePicker() {
     if (window.currentIOSDatePicker) {
         document.body.removeChild(window.currentIOSDatePicker);
         window.currentIOSDatePicker = null;
     }
 }
 
-function setPickerDate(taskId, year, month, day) {
-    const newDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    updateTaskDate(taskId, newDate, { stopPropagation: () => {} });
-    closeTaskPicker();
-}
-
-function setTaskToday(taskId) {
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    const timeInput = document.getElementById('timePicker');
-    const time = timeInput ? timeInput.value : '';
+// Apply date and time changes
+function applyDateTimeChange(taskId) {
+    const dateInput = document.getElementById(`picker-date-${taskId}`);
+    const timeInput = document.getElementById(`picker-time-${taskId}`);
     
-    updateTaskDate(taskId, todayStr, { stopPropagation: () => {} });
-    if (time) {
-        updateTaskTime(taskId, time, { stopPropagation: () => {} });
+    if (!dateInput) return;
+    
+    const newDate = dateInput.value;
+    const newTime = timeInput ? timeInput.value : '';
+    
+    // Update task date
+    if (newDate) {
+        updateTaskDate(taskId, newDate, { stopPropagation: () => {} });
     }
-    closeTaskPicker();
-}
-
-function clearTaskDateTime(taskId) {
-    updateTaskDate(taskId, '', { stopPropagation: () => {} });
-    updateTaskTime(taskId, '', { stopPropagation: () => {} });
-    closeTaskPicker();
+    
+    // Update task time
+    if (newTime) {
+        updateTaskTime(taskId, newTime, { stopPropagation: () => {} });
+    }
+    
+    // Close picker
+    closeDateTimePicker();
+    
+    // Show success feedback
+    showMessage('Date and time updated!', 'success');
 }
 
 // Time dropdown picker
