@@ -1167,10 +1167,15 @@ function renderTodayView() {
         // Exclude deleted tasks
         if (task.status === 'deleted') return false;
         
-        // Show tasks for this specific date
+        // Events should ONLY appear on their exact due date - no exceptions
+        if (task.isEvent) {
+            return task.dueDate === todayStr;
+        }
+        
+        // Show regular tasks for this specific date
         if (task.dueDate === todayStr) return true;
         
-        // Only show overdue tasks if we're viewing TODAY (not past/future dates)
+        // Only show overdue regular tasks if we're viewing TODAY (not past/future dates)
         if (isToday && task.dueDate && task.dueDate < todayStr && task.status === 'pending') {
             return true;
         }
