@@ -407,8 +407,11 @@ async function updateTaskTime(taskId, newTime, event) {
         // Update task time (empty string for untimed tasks)
         task.dueTime = newTime || null;
         
-        // Save to server
-        await saveTasks();
+        // Save to localStorage and server
+        saveTasks();
+        if (typeof uploadAllTasks === 'function') {
+            await uploadAllTasks();
+        }
         
         // Re-render current view to reposition the task if needed
         if (typeof renderCurrentView === 'function') {
