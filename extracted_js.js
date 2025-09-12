@@ -26353,5 +26353,3 @@
         window.clearTrashModal = clearTrashModal;
         window.changeTrashPage = changeTrashPage;
         window.saveTabDisplayMode = saveTabDisplayMode;
-        
-    }); // Close main DOMContentLoaded event listener
