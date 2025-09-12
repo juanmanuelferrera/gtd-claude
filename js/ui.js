@@ -1160,9 +1160,30 @@ function renderTodayView() {
     
     const today = new Date(currentTodayDate);
     const todayStr = getLocalDateString(today);
+    const actualTodayStr = getLocalDateString(new Date());
     
-    // Get today's tasks AND overdue tasks (only show overdue on current day)
-    const isToday = todayStr === getLocalDateString(new Date());
+    // Auto-migrate overdue tasks to today (except Events)
+    if (todayStr === actualTodayStr) { // Only do this when viewing actual today
+        let migrated = false;
+        tasks.forEach(task => {
+            if (task.status === 'deleted' || task.isEvent) return; // Skip deleted tasks and events
+            
+            // If task is from a previous date and not completed, move it to today
+            if (task.dueDate && task.dueDate < todayStr && task.status === 'pending') {
+                console.log(`🔄 Auto-migrating overdue task: ${task.title} from ${task.dueDate} to ${todayStr}`);
+                task.dueDate = todayStr;
+                migrated = true;
+            }
+        });
+        
+        if (migrated) {
+            // Save the changes
+            if (typeof saveTasks === 'function') saveTasks();
+            if (typeof uploadAllTasks === 'function') uploadAllTasks();
+        }
+    }
+    
+    // Get today's tasks (no need for overdue logic since we auto-migrate)
     let todayTasks = tasks.filter(task => {
         // Exclude deleted tasks
         if (task.status === 'deleted') return false;
@@ -1172,15 +1193,8 @@ function renderTodayView() {
             return task.dueDate === todayStr;
         }
         
-        // Show regular tasks for this specific date
-        if (task.dueDate === todayStr) return true;
-        
-        // Only show overdue regular tasks if we're viewing TODAY (not past/future dates)
-        if (isToday && task.dueDate && task.dueDate < todayStr && task.status === 'pending') {
-            return true;
-        }
-        
-        return false;
+        // Show regular tasks for this specific date only
+        return task.dueDate === todayStr;
     });
     
     // Apply template filter if active
