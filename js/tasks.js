@@ -418,6 +418,14 @@ async function updateTaskTime(taskId, newTime, event) {
             renderCurrentView();
         }
         
+        // Force additional render for mobile compatibility
+        setTimeout(() => {
+            if (typeof renderCurrentView === 'function') {
+                console.log('🔄 Force re-render for mobile compatibility');
+                renderCurrentView();
+            }
+        }, 100);
+        
         console.log('✅ Task time updated successfully');
     } catch (error) {
         console.error('❌ Error updating task time:', error);
