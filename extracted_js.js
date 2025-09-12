@@ -1,5 +1,5 @@
 
-        console.log('🚀 HyperFiler Pro v1.0 Stable - Starting initialization...');
+        console.log('🚀 HyperFiler Pro v3.5 - Starting initialization...');
         window.addEventListener('error', function(e) {
             console.error('❌ UNCAUGHT ERROR:', e.message, 'at line', e.lineno, 'column', e.colno);
             console.error('Stack:', e.error?.stack);
@@ -13,8 +13,8 @@
         document.addEventListener('touchmove', function(e) {
             if (e.touches.length > 1) return; // Allow multi-touch gestures
             
-            // Check if we're scrolling inside a scrollable element or touching a task for swiping
-            let scrollable = e.target.closest('#todaySchedule, #weekSchedule, #monthSchedule, #listsContainer, #allTasks, #searchResults, #statsContainer, #settingsContainer, #repeatContainer, .modal-content, .task-card, .task-item, .time-slot-task, #repeatTasksList, #listItemsContainer, [data-task-id]');
+            // Check if we're scrolling inside a scrollable element
+            let scrollable = e.target.closest('#todaySchedule, #weekSchedule, #monthSchedule, #listsContainer, #allTasks, #searchResults, #statsContainer, #settingsContainer, #repeatContainer, .modal-content');
             
             if (!scrollable) {
                 e.preventDefault();
@@ -40,7 +40,7 @@
             
             // Remove dangerous characters and scripts
             return input
-                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/)<[^<]*)*<\/script>/gi, '')
                 .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
                 .replace(/javascript:/gi, '')
                 .replace(/on\w+\s*=/gi, '')
@@ -200,25 +200,6 @@
                 'Select All': 'Seleccionar Todo',
                 'Print Results': 'Imprimir Resultados',
                 'Trash': 'Papelera',
-                'Trash is empty': 'La papelera está vacía',
-                'deleted task': 'tarea eliminada',
-                'deleted tasks': 'tareas eliminadas',
-                'Restore All': 'Restaurar Todo',
-                'Empty Trash': 'Vaciar Papelera',
-                'Permanently delete': 'Eliminar permanentemente',
-                'This cannot be undone.': 'Esto no se puede deshacer.',
-                'Restore': 'Restaurar',
-                'Delete Forever': 'Eliminar Para Siempre',
-                'Deleted': 'Eliminada',
-                'Due': 'Vence',
-                'No date': 'Sin fecha',
-                'Showing': 'Mostrando',
-                'of': 'de',
-                'items': 'elementos',
-                'Prev': 'Anterior',
-                'Next': 'Siguiente',
-                'Page': 'Página',
-                'Are you sure you want to permanently delete all items in trash?': '¿Estás seguro de que quieres eliminar permanentemente todos los elementos de la papelera?',
                 
                 // Settings UI
                 'Settings / Ajustes': 'Ajustes / Settings',
@@ -408,11 +389,6 @@
             setTimeout(() => {
                 restoreMobileNavEmojis();
             }, 100);
-            
-            // Update Tawk.to chat language
-            if (typeof updateTawkLanguage === 'function') {
-                updateTawkLanguage(lang);
-            }
         }
         
         function toggleLanguageHeader() {
@@ -471,9 +447,7 @@
                 'nav-all': { icon: '🔍', key: 'Search' },
                 'nav-lists': { icon: '📝', key: 'Lists' },
                 'nav-repeat': { icon: '🔄', key: 'Repeat' },
-                'nav-undo': { icon: '↩️', key: 'Undo' },
-                'nav-trash': { icon: '🗑️', key: 'Trash' },
-                'nav-settings': { icon: '⚙️', key: 'Settings' }
+                'nav-undo': { icon: '↶', key: 'Undo' }
             };
             // Get current tab display mode to respect user preference
             const currentTabDisplayMode = localStorage.getItem('tabDisplayMode') || 'both';
@@ -959,7 +933,10 @@
             // Don't translate immediately - wait for DOM to be ready
         }
         
-        // API_BASE is defined by utils.js - no redeclaration needed
+        // CRITICAL: Define authentication functions FIRST before any other code
+        const API_BASE = window.location.hostname.includes('localhost') 
+            ? 'http://localhost:8787' 
+            : 'https://hyperfiler-fresh-api.joanmanelferrera-400.workers.dev';
         // Helper function to clear authentication data
         function clearAuthData() {
             // Clear BOTH localStorage and sessionStorage to be thorough
@@ -1180,7 +1157,7 @@
             
             // Remove dangerous content
             const cleaned = input
-                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/)<[^<]*)*<\/script>/gi, '')
                 .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
                 .replace(/javascript:/gi, '')
                 .replace(/on\w+\s*=/gi, '')
@@ -1204,7 +1181,7 @@
             
             // Remove dangerous content but don't limit length here
             const cleaned = notes
-                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/)<[^<]*)*<\/script>/gi, '')
                 .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
                 .replace(/javascript:/gi, '')
                 .replace(/on\w+\s*=/gi, '')
@@ -2202,8 +2179,8 @@
                 }
                 lastAuthCheck = now;
                 
-                // Mobile auth check - removed iPhone-specific detection
-                if (false && window.innerWidth <= 768 && /iPhone|iPad|iPod|Safari/i.test(navigator.userAgent)) {
+                // Mobile Safari fix: Validate token-based auth for mobile devices
+                if (window.innerWidth <= 768 && /iPhone|iPad|iPod|Safari/i.test(navigator.userAgent)) {
                     // Check localStorage first (persistent login), then sessionStorage fallback
                     let authToken = null;
                     const token = localStorage.getItem('authToken');
@@ -2228,7 +2205,7 @@
                     if (authToken) {
                         // Actually validate the token instead of just checking existence
                         try {
-                            const response = await authenticatedFetch(`${window.API_BASE}/auth/me`, {
+                            const response = await authenticatedFetch(`${API_BASE}/auth/me`, {
                                 method: 'GET'
                             });
                             
@@ -2263,7 +2240,7 @@
                 
                 for (let attempt = 1; attempt <= 3; attempt++) {
                     try {
-                        response = await authenticatedFetch(`${window.API_BASE}/auth/me`, {
+                        response = await authenticatedFetch(`${API_BASE}/auth/me`, {
                             method: 'GET'
                         });
                         
@@ -2638,7 +2615,7 @@
             try {
                 console.log('🔐 Attempting login with inline form');
                 
-                const response = await fetch(`${window.API_BASE}/auth/login`, {
+                const response = await fetch(`${API_BASE}/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2743,7 +2720,7 @@
         async function logout() {
             try {
                 // Call backend logout endpoint to clear httpOnly cookie
-                await authenticatedFetch(`${window.API_BASE}/auth/logout`, {
+                await authenticatedFetch(`${API_BASE}/auth/logout`, {
                     method: 'POST'
                 });
             } catch (error) {
@@ -3122,7 +3099,7 @@
         // Upgrade to Pro function
         async function upgradeToPro() {
             try {
-                const response = await authenticatedFetch(`${window.API_BASE}/payments/create-checkout-session`, {
+                const response = await authenticatedFetch(`${API_BASE}/payments/create-checkout-session`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -3294,7 +3271,7 @@
                     throw new Error('No authentication');
                 }
                 
-                const response = await fetch(`${window.API_BASE}/tasks/${taskId}`, {
+                const response = await fetch(`${API_BASE}/tasks/${taskId}`, {
                     method: 'DELETE',
                     mode: 'cors',
                     headers: getAuthHeaders()
@@ -3679,36 +3656,12 @@
         let initializationInProgress = false;
         
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🔥 DOMContentLoaded fired!');
-            
             if (initializationInProgress) {
                 console.log('Initialization already in progress, preventing duplicate');
                 return;
             }
             
             initializationInProgress = true;
-            
-            // IMMEDIATE N KEY TEST - Add this first thing
-            console.log('🔥 Adding IMMEDIATE N key test listener');
-            document.addEventListener('keydown', function(event) {
-                if (event.key.toLowerCase() === 'n') {
-                    console.log('🎯🎯🎯 IMMEDIATE N KEY TEST DETECTED!');
-                }
-            });
-            
-            // INITIALIZE LANGUAGE SYSTEM
-            console.log('🌐 Initializing language system...');
-            const savedLanguage = localStorage.getItem('preferredLanguage') || 'en';
-            currentLanguage = savedLanguage;
-            console.log('🌐 Restored language:', currentLanguage);
-            
-            // Apply translations immediately
-            setTimeout(() => {
-                translateUI();
-                updateLanguageButtonStyles();
-                updateHeaderLanguageButton();
-                console.log('🌐 Language system initialized and UI translated');
-            }, 50);
             
             // CRITICAL: Ensure mobile nav emojis are present on page load
             setTimeout(() => {
@@ -3962,47 +3915,15 @@
             updateMobileNavigation();
             
             // Add keyboard shortcuts
-            console.log('🔍 Adding keydown event listener');
-            console.log('🔍 Document ready state:', document.readyState);
-            console.log('🔍 Document element:', document.documentElement ? 'exists' : 'missing');
-            
-            try {
-            const keyHandler = function(event) {
-                // Debug ALL key presses
-                console.log('🔍 Key Debug: Key pressed:', event.key, 'Ctrl:', event.ctrlKey, 'Alt:', event.altKey, 'Meta:', event.metaKey);
-                
-                // Special debugging for 'n' key
-                if (event.key.toLowerCase() === 'n') {
-                    console.log('🎯 N KEY DETECTED! Target:', event.target.tagName, 'ActiveElement:', document.activeElement?.tagName);
-                }
-                
+            document.addEventListener('keydown', function(event) {
                 // Debug Ctrl+L capture
                 if (event.ctrlKey && event.key === 'l') {
                     console.log('🔥 Ctrl+L captured at top level - first handler');
                 }
                 
-                if ((event.key === 'n' || event.key === 'N') && !event.ctrlKey && !event.metaKey && !event.altKey) {
-                    console.log('🎯 N KEY HANDLER REACHED!');
-                    // Only trigger if not typing in an input field
-                    const activeElement = document.activeElement;
-                    const isTyping = activeElement && (
-                        activeElement.tagName === 'INPUT' || 
-                        activeElement.tagName === 'TEXTAREA' || 
-                        activeElement.contentEditable === 'true'
-                    );
-                    
-                    console.log('🔍 N Key Debug: activeElement:', activeElement?.tagName, activeElement);
-                    console.log('🔍 N Key Debug: isTyping:', isTyping);
-                    console.log('🔍 N Key Debug: contentEditable:', activeElement?.contentEditable);
-                    
-                    if (!isTyping) {
-                        console.log('🔍 N Key Debug: Opening add task modal');
-                        event.preventDefault();
-                        event.stopPropagation();
-                        openAddTaskModal();
-                    } else {
-                        console.log('🔍 N Key Debug: Blocked - user is typing in:', activeElement?.tagName);
-                    }
+                if (event.ctrlKey && event.key === 'n') {
+                    event.preventDefault();
+                    openAddTaskModal();
                 }
                 if (event.ctrlKey && event.key === 'z') {
                     event.preventDefault();
@@ -4096,20 +4017,7 @@
                     event.preventDefault();
                     event.target.click();
                 }
-            };
-            
-            document.addEventListener('keydown', keyHandler);
-            console.log('🔍 Keydown event listener registered successfully');
-            
-            // Test if event listeners are working
-            setTimeout(() => {
-                console.log('🔍 Testing event listener in 2 seconds...');
-                document.dispatchEvent(new KeyboardEvent('keydown', { key: 'TEST' }));
-            }, 2000);
-            
-            } catch (error) {
-                console.error('🔥 ERROR in keyboard handler setup:', error);
-            }
+            });
             
             try {
                 // Set default date and time to now
@@ -4367,7 +4275,7 @@
         window.testSimpleSync = async function() {
             try {
                 // Get fresh token
-                const loginResponse = await fetch(`${window.API_BASE}/auth/login`, {
+                const loginResponse = await fetch(`${API_BASE}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
@@ -4455,10 +4363,7 @@
                 'lists': { key: 'HeaderLists', emoji: '📝' }
             };
             
-            // Update both legacy and modern header titles
             const headerTitle = document.getElementById('mobileHeaderTitle');
-            const modernHeaderTitle = document.getElementById('dynamicHeaderTitle');
-            
             if (headerTitle) {
                 const titleData = titles[viewName];
                 if (titleData) {
@@ -4473,27 +4378,6 @@
                 } else {
                     headerTitle.textContent = viewName;
                 }
-            }
-            
-            // Update modern header with clean title (no emojis)
-            if (modernHeaderTitle) {
-                const cleanTitles = {
-                    'today': 'Today',
-                    'week': 'Week',
-                    'calendar': 'Calendar',
-                    'all': 'All Tasks',
-                    'repeat': 'Recurring',
-                    'lists': 'Lists'
-                };
-                
-                // Add animation class
-                modernHeaderTitle.classList.add('animating');
-                modernHeaderTitle.textContent = cleanTitles[viewName] || viewName;
-                
-                // Remove animation class after animation completes
-                setTimeout(() => {
-                    modernHeaderTitle.classList.remove('animating');
-                }, 300);
             }
             // Update mobile navigation active state
             const mobileNavButtons = document.querySelectorAll('.mobile-nav-btn');
@@ -4623,12 +4507,132 @@
             if (typeof showKeyboardShortcuts === 'function') {
                 showKeyboardShortcuts();
             } else {
-                alert('Keyboard Shortcuts:\n\nN: Add new task\nCtrl+T: Today view\nCtrl+W: Week view\nCtrl+M: Month view\nCtrl+L: Lists view\nCtrl+R: Repeat view\nCtrl+U: Undo view\nCtrl+Y: Statistics view\nCtrl+S: Search\nCtrl+Z: Undo action\nCtrl+B: Create backup\n\nUse arrow keys to navigate tasks\nPress Enter to edit a task\nPress Space to delete selected task');
+                alert('Keyboard Shortcuts:\n\nCtrl+N: Add new task\nCtrl+T: Today view\nCtrl+W: Week view\nCtrl+M: Month view\nCtrl+L: Lists view\nCtrl+R: Repeat view\nCtrl+U: Undo view\nCtrl+Y: Statistics view\nCtrl+S: Search\nCtrl+Z: Undo action\nCtrl+B: Create backup\n\nUse arrow keys to navigate tasks\nPress Enter to edit a task\nPress Space to delete selected task');
             }
         }
         // Mobile task actions dropdown functionality
         let mobileTaskDropdownTimeout;
         
+        function showMobileTaskModal(taskId, event) {
+            event.stopPropagation();
+            
+            // Don't show mobile task modal in keyboard-only mode
+            if (localStorage.getItem('keyboardOnlyMode') === 'true') {
+                return;
+            }
+            
+            // Clear any existing timeout
+            if (mobileTaskDropdownTimeout) {
+                clearTimeout(mobileTaskDropdownTimeout);
+            }
+            
+            const modal = document.getElementById('mobileTaskModal');
+            
+            if (!modal) {
+                console.error('❌ Modal element not found!');
+                return;
+            }
+            
+            // Get the clicked element position
+            const clickedElement = event.target.closest('.task-item');
+            let rect;
+            if (!clickedElement) {
+                console.error('❌ Could not find task-item element');
+                // Try to position modal at click location as fallback
+                rect = { bottom: event.clientY, left: event.clientX };
+            } else {
+                rect = clickedElement.getBoundingClientRect();
+            }
+            
+            // Populate modal with task actions
+            const buttonsContainer = document.getElementById('mobileTaskModalButtons');
+            buttonsContainer.innerHTML = `
+                <div style="display: flex; flex-direction: column; width: 100%; margin: 0; padding: 0; gap: 8px;">
+                        <button onclick="delayTask('${taskId}', 1, event); hideMobileTaskModal()" 
+                            style="border: none; border-radius: 8px; background: #FFC107 !important; color: #000 !important; 
+                                   font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; height: 60px; margin: 0; padding: 0;
+                                   display: flex; align-items: center; justify-content: center;">
+                            ⏰ Delay +1 Day
+                        </button>
+                        <button onclick="delayTask('${taskId}', 7, event); hideMobileTaskModal()" 
+                            style="border: none; border-radius: 8px; background: #007BFF !important; color: white !important; 
+                                   font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; height: 60px; margin: 0; padding: 0;
+                                   display: flex; align-items: center; justify-content: center;">
+                            📅 Delay +1 Week
+                        </button>
+                        <button onclick="delayTask('${taskId}', 30, event); hideMobileTaskModal()" 
+                            style="border: none; border-radius: 8px; background: #28A745 !important; color: white !important; 
+                                   font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; height: 60px; margin: 0; padding: 0;
+                                   display: flex; align-items: center; justify-content: center;">
+                            📆 Delay +1 Month
+                        </button>
+                        <button onclick="quickDeleteTask('${taskId}', event); hideMobileTaskModal()" 
+                            style="border: none; border-radius: 8px; background: #DC3545 !important; color: white !important; 
+                                   font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; height: 60px; margin: 0; padding: 0;
+                                   display: flex; align-items: center; justify-content: center;">
+                            🗑️ Delete Task
+                        </button>
+                        <button onclick="editTask('${taskId}', event); hideMobileTaskModal()" 
+                            style="border: none; border-radius: 8px; background: #6C757D !important; color: white !important; 
+                                   font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; height: 60px; margin: 0; padding: 0;
+                                   display: flex; align-items: center; justify-content: center;">
+                            ✏️ Edit Task
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Enhanced positioning with viewport boundary checks
+            const viewportHeight = window.innerHeight;
+            const viewportWidth = window.innerWidth;
+            const modalHeight = 400; // Approximate modal height
+            const modalWidth = 320;
+            
+            // Calculate optimal position
+            let top = rect.bottom + 5;
+            let left = rect.left;
+            
+            // Adjust if modal would go below viewport
+            if (top + modalHeight > viewportHeight) {
+                // Position above the task instead
+                top = Math.max(10, rect.top - modalHeight - 5);
+            }
+            
+            // Adjust if modal would still go above viewport (for very tall modals)
+            if (top < 10) {
+                // Center vertically in viewport as last resort
+                top = Math.max(10, (viewportHeight - modalHeight) / 2);
+            }
+            
+            // Adjust horizontal position with better edge handling
+            left = Math.max(10, Math.min(left, viewportWidth - modalWidth - 10));
+            
+            // Always center the modal for smooth appearance
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            
+            // Show modal
+            modal.classList.add('show');
+            
+            // Set auto-close timer
+            mobileTaskDropdownTimeout = setTimeout(() => {
+                hideMobileTaskModal();
+            }, 3000); // Auto-close after 3 seconds
+        }
+        function hideMobileTaskModal() {
+            // Clear any existing timeout
+            if (mobileTaskDropdownTimeout) {
+                clearTimeout(mobileTaskDropdownTimeout);
+                mobileTaskDropdownTimeout = null;
+            }
+            
+            const modal = document.getElementById('mobileTaskModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
         function showMobileTaskActions(taskId, event) {
             if (event) event.stopPropagation();
             
@@ -4663,7 +4667,7 @@
                             style="width: 100%; padding: 12px 0; font-size: 17px; border: none; background: transparent; outline: none; font-weight: 400; margin-bottom: 15px; color: #000; line-height: 1.3; border-bottom: 1px solid #e5e5ea;"
                             placeholder="Título de la tarea">
                         
-                        <textarea id="mobileEditNotes" placeholder="Notas" maxlength="30000"
+                        <textarea id="mobileEditNotes" placeholder="Notas" 
                             oninput="autoSaveMobileTaskEdit('${taskId}')"
                             onfocus="clearMobileEditAutoClose()"
                             onblur="saveMobileTaskEdit('${taskId}'); setMobileEditAutoClose()"
@@ -5131,11 +5135,6 @@
             currentSwipeElement = event.currentTarget;
             isSwipeInProgress = false;
             swipeStartTime = Date.now();
-            
-            // Visual feedback that touch started
-            if (currentSwipeElement) {
-                currentSwipeElement.style.background = 'rgba(0, 123, 255, 0.05)';
-            }
         }
         
         function handleTaskTouchMove(event) {
@@ -5164,11 +5163,9 @@
                     
                     // Show action hint
                     if (deltaX > 30) {
-                        // Right swipe - yellow for "move to tomorrow"
                         currentSwipeElement.style.background = 'rgba(255, 193, 7, 0.15)';
                     } else if (deltaX < -30) {
-                        // Left swipe - blue for "set date/time"
-                        currentSwipeElement.style.background = 'rgba(0, 123, 255, 0.15)';
+                        currentSwipeElement.style.background = 'rgba(220, 53, 69, 0.15)';
                     } else {
                         currentSwipeElement.style.background = '';
                     }
@@ -5189,27 +5186,17 @@
             currentSwipeElement.style.transform = '';
             currentSwipeElement.style.background = '';
             
-            // Much simpler swipe detection - just need minimum distance
-            if (Math.abs(deltaX) > 50) {
-                // Show immediate visual feedback
-                const direction = deltaX > 0 ? 'RIGHT' : 'LEFT';
-                showInlineNotification(`🔄 SWIPE ${direction} DETECTED!`, 'info');
-                
+            // Only trigger if it was a real swipe (not just a tap)
+            if (isSwipeInProgress && Math.abs(deltaX) > 60 && swipeTime < 1000) {
                 setTimeout(() => {
                     if (deltaX > 0) {
-                        // Swipe right - move task to next day
-                        delayTask(taskId, 1, event);
-                        showInlineNotification('📅 Task moved to tomorrow', 'success');
+                        // Swipe right - open delay modal
+                        toggleMobileTimeDropdown(taskId, event);
                     } else {
-                        // Swipe left - open iOS-style date/time picker
-                        openIOSStyleDateTimePicker(taskId);
+                        // Swipe left - delete task
+                        quickDeleteTask(taskId, event);
                     }
-                }, 500);
-            } else {
-                // Show debug info if no swipe detected
-                if (Math.abs(deltaX) > 10) {
-                    showInlineNotification(`🤏 Small movement detected: ${Math.round(deltaX)}px`, 'info');
-                }
+                }, 100);
             }
             
             // Reset swipe state
@@ -5217,308 +5204,9 @@
             isSwipeInProgress = false;
             swipeStartTime = 0;
         }
-        
-        // iOS-style date/time picker modal
-        function openIOSStyleDateTimePicker(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (!task) return;
-            
-            // Create modal overlay
-            const modal = document.createElement('div');
-            modal.id = 'iosDateTimeModal';
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.4);
-                display: flex;
-                align-items: flex-end;
-                justify-content: center;
-                z-index: 10000;
-                opacity: 0;
-                transition: opacity 0.3s ease;
-            `;
-            
-            // Get current date and time
-            const currentDate = task.dueDate || new Date().toISOString().split('T')[0];
-            const currentTime = task.dueTime || '';
-            
-            // Create picker content
-            modal.innerHTML = `
-                <div style="
-                    background: #f8f9fa;
-                    border-radius: 16px 16px 0 0;
-                    width: 100%;
-                    max-width: 100%;
-                    padding: 0;
-                    transform: translateY(100%);
-                    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-                ">
-                    <!-- Header -->
-                    <div style="
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 16px 20px;
-                        border-bottom: 1px solid #e9ecef;
-                        background: #ffffff;
-                        border-radius: 16px 16px 0 0;
-                    ">
-                        <button onclick="closeIOSDateTimePicker()" style="
-                            background: none;
-                            border: none;
-                            color: #007AFF;
-                            font-size: 17px;
-                            font-weight: 400;
-                            cursor: pointer;
-                            padding: 8px;
-                        ">Cancel</button>
-                        <h3 style="
-                            margin: 0;
-                            font-size: 17px;
-                            font-weight: 600;
-                            color: #1c1c1e;
-                        ">Set Date & Time</h3>
-                        <button onclick="saveIOSDateTime('\${taskId}')" style="
-                            background: none;
-                            border: none;
-                            color: #007AFF;
-                            font-size: 17px;
-                            font-weight: 600;
-                            cursor: pointer;
-                            padding: 8px;
-                        ">Done</button>
-                    </div>
-                    
-                    <!-- Date Input -->
-                    <div style="background: #ffffff; padding: 16px 20px; border-bottom: 1px solid #e9ecef;">
-                        <label style="
-                            display: block;
-                            font-size: 15px;
-                            font-weight: 600;
-                            color: #1c1c1e;
-                            margin-bottom: 8px;
-                        ">Date</label>
-                        <input type="date" id="iosDateInput" value="\${currentDate}" style="
-                            width: 100%;
-                            padding: 12px 16px;
-                            border: 1px solid #d1d5db;
-                            border-radius: 10px;
-                            font-size: 16px;
-                            background: #f8f9fa;
-                            color: #1c1c1e;
-                            outline: none;
-                        ">
-                    </div>
-                    
-                    <!-- Time Input -->
-                    <div style="background: #ffffff; padding: 16px 20px; border-bottom: 1px solid #e9ecef;">
-                        <label style="
-                            display: block;
-                            font-size: 15px;
-                            font-weight: 600;
-                            color: #1c1c1e;
-                            margin-bottom: 8px;
-                        ">Time</label>
-                        <input type="time" id="iosTimeInput" value="\${currentTime}" style="
-                            width: 100%;
-                            padding: 12px 16px;
-                            border: 1px solid #d1d5db;
-                            border-radius: 10px;
-                            font-size: 16px;
-                            background: #f8f9fa;
-                            color: #1c1c1e;
-                            outline: none;
-                        ">
-                        <div style="
-                            display: flex;
-                            gap: 8px;
-                            margin-top: 12px;
-                            flex-wrap: wrap;
-                        ">
-                            <button onclick="setQuickTime('09:00')" style="
-                                background: #e9ecef;
-                                border: none;
-                                padding: 8px 12px;
-                                border-radius: 6px;
-                                font-size: 14px;
-                                color: #495057;
-                                cursor: pointer;
-                            ">9:00 AM</button>
-                            <button onclick="setQuickTime('12:00')" style="
-                                background: #e9ecef;
-                                border: none;
-                                padding: 8px 12px;
-                                border-radius: 6px;
-                                font-size: 14px;
-                                color: #495057;
-                                cursor: pointer;
-                            ">12:00 PM</button>
-                            <button onclick="setQuickTime('15:00')" style="
-                                background: #e9ecef;
-                                border: none;
-                                padding: 8px 12px;
-                                border-radius: 6px;
-                                font-size: 14px;
-                                color: #495057;
-                                cursor: pointer;
-                            ">3:00 PM</button>
-                            <button onclick="setQuickTime('18:00')" style="
-                                background: #e9ecef;
-                                border: none;
-                                padding: 8px 12px;
-                                border-radius: 6px;
-                                font-size: 14px;
-                                color: #495057;
-                                cursor: pointer;
-                            ">6:00 PM</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Quick Actions -->
-                    <div style="background: #ffffff; padding: 16px 20px;">
-                        <div style="
-                            display: flex;
-                            gap: 8px;
-                            flex-wrap: wrap;
-                        ">
-                            <button onclick="setQuickDate('today')" style="
-                                background: #007AFF;
-                                color: white;
-                                border: none;
-                                padding: 10px 16px;
-                                border-radius: 8px;
-                                font-size: 15px;
-                                font-weight: 500;
-                                cursor: pointer;
-                                flex: 1;
-                                min-width: 70px;
-                            ">Today</button>
-                            <button onclick="setQuickDate('tomorrow')" style="
-                                background: #34C759;
-                                color: white;
-                                border: none;
-                                padding: 10px 16px;
-                                border-radius: 8px;
-                                font-size: 15px;
-                                font-weight: 500;
-                                cursor: pointer;
-                                flex: 1;
-                                min-width: 70px;
-                            ">Tomorrow</button>
-                            <button onclick="setQuickDate('nextweek')" style="
-                                background: #FF9500;
-                                color: white;
-                                border: none;
-                                padding: 10px 16px;
-                                border-radius: 8px;
-                                font-size: 15px;
-                                font-weight: 500;
-                                cursor: pointer;
-                                flex: 1;
-                                min-width: 70px;
-                            ">Next Week</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Safe area padding for iOS -->
-                    <div style="height: env(safe-area-inset-bottom, 20px);"></div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            // Animate in
-            setTimeout(() => {
-                modal.style.opacity = '1';
-                const content = modal.querySelector('div');
-                content.style.transform = 'translateY(0)';
-            }, 50);
-            
-            // Close on backdrop click
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    closeIOSDateTimePicker();
-                }
-            });
-        }
-        
-        function closeIOSDateTimePicker() {
-            const modal = document.getElementById('iosDateTimeModal');
-            if (modal) {
-                modal.style.opacity = '0';
-                const content = modal.querySelector('div');
-                content.style.transform = 'translateY(100%)';
-                setTimeout(() => {
-                    modal.remove();
-                }, 300);
-            }
-        }
-        
-        function setQuickTime(time) {
-            const timeInput = document.getElementById('iosTimeInput');
-            if (timeInput) {
-                timeInput.value = time;
-            }
-        }
-        
-        function setQuickDate(type) {
-            const dateInput = document.getElementById('iosDateInput');
-            if (!dateInput) return;
-            
-            const today = new Date();
-            let targetDate;
-            
-            switch(type) {
-                case 'today':
-                    targetDate = today;
-                    break;
-                case 'tomorrow':
-                    targetDate = new Date(today);
-                    targetDate.setDate(today.getDate() + 1);
-                    break;
-                case 'nextweek':
-                    targetDate = new Date(today);
-                    targetDate.setDate(today.getDate() + 7);
-                    break;
-                default:
-                    targetDate = today;
-            }
-            
-            dateInput.value = targetDate.toISOString().split('T')[0];
-        }
-        
-        function saveIOSDateTime(taskId) {
-            const dateInput = document.getElementById('iosDateInput');
-            const timeInput = document.getElementById('iosTimeInput');
-            
-            if (!dateInput || !timeInput) return;
-            
-            const task = tasks.find(t => t.id === taskId);
-            if (!task) return;
-            
-            // Update task
-            task.dueDate = dateInput.value;
-            task.dueTime = timeInput.value;
-            task.updatedAt = new Date().toISOString();
-            
-            // Save and refresh
-            saveTasksToLocalStorage();
-            saveTasksToServer();
-            renderCurrentView();
-            
-            // Show success message
-            const timeDisplay = timeInput.value ? ` at ${formatTime(timeInput.value)}` : '';
-            showInlineNotification(`📅 Task scheduled for ${formatDateForDisplay(dateInput.value)}${timeDisplay}`, 'success');
-            
-            // Close modal
-            closeIOSDateTimePicker();
-        }
         // Hide modal when clicking outside
         document.addEventListener('click', function(event) {
-            if (!event.target.closest('#mobileTaskModal')) {
+            if (!event.target.closest('.mobile-task-actions') && !event.target.closest('#mobileTaskModal')) {
                 hideMobileTaskModal();
             }
         });
@@ -5629,7 +5317,7 @@
                     userId: window.currentUser.user.id
                 };
                 
-                const response = await fetch(`${window.API_BASE}/lists/sync`, {
+                const response = await fetch(`${API_BASE}/lists/sync`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -5690,7 +5378,7 @@
                     userId: window.currentUser.user.id
                 };
                 
-                const response = await fetch(`${window.API_BASE}/tasks/sync`, {
+                const response = await fetch(`${API_BASE}/tasks/sync`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -5744,7 +5432,7 @@
             }
             
             try {
-                const response = await fetch(`${window.API_BASE}/lists/${window.currentUser.user.id}`, {
+                const response = await fetch(`${API_BASE}/lists/${window.currentUser.user.id}`, {
                     headers: getAuthHeaders()
                 });
                 if (response.ok) {
@@ -5819,7 +5507,7 @@
                 // Use the current customTemplates variable (which should be in sync with localStorage)
                 const templatesArray = customTemplates || [];
                 
-                const response = await fetch(`${window.API_BASE}/templates/sync`, {
+                const response = await fetch(`${API_BASE}/templates/sync`, {
                     method: 'POST',
                     headers: getAuthHeaders(),
                     body: JSON.stringify({
@@ -5856,7 +5544,7 @@
             }
             
             try {
-                const response = await fetch(`${window.API_BASE}/templates/${window.currentUser.user.id}`, {
+                const response = await fetch(`${API_BASE}/templates/${window.currentUser.user.id}`, {
                     headers: getAuthHeaders()
                 });
                 if (response.ok) {
@@ -5930,7 +5618,7 @@
             try {
                 console.log('📥 Downloading tasks from server...');
                 
-                const response = await fetch(`${window.API_BASE}/tasks/${window.currentUser.user.id}`, {
+                const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
                     headers: {
                         'Authorization': `Bearer ${authToken}`,
                         'Content-Type': 'application/json'
@@ -6044,10 +5732,8 @@
                     }
                 }
                 
-                // Refresh UI - delayed to preserve touch handlers
-                setTimeout(() => {
-                    renderCurrentView();
-                }, 100);
+                // Refresh UI
+                renderCurrentView();
                 
                 return;
                 
@@ -6088,7 +5774,7 @@
             try {
                 console.log(`📥 DELTA SYNC: Getting changes since ${new Date(parseInt(lastSyncTime)).toISOString()}`);
                 
-                const response = await fetch(`${window.API_BASE}/tasks/${window.currentUser.user.id}/changes?since=${lastSyncTime}`, {
+                const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}/changes?since=${lastSyncTime}`, {
                     headers: {
                         'Authorization': `Bearer ${authToken}`,
                         'Content-Type': 'application/json'
@@ -6160,7 +5846,7 @@
             }
             try {
                 console.log(`📤 DELTA UPLOAD: Sending ${(localChanges.created || []).length} created, ${(localChanges.updated || []).length} updated, ${(localChanges.deleted || []).length} deleted`);
-                const response = await fetch(`${window.API_BASE}/tasks/delta`, {
+                const response = await fetch(`${API_BASE}/tasks/delta`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${authToken}`,
@@ -6317,10 +6003,8 @@
                 console.log('📥 Falling back to full sync');
                 await downloadAllTasks();
             } else {
-                // Delta sync succeeded, refresh UI - delayed to preserve touch handlers
-                setTimeout(() => {
-                    renderCurrentView();
-                }, 100);
+                // Delta sync succeeded, refresh UI
+                renderCurrentView();
                 
                 // Update sync timestamp
                 localStorage.setItem('lastSyncTime', Date.now().toString());
@@ -6346,7 +6030,7 @@
                 const syncPeriod = getSyncPeriod();
                 
                 // Build URL with selective sync parameter for new devices
-                let apiUrl = `${window.API_BASE}/tasks/${window.currentUser.user.id}`;
+                let apiUrl = `${API_BASE}/tasks/${window.currentUser.user.id}`;
                 if (isNewDevice && syncPeriod !== 'all') {
                     const cutoffDate = new Date();
                     cutoffDate.setDate(cutoffDate.getDate() - parseInt(syncPeriod));
@@ -6688,9 +6372,9 @@
                 
                 console.log('🔑 Using httpOnly cookie authentication');
                 console.log('👤 User ID:', window.currentUser?.user?.id);
-                console.log('🌐 API URL:', `${window.API_BASE}/tasks/${window.currentUser.user.id}`);
+                console.log('🌐 API URL:', `${API_BASE}/tasks/${window.currentUser.user.id}`);
                 
-                const response = await fetch(`${window.API_BASE}/tasks/${window.currentUser.user.id}`, {
+                const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
                     headers: getAuthHeaders()
                 });
                 
@@ -6807,7 +6491,7 @@
             
             try {
                 
-                const response = await fetch(`${window.API_BASE}/tasks/${window.currentUser.user.id}`, {
+                const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
                     headers: getAuthHeaders()
                 });
                 
@@ -9115,11 +8799,13 @@
             const timeValue = document.getElementById('editTaskTimeOnly').value;
             const button = document.getElementById('dateTimeDisplay');
             
-            if (!button) return;
-            
             if (dateValue && timeValue) {
-                // Use formatDateForDisplay for consistent "Today" formatting
-                const dateStr = formatDateForDisplay(dateValue);
+                const date = new Date(dateValue);
+                const dateStr = date.toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
                 
                 // Format time to 12-hour format for better readability
                 const [hours, minutes] = timeValue.split(':');
@@ -9127,11 +8813,15 @@
                 const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
                 const formattedTime = `${hour12}:${minutes} ${ampm}`;
                 
-                button.textContent = `${dateStr}, ${formattedTime}`;
+                button.textContent = `${dateStr} at ${formattedTime}`;
             } else if (dateValue) {
-                // Use formatDateForDisplay for consistent "Today" formatting
-                const dateStr = formatDateForDisplay(dateValue);
-                button.textContent = dateStr;  // Just show "Today" without "(no time)"
+                const date = new Date(dateValue);
+                const dateStr = date.toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+                button.textContent = `${dateStr} (no time)`;
             } else {
                 button.textContent = 'Select date & time...';
             }
@@ -9139,33 +8829,6 @@
         // Navigation and view management
         function showView(viewName, preserveDate = false) {
             currentView = viewName;
-            
-            // Track page view in Tawk.to
-            if (typeof trackTawkPageView === 'function') {
-                trackTawkPageView(viewName);
-            }
-            
-            // Update modern header title
-            const modernHeaderTitle = document.getElementById('dynamicHeaderTitle');
-            if (modernHeaderTitle) {
-                const cleanTitles = {
-                    'today': 'Today',
-                    'week': 'Week',
-                    'calendar': 'Calendar',
-                    'all': 'All Tasks',
-                    'search': 'Search',
-                    'repeat': 'Recurring',
-                    'lists': 'Lists',
-                    'stats': 'Statistics',
-                    'undo': currentLanguage === 'es' ? 'Historial' : 'History'
-                };
-                
-                modernHeaderTitle.classList.add('animating');
-                modernHeaderTitle.textContent = cleanTitles[viewName] || viewName;
-                setTimeout(() => {
-                    modernHeaderTitle.classList.remove('animating');
-                }, 300);
-            }
             
             // Reset task selection when changing views
             if (typeof resetTaskSelection === 'function') {
@@ -10621,7 +10284,7 @@
                 const dateStr = task.dueDate ? formatDate(new Date(task.dueDate)) : 'No date';
                 const timeStr = task.dueTime ? ` at ${formatTime(task.dueTime)}` : '';
                 const isCompleted = task.status === 'completed';
-                const isOverdue = task.status === 'pending' && task.dueDate && task.dueDate < today && !task.isEvent;
+                const isOverdue = task.dueDate && task.dueDate < today && !isCompleted;
                 const isToday = task.dueDate === today;
                 
                 let statusStyle = 'background: #e8f5e8; color: #2e7d32;'; // Default pending
@@ -11057,23 +10720,7 @@
         function loadListSections() {
             try {
                 const saved = localStorage.getItem('gtd_list_sections');
-                const loadedSections = saved ? JSON.parse(saved) : [];
-                
-                // Preserve existing collapsed states when reloading
-                if (listSections && listSections.length > 0) {
-                    const currentStates = new Map();
-                    listSections.forEach(section => {
-                        currentStates.set(section.id, section.collapsed);
-                    });
-                    
-                    // Update with fresh data but keep collapsed states
-                    listSections = loadedSections.map(section => ({
-                        ...section,
-                        collapsed: currentStates.has(section.id) ? currentStates.get(section.id) : section.collapsed
-                    }));
-                } else {
-                    listSections = loadedSections;
-                }
+                listSections = saved ? JSON.parse(saved) : [];
             } catch (error) {
                 console.error('Error loading list sections:', error);
                 listSections = [];
@@ -11136,7 +10783,7 @@
                          ondragover="handleSectionDragOver(event)"
                          ondrop="handleSectionDrop(event, ${index})">
                         <div class="list-section-drag-handle">⋮⋮</div>
-                        <div class="list-section-header" onclick="${typeof toggleListSection === 'function' ? `toggleListSection('${section.id}')` : 'console.warn(\"toggleListSection not available\")'}">
+                        <div class="list-section-header" onclick="toggleListSection('${section.id}')">
                             <div class="list-section-title">
                                 <span>${isCollapsed ? '📁' : '📂'}</span>
                                 ${section.name}
@@ -11235,144 +10882,26 @@
         
         // Toggle list section collapse/expand
         async function toggleListSection(sectionId) {
-            console.log('🔄 toggleListSection called with ID:', sectionId);
-            
-            // Use global scope to match ui.js implementation
-            const sections = window.listSections || listSections;
-            if (!sections) {
-                console.warn('No listSections found in toggleListSection');
-                return;
-            }
-            
-            const section = sections.find(s => s.id === sectionId);
+            const section = listSections.find(s => s.id === sectionId);
             if (section) {
-                console.log('📁 Toggling section:', section.name, 'collapsed:', !section.collapsed);
                 section.collapsed = !section.collapsed;
-                
-                // Update global reference
-                if (window.listSections) {
-                    window.listSections = sections;
-                }
-                
                 await saveListSections();
                 renderListsView();
-            } else {
-                console.warn('Section not found with ID:', sectionId, 'Available sections:', sections.map(s => s.id));
             }
         }
         
         async function toggleAllSections() {
-            console.log('🔄 TOGGLE ALL (extracted_js): Starting, current view:', window.currentView);
+            // Check if all sections are collapsed
+            const allCollapsed = listSections.every(section => section.collapsed);
             
-            try {
-                // Check which view we're in and find appropriate sections
-                const listSections = document.querySelectorAll('.list-section');
-                const timeBlocks = document.querySelectorAll('.time-block');
-                
-                console.log(`🔄 TOGGLE ALL (extracted_js): Found ${listSections.length} list sections, ${timeBlocks.length} time blocks`);
-                
-                if (listSections.length > 0) {
-                    // Lists view - use data-driven approach
-                    const sections = window.listSections || [];
-                    if (sections.length === 0) {
-                        console.warn('No listSections data found');
-                        return;
-                    }
-                    
-                    // Check if all sections are collapsed
-                    const allCollapsed = sections.every(section => section.collapsed);
-                    
-                    // Toggle all sections to the opposite state
-                    sections.forEach(section => {
-                        section.collapsed = !allCollapsed;
-                    });
-                    
-                    // Save and refresh
-                    await saveListSections();
-                    renderListsView();
-                    
-                    console.log(`✅ Toggled ${sections.length} list sections - ${allCollapsed ? 'expanded' : 'collapsed'} all`);
-                    
-                } else if (timeBlocks.length > 0) {
-                    // Today view - use time block approach
-                    console.log('🔄 TOGGLE ALL (extracted_js): Using time blocks');
-                    
-                    // Get current collapse states from localStorage
-                    const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
-                    
-                    // Check if any time blocks are visible
-                    let anyVisible = false;
-                    timeBlocks.forEach(block => {
-                        const header = block.querySelector('.time-block-header');
-                        if (header) {
-                            const timeKey = header.textContent.includes('No Specific Time') ? 'untimed' : 
-                                           header.textContent.match(/\d{1,2}:\d{2}/)?.[0]?.replace(':', '');
-                            if (timeKey && collapseStates[timeKey] !== true) {
-                                anyVisible = true;
-                            }
-                        }
-                    });
-                    
-                    // Toggle all time blocks
-                    timeBlocks.forEach(block => {
-                        const header = block.querySelector('.time-block-header');
-                        if (header) {
-                            const timeKey = header.textContent.includes('No Specific Time') ? 'untimed' : 
-                                           header.textContent.match(/\d{1,2}:\d{2}/)?.[0]?.replace(':', '');
-                            if (timeKey && typeof toggleTimeBlock === 'function') {
-                                const shouldCollapse = anyVisible;
-                                const currentlyCollapsed = collapseStates[timeKey] === true;
-                                
-                                // Only toggle if state needs to change
-                                if (currentlyCollapsed !== shouldCollapse) {
-                                    toggleTimeBlock(timeKey);
-                                }
-                            }
-                        }
-                    });
-                    
-                    console.log(`✅ Toggled ${timeBlocks.length} time blocks - ${anyVisible ? 'collapsed' : 'expanded'} all`);
-                    
-                } else {
-                    // No sections found - try again after a brief delay
-                    console.log('🔄 TOGGLE ALL (extracted_js): No sections found, retrying in 100ms...');
-                    setTimeout(async () => {
-                        const retryListSections = document.querySelectorAll('.list-section');
-                        const retryTimeBlocks = document.querySelectorAll('.time-block');
-                        
-                        if (retryListSections.length > 0) {
-                            // Retry with list sections
-                            const sections = window.listSections || [];
-                            if (sections.length > 0) {
-                                const allCollapsed = sections.every(section => section.collapsed);
-                                sections.forEach(section => {
-                                    section.collapsed = !allCollapsed;
-                                });
-                                await saveListSections();
-                                renderListsView();
-                            }
-                        } else if (retryTimeBlocks.length > 0) {
-                            // Call the time block function if available
-                            if (typeof toggleTimeBlock === 'function') {
-                                retryTimeBlocks.forEach(block => {
-                                    const header = block.querySelector('.time-block-header');
-                                    if (header) {
-                                        const timeKey = header.textContent.includes('No Specific Time') ? 'untimed' : 
-                                                       header.textContent.match(/\d{1,2}:\d{2}/)?.[0]?.replace(':', '');
-                                        if (timeKey) {
-                                            toggleTimeBlock(timeKey);
-                                        }
-                                    }
-                                });
-                            }
-                        } else {
-                            console.warn('🔄 TOGGLE ALL (extracted_js): No sections found after retry');
-                        }
-                    }, 100);
-                }
-            } catch (error) {
-                console.error('Error in toggleAllSections (extracted_js):', error);
-            }
+            // Toggle all sections to the opposite state
+            listSections.forEach(section => {
+                section.collapsed = !allCollapsed;
+            });
+            
+            // Save and refresh
+            await saveListSections();
+            renderListsView();
         }
         
         // Open create section modal
@@ -11687,8 +11216,8 @@
         }
         
         // Variables for list items modal
-        window.currentListSectionId = null;
-        window.currentListId = null;
+        let currentListSectionId = null;
+        let currentListId = null;
         
         // Open list modal to manage items
         function openListModal(sectionId, listId) {
@@ -11699,8 +11228,8 @@
             if (!list) return;
             
             // Store current list context
-            window.currentListSectionId = sectionId;
-            window.currentListId = listId;
+            currentListSectionId = sectionId;
+            currentListId = listId;
             
             // Update modal title
             document.getElementById('listItemsModalTitle').textContent = `📋 ${list.name}`;
@@ -11730,8 +11259,8 @@
         function closeListItemsModal(event) {
             if (!event || event.target === document.getElementById('listItemsModal')) {
                 document.getElementById('listItemsModal').style.display = 'none';
-                window.currentListSectionId = null;
-                window.currentListId = null;
+                currentListSectionId = null;
+                currentListId = null;
             }
         }
         
@@ -11859,10 +11388,10 @@
         
         // Toggle list item completion
         async function toggleListItem(itemIndex) {
-            const section = listSections.find(s => s.id == window.currentListSectionId);
+            const section = listSections.find(s => s.id == currentListSectionId);
             if (!section) return;
             
-            const list = section.lists.find(l => l.id == window.currentListId);
+            const list = section.lists.find(l => l.id == currentListId);
             if (!list || !list.items || !list.items[itemIndex]) return;
             
             // Toggle completed status
@@ -13021,7 +12550,7 @@
         }
         // Render individual task card
         function renderTaskCard(task) {
-            const isOverdue = window.isTaskOverdue ? window.isTaskOverdue(task) : (task.dueDate && task.dueDate < getLocalDateString() && task.status === 'pending');
+            const isOverdue = task.dueDate && task.dueDate < getLocalDateString() && task.status === 'pending';
             const isEvent = task.isEvent;
             let cardClass = `task-card ${task.status}`;
             
@@ -13034,13 +12563,7 @@
             const timeDisplay = task.dueTime ? ` at ${formatTime(task.dueTime)}` : '';
             
             return `
-                <div class="${cardClass}" 
-                     onclick="handleTaskCardClick('${task.id}', event)" 
-                     oncontextmenu="editTask('${task.id}', event); return false;"
-                     ontouchstart="handleTaskTouchStart(event)"
-                     ontouchmove="handleTaskTouchMove(event)"
-                     ontouchend="handleTaskTouchEnd(event)"
-                     data-task-id="${task.id}">
+                <div class="${cardClass}" onclick="editTask('${task.id}')" data-task-id="${task.id}">
                     <div class="task-header">
                         <div class="task-title">${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}</div>
                     </div>
@@ -13052,8 +12575,7 @@
                     
                     ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
                     
-                    <!-- Desktop Task Actions -->
-                    <div class="task-actions desktop-task-actions">
+                    <div class="task-actions">
                         <div class="checkbox-container">
                             <input type="checkbox" class="task-checkbox" ${task.status === 'completed' ? 'checked' : ''} 
                                    onclick="toggleTaskStatus('${task.id}', event)">
@@ -13874,9 +13396,10 @@
         function updateCurrentTodayDisplay() {
             const displayElement = document.getElementById('currentTodayDate');
             if (displayElement) {
-                // Desktop red strip: Show date format without year (e.g., "Monday, October 21") - FORCE UPDATE
+                // Desktop red strip: Show full date format (e.g., "Monday, October 21, 2024")
                 const fullOptions = { 
                     weekday: 'long', 
+                    year: 'numeric', 
                     month: 'long', 
                     day: 'numeric' 
                 };
@@ -14579,17 +14102,19 @@
                 repeatDropdown.style.opacity = '1';
             }
             
-            // Set date and time inputs - default to today if no date set
-            const defaultDate = task.dueDate || getLocalDateString(new Date());
-            document.getElementById('editTaskDateOnly').value = defaultDate;
-            document.getElementById('editTaskTimeOnly').value = task.dueTime || '';
+            // Set date and time inputs
+            if (task.dueDate) {
+                document.getElementById('editTaskDateOnly').value = task.dueDate;
+                document.getElementById('editTaskTimeOnly').value = task.dueTime || '';
+            } else {
+                document.getElementById('editTaskDateOnly').value = '';
+                document.getElementById('editTaskTimeOnly').value = '';
+            }
             
-            // Also update the main date/time fields
-            document.getElementById('editTaskDate').value = defaultDate;
-            document.getElementById('editTaskTime').value = task.dueTime || '';
-            
-            // Update display
+            // Update display and hidden fields
             updateDateTimeDisplay();
+            document.getElementById('editTaskDate').value = task.dueDate || '';
+            document.getElementById('editTaskTime').value = task.dueTime || '';
             
             // Set modal title for editing
             const modalTitle = document.querySelector('#taskModal h3');
@@ -15168,7 +14693,7 @@
             console.log('🎯 performUndo called, undo stack length:', undoStack.length);
             if (undoStack.length === 0) {
                 console.log('❌ No undo actions available');
-                alert(translateText('No Actions to Undo'));
+                alert('Nothing to undo');
                 return;
             }
             const lastState = undoStack.pop();
@@ -15762,19 +15287,16 @@
                             // Template is already in the title, no need to do anything special
                         }
                     }
-                }, 1500); // 1.5s delay to allow complete phrase typing
+                }, 1500); // 1.5s delay to let user finish typing
             });
             
             // Add blur event to clean up title when user finishes typing
             newInput.addEventListener('blur', function(event) {
                 const input = event.target.value;
                 const parsed = parseNaturalLanguage(input);
-                if (parsed && parsed.title) {
-                    // Only update title if we have a valid title (not empty from standalone time)
-                    // Keep the original if it's just a time pattern like "at 8am"
-                    if (parsed.title.trim() !== '') {
-                        event.target.value = parsed.title + ' ';
-                    }
+                if (parsed) {
+                    // Only update title when user finishes editing, and add space for continued typing
+                    event.target.value = parsed.title + ' ';
                 }
             });
             
@@ -15925,21 +15447,6 @@
             
             // Patterns for different natural language formats
             const patterns = [
-                // Standalone time pattern: "at 8am" or "at 3:30pm"
-                {
-                    regex: /^at\s+(.+)$/i,
-                    parser: (match) => {
-                        const timeResult = normalizeTime(match[1]);
-                        if (timeResult) {
-                            return {
-                                title: '',  // Empty title for standalone time
-                                date: getLocalDateString(new Date()),  // Default to today
-                                time: timeResult
-                            };
-                        }
-                        return null;
-                    }
-                },
                 // Standard order: "task tomorrow at 6pm" or "task today at 6:30"
                 {
                     regex: /^(.+?)\s+(today|tomorrow)\s+at\s+(.+)$/i,
@@ -16042,7 +15549,7 @@
                     parser: (match) => ({
                         title: match[1].trim(),
                         date: getDateForRelative(match[2]),
-                        time: null
+                        time: '06:00'
                     })
                 },
                 // Reverse order: "tomorrow task"
@@ -16051,7 +15558,7 @@
                     parser: (match) => ({
                         title: match[2].trim(),
                         date: getDateForRelative(match[1]),
-                        time: null
+                        time: '06:00'
                     })
                 },
                 // Standard order: "task on monday" or "task on friday"
@@ -16060,7 +15567,7 @@
                     parser: (match) => ({
                         title: match[1].trim(),
                         date: getDateForWeekday(match[2]),
-                        time: null
+                        time: '06:00'
                     })
                 },
                 // Reverse order: "on monday task"
@@ -16069,12 +15576,12 @@
                     parser: (match) => ({
                         title: match[2].trim(),
                         date: getDateForWeekday(match[1]),
-                        time: null
+                        time: '06:00'
                     })
                 },
-                // Standard order with relative periods and time: "task in 3 weeks at 6pm" or "task 3 weeks at 6pm"
+                // Standard order with relative periods and time: "task in 3 weeks at 6pm"
                 {
-                    regex: /^(.+?)\s+(?:in\s+)?(\d+|a|an)\s+(days?|weeks?|months?|years?)\s+at\s+(.+)$/i,
+                    regex: /^(.+?)\s+in\s+(\d+)\s+(days?|weeks?|months?|years?)\s+at\s+(.+)$/i,
                     parser: (match) => ({
                         title: match[1].trim(),
                         date: getDateForRelativePeriod(match[2], match[3]),
@@ -16174,7 +15681,7 @@
                     parser: (match) => ({
                         title: match[1].trim(),
                         date: getDateForRelativePeriod(match[2], match[3]),
-                        time: null
+                        time: '06:00'
                     })
                 },
                 // Standard order with "in a" only: "task in a month"
@@ -16183,7 +15690,7 @@
                     parser: (match) => ({
                         title: match[1].trim(),
                         date: getDateForRelativePeriod('a', match[2]),
-                        time: null
+                        time: '06:00'
                     })
                 },
                 // Reverse order with relative periods only: "in 3 weeks task"
@@ -16192,7 +15699,7 @@
                     parser: (match) => ({
                         title: match[3].trim(),
                         date: getDateForRelativePeriod(match[1], match[2]),
-                        time: null
+                        time: '06:00'
                     })
                 },
                 // Reverse order with "in a" only: "in a month task"
@@ -16201,7 +15708,7 @@
                     parser: (match) => ({
                         title: match[2].trim(),
                         date: getDateForRelativePeriod('a', match[1]),
-                        time: null
+                        time: '06:00'
                     })
                 },
                 // Standard order: "task at 6pm" (for today)
@@ -16484,7 +15991,7 @@
             try {
                 // Export both JSON (for compatibility) and SQLite database
                 const exportData = {
-                    version: '1.0', // Stable version for SQLite
+                    version: '2.0', // Updated version for SQLite
                     exportDate: new Date().toISOString(),
                     tasks: tasks,
                     templates: customTemplates, // Include templates in export
@@ -17034,10 +16541,7 @@
             const undoCount = undoStack.length - targetIndex;
             const targetState = undoStack[targetIndex];
             
-            const undoConfirm = currentLanguage === 'es' ? 
-                `¿Deshacer ${undoCount} acción(es) hasta: "${targetState.action}"?\n\nEsto deshará todos los cambios después de ese punto.` :
-                `Undo ${undoCount} action(s) back to: "${targetState.action}"?\n\nThis will undo all changes after that point.`;
-            if (!confirm(undoConfirm)) {
+            if (!confirm(`Undo ${undoCount} action(s) back to: "${targetState.action}"?\n\nThis will undo all changes after that point.`)) {
                 return;
             }
             
@@ -18767,24 +18271,7 @@
                 return;
             }
             
-            // Business rule: No tasks from previous days should exist
-            // Auto-move any past tasks to today before filtering
-            const today = getLocalDateString(new Date());
-            const updatedTasks = tasks.map(task => {
-                if (task.dueDate && task.dueDate < today && task.status === 'pending') {
-                    console.log(`📅 Auto-moving past task to today: "${task.title}" from ${task.dueDate} to ${today}`);
-                    return { ...task, dueDate: today, originalDueDate: task.dueDate };
-                }
-                return task;
-            });
-            
-            // Update the global tasks array with moved tasks
-            if (updatedTasks.some((task, index) => task.dueDate !== tasks[index].dueDate)) {
-                tasks.splice(0, tasks.length, ...updatedTasks);
-                saveTasks(); // Persist the changes
-            }
-            
-            let filteredTasks = updatedTasks;
+            let filteredTasks = tasks;
             
             // Apply search term filter
             if (searchTerm) {
@@ -19082,7 +18569,7 @@
         function renderSelectableTaskCard(task) {
             const isEvent = task.isEvent;
             const isCompleted = task.status === 'completed';
-            const isOverdue = window.isTaskOverdue ? window.isTaskOverdue(task) : (task.status === 'pending' && task.dueDate && task.dueDate < getLocalDateString());
+            const isOverdue = task.status === 'pending' && task.dueDate && task.dueDate < getLocalDateString();
             const isSelected = selectedTasks.has(task.id);
             
             const cardClass = `task-card task-card-selectable ${isEvent ? 'event' : ''} ${isCompleted ? 'completed' : ''} ${isOverdue ? 'overdue' : ''} ${isSelected ? 'selected' : ''}`;
@@ -19186,10 +18673,6 @@
             const deleteBtn = document.getElementById('deleteSelectedBtn');
             const countDisplay = document.getElementById('selectedCount');
             
-            // Modern floating toolbar
-            const floatingToolbar = document.getElementById('floatingSelectionToolbar');
-            const selectionBadge = document.getElementById('selectionCountBadge');
-            
             // Today view buttons
             const todayBatchOperations = document.getElementById('todayBatchOperations');
             const todayDeleteBtn = document.getElementById('todayDeleteSelectedBtn');
@@ -19222,20 +18705,7 @@
             const delayMonthBtn = document.getElementById('delaySelectedMonthBtn');
             
             if (selectedCount > 0) {
-                // Show modern floating toolbar
-                if (floatingToolbar) {
-                    floatingToolbar.style.display = 'flex';
-                    floatingToolbar.classList.remove('hiding');
-                    floatingToolbar.classList.add('showing');
-                    
-                    // Update selection count badge
-                    if (selectionBadge) {
-                        const taskText = selectedCount === 1 ? 'task' : 'tasks';
-                        selectionBadge.textContent = `${selectedCount} ${taskText} selected`;
-                    }
-                }
-                
-                // All Tasks view buttons (kept for backwards compatibility)
+                // All Tasks view buttons
                 if (deleteBtn) deleteBtn.style.display = 'inline-block';
                 if (delayDayBtn) delayDayBtn.style.display = 'inline-block';
                 if (delayWeekBtn) delayWeekBtn.style.display = 'inline-block';
@@ -19306,15 +18776,6 @@
                     `;
                 }
             } else {
-                // Hide modern floating toolbar
-                if (floatingToolbar && floatingToolbar.classList.contains('showing')) {
-                    floatingToolbar.classList.remove('showing');
-                    floatingToolbar.classList.add('hiding');
-                    setTimeout(() => {
-                        floatingToolbar.style.display = 'none';
-                    }, 300);
-                }
-                
                 // All Tasks view buttons
                 if (deleteBtn) deleteBtn.style.display = 'none';
                 if (delayDayBtn) delayDayBtn.style.display = 'none';
@@ -19376,39 +18837,6 @@
         function getSelectedTaskIds() {
             return Array.from(selectedTasks);
         }
-        
-        // Complete all selected tasks
-        function completeSelectedTasks() {
-            const taskIds = Array.from(selectedTasks);
-            if (taskIds.length === 0) return;
-            
-            taskIds.forEach(taskId => {
-                const task = tasks.find(t => t.id === taskId);
-                if (task && task.status !== 'completed') {
-                    task.status = 'completed';
-                    task.completedAt = new Date().toISOString();
-                }
-            });
-            
-            saveTasksToLocalStorage();
-            renderCurrentView();
-            clearAllSelections();
-            showInlineNotification(`✅ Completed ${taskIds.length} task${taskIds.length > 1 ? 's' : ''}`, 'success');
-        }
-        
-        // Hide the floating selection toolbar
-        function hideFloatingSelectionToolbar() {
-            const toolbar = document.getElementById('floatingSelectionToolbar');
-            if (toolbar) {
-                toolbar.classList.remove('showing');
-                toolbar.classList.add('hiding');
-                setTimeout(() => {
-                    toolbar.style.display = 'none';
-                }, 300);
-                clearAllSelections();
-            }
-        }
-        
         
         // Helper function to clear all task selections
         function clearAllSelections() {
@@ -19910,8 +19338,7 @@
             const restoreAllBtn = document.getElementById('restoreAllBtn');
             const emptyTrashBtn = document.getElementById('emptyTrashBtn');
             
-            const deletedTaskText = trash.length === 1 ? translateText('deleted task') : translateText('deleted tasks');
-            stats.textContent = `${trash.length} ${deletedTaskText}`;
+            stats.textContent = `${trash.length} deleted task${trash.length !== 1 ? 's' : ''}`;
             
             // Check for trash warning
             checkTrashWarning();
@@ -19920,7 +19347,7 @@
                 container.innerHTML = `
                     <div style="text-align: center; color: #666; padding: 40px;">
                         <div style="font-size: 48px; margin-bottom: 16px;">🗑️</div>
-                        <p>${translateText('Trash is empty')}</p>
+                        <p>Trash is empty</p>
                     </div>
                 `;
                 restoreAllBtn.style.display = 'none';
@@ -19941,12 +19368,12 @@
             if (trash.length > itemsPerPage) {
                 const paginationHtml = `
                     <div style="padding: 15px; border-bottom: 1px solid #eee; text-align: center;">
-                        <span style="color: #666; margin-right: 15px;">${translateText('Showing')} ${startIndex + 1}-${Math.min(endIndex, trash.length)} ${translateText('of')} ${trash.length} ${translateText('items')}</span>
+                        <span style="color: #666; margin-right: 15px;">Showing ${startIndex + 1}-${Math.min(endIndex, trash.length)} of ${trash.length} items</span>
                         <button onclick="changeTrashPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} 
-                                style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ddd; background: transparent; cursor: ${currentPage === 1 ? 'default' : 'pointer'};">← ${translateText('Prev')}</button>
-                        <span style="margin: 0 10px;">${translateText('Page')} ${currentPage} ${translateText('of')} ${totalPages}</span>
+                                style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ddd; background: transparent; cursor: ${currentPage === 1 ? 'default' : 'pointer'};">← Prev</button>
+                        <span style="margin: 0 10px;">Page ${currentPage} of ${totalPages}</span>
                         <button onclick="changeTrashPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} 
-                                style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ddd; background: transparent; cursor: ${currentPage === totalPages ? 'default' : 'pointer'};">${translateText('Next')} →</button>
+                                style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ddd; background: transparent; cursor: ${currentPage === totalPages ? 'default' : 'pointer'};">Next →</button>
                     </div>
                 `;
                 container.innerHTML = paginationHtml;
@@ -19962,16 +19389,16 @@
                             <div style="flex: 1;">
                                 <div style="font-weight: 600; margin-bottom: 5px; ${item.isEvent ? 'color: #dc3545;' : ''}">${item.isEvent ? '🔴 ' : ''}${item.title}</div>
                                 <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
-                                    ${translateText('Deleted')}: ${deleteDate} | ${translateText('Due')}: ${item.dueDate || translateText('No date')}
+                                    Deleted: ${deleteDate} | Due: ${item.dueDate || 'No date'}
                                 </div>
                                 ${item.notes ? `<div style="font-size: 13px; color: #555;">${item.notes}</div>` : ''}
                             </div>
                             <div style="display: flex; gap: 8px; margin-left: 15px;">
                                 <button onclick="restoreTask('${item.trashId}')" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;">
-                                    ↪ ${translateText('Restore')}
+                                    ↪ Restore
                                 </button>
                                 <button onclick="deleteForever('${item.trashId}')" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;">
-                                    ❌ ${translateText('Delete Forever')}
+                                    ❌ Delete Forever
                                 </button>
                             </div>
                         </div>
@@ -20024,7 +19451,7 @@
             const index = trash.findIndex(item => item.trashId === trashId);
             if (index === -1) return;
             const task = trash[index];
-            if (confirm(`${translateText('Permanently delete')} "${task.title}"? ${translateText('This cannot be undone.')}`)) {
+            if (confirm(`Permanently delete "${task.title}"? This cannot be undone.`)) {
                 trash.splice(index, 1);
                 localStorage.setItem('gtd_trash', JSON.stringify(trash));
                 updateTrashCounter();
@@ -20034,7 +19461,7 @@
         async function restoreAllTasks() {
             if (trash.length === 0) return;
             
-            if (confirm(`${translateText('Restore All')} ${trash.length} ${trash.length === 1 ? translateText('deleted task') : translateText('deleted tasks')}?`)) {
+            if (confirm(`Restore all ${trash.length} tasks from trash?`)) {
                 try {
                     for (const item of trash) {
                         const task = {...item};
@@ -20450,7 +19877,7 @@
                             console.log('💪 BACKUP RESTORE: Adding force overwrite flags to upload');
                         }
                         
-                        const tasksResponse = await fetch(`${window.API_BASE}/tasks/sync`, {
+                        const tasksResponse = await fetch(`${API_BASE}/tasks/sync`, {
                             method: 'POST',
                             headers: getAuthHeaders(),
                             body: JSON.stringify(uploadPayload)
@@ -21027,13 +20454,6 @@
         function renderTodayTemplateFilters(todayTasks) {
             const container = document.getElementById('todayTemplateFilters');
             const mobileContainer = document.getElementById('todayTemplateFiltersMobile');
-            
-            // Ensure mobile container is visible
-            if (mobileContainer) {
-                mobileContainer.style.display = 'block';
-            }
-            
-            console.log('🔍 MOBILE FILTER DEBUG: containers found:', !!container, !!mobileContainer);
             if (!container && !mobileContainer) return;
             
             // Extract all templates used in today's tasks
@@ -21045,15 +20465,6 @@
                 const templateMatches = text.match(/@\w+/g);
                 if (templateMatches) {
                     templateMatches.forEach(template => templatesInUse.add(template));
-                }
-            });
-            
-            // Also check for hashtag patterns (#word) as templates
-            todayTasks.forEach(task => {
-                const text = `${task.title || ''} ${task.notes || ''}`;
-                const hashtagMatches = text.match(/#\w+/g);
-                if (hashtagMatches) {
-                    hashtagMatches.forEach(tag => templatesInUse.add(tag));
                 }
             });
             
@@ -21082,38 +20493,24 @@
             }
             
             // Populate mobile version with dropdown-style filters
-            if (mobileContainer) {
-                console.log('📱 Mobile container found, templates:', sortedTemplates.length);
-                
-                // ALWAYS populate the mobile container
+            if (mobileContainer && sortedTemplates.length > 0) {
                 let mobileHtml = '<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
-                mobileHtml += '<select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">';
+                mobileHtml += '<select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: transparent; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">';
                 mobileHtml += '<option value="">All tasks</option>';
                 
-                // Add templates to dropdown
                 sortedTemplates.forEach(template => {
-                    const displayName = template; // e.g., "@casa" or "#urgent"
+                    const displayName = template; // e.g., "@casa"
                     const escapedTemplate = template.replace(/'/g, "\\'"); // Escape single quotes
                     mobileHtml += `<option value="${escapedTemplate}">${displayName}</option>`;
                 });
                 
                 mobileHtml += '</select>';
-                
-                // Add clear and refresh buttons
-                mobileHtml += '<button onclick="clearTodayTemplateFilter()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px; margin-left: 4px;">✖ Clear</button>';
-                mobileHtml += '<button onclick="renderTodayView()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px; margin-left: 4px;">🔄</button>';
-                
+                mobileHtml += `<button class="filter-btn filter-no-filter" onclick="showTodayNoFilterTasks()" title="Exit filter mode and return to normal view" style="font-size: 12px; padding: 6px 8px; white-space: nowrap;">➡️ ${translateText('Exit Filters')}</button>`;
                 mobileHtml += '</div>';
                 
-                // Always show debug info
-                mobileHtml += `<div style="font-size: 11px; color: #666; margin-top: 4px;">Tasks: ${todayTasks.length}, Templates: ${sortedTemplates.length ? sortedTemplates.join(', ') : 'none'}</div>`;
-                
-                // FORCE the container to update
                 mobileContainer.innerHTML = mobileHtml;
-                mobileContainer.style.display = 'block';
-                console.log('📱 Mobile container updated with', sortedTemplates.length, 'templates');
-            } else {
-                console.log('📱 Mobile container NOT FOUND!');
+            } else if (mobileContainer) {
+                mobileContainer.innerHTML = '';
             }
             
             // Restore active filter button state after re-rendering
@@ -21305,7 +20702,7 @@
         }
         // Render Today View with time blocks
         function renderTodayView() {
-            console.log('📱 renderTodayView called, tasks.length:', tasks.length);
+            console.log('📱 MOBILE DEBUG: renderTodayView called, tasks.length:', tasks.length);
             console.log('Current view:', currentView);
             const container = document.getElementById('todaySchedule');
             console.log('📱 MOBILE DEBUG: Container found:', !!container);
@@ -21424,12 +20821,7 @@
             
             // Sort time slots by time
             const sortedTimeSlots = Object.keys(timeSlots).sort();
-            
-            // Get actual current time (only relevant when viewing today)
-            const now = new Date();
-            const actualCurrentTime = now.toTimeString().slice(0, 5); // HH:MM format
-            const isViewingToday = todayStr === getLocalDateString(now);
-            
+            const currentTime = today.toTimeString().slice(0, 5);
             
             let html = '';
             
@@ -21449,10 +20841,8 @@
             
             // Render time slots (only for times that have tasks)
             sortedTimeSlots.forEach(time => {
-                // Only highlight current time when viewing today
-                const isCurrentTime = isViewingToday && time <= actualCurrentTime && 
-                    (sortedTimeSlots[sortedTimeSlots.indexOf(time) + 1] || '23:59') > actualCurrentTime;
-                
+                const isCurrentTime = time <= currentTime && 
+                    (sortedTimeSlots[sortedTimeSlots.indexOf(time) + 1] || '23:59') > currentTime;
                 
                 html += `
                     <div class="time-block" 
@@ -21477,31 +20867,16 @@
             
             // Render tasks without specific time
             if (noTimeSlot.length > 0) {
-                // Check collapse state from localStorage
-                const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
-                const isCollapsed = collapseStates['untimed'] === true;
-                console.log('🔄 No Specific Time section - reading collapse state:', isCollapsed, 'from localStorage:', collapseStates);
-                
-                // Check if "No Specific Time" should be highlighted as current time
-                // This happens when viewing today AND current time is after all timed slots
-                const isNoTimeCurrentTime = isViewingToday && sortedTimeSlots.length > 0 && 
-                    actualCurrentTime > sortedTimeSlots[sortedTimeSlots.length - 1];
-                
-                
                 html += `
                     <div class="time-block" 
                          ondragover="handleTodayDragOver(event)" 
                          ondrop="handleTodayDrop(event)" 
                          ondragleave="handleTodayDragLeave(event)"
                          data-time-slot="no-time">
-                        <div class="time-block-header ${isNoTimeCurrentTime ? 'current-time' : ''}" onclick="toggleTimeBlock('untimed')" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                            <span id="arrow-untimed" style="font-size: 12px; transition: transform 0.2s ease;" aria-expanded="${!isCollapsed}" aria-label="${isCollapsed ? 'Expand' : 'Collapse'} No Specific Time section">${isCollapsed ? '▶' : '▼'}</span>
-                            <span>📋 ${translateText('No Specific Time')}</span>
-                            ${isNoTimeCurrentTime ? `<span style="margin-left: auto; font-size: 12px; padding-right: 8px;">← ${translateText('Current Time')}</span>` : ''}
+                        <div class="time-block-header">
+                            <span>📋 No Specific Time</span>
                         </div>
                         <div class="time-block-content" 
-                             id="content-untimed"
-                             style="display: ${isCollapsed ? 'none' : 'block'}"
                              ondragover="handleTodayDragOver(event)" 
                              ondrop="handleTodayDrop(event)" 
                              ondragleave="handleTodayDragLeave(event)"
@@ -22316,7 +21691,7 @@
                             style="width: 100%; padding: 12px 0; font-size: 17px; border: none; background: transparent; outline: none; font-weight: 400; margin-bottom: 15px; color: #000; line-height: 1.3; border-bottom: 1px solid #e5e5ea;"
                             placeholder="Nueva tarea">
                         
-                        <textarea id="mobileNewNotes" placeholder="Notas" maxlength="30000"
+                        <textarea id="mobileNewNotes" placeholder="Notas" 
                             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
                             style="width: 100%; padding: 12px 0; font-size: 15px; border: none; background: transparent; outline: none; resize: none; height: 80px; color: #8e8e93; line-height: 1.4; border-bottom: 1px solid #e5e5ea;"></textarea>
                     </div>
@@ -24087,7 +23462,7 @@
         }
         
         function clearTrashModal() {
-            if (confirm(`${translateText('Are you sure you want to permanently delete all items in trash?')} ${translateText('This cannot be undone.')}`)) {
+            if (confirm('Are you sure you want to permanently delete all items in trash? This cannot be undone.')) {
                 trash.length = 0; // Clear the trash array
                 localStorage.setItem('trash', JSON.stringify(trash));
                 loadModalTrash(); // Refresh the display
@@ -25928,31 +25303,22 @@
                 !filterNavigationActive) {
                 
                 event.preventDefault();
-                event.stopImmediatePropagation();
-                
-                console.log('🔍 Arrow key navigation:', event.key, 'view:', currentView);
                 
                 if (event.key === 'ArrowLeft') {
                     if (currentView === 'today') {
                         previousDay();
-                        console.log('← Previous day');
                     } else if (currentView === 'week') {
                         previousWeekSmart();
-                        console.log('← Previous week');
                     } else if (currentView === 'calendar') {
                         previousMonthSmart();
-                        console.log('← Previous month');
                     }
                 } else if (event.key === 'ArrowRight') {
                     if (currentView === 'today') {
                         nextDay();
-                        console.log('→ Next day');
                     } else if (currentView === 'week') {
                         nextWeekSmart();
-                        console.log('→ Next week');
                     } else if (currentView === 'calendar') {
                         nextMonthSmart();
-                        console.log('→ Next month');
                     }
                 }
             }
@@ -26288,70 +25654,4 @@
                 }
             }, 10000); // Wait 10 seconds to ensure everything is loaded
         });
-        
-        // Handle mobile task action - single frictionless button
-        
-        // Touch handling for mobile task cards
-        let touchTimer;
-        let touchStartTime;
-        
-        
-        
-        function handleTaskCardClick(taskId, event) {
-            // On desktop, edit task immediately
-            if (window.innerWidth > 768) {
-                editTask(taskId, event);
-            }
-            // On mobile, do nothing - let the action button or long press handle it
-        }
-        
-        // Export mobile and toolbar functions globally
-        window.completeSelectedTasks = completeSelectedTasks;
-        window.hideFloatingSelectionToolbar = hideFloatingSelectionToolbar;
-        window.handleTaskCardClick = handleTaskCardClick;
-        window.handleTaskTouchStart = handleTaskTouchStart;
-        window.handleTaskTouchEnd = handleTaskTouchEnd;
-        window.renderTodayTemplateFilters = renderTodayTemplateFilters;
-        window.handleMobileTemplateFilter = handleMobileTemplateFilter;
-        window.clearTodayTemplateFilter = clearTodayTemplateFilter;
-        window.openIOSStyleDateTimePicker = openIOSStyleDateTimePicker;
-        window.closeIOSDateTimePicker = closeIOSDateTimePicker;
-        window.setQuickTime = setQuickTime;
-        window.setQuickDate = setQuickDate;
-        window.saveIOSDateTime = saveIOSDateTime;
-        
-        // Export UI functions that are referenced in HTML
-        window.toggleMobileUIVersion = toggleMobileUIVersion;
-        window.applyMobileUIVersion = applyMobileUIVersion;
-        window.applyTabDisplayMode = applyTabDisplayMode;
-        window.switchToMobileView = switchToMobileView;
-        window.toggleMobileMoreMenu = toggleMobileMoreMenu;
-        window.hideMobileMoreMenu = hideMobileMoreMenu;
-        window.closeSettings = closeSettings;
-        window.saveAllSettings = saveAllSettings;
-        window.loadSettingsValues = loadSettingsValues;
-        window.saveAutoPrintTime = saveAutoPrintTime;
-        window.updateSyncPeriod = updateSyncPeriod;
-        window.saveBackupSettings = saveBackupSettings;
-        window.toggleImportDropdown = toggleImportDropdown;
-        window.toggleExportDropdown = toggleExportDropdown;
-        window.selectImportFormat = selectImportFormat;
-        window.selectExportFormat = selectExportFormat;
-        window.toggleAutoPrint = toggleAutoPrint;
-        window.activateCurrentTime = activateCurrentTime;
-        window.toggleKeyboardOnlyMode = toggleKeyboardOnlyMode;
-        window.switchLanguage = switchLanguage;
-        window.openTrash = openTrash;
-        window.closeTrash = closeTrash;
-        window.renderTrash = renderTrash;
-        window.refreshUndoView = refreshUndoView;
-        window.undoToPoint = undoToPoint;
-        window.performUndo = performUndo;
-        window.restoreTask = restoreTask;
-        window.deleteForever = deleteForever;
-        window.restoreAllTasks = restoreAllTasks;
-        window.clearTrashModal = clearTrashModal;
-        window.changeTrashPage = changeTrashPage;
-        window.saveTabDisplayMode = saveTabDisplayMode;
-        
-    }); // Close main DOMContentLoaded event listener from line 3681
+    
