@@ -1515,8 +1515,87 @@ function generateSimpleTasksReview() {
     let reportHTML = `
         <div style="max-width: 900px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
             <h1 style="text-align: center; color: #2563eb; margin-bottom: 30px;">📊 GTD Review</h1>
+    `;
+    
+    // 1. EVENTS SECTION FIRST
+    const events = allTasks.filter(task => task.isEvent);
+    if (events.length > 0) {
+        reportHTML += `
+            <div style="margin-bottom: 40px;">
+                <h2 style="color: #0ea5e9; border-bottom: 3px solid #0ea5e9; padding-bottom: 8px; margin-bottom: 20px;">
+                    🎉 Events (${events.length})
+                </h2>
+        `;
+        
+        // Group events by date
+        const eventsByDate = {};
+        const noDateEvents = [];
+        
+        events.forEach(event => {
+            if (!event.dueDate) {
+                noDateEvents.push(event);
+            } else {
+                if (!eventsByDate[event.dueDate]) {
+                    eventsByDate[event.dueDate] = [];
+                }
+                eventsByDate[event.dueDate].push(event);
+            }
+        });
+        
+        // Show events without dates
+        if (noDateEvents.length > 0) {
+            reportHTML += `
+                <div style="margin-bottom: 25px; padding: 15px; background: #fef2f2; border-left: 4px solid #dc3545; border-radius: 4px;">
+                    <h3 style="margin: 0 0 15px 0; color: #dc3545;">🚨 No Date (${noDateEvents.length})</h3>
+                    <ul style="margin: 0; padding-left: 20px; list-style: none;">
+            `;
             
-            <!-- 1. TASKS GROUPED BY DATES -->
+            noDateEvents.forEach(event => {
+                reportHTML += `
+                    <li style="margin: 6px 0; padding: 8px; background: white; border-radius: 3px;">
+                        🎉 ${event.title || 'Untitled Event'}
+                        ${event.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${event.notes}</div>` : ''}
+                    </li>
+                `;
+            });
+            
+            reportHTML += `</ul></div>`;
+        }
+        
+        // Show events by date (sorted chronologically)
+        const sortedEventDates = Object.keys(eventsByDate).sort();
+        sortedEventDates.forEach(date => {
+            const eventsForDate = eventsByDate[date];
+            const isToday = date === todayStr;
+            const isPast = date < todayStr;
+            
+            const dateStyle = isPast ? 'color: #dc3545; background: #fef2f2;' : 
+                             isToday ? 'color: #ff6b35; background: #fff7ed;' : 
+                             'color: #059669; background: #f0fdf4;';
+            
+            reportHTML += `
+                <div style="margin-bottom: 20px; padding: 15px; border-left: 4px solid ${isPast ? '#dc3545' : isToday ? '#ff6b35' : '#059669'}; border-radius: 4px; ${dateStyle}">
+                    <h3 style="margin: 0 0 15px 0;">${isPast ? '🚨' : isToday ? '⚡' : '🎉'} ${date} (${eventsForDate.length})</h3>
+                    <ul style="margin: 0; padding-left: 20px; list-style: none;">
+            `;
+            
+            eventsForDate.forEach(event => {
+                reportHTML += `
+                    <li style="margin: 6px 0; padding: 8px; background: white; border-radius: 3px;">
+                        🎉 ${event.title || 'Untitled Event'}
+                        ${event.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${event.notes}</div>` : ''}
+                    </li>
+                `;
+            });
+            
+            reportHTML += `</ul></div>`;
+        });
+        
+        reportHTML += `</div>`;
+    }
+    
+    reportHTML += `
+            <!-- 2. TASKS GROUPED BY DATES -->
             <div style="margin-bottom: 40px;">
                 <h2 style="color: #2563eb; border-bottom: 3px solid #2563eb; padding-bottom: 8px; margin-bottom: 20px;">
                     📅 Tasks by Date
@@ -1701,7 +1780,50 @@ function generateSimplePlainTextReport(allTasks, todayStr) {
     text += `Generated on ${todayStr} at ${new Date().toLocaleTimeString()}\n`;
     text += `${'='.repeat(50)}\n\n`;
     
-    // Group tasks by dates
+    // 1. EVENTS SECTION FIRST
+    const events = allTasks.filter(task => task.isEvent);
+    if (events.length > 0) {
+        text += `EVENTS (${events.length})\n`;
+        text += `${'='.repeat(30)}\n\n`;
+        
+        const eventsByDate = {};
+        const noDateEvents = [];
+        
+        events.forEach(event => {
+            if (!event.dueDate) {
+                noDateEvents.push(event);
+            } else {
+                if (!eventsByDate[event.dueDate]) {
+                    eventsByDate[event.dueDate] = [];
+                }
+                eventsByDate[event.dueDate].push(event);
+            }
+        });
+        
+        if (noDateEvents.length > 0) {
+            text += `NO DATE (${noDateEvents.length})\n`;
+            text += `${'-'.repeat(20)}\n`;
+            noDateEvents.forEach(event => {
+                text += `• ${event.title || 'Untitled Event'}\n`;
+                if (event.notes) text += `  ${event.notes}\n`;
+            });
+            text += `\n`;
+        }
+        
+        const sortedEventDates = Object.keys(eventsByDate).sort();
+        sortedEventDates.forEach(date => {
+            const eventsForDate = eventsByDate[date];
+            text += `${date} (${eventsForDate.length})\n`;
+            text += `${'-'.repeat(20)}\n`;
+            eventsForDate.forEach(event => {
+                text += `• ${event.title || 'Untitled Event'}\n`;
+                if (event.notes) text += `  ${event.notes}\n`;
+            });
+            text += `\n`;
+        });
+    }
+    
+    // Group tasks by dates (excluding events)
     const dateGroups = {};
     const noDateTasks = [];
     
@@ -1788,7 +1910,47 @@ function generateSimpleOrgModeReport(allTasks, todayStr) {
     text += `#+DATE: ${todayStr}\n`;
     text += `#+TIME: ${new Date().toLocaleTimeString()}\n\n`;
     
-    // Group tasks by dates
+    // 1. EVENTS SECTION FIRST
+    const events = allTasks.filter(task => task.isEvent);
+    if (events.length > 0) {
+        text += `* Events (${events.length})\n\n`;
+        
+        const eventsByDate = {};
+        const noDateEvents = [];
+        
+        events.forEach(event => {
+            if (!event.dueDate) {
+                noDateEvents.push(event);
+            } else {
+                if (!eventsByDate[event.dueDate]) {
+                    eventsByDate[event.dueDate] = [];
+                }
+                eventsByDate[event.dueDate].push(event);
+            }
+        });
+        
+        if (noDateEvents.length > 0) {
+            text += `** No Date (${noDateEvents.length})\n`;
+            noDateEvents.forEach(event => {
+                text += `- ${event.title || 'Untitled Event'}\n`;
+                if (event.notes) text += `  ${event.notes}\n`;
+            });
+            text += `\n`;
+        }
+        
+        const sortedEventDates = Object.keys(eventsByDate).sort();
+        sortedEventDates.forEach(date => {
+            const eventsForDate = eventsByDate[date];
+            text += `** ${date} (${eventsForDate.length})\n`;
+            eventsForDate.forEach(event => {
+                text += `- ${event.title || 'Untitled Event'}\n`;
+                if (event.notes) text += `  ${event.notes}\n`;
+            });
+            text += `\n`;
+        });
+    }
+    
+    // Group tasks by dates (excluding events)
     const dateGroups = {};
     const noDateTasks = [];
     
