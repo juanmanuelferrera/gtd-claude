@@ -1144,6 +1144,39 @@ function renderTodayTemplateFilters(todayTasks) {
 }
 
 /**
+ * Force migration of all overdue tasks to today
+ */
+function forceTaskMigration() {
+    const todayStr = getLocalDateString(new Date());
+    console.log(`🔧 FORCE MIGRATION: Moving all overdue tasks to ${todayStr}`);
+    
+    let migrated = 0;
+    tasks.forEach(task => {
+        if (task.status === 'deleted' || task.isEvent) return;
+        
+        if (task.dueDate && task.dueDate < todayStr && task.status === 'pending') {
+            console.log(`🔄 Force migrating: "${task.title}" from ${task.dueDate} to ${todayStr}`);
+            task.dueDate = todayStr;
+            migrated++;
+        }
+    });
+    
+    if (migrated > 0) {
+        console.log(`✅ Force migrated ${migrated} tasks to today`);
+        if (typeof saveTasks === 'function') saveTasks();
+        if (typeof uploadAllTasks === 'function') uploadAllTasks();
+        if (typeof renderCurrentView === 'function') renderCurrentView();
+    } else {
+        console.log('ℹ️ No overdue tasks found to migrate');
+    }
+    
+    return migrated;
+}
+
+// Make function globally accessible
+window.forceTaskMigration = forceTaskMigration;
+
+/**
  * Basic renderTodayView function
  */
 function renderTodayView() {
@@ -1164,23 +1197,48 @@ function renderTodayView() {
     
     // Auto-migrate overdue tasks to today (except Events)
     if (todayStr === actualTodayStr) { // Only do this when viewing actual today
+        console.log(`🔍 Auto-migration check: Today is ${todayStr}, viewing ${todayStr}`);
         let migrated = false;
+        let overdueTasks = [];
+        
         tasks.forEach(task => {
-            if (task.status === 'deleted' || task.isEvent) return; // Skip deleted tasks and events
+            if (task.status === 'deleted') {
+                return; // Skip deleted tasks
+            }
             
-            // If task is from a previous date and not completed, move it to today
+            if (task.isEvent) {
+                return; // Skip events - they stay on their dates
+            }
+            
+            // Check for tasks from previous dates that are still pending
             if (task.dueDate && task.dueDate < todayStr && task.status === 'pending') {
-                console.log(`🔄 Auto-migrating overdue task: ${task.title} from ${task.dueDate} to ${todayStr}`);
+                overdueTasks.push({
+                    title: task.title,
+                    dueDate: task.dueDate,
+                    status: task.status,
+                    isEvent: task.isEvent
+                });
+                console.log(`🔄 Auto-migrating overdue task: "${task.title}" from ${task.dueDate} to ${todayStr}`);
                 task.dueDate = todayStr;
                 migrated = true;
             }
         });
         
+        console.log(`📊 Migration summary: Found ${overdueTasks.length} overdue tasks to migrate`);
+        if (overdueTasks.length > 0) {
+            console.table(overdueTasks);
+        }
+        
         if (migrated) {
+            console.log('💾 Saving migrated tasks...');
             // Save the changes
             if (typeof saveTasks === 'function') saveTasks();
             if (typeof uploadAllTasks === 'function') uploadAllTasks();
+        } else {
+            console.log('✅ No tasks needed migration');
         }
+    } else {
+        console.log(`⏭️ Skipping auto-migration: viewing ${todayStr}, but today is ${actualTodayStr}`);
     }
     
     // Get today's tasks (no need for overdue logic since we auto-migrate)
