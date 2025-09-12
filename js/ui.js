@@ -1198,15 +1198,32 @@ function renderTodayView() {
     // Auto-migrate overdue tasks to today (except Events)
     if (todayStr === actualTodayStr) { // Only do this when viewing actual today
         console.log(`🔍 Auto-migration check: Today is ${todayStr}, viewing ${todayStr}`);
+        console.log(`📋 Total tasks in system: ${tasks.length}`);
+        
+        // Debug: Show all tasks with their key properties
+        const allTasksDebug = tasks.map(task => ({
+            title: task.title ? task.title.substring(0, 30) + '...' : 'No title',
+            dueDate: task.dueDate,
+            status: task.status,
+            isEvent: task.isEvent,
+            isDeleted: task.status === 'deleted'
+        }));
+        console.log('📋 All tasks in system:');
+        console.table(allTasksDebug);
+        
         let migrated = false;
         let overdueTasks = [];
+        let skippedTasks = [];
         
         tasks.forEach(task => {
+            // Debug each task's migration decision
             if (task.status === 'deleted') {
+                skippedTasks.push({reason: 'deleted', title: task.title});
                 return; // Skip deleted tasks
             }
             
             if (task.isEvent) {
+                skippedTasks.push({reason: 'is_event', title: task.title, dueDate: task.dueDate});
                 return; // Skip events - they stay on their dates
             }
             
@@ -1221,12 +1238,27 @@ function renderTodayView() {
                 console.log(`🔄 Auto-migrating overdue task: "${task.title}" from ${task.dueDate} to ${todayStr}`);
                 task.dueDate = todayStr;
                 migrated = true;
+            } else if (task.dueDate && task.dueDate < todayStr) {
+                skippedTasks.push({
+                    reason: 'not_pending', 
+                    title: task.title, 
+                    dueDate: task.dueDate, 
+                    status: task.status
+                });
             }
         });
         
         console.log(`📊 Migration summary: Found ${overdueTasks.length} overdue tasks to migrate`);
+        console.log(`⏭️ Skipped ${skippedTasks.length} tasks (not eligible for migration)`);
+        
         if (overdueTasks.length > 0) {
+            console.log('🔄 Tasks being migrated:');
             console.table(overdueTasks);
+        }
+        
+        if (skippedTasks.length > 0) {
+            console.log('⏭️ Tasks skipped during migration:');
+            console.table(skippedTasks);
         }
         
         if (migrated) {
