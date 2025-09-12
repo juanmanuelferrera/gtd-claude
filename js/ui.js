@@ -1417,27 +1417,202 @@ function generateTasksReview() {
         </div>
     `;
 
-    // Generate different formats
-    const plainText = generatePlainTextReport(allTasks, timeGroups, projectGroups, todayStr);
-    const orgMode = generateOrgModeReport(allTasks, timeGroups, projectGroups, todayStr);
+    // Check if format preferences were set by the modal
+    const formats = window.selectedReviewFormats;
     
-    // Show format selection dialog
-    const format = prompt('Choose export format:\n1. HTML (browser view)\n2. TXT (plain text)\n3. ORG (Org-mode)\n4. PDF (print-friendly)\n\nEnter number (1-4):', '1');
-    
-    switch(format) {
-        case '2':
+    if (formats) {
+        // Generate only the selected formats
+        if (formats.txt) {
+            const plainText = generatePlainTextReport(allTasks, timeGroups, projectGroups, todayStr);
             downloadTextFile(plainText, `gtd-review-${todayStr}.txt`);
-            break;
-        case '3':
+        }
+        
+        if (formats.org) {
+            const orgMode = generateOrgModeReport(allTasks, timeGroups, projectGroups, todayStr);
             downloadTextFile(orgMode, `gtd-review-${todayStr}.org`);
-            break;
-        case '4':
-            openPrintableReport(reportHTML, todayStr);
-            break;
-        default:
+        }
+        
+        if (formats.html) {
             openHTMLReport(reportHTML, todayStr);
+        }
+        
+        if (formats.pdf) {
+            openPrintableReport(reportHTML, todayStr);
+        }
+        
+        // Clear the format preferences
+        window.selectedReviewFormats = null;
+        
+    } else {
+        // Fallback to old prompt-based system (for backward compatibility)
+        const plainText = generatePlainTextReport(allTasks, timeGroups, projectGroups, todayStr);
+        const orgMode = generateOrgModeReport(allTasks, timeGroups, projectGroups, todayStr);
+        
+        const format = prompt('Choose export format:\n1. HTML (browser view)\n2. TXT (plain text)\n3. ORG (Org-mode)\n4. PDF (print-friendly)\n\nEnter number (1-4):', '1');
+        
+        switch(format) {
+            case '2':
+                downloadTextFile(plainText, `gtd-review-${todayStr}.txt`);
+                break;
+            case '3':
+                downloadTextFile(orgMode, `gtd-review-${todayStr}.org`);
+                break;
+            case '4':
+                openPrintableReport(reportHTML, todayStr);
+                break;
+            default:
+                openHTMLReport(reportHTML, todayStr);
+        }
     }
 }
+
+/**
+ * Open the format selection modal for GTD Review
+ */
+function openReviewFormatModal() {
+    const modal = document.getElementById('reviewFormatModal');
+    if (modal) {
+        modal.style.display = 'block';
+        
+        // Add click outside to close
+        setTimeout(() => {
+            document.addEventListener('click', function closeOnClickOutside(event) {
+                if (event.target === modal) {
+                    closeReviewFormatModal();
+                    document.removeEventListener('click', closeOnClickOutside);
+                }
+            });
+        }, 100);
+    }
+}
+
+/**
+ * Close the format selection modal
+ */
+function closeReviewFormatModal() {
+    const modal = document.getElementById('reviewFormatModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+/**
+ * Generate review with only the selected formats
+ */
+function generateReviewWithSelectedFormats() {
+    const htmlChecked = document.getElementById('modal-format-html').checked;
+    const txtChecked = document.getElementById('modal-format-txt').checked;
+    const pdfChecked = document.getElementById('modal-format-pdf').checked;
+    const orgChecked = document.getElementById('modal-format-org').checked;
+    
+    if (!htmlChecked && !txtChecked && !pdfChecked && !orgChecked) {
+        alert('Please select at least one export format!');
+        return;
+    }
+    
+    // Close the modal first
+    closeReviewFormatModal();
+    
+    // Generate the review data
+    const allTasks = tasks.filter(task => task.status !== 'deleted');
+    
+    if (allTasks.length === 0) {
+        alert('No tasks to review!');
+        return;
+    }
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStr = getLocalDateString(today);
+    
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const tomorrowStr = getLocalDateString(tomorrow);
+    
+    const nextWeekStart = new Date(today);
+    nextWeekStart.setDate(today.getDate() + 7);
+    
+    const thisWeekEnd = new Date(today);
+    thisWeekEnd.setDate(today.getDate() + 6);
+    
+    // Group tasks by time periods (same logic as original function)
+    const timeGroups = {
+        today: [],
+        tomorrow: [],
+        thisWeek: [],
+        nextWeek: [],
+        future: [],
+        noDate: [],
+        events: []
+    };
+    
+    allTasks.forEach(task => {
+        if (task.isEvent) {
+            timeGroups.events.push(task);
+            return;
+        }
+        
+        if (!task.dueDate) {
+            timeGroups.noDate.push(task);
+            return;
+        }
+        
+        const taskDate = new Date(task.dueDate);
+        taskDate.setHours(0, 0, 0, 0);
+        
+        if (task.dueDate === todayStr) {
+            timeGroups.today.push(task);
+        } else if (task.dueDate === tomorrowStr) {
+            timeGroups.tomorrow.push(task);
+        } else if (taskDate > tomorrow && taskDate <= thisWeekEnd) {
+            timeGroups.thisWeek.push(task);
+        } else if (taskDate > thisWeekEnd && taskDate < nextWeekStart) {
+            timeGroups.nextWeek.push(task);
+        } else if (taskDate >= nextWeekStart) {
+            timeGroups.future.push(task);
+        }
+    });
+    
+    // Group tasks by projects (same logic as original function)
+    const projectGroups = {};
+    allTasks.forEach(task => {
+        if (task.isEvent) return;
+        
+        const text = `${task.title || ''} ${task.notes || ''}`;
+        const templates = TemplateProcessor.extractFromText(text);
+        
+        if (templates.length === 0) {
+            if (!projectGroups['No Project']) {
+                projectGroups['No Project'] = [];
+            }
+            projectGroups['No Project'].push(task);
+        } else {
+            templates.forEach(template => {
+                if (!projectGroups[template]) {
+                    projectGroups[template] = [];
+                }
+                projectGroups[template].push(task);
+            });
+        }
+    });
+    
+    // Generate reports in selected formats
+    let reportHTML = null;
+    let plainText = null;
+    let orgMode = null;
+    
+    // Store the format preferences in a temporary variable
+    window.selectedReviewFormats = {
+        html: htmlChecked,
+        txt: txtChecked,
+        pdf: pdfChecked,
+        org: orgChecked
+    };
+    
+    // Call the original generateTasksReview function which will now use our format preferences
+    generateTasksReview()
+}
+
 
 /**
  * Generate plain text report
