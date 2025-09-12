@@ -26354,5 +26354,4 @@
         window.changeTrashPage = changeTrashPage;
         window.saveTabDisplayMode = saveTabDisplayMode;
         
-        // End of extracted_js.js - all functions loaded
-        console.log('✅ extracted_js.js loaded successfully');
+    }); // Close main DOMContentLoaded event listener
