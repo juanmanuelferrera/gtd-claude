@@ -1045,6 +1045,263 @@ function performAllTasksSearch() {
 }
 
 /**
+ * Generate comprehensive tasks review with time-based and project groupings
+ */
+function generateTasksReview() {
+    const allTasks = tasks.filter(task => task.status !== 'deleted');
+    
+    if (allTasks.length === 0) {
+        alert('No tasks to review!');
+        return;
+    }
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStr = getLocalDateString(today);
+    
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const tomorrowStr = getLocalDateString(tomorrow);
+    
+    const nextWeekStart = new Date(today);
+    nextWeekStart.setDate(today.getDate() + 7);
+    
+    const thisWeekEnd = new Date(today);
+    thisWeekEnd.setDate(today.getDate() + 6);
+    
+    // Group tasks by time periods
+    const timeGroups = {
+        today: [],
+        tomorrow: [],
+        thisWeek: [], // next 5 days (day after tomorrow through this weekend)
+        nextWeek: [], // 7-13 days from now
+        future: [], // beyond 2 weeks
+        noDate: [], // tasks without due dates
+        events: [] // all events, will be sorted separately
+    };
+    
+    allTasks.forEach(task => {
+        if (task.isEvent) {
+            timeGroups.events.push(task);
+            return;
+        }
+        
+        if (!task.dueDate) {
+            timeGroups.noDate.push(task);
+            return;
+        }
+        
+        const taskDate = new Date(task.dueDate);
+        taskDate.setHours(0, 0, 0, 0);
+        
+        if (task.dueDate === todayStr) {
+            timeGroups.today.push(task);
+        } else if (task.dueDate === tomorrowStr) {
+            timeGroups.tomorrow.push(task);
+        } else if (taskDate > tomorrow && taskDate <= thisWeekEnd) {
+            timeGroups.thisWeek.push(task);
+        } else if (taskDate > thisWeekEnd && taskDate < nextWeekStart) {
+            timeGroups.nextWeek.push(task);
+        } else if (taskDate >= nextWeekStart) {
+            timeGroups.future.push(task);
+        }
+    });
+    
+    // Group tasks by projects (@template tags)
+    const projectGroups = {};
+    allTasks.forEach(task => {
+        if (task.isEvent) return; // Skip events for project grouping
+        
+        const text = `${task.title || ''} ${task.notes || ''}`;
+        const templates = TemplateProcessor.extractFromText(text);
+        
+        if (templates.length === 0) {
+            if (!projectGroups['No Project']) {
+                projectGroups['No Project'] = [];
+            }
+            projectGroups['No Project'].push(task);
+        } else {
+            templates.forEach(template => {
+                if (!projectGroups[template]) {
+                    projectGroups[template] = [];
+                }
+                projectGroups[template].push(task);
+            });
+        }
+    });
+    
+    // Generate report HTML
+    let reportHTML = `
+        <div style="max-width: 800px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <h1 style="text-align: center; color: #2563eb; margin-bottom: 30px;">📊 Tasks Review Report</h1>
+            
+            <!-- Summary Statistics -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                <h2 style="margin-top: 0;">📈 Summary</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                    <div><strong>Total Tasks:</strong> ${allTasks.length}</div>
+                    <div><strong>Today:</strong> ${timeGroups.today.length}</div>
+                    <div><strong>This Week:</strong> ${timeGroups.today.length + timeGroups.tomorrow.length + timeGroups.thisWeek.length}</div>
+                    <div><strong>Events:</strong> ${timeGroups.events.length}</div>
+                    <div><strong>Projects:</strong> ${Object.keys(projectGroups).length}</div>
+                    <div><strong>No Due Date:</strong> ${timeGroups.noDate.length}</div>
+                </div>
+            </div>
+    `;
+    
+    // Time-based sections
+    const timeSections = [
+        { key: 'today', title: '🔥 Today', tasks: timeGroups.today, urgent: true },
+        { key: 'tomorrow', title: '📅 Tomorrow', tasks: timeGroups.tomorrow, urgent: false },
+        { key: 'thisWeek', title: '📋 This Week', tasks: timeGroups.thisWeek, urgent: false },
+        { key: 'nextWeek', title: '📆 Next Week', tasks: timeGroups.nextWeek, urgent: false },
+        { key: 'future', title: '🔮 Future', tasks: timeGroups.future, urgent: false },
+        { key: 'noDate', title: '❓ No Due Date', tasks: timeGroups.noDate, urgent: true }
+    ];
+    
+    timeSections.forEach(section => {
+        if (section.tasks.length > 0) {
+            reportHTML += `
+                <div style="margin-bottom: 25px;">
+                    <h2 style="color: ${section.urgent ? '#dc3545' : '#2563eb'}; border-bottom: 2px solid ${section.urgent ? '#dc3545' : '#2563eb'}; padding-bottom: 5px;">
+                        ${section.title} (${section.tasks.length})
+                    </h2>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+            `;
+            
+            section.tasks.forEach(task => {
+                const templates = TemplateProcessor.extractFromText(`${task.title || ''} ${task.notes || ''}`);
+                const projectBadges = templates.map(t => `<span style="background: #e3f2fd; color: #1976d2; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 5px;">@${t}</span>`).join('');
+                
+                reportHTML += `
+                    <li style="margin: 5px 0; padding: 5px; ${section.urgent ? 'background: #fff5f5;' : ''} border-radius: 4px;">
+                        <strong>${task.title || 'Untitled'}</strong>
+                        ${task.dueDate ? `<em style="color: #666; margin-left: 10px;">${task.dueDate}</em>` : ''}
+                        ${task.dueTime ? `<span style="color: #007bff; margin-left: 5px;">${task.dueTime}</span>` : ''}
+                        ${projectBadges}
+                        ${task.notes ? `<br><span style="color: #666; font-size: 12px; margin-left: 10px;">${task.notes.substring(0, 100)}${task.notes.length > 100 ? '...' : ''}</span>` : ''}
+                    </li>
+                `;
+            });
+            
+            reportHTML += `</ul></div>`;
+        }
+    });
+    
+    // Events section
+    if (timeGroups.events.length > 0) {
+        timeGroups.events.sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''));
+        
+        reportHTML += `
+            <div style="margin-bottom: 25px;">
+                <h2 style="color: #28a745; border-bottom: 2px solid #28a745; padding-bottom: 5px;">
+                    🎯 Events (${timeGroups.events.length})
+                </h2>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+        `;
+        
+        timeGroups.events.forEach(event => {
+            reportHTML += `
+                <li style="margin: 5px 0; padding: 5px; background: #f0fff0; border-radius: 4px;">
+                    <strong>${event.title || 'Untitled Event'}</strong>
+                    ${event.dueDate ? `<em style="color: #666; margin-left: 10px;">${event.dueDate}</em>` : ''}
+                    ${event.dueTime ? `<span style="color: #28a745; margin-left: 5px;">${event.dueTime}</span>` : ''}
+                    ${event.notes ? `<br><span style="color: #666; font-size: 12px; margin-left: 10px;">${event.notes.substring(0, 100)}${event.notes.length > 100 ? '...' : ''}</span>` : ''}
+                </li>
+            `;
+        });
+        
+        reportHTML += `</ul></div>`;
+    }
+    
+    // Projects section
+    if (Object.keys(projectGroups).length > 0) {
+        reportHTML += `
+            <div style="margin-bottom: 25px;">
+                <h2 style="color: #6f42c1; border-bottom: 2px solid #6f42c1; padding-bottom: 5px;">
+                    🚀 Projects Overview (${Object.keys(projectGroups).length})
+                </h2>
+        `;
+        
+        // Sort projects by task count (descending)
+        const sortedProjects = Object.entries(projectGroups).sort((a, b) => b[1].length - a[1].length);
+        
+        sortedProjects.forEach(([projectName, projectTasks]) => {
+            reportHTML += `
+                <div style="margin: 15px 0; padding: 15px; background: #fafafa; border-left: 4px solid #6f42c1; border-radius: 0 4px 4px 0;">
+                    <h3 style="margin: 0 0 10px 0; color: #6f42c1;">
+                        ${projectName === 'No Project' ? '📝 No Project' : `@${projectName}`} 
+                        <span style="color: #666; font-weight: normal;">(${projectTasks.length} tasks)</span>
+                    </h3>
+                    <ul style="margin: 0; padding-left: 20px;">
+            `;
+            
+            projectTasks.forEach(task => {
+                const isOverdue = task.dueDate && task.dueDate < todayStr;
+                const isToday = task.dueDate === todayStr;
+                
+                reportHTML += `
+                    <li style="margin: 3px 0; ${isOverdue ? 'color: #dc3545; font-weight: bold;' : isToday ? 'color: #ff6b35; font-weight: bold;' : ''}">
+                        ${task.title || 'Untitled'}
+                        ${task.dueDate ? `<span style="color: #666; margin-left: 8px; font-size: 11px;">${task.dueDate}</span>` : ''}
+                        ${task.dueTime ? `<span style="color: #007bff; margin-left: 3px; font-size: 11px;">${task.dueTime}</span>` : ''}
+                    </li>
+                `;
+            });
+            
+            reportHTML += `</ul></div>`;
+        });
+        
+        reportHTML += `</div>`;
+    }
+    
+    reportHTML += `
+            <div style="text-align: center; margin-top: 30px; padding: 15px; background: #e3f2fd; border-radius: 8px;">
+                <p style="margin: 0; color: #1976d2; font-style: italic;">
+                    📊 Generated on ${todayStr} at ${new Date().toLocaleTimeString()}
+                </p>
+            </div>
+        </div>
+    `;
+    
+    // Open in new window
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+        newWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Tasks Review Report</title>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body { 
+                        margin: 20px; 
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        line-height: 1.5;
+                        color: #333;
+                    }
+                    @media print {
+                        body { margin: 10px; }
+                        .no-print { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="no-print" style="text-align: center; margin-bottom: 20px;">
+                    <button onclick="window.print()" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">🖨️ Print Report</button>
+                </div>
+                ${reportHTML}
+            </body>
+            </html>
+        `);
+        newWindow.document.close();
+    } else {
+        alert('Please allow popups to view the report');
+    }
+}
+
+/**
  * Render tasks with selection support
  */
 function renderTasksWithSelection(filteredTasks) {
