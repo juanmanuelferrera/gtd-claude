@@ -1385,8 +1385,7 @@ function renderWeekView() {
     
     if (!grid || !weekTitle) return;
     
-    // Clear any active template filter
-    window.activeWeekTemplateFilter = null;
+    // Keep active template filter if it exists
     
     // Update the week display
     updateCurrentWeekDisplay();
@@ -2027,9 +2026,7 @@ function renderCalendar() {
     
     if (!grid || !monthTitle) return;
     
-    // DEBUG: Clear any active template filter to test  
-    window.activeMonthTemplateFilter = null;
-    console.log('DEBUG: Cleared month template filter');
+    // Keep active template filter if it exists
     
     // Update the month display
     updateCurrentMonthDisplay();

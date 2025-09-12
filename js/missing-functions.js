@@ -142,6 +142,14 @@ function clearMonthTemplateFilter() {
     }
 }
 
+// Make template filter functions globally accessible
+window.filterWeekByTemplate = filterWeekByTemplate;
+window.clearWeekTemplateFilter = clearWeekTemplateFilter;
+window.filterMonthByTemplate = filterMonthByTemplate;
+window.clearMonthTemplateFilter = clearMonthTemplateFilter;
+window.renderWeekTemplateFilters = renderWeekTemplateFilters;
+window.renderMonthTemplateFilters = renderMonthTemplateFilters;
+
 // Simple calendar picker for task cards
 function openIOSDateTimePicker(taskId, currentDate, currentTime, buttonElement) {
     // Remove any existing picker
