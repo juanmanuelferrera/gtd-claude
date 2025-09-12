@@ -5,13 +5,22 @@
 
 class TemplateProcessor {
     /**
+     * Extract templates from text content
+     */
+    static extractFromText(text) {
+        if (!text) return [];
+        const templateMatches = text.match(/@\w+/g);
+        return templateMatches ? templateMatches : [];
+    }
+
+    /**
      * Extract templates from an array of tasks
      */
     static extractFromTasks(tasks) {
         const templates = new Set();
         tasks.forEach(task => {
             const text = `${task.title || ''} ${task.notes || ''}`;
-            const templateMatches = text.match(/@\w+/g);
+            const templateMatches = this.extractFromText(text);
             if (templateMatches) {
                 templateMatches.forEach(template => templates.add(template));
             }
