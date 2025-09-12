@@ -1514,6 +1514,9 @@ function renderWeekView() {
             // Exclude deleted tasks
             if (task.status === 'deleted') return false;
             
+            // Exclude completed tasks (they should not appear in week view)
+            if (task.status === 'completed') return false;
+            
             // Only show tasks for this specific date
             if (task.dueDate !== dateStr) return false;
             
@@ -1593,7 +1596,7 @@ function renderWeekView() {
         
         // Check for tasks on this date
         let dayTasks = typeof getTasksForDate === 'function' ? getTasksForDate(dateStr) : 
-                        (window.tasks || []).filter(task => task.dueDate === dateStr && task.status !== 'deleted');
+                        (window.tasks || []).filter(task => task.dueDate === dateStr && task.status !== 'deleted' && task.status !== 'completed');
         
         
         // Apply template filter if active
@@ -2148,6 +2151,9 @@ function renderCalendar() {
         // Exclude deleted tasks or tasks without dates
         if (!task.dueDate || task.status === 'deleted') return false;
         
+        // Exclude completed tasks (they should not appear in month view)
+        if (task.status === 'completed') return false;
+        
         const taskDate = new Date(task.dueDate);
         
         // Only show tasks for this month
@@ -2258,6 +2264,9 @@ function renderCalendar() {
                         (window.tasks || []).filter(task => {
                             // Exclude deleted tasks
                             if (task.status === 'deleted') return false;
+                            
+                            // Exclude completed tasks (they should not appear in month view)
+                            if (task.status === 'completed') return false;
                             
                             // Only show tasks for this specific date
                             if (task.dueDate !== dateStr) return false;
