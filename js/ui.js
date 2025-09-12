@@ -788,12 +788,7 @@ function groupTasksByDate(tasksArray) {
     // Sort tasks within each group: events first, then by time, then by status
     Object.keys(grouped).forEach(dateKey => {
         grouped[dateKey].tasks.sort((a, b) => {
-            // First, prioritize by completion status (pending first)
-            if (a.status !== b.status) {
-                return a.status === 'completed' ? 1 : -1;
-            }
-            
-            // Then prioritize events first within the same day
+            // Prioritize events first within the same day
             if (a.isEvent !== b.isEvent) {
                 return a.isEvent ? -1 : 1;
             }
@@ -851,7 +846,7 @@ function renderTaskCard(task) {
              style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; min-height: 40px; cursor: move;">
             <div style="display: flex; align-items: center; flex: 1;">
                 <div style="margin-right: 8px; color: #ccc; cursor: grab;">⋮⋮</div>
-                <input type="checkbox" class="task-checkbox" ${task.status === 'completed' ? 'checked' : ''} 
+                <input type="checkbox" class="task-checkbox" 
                        onclick="toggleTaskStatus('${task.id}', event)" style="margin-right: 10px;">
                 <div class="task-title" style="flex: 1;">
                     ${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}
@@ -990,6 +985,29 @@ function performAllTasksSearch() {
     }
     
     let filteredTasks = tasks;
+    
+    // First, exclude deleted tasks and apply date filtering (consistent with other views)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStr = getLocalDateString(today);
+    
+    filteredTasks = filteredTasks.filter(task => {
+        // Exclude deleted tasks
+        if (task.status === 'deleted') return false;
+        
+        // Events always show at their original date (no matter when)
+        if (task.isEvent) return true;
+        
+        // Regular tasks only show from today onward (past ones are auto-migrated to today)
+        if (task.dueDate) {
+            const taskDate = new Date(task.dueDate);
+            taskDate.setHours(0, 0, 0, 0);
+            return taskDate >= today;
+        }
+        
+        // Tasks without due dates always show
+        return true;
+    });
     
     // Apply search term filter
     if (searchTerm) {
@@ -1195,6 +1213,23 @@ function renderTodayView() {
     const todayStr = getLocalDateString(today);
     const actualTodayStr = getLocalDateString(new Date());
     
+    // One-time migration: Convert all "completed" tasks to "deleted" (cleanup legacy status)
+    let completedTasksMigrated = false;
+    tasks.forEach(task => {
+        if (task.status === 'completed') {
+            console.log(`🔄 Converting legacy completed task to deleted: "${task.title}"`);
+            task.status = 'deleted';
+            task.deletedAt = task.updatedAt || new Date().toISOString();
+            completedTasksMigrated = true;
+        }
+    });
+    
+    if (completedTasksMigrated) {
+        console.log('💾 Migrated legacy completed tasks to deleted status');
+        if (typeof saveTasks === 'function') saveTasks();
+        if (typeof uploadAllTasks === 'function') uploadAllTasks();
+    }
+
     // Auto-migrate overdue tasks to today (except Events)
     if (todayStr === actualTodayStr) { // Only do this when viewing actual today
         console.log(`🔍 Auto-migration check: Today is ${todayStr}, viewing ${todayStr}`);
@@ -1325,20 +1360,9 @@ function renderTodayView() {
     const timedTasks = regularTasks.filter(task => task.dueTime);
     const untimedTasks = regularTasks.filter(task => !task.dueTime);
     
-    // Sort timed tasks by status first (pending first, completed last), then by time
+    // Sort timed tasks by time
     timedTasks.sort((a, b) => {
-        if (a.status !== b.status) {
-            return a.status === 'completed' ? 1 : -1;
-        }
         return (a.dueTime || '').localeCompare(b.dueTime || '');
-    });
-    
-    // Sort untimed tasks by status (pending first, completed last)
-    untimedTasks.sort((a, b) => {
-        if (a.status !== b.status) {
-            return a.status === 'completed' ? 1 : -1;
-        }
-        return 0;
     });
     
     // Group by time slots
@@ -1402,13 +1426,7 @@ function renderTodayView() {
 
     // Render time slots
     sortedTimes.forEach(time => {
-        // Sort tasks within this time slot (pending first, completed last)
-        timeSlots[time].sort((a, b) => {
-            if (a.status !== b.status) {
-                return a.status === 'completed' ? 1 : -1;
-            }
-            return 0;
-        });
+        // Tasks are already filtered to exclude deleted ones, no sorting needed by status
         
         // Check if this is the current time slot
         const isCurrentTime = isViewingToday && time === currentTimeSlot;
@@ -1514,9 +1532,6 @@ function renderWeekView() {
             // Exclude deleted tasks
             if (task.status === 'deleted') return false;
             
-            // Exclude completed tasks (they should not appear in week view)
-            if (task.status === 'completed') return false;
-            
             // Only show tasks for this specific date
             if (task.dueDate !== dateStr) return false;
             
@@ -1596,7 +1611,7 @@ function renderWeekView() {
         
         // Check for tasks on this date
         let dayTasks = typeof getTasksForDate === 'function' ? getTasksForDate(dateStr) : 
-                        (window.tasks || []).filter(task => task.dueDate === dateStr && task.status !== 'deleted' && task.status !== 'completed');
+                        (window.tasks || []).filter(task => task.dueDate === dateStr && task.status !== 'deleted');
         
         
         // Apply template filter if active
@@ -1643,12 +1658,7 @@ function renderWeekView() {
         
         // Sort day tasks: events first, then by time
         const sortedDayTasks = [...dayTasks].sort((a, b) => {
-            // First, prioritize by completion status (pending first)
-            if (a.status !== b.status) {
-                return a.status === 'completed' ? 1 : -1;
-            }
-            
-            // Then prioritize events first
+            // Prioritize events first
             if (a.isEvent !== b.isEvent) {
                 return a.isEvent ? -1 : 1;
             }
@@ -2151,9 +2161,6 @@ function renderCalendar() {
         // Exclude deleted tasks or tasks without dates
         if (!task.dueDate || task.status === 'deleted') return false;
         
-        // Exclude completed tasks (they should not appear in month view)
-        if (task.status === 'completed') return false;
-        
         const taskDate = new Date(task.dueDate);
         
         // Only show tasks for this month
@@ -2265,9 +2272,6 @@ function renderCalendar() {
                             // Exclude deleted tasks
                             if (task.status === 'deleted') return false;
                             
-                            // Exclude completed tasks (they should not appear in month view)
-                            if (task.status === 'completed') return false;
-                            
                             // Only show tasks for this specific date
                             if (task.dueDate !== dateStr) return false;
                             
@@ -2344,12 +2348,7 @@ function renderCalendar() {
         
         // Sort day tasks: events first, then by time, then by creation date
         const sortedDayTasks = [...dayTasks].sort((a, b) => {
-            // First, prioritize by completion status (pending first)
-            if (a.status !== b.status) {
-                return a.status === 'completed' ? 1 : -1;
-            }
-            
-            // Then prioritize events first
+            // Prioritize events first
             if (a.isEvent !== b.isEvent) {
                 return a.isEvent ? -1 : 1;
             }
@@ -2431,8 +2430,7 @@ function renderCalendar() {
  */
 function renderStats() {
     const total = tasks.length;
-    const completed = tasks.filter(t => t.status === 'completed').length;
-    const pending = total - completed;
+    const pending = total;
     
     const today = getLocalDateString();
     const todayTasks = tasks.filter(t => t.dueDate === today).length;
@@ -2443,14 +2441,14 @@ function renderStats() {
     
     // Update stats display elements if they exist
     const totalTasksEl = document.getElementById('totalTasks');
-    const completedTasksEl = document.getElementById('completedTasks');
+    // Note: No completed tasks since tasks are either pending or deleted
     const pendingTasksEl = document.getElementById('pendingTasks');
     const todayTasksEl = document.getElementById('todayTasks');
     const overdueTasksEl = document.getElementById('overdueTasks');
     const criticalTasksEl = document.getElementById('criticalTasks');
     
     if (totalTasksEl) totalTasksEl.textContent = total;
-    if (completedTasksEl) completedTasksEl.textContent = completed;
+    // No completed tasks to display since we only have pending/deleted states
     if (pendingTasksEl) pendingTasksEl.textContent = pending;
     if (todayTasksEl) todayTasksEl.textContent = todayTasks;
     if (overdueTasksEl) overdueTasksEl.textContent = overdue;
@@ -2467,10 +2465,7 @@ function renderStats() {
     if (todayTasks > 0) {
         insights.push(`🔥 ${todayTasks} task${todayTasks !== 1 ? 's' : ''} due today. You've got this!`);
     }
-    if (completed > 0 && total > 0) {
-        const percentage = Math.round((completed / total) * 100);
-        insights.push(`✅ You've completed ${percentage}% of your tasks. Great progress!`);
-    }
+    // No completion percentage since tasks are either active or deleted
     if (insights.length === 0) {
         insights.push('🎉 You\'re all caught up! Time to add some new goals.');
     }
