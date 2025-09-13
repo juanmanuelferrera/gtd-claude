@@ -2745,12 +2745,21 @@ function completeTask(taskId, event) {
     event.stopPropagation(); // Prevent task edit dialog
     
     console.log('✅ Completing/deleting task:', taskId);
+    console.log('🔍 Total tasks in array:', tasks.length);
     
     // Find the task and mark it as deleted
-    const taskIndex = tasks.findIndex(t => t.id === taskId);
+    const taskIndex = tasks.findIndex(t => t.id == taskId); // Use == instead of === in case of type mismatch
+    console.log('📍 Task index found:', taskIndex);
+    
     if (taskIndex !== -1) {
+        const taskBefore = { ...tasks[taskIndex] };
+        console.log('📋 Task before deletion:', taskBefore);
+        
         tasks[taskIndex].status = 'deleted';
         tasks[taskIndex].deletedAt = new Date().toISOString();
+        
+        console.log('📋 Task after deletion:', tasks[taskIndex]);
+        console.log('💾 Saving tasks...');
         
         // Save changes
         saveTasksToLocalStorage();
@@ -2760,6 +2769,7 @@ function completeTask(taskId, event) {
             syncAll();
         }
         
+        console.log('🔄 Refreshing view...');
         // Refresh the current view
         renderCurrentView();
         
@@ -2767,6 +2777,11 @@ function completeTask(taskId, event) {
         if (typeof showNotification === 'function') {
             showNotification('Task completed', 'success');
         }
+        
+        console.log('✅ Task completion process finished');
+    } else {
+        console.error('❌ Task not found with ID:', taskId);
+        console.log('🔍 Available task IDs:', tasks.map(t => ({ id: t.id, type: typeof t.id, title: t.title?.substring(0, 20) })));
     }
 }
 
