@@ -1470,8 +1470,20 @@ function handleJsonImportFile(event) {
         try {
             const importData = JSON.parse(e.target.result);
             
+            // Ask user if they want to overwrite or add to existing data
+            const shouldOverwrite = confirm('🔄 IMPORT MODE:\n\nOK = REPLACE all existing data (recommended)\nCancel = ADD to existing data\n\nRecommended: Click OK to REPLACE everything with the backup data.');
+            
             if (importData.tasks && Array.isArray(importData.tasks)) {
-                tasks.push(...importData.tasks);
+                if (shouldOverwrite) {
+                    // OVERWRITE: Replace all tasks
+                    tasks.length = 0; // Clear existing tasks
+                    tasks.push(...importData.tasks);
+                    console.log(`🔄 OVERWRITE: Replaced all tasks with ${importData.tasks.length} imported tasks`);
+                } else {
+                    // ADD: Append to existing tasks
+                    tasks.push(...importData.tasks);
+                    console.log(`➕ ADD: Added ${importData.tasks.length} tasks to existing ${tasks.length - importData.tasks.length} tasks`);
+                }
                 
                 if (typeof saveTasksToLocalStorage === 'function') {
                     saveTasksToLocalStorage();
@@ -1480,20 +1492,65 @@ function handleJsonImportFile(event) {
                     renderCurrentView();
                 }
                 
-                alert(`Imported ${importData.tasks.length} tasks successfully!`);
+                const action = shouldOverwrite ? 'replaced all tasks with' : 'added';
+                alert(`Successfully ${action} ${importData.tasks.length} imported tasks!`);
             }
             
             // Import list sections if available
             if (importData.listSections && Array.isArray(importData.listSections)) {
-                window.listSections.push(...importData.listSections);
+                if (shouldOverwrite) {
+                    // OVERWRITE: Replace all lists
+                    window.listSections.length = 0; // Clear existing lists
+                    window.listSections.push(...importData.listSections);
+                    console.log(`🔄 OVERWRITE: Replaced all lists with ${importData.listSections.length} imported lists`);
+                } else {
+                    // ADD: Append to existing lists
+                    window.listSections.push(...importData.listSections);
+                    console.log(`➕ ADD: Added ${importData.listSections.length} lists to existing data`);
+                }
                 localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
             }
             
             // Import templates if available
             if (importData.templates && Array.isArray(importData.templates)) {
-                customTemplates.push(...importData.templates);
-                localStorage.setItem('gtdTemplates', JSON.stringify(customTemplates));
+                if (shouldOverwrite) {
+                    // OVERWRITE: Replace all templates
+                    if (typeof window.customTemplates !== 'undefined') {
+                        window.customTemplates.length = 0; // Clear existing templates
+                        window.customTemplates.push(...importData.templates);
+                        console.log(`🔄 OVERWRITE: Replaced all templates with ${importData.templates.length} imported templates`);
+                    }
+                } else {
+                    // ADD: Append to existing templates
+                    if (typeof window.customTemplates !== 'undefined') {
+                        window.customTemplates.push(...importData.templates);
+                        console.log(`➕ ADD: Added ${importData.templates.length} templates to existing data`);
+                    }
+                }
+                localStorage.setItem('gtd_custom_templates', JSON.stringify(window.customTemplates));
             }
+            
+            // Force sync to server after import
+            console.log('📤 Starting sync to server after import...');
+            setTimeout(async () => {
+                try {
+                    if (typeof uploadAllTasks === 'function') {
+                        await uploadAllTasks();
+                        console.log('✅ Tasks synced to server');
+                    }
+                    if (typeof uploadAllLists === 'function') {
+                        await uploadAllLists();
+                        console.log('✅ Lists synced to server');  
+                    }
+                    if (typeof uploadAllTemplates === 'function') {
+                        await uploadAllTemplates();
+                        console.log('✅ Templates synced to server');
+                    }
+                    console.log('✅ All data synced to server successfully');
+                } catch (error) {
+                    console.error('❌ Server sync failed after import:', error);
+                }
+            }, 1000);
             
         } catch (error) {
             console.error('JSON import failed:', error);
