@@ -2603,6 +2603,32 @@ function renderTasksWithSelection(filteredTasks) {
 }
 
 /**
+ * Verify that all necessary functions are available globally
+ */
+function verifyTaskFunctions() {
+    const requiredFunctions = [
+        'editTask',
+        'completeTask', 
+        'delayTask',
+        'openIOSDateTimePicker',
+        'openTimeDropdown',
+        'toggleTaskSelection'
+    ];
+    
+    const missingFunctions = requiredFunctions.filter(funcName => {
+        return typeof window[funcName] !== 'function';
+    });
+    
+    if (missingFunctions.length > 0) {
+        console.warn('⚠️ Missing functions for filtered tasks:', missingFunctions);
+        return false;
+    }
+    
+    console.log('✅ All task functions are available for filtered tasks');
+    return true;
+}
+
+/**
  * Bulk Task Entry Functions
  */
 
@@ -2685,7 +2711,7 @@ function importTasksFromTextarea() {
     lines.forEach((taskText, index) => {
         try {
             const newTask = {
-                id: Date.now() + index, // Unique ID
+                id: (Date.now() + index).toString(), // Unique ID as string
                 title: taskText,
                 notes: '',
                 dueDate: today,
