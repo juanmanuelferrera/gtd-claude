@@ -1628,17 +1628,40 @@ async function emergencyRecoverLists() {
     }
     
     try {
-        // Force download from server, bypassing protection flags
-        console.log('🔄 Forcing download from server...');
-        const response = await fetch(`${window.API_BASE}/lists/${window.currentUser.user.id}`, {
-            headers: {
+        // First, let's try using the existing getAuthHeaders function if available
+        let headers;
+        if (typeof getAuthHeaders === 'function') {
+            console.log('🔑 Using getAuthHeaders function...');
+            headers = getAuthHeaders();
+        } else {
+            console.log('🔑 Using manual auth headers...');
+            headers = {
                 'Authorization': `Bearer ${window.currentUser.token}`,
                 'Content-Type': 'application/json'
-            }
+            };
+        }
+        
+        console.log('🔄 Forcing download from server...');
+        console.log('🔗 API URL:', `${window.API_BASE}/lists/${window.currentUser.user.id}`);
+        console.log('🔑 Auth headers:', headers);
+        
+        const response = await fetch(`${window.API_BASE}/lists/${window.currentUser.user.id}`, {
+            headers: headers
         });
         
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response headers:', [...response.headers.entries()]);
+        
+        if (response.status === 401) {
+            console.error('❌ Unauthorized - token might be expired');
+            alert('❌ Authentication expired. Please refresh the page and log in again, then retry.');
+            return;
+        }
+        
         if (!response.ok) {
-            throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('❌ Server error response:', errorText);
+            throw new Error(`Server responded with ${response.status}: ${response.statusText}\n${errorText}`);
         }
         
         const data = await response.json();
@@ -1663,7 +1686,7 @@ async function emergencyRecoverLists() {
             return serverListSections;
         } else {
             console.log('⚠️ No lists found on server');
-            alert('No lists found on server to recover');
+            alert('No lists found on server to recover. They might not have been synced before being lost.');
         }
         
     } catch (error) {
@@ -1674,6 +1697,38 @@ async function emergencyRecoverLists() {
 
 // Make function globally accessible for emergency use
 window.emergencyRecoverLists = emergencyRecoverLists;
+
+/**
+ * Try to refresh authentication and then recover lists
+ */
+async function recoverListsWithAuthRefresh() {
+    console.log('🔄 Attempting to refresh authentication...');
+    
+    try {
+        // Try to refresh the auth session
+        if (typeof refreshAuthToken === 'function') {
+            console.log('🔑 Refreshing auth token...');
+            await refreshAuthToken();
+        } else if (typeof downloadAllTasks === 'function') {
+            // Sometimes downloading tasks triggers a token refresh
+            console.log('🔄 Triggering sync to refresh token...');
+            await downloadAllTasks();
+        }
+        
+        // Wait a moment for auth to settle
+        setTimeout(async () => {
+            console.log('🔄 Retrying list recovery...');
+            await emergencyRecoverLists();
+        }, 1000);
+        
+    } catch (error) {
+        console.error('❌ Auth refresh failed:', error);
+        alert('❌ Could not refresh authentication. Please refresh the page and log in again.');
+    }
+}
+
+// Make function globally accessible
+window.recoverListsWithAuthRefresh = recoverListsWithAuthRefresh;
 
 function resetTaskTitle() {
     const titleInput = document.getElementById('editTaskTitle');
