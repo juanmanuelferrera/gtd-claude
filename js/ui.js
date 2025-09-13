@@ -2597,6 +2597,8 @@ function renderTasksWithSelection(filteredTasks) {
 
 // Track selected tasks
 let selectedTaskIds = new Set();
+// Make it globally accessible for other modules
+window.selectedTaskIds = selectedTaskIds;
 
 /**
  * Toggle individual task selection
@@ -2703,6 +2705,7 @@ function deleteSelectedTasks() {
     
     if (selectedTaskIds.size === 0) {
         console.log('❌ No tasks selected for deletion');
+        alert('Please select tasks to delete first');
         return;
     }
     

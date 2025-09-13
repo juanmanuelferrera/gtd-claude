@@ -885,18 +885,21 @@ function undoLastAction() {
 }
 
 function deleteSelectedTasks() {
-    if (selectedTasks.size === 0) {
+    // Use the selectedTaskIds variable from ui.js for consistency
+    const selectedTasksSet = window.selectedTaskIds || selectedTasks || new Set();
+    
+    if (selectedTasksSet.size === 0) {
         alert('Please select tasks to delete first');
         return;
     }
     
-    const taskCount = selectedTasks.size;
+    const taskCount = selectedTasksSet.size;
     if (!confirm(`Delete ${taskCount} selected task${taskCount > 1 ? 's' : ''}?`)) {
         return;
     }
     
     // Delete selected tasks
-    const tasksToDelete = Array.from(selectedTasks);
+    const tasksToDelete = Array.from(selectedTasksSet);
     tasksToDelete.forEach(taskId => {
         if (typeof deleteTask === 'function') {
             deleteTask(taskId);
@@ -910,24 +913,32 @@ function deleteSelectedTasks() {
     });
     
     // Clear selection
-    selectedTasks.clear();
+    selectedTasksSet.clear();
+    if (window.selectedTaskIds) {
+        window.selectedTaskIds.clear();
+    }
     
     // Save and refresh
     if (typeof saveTasksToLocalStorage === 'function') {
         saveTasksToLocalStorage();
     }
-    if (typeof renderCurrentView === 'function') {
+    if (typeof performAllTasksSearch === 'function') {
+        performAllTasksSearch();
+    } else if (typeof renderCurrentView === 'function') {
         renderCurrentView();
     }
 }
 
 function delaySelectedTasks(days) {
-    if (selectedTasks.size === 0) {
+    // Use the selectedTaskIds variable from ui.js for consistency
+    const selectedTasksSet = window.selectedTaskIds || selectedTasks || new Set();
+    
+    if (selectedTasksSet.size === 0) {
         alert('Please select tasks to delay first');
         return;
     }
     
-    const tasksToDelay = Array.from(selectedTasks);
+    const tasksToDelay = Array.from(selectedTasksSet);
     tasksToDelay.forEach(taskId => {
         if (typeof delayTask === 'function') {
             delayTask(taskId, days);
@@ -935,7 +946,10 @@ function delaySelectedTasks(days) {
     });
     
     // Clear selection
-    selectedTasks.clear();
+    selectedTasksSet.clear();
+    if (window.selectedTaskIds) {
+        window.selectedTaskIds.clear();
+    }
     
     // Refresh view
     if (typeof renderCurrentView === 'function') {
