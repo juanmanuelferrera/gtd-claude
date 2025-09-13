@@ -546,10 +546,23 @@ async function _downloadAllListsInternal() {
             const data = await response.json();
             const serverListSections = data.listSections || [];
             
-            // MANDATORY REFRESH: Direct replacement with server data
+            // MANDATORY REFRESH: Direct replacement with server data - BUT STILL CHECK FOR DATA LOSS
             if (window.forceMandatoryRefresh || window.staleBrowserMode) {
-                console.log('🚨 MANDATORY REFRESH: Directly replacing lists with server data');
+                console.log('🚨 MANDATORY REFRESH: Attempting to replace lists with server data');
+                
+                // CRITICAL SAFETY: Even in mandatory refresh, never replace with empty unless explicitly cleared
+                const localListCount = typeof listSections !== 'undefined' ? listSections.length : 0;
+                const serverListCount = serverListSections.length;
+                
+                if (serverListCount === 0 && localListCount > 0 && !window.justClearedAllData) {
+                    console.error('🚨 MANDATORY REFRESH SAFETY: Server returned empty lists but local has data!');
+                    console.error('🛡️ Even in mandatory refresh mode, this looks like data loss. Blocking sync.');
+                    console.error('🔧 If you intentionally cleared server data, set window.justClearedAllData = true first');
+                    return;
+                }
+                
                 if (typeof listSections !== 'undefined') {
+                    console.log('✅ MANDATORY REFRESH: Safety checks passed, replacing with server data');
                     listSections = serverListSections;
                     localStorage.setItem('gtd_list_sections', JSON.stringify(listSections));
                     if (currentView === 'lists' && typeof renderListsView === 'function') {
@@ -566,13 +579,26 @@ async function _downloadAllListsInternal() {
                     console.log(`📥 LISTS SYNC: Local count ${localListCount}, server count ${serverListCount}`);
                 }
                 
-                // Additional safety: Check if server has significantly fewer lists
-                if (serverListCount < localListCount * 0.5 && localListCount > 2) {
-                    console.log('🛡️ LISTS SAFETY: Server has significantly fewer lists than local - skipping download');
+                // CRITICAL BUG FIX: Enhanced safety checks to prevent data loss
+                console.log(`🔍 LISTS SYNC SAFETY CHECK: Local count ${localListCount}, server count ${serverListCount}`);
+                
+                // CRITICAL: Never replace local lists with empty server lists unless local is also empty
+                if (serverListCount === 0 && localListCount > 0) {
+                    console.error('🚨 CRITICAL SAFETY: Server returned empty lists but local has data - BLOCKING sync to prevent data loss!');
+                    console.error('🛡️ This likely means server connection issues or auth problems. Local data preserved.');
                     return;
                 }
                 
+                // Additional safety: Check if server has significantly fewer lists
+                if (serverListCount < localListCount * 0.5 && localListCount > 1) {
+                    console.error('🛡️ LISTS SAFETY: Server has significantly fewer lists than local - BLOCKING download to prevent data loss');
+                    console.error(`🛡️ Local: ${localListCount} lists, Server: ${serverListCount} lists - discrepancy too large`);
+                    return;
+                }
+                
+                // Only proceed if safety checks pass
                 if (typeof listSections !== 'undefined') {
+                    console.log('✅ LISTS SAFETY: Checks passed, updating local lists with server data');
                     listSections = serverListSections;
                     localStorage.setItem('gtd_list_sections', JSON.stringify(listSections));
                     if (currentView === 'lists' && typeof renderListsView === 'function') {
