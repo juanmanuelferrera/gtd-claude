@@ -1471,7 +1471,7 @@ function handleJsonImportFile(event) {
             const importData = JSON.parse(e.target.result);
             
             // Ask user if they want to overwrite or add to existing data
-            const shouldOverwrite = confirm('🔄 IMPORT MODE:\n\nOK = REPLACE all existing data (recommended)\nCancel = ADD to existing data\n\nRecommended: Click OK to REPLACE everything with the backup data.');
+            const shouldOverwrite = confirm('⚠️ IMPORT MODE SELECTION:\n\n✅ Click OK to REPLACE ALL existing data (RECOMMENDED)\n❌ Click Cancel to ADD to existing data (creates duplicates)\n\n🔄 FOR CLEAN RESTORE: Click OK to completely replace everything with backup data.');
             
             if (importData.tasks && Array.isArray(importData.tasks)) {
                 if (shouldOverwrite) {
@@ -1945,6 +1945,108 @@ async function forceDownloadListsFromServer() {
 
 // Make function globally accessible
 window.forceDownloadListsFromServer = forceDownloadListsFromServer;
+
+/**
+ * Force import JSON backup with OVERWRITE mode (no questions asked)
+ * Use this when you want to completely replace all data
+ */
+async function forceImportJSONOverwrite() {
+    console.log('🔄 FORCE IMPORT: Opening file picker for JSON overwrite...');
+    
+    // Create a file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importData = JSON.parse(e.target.result);
+                console.log('📥 Loaded JSON data for FORCE OVERWRITE:', importData);
+                
+                // Final confirmation
+                const finalConfirm = confirm(`🔄 FORCE OVERWRITE CONFIRMATION\n\nThis will COMPLETELY REPLACE all your data with the backup:\n\n• Tasks: ${importData.tasks?.length || 0}\n• Lists: ${importData.listSections?.length || 0}\n• Templates: ${importData.templates?.length || importData.customTemplates?.length || 0}\n\nThis action CANNOT be undone!\n\nProceed?`);
+                
+                if (!finalConfirm) {
+                    alert('❌ Import cancelled.');
+                    return;
+                }
+                
+                // FORCE OVERWRITE ALL DATA
+                console.log('🔄 FORCE OVERWRITE: Replacing ALL data...');
+                
+                // Replace tasks
+                if (importData.tasks && Array.isArray(importData.tasks)) {
+                    tasks.length = 0;
+                    tasks.push(...importData.tasks);
+                    if (typeof saveTasksToLocalStorage === 'function') {
+                        saveTasksToLocalStorage();
+                    }
+                    console.log(`✅ OVERWRITE: Replaced with ${importData.tasks.length} tasks`);
+                }
+                
+                // Replace lists
+                if (importData.listSections && Array.isArray(importData.listSections)) {
+                    window.listSections.length = 0;
+                    window.listSections.push(...importData.listSections);
+                    localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
+                    console.log(`✅ OVERWRITE: Replaced with ${importData.listSections.length} lists`);
+                }
+                
+                // Replace templates
+                const templates = importData.templates || importData.customTemplates;
+                if (templates && Array.isArray(templates)) {
+                    if (typeof window.customTemplates !== 'undefined') {
+                        window.customTemplates.length = 0;
+                        window.customTemplates.push(...templates);
+                        localStorage.setItem('gtd_custom_templates', JSON.stringify(window.customTemplates));
+                        console.log(`✅ OVERWRITE: Replaced with ${templates.length} templates`);
+                    }
+                }
+                
+                alert('✅ FORCE OVERWRITE COMPLETE!\n\nAll data has been replaced with the backup.');
+                
+                // Refresh UI
+                if (typeof renderCurrentView === 'function') {
+                    renderCurrentView();
+                }
+                
+                // Force sync to server
+                setTimeout(async () => {
+                    try {
+                        window.justModifiedTasks = true;
+                        window.justModifiedLists = true;
+                        window.justModifiedTemplates = true;
+                        
+                        if (typeof uploadAllTasks === 'function') await uploadAllTasks();
+                        if (typeof uploadAllLists === 'function') await uploadAllLists();
+                        if (typeof uploadAllTemplates === 'function') await uploadAllTemplates();
+                        
+                        console.log('✅ All data synced to server after force import');
+                    } catch (error) {
+                        console.error('❌ Sync failed after import:', error);
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                console.error('❌ JSON parsing failed:', error);
+                alert('❌ Failed to read JSON file. Please check the file format.');
+            }
+        };
+        
+        reader.readAsText(file);
+    };
+    
+    // Trigger file selection
+    input.click();
+}
+
+// Make function globally accessible
+window.forceImportJSONOverwrite = forceImportJSONOverwrite;
 
 function resetTaskTitle() {
     const titleInput = document.getElementById('editTaskTitle');
