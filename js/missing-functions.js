@@ -1615,6 +1615,66 @@ async function addNewTemplate() {
 // Make function globally accessible
 window.addNewTemplate = addNewTemplate;
 
+/**
+ * Emergency function to recover lists from server
+ */
+async function emergencyRecoverLists() {
+    console.log('🚨 EMERGENCY: Attempting to recover lists from server...');
+    
+    if (!window.currentUser?.user?.id) {
+        console.error('❌ No user logged in');
+        alert('Please log in first to recover lists');
+        return;
+    }
+    
+    try {
+        // Force download from server, bypassing protection flags
+        console.log('🔄 Forcing download from server...');
+        const response = await fetch(`${window.API_BASE}/lists/${window.currentUser.user.id}`, {
+            headers: {
+                'Authorization': `Bearer ${window.currentUser.token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('📥 Server response:', data);
+        
+        const serverListSections = data.listSections || [];
+        console.log(`📋 Found ${serverListSections.length} lists on server`);
+        
+        if (serverListSections.length > 0) {
+            // Restore lists
+            window.listSections = serverListSections;
+            localStorage.setItem('gtd_list_sections', JSON.stringify(serverListSections));
+            
+            console.log('✅ Lists recovered from server!');
+            alert(`✅ Recovered ${serverListSections.length} lists from server!`);
+            
+            // Refresh UI if possible
+            if (typeof renderCurrentView === 'function') {
+                renderCurrentView();
+            }
+            
+            return serverListSections;
+        } else {
+            console.log('⚠️ No lists found on server');
+            alert('No lists found on server to recover');
+        }
+        
+    } catch (error) {
+        console.error('❌ Recovery failed:', error);
+        alert(`Recovery failed: ${error.message}`);
+    }
+}
+
+// Make function globally accessible for emergency use
+window.emergencyRecoverLists = emergencyRecoverLists;
+
 function resetTaskTitle() {
     const titleInput = document.getElementById('editTaskTitle');
     if (titleInput) {
