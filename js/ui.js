@@ -2604,10 +2604,14 @@ let selectedTaskIds = new Set();
 function toggleTaskSelection(taskId, event) {
     event.stopPropagation(); // Prevent task edit dialog
     
+    console.log('🔄 Toggling selection for task ID:', taskId);
+    
     if (selectedTaskIds.has(taskId)) {
         selectedTaskIds.delete(taskId);
+        console.log('➖ Removed from selection. Current selection:', Array.from(selectedTaskIds));
     } else {
         selectedTaskIds.add(taskId);
+        console.log('➕ Added to selection. Current selection:', Array.from(selectedTaskIds));
     }
     
     updateBulkSelectionUI();
@@ -2695,7 +2699,12 @@ function updateBulkSelectionUI() {
  * Delete selected tasks in bulk
  */
 function deleteSelectedTasks() {
-    if (selectedTaskIds.size === 0) return;
+    console.log('🎯 deleteSelectedTasks called, selectedTaskIds:', Array.from(selectedTaskIds));
+    
+    if (selectedTaskIds.size === 0) {
+        console.log('❌ No tasks selected for deletion');
+        return;
+    }
     
     const confirmMessage = `Are you sure you want to delete ${selectedTaskIds.size} selected task(s)? This action cannot be undone.`;
     
@@ -2704,10 +2713,16 @@ function deleteSelectedTasks() {
         
         // Delete each selected task
         selectedTaskIds.forEach(taskId => {
+            console.log('🔍 Looking for task with ID:', taskId);
             const taskIndex = tasks.findIndex(t => t.id === taskId);
+            console.log('📍 Task index found:', taskIndex);
+            
             if (taskIndex !== -1) {
+                console.log('✅ Setting task to deleted:', tasks[taskIndex].title);
                 tasks[taskIndex].status = 'deleted';
                 deletedCount++;
+            } else {
+                console.log('❌ Task not found in tasks array');
             }
         });
         
@@ -2715,11 +2730,11 @@ function deleteSelectedTasks() {
         selectedTaskIds.clear();
         
         // Save changes and refresh view
-        saveTasks();
+        saveTasksToLocalStorage();
         
         // Sync with server if available
-        if (typeof syncTasks === 'function') {
-            syncTasks();
+        if (typeof syncAll === 'function') {
+            syncAll();
         }
         
         // Refresh the All Tasks view
@@ -2767,11 +2782,11 @@ function delaySelectedTasks(days) {
         selectedTaskIds.clear();
         
         // Save changes and refresh view
-        saveTasks();
+        saveTasksToLocalStorage();
         
         // Sync with server if available
-        if (typeof syncTasks === 'function') {
-            syncTasks();
+        if (typeof syncAll === 'function') {
+            syncAll();
         }
         
         // Refresh the All Tasks view
