@@ -1,5 +1,5 @@
 // Utility functions and initialization code
-console.log('🚀 HyperFiler Pro v1.2.0 - Starting initialization...');
+console.log('🚀 HyperFiler Pro v1.3.0 - Starting initialization...');
 
 window.addEventListener('error', function(e) {
     console.error('❌ UNCAUGHT ERROR:', e.message, 'at line', e.lineno, 'column', e.colno);
