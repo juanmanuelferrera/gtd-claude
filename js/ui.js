@@ -2614,12 +2614,26 @@ function openTaskImportModal() {
     const modal = document.getElementById('taskImportModal');
     const textarea = document.getElementById('taskImportTextarea');
     
-    if (modal && textarea) {
+    console.log('🔍 Modal element found:', !!modal);
+    console.log('🔍 Textarea element found:', !!textarea);
+    
+    if (modal) {
+        console.log('📱 Setting modal display to block');
         modal.style.display = 'block';
-        textarea.value = '';
-        textarea.focus();
+        modal.style.zIndex = '2000'; // Ensure it's on top
+        
+        if (textarea) {
+            textarea.value = '';
+            setTimeout(() => textarea.focus(), 100); // Delay focus slightly
+        } else {
+            console.error('❌ Textarea not found');
+        }
     } else {
-        console.error('❌ Task import modal or textarea not found');
+        console.error('❌ Modal element not found - searching for alternatives');
+        
+        // Debug: list all modal elements
+        const allModals = document.querySelectorAll('[id*="modal"], [class*="modal"]');
+        console.log('🔍 All modal elements found:', Array.from(allModals).map(m => m.id || m.className));
     }
 }
 
