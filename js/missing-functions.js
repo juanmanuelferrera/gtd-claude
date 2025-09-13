@@ -1553,32 +1553,67 @@ function handleTextImportFile(event) {
     reader.readAsText(file);
 }
 
-function addNewTemplate() {
+async function addNewTemplate() {
+    console.log('🏷️ addNewTemplate called');
     const input = document.getElementById('newTemplateInput');
-    if (!input) return;
+    if (!input) {
+        console.error('❌ newTemplateInput not found');
+        return;
+    }
     
-    const template = input.value.trim();
-    if (!template) return;
+    let template = input.value.trim();
+    if (!template) {
+        console.log('⚠️ No template text entered');
+        return;
+    }
     
-    if (typeof customTemplates !== 'undefined') {
-        if (!customTemplates.includes(template)) {
-            customTemplates.push(template);
-            
-            // Save templates
-            if (typeof saveTemplates === 'function') {
-                saveTemplates();
-            }
-            
-            // Clear input
-            input.value = '';
-            
-            // Re-render template buttons
-            if (typeof renderTemplateButtons === 'function') {
-                renderTemplateButtons();
-            }
-        }
+    // Ensure template starts with @
+    if (!template.startsWith('@')) {
+        template = '@' + template;
+    }
+    
+    // Remove any spaces
+    template = template.replace(/\s/g, '');
+    
+    console.log('📝 Adding template:', template);
+    
+    // Initialize customTemplates if needed
+    if (typeof window.customTemplates === 'undefined') {
+        window.customTemplates = [];
+    }
+    
+    // Check if template already exists
+    if (window.customTemplates.includes(template)) {
+        alert('Template already exists');
+        return;
+    }
+    
+    // Add template
+    window.customTemplates.push(template);
+    console.log('✅ Template added, current templates:', window.customTemplates);
+    
+    // Save templates persistently
+    if (typeof saveTemplates === 'function') {
+        console.log('💾 Saving templates...');
+        await saveTemplates();
+    } else {
+        // Fallback: save directly to localStorage
+        console.log('💾 Saving templates to localStorage (fallback)...');
+        localStorage.setItem('gtd_custom_templates', JSON.stringify(window.customTemplates));
+    }
+    
+    // Clear input
+    input.value = '';
+    
+    // Re-render template buttons
+    if (typeof renderTemplateButtons === 'function') {
+        console.log('🔄 Rendering template buttons...');
+        renderTemplateButtons();
     }
 }
+
+// Make function globally accessible
+window.addNewTemplate = addNewTemplate;
 
 function resetTaskTitle() {
     const titleInput = document.getElementById('editTaskTitle');
