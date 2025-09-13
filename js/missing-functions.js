@@ -1835,17 +1835,32 @@ async function importListsOnlyFromJSON() {
                         renderCurrentView();
                     }
                     
-                    // Sync to server
-                    setTimeout(async () => {
+                    // CRITICAL: Set flag to prevent downloads from overwriting our import
+                    window.justModifiedLists = true;
+                    console.log('🔒 Set justModifiedLists flag to protect import');
+                    
+                    // Sync to server IMMEDIATELY
+                    (async () => {
                         try {
                             if (typeof uploadAllLists === 'function') {
                                 await uploadAllLists();
-                                console.log('✅ Lists synced to server');
+                                console.log('✅ Lists synced to server successfully');
+                                
+                                // Clear flag after successful upload  
+                                setTimeout(() => {
+                                    window.justModifiedLists = false;
+                                    console.log('🔓 Cleared justModifiedLists protection flag');
+                                }, 5000);
                             }
                         } catch (error) {
                             console.error('❌ Failed to sync lists to server:', error);
+                            // Clear flag even on error to avoid permanent blocking
+                            setTimeout(() => {
+                                window.justModifiedLists = false;
+                                console.log('🔓 Cleared justModifiedLists flag after error');
+                            }, 10000);
                         }
-                    }, 1000);
+                    })();
                 }
                 
             } catch (error) {
@@ -1863,6 +1878,73 @@ async function importListsOnlyFromJSON() {
 
 // Make function globally accessible
 window.importListsOnlyFromJSON = importListsOnlyFromJSON;
+
+/**
+ * Emergency function to bypass sync protection and force download lists from server
+ * Use this when lists disappeared due to sync timing issues
+ */
+async function forceDownloadListsFromServer() {
+    console.log('🚨 FORCE DOWNLOAD: Bypassing all protection to get lists from server...');
+    
+    if (!window.currentUser?.user?.id) {
+        alert('❌ No user logged in. Please log in first.');
+        return;
+    }
+    
+    try {
+        // Get auth headers
+        let headers;
+        if (typeof getAuthHeaders === 'function') {
+            headers = getAuthHeaders();
+        } else {
+            headers = {
+                'Authorization': `Bearer ${window.currentUser.token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+        
+        console.log('🔄 Forcing download from server (bypassing ALL protections)...');
+        const response = await fetch(`${window.API_BASE}/lists/${window.currentUser.user.id}`, {
+            headers: headers
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('📥 Server response:', data);
+        
+        const serverListSections = data.listSections || [];
+        console.log(`📋 Found ${serverListSections.length} lists on server`);
+        
+        if (serverListSections.length > 0) {
+            // Force restore lists (bypassing all safety checks)
+            window.listSections = serverListSections;
+            localStorage.setItem('gtd_list_sections', JSON.stringify(serverListSections));
+            
+            console.log('✅ Lists force-downloaded from server!');
+            alert(`✅ Force-recovered ${serverListSections.length} lists from server!`);
+            
+            // Refresh UI
+            if (typeof renderCurrentView === 'function') {
+                renderCurrentView();
+            }
+            
+            return serverListSections;
+        } else {
+            console.log('⚠️ No lists found on server');
+            alert('❌ No lists found on server. They may not have been uploaded yet.');
+        }
+        
+    } catch (error) {
+        console.error('❌ Force download failed:', error);
+        alert(`❌ Force download failed: ${error.message}`);
+    }
+}
+
+// Make function globally accessible
+window.forceDownloadListsFromServer = forceDownloadListsFromServer;
 
 function resetTaskTitle() {
     const titleInput = document.getElementById('editTaskTitle');
