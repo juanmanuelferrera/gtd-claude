@@ -3235,6 +3235,45 @@ function forceTaskMigration() {
 window.forceTaskMigration = forceTaskMigration;
 
 /**
+ * Fix bulk imported tasks with numeric IDs by converting them to strings
+ */
+function fixBulkTaskIds() {
+    console.log('🔧 Fixing bulk task IDs...');
+    
+    let fixedCount = 0;
+    tasks.forEach(task => {
+        if (typeof task.id === 'number') {
+            console.log(`🔄 Converting task ID from ${task.id} to "${task.id}"`);
+            task.id = task.id.toString();
+            fixedCount++;
+        }
+    });
+    
+    if (fixedCount > 0) {
+        console.log(`✅ Fixed ${fixedCount} task IDs`);
+        saveTasksToLocalStorage();
+        
+        // Sync with server if available
+        if (typeof syncAll === 'function') {
+            syncAll();
+        }
+        
+        // Refresh current view
+        if (typeof renderCurrentView === 'function') {
+            renderCurrentView();
+        }
+        
+        alert(`Fixed ${fixedCount} task IDs. Edit modal should now work for all tasks.`);
+    } else {
+        console.log('ℹ️ No numeric IDs found to fix');
+        alert('No task IDs need fixing. All tasks already have string IDs.');
+    }
+}
+
+// Make function globally accessible
+window.fixBulkTaskIds = fixBulkTaskIds;
+
+/**
  * Basic renderTodayView function
  */
 function renderTodayView() {
