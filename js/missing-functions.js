@@ -2633,18 +2633,33 @@ function renderTemplateButtons() {
 
 // Insert template into task title input
 function insertTemplateToTask(template) {
+    console.log('🏷️ insertTemplateToTask called with:', template);
     const titleInput = document.getElementById('editTaskTitle');
-    if (!titleInput) return;
+    if (!titleInput) {
+        console.error('❌ editTaskTitle input not found');
+        return;
+    }
     
     const currentValue = titleInput.value.trim();
+    console.log('📝 Current value:', currentValue);
+    
     if (currentValue) {
         titleInput.value = currentValue + ' ' + template;
     } else {
         titleInput.value = template;
     }
+    
+    console.log('✅ New value:', titleInput.value);
     titleInput.focus();
     titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
+    
+    // Trigger input event to ensure any listeners are notified
+    titleInput.dispatchEvent(new Event('input', { bubbles: true }));
+    titleInput.dispatchEvent(new Event('change', { bubbles: true }));
 }
+
+// Make function globally accessible
+window.insertTemplateToTask = insertTemplateToTask;
 
 // Delete template
 async function deleteTemplate(template) {
