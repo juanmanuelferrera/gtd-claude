@@ -2610,8 +2610,7 @@ function renderTasksWithSelection(filteredTasks) {
  * Open bulk task entry modal
  */
 function openTaskImportModal() {
-    alert('openTaskImportModal called!'); // Temporary debug alert
-    console.log('📥 Opening bulk task import modal');
+    console.log('📥 CORRECT: openTaskImportModal called - showing modal');
     const modal = document.getElementById('taskImportModal');
     const textarea = document.getElementById('taskImportTextarea');
     
@@ -2661,11 +2660,15 @@ function closeTaskImportModal(event) {
  * Import tasks from textarea - one task per line
  */
 function importTasksFromTextarea() {
-    console.log('📝 Starting bulk task import');
+    console.log('📝 WRONG: importTasksFromTextarea called directly - should call openTaskImportModal first');
     
     const textarea = document.getElementById('taskImportTextarea');
-    if (!textarea) {
-        console.error('❌ Task import textarea not found');
+    const modal = document.getElementById('taskImportModal');
+    
+    // If textarea doesn't exist or modal is not visible, open the modal first
+    if (!textarea || !modal || modal.style.display === 'none' || !modal.style.display) {
+        console.log('🔄 Textarea not found or modal not open, opening modal first');
+        openTaskImportModal();
         return;
     }
     
