@@ -1787,6 +1787,83 @@ async function recoverListsWithAuthRefresh() {
 // Make function globally accessible
 window.recoverListsWithAuthRefresh = recoverListsWithAuthRefresh;
 
+/**
+ * Import ONLY Lists from a JSON backup file
+ * Useful when you want to restore lists but keep current tasks/templates
+ */
+async function importListsOnlyFromJSON() {
+    console.log('📋 Starting Lists-only import...');
+    
+    // Create a file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importData = JSON.parse(e.target.result);
+                console.log('📥 Loaded JSON data:', importData);
+                
+                // Check if listSections exist in the backup
+                if (!importData.listSections || !Array.isArray(importData.listSections)) {
+                    alert('❌ No Lists found in this backup file.\n\nLook for "listSections" property in the JSON.');
+                    return;
+                }
+                
+                const listsToImport = importData.listSections;
+                console.log(`📋 Found ${listsToImport.length} lists in backup:`, listsToImport);
+                
+                // Show preview of what will be imported
+                const listNames = listsToImport.map(list => list.title || list.name || 'Unnamed List').join(', ');
+                const confirmMessage = `📋 IMPORT LISTS ONLY\n\nFound ${listsToImport.length} lists:\n${listNames}\n\n⚠️ This will REPLACE your current lists but keep your tasks and templates.\n\nProceed?`;
+                
+                if (confirm(confirmMessage)) {
+                    // Replace lists
+                    window.listSections = [...listsToImport]; // Create a copy
+                    localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
+                    
+                    console.log('✅ Lists imported successfully');
+                    alert(`✅ Successfully imported ${listsToImport.length} lists!\n\nYour tasks and templates remain unchanged.`);
+                    
+                    // Refresh UI if in Lists view
+                    if (typeof renderCurrentView === 'function') {
+                        renderCurrentView();
+                    }
+                    
+                    // Sync to server
+                    setTimeout(async () => {
+                        try {
+                            if (typeof uploadAllLists === 'function') {
+                                await uploadAllLists();
+                                console.log('✅ Lists synced to server');
+                            }
+                        } catch (error) {
+                            console.error('❌ Failed to sync lists to server:', error);
+                        }
+                    }, 1000);
+                }
+                
+            } catch (error) {
+                console.error('❌ JSON parsing failed:', error);
+                alert('❌ Failed to read JSON file. Please check the file format.');
+            }
+        };
+        
+        reader.readAsText(file);
+    };
+    
+    // Trigger file selection
+    input.click();
+}
+
+// Make function globally accessible
+window.importListsOnlyFromJSON = importListsOnlyFromJSON;
+
 function resetTaskTitle() {
     const titleInput = document.getElementById('editTaskTitle');
     if (titleInput) {
