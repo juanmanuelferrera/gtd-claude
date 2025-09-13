@@ -823,7 +823,7 @@ function groupTasksByDate(tasksArray) {
 /**
  * Render individual task card
  */
-function renderTaskCard(task, showCheckbox = false) {
+function renderTaskCard(task, isAllTasksView = false) {
     const isOverdue = window.isTaskOverdue ? window.isTaskOverdue(task) : (task.dueDate && task.dueDate < getLocalDateString() && task.status === 'pending');
     const isEvent = task.isEvent;
     let cardClass = `task-card ${task.status}`;
@@ -836,13 +836,20 @@ function renderTaskCard(task, showCheckbox = false) {
     
     const timeDisplay = task.dueTime ? ` at ${formatTime(task.dueTime)}` : '';
     
-    // Only show checkbox in All Tasks view
-    const checkboxHtml = showCheckbox ? `
-                <input type="checkbox" class="task-selection-checkbox" 
-                       onclick="toggleTaskSelection('${task.id}', event)" 
-                       data-task-id="${task.id}"
-                       style="margin-right: 10px;"
-                       title="Select this task for bulk actions">` : '';
+    // Different checkbox behavior based on view
+    const checkboxHtml = isAllTasksView ? 
+        // All Tasks view: checkbox for bulk selection
+        `<input type="checkbox" class="task-selection-checkbox" 
+               onclick="toggleTaskSelection('${task.id}', event)" 
+               data-task-id="${task.id}"
+               style="margin-right: 10px;"
+               title="Select this task for bulk actions">` : 
+        // Today/Week/Month views: checkbox for task completion/deletion
+        `<input type="checkbox" class="task-completion-checkbox" 
+               onclick="completeTask('${task.id}', event)" 
+               data-task-id="${task.id}"
+               style="margin-right: 10px;"
+               title="Mark as complete">`;
     
     return `
         <div class="${cardClass}" 
@@ -953,7 +960,7 @@ function renderTasks(viewType) {
                     <span class="group-count">(${groupTasks.length})</span>
                 </h4>
                 <div class="group-content" id="content-${dateKey}">
-                    ${groupTasks.map(task => renderTaskCard(task, false)).join('')}
+                    ${groupTasks.map(task => renderTaskCard(task)).join('')}
                 </div>
             </div>
         `;
@@ -2603,6 +2610,38 @@ function renderTasksWithSelection(filteredTasks) {
 let selectedTaskIds = new Set();
 // Make it globally accessible for other modules
 window.selectedTaskIds = selectedTaskIds;
+
+/**
+ * Complete/Delete a task when checkbox is clicked in Today/Week/Month views
+ */
+function completeTask(taskId, event) {
+    event.stopPropagation(); // Prevent task edit dialog
+    
+    console.log('✅ Completing/deleting task:', taskId);
+    
+    // Find the task and mark it as deleted
+    const taskIndex = tasks.findIndex(t => t.id === taskId);
+    if (taskIndex !== -1) {
+        tasks[taskIndex].status = 'deleted';
+        tasks[taskIndex].deletedAt = new Date().toISOString();
+        
+        // Save changes
+        saveTasksToLocalStorage();
+        
+        // Sync with server if available
+        if (typeof syncAll === 'function') {
+            syncAll();
+        }
+        
+        // Refresh the current view
+        renderCurrentView();
+        
+        // Show feedback
+        if (typeof showNotification === 'function') {
+            showNotification('Task completed', 'success');
+        }
+    }
+}
 
 /**
  * Toggle individual task selection
