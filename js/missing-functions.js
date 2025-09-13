@@ -1102,7 +1102,10 @@ function handleFileImport(event) {
             const importData = JSON.parse(e.target.result);
             
             if (importData.tasks && Array.isArray(importData.tasks)) {
-                tasks.push(...importData.tasks);
+                // ALWAYS OVERWRITE - Clear existing tasks and replace with imported ones
+                console.log(`🔄 OVERWRITE MODE: Replacing ${tasks.length} existing tasks with ${importData.tasks.length} imported tasks`);
+                tasks.length = 0; // Clear existing tasks
+                tasks.push(...importData.tasks); // Add imported tasks
                 
                 if (typeof saveTasksToLocalStorage === 'function') {
                     saveTasksToLocalStorage();
@@ -1111,7 +1114,23 @@ function handleFileImport(event) {
                     renderCurrentView();
                 }
                 
-                alert(`Imported ${importData.tasks.length} tasks successfully!`);
+                alert(`✅ REPLACED all tasks with ${importData.tasks.length} imported tasks!`);
+                
+                // Set sync protection flag and upload to server
+                window.justModifiedTasks = true;
+                setTimeout(async () => {
+                    try {
+                        if (typeof uploadAllTasks === 'function') {
+                            await uploadAllTasks();
+                            console.log('✅ Tasks synced to server after import');
+                        }
+                        setTimeout(() => {
+                            window.justModifiedTasks = false;
+                        }, 5000);
+                    } catch (error) {
+                        console.error('❌ Failed to sync tasks after import:', error);
+                    }
+                }, 1000);
             }
             
             closeImportModal();
