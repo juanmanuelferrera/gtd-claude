@@ -2603,6 +2603,128 @@ function renderTasksWithSelection(filteredTasks) {
 }
 
 /**
+ * Bulk Task Entry Functions
+ */
+
+/**
+ * Open bulk task entry modal
+ */
+function openTaskImportModal() {
+    console.log('📥 Opening bulk task import modal');
+    const modal = document.getElementById('taskImportModal');
+    const textarea = document.getElementById('taskImportTextarea');
+    
+    if (modal && textarea) {
+        modal.style.display = 'block';
+        textarea.value = '';
+        textarea.focus();
+    } else {
+        console.error('❌ Task import modal or textarea not found');
+    }
+}
+
+/**
+ * Close bulk task entry modal
+ */
+function closeTaskImportModal(event) {
+    console.log('❌ Closing bulk task import modal');
+    const modal = document.getElementById('taskImportModal');
+    
+    // Only close if clicked on backdrop or close button
+    if (!event || event.target === modal || event.target.closest('button[onclick*="closeTaskImportModal"]')) {
+        if (modal) {
+            modal.style.display = 'none';
+            const textarea = document.getElementById('taskImportTextarea');
+            if (textarea) {
+                textarea.value = '';
+            }
+        }
+    }
+}
+
+/**
+ * Import tasks from textarea - one task per line
+ */
+function importTasksFromTextarea() {
+    console.log('📝 Starting bulk task import');
+    
+    const textarea = document.getElementById('taskImportTextarea');
+    if (!textarea) {
+        console.error('❌ Task import textarea not found');
+        return;
+    }
+    
+    const text = textarea.value.trim();
+    if (!text) {
+        alert('Please enter some tasks to import');
+        return;
+    }
+    
+    // Split by lines and filter out empty lines
+    const lines = text.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+    
+    if (lines.length === 0) {
+        alert('No valid tasks found to import');
+        return;
+    }
+    
+    console.log(`📋 Processing ${lines.length} task lines`);
+    
+    // Get today's date string
+    const today = getLocalDateString(new Date());
+    let importedCount = 0;
+    
+    // Create tasks
+    lines.forEach((taskText, index) => {
+        try {
+            const newTask = {
+                id: Date.now() + index, // Unique ID
+                title: taskText,
+                notes: '',
+                dueDate: today,
+                dueTime: '', // Untimed - goes to "No Specific Time" section
+                status: 'pending',
+                isEvent: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Add to tasks array
+            tasks.push(newTask);
+            importedCount++;
+            
+            console.log(`✅ Created task ${index + 1}: "${taskText}"`);
+        } catch (error) {
+            console.error(`❌ Error creating task from line: "${taskText}"`, error);
+        }
+    });
+    
+    // Save tasks
+    saveTasksToLocalStorage();
+    
+    // Sync with server if available
+    if (typeof syncAll === 'function') {
+        syncAll();
+    }
+    
+    // Close modal and clear textarea
+    textarea.value = '';
+    closeTaskImportModal();
+    
+    // Refresh the current view to show new tasks
+    renderCurrentView();
+    
+    // Show success message
+    if (typeof showNotification === 'function') {
+        showNotification(`✅ Imported ${importedCount} tasks to Today`, 'success');
+    }
+    
+    console.log(`🎉 Successfully imported ${importedCount} tasks`);
+}
+
+/**
  * Bulk Selection Functions for All Tasks View
  */
 
