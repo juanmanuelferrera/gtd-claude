@@ -2610,6 +2610,7 @@ function renderTasksWithSelection(filteredTasks) {
  * Open bulk task entry modal
  */
 function openTaskImportModal() {
+    alert('openTaskImportModal called!'); // Temporary debug alert
     console.log('📥 Opening bulk task import modal');
     const modal = document.getElementById('taskImportModal');
     const textarea = document.getElementById('taskImportTextarea');
