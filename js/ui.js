@@ -823,7 +823,7 @@ function groupTasksByDate(tasksArray) {
 /**
  * Render individual task card
  */
-function renderTaskCard(task) {
+function renderTaskCard(task, showCheckbox = false) {
     const isOverdue = window.isTaskOverdue ? window.isTaskOverdue(task) : (task.dueDate && task.dueDate < getLocalDateString() && task.status === 'pending');
     const isEvent = task.isEvent;
     let cardClass = `task-card ${task.status}`;
@@ -835,6 +835,14 @@ function renderTaskCard(task) {
     }
     
     const timeDisplay = task.dueTime ? ` at ${formatTime(task.dueTime)}` : '';
+    
+    // Only show checkbox in All Tasks view
+    const checkboxHtml = showCheckbox ? `
+                <input type="checkbox" class="task-selection-checkbox" 
+                       onclick="toggleTaskSelection('${task.id}', event)" 
+                       data-task-id="${task.id}"
+                       style="margin-right: 10px;"
+                       title="Select this task for bulk actions">` : '';
     
     return `
         <div class="${cardClass}" 
@@ -849,11 +857,7 @@ function renderTaskCard(task) {
              style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; min-height: 40px; cursor: move; transition: transform 0.3s ease;">
             <div style="display: flex; align-items: center; flex: 1;">
                 <div style="margin-right: 8px; color: #ccc; cursor: grab;">⋮⋮</div>
-                <input type="checkbox" class="task-selection-checkbox" 
-                       onclick="toggleTaskSelection('${task.id}', event)" 
-                       data-task-id="${task.id}"
-                       style="margin-right: 10px;"
-                       title="Select this task for bulk actions">
+                ${checkboxHtml}
                 <div class="task-title" style="flex: 1;">
                     ${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}
                     ${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}
@@ -949,7 +953,7 @@ function renderTasks(viewType) {
                     <span class="group-count">(${groupTasks.length})</span>
                 </h4>
                 <div class="group-content" id="content-${dateKey}">
-                    ${groupTasks.map(task => renderTaskCard(task)).join('')}
+                    ${groupTasks.map(task => renderTaskCard(task, false)).join('')}
                 </div>
             </div>
         `;
@@ -2579,7 +2583,7 @@ function renderTasksWithSelection(filteredTasks) {
                     <span class="group-count">(${groupTasks.length})</span>
                 </h4>
                 <div class="group-content">
-                    ${groupTasks.map(task => renderTaskCard(task)).join('')}
+                    ${groupTasks.map(task => renderTaskCard(task, true)).join('')}
                 </div>
             </div>
         `;
