@@ -2610,30 +2610,17 @@ function renderTasksWithSelection(filteredTasks) {
  * Open bulk task entry modal
  */
 function openTaskImportModal() {
-    console.log('📥 CORRECT: openTaskImportModal called - showing modal');
+    console.log('📥 Opening bulk task import modal');
     const modal = document.getElementById('taskImportModal');
     const textarea = document.getElementById('taskImportTextarea');
     
-    console.log('🔍 Modal element found:', !!modal);
-    console.log('🔍 Textarea element found:', !!textarea);
-    
-    if (modal) {
-        console.log('📱 Setting modal display to block');
+    if (modal && textarea) {
         modal.style.display = 'block';
         modal.style.zIndex = '2000'; // Ensure it's on top
-        
-        if (textarea) {
-            textarea.value = '';
-            setTimeout(() => textarea.focus(), 100); // Delay focus slightly
-        } else {
-            console.error('❌ Textarea not found');
-        }
+        textarea.value = '';
+        setTimeout(() => textarea.focus(), 100); // Delay focus slightly
     } else {
-        console.error('❌ Modal element not found - searching for alternatives');
-        
-        // Debug: list all modal elements
-        const allModals = document.querySelectorAll('[id*="modal"], [class*="modal"]');
-        console.log('🔍 All modal elements found:', Array.from(allModals).map(m => m.id || m.className));
+        console.error('❌ Task import modal or textarea not found');
     }
 }
 
@@ -2660,14 +2647,14 @@ function closeTaskImportModal(event) {
  * Import tasks from textarea - one task per line
  */
 function importTasksFromTextarea() {
-    console.log('📝 WRONG: importTasksFromTextarea called directly - should call openTaskImportModal first');
+    console.log('📝 Starting bulk task import');
     
     const textarea = document.getElementById('taskImportTextarea');
     const modal = document.getElementById('taskImportModal');
     
     // If textarea doesn't exist or modal is not visible, open the modal first
     if (!textarea || !modal || modal.style.display === 'none' || !modal.style.display) {
-        console.log('🔄 Textarea not found or modal not open, opening modal first');
+        console.log('🔄 Opening modal first (called from other button)');
         openTaskImportModal();
         return;
     }
