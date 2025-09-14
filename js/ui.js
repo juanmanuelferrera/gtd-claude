@@ -856,7 +856,7 @@ function initializeKeyboardNavigation() {
             case 'u':
                 showView('recent-actions');
                 break;
-            case 'g':
+            case 'x':
                 showView('settings');
                 break;
             case '/':
