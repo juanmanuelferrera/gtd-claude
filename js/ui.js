@@ -4793,8 +4793,10 @@ let selectedButtonIndex = 0;
 let templateButtons = [];
 
 function activateTemplateSelector() {
-    console.log('🏷️ T key pressed - activating first template filter');
+    console.log('🏷️ T key pressed - entering template navigation mode');
     
+    // T key behavior: Show ALL templates with navigation
+    // Different from clicking which applies filters
     try {
         // First ensure we're in Today view
         if (window.currentView !== 'today') {
@@ -4823,13 +4825,13 @@ function activateTemplateSelector() {
         templateNavActive = true;
         selectedButtonIndex = 0;
         
-        // Highlight AND activate the first template filter
+        // Only highlight the first template, DON'T apply filter
+        // This shows ALL templates, unlike clicking which filters
         highlightTemplateButton(0);
-        clickTemplateButton(templateButtons[0]);
         
         // Show user feedback about template selection
         const templateName = templateButtons[0].textContent;
-        console.log(`🎯 Template filter navigation active. Applied: ${templateName}. Use ← → arrows to navigate, ESC to exit.`);
+        console.log(`🎯 Template navigation active. Highlighted: ${templateName}. Use ← → arrows to navigate, Enter to apply filter, ESC to exit.`);
     } catch (error) {
         console.error('❌ Error in activateTemplateSelector:', error);
         templateNavActive = false; // Reset on error
@@ -4878,13 +4880,12 @@ function navigateTemplateButtons(direction) {
         return;
     }
     
-    // Update highlighting and activate filter if we moved
+    // Update highlighting if we moved (DON'T apply filter automatically)
     if (oldIndex !== selectedButtonIndex) {
         highlightTemplateButton(selectedButtonIndex);
-        clickTemplateButton(templateButtons[selectedButtonIndex]);
         
         const templateName = templateButtons[selectedButtonIndex].textContent;
-        console.log(`🎯 Activated template filter: ${templateName}`);
+        console.log(`🎯 Highlighted template: ${templateName}. Press Enter to apply filter.`);
     }
     
     console.log('🔄 Navigated to template button', selectedButtonIndex, templateButtons[selectedButtonIndex]?.textContent);
