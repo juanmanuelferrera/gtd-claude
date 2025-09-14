@@ -853,6 +853,12 @@ function initializeKeyboardNavigation() {
             case '6':
                 showView('repeat');
                 break;
+            case '7':
+                showView('recent-actions');
+                break;
+            case '8':
+                showView('settings');
+                break;
             case '/':
                 e.preventDefault();
                 showView('search');
