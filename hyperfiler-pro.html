@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-debug-date-click]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fix-html-gototoday]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -6246,18 +6246,24 @@
     
     // Go to today's date
     function goToToday() {
+        console.log('🏠 goToToday() called - HTML version');
         // Trigger today view if available
         if (typeof showView === 'function') {
             showView('today');
         }
         
         // Reset any global date variables to today
+        const todayDate = new Date();
         if (window.currentDate !== undefined) {
-            window.currentDate = getLocalDateString(new Date());
+            window.currentDate = getLocalDateString(todayDate);
         }
         if (window.selectedDate !== undefined) {
-            window.selectedDate = getLocalDateString(new Date());
+            window.selectedDate = getLocalDateString(todayDate);
         }
+        
+        // CRITICAL: Also update currentTodayDate which is used by the navigation system
+        window.currentTodayDate = todayDate;
+        console.log('🏠 Updated window.currentTodayDate to:', window.currentTodayDate.toDateString());
         
         setTimeout(updateMobileDateDisplay, 100); // Update after view change
         console.log('🏠 Returned to today');
