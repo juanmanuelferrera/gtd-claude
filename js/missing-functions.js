@@ -2564,11 +2564,40 @@ function getBackupSettings() {
 // List management functions
 function openCreateSectionModal() {
     console.log('Opening create section modal...');
-    // Placeholder for create section modal
     const sectionName = prompt('Enter section name:');
-    if (sectionName) {
-        console.log('Would create section:', sectionName);
+    if (sectionName && sectionName.trim()) {
+        createListSection(sectionName.trim());
     }
+}
+
+// Create new list section
+async function createListSection(name) {
+    const newSection = {
+        id: Date.now().toString(),
+        name: name,
+        lists: [],
+        collapsed: false,
+        createdAt: new Date().toISOString()
+    };
+    
+    // Initialize listSections if it doesn't exist
+    if (!window.listSections) {
+        window.listSections = [];
+    }
+    
+    window.listSections.push(newSection);
+    
+    // Save to localStorage and sync
+    if (typeof saveListSections === 'function') {
+        await saveListSections();
+    }
+    
+    // Re-render the lists view
+    if (typeof renderListsView === 'function') {
+        renderListsView();
+    }
+    
+    console.log('✅ Created new section:', name);
 }
 
 // Edit list section
@@ -4131,6 +4160,7 @@ window.saveAutoPrintTime = saveAutoPrintTime;
 window.updateSyncPeriod = updateSyncPeriod;
 window.openSettings = openSettings;
 window.openCreateSectionModal = openCreateSectionModal;
+window.createListSection = createListSection;
 window.toggleAllSections = toggleAllSections;
 window.updateDesktopDateTime = updateDesktopDateTime;
 window.initializeDateTimePickers = initializeDateTimePickers;
