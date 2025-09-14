@@ -4075,11 +4075,18 @@ function renderWeekView() {
         });
         
         // Drop events
+        console.log('🎯 Setting up drop zone for day:', dateStr);
         if (typeof handleDragOver === 'function') {
+            console.log('🔧 Adding dragover listener to day:', dateStr);
             dayElement.addEventListener('dragover', handleDragOver);
+        } else {
+            console.warn('⚠️ handleDragOver not available for day:', dateStr);
         }
         if (typeof handleDrop === 'function') {
+            console.log('🔧 Adding drop listener to day:', dateStr);
             dayElement.addEventListener('drop', handleDrop);
+        } else {
+            console.warn('⚠️ handleDrop not available for day:', dateStr);
         }
         if (typeof handleDragEnter === 'function') {
             dayElement.addEventListener('dragenter', handleDragEnter);
@@ -4750,11 +4757,19 @@ function renderCalendar() {
             taskElement.title = task.title; // Native tooltip
             taskElement.draggable = true;
             
+            console.log('🔧 Setting up drag and drop for calendar task:', task.title, 'draggable:', taskElement.draggable);
+            
             if (typeof handleDragStart === 'function') {
+                console.log('🔧 Adding dragstart listener to calendar task:', task.title);
                 taskElement.addEventListener('dragstart', handleDragStart);
+            } else {
+                console.warn('⚠️ handleDragStart not available for calendar task:', task.title);
             }
             if (typeof handleDragEnd === 'function') {
+                console.log('🔧 Adding dragend listener to calendar task:', task.title);
                 taskElement.addEventListener('dragend', handleDragEnd);
+            } else {
+                console.warn('⚠️ handleDragEnd not available for calendar task:', task.title);
             }
             taskElement.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -4768,11 +4783,18 @@ function renderCalendar() {
         
         
         // Drop events
+        console.log('🎯 Setting up drop zone for day:', dateStr);
         if (typeof handleDragOver === 'function') {
+            console.log('🔧 Adding dragover listener to day:', dateStr);
             dayElement.addEventListener('dragover', handleDragOver);
+        } else {
+            console.warn('⚠️ handleDragOver not available for day:', dateStr);
         }
         if (typeof handleDrop === 'function') {
+            console.log('🔧 Adding drop listener to day:', dateStr);
             dayElement.addEventListener('drop', handleDrop);
+        } else {
+            console.warn('⚠️ handleDrop not available for day:', dateStr);
         }
         if (typeof handleDragEnter === 'function') {
             dayElement.addEventListener('dragenter', handleDragEnter);

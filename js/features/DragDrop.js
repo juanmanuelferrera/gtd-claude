@@ -42,7 +42,11 @@ class DragDropManager {
      * Handle drag start for tasks
      */
     handleDragStart(e) {
+        console.log('🚀 DRAG START EVENT TRIGGERED!', e.target);
+        console.log('🎯 Target element:', e.target.tagName, e.target.className, e.target.textContent);
+        
         const taskIdStr = e.target.dataset.taskId;
+        console.log('📋 Task ID from dataset:', taskIdStr);
         
         // Find task in global tasks array
         const taskId = parseInt(taskIdStr);
