@@ -3307,9 +3307,23 @@ function renderTodayTemplateFilters(todayTasks) {
     const container = document.getElementById('todayTemplateFilters');
     if (!container) return;
     
-    // Extract templates from today's tasks
+    // Extract templates from ALL tasks for today (unfiltered) to show all available templates
+    // This ensures all template buttons remain visible even when a filter is active
+    const todayStr = getLocalDateString(new Date(currentTodayDate));
+    const allTodayTasks = tasks.filter(task => {
+        if (task.status === 'deleted') return false;
+        if (task.isEvent) {
+            const taskDate = new Date(task.dueDate);
+            const endDate = task.endDate ? new Date(task.endDate) : taskDate;
+            const today = new Date(currentTodayDate);
+            return today >= taskDate && today <= endDate;
+        } else {
+            return task.dueDate === todayStr;
+        }
+    });
+    
     const templatesInUse = new Set();
-    todayTasks.forEach(task => {
+    allTodayTasks.forEach(task => {
         const text = `${task.title || ''} ${task.notes || ''}`;
         const templateMatches = text.match(/@\w+/g);
         if (templateMatches) {
