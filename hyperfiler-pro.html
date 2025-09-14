@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fix-navigation-integration]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fix-date-display-nav]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -5962,7 +5962,7 @@
     <script src="js/utils.js?v=1757614969"></script>
     <script src="js/auth.js?v=1736363000"></script>
     <script src="js/tasks.js?v=1736363000"></script>
-    <script src="js/ui.js?v=1757614765"></script>
+    <script src="js/ui.js?v=20250914-fix-date-display"></script>
     <script src="js/sync.js?v=1736363000"></script>
     <script src="js/missing-functions.js?v=20250914-time-grid-compact"></script>
     <script src="js/natural-language.js?v=1736363000"></script>
@@ -6104,14 +6104,68 @@
         const dynamicHeaderTitle = document.getElementById('dynamicHeaderTitle');
         
         if (mobileDateDisplay) {
-            // Try to get current date from existing global variables or current date
+            // Try to get current date from multiple possible sources, prioritizing currentTodayDate
             let currentDate = new Date();
+            let dateFound = false;
             
-            // Check if there are existing date variables in the app
-            if (window.currentDate) {
-                currentDate = new Date(window.currentDate);
-            } else if (window.selectedDate) {
-                currentDate = new Date(window.selectedDate);
+            // PRIORITY: Check currentTodayDate (used by navigation system)
+            if (window.currentTodayDate && !dateFound) {
+                try {
+                    currentDate = new Date(window.currentTodayDate);
+                    if (!isNaN(currentDate.getTime())) {
+                        dateFound = true;
+                        console.log('📅 Using window.currentTodayDate:', window.currentTodayDate);
+                    }
+                } catch (e) {}
+            }
+            
+            // Check various global date variables that might exist
+            if (window.currentDate && !dateFound) {
+                try {
+                    currentDate = new Date(window.currentDate);
+                    if (!isNaN(currentDate.getTime())) {
+                        dateFound = true;
+                        console.log('📅 Using window.currentDate:', window.currentDate);
+                    }
+                } catch (e) {}
+            }
+            
+            if (window.selectedDate && !dateFound) {
+                try {
+                    currentDate = new Date(window.selectedDate);
+                    if (!isNaN(currentDate.getTime())) {
+                        dateFound = true;
+                        console.log('📅 Using window.selectedDate:', window.selectedDate);
+                    }
+                } catch (e) {}
+            }
+            
+            if (window.todayDate && !dateFound) {
+                try {
+                    currentDate = new Date(window.todayDate);
+                    if (!isNaN(currentDate.getTime())) {
+                        dateFound = true;
+                        console.log('📅 Using window.todayDate:', window.todayDate);
+                    }
+                } catch (e) {}
+            }
+            
+            // Check if there's a date in localStorage
+            if (!dateFound) {
+                const storedDate = localStorage.getItem('currentViewDate') || localStorage.getItem('selectedDate');
+                if (storedDate) {
+                    try {
+                        currentDate = new Date(storedDate);
+                        if (!isNaN(currentDate.getTime())) {
+                            dateFound = true;
+                            console.log('📅 Using stored date:', storedDate);
+                        }
+                    } catch (e) {}
+                }
+            }
+            
+            if (!dateFound) {
+                console.log('📅 Using current date (no app date found)');
             }
             
             const options = { 
@@ -6206,6 +6260,28 @@
         console.log('📅 Date observer setup complete');
     }
     
+    // Hook into the actual button clicks to update immediately
+    function hookIntoNavigationButtons() {
+        const prevButton = document.querySelector('button[onclick*="previousDay"]');
+        const nextButton = document.querySelector('button[onclick*="nextDay"]');
+        
+        if (prevButton) {
+            prevButton.addEventListener('click', function() {
+                setTimeout(updateMobileDateDisplay, 100);
+                console.log('🔄 Previous button clicked, updating display');
+            });
+        }
+        
+        if (nextButton) {
+            nextButton.addEventListener('click', function() {
+                setTimeout(updateMobileDateDisplay, 100);
+                console.log('🔄 Next button clicked, updating display');
+            });
+        }
+        
+        console.log('🔗 Navigation buttons hooked');
+    }
+    
     // Initialize everything
     document.addEventListener('DOMContentLoaded', function() {
         window.goToToday = goToToday;
@@ -6213,11 +6289,14 @@
         // Initial update
         updateMobileDateDisplay();
         
+        // Hook into button clicks
+        setTimeout(hookIntoNavigationButtons, 1000);
+        
         // Setup observer for automatic updates
         setTimeout(setupDateObserver, 1000);
         
         // Also update periodically to catch any missed changes
-        setInterval(updateMobileDateDisplay, 2000);
+        setInterval(updateMobileDateDisplay, 5000);
         
         console.log('✅ Non-intrusive date display system loaded');
     });

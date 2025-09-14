@@ -468,6 +468,11 @@ function updateMobileDateHeader() {
         const monthName = monthNames[currentDate.getMonth()];
         headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold;">${monthName}</span>`;
     }
+    
+    // Also update the mobile date display between Ant/Sig buttons
+    if (typeof updateMobileDateDisplay === 'function') {
+        updateMobileDateDisplay();
+    }
 }
 
 /**
