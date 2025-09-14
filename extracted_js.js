@@ -20592,7 +20592,11 @@
             container.innerHTML = html;
             if (mobileContainer) {
                 mobileContainer.innerHTML = mobileHtml;
-                mobileContainer.style.display = templatesInUse.size > 0 ? 'block' : 'none';
+                // Don't override CSS display - let mobile-only class handle visibility
+                // Just control whether content is there or not
+                if (templatesInUse.size === 0) {
+                    mobileContainer.innerHTML = '';
+                }
             }
             
             // Restore active filter button state after re-rendering
