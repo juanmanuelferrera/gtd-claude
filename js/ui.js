@@ -833,6 +833,7 @@ function initializeKeyboardNavigation() {
         console.log('🔑 Key pressed:', e.key, 'Target:', e.target.tagName, 'Prevented:', e.defaultPrevented);
         // Handle template navigation first
         if (templateNavActive) {
+            console.log('🏷️ Template navigation active, handling key:', e.key);
             switch (e.key) {
                 case 'ArrowLeft':
                     e.preventDefault();
@@ -846,8 +847,11 @@ function initializeKeyboardNavigation() {
                     e.preventDefault();
                     exitTemplateNavigation();
                     return;
+                default:
+                    // Allow other keys to pass through when template nav is active
+                    console.log('🔓 Allowing key to pass through template nav:', e.key);
+                    break;
             }
-            return; // Don't process other keys when template navigation is active
         }
         
         // Only handle keyboard shortcuts when not typing in inputs
@@ -891,9 +895,15 @@ function initializeKeyboardNavigation() {
                 showView('settings');
                 break;
             case 't':
-                console.log('✅ T key - activating template navigation');
+                console.log('✅ T key pressed');
                 e.preventDefault();
-                activateTemplateSelector();
+                if (templateNavActive) {
+                    console.log('🔄 T pressed again - exiting template navigation');
+                    exitTemplateNavigation();
+                } else {
+                    console.log('🏷️ Activating template navigation');
+                    activateTemplateSelector();
+                }
                 break;
             case '/':
                 e.preventDefault();
@@ -4776,21 +4786,28 @@ let templateButtons = [];
 function activateTemplateSelector() {
     console.log('🏷️ T key pressed - activating first template button');
     
-    // Get template buttons from the DOM
-    templateButtons = Array.from(document.querySelectorAll('#templateButtons button'));
-    console.log('📋 Found template buttons:', templateButtons.length);
-    
-    if (templateButtons.length === 0) {
-        console.log('❌ No template buttons available');
-        showMessage('No templates available. Create templates using @tags in your tasks.', 'info');
-        return;
+    try {
+        // Get template buttons from the DOM
+        templateButtons = Array.from(document.querySelectorAll('#templateButtons button'));
+        console.log('📋 Found template buttons:', templateButtons.length);
+        
+        if (templateButtons.length === 0) {
+            console.log('❌ No template buttons available - template nav remains inactive');
+            showMessage('No templates available. Create templates using @tags in your tasks.', 'info');
+            templateNavActive = false; // Ensure it stays false
+            return;
+        }
+        
+        // Activate first template button
+        console.log('✅ Activating template navigation mode');
+        templateNavActive = true;
+        selectedButtonIndex = 0;
+        clickTemplateButton(templateButtons[0]);
+        highlightTemplateButton(0);
+    } catch (error) {
+        console.error('❌ Error in activateTemplateSelector:', error);
+        templateNavActive = false; // Reset on error
     }
-    
-    // Activate first template button
-    templateNavActive = true;
-    selectedButtonIndex = 0;
-    clickTemplateButton(templateButtons[0]);
-    highlightTemplateButton(0);
 }
 
 function clickTemplateButton(button) {
@@ -4830,19 +4847,29 @@ function navigateTemplateButtons(direction) {
 }
 
 function exitTemplateNavigation() {
-    if (!templateNavActive) return;
+    console.log('🚪 exitTemplateNavigation called, current state:', templateNavActive);
     
-    console.log('🚪 Exiting template navigation');
+    if (!templateNavActive) {
+        console.log('⚠️ Template nav was already inactive');
+        return;
+    }
+    
+    console.log('✅ Deactivating template navigation mode');
     templateNavActive = false;
     selectedButtonIndex = 0;
     
     // Remove highlights from all buttons
     templateButtons.forEach(btn => {
-        btn.style.outline = '';
-        btn.style.backgroundColor = '';
+        try {
+            btn.style.outline = '';
+            btn.style.backgroundColor = '';
+        } catch (error) {
+            console.error('Error removing highlight from button:', error);
+        }
     });
     
     templateButtons = [];
+    console.log('🏁 Template navigation fully exited');
 }
 
 // Make functions globally available
