@@ -4202,9 +4202,12 @@ window.handleAllTasksMobileTemplateFilter = handleAllTasksMobileTemplateFilter;
 
 // Handle mobile template filter for Today view (from extracted_js.js)
 function handleMobileTemplateFilter(selectedValue) {
+    console.log('🔍 DEBUG: handleMobileTemplateFilter called with value:', selectedValue);
     if (selectedValue === '') {
+        console.log('🔍 DEBUG: Clearing template filter');
         clearTodayTemplateFilter();
     } else {
+        console.log('🔍 DEBUG: Filtering by template:', selectedValue);
         filterTodayByTemplate(selectedValue);
     }
 }
@@ -4231,11 +4234,15 @@ window.clearTodayTemplateFilter = clearTodayTemplateFilter;
 
 // Filter today by template
 function filterTodayByTemplate(template) {
+    console.log('🔍 DEBUG: filterTodayByTemplate called with template:', template);
     if (typeof window.filterTodayByTemplate_original === 'function') {
+        console.log('🔍 DEBUG: Using original filterTodayByTemplate function');
         window.filterTodayByTemplate_original(template);
     } else {
+        console.log('🔍 DEBUG: Using fallback filterTodayByTemplate implementation');
         // Fallback implementation - basic template filtering
         const allTasks = document.querySelectorAll('#todaySchedule .time-slot-task');
+        console.log('🔍 DEBUG: Found tasks to filter:', allTasks.length);
         allTasks.forEach(taskElement => {
             const taskId = taskElement.getAttribute('data-task-id');
             const task = tasks.find(t => t.id == taskId);
