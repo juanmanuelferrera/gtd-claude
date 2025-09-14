@@ -467,16 +467,6 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
                 }).join('')}
             </div>
         </div>
-        
-        <!-- Quick Actions -->
-        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
-            <div style="display: flex; gap: 6px;">
-                <button onclick="setTimeQuick('${taskId}', 'morning')" style="flex: 1; padding: 8px; background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600;">9:00</button>
-                <button onclick="setTimeQuick('${taskId}', 'noon')" style="flex: 1; padding: 8px; background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600;">12:00</button>
-                <button onclick="setTimeQuick('${taskId}', 'afternoon')" style="flex: 1; padding: 8px; background: #e8f5e8; color: #388e3c; border: none; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600;">15:00</button>
-                <button onclick="setTimeQuick('${taskId}', 'evening')" style="flex: 1; padding: 8px; background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600;">18:00</button>
-            </div>
-        </div>
     `;
     
     timeCard.innerHTML = html;
