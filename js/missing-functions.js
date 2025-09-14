@@ -1843,6 +1843,7 @@ async function addNewTemplate() {
     template = template.replace(/\s/g, '');
     
     console.log('📝 Adding template:', template);
+    console.log('📝 Template includes @?', template.includes('@'));
     
     // Initialize customTemplates if needed
     if (typeof window.customTemplates === 'undefined') {
@@ -1857,6 +1858,8 @@ async function addNewTemplate() {
     
     // Add template
     window.customTemplates.push(template);
+    console.log('📝 Template added to array:', template);
+    console.log('📝 Full customTemplates array:', window.customTemplates);
     console.log('✅ Template added, current templates:', window.customTemplates);
     
     // Save templates persistently

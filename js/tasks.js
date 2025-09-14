@@ -1148,7 +1148,9 @@ function renderTemplateButtons() {
     
     container.innerHTML = '';
     
+    console.log('🎨 Rendering templates:', customTemplates);
     customTemplates.forEach(template => {
+        console.log('🎨 Rendering template button:', template, 'includes @:', template.includes('@'));
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'template-btn';
