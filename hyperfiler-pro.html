@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-aggressive-mobile-month-fix]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-mobile-header-month-current-day-templates]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -6361,28 +6361,16 @@
         // Initial update
         updateMobileDateDisplay();
         
-        // Initialize mobile header with current month - AGGRESSIVE APPROACH
-        function setMobileHeaderMonth() {
-            const headerElement = document.getElementById('mobileHeaderTitle');
-            if (headerElement) {
-                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                const currentMonth = monthNames[new Date().getMonth()];
-                headerElement.textContent = currentMonth;
-                headerElement.style.cursor = 'pointer';
-                headerElement.style.color = '#007aff';
-                headerElement.style.fontWeight = 'bold';
-                headerElement.onclick = goToToday;
-                console.log('📱 Mobile header FORCE set to:', currentMonth);
-                return true;
-            }
-            return false;
-        }
-        
-        // Try multiple times to ensure it works
-        setTimeout(setMobileHeaderMonth, 100);
-        setTimeout(setMobileHeaderMonth, 500);
-        setTimeout(setMobileHeaderMonth, 1000);
-        setTimeout(setMobileHeaderMonth, 2000);
+        // Initialize mobile header with current month
+        setTimeout(function() {
+            try {
+                const headerElement = document.getElementById('mobileHeaderTitle');
+                if (headerElement) {
+                    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                    const currentMonth = monthNames[new Date().getMonth()];
+                    headerElement.innerHTML = '<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold; color: #007aff;">' + currentMonth + '</span>';
+                    console.log('📱 Mobile header set to:', currentMonth);
+                }
                 
                 if (typeof updateMobileDateHeader === 'function') {
                     updateMobileDateHeader();
