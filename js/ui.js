@@ -4889,11 +4889,21 @@ function activateTemplateSelector() {
             return;
         }
         
-        // Get ALL buttons from Today view but exclude Toggle All button
-        // Toggle All button doesn't have filter-btn class, so we can filter it out
+        // Get template filter buttons and Clear button (exclude Toggle All)
+        // This includes both .filter-btn (templates) and .filter-clear (Clear) buttons
         templateButtons = Array.from(document.querySelectorAll('#todayTemplateFilters button'))
-            .filter(btn => btn.textContent.trim() !== '⏰ Toggle All');
-        console.log('📋 Found template buttons (excluding Toggle All):', templateButtons.length);
+            .filter(btn => {
+                const text = btn.textContent.trim();
+                // Include: template buttons, Clear button, exclude: Toggle All
+                return text !== '⏰ Toggle All' && text !== 'T';
+            });
+        console.log('📋 Found navigable buttons (templates + Clear):', templateButtons.length);
+        
+        // Log what buttons we found for debugging
+        templateButtons.forEach((btn, index) => {
+            const isClear = btn.classList.contains('filter-clear');
+            console.log(`  ${index}: ${btn.textContent.trim()} ${isClear ? '(Clear)' : '(Template)'}`);
+        });
         
         if (templateButtons.length === 0) {
             console.log('❌ No template filters available - template nav remains inactive');
@@ -4921,12 +4931,15 @@ function activateTemplateSelector() {
 }
 
 function clickTemplateButton(button) {
+    const buttonText = button.textContent.trim();
+    
     // Check if this is the Clear button
-    if (button.classList.contains('filter-clear')) {
-        console.log('🔴 Clearing template filter');
+    if (button.classList.contains('filter-clear') || buttonText.includes('Clear')) {
+        console.log('🔴 Arrow navigation activated Clear button - clearing template filter');
     } else {
-        console.log('🔘 Applying template filter:', button.textContent);
+        console.log('🔘 Arrow navigation activated template filter:', buttonText);
     }
+    
     // Simulate click on the button (works for both template and clear buttons)
     button.click();
 }
