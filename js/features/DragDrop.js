@@ -107,6 +107,7 @@ class DragDropManager {
      * Handle drag over (required for drop to work)
      */
     handleDragOver(e) {
+        console.log('🌊 DRAGOVER event on:', e.currentTarget.tagName + '.' + e.currentTarget.className, 'date:', e.currentTarget.dataset.date);
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
     }
@@ -143,23 +144,42 @@ class DragDropManager {
      * Handle drop for date changes
      */
     async handleDrop(e) {
+        console.log('🎯 DROP HANDLER CALLED!', e.target, e.currentTarget);
+        console.log('🎯 Drop event details:', {
+            type: e.type,
+            target: e.target.tagName + '.' + e.target.className,
+            currentTarget: e.currentTarget.tagName + '.' + e.currentTarget.className,
+            draggedTask: this.draggedTask ? this.draggedTask.title : 'none'
+        });
+        
         e.preventDefault();
         e.currentTarget.classList.remove('drop-target');
         
         if (!this.draggedTask) {
-            console.error('No draggedTask found in handleDrop');
+            console.error('❌ No draggedTask found in handleDrop');
             return;
         }
         
+        console.log('✅ Dragged task found:', this.draggedTask.title);
+        
         const newDate = e.currentTarget.dataset.date;
+        console.log('🗓️ Target date from dataset:', newDate);
+        
         if (!newDate) {
-            console.error('No date found on drop target');
+            console.error('❌ No date found on drop target');
             return;
         }
         
         if (newDate === this.draggedTask.dueDate) {
+            console.log('⏭️ Same date - no change needed');
             return; // No change needed
         }
+        
+        console.log('🚀 Calling updateTaskDate with:', {
+            taskTitle: this.draggedTask.title,
+            oldDate: this.draggedTask.dueDate,
+            newDate: newDate
+        });
         
         await this.updateTaskDate(this.draggedTask, newDate);
     }
