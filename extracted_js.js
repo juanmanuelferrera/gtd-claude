@@ -20530,6 +20530,9 @@
             const mobileContainer = document.getElementById('allTasksTemplateFiltersMobile');
             if (!container) return;
             
+            console.log('🔍 DEBUG: renderAllTasksTemplateFilters called with tasks:', allTasks?.length || 0);
+            console.log('🔍 DEBUG: Mobile container found:', !!mobileContainer);
+            
             // Extract all templates used in all tasks
             const templatesInUse = new Set();
             
@@ -20541,6 +20544,8 @@
                     templateMatches.forEach(template => templatesInUse.add(template));
                 }
             });
+            
+            console.log('🔍 DEBUG: Templates found:', Array.from(templatesInUse));
             
             let html = '';
             let mobileHtml = '';
@@ -20581,6 +20586,8 @@
                     mobileHtml += '</select>';
                     mobileHtml += `<button onclick="clearAllTasksTemplateFilter()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">✖ Clear</button>`;
                     mobileHtml += '</div>';
+                    
+                    console.log('🔍 DEBUG: Mobile HTML generated:', mobileHtml);
                 }
             } else {
                 // Hide the separate Clear button when no templates
@@ -20591,12 +20598,16 @@
             
             container.innerHTML = html;
             if (mobileContainer) {
+                console.log('🔍 DEBUG: Setting mobile container HTML:', mobileHtml);
                 mobileContainer.innerHTML = mobileHtml;
                 // Don't override CSS display - let mobile-only class handle visibility
                 // Just control whether content is there or not
                 if (templatesInUse.size === 0) {
+                    console.log('🔍 DEBUG: Clearing mobile container (no templates)');
                     mobileContainer.innerHTML = '';
                 }
+            } else {
+                console.log('🔍 DEBUG: Mobile container not found!');
             }
             
             // Restore active filter button state after re-rendering
