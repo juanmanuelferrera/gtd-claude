@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-simple-month-fix]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-mobile-header-month-current-day-templates]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -3853,7 +3853,7 @@
             " oninput="performMobileSearch(this.value)" />
         </div>
         <div class="mobile-header-title" id="mobileHeaderTitle">
-            Today
+            <!-- Will be updated by JavaScript -->
         </div>
         <div class="mobile-header-right">
         </div>
@@ -6211,6 +6211,11 @@
                 console.log('📱 Month header set to:', monthName, 'using same pattern as date');
             }
             
+            // Update template filter for current date
+            if (typeof forceMobileUpdate === 'function') {
+                forceMobileUpdate();
+            }
+            
             // Make date clickable to return to today
             mobileDateDisplay.style.cursor = 'pointer';
             mobileDateDisplay.onclick = function() {
@@ -6643,13 +6648,25 @@
                 let templates = new Set();
                 
                 if (window.tasks && window.tasks.length > 0) {
-                    const today = new Date().toISOString().split('T')[0];
-                    const todayTasks = window.tasks.filter(t => 
-                        t.dueDate === today || 
-                        (t.dueDate && t.dueDate < today && t.status === 'pending')
+                    // Use current viewing date instead of just today
+                    let viewingDate = new Date();
+                    
+                    // Get current date from navigation if available
+                    if (window.currentTodayDate && window.currentTodayDate instanceof Date) {
+                        viewingDate = window.currentTodayDate;
+                    } else if (typeof currentTodayDate !== 'undefined' && currentTodayDate instanceof Date) {
+                        viewingDate = currentTodayDate;
+                    }
+                    
+                    const currentDateStr = viewingDate.toISOString().split('T')[0];
+                    console.log('📅 Building template filter for date:', currentDateStr);
+                    
+                    // Only show templates from current day's tasks (no overdue tasks)
+                    const dateTasks = window.tasks.filter(t => 
+                        t.dueDate === currentDateStr
                     );
                     
-                    todayTasks.forEach(task => {
+                    dateTasks.forEach(task => {
                         const text = (task.title || '') + ' ' + (task.notes || '');
                         // Find @templates and #hashtags
                         const matches = text.match(/[@#]\w+/g);
