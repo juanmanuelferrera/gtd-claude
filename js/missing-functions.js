@@ -158,6 +158,10 @@ function openIOSDateTimePicker(taskId, currentDate, currentTime, buttonElement) 
         window.currentIOSDatePicker = null;
     }
     
+    // Detect device type
+    const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    console.log(`🔧 openIOSDateTimePicker: Detected ${isMobile ? 'mobile' : 'desktop'} device`);
+    
     // Create modal overlay
     const modal = document.createElement('div');
     modal.style.cssText = `
@@ -169,75 +173,173 @@ function openIOSDateTimePicker(taskId, currentDate, currentTime, buttonElement) 
     
     // Create simple iOS-style picker container
     const picker = document.createElement('div');
-    picker.style.cssText = `
-        background: white; 
-        border-radius: 20px; 
-        width: 90%; 
-        max-width: 350px; 
-        padding: 0;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        overflow: hidden;
-        animation: modalSlideIn 0.3s ease-out;
-    `;
     
     // Get current values
     const today = new Date();
     const currentDateValue = currentDate || getLocalDateString(today);
     const currentTimeValue = currentTime || '';
     
-    picker.innerHTML = `
-        <div style="padding: 25px 20px 20px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
-            <h3 style="margin: 0; font-size: 18px; font-weight: 600;">📅 Set Date & Time</h3>
-        </div>
+    if (isMobile) {
+        // Mobile version: Full date & time picker
+        console.log('📱 Showing mobile version with date & time');
+        picker.style.cssText = `
+            background: white; 
+            border-radius: 20px; 
+            width: 90%; 
+            max-width: 350px; 
+            padding: 0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: modalSlideIn 0.3s ease-out;
+        `;
         
-        <div style="padding: 30px 20px;">
-            <!-- Date Input -->
-            <div style="margin-bottom: 25px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px;">Date</label>
-                <input type="date" 
-                       id="picker-date-${taskId}" 
-                       value="${currentDateValue}" 
-                       style="width: 100%; padding: 12px 15px; border: 2px solid #e0e4e7; border-radius: 12px; font-size: 16px; background: #f8f9fa; transition: all 0.2s;"
-                       onchange="this.style.background='#e3f2fd'; this.style.borderColor='#2196f3';"
-                       onfocus="this.style.borderColor='#2196f3'; this.style.background='#f0f8ff';">
+        picker.innerHTML = `
+            <div style="padding: 25px 20px 20px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
+                <h3 style="margin: 0; font-size: 18px; font-weight: 600;">📅 Set Date & Time</h3>
             </div>
             
-            <!-- Time Input -->
-            <div style="margin-bottom: 25px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px;">Time (Optional)</label>
-                <input type="time" 
-                       id="picker-time-${taskId}" 
-                       value="${currentTimeValue}" 
-                       style="width: 100%; padding: 12px 15px; border: 2px solid #e0e4e7; border-radius: 12px; font-size: 16px; background: #f8f9fa; transition: all 0.2s;"
-                       onchange="this.style.background='#e3f2fd'; this.style.borderColor='#2196f3';"
-                       onfocus="this.style.borderColor='#2196f3'; this.style.background='#f0f8ff';">
-            </div>
-            
-            <!-- Quick Actions -->
-            <div style="margin-bottom: 25px;">
-                <div style="font-weight: 600; color: #333; font-size: 14px; margin-bottom: 10px;">Quick Options</div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button onclick="setQuickDate('${taskId}', 0)" style="flex: 1; padding: 10px; background: #e3f2fd; color: #1976d2; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#bbdefb'" onmouseout="this.style.background='#e3f2fd'">Today</button>
-                    <button onclick="setQuickDate('${taskId}', 1)" style="flex: 1; padding: 10px; background: #fff3e0; color: #f57c00; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#ffe0b2'" onmouseout="this.style.background='#fff3e0'">Tomorrow</button>
-                    <button onclick="setQuickDate('${taskId}', 7)" style="flex: 1; padding: 10px; background: #e8f5e8; color: #388e3c; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#c8e6c9'" onmouseout="this.style.background='#e8f5e8'">Next Week</button>
+            <div style="padding: 30px 20px;">
+                <!-- Date Input -->
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px;">Date</label>
+                    <input type="date" 
+                           id="picker-date-${taskId}" 
+                           value="${currentDateValue}" 
+                           style="width: 100%; padding: 12px 15px; border: 2px solid #e0e4e7; border-radius: 12px; font-size: 16px; background: #f8f9fa; transition: all 0.2s;"
+                           onchange="this.style.background='#e3f2fd'; this.style.borderColor='#2196f3';"
+                           onfocus="this.style.borderColor='#2196f3'; this.style.background='#f0f8ff';">
+                </div>
+                
+                <!-- Time Input -->
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px;">Time (Optional)</label>
+                    <input type="time" 
+                           id="picker-time-${taskId}" 
+                           value="${currentTimeValue}" 
+                           style="width: 100%; padding: 12px 15px; border: 2px solid #e0e4e7; border-radius: 12px; font-size: 16px; background: #f8f9fa; transition: all 0.2s;"
+                           onchange="this.style.background='#e3f2fd'; this.style.borderColor='#2196f3';"
+                           onfocus="this.style.borderColor='#2196f3'; this.style.background='#f0f8ff';">
+                </div>
+                
+                <!-- Quick Actions -->
+                <div style="margin-bottom: 25px;">
+                    <div style="font-weight: 600; color: #333; font-size: 14px; margin-bottom: 10px;">Quick Options</div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button onclick="setQuickDate('${taskId}', 0)" style="flex: 1; padding: 10px; background: #e3f2fd; color: #1976d2; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#bbdefb'" onmouseout="this.style.background='#e3f2fd'">Today</button>
+                        <button onclick="setQuickDate('${taskId}', 1)" style="flex: 1; padding: 10px; background: #fff3e0; color: #f57c00; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#ffe0b2'" onmouseout="this.style.background='#fff3e0'">Tomorrow</button>
+                        <button onclick="setQuickDate('${taskId}', 7)" style="flex: 1; padding: 10px; background: #e8f5e8; color: #388e3c; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#c8e6c9'" onmouseout="this.style.background='#e8f5e8'">Next Week</button>
+                    </div>
                 </div>
             </div>
-        </div>
+            
+            <!-- Action Buttons -->
+            <div style="padding: 0 20px 20px 20px; display: flex; gap: 10px;">
+                <button onclick="closeDateTimePicker()" 
+                        style="flex: 1; padding: 14px; background: #f5f5f5; color: #666; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                        onmouseover="this.style.background='#eeeeee'" onmouseout="this.style.background='#f5f5f5'">
+                    Cancel
+                </button>
+                <button onclick="applyDateTimeChange('${taskId}')" 
+                        style="flex: 2; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);"
+                        onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)'">
+                    ✓ Save
+                </button>
+            </div>
+        `;
+    } else {
+        // Desktop version: Simple calendar-only picker (like the main date modal)
+        console.log('🖥️ Showing desktop version - simple calendar only');
+        picker.style.cssText = `
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            border-radius: 20px; 
+            width: 90%; 
+            max-width: 320px; 
+            height: auto;
+            padding: 0;
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+            overflow: hidden;
+            animation: modalSlideIn 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+        `;
         
-        <!-- Action Buttons -->
-        <div style="padding: 0 20px 20px 20px; display: flex; gap: 10px;">
-            <button onclick="closeDateTimePicker()" 
-                    style="flex: 1; padding: 14px; background: #f5f5f5; color: #666; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                    onmouseover="this.style.background='#eeeeee'" onmouseout="this.style.background='#f5f5f5'">
-                Cancel
-            </button>
-            <button onclick="applyDateTimeChange('${taskId}')" 
-                    style="flex: 2; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);"
-                    onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)'">
-                ✓ Save
-            </button>
-        </div>
-    `;
+        // Parse current date for initial values
+        const currentDateObj = currentDateValue ? new Date(currentDateValue + 'T00:00:00') : new Date();
+        const currentDay = currentDateObj.getDate();
+        const currentMonth = currentDateObj.getMonth();
+        
+        picker.innerHTML = `
+            <!-- Header -->
+            <div style="background: rgba(255,255,255,0.1); padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2);">
+                <h3 style="margin: 0; color: white; font-size: 18px; font-weight: 600;">📅 Select Date</h3>
+            </div>
+            
+            <!-- Calendar Content -->
+            <div style="padding: 25px; background: rgba(255,255,255,0.05);">
+                <!-- Month/Day Selection -->
+                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                    <!-- Day Picker -->
+                    <div style="flex: 1;">
+                        <label style="display: block; color: rgba(255,255,255,0.8); font-size: 12px; margin-bottom: 8px; font-weight: 500;">DAY</label>
+                        <select id="taskline-day-picker-${taskId}" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.9); border: none; border-radius: 12px; font-size: 16px; font-weight: 600; color: #333; cursor: pointer;">
+                            ${Array.from({length: 31}, (_, i) => {
+                                const day = i + 1;
+                                const selected = day === currentDay ? 'selected' : '';
+                                return `<option value="${day}" ${selected}>${day}</option>`;
+                            }).join('')}
+                        </select>
+                    </div>
+                    
+                    <!-- Month Picker -->
+                    <div style="flex: 2;">
+                        <label style="display: block; color: rgba(255,255,255,0.8); font-size: 12px; margin-bottom: 8px; font-weight: 500;">MONTH</label>
+                        <select id="taskline-month-picker-${taskId}" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.9); border: none; border-radius: 12px; font-size: 16px; font-weight: 600; color: #333; cursor: pointer;">
+                            ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((month, index) => {
+                                const selected = index === currentMonth ? 'selected' : '';
+                                return `<option value="${index}" ${selected}>${month}</option>`;
+                            }).join('')}
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Selected Date Display -->
+                <div id="taskline-selected-display-${taskId}" style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 12px; text-align: center; color: white; font-size: 16px; font-weight: 600; margin-bottom: 20px; border: 2px solid rgba(255,255,255,0.2);">
+                    ${currentDay} ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][currentMonth]}
+                </div>
+                
+                <!-- Quick Options -->
+                <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                    <button onclick="setTasklineQuickDate('${taskId}', 0)" style="flex: 1; padding: 10px 8px; background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 8px; font-size: 11px; cursor: pointer; transition: all 0.2s; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">Today</button>
+                    <button onclick="setTasklineQuickDate('${taskId}', 1)" style="flex: 1; padding: 10px 8px; background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 8px; font-size: 11px; cursor: pointer; transition: all 0.2s; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">Tomorrow</button>
+                    <button onclick="setTasklineQuickDate('${taskId}', 7)" style="flex: 1; padding: 10px 6px; background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 8px; font-size: 11px; cursor: pointer; transition: all 0.2s; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">Next Week</button>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div style="padding: 20px; display: flex; gap: 12px; background: rgba(255,255,255,0.05); border-top: 1px solid rgba(255,255,255,0.1);">
+                <button onclick="closeDateTimePicker()" style="flex: 1; background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; backdrop-filter: blur(10px); transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">Cancel</button>
+                <button onclick="applyTasklineDesktopDate('${taskId}')" style="flex: 1; background: rgba(255,255,255,0.9); color: #667eea; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(255,255,255,0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 20px rgba(255,255,255,0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(255,255,255,0.3)'">Apply</button>
+            </div>
+        `;
+        
+        // Add event listeners for desktop calendar updates
+        setTimeout(() => {
+            const dayPicker = document.getElementById(`taskline-day-picker-${taskId}`);
+            const monthPicker = document.getElementById(`taskline-month-picker-${taskId}`);
+            const display = document.getElementById(`taskline-selected-display-${taskId}`);
+            
+            function updateTasklineDisplay() {
+                if (dayPicker && monthPicker && display) {
+                    const selectedDay = dayPicker.value;
+                    const selectedMonth = monthPicker.options[monthPicker.selectedIndex].text;
+                    display.textContent = `${selectedDay} ${selectedMonth}`;
+                }
+            }
+            
+            if (dayPicker) dayPicker.addEventListener('change', updateTasklineDisplay);
+            if (monthPicker) monthPicker.addEventListener('change', updateTasklineDisplay);
+        }, 100);
+    }
     
     // Add CSS animation
     if (!document.getElementById('modal-animations')) {
@@ -305,6 +407,55 @@ function applyDateTimeChange(taskId) {
     
     // Show success feedback
     showMessage('Date and time updated!', 'success');
+}
+
+// Helper function to set quick dates for taskline desktop version
+function setTasklineQuickDate(taskId, daysFromToday) {
+    const date = new Date();
+    date.setDate(date.getDate() + daysFromToday);
+    const day = date.getDate();
+    const month = date.getMonth();
+    
+    // Update the pickers
+    const dayPicker = document.getElementById(`taskline-day-picker-${taskId}`);
+    const monthPicker = document.getElementById(`taskline-month-picker-${taskId}`);
+    const display = document.getElementById(`taskline-selected-display-${taskId}`);
+    
+    if (dayPicker && monthPicker && display) {
+        dayPicker.value = day;
+        monthPicker.value = month;
+        
+        const selectedMonth = monthPicker.options[monthPicker.selectedIndex].text;
+        display.textContent = `${day} ${selectedMonth}`;
+    }
+}
+
+// Apply desktop calendar date for taskline
+function applyTasklineDesktopDate(taskId) {
+    const dayPicker = document.getElementById(`taskline-day-picker-${taskId}`);
+    const monthPicker = document.getElementById(`taskline-month-picker-${taskId}`);
+    
+    if (!dayPicker || !monthPicker) return;
+    
+    const selectedDay = parseInt(dayPicker.value);
+    const selectedMonth = parseInt(monthPicker.value);
+    
+    // Create date string (use current year)
+    const currentYear = new Date().getFullYear();
+    const dateString = `${currentYear}-${(selectedMonth + 1).toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
+    
+    console.log('🔧 Applying taskline desktop date:', dateString);
+    
+    // Update task date
+    if (dateString) {
+        updateTaskDate(taskId, dateString, { stopPropagation: () => {} });
+    }
+    
+    // Close picker
+    closeDateTimePicker();
+    
+    // Show success feedback
+    showMessage('Date updated!', 'success');
 }
 
 // Time dropdown picker
