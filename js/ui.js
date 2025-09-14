@@ -924,7 +924,8 @@ function initializeKeyboardNavigation() {
         
         switch (e.key.toLowerCase()) {
             case 'd':
-                console.log('✅ D key - switching to Today view');
+                console.log('✅ D key - switching to Today view and clearing all template filters');
+                clearAllTemplateFilters();
                 showView('today');
                 break;
             case 'w':
@@ -5030,6 +5031,46 @@ function exitTemplateNavigation() {
     
     templateButtons = [];
     console.log('🏁 Template navigation fully exited');
+}
+
+function clearAllTemplateFilters() {
+    console.log('🧹 D key pressed - clearing all template filters across all views');
+    
+    // Clear Today template filter
+    if (window.activeTodayTemplateFilter) {
+        console.log('🔄 Clearing Today template filter:', window.activeTodayTemplateFilter);
+        window.activeTodayTemplateFilter = null;
+    }
+    
+    // Clear Week template filter
+    if (window.activeWeekTemplateFilter) {
+        console.log('🔄 Clearing Week template filter:', window.activeWeekTemplateFilter);
+        window.activeWeekTemplateFilter = null;
+    }
+    
+    // Clear Month template filter
+    if (window.activeMonthTemplateFilter) {
+        console.log('🔄 Clearing Month template filter:', window.activeMonthTemplateFilter);
+        window.activeMonthTemplateFilter = null;
+    }
+    
+    // Clear All Tasks template filter if it exists
+    if (window.activeAllTasksTemplateFilter) {
+        console.log('🔄 Clearing All Tasks template filter:', window.activeAllTasksTemplateFilter);
+        window.activeAllTasksTemplateFilter = null;
+    }
+    
+    // Update app state if it exists
+    if (window.appState) {
+        const filters = { ...window.appState.get('filters') };
+        filters.activeTodayTemplateFilter = null;
+        filters.activeWeekTemplateFilter = null;
+        filters.activeMonthTemplateFilter = null;
+        filters.activeAllTasksTemplateFilter = null;
+        window.appState.setState({ filters });
+    }
+    
+    console.log('✅ All template filters cleared');
 }
 
 function clearAllTemplateHighlights() {
