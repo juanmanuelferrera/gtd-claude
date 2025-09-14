@@ -46,8 +46,8 @@ class TemplateFilter {
             html += this.createTemplateButton(template, isActive);
         });
 
-        // Add clear filter button if filter is active
-        if (this.activeFilter) {
+        // Always add clear filter button at the end
+        if (templates.length > 0) {
             html += this.createClearButton();
         }
 
