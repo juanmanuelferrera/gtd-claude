@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-all-tasks-day-toggle-calendar]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-cache-bust-v2]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -4252,20 +4252,6 @@
                 </div>
             </div>
             
-            <!-- Day Selection Calendar -->
-            <div id="allTasksCalendar" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 12px; border: 1px solid #e1e5e9;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                    <h4 style="margin: 0; font-size: 14px; color: #495057;">📅 Filter by Days</h4>
-                    <div style="display: flex; gap: 8px;">
-                        <button onclick="selectAllDays()" style="padding: 4px 8px; font-size: 11px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Select All</button>
-                        <button onclick="clearAllDays()" style="padding: 4px 8px; font-size: 11px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear All</button>
-                    </div>
-                </div>
-                <div id="calendarWidget" style="background: white; border-radius: 8px; padding: 12px;">
-                    <!-- Calendar will be generated here -->
-                </div>
-            </div>
-            
             <!-- Search and Selection Controls -->
             <div class="all-tasks-controls">
                 <div class="selection-controls" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
@@ -5981,7 +5967,7 @@
     <script src="js/missing-functions.js?v=20250914-time-grid-compact"></script>
     <script src="js/natural-language.js?v=1736363000"></script>
     <script src="js/patches.js?v=1736363000"></script>
-    <script src="extracted_js.js?v=20250914-day-toggle-calendar"></script>
+    <script src="extracted_js.js?v=20250914-cache-bust-v2"></script>
     
     <!-- Tawk.to Live Chat Integration with automatic language detection -->
 
@@ -6368,197 +6354,6 @@
         console.log('🔗 Navigation buttons hooked');
     }
     
-    // All Tasks Day Filter Calendar
-    let selectedDays = new Set(); // Store selected dates as 'YYYY-MM-DD' strings
-    
-    function generateAllTasksCalendar() {
-        const calendarWidget = document.getElementById('calendarWidget');
-        if (!calendarWidget) return;
-        
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-        
-        // Generate calendar for current month
-        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                           'July', 'August', 'September', 'October', 'November', 'December'];
-        
-        const firstDay = new Date(currentYear, currentMonth, 1);
-        const lastDay = new Date(currentYear, currentMonth + 1, 0);
-        const startDate = firstDay.getDay(); // Day of week for first day
-        const totalDays = lastDay.getDate();
-        
-        let calendarHTML = `
-            <div style="text-align: center; font-weight: bold; margin-bottom: 10px; font-size: 16px; color: #2c3e50;">
-                ${monthNames[currentMonth]} ${currentYear}
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center;">
-                <div style="font-weight: bold; padding: 5px; font-size: 12px; color: #6c757d;">Su</div>
-                <div style="font-weight: bold; padding: 5px; font-size: 12px; color: #6c757d;">Mo</div>
-                <div style="font-weight: bold; padding: 5px; font-size: 12px; color: #6c757d;">Tu</div>
-                <div style="font-weight: bold; padding: 5px; font-size: 12px; color: #6c757d;">We</div>
-                <div style="font-weight: bold; padding: 5px; font-size: 12px; color: #6c757d;">Th</div>
-                <div style="font-weight: bold; padding: 5px; font-size: 12px; color: #6c757d;">Fr</div>
-                <div style="font-weight: bold; padding: 5px; font-size: 12px; color: #6c757d;">Sa</div>
-        `;
-        
-        // Add empty cells for days before the first day of the month
-        for (let i = 0; i < startDate; i++) {
-            calendarHTML += '<div style="padding: 8px;"></div>';
-        }
-        
-        // Add days of the month
-        for (let day = 1; day <= totalDays; day++) {
-            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const isToday = day === now.getDate();
-            const isSelected = selectedDays.has(dateStr);
-            
-            const bgColor = isSelected ? '#007bff' : (isToday ? '#e9ecef' : 'transparent');
-            const textColor = isSelected ? 'white' : (isToday ? '#495057' : '#212529');
-            const border = isToday ? '2px solid #007bff' : '1px solid #dee2e6';
-            
-            calendarHTML += `
-                <div onclick="toggleDay('${dateStr}')" 
-                     style="padding: 8px; cursor: pointer; border: ${border}; border-radius: 4px; 
-                            background: ${bgColor}; color: ${textColor}; font-size: 13px; font-weight: 500;
-                            transition: all 0.2s ease; hover: background-color: #f8f9fa;"
-                     onmouseover="if(!this.style.backgroundColor.includes('007bff')) this.style.backgroundColor='#f8f9fa'"
-                     onmouseout="if(!this.style.backgroundColor.includes('007bff')) this.style.backgroundColor='${bgColor}'"
-                     id="day-${dateStr}">
-                    ${day}
-                </div>
-            `;
-        }
-        
-        calendarHTML += '</div>';
-        calendarWidget.innerHTML = calendarHTML;
-    }
-    
-    function toggleDay(dateStr) {
-        if (selectedDays.has(dateStr)) {
-            selectedDays.delete(dateStr);
-        } else {
-            selectedDays.add(dateStr);
-        }
-        
-        // Update visual appearance
-        const dayElement = document.getElementById(`day-${dateStr}`);
-        if (dayElement) {
-            const isSelected = selectedDays.has(dateStr);
-            dayElement.style.backgroundColor = isSelected ? '#007bff' : 'transparent';
-            dayElement.style.color = isSelected ? 'white' : '#212529';
-        }
-        
-        // Re-filter tasks based on selected days
-        filterTasksBySelectedDays();
-    }
-    
-    function selectAllDays() {
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-        const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
-        
-        selectedDays.clear();
-        for (let day = 1; day <= totalDays; day++) {
-            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            selectedDays.add(dateStr);
-        }
-        
-        generateAllTasksCalendar(); // Regenerate to update visual state
-        filterTasksBySelectedDays();
-    }
-    
-    function clearAllDays() {
-        selectedDays.clear();
-        generateAllTasksCalendar(); // Regenerate to update visual state
-        filterTasksBySelectedDays();
-    }
-    
-    function filterTasksBySelectedDays() {
-        if (selectedDays.size === 0) {
-            // If no days selected, show all tasks
-            if (typeof performAllTasksSearch === 'function') {
-                performAllTasksSearch();
-            }
-            return;
-        }
-        
-        // Filter tasks by selected days
-        const searchInput = document.getElementById('allTasksSearchInput');
-        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
-        
-        let filteredTasks = [];
-        if (window.tasks && window.tasks.length > 0) {
-            filteredTasks = window.tasks.filter(task => {
-                // Check if task's due date is in selected days
-                const taskDate = task.dueDate;
-                const dayMatch = !taskDate || selectedDays.has(taskDate);
-                
-                // Also apply search term if provided
-                if (searchTerm) {
-                    const titleMatch = task.title && task.title.toLowerCase().includes(searchTerm);
-                    const notesMatch = task.notes && task.notes.toLowerCase().includes(searchTerm);
-                    const dateMatch = task.dueDate && task.dueDate.includes(searchTerm);
-                    const statusMatch = task.status && task.status.toLowerCase().includes(searchTerm);
-                    
-                    return dayMatch && (titleMatch || notesMatch || dateMatch || statusMatch);
-                }
-                
-                return dayMatch;
-            });
-        }
-        
-        // Render filtered tasks
-        if (typeof renderTasksWithSelection === 'function') {
-            renderTasksWithSelection(filteredTasks);
-        }
-        
-        // Update template filters
-        if (typeof renderAllTasksTemplateFilters === 'function') {
-            renderAllTasksTemplateFilters(filteredTasks);
-        }
-    }
-    
-    // Hook into the existing search function to respect day filters
-    const originalPerformAllTasksSearch = window.performAllTasksSearch;
-    if (originalPerformAllTasksSearch) {
-        window.performAllTasksSearch = function() {
-            if (selectedDays.size > 0) {
-                // If days are selected, use our custom filter
-                filterTasksBySelectedDays();
-            } else {
-                // Otherwise use the original search function
-                originalPerformAllTasksSearch();
-            }
-        };
-    }
-
-    // Override renderAllTasksView to include calendar initialization
-    const originalRenderAllTasksView = window.renderAllTasksView;
-    window.renderAllTasksView = function() {
-        if (originalRenderAllTasksView) {
-            originalRenderAllTasksView();
-        }
-        // Generate the calendar when All Tasks view is rendered
-        setTimeout(() => {
-            generateAllTasksCalendar();
-        }, 100);
-    };
-    
-    // Hook into showView to initialize calendar for 'all' view
-    const originalShowView = window.showView;
-    if (originalShowView) {
-        window.showView = function(viewName) {
-            originalShowView(viewName);
-            if (viewName === 'all') {
-                setTimeout(() => {
-                    generateAllTasksCalendar();
-                }, 100);
-            }
-        };
-    }
-
     // Initialize everything
     document.addEventListener('DOMContentLoaded', function() {
         window.goToToday = goToToday;
