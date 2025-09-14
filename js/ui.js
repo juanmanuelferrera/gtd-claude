@@ -475,8 +475,10 @@ function updateMobileDateHeader() {
     try {
         console.log('🔄 updateMobileDateHeader() called');
         const headerTitle = document.getElementById('mobileHeaderTitle');
+        console.log('🎯 headerTitle element:', headerTitle);
         if (headerTitle) {
-            console.log('📱 Mobile header element found');
+            console.log('📱 Mobile header element found, current content:', headerTitle.innerHTML);
+            console.log('📱 Element styles:', window.getComputedStyle(headerTitle).display, window.getComputedStyle(headerTitle).visibility);
             
             // Use the same reliable date checking pattern as updateMobileDateDisplay
             let currentDate = new Date();
@@ -522,10 +524,16 @@ function updateMobileDateHeader() {
             const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
             const monthName = monthNames[currentDate.getMonth()];
             
-            // Make month clickable to return to today
+            // Make month clickable to return to today  
             headerTitle.innerHTML = '<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold; color: #007aff;">' + monthName + '</span>';
             
+            // Force visibility
+            headerTitle.style.display = 'block';
+            headerTitle.style.visibility = 'visible';
+            headerTitle.style.color = '#007aff';
+            
             console.log('📱 Mobile header updated to:', monthName, 'from date:', currentDate.toDateString());
+            console.log('📱 Final innerHTML:', headerTitle.innerHTML);
         }
         
         // Also update the mobile date display between Ant/Sig buttons
@@ -4704,3 +4712,14 @@ async function saveListSections() {
 // Make functions globally available
 window.toggleListSection = toggleListSection;
 window.saveListSections = saveListSections;
+
+// Force mobile header update immediately when script loads
+console.log('🚀 UI.js loaded - forcing mobile header update');
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            console.log('🔥 Force calling updateMobileDateHeader from ui.js');
+            updateMobileDateHeader();
+        }, 100);
+    });
+}
