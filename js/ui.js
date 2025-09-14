@@ -197,12 +197,14 @@ function switchToMobileView(viewName) {
         const titleData = titles[viewName];
         if (titleData) {
             if (viewName === 'today') {
-                if (typeof getCurrentTodayDate === 'function') {
-                    const currentDate = getCurrentTodayDate();
-                    const monthNames = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
-                    const monthName = monthNames[currentDate.getMonth()];
-                    headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold;">${monthName}</span>`;
-                }
+                console.log('🔄 switchToMobileView setting today header');
+                // Use the dedicated function for consistent behavior
+                setTimeout(function() {
+                    if (typeof updateMobileDateHeader === 'function') {
+                        updateMobileDateHeader();
+                        console.log('🔄 Called updateMobileDateHeader from switchToMobileView');
+                    }
+                }, 100);
             } else {
                 const translatedText = typeof translateText === 'function' ? translateText(titleData.key) : titleData.key;
                 headerTitle.textContent = titleData.emoji + ' ' + translatedText;
@@ -419,20 +421,29 @@ function updateMobileNavigation() {
         // Update header title based on current view
         const headerTitle = document.getElementById('mobileHeaderTitle');
         if (headerTitle) {
-            const titles = {
-                'today': '🔥 Today',
-                'week': '📅 Week',
-                'calendar': '🗓️ Month',
-                'all': '🔍 All Tasks',
-                'repeat': '🔄 Repeat',
-                'lists': '📝 Lists',
-                'stats': '📊 Stats',
-                'settings': '⚙️ Settings',
-                'search': '🔍 Search',
-                'undo': '↩️ Undo'
-            };
-            
-            headerTitle.textContent = titles[currentView] || currentView;
+            if (currentView === 'today') {
+                // Use the dedicated function for today view to show month
+                console.log('🔄 updateMobileNavigation calling updateMobileDateHeader for today view');
+                setTimeout(function() {
+                    if (typeof updateMobileDateHeader === 'function') {
+                        updateMobileDateHeader();
+                    }
+                }, 100);
+            } else {
+                const titles = {
+                    'week': '📅 Week',
+                    'calendar': '🗓️ Month',
+                    'all': '🔍 All Tasks',
+                    'repeat': '🔄 Repeat',
+                    'lists': '📝 Lists',
+                    'stats': '📊 Stats',
+                    'settings': '⚙️ Settings',
+                    'search': '🔍 Search',
+                    'undo': '↩️ Undo'
+                };
+                
+                headerTitle.textContent = titles[currentView] || currentView;
+            }
         }
     }
     
@@ -461,23 +472,37 @@ function getCurrentTodayDate() {
 }
 
 function updateMobileDateHeader() {
+    console.log('🔍 updateMobileDateHeader() called');
     const headerTitle = document.getElementById('mobileHeaderTitle');
+    console.log('🔍 headerTitle element:', headerTitle);
+    
     if (headerTitle) {
+        console.log('🔍 Current headerTitle content before update:', headerTitle.innerHTML);
+        
         // Get current date based on what's being viewed
         let currentDate = getCurrentTodayDate();
+        console.log('🔍 getCurrentTodayDate():', currentDate);
         
         // Use window.currentTodayDate if available (for navigation consistency)
         if (window.currentTodayDate) {
             currentDate = window.currentTodayDate;
+            console.log('🔍 Using window.currentTodayDate:', currentDate);
         }
         
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         const monthName = monthNames[currentDate.getMonth()];
+        console.log('🔍 Month name generated:', monthName, 'from month index:', currentDate.getMonth());
         
         // Make month clickable to return to today
-        headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold; color: #007aff; text-decoration: none;">${monthName}</span>`;
+        const newContent = `<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold; color: #007aff; text-decoration: none;">${monthName}</span>`;
+        console.log('🔍 Setting new content:', newContent);
+        headerTitle.innerHTML = newContent;
         
+        // Verify the content was set
+        console.log('🔍 Content after update:', headerTitle.innerHTML);
         console.log('📱 Mobile header updated to:', monthName, 'for date:', currentDate.toDateString());
+    } else {
+        console.log('❌ mobileHeaderTitle element not found!');
     }
     
     // Also update the mobile date display between Ant/Sig buttons
