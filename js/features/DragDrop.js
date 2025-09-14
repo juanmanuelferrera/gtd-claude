@@ -190,9 +190,68 @@ class DragDropManager {
                 }
             }
             
-            // IMMEDIATE VISUAL FEEDBACK: Refresh view right away
+            // IMMEDIATE VISUAL FEEDBACK: Try DOM manipulation first, then refresh
             console.log(`🎯 Providing immediate visual feedback for drag and drop to ${newDate}`);
-            this.refreshCurrentView();
+            console.log('🔍 Current view:', window.currentView, 'App state view:', window.appState?.get('currentView'));
+            
+            // Try to find and move the dragged element immediately
+            const draggedElement = document.querySelector(`[data-task-id="${task.id}"]`);
+            const targetDate = document.querySelector(`[data-date="${newDate}"]`);
+            
+            if (draggedElement && targetDate) {
+                console.log('🎯 Found dragged element and target - attempting immediate DOM move');
+                
+                // Clone the element to avoid issues
+                const clonedElement = draggedElement.cloneNode(true);
+                
+                // Remove from old location
+                draggedElement.remove();
+                
+                // Add to new location
+                const taskContainer = targetDate.querySelector('.calendar-day-tasks') || targetDate;
+                taskContainer.appendChild(clonedElement);
+                
+                console.log('✅ Successfully moved task element in DOM');
+            } else {
+                console.log('⚠️ Could not find dragged element or target for immediate DOM manipulation');
+                console.log('Dragged element:', draggedElement ? 'found' : 'not found');
+                console.log('Target date element:', targetDate ? 'found' : 'not found');
+            }
+            
+            // Try multiple refresh approaches for immediate feedback
+            const currentView = window.currentView || (window.appState && window.appState.get('currentView'));
+            console.log('🔄 Attempting to refresh view:', currentView);
+            
+            if (currentView === 'calendar' || currentView === 'month') {
+                // Debug: Check available functions
+                console.log('🔍 Available render functions:', {
+                    renderCalendar: typeof renderCalendar,
+                    'window.renderCalendar': typeof window.renderCalendar,
+                    showView: typeof showView,
+                    'window.showView': typeof window.showView
+                });
+                
+                // Try multiple calendar refresh methods
+                if (typeof renderCalendar === 'function') {
+                    console.log('📅 Calling renderCalendar()');
+                    renderCalendar();
+                } else if (typeof window.renderCalendar === 'function') {
+                    console.log('📅 Calling window.renderCalendar()');
+                    window.renderCalendar();
+                } else if (typeof showView === 'function') {
+                    console.log('📅 Calling showView(calendar) as fallback');
+                    showView('calendar');
+                } else if (typeof window.showView === 'function') {
+                    console.log('📅 Calling window.showView(calendar) as fallback');
+                    window.showView('calendar');
+                } else {
+                    console.warn('⚠️ No calendar render function found!');
+                    this.refreshCurrentView();
+                }
+            } else {
+                // Fallback to standard refresh
+                this.refreshCurrentView();
+            }
             
             // Show success feedback immediately
             const formattedOldDate = oldDate ? (oldDate === newDate ? 'same date' : new Date(oldDate).toLocaleDateString()) : 'No date';
