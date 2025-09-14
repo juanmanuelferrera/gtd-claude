@@ -351,12 +351,14 @@ function setCalendarQuickDate(taskId, daysFromToday) {
     selectCalendarDate(taskId, date.getDate());
 }
 
-// Time dropdown picker
+// Time dropdown picker - Grid Card Layout
 function openTimeDropdown(taskId, currentTime, buttonElement) {
     // Remove any existing picker
     if (window.currentTimeDropdown) {
         document.body.removeChild(window.currentTimeDropdown);
     }
+    
+    console.log('🕐 Opening time grid card for task:', taskId);
     
     // Get button position
     const buttonRect = buttonElement.getBoundingClientRect();
@@ -368,61 +370,133 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
         background: rgba(0,0,0,0.3); z-index: 10000;
     `;
     
-    // Create picker
-    const picker = document.createElement('div');
-    picker.style.cssText = `
-        background: white; border-radius: 12px; width: 200px; 
+    // Create time card
+    const timeCard = document.createElement('div');
+    timeCard.style.cssText = `
+        background: white; border-radius: 12px; width: 320px; 
         padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         position: fixed; z-index: 10001;
-        left: ${Math.max(10, Math.min(buttonRect.left, window.innerWidth - 220))}px;
-        top: ${Math.max(10, Math.min(buttonRect.bottom + 10, window.innerHeight - 300))}px;
-        border: 1px solid #e0e0e0; max-height: 250px; overflow-y: auto;
+        left: ${Math.max(10, Math.min(buttonRect.left - 50, window.innerWidth - 340))}px;
+        top: ${Math.max(10, Math.min(buttonRect.bottom + 10, window.innerHeight - 380))}px;
+        border: 1px solid #e0e0e0;
     `;
     
-    // Generate time options from 6:00 to 22:00 every hour
-    const times = [];
-    for (let hour = 6; hour <= 22; hour++) {
-        times.push(`${String(hour).padStart(2, '0')}:00`);
+    // Generate morning times (6:00 - 11:00)
+    const morningTimes = [];
+    for (let hour = 6; hour <= 11; hour++) {
+        morningTimes.push(`${String(hour).padStart(2, '0')}:00`);
+    }
+    
+    // Generate afternoon times (12:00 - 17:00)
+    const afternoonTimes = [];
+    for (let hour = 12; hour <= 17; hour++) {
+        afternoonTimes.push(`${String(hour).padStart(2, '0')}:00`);
+    }
+    
+    // Generate evening times (18:00 - 22:00)
+    const eveningTimes = [];
+    for (let hour = 18; hour <= 22; hour++) {
+        eveningTimes.push(`${String(hour).padStart(2, '0')}:00`);
     }
     
     let html = `
-        <div style="margin-bottom: 10px;">
-            <div onclick="clearTimeAndClose('${taskId}')" 
-                 style="padding: 10px; margin: 2px 0; cursor: pointer; border-radius: 6px; text-align: center; background: #f8f9fa; font-weight: 600;"
-                 onmouseover="this.style.background='#e9ecef'"
-                 onmouseout="this.style.background='#f8f9fa'">Untimed</div>
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+            <div style="font-weight: 600; font-size: 16px; color: #333; margin-bottom: 8px;">
+                🕐 Select Time
+            </div>
+            <button onclick="clearTimeAndClose('${taskId}')" 
+                    style="background: #f0f0f0; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                ✕ Clear Time (Untimed)
+            </button>
         </div>
-        <div style="margin-bottom: 10px;">
-    `;
-    
-    times.forEach(time => {
-        const isSelected = time === currentTime;
-        const style = isSelected 
-            ? 'background: #007AFF; color: white; font-weight: bold;'
-            : 'background: #f8f9fa;';
         
-        html += `<div onclick="setTimeAndClose('${taskId}', '${time}')" 
-                      style="padding: 8px; margin: 2px 0; cursor: pointer; border-radius: 6px; text-align: center; ${style}"
-                      onmouseover="this.style.background='${isSelected ? '#0056CC' : '#e9ecef'}'"
-                      onmouseout="this.style.background='${isSelected ? '#007AFF' : '#f8f9fa'}'">${time}</div>`;
-    });
-    
-    html += `
+        <!-- Morning Times -->
+        <div style="margin-bottom: 12px;">
+            <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 8px;">MORNING</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                ${morningTimes.map(time => {
+                    const isSelected = time === currentTime;
+                    const baseStyle = 'padding: 10px 8px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 500; transition: all 0.2s;';
+                    const colorStyle = isSelected 
+                        ? 'background: #007AFF; color: white;'
+                        : 'background: #e3f2fd; color: #1976d2;';
+                    
+                    return `<div onclick="setTimeAndClose('${taskId}', '${time}')" 
+                                 style="${baseStyle} ${colorStyle}"
+                                 onmouseover="this.style.background='${isSelected ? '#0056CC' : '#bbdefb'}'"
+                                 onmouseout="this.style.background='${isSelected ? '#007AFF' : '#e3f2fd'}'">
+                                ${time}
+                            </div>`;
+                }).join('')}
+            </div>
+        </div>
+        
+        <!-- Afternoon Times -->
+        <div style="margin-bottom: 12px;">
+            <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 8px;">AFTERNOON</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                ${afternoonTimes.map(time => {
+                    const isSelected = time === currentTime;
+                    const baseStyle = 'padding: 10px 8px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 500; transition: all 0.2s;';
+                    const colorStyle = isSelected 
+                        ? 'background: #007AFF; color: white;'
+                        : 'background: #fff3e0; color: #f57c00;';
+                    
+                    return `<div onclick="setTimeAndClose('${taskId}', '${time}')" 
+                                 style="${baseStyle} ${colorStyle}"
+                                 onmouseover="this.style.background='${isSelected ? '#0056CC' : '#ffe0b2'}'"
+                                 onmouseout="this.style.background='${isSelected ? '#007AFF' : '#fff3e0'}'">
+                                ${time}
+                            </div>`;
+                }).join('')}
+            </div>
+        </div>
+        
+        <!-- Evening Times -->
+        <div style="margin-bottom: 12px;">
+            <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 8px;">EVENING</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                ${eveningTimes.map(time => {
+                    const isSelected = time === currentTime;
+                    const baseStyle = 'padding: 10px 8px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 500; transition: all 0.2s;';
+                    const colorStyle = isSelected 
+                        ? 'background: #007AFF; color: white;'
+                        : 'background: #f3e5f5; color: #7b1fa2;';
+                    
+                    return `<div onclick="setTimeAndClose('${taskId}', '${time}')" 
+                                 style="${baseStyle} ${colorStyle}"
+                                 onmouseover="this.style.background='${isSelected ? '#0056CC' : '#e1bee7'}'"
+                                 onmouseout="this.style.background='${isSelected ? '#007AFF' : '#f3e5f5'}'">
+                                ${time}
+                            </div>`;
+                }).join('')}
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
+            <div style="display: flex; gap: 6px;">
+                <button onclick="setTimeQuick('${taskId}', 'morning')" style="flex: 1; padding: 8px; background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600;">9:00</button>
+                <button onclick="setTimeQuick('${taskId}', 'noon')" style="flex: 1; padding: 8px; background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600;">12:00</button>
+                <button onclick="setTimeQuick('${taskId}', 'afternoon')" style="flex: 1; padding: 8px; background: #e8f5e8; color: #388e3c; border: none; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600;">15:00</button>
+                <button onclick="setTimeQuick('${taskId}', 'evening')" style="flex: 1; padding: 8px; background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600;">18:00</button>
+            </div>
         </div>
     `;
     
-    picker.innerHTML = html;
+    timeCard.innerHTML = html;
     
     // Store references
     window.currentTimeDropdown = overlay;
     
-    overlay.appendChild(picker);
+    overlay.appendChild(timeCard);
     document.body.appendChild(overlay);
     
-    // Auto-close after 6 seconds
+    // Auto-close after 10 seconds
     window.timeAutoCloseTimer = setTimeout(() => {
         closeTimeDropdown();
-    }, 6000);
+    }, 10000);
     
     // Close on backdrop click
     overlay.addEventListener('click', (e) => {
@@ -451,6 +525,31 @@ function setTimeAndClose(taskId, time) {
 function clearTimeAndClose(taskId) {
     updateTaskTime(taskId, '', { stopPropagation: () => {} });
     closeTimeDropdown();
+}
+
+// Quick time selection
+function setTimeQuick(taskId, timeType) {
+    let time = '';
+    switch(timeType) {
+        case 'morning':
+            time = '09:00';
+            break;
+        case 'noon':
+            time = '12:00';
+            break;
+        case 'afternoon':
+            time = '15:00';
+            break;
+        case 'evening':
+            time = '18:00';
+            break;
+    }
+    
+    if (time) {
+        updateTaskTime(taskId, time, { stopPropagation: () => {} });
+        closeTimeDropdown();
+        showMessage(`Time set to ${time}`, 'success');
+    }
 }
 
 // Template buttons section rendering
