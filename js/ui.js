@@ -4802,8 +4802,14 @@ function activateTemplateSelector() {
         console.log('✅ Activating template navigation mode');
         templateNavActive = true;
         selectedButtonIndex = 0;
-        clickTemplateButton(templateButtons[0]);
+        
+        // First highlight, then click to ensure visual feedback
         highlightTemplateButton(0);
+        clickTemplateButton(templateButtons[0]);
+        
+        // Show user feedback about template selection
+        const templateName = templateButtons[0].textContent;
+        showMessage(`Template navigation active. Selected: ${templateName}. Use ← → arrows to navigate, T to exit.`, 'info');
     } catch (error) {
         console.error('❌ Error in activateTemplateSelector:', error);
         templateNavActive = false; // Reset on error
@@ -4821,26 +4827,44 @@ function highlightTemplateButton(index) {
     templateButtons.forEach(btn => {
         btn.style.outline = '';
         btn.style.backgroundColor = '';
+        btn.style.boxShadow = '';
     });
     
-    // Highlight selected button
+    // Highlight selected button with stronger visual indication
     if (templateButtons[index]) {
+        console.log('🎯 Highlighting template button at index:', index, 'Button text:', templateButtons[index].textContent);
         templateButtons[index].style.outline = '3px solid #007aff';
-        templateButtons[index].style.backgroundColor = 'rgba(0, 122, 255, 0.1)';
+        templateButtons[index].style.backgroundColor = 'rgba(0, 122, 255, 0.2)';
+        templateButtons[index].style.boxShadow = '0 0 10px rgba(0, 122, 255, 0.5)';
+        
+        // Scroll the highlighted button into view
+        templateButtons[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 }
 
 function navigateTemplateButtons(direction) {
     if (!templateNavActive || templateButtons.length === 0) return;
     
+    const oldIndex = selectedButtonIndex;
+    
     if (direction === 'left' && selectedButtonIndex > 0) {
         selectedButtonIndex--;
-        clickTemplateButton(templateButtons[selectedButtonIndex]);
-        highlightTemplateButton(selectedButtonIndex);
     } else if (direction === 'right' && selectedButtonIndex < templateButtons.length - 1) {
         selectedButtonIndex++;
-        clickTemplateButton(templateButtons[selectedButtonIndex]);
+    } else {
+        // At boundary, show feedback
+        const message = direction === 'left' ? 'Already at first template' : 'Already at last template';
+        showMessage(message, 'info');
+        return;
+    }
+    
+    // Update highlighting and click if we moved
+    if (oldIndex !== selectedButtonIndex) {
         highlightTemplateButton(selectedButtonIndex);
+        clickTemplateButton(templateButtons[selectedButtonIndex]);
+        
+        const templateName = templateButtons[selectedButtonIndex].textContent;
+        showMessage(`Selected template: ${templateName}`, 'info');
     }
     
     console.log('🔄 Navigated to template button', selectedButtonIndex, templateButtons[selectedButtonIndex]?.textContent);
