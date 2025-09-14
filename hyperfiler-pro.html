@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-keyboard-numbers-visible]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-no-horizontal-scroll]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -49,6 +49,11 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+        
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
         }
 
         /* ========== THINGS APP DESIGN SYSTEM ========== */
@@ -291,6 +296,7 @@
                 position: fixed;
                 height: 100vh;
                 overflow-y: auto;
+                overflow-x: hidden;
                 z-index: 100;
                 box-shadow: 0 0 20px rgba(0,0,0,0.03) !important;
             }
@@ -299,6 +305,8 @@
                 margin-left: 220px;
                 flex: 1;
                 padding: 20px;
+                overflow-x: hidden;
+                width: calc(100% - 220px);
                 min-height: 100vh;
             }
             
