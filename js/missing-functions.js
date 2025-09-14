@@ -1862,6 +1862,19 @@ async function addNewTemplate() {
     console.log('📝 Full customTemplates array:', window.customTemplates);
     console.log('✅ Template added, current templates:', window.customTemplates);
     
+    // Ensure global customTemplates variable is also updated
+    if (typeof window.customTemplates !== 'undefined' && Array.isArray(window.customTemplates)) {
+        window.customTemplates = [...window.customTemplates];
+        // Sync with global customTemplates variable used by renderTemplateButtons
+        if (typeof customTemplates !== 'undefined') {
+            customTemplates.splice(0, customTemplates.length, ...window.customTemplates);
+            console.log('🔄 Synced global customTemplates:', customTemplates);
+        } else {
+            window.customTemplates = window.customTemplates;
+            console.log('🔄 Set global customTemplates reference');
+        }
+    }
+    
     // Save templates persistently
     if (typeof saveTemplates === 'function') {
         console.log('💾 Saving templates...');
@@ -1875,10 +1888,24 @@ async function addNewTemplate() {
     // Clear input
     input.value = '';
     
-    // Re-render template buttons
+    // Force re-render template buttons multiple times
+    console.log('🔄 About to render template buttons...');
     if (typeof renderTemplateButtons === 'function') {
-        console.log('🔄 Rendering template buttons...');
+        console.log('🔄 Rendering template buttons immediately...');
         renderTemplateButtons();
+        
+        // Add delayed renders to ensure it works
+        setTimeout(() => {
+            console.log('🔄 Rendering template buttons (100ms delay)...');
+            renderTemplateButtons();
+        }, 100);
+        
+        setTimeout(() => {
+            console.log('🔄 Rendering template buttons (500ms delay)...');
+            renderTemplateButtons();
+        }, 500);
+    } else {
+        console.error('❌ renderTemplateButtons function not available');
     }
 }
 
