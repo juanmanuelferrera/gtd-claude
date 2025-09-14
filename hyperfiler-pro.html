@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-reverted-day-toggle]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-clear-mobile-filter-on-day-change]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -5967,7 +5967,7 @@
     <script src="js/missing-functions.js?v=20250914-time-grid-compact"></script>
     <script src="js/natural-language.js?v=1736363000"></script>
     <script src="js/patches.js?v=1736363000"></script>
-    <script src="extracted_js.js?v=20250914-reverted-day-toggle"></script>
+    <script src="extracted_js.js?v=20250914-clear-mobile-filter"></script>
     
     <!-- Tawk.to Live Chat Integration with automatic language detection -->
 
@@ -6354,6 +6354,47 @@
         console.log('🔗 Navigation buttons hooked');
     }
     
+    // Clear mobile template filter dropdown
+    function clearMobileTemplateFilter() {
+        const mobileFilterDropdown = document.getElementById('todayMobileFilter');
+        if (mobileFilterDropdown) {
+            mobileFilterDropdown.value = '';  // Reset to "All tasks"
+            console.log('🔄 Mobile template filter cleared on day change');
+        }
+    }
+    
+    // Hook into day navigation functions to clear mobile filter
+    function hookIntoDayNavigation() {
+        // Override previousDay function to clear mobile filter
+        if (window.previousDay && typeof window.previousDay === 'function') {
+            const originalPreviousDay = window.previousDay;
+            window.previousDay = function() {
+                clearMobileTemplateFilter();
+                return originalPreviousDay();
+            };
+        }
+        
+        // Override nextDay function to clear mobile filter  
+        if (window.nextDay && typeof window.nextDay === 'function') {
+            const originalNextDay = window.nextDay;
+            window.nextDay = function() {
+                clearMobileTemplateFilter();
+                return originalNextDay();
+            };
+        }
+        
+        // Also hook into goToToday
+        if (window.goToToday && typeof window.goToToday === 'function') {
+            const originalGoToToday = window.goToToday;
+            window.goToToday = function() {
+                clearMobileTemplateFilter();
+                return originalGoToToday();
+            };
+        }
+        
+        console.log('🔗 Mobile filter clearing hooked into day navigation');
+    }
+
     // Initialize everything
     document.addEventListener('DOMContentLoaded', function() {
         window.goToToday = goToToday;
@@ -6382,6 +6423,9 @@
         
         // Hook into button clicks
         setTimeout(hookIntoNavigationButtons, 1000);
+        
+        // Hook into day navigation for mobile filter clearing
+        setTimeout(hookIntoDayNavigation, 1500);
         
         // Setup observer for automatic updates
         setTimeout(setupDateObserver, 1000);
