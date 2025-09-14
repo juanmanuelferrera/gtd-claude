@@ -1270,32 +1270,55 @@ function createEmergencyBackup() {
 
 // Modal functions
 function openDateTimeModal() {
+    console.log('🔧 DEBUG: openDateTimeModal called (from missing-functions.js)');
     const modal = document.getElementById('dateTimeModal');
     if (modal) {
-        modal.style.display = 'block';
-        
         // Get current values or set defaults
         const currentDate = document.getElementById('editTaskDateOnly').value;
         const currentTime = document.getElementById('editTaskTimeOnly').value;
+        
+        console.log('Current date:', currentDate, 'Current time:', currentTime);
         
         // Set default to today if no date is set
         const defaultDate = currentDate || getLocalDateString(new Date());
         const defaultTime = currentTime || '';
         
-        // Set desktop inputs
-        const desktopDateInput = document.getElementById('desktopDateInput');
-        const desktopTimeInput = document.getElementById('desktopTimeInput');
-        if (desktopDateInput) desktopDateInput.value = defaultDate;
-        if (desktopTimeInput) desktopTimeInput.value = defaultTime;
+        // Detect device type and show appropriate version
+        const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        // Set mobile inputs
-        const mobileDateInput = document.getElementById('mobileDateInput');
-        const mobileTimeInput = document.getElementById('mobileTimeInput');
-        if (mobileDateInput) mobileDateInput.value = defaultDate;
-        if (mobileTimeInput) mobileTimeInput.value = defaultTime;
+        if (isMobile) {
+            console.log('📱 Detected mobile device - showing mobile version');
+            // Show mobile version, hide desktop version
+            const mobileModal = document.querySelector('.modal-content.mobile-only');
+            const desktopModal = document.querySelector('.modal-content.desktop-only');
+            if (mobileModal) mobileModal.style.display = 'block';
+            if (desktopModal) desktopModal.style.display = 'none';
+            
+            // Initialize mobile pickers
+            if (typeof initializeMobileDatePickers === 'function') {
+                initializeMobileDatePickers();
+            }
+        } else {
+            console.log('🖥️ Detected desktop device - showing desktop version');
+            // Show desktop version, hide mobile version
+            const mobileModal = document.querySelector('.modal-content.mobile-only');
+            const desktopModal = document.querySelector('.modal-content.desktop-only');
+            if (mobileModal) mobileModal.style.display = 'none';
+            if (desktopModal) desktopModal.style.display = 'block';
+            
+            // Initialize desktop pickers (date only)
+            if (typeof initializeDesktopDatePickers === 'function') {
+                initializeDesktopDatePickers();
+            } else {
+                // Fallback initialization
+                initializeDateTimePickers(defaultDate, defaultTime);
+            }
+        }
         
-        // Initialize the picker selects with current values
-        initializeDateTimePickers(defaultDate, defaultTime);
+        modal.style.display = 'block';
+        console.log('Modal should be visible now');
+    } else {
+        console.error('dateTimeModal not found!');
     }
 }
 
