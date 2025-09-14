@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fab-lowered-90px]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fab-round-fix]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -6092,7 +6092,10 @@
                 fab.style.right = '20px';
                 fab.style.zIndex = '1001';
                 fab.style.position = 'fixed';
-                console.log('🔧 FAB position forced for mobile: bottom=90px');
+                fab.style.width = '56px';
+                fab.style.height = '56px';
+                fab.style.borderRadius = '50%';
+                console.log('🔧 FAB position and shape forced for mobile: bottom=90px, perfectly round');
             }
         }
         
