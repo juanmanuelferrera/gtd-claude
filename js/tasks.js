@@ -756,13 +756,9 @@ async function saveTaskEdit() {
         const isEvent = document.getElementById('editTaskIsEvent').checked;
         const repeatType = document.getElementById('editTaskRepeat').value;
         
-        // Apply natural language parsing to clean up title one final time
-        if (typeof parseNaturalLanguage === 'function') {
-            const parsed = parseNaturalLanguage(title);
-            if (parsed) {
-                title = parsed.title;
-            }
-        }
+        // Skip natural language parsing to preserve templates
+        // Templates should remain in the title field
+        console.log('💾 Preserving templates in title:', title);
         
         
         if (!title) {
