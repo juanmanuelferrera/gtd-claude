@@ -2142,6 +2142,7 @@ function resetTaskTitle() {
 // Settings and language functions
 function switchLanguage(lang) {
     console.log('🔧 switchLanguage called with:', lang);
+    alert('🌐 Language switching to: ' + lang); // Debug alert
     currentLanguage = lang;
     localStorage.setItem('preferredLanguage', lang);
     
