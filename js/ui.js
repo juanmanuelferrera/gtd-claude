@@ -3503,6 +3503,35 @@ function renderTodayView() {
     
     
     if (todayTasks.length === 0) {
+        // If we have an active template filter and no matches, check if there are tasks without the filter
+        if (window.activeTodayTemplateFilter) {
+            // Get all tasks for today without template filter
+            const allTodayTasks = tasks.filter(task => {
+                if (task.status === 'deleted') return false;
+                
+                if (task.isEvent) {
+                    // Events can span multiple days, check if today is within range
+                    const taskDate = new Date(task.dueDate);
+                    const endDate = task.endDate ? new Date(task.endDate) : taskDate;
+                    const today = new Date(currentTodayDate);
+                    return today >= taskDate && today <= endDate;
+                } else {
+                    // Show regular tasks for this specific date only
+                    return task.dueDate === todayStr;
+                }
+            });
+            
+            if (allTodayTasks.length > 0) {
+                // There are tasks for this day, so clear the filter and show them
+                console.log(`🔄 Auto-clearing template filter "${window.activeTodayTemplateFilter}" - no matches but ${allTodayTasks.length} tasks exist for ${todayStr}`);
+                window.activeTodayTemplateFilter = null;
+                
+                // Re-run renderTodayView to show all tasks
+                renderTodayView();
+                return;
+            }
+        }
+        
         const message = window.activeTodayTemplateFilter 
             ? `No tasks with template "${window.activeTodayTemplateFilter}" for ${todayStr}`
             : `No tasks for ${todayStr}`;
