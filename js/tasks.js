@@ -1229,32 +1229,32 @@ function insertTemplateToTask(template) {
     const activeElement = document.activeElement;
     console.log('🎯 Active element:', activeElement?.id || 'none');
     
-    // Always insert into title field for templates
-    if (titleInput) {
-        const currentValue = titleInput.value.trim();
-        console.log('📝 Current title value:', currentValue);
+    // Always insert into notes field for templates
+    if (notesInput) {
+        const currentNotes = notesInput.value.trim();
+        console.log('📝 Current notes value:', currentNotes);
         
-        // Append template with space, supporting multiple templates
-        if (currentValue) {
-            titleInput.value = currentValue + ' ' + template;
-            console.log('✅ Appended template to title');
+        // Add template to notes, each on new line
+        if (currentNotes) {
+            notesInput.value = currentNotes + '\n' + template;
+            console.log('✅ Appended template to notes');
         } else {
-            titleInput.value = template;
-            console.log('✅ Set template as title');
+            notesInput.value = template;
+            console.log('✅ Set template as notes');
         }
         
-        console.log('📍 New title value:', titleInput.value);
+        console.log('📍 New notes value:', notesInput.value);
         
-        // Ensure focus stays on title input
-        titleInput.focus();
-        titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
+        // Ensure focus stays on notes input
+        notesInput.focus();
+        notesInput.setSelectionRange(notesInput.value.length, notesInput.value.length);
         
-        // Don't trigger input event to prevent natural language parser from removing templates
-        // Only trigger change event for any other listeners
-        console.log('⚠️ Not triggering input event to preserve templates');
-        titleInput.dispatchEvent(new Event('change', { bubbles: true }));
+        // Trigger change event for any listeners
+        notesInput.dispatchEvent(new Event('change', { bubbles: true }));
+        
+        console.log('🎯 Templates added to notes field, one per line');
     } else {
-        console.error('❌ editTaskTitle input not found');
+        console.error('❌ editTaskNotes input not found');
     }
 }
 

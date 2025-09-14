@@ -3340,8 +3340,8 @@ function insertTemplateToTask(template) {
     const titleInput = document.getElementById('editTaskTitle');
     const notesInput = document.getElementById('editTaskNotes');
     
-    if (!titleInput) {
-        console.error('❌ editTaskTitle input not found');
+    if (!notesInput) {
+        console.error('❌ editTaskNotes input not found');
         return;
     }
     
@@ -3349,31 +3349,29 @@ function insertTemplateToTask(template) {
     const activeElement = document.activeElement;
     console.log('🎯 Active element:', activeElement?.id || 'none');
     
-    const currentValue = titleInput.value.trim();
-    console.log('📝 Current title value before insertion:', currentValue);
+    const currentNotes = notesInput.value.trim();
+    console.log('📝 Current notes value before insertion:', currentNotes);
     console.log('📝 Template to insert:', template);
     
-    // Always append with space, supporting multiple templates
-    if (currentValue) {
-        titleInput.value = currentValue + ' ' + template;
-        console.log('✅ Appended template to existing title');
+    // Add template to notes field, each template on a new line
+    if (currentNotes) {
+        notesInput.value = currentNotes + '\n' + template;
+        console.log('✅ Appended template to existing notes');
     } else {
-        titleInput.value = template;
-        console.log('✅ Set template as initial title');
+        notesInput.value = template;
+        console.log('✅ Set template as initial notes');
     }
     
-    console.log('✅ New title value after insertion:', titleInput.value);
+    console.log('✅ New notes value after insertion:', notesInput.value);
     
-    // Force focus back to title input
-    titleInput.focus();
-    titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
+    // Force focus back to notes input
+    notesInput.focus();
+    notesInput.setSelectionRange(notesInput.value.length, notesInput.value.length);
     
-    // Don't trigger input event to prevent natural language parser from removing templates
-    // Only trigger change event for any other listeners
-    console.log('⚠️ Not triggering input event to preserve templates');
-    titleInput.dispatchEvent(new Event('change', { bubbles: true }));
+    // Trigger change event for any listeners
+    notesInput.dispatchEvent(new Event('change', { bubbles: true }));
     
-    console.log('🎯 Multiple template support - templates accumulate in title field');
+    console.log('🎯 Multiple template support - templates accumulate in notes field, one per line');
 }
 
 // Override any previous definition
