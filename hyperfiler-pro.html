@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-restore-mobile-date-display]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fix-header-plus-and-date]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -3830,13 +3830,8 @@
                 <h1 class="header-title" id="dynamicHeaderTitle">Today</h1>
             </div>
             
-            <!-- Right: Add Button -->
-            <button class="header-add-btn" 
-                    id="headerAddBtn" 
-                    onclick="openAddTaskModalMobile()"
-                    aria-label="Add new task">
-                <span class="add-btn-icon">+</span>
-            </button>
+            <!-- Right: Empty space (removed add button) -->
+            <div style="width: 48px;"></div>
         </div>
     </div>
 
@@ -6101,6 +6096,28 @@
         window.addEventListener('resize', fixFABPosition);
         
         console.log('✅ FAB mobile position script loaded');
+    });
+    
+    // Update mobile date display
+    function updateMobileDateDisplay() {
+        const mobileDateDisplay = document.getElementById('mobileDateDisplay');
+        if (mobileDateDisplay) {
+            const today = new Date();
+            const options = { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric'
+            };
+            const dateStr = today.toLocaleDateString('en-US', options);
+            mobileDateDisplay.textContent = dateStr;
+            console.log('📅 Mobile date display updated:', dateStr);
+        }
+    }
+    
+    // Update date display when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        updateMobileDateDisplay();
+        console.log('✅ Mobile date display script loaded');
     });
     </script>
 
