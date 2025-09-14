@@ -3346,19 +3346,6 @@ function renderTodayTemplateFilters(todayTasks) {
     
     let html = '';
     
-    // Add T keyboard shortcut indicator
-    html += `<span style="
-        display: inline-block;
-        background: #f0f0f0;
-        color: #666;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 11px;
-        font-weight: bold;
-        margin-right: 8px;
-        border: 1px solid #ddd;
-    " title="Press T to navigate templates">T</span>`;
-    
     // Add toggle all time slots button first
     html += `<button onclick="toggleAllTimeSlots()" title="Toggle all time slots" style="
         background: #007AFF; 
@@ -3400,6 +3387,19 @@ function renderTodayTemplateFilters(todayTasks) {
             cursor: pointer;
         ">✖ Clear</button>`;
     }
+    
+    // Add T keyboard shortcut indicator at the end
+    html += `<span style="
+        display: inline-block;
+        background: #f0f0f0;
+        color: #666;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: bold;
+        margin-left: 8px;
+        border: 1px solid #ddd;
+    " title="Press T to navigate templates">T</span>`;
     
     container.innerHTML = html;
 }
