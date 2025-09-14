@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-time-grid-compact]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-mobile-fab-fix]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -3732,8 +3732,8 @@
         /* Mobile floating add button positioning */
         @media (max-width: 768px) {
             .floating-add-btn, #fabAddTask {
-                bottom: calc(80px + 16px) !important; /* 80px bottom nav + 16px spacing */
-                bottom: calc(80px + 16px + env(safe-area-inset-bottom, 0px)) !important; /* Add safe area */
+                bottom: calc(100px + 20px) !important; /* 100px bottom nav + 20px spacing */
+                bottom: calc(100px + 20px + env(safe-area-inset-bottom, 0px)) !important; /* Add safe area */
                 right: 20px !important; /* Closer to edge on mobile */
                 width: 56px !important; /* Keep consistent size */
                 height: 56px !important; /* Match width exactly for perfect circle */
@@ -3751,7 +3751,7 @@
         /* Landscape mobile adjustments */
         @media (max-width: 768px) and (orientation: landscape) {
             .floating-add-btn, #fabAddTask {
-                bottom: calc(60px + 12px + env(safe-area-inset-bottom, 0px)) !important; /* Shorter nav + spacing */
+                bottom: calc(80px + 16px + env(safe-area-inset-bottom, 0px)) !important; /* Shorter nav + spacing */
                 width: 48px !important; /* Even smaller in landscape */
                 height: 48px !important;
                 font-size: 24px !important;
