@@ -1157,43 +1157,78 @@ function closeImportModal() {
 }
 
 function clearAllTasks() {
-    const firstConfirmation = confirm('⚠️ WARNING: This will DELETE ALL your tasks, events, and templates FOREVER!\n\nThis action CANNOT be undone!\n\nAre you absolutely sure you want to continue?');
-    
-    if (!firstConfirmation) return;
-    
-    const secondConfirmation = confirm('🔴 FINAL WARNING: You are about to PERMANENTLY DELETE everything!\n\nType YES in the next dialog to confirm.');
-    
-    if (!secondConfirmation) return;
-    
-    const finalConfirmation = prompt('Type "DELETE EVERYTHING" to confirm:');
-    
-    if (finalConfirmation !== 'DELETE EVERYTHING') {
-        alert('Operation cancelled.');
-        return;
+    console.log('🔍 DEBUG: clearAllTasks called');
+    try {
+        const firstConfirmation = confirm('⚠️ WARNING: This will DELETE ALL your tasks, events, and templates FOREVER!\n\nThis action CANNOT be undone!\n\nAre you absolutely sure you want to continue?');
+        
+        if (!firstConfirmation) {
+            console.log('🔍 DEBUG: First confirmation cancelled');
+            return;
+        }
+        
+        const secondConfirmation = confirm('🔴 FINAL WARNING: You are about to PERMANENTLY DELETE everything!\n\nType YES in the next dialog to confirm.');
+        
+        if (!secondConfirmation) {
+            console.log('🔍 DEBUG: Second confirmation cancelled');
+            return;
+        }
+        
+        const finalConfirmation = prompt('Type "DELETE EVERYTHING" to confirm:');
+        
+        if (finalConfirmation !== 'DELETE EVERYTHING') {
+            console.log('🔍 DEBUG: Final confirmation failed:', finalConfirmation);
+            alert('Operation cancelled.');
+            return;
+        }
+        
+        console.log('🔍 DEBUG: All confirmations passed, clearing data...');
+        
+        // Clear everything
+        if (typeof tasks !== 'undefined') {
+            tasks = [];
+            console.log('🔍 DEBUG: tasks cleared');
+        }
+        if (typeof window.listSections !== 'undefined') {
+            window.listSections = [];
+            console.log('🔍 DEBUG: listSections cleared');
+        }
+        if (typeof customTemplates !== 'undefined') {
+            customTemplates = [];
+            console.log('🔍 DEBUG: customTemplates cleared');
+        }
+        
+        // Save changes
+        if (typeof saveTasksToLocalStorage === 'function') {
+            console.log('🔍 DEBUG: Calling saveTasksToLocalStorage');
+            saveTasksToLocalStorage();
+        } else {
+            console.log('🔍 DEBUG: saveTasksToLocalStorage not available');
+        }
+        
+        localStorage.removeItem('gtd_list_sections');
+        localStorage.removeItem('gtdTemplates');
+        console.log('🔍 DEBUG: localStorage items removed');
+        
+        // Refresh UI
+        if (typeof renderCurrentView === 'function') {
+            console.log('🔍 DEBUG: Calling renderCurrentView');
+            renderCurrentView();
+        } else {
+            console.log('🔍 DEBUG: renderCurrentView not available, trying alternative refresh');
+            if (typeof renderTodayView === 'function') {
+                renderTodayView();
+            } else if (typeof location !== 'undefined') {
+                location.reload();
+            }
+        }
+        
+        alert('All data has been cleared.');
+        console.log('🔍 DEBUG: clearAllTasks completed successfully');
+        
+    } catch (error) {
+        console.error('🔍 ERROR in clearAllTasks:', error);
+        alert('Error clearing tasks: ' + error.message);
     }
-    
-    // Clear everything
-    tasks = [];
-    if (typeof window.listSections !== 'undefined') {
-        window.listSections = [];
-    }
-    if (typeof customTemplates !== 'undefined') {
-        customTemplates = [];
-    }
-    
-    // Save changes
-    if (typeof saveTasksToLocalStorage === 'function') {
-        saveTasksToLocalStorage();
-    }
-    localStorage.removeItem('gtd_list_sections');
-    localStorage.removeItem('gtdTemplates');
-    
-    // Refresh UI
-    if (typeof renderCurrentView === 'function') {
-        renderCurrentView();
-    }
-    
-    alert('All data has been cleared.');
 }
 
 function performUndo() {
