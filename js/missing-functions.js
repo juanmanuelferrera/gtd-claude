@@ -4200,6 +4200,73 @@ function handleAllTasksMobileTemplateFilter(selectedValue) {
 }
 window.handleAllTasksMobileTemplateFilter = handleAllTasksMobileTemplateFilter;
 
+// Handle mobile template filter for Today view (from extracted_js.js)
+function handleMobileTemplateFilter(selectedValue) {
+    if (selectedValue === '') {
+        clearTodayTemplateFilter();
+    } else {
+        filterTodayByTemplate(selectedValue);
+    }
+}
+window.handleMobileTemplateFilter = handleMobileTemplateFilter;
+
+// Clear today template filter
+function clearTodayTemplateFilter() {
+    if (typeof window.clearTodayTemplateFilter_original === 'function') {
+        window.clearTodayTemplateFilter_original();
+    } else {
+        // Fallback implementation
+        const allTasks = document.querySelectorAll('#todaySchedule .time-slot-task');
+        allTasks.forEach(taskElement => {
+            taskElement.style.display = 'block';
+            taskElement.style.opacity = '1';
+        });
+        const timeBlocks = document.querySelectorAll('#todaySchedule .time-block');
+        timeBlocks.forEach(block => {
+            block.style.display = 'block';
+        });
+    }
+}
+window.clearTodayTemplateFilter = clearTodayTemplateFilter;
+
+// Filter today by template
+function filterTodayByTemplate(template) {
+    if (typeof window.filterTodayByTemplate_original === 'function') {
+        window.filterTodayByTemplate_original(template);
+    } else {
+        // Fallback implementation - basic template filtering
+        const allTasks = document.querySelectorAll('#todaySchedule .time-slot-task');
+        allTasks.forEach(taskElement => {
+            const taskId = taskElement.getAttribute('data-task-id');
+            const task = tasks.find(t => t.id == taskId);
+            
+            if (task) {
+                const taskText = `${task.title || ''} ${task.notes || ''}`;
+                const hasTemplate = taskText.toLowerCase().includes(template.toLowerCase());
+                
+                if (hasTemplate) {
+                    taskElement.style.display = 'block';
+                    taskElement.style.opacity = '1';
+                } else {
+                    taskElement.style.display = 'none';
+                }
+            }
+        });
+        
+        // Hide empty time blocks
+        const timeBlocks = document.querySelectorAll('#todaySchedule .time-block');
+        timeBlocks.forEach(block => {
+            const visibleTasks = block.querySelectorAll('.time-slot-task[style*="display: block"], .time-slot-task:not([style*="display: none"])');
+            if (visibleTasks.length === 0) {
+                block.style.display = 'none';
+            } else {
+                block.style.display = 'block';
+            }
+        });
+    }
+}
+window.filterTodayByTemplate = filterTodayByTemplate;
+
 // Global variables
 window.selectedTasks = selectedTasks;
 window.activeAllTasksTemplateFilter = activeAllTasksTemplateFilter;
