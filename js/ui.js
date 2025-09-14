@@ -835,7 +835,7 @@ function initializeKeyboardNavigation() {
         }
         
         switch (e.key.toLowerCase()) {
-            case 't':
+            case 'd':
                 showView('today');
                 break;
             case 'w':
