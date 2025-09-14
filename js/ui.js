@@ -844,6 +844,7 @@ function initializeKeyboardNavigation() {
                     navigateTemplateButtons('right');
                     return;
                 case 'Escape':
+                    console.log('🚪 ESC pressed during template navigation - exiting');
                     e.preventDefault();
                     exitTemplateNavigation();
                     return;
@@ -4848,8 +4849,8 @@ function highlightTemplateButton(index) {
         templateButtons[index].style.backgroundColor = 'rgba(0, 122, 255, 0.2)';
         templateButtons[index].style.boxShadow = '0 0 10px rgba(0, 122, 255, 0.5)';
         
-        // Scroll the highlighted button into view
-        templateButtons[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Don't scroll - keep all templates visible in view
+        // templateButtons[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 }
 
@@ -4886,6 +4887,8 @@ function exitTemplateNavigation() {
     
     if (!templateNavActive) {
         console.log('⚠️ Template nav was already inactive');
+        // Still clear any lingering highlights as a safeguard
+        clearAllTemplateHighlights();
         return;
     }
     
@@ -4893,18 +4896,36 @@ function exitTemplateNavigation() {
     templateNavActive = false;
     selectedButtonIndex = 0;
     
-    // Remove highlights from all buttons
+    // Remove highlights from current template buttons
     templateButtons.forEach(btn => {
         try {
             btn.style.outline = '';
             btn.style.backgroundColor = '';
+            btn.style.boxShadow = '';
         } catch (error) {
             console.error('Error removing highlight from button:', error);
         }
     });
     
+    // Clear any lingering highlights as a safeguard
+    clearAllTemplateHighlights();
+    
     templateButtons = [];
     console.log('🏁 Template navigation fully exited');
+}
+
+function clearAllTemplateHighlights() {
+    // Safeguard function to clear any template button highlights that might be stuck
+    const allTemplateButtons = document.querySelectorAll('#todayTemplateFilters button.filter-btn');
+    allTemplateButtons.forEach(btn => {
+        try {
+            btn.style.outline = '';
+            btn.style.backgroundColor = '';
+            btn.style.boxShadow = '';
+        } catch (error) {
+            console.error('Error clearing highlight from button:', error);
+        }
+    });
 }
 
 // Make functions globally available
