@@ -4793,7 +4793,7 @@ function activateTemplateSelector() {
         
         if (templateButtons.length === 0) {
             console.log('❌ No template buttons available - template nav remains inactive');
-            showMessage('No templates available. Create templates using @tags in your tasks.', 'info');
+            console.log('💡 No templates available. Create templates using @tags in your tasks.');
             templateNavActive = false; // Ensure it stays false
             return;
         }
@@ -4809,7 +4809,7 @@ function activateTemplateSelector() {
         
         // Show user feedback about template selection
         const templateName = templateButtons[0].textContent;
-        showMessage(`Template navigation active. Selected: ${templateName}. Use ← → arrows to navigate, T to exit.`, 'info');
+        console.log(`🎯 Template navigation active. Selected: ${templateName}. Use ← → arrows to navigate, T to exit.`);
     } catch (error) {
         console.error('❌ Error in activateTemplateSelector:', error);
         templateNavActive = false; // Reset on error
@@ -4854,7 +4854,7 @@ function navigateTemplateButtons(direction) {
     } else {
         // At boundary, show feedback
         const message = direction === 'left' ? 'Already at first template' : 'Already at last template';
-        showMessage(message, 'info');
+        console.log(`🔄 ${message}`);
         return;
     }
     
@@ -4864,7 +4864,7 @@ function navigateTemplateButtons(direction) {
         clickTemplateButton(templateButtons[selectedButtonIndex]);
         
         const templateName = templateButtons[selectedButtonIndex].textContent;
-        showMessage(`Selected template: ${templateName}`, 'info');
+        console.log(`🎯 Selected template: ${templateName}`);
     }
     
     console.log('🔄 Navigated to template button', selectedButtonIndex, templateButtons[selectedButtonIndex]?.textContent);
