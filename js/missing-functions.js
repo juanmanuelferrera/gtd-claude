@@ -4232,47 +4232,6 @@ function clearTodayTemplateFilter() {
 }
 window.clearTodayTemplateFilter = clearTodayTemplateFilter;
 
-// Filter today by template
-function filterTodayByTemplate(template) {
-    console.log('🔍 DEBUG: filterTodayByTemplate called with template:', template);
-    if (typeof window.filterTodayByTemplate_original === 'function') {
-        console.log('🔍 DEBUG: Using original filterTodayByTemplate function');
-        window.filterTodayByTemplate_original(template);
-    } else {
-        console.log('🔍 DEBUG: Using fallback filterTodayByTemplate implementation');
-        // Fallback implementation - basic template filtering
-        const allTasks = document.querySelectorAll('#todaySchedule .time-slot-task');
-        console.log('🔍 DEBUG: Found tasks to filter:', allTasks.length);
-        allTasks.forEach(taskElement => {
-            const taskId = taskElement.getAttribute('data-task-id');
-            const task = tasks.find(t => t.id == taskId);
-            
-            if (task) {
-                const taskText = `${task.title || ''} ${task.notes || ''}`;
-                const hasTemplate = taskText.toLowerCase().includes(template.toLowerCase());
-                
-                if (hasTemplate) {
-                    taskElement.style.display = 'block';
-                    taskElement.style.opacity = '1';
-                } else {
-                    taskElement.style.display = 'none';
-                }
-            }
-        });
-        
-        // Hide empty time blocks
-        const timeBlocks = document.querySelectorAll('#todaySchedule .time-block');
-        timeBlocks.forEach(block => {
-            const visibleTasks = block.querySelectorAll('.time-slot-task[style*="display: block"], .time-slot-task:not([style*="display: none"])');
-            if (visibleTasks.length === 0) {
-                block.style.display = 'none';
-            } else {
-                block.style.display = 'block';
-            }
-        });
-    }
-}
-window.filterTodayByTemplate = filterTodayByTemplate;
 
 // Global variables
 window.selectedTasks = selectedTasks;
