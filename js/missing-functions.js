@@ -4121,20 +4121,20 @@ function renderRecentActionsView() {
         const bgColor = action.type === 'delete' ? 'rgba(220, 53, 69, 0.05)' : 'rgba(111, 66, 193, 0.05)';
         
         html += `
-            <div class="action-card" style="background: ${bgColor}; border: 1px solid #e9ecef; border-left: 4px solid ${borderColor}; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s; position: relative;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 16px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
-                    <div style="flex: 1; padding-right: 16px;">
-                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                            <span style="font-size: 20px; margin-right: 12px;">${action.icon}</span>
-                            <h3 style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">
+            <div class="action-card" style="background: ${bgColor}; border: 1px solid #e9ecef; border-left: 4px solid ${borderColor}; border-radius: 8px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s; position: relative; margin-bottom: 8px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 16px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                    <div style="flex: 1; padding-right: 12px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 18px; margin-right: 8px;">${action.icon}</span>
+                            <h3 style="margin: 0; color: #333; font-size: 15px; font-weight: 600;">
                                 ${action.title}
                             </h3>
                         </div>
-                        <p style="margin: 0 0 12px 0; color: #666; font-size: 14px; line-height: 1.5;">
+                        <p style="margin: 0 0 6px 0; color: #666; font-size: 13px; line-height: 1.4;">
                             ${action.description}
                         </p>
-                        ${action.task && action.task.notes ? `<p style="margin: 0 0 12px 0; color: #888; font-size: 13px; font-style: italic; opacity: 0.8;">${action.task.notes.substring(0, 150)}${action.task.notes.length > 150 ? '...' : ''}</p>` : ''}
-                        <div style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: #888;">
+                        ${action.task && action.task.notes ? `<p style="margin: 0 0 6px 0; color: #888; font-size: 12px; font-style: italic; opacity: 0.8;">${action.task.notes.substring(0, 100)}${action.task.notes.length > 100 ? '...' : ''}</p>` : ''}
+                        <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: #888;">
                             <span style="display: flex; align-items: center;">
                                 <span style="margin-right: 4px;">⏰</span>
                                 ${actionDate} at ${actionTime}
@@ -4146,17 +4146,17 @@ function renderRecentActionsView() {
                         </div>
                     </div>
                 </div>
-                <div style="display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid #f0f0f0; padding-top: 16px;">
+                <div style="display: flex; gap: 8px; justify-content: flex-end; border-top: 1px solid #f0f0f0; padding-top: 10px;">
                     ${action.type === 'delete' && action.canRestore ? `
-                        <button onclick="restoreDeletedTask('${action.task.id}')" style="background: #28a745; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
+                        <button onclick="restoreDeletedTask('${action.task.id}')" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 4px;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
                             <span>↩️</span> Restore
                         </button>
-                        ${action.canPermanentDelete ? `<button onclick="permanentlyDeleteTask('${action.task.id}')" style="background: #dc3545; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
+                        ${action.canPermanentDelete ? `<button onclick="permanentlyDeleteTask('${action.task.id}')" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 4px;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
                             <span>🗑️</span> Delete Forever
                         </button>` : ''}
                     ` : ''}
                     ${action.type === 'undo' && action.canUndo ? `
-                        <button onclick="undoSpecificAction(${action.stackIndex})" style="background: #6f42c1; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#563d7c'" onmouseout="this.style.background='#6f42c1'">
+                        <button onclick="undoSpecificAction(${action.stackIndex})" style="background: #6f42c1; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 4px;" onmouseover="this.style.background='#563d7c'" onmouseout="this.style.background='#6f42c1'">
                             <span>↩️</span> Undo This Action
                         </button>
                     ` : ''}
