@@ -828,7 +828,9 @@ function showOptimisticFeedback(message, type = 'info', duration = 3000) {
  * Keyboard navigation support
  */
 function initializeKeyboardNavigation() {
+    console.log('🎹 initializeKeyboardNavigation called - T key should work now');
     document.addEventListener('keydown', (e) => {
+        console.log('🔑 Key pressed:', e.key, 'Target:', e.target.tagName);
         // Handle template selector navigation first
         if (templateSelectorActive) {
             switch (e.key) {
@@ -4886,6 +4888,12 @@ function closeTemplateSelector() {
 // Make functions globally available
 window.activateTemplateSelector = activateTemplateSelector;
 window.closeTemplateSelector = closeTemplateSelector;
+
+// Add test function to window for debugging
+window.testTemplateSelector = function() {
+    console.log('🧪 Testing template selector...');
+    activateTemplateSelector();
+};
 
 // List management functions  
 async function toggleListSection(sectionId) {
