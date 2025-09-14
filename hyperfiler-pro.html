@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-clear-mobile-filter-on-day-change]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fix-stuck-dropdown-filter]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -6359,8 +6359,27 @@
         const mobileFilterDropdown = document.getElementById('todayMobileFilter');
         if (mobileFilterDropdown) {
             mobileFilterDropdown.value = '';  // Reset to "All tasks"
-            console.log('🔄 Mobile template filter cleared on day change');
+            console.log('🔄 Mobile template filter dropdown cleared on day change');
         }
+        
+        // Also clear the active template filter states
+        window.activeTodayTemplateFilter = null;
+        if (window.activeTemplateFilter !== undefined) {
+            window.activeTemplateFilter = null;
+        }
+        
+        // Don't call clearTodayTemplateFilter() as it would trigger re-render
+        // Just clear the states directly
+        
+        // Force regenerate template filters with cleared state after a short delay
+        setTimeout(() => {
+            const mobileFilterDropdown = document.getElementById('todayMobileFilter');
+            if (mobileFilterDropdown) {
+                mobileFilterDropdown.value = '';  // Ensure it's still cleared after regeneration
+            }
+        }, 200);
+        
+        console.log('🔄 All template filter states cleared on day change');
     }
     
     // Hook into day navigation functions to clear mobile filter
