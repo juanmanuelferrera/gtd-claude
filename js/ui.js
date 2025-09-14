@@ -834,29 +834,29 @@ function initializeKeyboardNavigation() {
             return;
         }
         
-        switch (e.key) {
-            case '1':
+        switch (e.key.toLowerCase()) {
+            case 't':
                 showView('today');
                 break;
-            case '2':
+            case 'w':
                 showView('week');
                 break;
-            case '3':
+            case 'm':
                 showView('calendar');
                 break;
-            case '4':
+            case 's':
                 showView('all');
                 break;
-            case '5':
+            case 'l':
                 showView('lists');
                 break;
-            case '6':
+            case 'r':
                 showView('repeat');
                 break;
-            case '7':
+            case 'u':
                 showView('recent-actions');
                 break;
-            case '8':
+            case 'g':
                 showView('settings');
                 break;
             case '/':
