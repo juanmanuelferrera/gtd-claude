@@ -1159,13 +1159,16 @@ function renderTemplateButtons() {
         
         let touchStartTime = 0;
         let touchTimer = null;
+        let touchHandled = false;
         
         // Touch start for mobile long-press
         button.addEventListener('touchstart', (e) => {
             touchStartTime = Date.now();
+            touchHandled = false;
             touchTimer = setTimeout(async () => {
                 // Long press detected - show delete option
                 e.preventDefault();
+                touchHandled = true;
                 button.classList.add('deleting');
                 if (confirm(`Delete template "${template}"?`)) {
                     await deleteTemplate(template);
@@ -1179,8 +1182,11 @@ function renderTemplateButtons() {
         button.addEventListener('touchend', (e) => {
             clearTimeout(touchTimer);
             const touchDuration = Date.now() - touchStartTime;
-            if (touchDuration < 800) {
+            if (touchDuration < 800 && !touchHandled) {
                 // Short tap - insert template
+                e.preventDefault(); // Prevent the click event from firing
+                touchHandled = true;
+                console.log('👆 Touch: inserting template:', template);
                 insertTemplateToTask(template);
             }
             button.classList.remove('deleting');
@@ -1188,8 +1194,12 @@ function renderTemplateButtons() {
         
         // Left click: insert template (for desktop)
         button.addEventListener('click', (e) => {
-            if (e.pointerType === 'touch') return; // Skip if it's a touch event
-            insertTemplateToTask(template);
+            // Only handle if not already handled by touch
+            if (!touchHandled) {
+                console.log('🖱️ Click: inserting template:', template);
+                insertTemplateToTask(template);
+            }
+            touchHandled = false; // Reset for next interaction
         });
         
         // Right click: delete template (for desktop)
