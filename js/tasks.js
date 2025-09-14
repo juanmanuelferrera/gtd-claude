@@ -7,7 +7,7 @@
 let tasks = [];
 let currentEditTaskId = null;
 let undoStack = [];
-let maxUndoSteps = 10;
+let maxUndoSteps = 5;
 let draggedTask = null;
 let isSaving = false;
 

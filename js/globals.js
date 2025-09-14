@@ -67,7 +67,7 @@ if (typeof window.undoStack === 'undefined') {
 }
 
 if (typeof window.maxUndoSteps === 'undefined') {
-    window.maxUndoSteps = 10;
+    window.maxUndoSteps = 5;
 }
 
 if (typeof window.draggedTask === 'undefined') {
