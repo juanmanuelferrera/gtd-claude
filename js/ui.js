@@ -479,9 +479,11 @@ function updateMobileDateHeader() {
  * Navigation date functions
  */
 function goToToday() {
+    console.log('🏠 goToToday() called - before:', currentTodayDate.toDateString());
     currentTodayDate = new Date();
     // Sync with global window variable for other components
     window.currentTodayDate = currentTodayDate;
+    console.log('🏠 goToToday() - after:', currentTodayDate.toDateString(), 'window.currentTodayDate:', window.currentTodayDate.toDateString());
     if (currentView === 'today') {
         updateMobileDateHeader();
         renderCurrentView();

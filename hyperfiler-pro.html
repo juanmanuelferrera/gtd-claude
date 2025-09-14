@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-sync-date-variables]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fix-go-to-today-display]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -5962,7 +5962,7 @@
     <script src="js/utils.js?v=1757614969"></script>
     <script src="js/auth.js?v=1736363000"></script>
     <script src="js/tasks.js?v=1736363000"></script>
-    <script src="js/ui.js?v=20250914-sync-date-vars"></script>
+    <script src="js/ui.js?v=20250914-fix-go-to-today"></script>
     <script src="js/sync.js?v=1736363000"></script>
     <script src="js/missing-functions.js?v=20250914-time-grid-compact"></script>
     <script src="js/natural-language.js?v=1736363000"></script>
@@ -6193,7 +6193,10 @@
             // Make date clickable to return to today
             mobileDateDisplay.style.cursor = 'pointer';
             mobileDateDisplay.onclick = function() {
+                console.log('📅 Date clicked - going to today');
                 goToToday();
+                // Force immediate update of mobile date display
+                setTimeout(updateMobileDateDisplay, 100);
             };
             
             console.log('📅 Mobile date display updated:', dateStr);
