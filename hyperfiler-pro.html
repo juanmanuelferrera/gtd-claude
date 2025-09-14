@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fab-zindex-fix]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fab-javascript-force]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -6080,6 +6080,28 @@
         }
     };
     console.log('✅ Inline saveListSections override loaded');
+    </script>
+
+    <script>
+    // Force FAB button position on mobile - override any CSS issues
+    document.addEventListener('DOMContentLoaded', function() {
+        function fixFABPosition() {
+            const fab = document.getElementById('fabAddTask');
+            if (fab && window.innerWidth <= 768) {
+                fab.style.bottom = '150px';
+                fab.style.right = '20px';
+                fab.style.zIndex = '1001';
+                fab.style.position = 'fixed';
+                console.log('🔧 FAB position forced for mobile: bottom=150px');
+            }
+        }
+        
+        // Fix position on load and resize
+        fixFABPosition();
+        window.addEventListener('resize', fixFABPosition);
+        
+        console.log('✅ FAB mobile position script loaded');
+    });
     </script>
 
     <!-- Floating Action Button (FAB) for Quick Add Task -->
