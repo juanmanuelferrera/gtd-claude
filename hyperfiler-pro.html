@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fix-blank-screen-calendar]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-all-tasks-day-toggle-calendar]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -6372,9 +6372,8 @@
     let selectedDays = new Set(); // Store selected dates as 'YYYY-MM-DD' strings
     
     function generateAllTasksCalendar() {
-        try {
-            const calendarWidget = document.getElementById('calendarWidget');
-            if (!calendarWidget) return;
+        const calendarWidget = document.getElementById('calendarWidget');
+        if (!calendarWidget) return;
         
         const now = new Date();
         const currentMonth = now.getMonth();
@@ -6431,34 +6430,27 @@
             `;
         }
         
-            calendarHTML += '</div>';
-            calendarWidget.innerHTML = calendarHTML;
-        } catch (error) {
-            console.error('Error generating calendar:', error);
-        }
+        calendarHTML += '</div>';
+        calendarWidget.innerHTML = calendarHTML;
     }
     
     function toggleDay(dateStr) {
-        try {
-            if (selectedDays.has(dateStr)) {
-                selectedDays.delete(dateStr);
-            } else {
-                selectedDays.add(dateStr);
-            }
-            
-            // Update visual appearance
-            const dayElement = document.getElementById(`day-${dateStr}`);
-            if (dayElement) {
-                const isSelected = selectedDays.has(dateStr);
-                dayElement.style.backgroundColor = isSelected ? '#007bff' : 'transparent';
-                dayElement.style.color = isSelected ? 'white' : '#212529';
-            }
-            
-            // Re-filter tasks based on selected days
-            filterTasksBySelectedDays();
-        } catch (error) {
-            console.error('Error toggling day:', error);
+        if (selectedDays.has(dateStr)) {
+            selectedDays.delete(dateStr);
+        } else {
+            selectedDays.add(dateStr);
         }
+        
+        // Update visual appearance
+        const dayElement = document.getElementById(`day-${dateStr}`);
+        if (dayElement) {
+            const isSelected = selectedDays.has(dateStr);
+            dayElement.style.backgroundColor = isSelected ? '#007bff' : 'transparent';
+            dayElement.style.color = isSelected ? 'white' : '#212529';
+        }
+        
+        // Re-filter tasks based on selected days
+        filterTasksBySelectedDays();
     }
     
     function selectAllDays() {
@@ -6528,46 +6520,43 @@
         }
     }
     
-    // Safely hook into functions after they're loaded
-    function initializeAllTasksCalendarHooks() {
-        // Hook into the existing search function to respect day filters
-        if (window.performAllTasksSearch && typeof window.performAllTasksSearch === 'function') {
-            const originalPerformAllTasksSearch = window.performAllTasksSearch;
-            window.performAllTasksSearch = function() {
-                if (selectedDays && selectedDays.size > 0) {
-                    // If days are selected, use our custom filter
-                    filterTasksBySelectedDays();
-                } else {
-                    // Otherwise use the original search function
-                    originalPerformAllTasksSearch();
-                }
-            };
-        }
+    // Hook into the existing search function to respect day filters
+    const originalPerformAllTasksSearch = window.performAllTasksSearch;
+    if (originalPerformAllTasksSearch) {
+        window.performAllTasksSearch = function() {
+            if (selectedDays.size > 0) {
+                // If days are selected, use our custom filter
+                filterTasksBySelectedDays();
+            } else {
+                // Otherwise use the original search function
+                originalPerformAllTasksSearch();
+            }
+        };
+    }
 
-        // Override renderAllTasksView to include calendar initialization
-        if (window.renderAllTasksView && typeof window.renderAllTasksView === 'function') {
-            const originalRenderAllTasksView = window.renderAllTasksView;
-            window.renderAllTasksView = function() {
-                originalRenderAllTasksView();
-                // Generate the calendar when All Tasks view is rendered
+    // Override renderAllTasksView to include calendar initialization
+    const originalRenderAllTasksView = window.renderAllTasksView;
+    window.renderAllTasksView = function() {
+        if (originalRenderAllTasksView) {
+            originalRenderAllTasksView();
+        }
+        // Generate the calendar when All Tasks view is rendered
+        setTimeout(() => {
+            generateAllTasksCalendar();
+        }, 100);
+    };
+    
+    // Hook into showView to initialize calendar for 'all' view
+    const originalShowView = window.showView;
+    if (originalShowView) {
+        window.showView = function(viewName) {
+            originalShowView(viewName);
+            if (viewName === 'all') {
                 setTimeout(() => {
                     generateAllTasksCalendar();
                 }, 100);
-            };
-        }
-        
-        // Hook into showView to initialize calendar for 'all' view
-        if (window.showView && typeof window.showView === 'function') {
-            const originalShowView = window.showView;
-            window.showView = function(viewName) {
-                originalShowView(viewName);
-                if (viewName === 'all') {
-                    setTimeout(() => {
-                        generateAllTasksCalendar();
-                    }, 100);
-                }
-            };
-        }
+            }
+        };
     }
 
     // Initialize everything
@@ -6604,9 +6593,6 @@
         
         // Also update periodically to catch any missed changes
         setInterval(updateMobileDateDisplay, 5000);
-        
-        // Initialize calendar hooks after all JS files have loaded
-        setTimeout(initializeAllTasksCalendarHooks, 2000);
         
         console.log('✅ Non-intrusive date display system loaded');
     });
