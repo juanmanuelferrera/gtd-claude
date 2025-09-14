@@ -4874,30 +4874,38 @@ let templateButtons = [];
 function activateTemplateSelector() {
     console.log('🏷️ T key pressed - entering template navigation mode');
     
-    // T key behavior: Show ALL templates with navigation
-    // Different from clicking which applies filters
+    // T key behavior: Show ALL templates with navigation for any view
+    // Works with Today, Week, Month views that have template filters
     try {
-        // First ensure we're in Today view
-        if (window.currentView !== 'today') {
-            console.log('📅 T key: Switching to Today view first (current view:', window.currentView, ')');
+        // Determine which template container to use based on current view
+        let templateContainer;
+        if (window.currentView === 'today') {
+            templateContainer = '#todayTemplateFilters';
+        } else if (window.currentView === 'week') {
+            templateContainer = '#weekTemplateFilters';
+        } else if (window.currentView === 'calendar') {
+            templateContainer = '#monthTemplateFilters';
+        } else {
+            // For views without template filters, switch to Today view
+            console.log('📅 T key: Current view has no templates, switching to Today view (current view:', window.currentView, ')');
             showView('today');
             // Wait for view to render before proceeding
             setTimeout(() => {
                 console.log('⏱️ View rendered, now activating template selector');
                 activateTemplateSelector();
-            }, 150); // Slightly longer delay for view to fully render
+            }, 150);
             return;
         }
         
-        // Get template filter buttons and Clear button (exclude Toggle All)
+        // Get template filter buttons and Clear button from the appropriate container
         // This includes both .filter-btn (templates) and .filter-clear (Clear) buttons
-        templateButtons = Array.from(document.querySelectorAll('#todayTemplateFilters button'))
+        templateButtons = Array.from(document.querySelectorAll(`${templateContainer} button`))
             .filter(btn => {
                 const text = btn.textContent.trim();
-                // Include: template buttons, Clear button, exclude: Toggle All
+                // Include: template buttons, Clear button, exclude: Toggle All and T indicator
                 return text !== '⏰ Toggle All' && text !== 'T';
             });
-        console.log('📋 Found navigable buttons (templates + Clear):', templateButtons.length);
+        console.log(`📋 Found navigable buttons in ${window.currentView} view (templates + Clear):`, templateButtons.length);
         
         // Log what buttons we found for debugging
         templateButtons.forEach((btn, index) => {
