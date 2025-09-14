@@ -831,27 +831,23 @@ function initializeKeyboardNavigation() {
     console.log('🎹 initializeKeyboardNavigation called - T key should work now');
     document.addEventListener('keydown', (e) => {
         console.log('🔑 Key pressed:', e.key, 'Target:', e.target.tagName);
-        // Handle template selector navigation first
-        if (templateSelectorActive) {
+        // Handle template navigation first
+        if (templateNavActive) {
             switch (e.key) {
                 case 'ArrowLeft':
                     e.preventDefault();
-                    navigateTemplateSelector('left');
+                    navigateTemplateButtons('left');
                     return;
                 case 'ArrowRight':
                     e.preventDefault();
-                    navigateTemplateSelector('right');
-                    return;
-                case 'Enter':
-                    e.preventDefault();
-                    selectCurrentTemplate();
+                    navigateTemplateButtons('right');
                     return;
                 case 'Escape':
                     e.preventDefault();
-                    closeTemplateSelector();
+                    exitTemplateNavigation();
                     return;
             }
-            return; // Don't process other keys when template selector is active
+            return; // Don't process other keys when template navigation is active
         }
         
         // Only handle keyboard shortcuts when not typing in inputs
@@ -894,9 +890,9 @@ function initializeKeyboardNavigation() {
                 showView('search');
                 break;
             case 'Escape':
-                // Close template selector if active
-                if (templateSelectorActive) {
-                    closeTemplateSelector();
+                // Close template navigation if active
+                if (templateNavActive) {
+                    exitTemplateNavigation();
                     return;
                 }
                 // Close any open modals
@@ -4758,140 +4754,91 @@ function initializeUI() {
 }
 
 /**
- * Template selector functionality - starts with first template selected
+ * Template button navigation - directly activate template buttons with T and arrows
  */
-let templateSelectorActive = false;
-let selectedTemplateIndex = 0;
-let availableTemplates = [];
+let templateNavActive = false;
+let selectedButtonIndex = 0;
+let templateButtons = [];
 
 function activateTemplateSelector() {
-    console.log('🏷️ activateTemplateSelector called');
+    console.log('🏷️ T key pressed - activating first template button');
     
-    // Get available templates
-    availableTemplates = [];
+    // Get template buttons from the DOM
+    templateButtons = Array.from(document.querySelectorAll('#templateButtons button'));
+    console.log('📋 Found template buttons:', templateButtons.length);
     
-    // Add custom templates first (they have priority)
-    if (window.customTemplates && window.customTemplates.length > 0) {
-        availableTemplates = [...window.customTemplates];
-        console.log('📋 Found custom templates:', availableTemplates);
-    }
-    
-    // If no custom templates, get extracted templates from existing tasks
-    if (availableTemplates.length === 0 && window.tasks) {
-        const extractedTemplates = new Set();
-        window.tasks.forEach(task => {
-            const text = `${task.title || ''} ${task.notes || ''}`;
-            const templateMatches = text.match(/@\w+/g);
-            if (templateMatches) {
-                templateMatches.forEach(template => extractedTemplates.add(template));
-            }
-        });
-        availableTemplates = Array.from(extractedTemplates);
-        console.log('📋 Found extracted templates:', availableTemplates);
-    }
-    
-    if (availableTemplates.length === 0) {
-        console.log('❌ No templates available');
+    if (templateButtons.length === 0) {
+        console.log('❌ No template buttons available');
         showMessage('No templates available. Create templates using @tags in your tasks.', 'info');
         return;
     }
     
-    // Start with first template selected (index 0)
-    templateSelectorActive = true;
-    selectedTemplateIndex = 0;
-    showTemplateSelector();
+    // Activate first template button
+    templateNavActive = true;
+    selectedButtonIndex = 0;
+    clickTemplateButton(templateButtons[0]);
+    highlightTemplateButton(0);
 }
 
-function showTemplateSelector() {
-    // Create or update template selector overlay
-    let overlay = document.getElementById('templateSelectorOverlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'templateSelectorOverlay';
-        overlay.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            z-index: 10000;
-            min-width: 300px;
-            text-align: center;
-        `;
-        document.body.appendChild(overlay);
-    }
-    
-    let html = '<h3 style="margin: 0 0 15px 0; font-size: 18px;">📋 Select Template</h3>';
-    html += '<div style="margin-bottom: 15px; font-size: 12px; opacity: 0.8;">Use ← → arrows to navigate, Enter to select, Esc to cancel</div>';
-    
-    availableTemplates.forEach((template, index) => {
-        const isSelected = index === selectedTemplateIndex;
-        html += `<div style="
-            padding: 10px 15px;
-            margin: 5px 0;
-            background: ${isSelected ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'};
-            border-radius: 8px;
-            border: 2px solid ${isSelected ? 'rgba(255,255,255,0.8)' : 'transparent'};
-            font-weight: ${isSelected ? 'bold' : 'normal'};
-            transition: all 0.2s ease;
-        ">${template}</div>`;
+function clickTemplateButton(button) {
+    console.log('🔘 Auto-clicking template button via T key navigation:', button.textContent);
+    // Simulate click on the template button (preserves existing click behavior)
+    button.click();
+}
+
+function highlightTemplateButton(index) {
+    // Remove highlight from all buttons
+    templateButtons.forEach(btn => {
+        btn.style.outline = '';
+        btn.style.backgroundColor = '';
     });
     
-    overlay.innerHTML = html;
-}
-
-function navigateTemplateSelector(direction) {
-    if (!templateSelectorActive) return;
-    
-    if (direction === 'left' && selectedTemplateIndex > 0) {
-        selectedTemplateIndex--;
-    } else if (direction === 'right' && selectedTemplateIndex < availableTemplates.length - 1) {
-        selectedTemplateIndex++;
-    }
-    
-    showTemplateSelector();
-}
-
-function selectCurrentTemplate() {
-    if (!templateSelectorActive || selectedTemplateIndex >= availableTemplates.length) return;
-    
-    const selectedTemplate = availableTemplates[selectedTemplateIndex];
-    closeTemplateSelector();
-    
-    // Insert template into active field
-    if (typeof insertTemplateToTask === 'function') {
-        console.log('✅ insertTemplateToTask function found, calling...');
-        insertTemplateToTask(selectedTemplate);
-        showMessage(`Template "${selectedTemplate}" inserted`, 'success');
-    } else {
-        console.log('❌ insertTemplateToTask function not found');
-        // Fallback - just show the template
-        showMessage(`Selected template: ${selectedTemplate}`, 'info');
+    // Highlight selected button
+    if (templateButtons[index]) {
+        templateButtons[index].style.outline = '3px solid #007aff';
+        templateButtons[index].style.backgroundColor = 'rgba(0, 122, 255, 0.1)';
     }
 }
 
-function closeTemplateSelector() {
-    templateSelectorActive = false;
-    selectedTemplateIndex = 0;
-    availableTemplates = [];
+function navigateTemplateButtons(direction) {
+    if (!templateNavActive || templateButtons.length === 0) return;
     
-    const overlay = document.getElementById('templateSelectorOverlay');
-    if (overlay) {
-        overlay.remove();
+    if (direction === 'left' && selectedButtonIndex > 0) {
+        selectedButtonIndex--;
+        clickTemplateButton(templateButtons[selectedButtonIndex]);
+        highlightTemplateButton(selectedButtonIndex);
+    } else if (direction === 'right' && selectedButtonIndex < templateButtons.length - 1) {
+        selectedButtonIndex++;
+        clickTemplateButton(templateButtons[selectedButtonIndex]);
+        highlightTemplateButton(selectedButtonIndex);
     }
+    
+    console.log('🔄 Navigated to template button', selectedButtonIndex, templateButtons[selectedButtonIndex]?.textContent);
+}
+
+function exitTemplateNavigation() {
+    if (!templateNavActive) return;
+    
+    console.log('🚪 Exiting template navigation');
+    templateNavActive = false;
+    selectedButtonIndex = 0;
+    
+    // Remove highlights from all buttons
+    templateButtons.forEach(btn => {
+        btn.style.outline = '';
+        btn.style.backgroundColor = '';
+    });
+    
+    templateButtons = [];
 }
 
 // Make functions globally available
 window.activateTemplateSelector = activateTemplateSelector;
-window.closeTemplateSelector = closeTemplateSelector;
+window.exitTemplateNavigation = exitTemplateNavigation;
 
 // Add test function to window for debugging
 window.testTemplateSelector = function() {
-    console.log('🧪 Testing template selector...');
+    console.log('🧪 Testing template button navigation...');
     activateTemplateSelector();
 };
 
