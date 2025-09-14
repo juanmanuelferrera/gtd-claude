@@ -860,6 +860,7 @@ function initializeKeyboardNavigation() {
                 showView('settings');
                 break;
             case 't':
+                console.log('🔑 T key pressed, activating first template...');
                 e.preventDefault();
                 activateFirstTemplate();
                 break;
@@ -4730,12 +4731,15 @@ function initializeUI() {
  * Simple template activation - just use first available template
  */
 function activateFirstTemplate() {
+    console.log('🏷️ activateFirstTemplate called');
+    
     // Get available templates
     let availableTemplates = [];
     
     // Add custom templates first (they have priority)
     if (window.customTemplates && window.customTemplates.length > 0) {
         availableTemplates = [...window.customTemplates];
+        console.log('📋 Found custom templates:', availableTemplates);
     }
     
     // If no custom templates, get extracted templates from existing tasks
@@ -4749,25 +4753,33 @@ function activateFirstTemplate() {
             }
         });
         availableTemplates = Array.from(extractedTemplates);
+        console.log('📋 Found extracted templates:', availableTemplates);
     }
     
     if (availableTemplates.length === 0) {
+        console.log('❌ No templates available');
         showMessage('No templates available. Create templates using @tags in your tasks.', 'info');
         return;
     }
     
     // Use first template
     const firstTemplate = availableTemplates[0];
+    console.log('🏷️ Using first template:', firstTemplate);
     
     // Insert template into active field
     if (typeof insertTemplateToTask === 'function') {
+        console.log('✅ insertTemplateToTask function found, calling...');
         insertTemplateToTask(firstTemplate);
         showMessage(`Template "${firstTemplate}" inserted`, 'success');
     } else {
+        console.log('❌ insertTemplateToTask function not found');
         // Fallback - just show the template
         showMessage(`First template: ${firstTemplate}`, 'info');
     }
 }
+
+// Make function globally available
+window.activateFirstTemplate = activateFirstTemplate;
 
 // List management functions  
 async function toggleListSection(sectionId) {
