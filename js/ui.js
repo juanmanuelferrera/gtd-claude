@@ -851,6 +851,12 @@ function initializeKeyboardNavigation() {
                         exitTemplateNavigation();
                     }
                     return;
+                case 't':
+                case 'T':
+                    console.log('🔄 T pressed during template navigation - toggling off');
+                    e.preventDefault();
+                    exitTemplateNavigation();
+                    return;
                 case 'Escape':
                     console.log('🚪 ESC pressed during template navigation - exiting');
                     console.log('Template nav state before exit:', templateNavActive);
