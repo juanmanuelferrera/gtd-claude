@@ -853,8 +853,11 @@ function initializeKeyboardNavigation() {
                     return;
                 case 'Escape':
                     console.log('🚪 ESC pressed during template navigation - exiting');
+                    console.log('Template nav state before exit:', templateNavActive);
                     e.preventDefault();
+                    e.stopPropagation(); // Stop event from bubbling
                     exitTemplateNavigation();
+                    console.log('Template nav state after exit:', templateNavActive);
                     return;
                 default:
                     // Check if it's a navigation key - if so, exit template nav and let it through
@@ -927,11 +930,10 @@ function initializeKeyboardNavigation() {
                 showView('search');
                 break;
             case 'Escape':
-                // Close template navigation if active
-                if (templateNavActive) {
-                    exitTemplateNavigation();
-                    return;
-                }
+                // Template navigation should already be handled above
+                // This is only for closing modals when not in template nav
+                console.log('🚪 ESC pressed in general navigation');
+                e.preventDefault();
                 // Close any open modals
                 const openModals = document.querySelectorAll('[style*="display: block"]');
                 openModals.forEach(modal => {
@@ -4835,10 +4837,11 @@ function activateTemplateSelector() {
     try {
         // First ensure we're in Today view
         if (window.currentView !== 'today') {
-            console.log('📅 Switching to Today view for template navigation');
+            console.log('📅 T key: Switching to Today view first (current view:', window.currentView, ')');
             showView('today');
             // Wait for view to render before proceeding
             setTimeout(() => {
+                console.log('⏱️ View rendered, now activating template selector');
                 activateTemplateSelector();
             }, 100);
             return;
