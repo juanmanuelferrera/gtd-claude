@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-mobile-fab-220px]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fab-inline-fix]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -2047,6 +2047,7 @@
             border: none;
             border-radius: 50px;
             padding: 16px 32px;
+            bottom: 30px; /* Default bottom position for desktop */
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
@@ -6083,7 +6084,6 @@
     <!-- Floating Action Button (FAB) for Quick Add Task -->
     <button id="fabAddTask" onclick="openAddTaskModal()" class="floating-add-btn" style="
         position: fixed;
-        bottom: 30px;
         right: 30px;
         width: 56px;
         height: 56px;
