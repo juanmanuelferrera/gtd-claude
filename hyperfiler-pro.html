@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-persistent-template-buttons-modal]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-bulletproof-template-persistence]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -6414,39 +6414,221 @@
         console.log('🔗 Mobile filter clearing hooked into day navigation');
     }
 
-    // Ensure templates are loaded and rendered properly
-    function ensureTemplatesLoaded() {
-        // Load templates from localStorage if they exist
-        const saved = localStorage.getItem('gtdTemplates');
-        if (saved) {
+    // BULLETPROOF TEMPLATE PERSISTENCE SYSTEM
+    window.PERSISTENT_TEMPLATES = {
+        // Storage key for templates
+        STORAGE_KEY: 'hyperfiler_persistent_templates',
+        
+        // Get all saved templates
+        getAll: function() {
             try {
-                window.customTemplates = JSON.parse(saved);
-                console.log('📋 Loaded templates from localStorage:', window.customTemplates.length);
+                const saved = localStorage.getItem(this.STORAGE_KEY);
+                return saved ? JSON.parse(saved) : [];
             } catch (error) {
-                console.error('Error loading templates:', error);
-                window.customTemplates = [];
+                console.error('❌ Error loading templates:', error);
+                return [];
             }
-        } else {
-            // Initialize with default templates if none exist
-            window.customTemplates = window.customTemplates || [];
-            console.log('📋 No saved templates, using defaults');
+        },
+        
+        // Save templates to localStorage
+        save: function(templates) {
+            try {
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(templates));
+                console.log('💾 Templates saved:', templates.length);
+                return true;
+            } catch (error) {
+                console.error('❌ Error saving templates:', error);
+                return false;
+            }
+        },
+        
+        // Add a new template
+        add: function(template) {
+            if (!template || typeof template !== 'string') return false;
+            
+            // Clean and format template
+            template = template.trim();
+            if (!template.startsWith('@')) {
+                template = '@' + template;
+            }
+            template = template.replace(/\s+/g, ''); // Remove spaces
+            
+            const templates = this.getAll();
+            
+            // Check if already exists
+            if (templates.includes(template)) {
+                console.log('⚠️ Template already exists:', template);
+                return false;
+            }
+            
+            // Add and save
+            templates.push(template);
+            this.save(templates);
+            console.log('✅ Template added:', template);
+            return true;
+        },
+        
+        // Remove a template
+        remove: function(template) {
+            const templates = this.getAll();
+            const filtered = templates.filter(t => t !== template);
+            if (filtered.length !== templates.length) {
+                this.save(filtered);
+                console.log('🗑️ Template removed:', template);
+                return true;
+            }
+            return false;
+        },
+        
+        // Render template buttons in the modal
+        render: function() {
+            const container = document.getElementById('templateButtons');
+            if (!container) {
+                console.log('⚠️ Template container not found');
+                return;
+            }
+            
+            const templates = this.getAll();
+            console.log('🎨 Rendering templates:', templates);
+            
+            // Clear container
+            container.innerHTML = '';
+            
+            if (templates.length === 0) {
+                container.innerHTML = '<div style="color: #666; font-size: 12px; padding: 8px;">No saved templates. Add templates below.</div>';
+                return;
+            }
+            
+            // Create template buttons
+            templates.forEach(template => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'template-btn';
+                button.textContent = template;
+                button.title = `Click to add "${template}" • Long press to delete`;
+                button.style.cssText = `
+                    background: #007bff;
+                    color: white;
+                    border: none;
+                    padding: 6px 12px;
+                    margin: 2px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    transition: all 0.2s;
+                `;
+                
+                // Click to add template to task
+                button.addEventListener('click', () => {
+                    const titleInput = document.getElementById('editTaskTitle');
+                    if (titleInput) {
+                        const currentValue = titleInput.value.trim();
+                        if (currentValue) {
+                            titleInput.value = currentValue + ' ' + template;
+                        } else {
+                            titleInput.value = template;
+                        }
+                        titleInput.focus();
+                        console.log('📝 Template added to task:', template);
+                    }
+                });
+                
+                // Long press to delete
+                let touchTimer = null;
+                let isLongPress = false;
+                
+                button.addEventListener('mousedown', () => {
+                    isLongPress = false;
+                    touchTimer = setTimeout(() => {
+                        isLongPress = true;
+                        if (confirm(`Delete template "${template}"?`)) {
+                            window.PERSISTENT_TEMPLATES.remove(template);
+                            window.PERSISTENT_TEMPLATES.render(); // Re-render
+                        }
+                    }, 800);
+                });
+                
+                button.addEventListener('mouseup', () => {
+                    if (touchTimer) {
+                        clearTimeout(touchTimer);
+                    }
+                });
+                
+                button.addEventListener('mouseleave', () => {
+                    if (touchTimer) {
+                        clearTimeout(touchTimer);
+                    }
+                });
+                
+                // Hover effects
+                button.addEventListener('mouseenter', () => {
+                    button.style.backgroundColor = '#0056b3';
+                });
+                
+                button.addEventListener('mouseleave', () => {
+                    button.style.backgroundColor = '#007bff';
+                });
+                
+                container.appendChild(button);
+            });
+            
+            console.log('✅ Templates rendered successfully');
+        }
+    };
+    
+    // Override the addNewTemplate function to use our persistent system
+    window.addNewTemplate = async function() {
+        console.log('🏷️ addNewTemplate called (persistent version)');
+        const input = document.getElementById('newTemplateInput');
+        if (!input) {
+            console.error('❌ newTemplateInput not found');
+            return;
         }
         
-        // Render template buttons if container exists
-        if (typeof renderTemplateButtons === 'function') {
-            setTimeout(() => {
-                renderTemplateButtons();
-                console.log('📋 Template buttons rendered');
-            }, 100);
+        const template = input.value.trim();
+        if (!template) {
+            console.log('⚠️ No template text entered');
+            return;
         }
+        
+        // Add template using persistent system
+        const added = window.PERSISTENT_TEMPLATES.add(template);
+        if (added) {
+            // Clear input and re-render
+            input.value = '';
+            window.PERSISTENT_TEMPLATES.render();
+            input.focus();
+        } else {
+            alert('Template already exists or invalid!');
+        }
+    };
+    
+    // Function to ensure templates are always rendered when modal opens
+    function forceRenderTemplates() {
+        setTimeout(() => {
+            window.PERSISTENT_TEMPLATES.render();
+        }, 50);
+        
+        // Try again with longer delay in case modal is still loading
+        setTimeout(() => {
+            window.PERSISTENT_TEMPLATES.render();
+        }, 200);
+        
+        // And one more time to be sure
+        setTimeout(() => {
+            window.PERSISTENT_TEMPLATES.render();
+        }, 500);
     }
 
     // Initialize everything
     document.addEventListener('DOMContentLoaded', function() {
         window.goToToday = goToToday;
         
-        // Ensure templates are properly loaded and displayed
-        setTimeout(ensureTemplatesLoaded, 500);
+        // Initialize persistent template system
+        setTimeout(() => {
+            window.PERSISTENT_TEMPLATES.render();
+            console.log('🎯 Initial template render completed');
+        }, 500);
         
         // Initial update
         updateMobileDateDisplay();
@@ -6476,19 +6658,14 @@
         // Hook into day navigation for mobile filter clearing
         setTimeout(hookIntoDayNavigation, 1500);
         
-        // Hook into modal opening to ensure templates are rendered
+        // Hook into modal opening to force render persistent templates
         setTimeout(() => {
             const originalOpenAddTaskModal = window.openAddTaskModal;
             if (originalOpenAddTaskModal) {
                 window.openAddTaskModal = function(dateStr) {
                     const result = originalOpenAddTaskModal(dateStr);
-                    // Ensure templates are rendered when modal opens
-                    setTimeout(() => {
-                        if (typeof renderTemplateButtons === 'function') {
-                            renderTemplateButtons();
-                            console.log('📋 Templates force-rendered on modal open');
-                        }
-                    }, 100);
+                    console.log('🎯 Add task modal opened - rendering persistent templates');
+                    forceRenderTemplates();
                     return result;
                 };
             }
@@ -6497,15 +6674,26 @@
             if (originalOpenEditTaskModal) {
                 window.openEditTaskModal = function(taskId) {
                     const result = originalOpenEditTaskModal(taskId);
-                    // Ensure templates are rendered when modal opens
-                    setTimeout(() => {
-                        if (typeof renderTemplateButtons === 'function') {
-                            renderTemplateButtons();
-                            console.log('📋 Templates force-rendered on edit modal open');
-                        }
-                    }, 100);
+                    console.log('🎯 Edit task modal opened - rendering persistent templates');
+                    forceRenderTemplates();
                     return result;
                 };
+            }
+            
+            // Also hook into any generic modal opening
+            const modalElement = document.getElementById('taskModal');
+            if (modalElement) {
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                            if (modalElement.style.display === 'block') {
+                                console.log('🎯 Modal detected open via style change');
+                                forceRenderTemplates();
+                            }
+                        }
+                    });
+                });
+                observer.observe(modalElement, { attributes: true });
             }
         }, 2000);
         
