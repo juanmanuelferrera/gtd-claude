@@ -4759,6 +4759,25 @@ function renderCalendar() {
             
             console.log('🔧 Setting up drag and drop for calendar task:', task.title, 'draggable:', taskElement.draggable);
             
+            // Check for CSS that might prevent dragging
+            const computedStyle = window.getComputedStyle(taskElement);
+            console.log('🎨 Task CSS check:', {
+                draggable: taskElement.draggable,
+                userSelect: computedStyle.userSelect,
+                pointerEvents: computedStyle.pointerEvents,
+                position: computedStyle.position,
+                zIndex: computedStyle.zIndex
+            });
+            
+            // Add mouse event debugging
+            taskElement.addEventListener('mousedown', (e) => {
+                console.log('🖱️ MOUSEDOWN on task:', task.title);
+            });
+            
+            taskElement.addEventListener('mouseup', (e) => {
+                console.log('🖱️ MOUSEUP on task:', task.title);
+            });
+            
             if (typeof handleDragStart === 'function') {
                 console.log('🔧 Adding dragstart listener to calendar task:', task.title);
                 taskElement.addEventListener('dragstart', handleDragStart);
