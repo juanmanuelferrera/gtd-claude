@@ -843,6 +843,14 @@ function initializeKeyboardNavigation() {
                     e.preventDefault();
                     navigateTemplateButtons('right');
                     return;
+                case 'Enter':
+                    console.log('⚡ Enter pressed - applying highlighted template filter');
+                    e.preventDefault();
+                    if (templateButtons[selectedButtonIndex]) {
+                        clickTemplateButton(templateButtons[selectedButtonIndex]);
+                        exitTemplateNavigation();
+                    }
+                    return;
                 case 'Escape':
                     console.log('🚪 ESC pressed during template navigation - exiting');
                     e.preventDefault();
@@ -4815,13 +4823,12 @@ function activateTemplateSelector() {
         templateNavActive = true;
         selectedButtonIndex = 0;
         
-        // First highlight, then click to ensure visual feedback
+        // Only highlight the first template, don't click it yet
         highlightTemplateButton(0);
-        clickTemplateButton(templateButtons[0]);
         
         // Show user feedback about template selection
         const templateName = templateButtons[0].textContent;
-        console.log(`🎯 Template filter navigation active. Selected: ${templateName}. Use ← → arrows to navigate, T to exit.`);
+        console.log(`🎯 Template filter navigation active. Highlighted: ${templateName}. Use ← → arrows to navigate, Enter to apply, ESC to exit.`);
     } catch (error) {
         console.error('❌ Error in activateTemplateSelector:', error);
         templateNavActive = false; // Reset on error
@@ -4829,7 +4836,7 @@ function activateTemplateSelector() {
 }
 
 function clickTemplateButton(button) {
-    console.log('🔘 Auto-clicking template filter button via T key navigation:', button.textContent);
+    console.log('🔘 Applying template filter:', button.textContent);
     // Simulate click on the template filter button (preserves existing click behavior)
     button.click();
 }
@@ -4870,13 +4877,12 @@ function navigateTemplateButtons(direction) {
         return;
     }
     
-    // Update highlighting and click if we moved
+    // Update highlighting if we moved (don't auto-click)
     if (oldIndex !== selectedButtonIndex) {
         highlightTemplateButton(selectedButtonIndex);
-        clickTemplateButton(templateButtons[selectedButtonIndex]);
         
         const templateName = templateButtons[selectedButtonIndex].textContent;
-        console.log(`🎯 Selected template: ${templateName}`);
+        console.log(`🎯 Highlighted template: ${templateName}`);
     }
     
     console.log('🔄 Navigated to template button', selectedButtonIndex, templateButtons[selectedButtonIndex]?.textContent);
