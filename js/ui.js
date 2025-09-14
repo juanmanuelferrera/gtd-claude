@@ -857,9 +857,17 @@ function initializeKeyboardNavigation() {
                     exitTemplateNavigation();
                     return;
                 default:
-                    // Allow other keys to pass through when template nav is active
-                    console.log('🔓 Allowing key to pass through template nav:', e.key);
-                    break;
+                    // Check if it's a navigation key - if so, exit template nav and let it through
+                    const navKeys = ['d', 'w', 'm', 's', 'l', 'r', 'u', 'x', '/'];
+                    if (navKeys.includes(e.key.toLowerCase())) {
+                        console.log('🔄 Navigation key pressed - exiting template nav and switching view:', e.key);
+                        exitTemplateNavigation();
+                        // Don't return - let the key fall through to normal navigation
+                    } else {
+                        // Other keys just pass through
+                        console.log('🔓 Allowing key to pass through template nav:', e.key);
+                        break;
+                    }
             }
         }
         
