@@ -3353,9 +3353,9 @@ function insertTemplateToTask(template) {
     console.log('📝 Current notes value before insertion:', currentNotes);
     console.log('📝 Template to insert:', template);
     
-    // Add template to notes field, each template on a new line
+    // Add template to notes field, templates on same line separated by spaces
     if (currentNotes) {
-        notesInput.value = currentNotes + '\n' + template;
+        notesInput.value = currentNotes + ' ' + template;
         console.log('✅ Appended template to existing notes');
     } else {
         notesInput.value = template;
@@ -3371,7 +3371,7 @@ function insertTemplateToTask(template) {
     // Trigger change event for any listeners
     notesInput.dispatchEvent(new Event('change', { bubbles: true }));
     
-    console.log('🎯 Multiple template support - templates accumulate in notes field, one per line');
+    console.log('🎯 Multiple template support - templates accumulate in notes field inline');
 }
 
 // Override any previous definition

@@ -1234,9 +1234,9 @@ function insertTemplateToTask(template) {
         const currentNotes = notesInput.value.trim();
         console.log('📝 Current notes value:', currentNotes);
         
-        // Add template to notes, each on new line
+        // Add template to notes, inline with spaces
         if (currentNotes) {
-            notesInput.value = currentNotes + '\n' + template;
+            notesInput.value = currentNotes + ' ' + template;
             console.log('✅ Appended template to notes');
         } else {
             notesInput.value = template;
@@ -1252,7 +1252,7 @@ function insertTemplateToTask(template) {
         // Trigger change event for any listeners
         notesInput.dispatchEvent(new Event('change', { bubbles: true }));
         
-        console.log('🎯 Templates added to notes field, one per line');
+        console.log('🎯 Templates added to notes field inline');
     } else {
         console.error('❌ editTaskNotes input not found');
     }
