@@ -373,11 +373,11 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
     // Create time card
     const timeCard = document.createElement('div');
     timeCard.style.cssText = `
-        background: white; border-radius: 12px; width: 320px; 
-        padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        background: white; border-radius: 12px; width: 240px; 
+        padding: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         position: fixed; z-index: 10001;
-        left: ${Math.max(10, Math.min(buttonRect.left - 50, window.innerWidth - 340))}px;
-        top: ${Math.max(10, Math.min(buttonRect.bottom + 10, window.innerHeight - 380))}px;
+        left: ${Math.max(10, Math.min(buttonRect.left - 30, window.innerWidth - 260))}px;
+        top: ${Math.max(10, Math.min(buttonRect.bottom + 10, window.innerHeight - 320))}px;
         border: 1px solid #e0e0e0;
     `;
     
@@ -413,7 +413,7 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
                 ${morningTimes.map(time => {
                     const isSelected = time === currentTime;
-                    const baseStyle = 'padding: 10px 8px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 500; transition: all 0.2s;';
+                    const baseStyle = 'padding: 6px 4px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 11px; font-weight: 500; transition: all 0.2s;';
                     const colorStyle = isSelected 
                         ? 'background: #007AFF; color: white;'
                         : 'background: #e3f2fd; color: #1976d2;';
@@ -433,7 +433,7 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
                 ${afternoonTimes.map(time => {
                     const isSelected = time === currentTime;
-                    const baseStyle = 'padding: 10px 8px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 500; transition: all 0.2s;';
+                    const baseStyle = 'padding: 6px 4px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 11px; font-weight: 500; transition: all 0.2s;';
                     const colorStyle = isSelected 
                         ? 'background: #007AFF; color: white;'
                         : 'background: #fff3e0; color: #f57c00;';
@@ -453,7 +453,7 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
                 ${eveningTimes.map(time => {
                     const isSelected = time === currentTime;
-                    const baseStyle = 'padding: 10px 8px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 500; transition: all 0.2s;';
+                    const baseStyle = 'padding: 6px 4px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 11px; font-weight: 500; transition: all 0.2s;';
                     const colorStyle = isSelected 
                         ? 'background: #007AFF; color: white;'
                         : 'background: #f3e5f5; color: #7b1fa2;';
