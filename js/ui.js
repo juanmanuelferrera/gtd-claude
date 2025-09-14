@@ -4889,10 +4889,11 @@ function activateTemplateSelector() {
             return;
         }
         
-        // Get ALL buttons from Today view (templates + clear)
-        // This includes both filter-btn and filter-clear classes
-        templateButtons = Array.from(document.querySelectorAll('#todayTemplateFilters button'));
-        console.log('📋 Found template buttons (including Clear):', templateButtons.length);
+        // Get ALL buttons from Today view but exclude Toggle All button
+        // Toggle All button doesn't have filter-btn class, so we can filter it out
+        templateButtons = Array.from(document.querySelectorAll('#todayTemplateFilters button'))
+            .filter(btn => btn.textContent.trim() !== '⏰ Toggle All');
+        console.log('📋 Found template buttons (excluding Toggle All):', templateButtons.length);
         
         if (templateButtons.length === 0) {
             console.log('❌ No template filters available - template nav remains inactive');
@@ -5012,7 +5013,9 @@ function exitTemplateNavigation() {
 
 function clearAllTemplateHighlights() {
     // Safeguard function to clear any template button highlights that might be stuck
-    const allTemplateButtons = document.querySelectorAll('#todayTemplateFilters button');
+    // Exclude Toggle All button from clearing highlights
+    const allTemplateButtons = Array.from(document.querySelectorAll('#todayTemplateFilters button'))
+        .filter(btn => btn.textContent.trim() !== '⏰ Toggle All');
     allTemplateButtons.forEach(btn => {
         try {
             btn.style.outline = '';
