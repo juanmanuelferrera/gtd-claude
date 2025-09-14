@@ -737,6 +737,7 @@ function quickSearch(term) {
 }
 
 function performAllTasksSearch() {
+    console.log('🔍 DEBUG: performAllTasksSearch called (missing-functions.js version)');
     const searchInputElement = document.getElementById('allTasksSearchInput');
     
     if (!searchInputElement) {
@@ -777,6 +778,11 @@ function performAllTasksSearch() {
     // Store filtered tasks for reference
     if (typeof currentFilteredTasks !== 'undefined') {
         window.currentFilteredTasks = filteredTasks;
+    }
+    
+    // Generate template filters for All Tasks view (both desktop and mobile)
+    if (typeof renderAllTasksTemplateFilters === 'function') {
+        renderAllTasksTemplateFilters(filteredTasks);
     }
     
     // Render tasks
