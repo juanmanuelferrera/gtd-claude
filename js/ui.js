@@ -57,7 +57,7 @@ function showView(viewName, preserveDate = false) {
     // Update container background to match active tab
     const container = document.querySelector('.container');
     if (container) {
-        container.classList.remove('today-active', 'week-active', 'calendar-active', 'all-active', 'lists-active', 'repeat-active', 'undo-active', 'stats-active', 'settings-active', 'trash-active');
+        container.classList.remove('today-active', 'week-active', 'calendar-active', 'all-active', 'lists-active', 'repeat-active', 'undo-active', 'stats-active', 'settings-active', 'recent-actions-active');
         container.classList.add(`${viewName}-active`);
     }
     
@@ -66,7 +66,7 @@ function showView(viewName, preserveDate = false) {
         'today-view': viewName === 'today',
         'calendar-view': viewName === 'calendar',
         'week-view': viewName === 'week',
-        'tasks-view': viewName === 'all' || viewName === 'trash',
+        'tasks-view': viewName === 'all' || viewName === 'recent-actions',
         'stats-view': viewName === 'stats',
         'lists-view': viewName === 'lists',
         'repeat-view': viewName === 'repeat',
@@ -152,10 +152,10 @@ function showView(viewName, preserveDate = false) {
                 renderTasks(viewName);
             }
             break;
-        case 'trash':
-            console.log('showView: switching to trash view');
-            if (typeof renderTrashView === 'function') {
-                renderTrashView();
+        case 'recent-actions':
+            console.log('showView: switching to recent actions view');
+            if (typeof renderRecentActionsView === 'function') {
+                renderRecentActionsView();
             }
             break;
         default:
@@ -316,9 +316,9 @@ function renderCurrentView() {
                 renderStats();
             }
             break;
-        case 'trash':
-            if (typeof renderTrashView === 'function') {
-                renderTrashView();
+        case 'recent-actions':
+            if (typeof renderRecentActionsView === 'function') {
+                renderRecentActionsView();
             }
             break;
         case 'search':
@@ -451,7 +451,7 @@ function updateMobileNavigation() {
                     'stats': '📊 Stats',
                     'settings': '⚙️ Settings',
                     'search': '🔍 Search',
-                    'undo': '↩️ Undo'
+                    'recent-actions': '⏮️ Recent Actions'
                 };
                 
                 headerTitle.textContent = titles[currentView] || currentView;

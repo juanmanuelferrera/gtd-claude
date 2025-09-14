@@ -3966,10 +3966,82 @@ function openTrash() {
 }
 
 /**
- * Render Trash View - shows deleted tasks with restore/permanently delete options
+ * Recent Actions View Functions
+ * Unified system combining deleted tasks (Trash) and undo stack actions
  */
-function renderTrashView() {
-    console.log('🗑️ Rendering trash view...');
+
+function getRecentActions() {
+    const actions = [];
+    
+    // Get deleted tasks (from old Trash system)
+    const deletedTasks = tasks.filter(task => task.status === 'deleted');
+    deletedTasks.forEach(task => {
+        actions.push({
+            type: 'delete',
+            icon: '🗑️',
+            title: 'Deleted Task',
+            task: task,
+            timestamp: task.deletedAt || task.updatedAt || Date.now(),
+            description: `${task.title || 'Untitled Task'}`,
+            canRestore: true,
+            canPermanentDelete: true
+        });
+    });
+    
+    // Get undo stack actions (from old Undo system)
+    if (typeof undoStack !== 'undefined' && undoStack.length > 0) {
+        undoStack.forEach((state, index) => {
+            let icon = '↩️';
+            let title = 'Action';
+            let description = state.action || 'Unknown action';
+            
+            switch (state.action) {
+                case 'toggle_complete':
+                    icon = '✅';
+                    title = 'Completed Task';
+                    description = state.task ? state.task.title || 'Untitled Task' : 'Task completion';
+                    break;
+                case 'update date':
+                    icon = '📅';
+                    title = 'Changed Date';
+                    description = state.task ? state.task.title || 'Untitled Task' : 'Date update';
+                    break;
+                case 'update time':
+                    icon = '⏰';
+                    title = 'Changed Time';
+                    description = state.task ? state.task.title || 'Untitled Task' : 'Time update';
+                    break;
+                case 'delay task':
+                    icon = '⏭️';
+                    title = 'Delayed Task';
+                    description = state.task ? state.task.title || 'Untitled Task' : 'Task delay';
+                    break;
+                default:
+                    icon = '↩️';
+                    title = 'Modified';
+                    break;
+            }
+            
+            actions.push({
+                type: 'undo',
+                icon: icon,
+                title: title,
+                description: description,
+                timestamp: state.timestamp || Date.now(),
+                stackIndex: index,
+                canUndo: true
+            });
+        });
+    }
+    
+    // Sort by timestamp (most recent first)
+    actions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    return actions;
+}
+
+function renderRecentActionsView() {
+    console.log('⏮️ Rendering recent actions view...');
     
     const container = document.getElementById('tasksContainer');
     if (!container) {
@@ -3982,17 +4054,17 @@ function renderTrashView() {
         return;
     }
     
-    // Get all deleted tasks
-    const deletedTasks = tasks.filter(task => task.status === 'deleted');
+    // Get all recent actions
+    const recentActions = getRecentActions();
     
-    console.log(`🗑️ Found ${deletedTasks.length} deleted tasks`);
+    console.log(`⏮️ Found ${recentActions.length} recent actions`);
     
-    if (deletedTasks.length === 0) {
+    if (recentActions.length === 0) {
         container.innerHTML = `
             <div class="no-tasks-today" style="text-align: center; padding: 40px; color: #666;">
-                <div style="font-size: 48px; margin-bottom: 16px;">🗑️</div>
-                <h3>Trash is Empty</h3>
-                <p style="color: #999; margin-bottom: 20px;">No deleted tasks to show. When you delete tasks, they'll appear here.</p>
+                <div style="font-size: 48px; margin-bottom: 16px;">⏮️</div>
+                <h3>No Recent Actions</h3>
+                <p style="color: #999; margin-bottom: 20px;">No recent actions to undo or restore. When you delete tasks or make changes, they'll appear here.</p>
                 <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
                     <button onclick="showView('today')" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
                         🔥 Go to Today
@@ -4006,70 +4078,81 @@ function renderTrashView() {
         return;
     }
     
-    // Sort deleted tasks by deletion date (most recent first)
-    deletedTasks.sort((a, b) => {
-        const aDeleted = a.deletedAt || a.updatedAt || '0';
-        const bDeleted = b.deletedAt || b.updatedAt || '0';
-        return new Date(bDeleted) - new Date(aDeleted);
-    });
+    // Count different action types
+    const deletedCount = recentActions.filter(a => a.type === 'delete').length;
+    const undoCount = recentActions.filter(a => a.type === 'undo').length;
     
     let html = `
-        <div class="trash-header" style="padding: 20px; background: linear-gradient(135deg, #dc3545, #c82333); color: white; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);">
+        <div class="recent-actions-header" style="padding: 20px; background: linear-gradient(135deg, #6f42c1, #563d7c); color: white; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(111, 66, 193, 0.2);">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                 <div>
                     <h2 style="margin: 0; font-size: 24px; font-weight: 700; display: flex; align-items: center;">
-                        <span style="margin-right: 12px; font-size: 28px;">🗑️</span>
-                        Trash
+                        <span style="margin-right: 12px; font-size: 28px;">⏮️</span>
+                        Recent Actions
                     </h2>
-                    <p style="margin: 4px 0 0 0; opacity: 0.9; font-size: 16px;">${deletedTasks.length} deleted task${deletedTasks.length !== 1 ? 's' : ''}</p>
+                    <p style="margin: 4px 0 0 0; opacity: 0.9; font-size: 16px;">${recentActions.length} recent action${recentActions.length !== 1 ? 's' : ''}</p>
                 </div>
                 <div style="display: flex; gap: 12px;">
-                    <button onclick="restoreAllTasks()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                        ↩️ Restore All
-                    </button>
-                    <button onclick="emptyTrash()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                        🗑️ Empty Trash
-                    </button>
+                    ${deletedCount > 0 ? `<button onclick="restoreAllDeletedTasks()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                        ↩️ Restore All Deleted (${deletedCount})
+                    </button>` : ''}
+                    ${undoCount > 0 ? `<button onclick="undoAllActions()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                        ↩️ Undo All (${undoCount})
+                    </button>` : ''}
                 </div>
             </div>
         </div>
-        <div class="trash-tasks" style="display: grid; gap: 16px;">
+        <div class="recent-actions-list" style="display: grid; gap: 16px;">
     `;
     
-    deletedTasks.forEach(task => {
-        const deletedDate = task.deletedAt ? new Date(task.deletedAt).toLocaleDateString() : 'Unknown';
-        const dueDate = task.dueDate || 'No date';
-        const dueTime = task.dueTime ? ` at ${task.dueTime}` : '';
+    recentActions.forEach(action => {
+        const actionDate = new Date(action.timestamp).toLocaleDateString();
+        const actionTime = new Date(action.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        // Color coding by action type
+        const borderColor = action.type === 'delete' ? '#dc3545' : '#6f42c1';
+        const bgColor = action.type === 'delete' ? 'rgba(220, 53, 69, 0.05)' : 'rgba(111, 66, 193, 0.05)';
         
         html += `
-            <div class="trash-task-card" style="background: #fff; border: 1px solid #e9ecef; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 16px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'">
-                <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #dc3545;"></div>
+            <div class="action-card" style="background: ${bgColor}; border: 1px solid #e9ecef; border-left: 4px solid ${borderColor}; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s; position: relative;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 16px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
                     <div style="flex: 1; padding-right: 16px;">
-                        <h3 style="margin: 0 0 8px 0; color: #333; font-size: 18px; font-weight: 600; text-decoration: line-through; opacity: 0.7;">
-                            ${task.isEvent ? '🔴 ' : ''}${task.title || 'Untitled Task'}
-                        </h3>
-                        ${task.notes ? `<p style="margin: 0 0 12px 0; color: #666; font-size: 14px; line-height: 1.5; opacity: 0.8;">${task.notes.substring(0, 200)}${task.notes.length > 200 ? '...' : ''}</p>` : ''}
-                        <div style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: #888; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 20px; margin-right: 12px;">${action.icon}</span>
+                            <h3 style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">
+                                ${action.title}
+                            </h3>
+                        </div>
+                        <p style="margin: 0 0 12px 0; color: #666; font-size: 14px; line-height: 1.5;">
+                            ${action.description}
+                        </p>
+                        ${action.task && action.task.notes ? `<p style="margin: 0 0 12px 0; color: #888; font-size: 13px; font-style: italic; opacity: 0.8;">${action.task.notes.substring(0, 150)}${action.task.notes.length > 150 ? '...' : ''}</p>` : ''}
+                        <div style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: #888;">
                             <span style="display: flex; align-items: center;">
+                                <span style="margin-right: 4px;">⏰</span>
+                                ${actionDate} at ${actionTime}
+                            </span>
+                            ${action.task && action.task.dueDate ? `<span style="display: flex; align-items: center;">
                                 <span style="margin-right: 4px;">📅</span>
-                                Due: ${dueDate}${dueTime}
-                            </span>
-                            <span style="display: flex; align-items: center;">
-                                <span style="margin-right: 4px;">🗑️</span>
-                                Deleted: ${deletedDate}
-                            </span>
-                            ${task.isEvent ? '<span style="display: flex; align-items: center;"><span style="margin-right: 4px;">🔴</span>Event</span>' : ''}
+                                Due: ${action.task.dueDate}${action.task.dueTime ? ` at ${action.task.dueTime}` : ''}
+                            </span>` : ''}
                         </div>
                     </div>
                 </div>
                 <div style="display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid #f0f0f0; padding-top: 16px;">
-                    <button onclick="restoreTask('${task.id}')" style="background: #28a745; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
-                        <span>↩️</span> Restore
-                    </button>
-                    <button onclick="permanentlyDeleteTask('${task.id}')" style="background: #dc3545; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
-                        <span>🗑️</span> Delete Forever
-                    </button>
+                    ${action.type === 'delete' && action.canRestore ? `
+                        <button onclick="restoreDeletedTask('${action.task.id}')" style="background: #28a745; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
+                            <span>↩️</span> Restore
+                        </button>
+                        ${action.canPermanentDelete ? `<button onclick="permanentlyDeleteTask('${action.task.id}')" style="background: #dc3545; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
+                            <span>🗑️</span> Delete Forever
+                        </button>` : ''}
+                    ` : ''}
+                    ${action.type === 'undo' && action.canUndo ? `
+                        <button onclick="undoSpecificAction(${action.stackIndex})" style="background: #6f42c1; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#563d7c'" onmouseout="this.style.background='#6f42c1'">
+                            <span>↩️</span> Undo This Action
+                        </button>
+                    ` : ''}
                 </div>
             </div>
         `;
@@ -4078,6 +4161,163 @@ function renderTrashView() {
     html += '</div>';
     
     container.innerHTML = html;
+}
+
+/**
+ * Recent Actions Support Functions
+ */
+function restoreDeletedTask(taskId) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) {
+        console.error('Task not found:', taskId);
+        return;
+    }
+    
+    if (task.status !== 'deleted') {
+        console.error('Task is not deleted:', taskId);
+        return;
+    }
+    
+    // Restore the task
+    task.status = 'pending';
+    task.deletedAt = null;
+    task.updatedAt = new Date().toISOString();
+    
+    console.log('✅ Task restored from Recent Actions:', task.title);
+    
+    // Save and sync
+    if (typeof saveTasks === 'function') {
+        saveTasks();
+    }
+    if (typeof uploadAllTasks === 'function') {
+        uploadAllTasks();
+    }
+    
+    // Refresh Recent Actions view
+    renderRecentActionsView();
+    
+    // Show success message
+    if (typeof showInlineNotification === 'function') {
+        showInlineNotification(`Task restored: ${task.title}`, 'success');
+    }
+}
+
+function restoreAllDeletedTasks() {
+    const deletedTasks = tasks.filter(task => task.status === 'deleted');
+    
+    if (deletedTasks.length === 0) {
+        if (typeof showInlineNotification === 'function') {
+            showInlineNotification('No deleted tasks to restore', 'info');
+        }
+        return;
+    }
+    
+    // Confirm restoring all
+    if (!confirm(`Restore all ${deletedTasks.length} deleted tasks?`)) {
+        return;
+    }
+    
+    deletedTasks.forEach(task => {
+        task.status = 'pending';
+        task.deletedAt = null;
+        task.updatedAt = new Date().toISOString();
+    });
+    
+    console.log(`✅ Restored ${deletedTasks.length} tasks from Recent Actions`);
+    
+    // Save and sync
+    if (typeof saveTasks === 'function') {
+        saveTasks();
+    }
+    if (typeof uploadAllTasks === 'function') {
+        uploadAllTasks();
+    }
+    
+    // Refresh Recent Actions view
+    renderRecentActionsView();
+    
+    // Show success message
+    if (typeof showInlineNotification === 'function') {
+        showInlineNotification(`${deletedTasks.length} tasks restored`, 'success');
+    }
+}
+
+function undoSpecificAction(stackIndex) {
+    if (typeof undoStack === 'undefined' || !undoStack[stackIndex]) {
+        console.error('Undo action not found at index:', stackIndex);
+        return;
+    }
+    
+    // Get the specific state to restore
+    const state = undoStack[stackIndex];
+    
+    if (state && state.tasks) {
+        // Restore the tasks state from this specific point
+        tasks = JSON.parse(JSON.stringify(state.tasks));
+        
+        // Remove this action and all newer ones from the undo stack
+        undoStack.splice(stackIndex);
+        
+        console.log('✅ Undid action:', state.action);
+        
+        // Save and sync
+        if (typeof saveTasksToLocalStorage === 'function') {
+            saveTasksToLocalStorage();
+        }
+        if (typeof uploadAllTasks === 'function') {
+            uploadAllTasks();
+        }
+        
+        // Refresh Recent Actions view
+        renderRecentActionsView();
+        
+        // Show success message
+        if (typeof showInlineNotification === 'function') {
+            showInlineNotification(`Undid: ${state.action}`, 'success');
+        }
+    }
+}
+
+function undoAllActions() {
+    if (typeof undoStack === 'undefined' || undoStack.length === 0) {
+        if (typeof showInlineNotification === 'function') {
+            showInlineNotification('No actions to undo', 'info');
+        }
+        return;
+    }
+    
+    // Confirm undoing all actions
+    if (!confirm(`Undo all ${undoStack.length} recent actions? This will revert all recent changes.`)) {
+        return;
+    }
+    
+    // Get the oldest state (first item in undo stack)
+    const oldestState = undoStack[0];
+    
+    if (oldestState && oldestState.tasks) {
+        tasks = JSON.parse(JSON.stringify(oldestState.tasks));
+        
+        // Clear the entire undo stack
+        undoStack.length = 0;
+        
+        console.log('✅ Undid all recent actions');
+        
+        // Save and sync
+        if (typeof saveTasksToLocalStorage === 'function') {
+            saveTasksToLocalStorage();
+        }
+        if (typeof uploadAllTasks === 'function') {
+            uploadAllTasks();
+        }
+        
+        // Refresh Recent Actions view
+        renderRecentActionsView();
+        
+        // Show success message
+        if (typeof showInlineNotification === 'function') {
+            showInlineNotification('All actions undone', 'success');
+        }
+    }
 }
 
 /**

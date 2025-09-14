@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-trash-view-fix]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-recent-actions]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -445,9 +445,9 @@
         #nav-repeat.active { background: linear-gradient(to right, rgba(90, 200, 250, 0.08), transparent); }
         #nav-repeat.active::before { background: #5AC8FA; }
         
-        #nav-undo:hover { background: linear-gradient(to right, rgba(255, 214, 10, 0.05), transparent); }
-        #nav-undo.active { background: linear-gradient(to right, rgba(255, 214, 10, 0.08), transparent); }
-        #nav-undo.active::before { background: #FFD60A; }
+        #nav-recent-actions:hover { background: linear-gradient(to right, rgba(111, 66, 193, 0.05), transparent); }
+        #nav-recent-actions.active { background: linear-gradient(to right, rgba(111, 66, 193, 0.08), transparent); }
+        #nav-recent-actions.active::before { background: #6f42c1; }
         
         #nav-settings:hover { background: linear-gradient(to right, rgba(142, 142, 147, 0.05), transparent); }
         #nav-settings.active { background: linear-gradient(to right, rgba(142, 142, 147, 0.08), transparent); }
@@ -3896,9 +3896,9 @@
             <div class="mobile-more-icon">🔄</div>
             <div>Recurring</div>
         </button>
-        <button class="mobile-more-item" onclick="provideFeedback(this); undoLastAction(); hideMobileMoreMenu();">
-            <div class="mobile-more-icon">↶</div>
-            <div>Undo</div>
+        <button class="mobile-more-item" onclick="provideFeedback(this); switchToMobileView('recent-actions'); hideMobileMoreMenu();">
+            <div class="mobile-more-icon">⏮️</div>
+            <div>Recent Actions</div>
         </button>
         <div style="border-top: 1px solid #e0e0e0; margin: 8px 0; padding-top: 8px;">
             <div style="text-align: center; font-size: 12px; color: #666; margin-bottom: 8px;">Language / Idioma</div>
@@ -3941,11 +3941,8 @@
             <button class="nav-btn" onclick="showView('repeat')" id="nav-repeat" tabindex="6">
                 🔄 Repeat
             </button>
-            <button class="nav-btn" onclick="showView('undo')" id="nav-undo" tabindex="7">
-                ↩️ Undo
-            </button>
-            <button class="nav-btn" onclick="openTrash()" id="nav-trash" tabindex="8">
-                🗑️ Trash
+            <button class="nav-btn" onclick="showView('recent-actions')" id="nav-recent-actions" tabindex="7">
+                ⏮️ Recent Actions
             </button>
             <button class="nav-btn" onclick="showView('settings')" id="nav-settings" tabindex="9">
                 ⚙️ Settings
@@ -4289,8 +4286,8 @@
                         <button class="btn btn-secondary btn-small" onclick="printSearchResults()" id="printSearchBtn" style="background: #17a2b8; color: white; border-color: #17a2b8; font-size: 11px; padding: 8px 6px;">
                             🖨️ Print
                         </button>
-                        <button class="btn btn-secondary btn-small" onclick="openTrash()" id="trashBtn" style="background: #6c757d; color: white; border-color: #6c757d; font-weight: 600; font-size: 11px; padding: 8px 6px;">
-                            🗑️ Trash (<span id="trashCount">0</span>)
+                        <button class="btn btn-secondary btn-small" onclick="showView('recent-actions')" id="recentActionsBtn" style="background: #6f42c1; color: white; border-color: #6f42c1; font-weight: 600; font-size: 11px; padding: 8px 6px;">
+                            ⏮️ Recent Actions
                         </button>
                         <span id="selectedCount" class="selected-count" style="display: none; font-size: 11px;">0 selected</span>
                     </div>
@@ -5962,9 +5959,9 @@
     <script src="js/utils.js?v=1757614969"></script>
     <script src="js/auth.js?v=1736363000"></script>
     <script src="js/tasks.js?v=20250914-inline-templates"></script>
-    <script src="js/ui.js?v=20250914-trash-view-fix"></script>
+    <script src="js/ui.js?v=20250914-recent-actions"></script>
     <script src="js/sync.js?v=1736363000"></script>
-    <script src="js/missing-functions.js?v=20250914-trash-fix"></script>
+    <script src="js/missing-functions.js?v=20250914-recent-actions"></script>
     <script src="js/natural-language.js?v=1736363000"></script>
     <script src="js/patches.js?v=1736363000"></script>
     <script src="extracted_js.js?v=20250914-clear-mobile-filter"></script>
