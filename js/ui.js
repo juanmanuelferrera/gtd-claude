@@ -4769,13 +4769,51 @@ function renderCalendar() {
                 zIndex: computedStyle.zIndex
             });
             
-            // Add mouse event debugging
+            // Add comprehensive mouse event debugging to track drag gesture
+            let mouseDownTime = 0;
+            let mouseDownPos = { x: 0, y: 0 };
+            let mouseMoveCount = 0;
+            
             taskElement.addEventListener('mousedown', (e) => {
-                console.log('🖱️ MOUSEDOWN on task:', task.title);
+                mouseDownTime = Date.now();
+                mouseDownPos = { x: e.clientX, y: e.clientY };
+                mouseMoveCount = 0;
+                console.log('🖱️ MOUSEDOWN on task:', task.title, 'at', mouseDownPos, 'button:', e.button);
+            });
+            
+            taskElement.addEventListener('mousemove', (e) => {
+                if (mouseDownTime > 0) {
+                    mouseMoveCount++;
+                    const distance = Math.sqrt(
+                        Math.pow(e.clientX - mouseDownPos.x, 2) + 
+                        Math.pow(e.clientY - mouseDownPos.y, 2)
+                    );
+                    console.log('🖱️ MOUSEMOVE during potential drag:', task.title, 'distance:', distance, 'moveCount:', mouseMoveCount);
+                    
+                    // Check if we've moved enough to trigger a drag
+                    if (distance > 5) {
+                        console.log('🎯 SUFFICIENT MOVEMENT for drag detected:', distance, 'pixels');
+                    }
+                }
             });
             
             taskElement.addEventListener('mouseup', (e) => {
-                console.log('🖱️ MOUSEUP on task:', task.title);
+                const holdTime = Date.now() - mouseDownTime;
+                const finalPos = { x: e.clientX, y: e.clientY };
+                const totalDistance = Math.sqrt(
+                    Math.pow(finalPos.x - mouseDownPos.x, 2) + 
+                    Math.pow(finalPos.y - mouseDownPos.y, 2)
+                );
+                
+                console.log('🖱️ MOUSEUP on task:', task.title, {
+                    holdTime: holdTime + 'ms',
+                    totalDistance: totalDistance + 'px',
+                    mouseMoveEvents: mouseMoveCount,
+                    startPos: mouseDownPos,
+                    endPos: finalPos
+                });
+                
+                mouseDownTime = 0;
             });
             
             if (typeof handleDragStart === 'function') {

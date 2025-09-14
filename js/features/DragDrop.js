@@ -44,6 +44,13 @@ class DragDropManager {
     handleDragStart(e) {
         console.log('🚀 DRAG START EVENT TRIGGERED!', e.target);
         console.log('🎯 Target element:', e.target.tagName, e.target.className, e.target.textContent);
+        console.log('🎯 Event details:', {
+            type: e.type,
+            bubbles: e.bubbles,
+            cancelable: e.cancelable,
+            dataTransfer: !!e.dataTransfer,
+            defaultPrevented: e.defaultPrevented
+        });
         
         const taskIdStr = e.target.dataset.taskId;
         console.log('📋 Task ID from dataset:', taskIdStr);
