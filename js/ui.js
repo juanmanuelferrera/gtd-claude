@@ -881,6 +881,39 @@ function initializeKeyboardNavigation() {
         }
         
         console.log('⌨️ Processing shortcut key:', e.key.toLowerCase());
+        
+        // Handle arrow keys for date navigation (when not in template nav)
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            e.preventDefault();
+            
+            if (e.key === 'ArrowLeft') {
+                // Navigate to previous day/week/month based on current view
+                if (window.currentView === 'today') {
+                    console.log('⬅️ Arrow left - previous day');
+                    if (typeof previousDay === 'function') previousDay();
+                } else if (window.currentView === 'week') {
+                    console.log('⬅️ Arrow left - previous week');
+                    if (typeof previousWeek === 'function') previousWeek();
+                } else if (window.currentView === 'calendar') {
+                    console.log('⬅️ Arrow left - previous month');
+                    if (typeof previousMonth === 'function') previousMonth();
+                }
+            } else if (e.key === 'ArrowRight') {
+                // Navigate to next day/week/month based on current view
+                if (window.currentView === 'today') {
+                    console.log('➡️ Arrow right - next day');
+                    if (typeof nextDay === 'function') nextDay();
+                } else if (window.currentView === 'week') {
+                    console.log('➡️ Arrow right - next week');
+                    if (typeof nextWeek === 'function') nextWeek();
+                } else if (window.currentView === 'calendar') {
+                    console.log('➡️ Arrow right - next month');
+                    if (typeof nextMonth === 'function') nextMonth();
+                }
+            }
+            return;
+        }
+        
         switch (e.key.toLowerCase()) {
             case 'd':
                 console.log('✅ D key - switching to Today view');
