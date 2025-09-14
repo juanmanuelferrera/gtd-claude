@@ -4321,90 +4321,7 @@ function undoAllActions() {
 }
 
 /**
- * Restore a task from trash
- */
-function restoreTask(taskId) {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) {
-        console.error('Task not found:', taskId);
-        return;
-    }
-    
-    if (task.status !== 'deleted') {
-        console.error('Task is not deleted:', taskId);
-        return;
-    }
-    
-    // Restore the task
-    task.status = 'pending';
-    task.deletedAt = null;
-    task.updatedAt = new Date().toISOString();
-    
-    console.log('✅ Task restored from trash:', task.title);
-    
-    // Save and sync
-    if (typeof saveTasks === 'function') {
-        saveTasks();
-    }
-    if (typeof uploadAllTasks === 'function') {
-        uploadAllTasks();
-    }
-    
-    // Refresh trash view
-    renderTrashView();
-    
-    // Show success message
-    if (typeof showInlineNotification === 'function') {
-        showInlineNotification(`Task restored: ${task.title}`, 'success');
-    }
-}
-
-/**
- * Restore all tasks from trash
- */
-function restoreAllTasks() {
-    const deletedTasks = tasks.filter(task => task.status === 'deleted');
-    
-    if (deletedTasks.length === 0) {
-        if (typeof showInlineNotification === 'function') {
-            showInlineNotification('No tasks to restore', 'info');
-        }
-        return;
-    }
-    
-    // Confirm restoring all
-    if (!confirm(`Are you sure you want to restore all ${deletedTasks.length} tasks from trash?`)) {
-        return;
-    }
-    
-    // Restore all deleted tasks
-    deletedTasks.forEach(task => {
-        task.status = 'pending';
-        task.deletedAt = null;
-        task.updatedAt = new Date().toISOString();
-    });
-    
-    console.log(`✅ Restored ${deletedTasks.length} tasks from trash`);
-    
-    // Save and sync
-    if (typeof saveTasks === 'function') {
-        saveTasks();
-    }
-    if (typeof uploadAllTasks === 'function') {
-        uploadAllTasks();
-    }
-    
-    // Refresh trash view
-    renderTrashView();
-    
-    // Show success message
-    if (typeof showInlineNotification === 'function') {
-        showInlineNotification(`Restored ${deletedTasks.length} tasks from trash`, 'success');
-    }
-}
-
-/**
- * Permanently delete a task (cannot be undone)
+ * Permanently delete a task (used by Recent Actions)
  */
 function permanentlyDeleteTask(taskId) {
     const task = tasks.find(t => t.id === taskId);
@@ -4420,56 +4337,12 @@ function permanentlyDeleteTask(taskId) {
         return;
     }
     
-    // Remove task from array
-    const taskIndex = tasks.indexOf(task);
-    if (taskIndex > -1) {
+    // Remove task completely
+    const taskIndex = tasks.findIndex(t => t.id === taskId);
+    if (taskIndex !== -1) {
         tasks.splice(taskIndex, 1);
-        console.log('🗑️ Task permanently deleted:', taskTitle);
-        
-        // Save and sync
-        if (typeof saveTasks === 'function') {
-            saveTasks();
-        }
-        if (typeof uploadAllTasks === 'function') {
-            uploadAllTasks();
-        }
-        
-        // Refresh trash view
-        renderTrashView();
-        
-        // Show success message
-        if (typeof showInlineNotification === 'function') {
-            showInlineNotification(`Task permanently deleted: ${taskTitle}`, 'success');
-        }
+        console.log(`🗑️ Permanently deleted task: ${taskTitle}`);
     }
-}
-
-/**
- * Empty the entire trash (permanently delete all deleted tasks)
- */
-function emptyTrash() {
-    const deletedTasks = tasks.filter(task => task.status === 'deleted');
-    
-    if (deletedTasks.length === 0) {
-        if (typeof showInlineNotification === 'function') {
-            showInlineNotification('Trash is already empty', 'info');
-        }
-        return;
-    }
-    
-    // Confirm emptying trash
-    if (!confirm(`Are you sure you want to permanently delete all ${deletedTasks.length} tasks in trash? This cannot be undone.`)) {
-        return;
-    }
-    
-    // Remove all deleted tasks
-    for (let i = tasks.length - 1; i >= 0; i--) {
-        if (tasks[i].status === 'deleted') {
-            tasks.splice(i, 1);
-        }
-    }
-    
-    console.log(`🗑️ Emptied trash: ${deletedTasks.length} tasks permanently deleted`);
     
     // Save and sync
     if (typeof saveTasks === 'function') {
@@ -4479,15 +4352,14 @@ function emptyTrash() {
         uploadAllTasks();
     }
     
-    // Refresh trash view
-    renderTrashView();
+    // Refresh Recent Actions view
+    renderRecentActionsView();
     
     // Show success message
     if (typeof showInlineNotification === 'function') {
-        showInlineNotification(`Trash emptied: ${deletedTasks.length} tasks permanently deleted`, 'success');
+        showInlineNotification(`Task permanently deleted: ${taskTitle}`, 'success');
     }
 }
-
 
 // Keyboard support for collapse/expand functionality
 function setupCollapseExpandKeyboardSupport() {
