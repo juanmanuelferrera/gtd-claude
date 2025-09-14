@@ -412,8 +412,7 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
         </div>
         
         <!-- Morning Times -->
-        <div style="margin-bottom: 12px;">
-            <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 8px;">MORNING</div>
+        <div style="margin-bottom: 10px;">
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
                 ${morningTimes.map(time => {
                     const isSelected = time === currentTime;
@@ -433,8 +432,7 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
         </div>
         
         <!-- Afternoon Times -->
-        <div style="margin-bottom: 12px;">
-            <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 8px;">AFTERNOON</div>
+        <div style="margin-bottom: 10px;">
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
                 ${afternoonTimes.map(time => {
                     const isSelected = time === currentTime;
@@ -454,8 +452,7 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
         </div>
         
         <!-- Evening Times -->
-        <div style="margin-bottom: 12px;">
-            <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 8px;">EVENING</div>
+        <div style="margin-bottom: 10px;">
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
                 ${eveningTimes.map(time => {
                     const isSelected = time === currentTime;
