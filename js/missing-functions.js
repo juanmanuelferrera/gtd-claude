@@ -402,11 +402,8 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
     let html = `
         <!-- Header -->
         <div style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-            <div style="font-weight: 600; font-size: 16px; color: #333; margin-bottom: 8px;">
-                🕐 Select Time
-            </div>
             <button onclick="clearTimeAndClose('${taskId}')" 
-                    style="background: #f0f0f0; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                    style="background: #f0f0f0; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-size: 12px; font-weight: 600;">
                 ✕ Clear Time (Untimed)
             </button>
         </div>
