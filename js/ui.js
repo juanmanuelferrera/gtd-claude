@@ -4823,12 +4823,13 @@ function activateTemplateSelector() {
         templateNavActive = true;
         selectedButtonIndex = 0;
         
-        // Only highlight the first template, don't click it yet
+        // Highlight AND activate the first template filter
         highlightTemplateButton(0);
+        clickTemplateButton(templateButtons[0]);
         
         // Show user feedback about template selection
         const templateName = templateButtons[0].textContent;
-        console.log(`🎯 Template filter navigation active. Highlighted: ${templateName}. Use ← → arrows to navigate, Enter to apply, ESC to exit.`);
+        console.log(`🎯 Template filter navigation active. Applied: ${templateName}. Use ← → arrows to navigate, ESC to exit.`);
     } catch (error) {
         console.error('❌ Error in activateTemplateSelector:', error);
         templateNavActive = false; // Reset on error
@@ -4877,12 +4878,13 @@ function navigateTemplateButtons(direction) {
         return;
     }
     
-    // Update highlighting if we moved (don't auto-click)
+    // Update highlighting and activate filter if we moved
     if (oldIndex !== selectedButtonIndex) {
         highlightTemplateButton(selectedButtonIndex);
+        clickTemplateButton(templateButtons[selectedButtonIndex]);
         
         const templateName = templateButtons[selectedButtonIndex].textContent;
-        console.log(`🎯 Highlighted template: ${templateName}`);
+        console.log(`🎯 Activated template filter: ${templateName}`);
     }
     
     console.log('🔄 Navigated to template button', selectedButtonIndex, templateButtons[selectedButtonIndex]?.textContent);
