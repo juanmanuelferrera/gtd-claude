@@ -3344,21 +3344,27 @@ function insertTemplateToTask(template) {
     }
     
     const currentValue = titleInput.value.trim();
-    console.log('📝 Current value:', currentValue);
+    console.log('📝 Current value before template insertion:', currentValue);
+    console.log('📝 Template to insert:', template);
     
+    // Always append with space, supporting multiple templates
     if (currentValue) {
         titleInput.value = currentValue + ' ' + template;
+        console.log('✅ Appended template to existing content');
     } else {
         titleInput.value = template;
+        console.log('✅ Set template as initial content');
     }
     
-    console.log('✅ New value:', titleInput.value);
+    console.log('✅ New value after template insertion:', titleInput.value);
     titleInput.focus();
     titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
     
     // Trigger input event to ensure any listeners are notified
     titleInput.dispatchEvent(new Event('input', { bubbles: true }));
     titleInput.dispatchEvent(new Event('change', { bubbles: true }));
+    
+    console.log('🎯 Multiple template support enabled - templates should accumulate');
 }
 
 // Make function globally accessible
