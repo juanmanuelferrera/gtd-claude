@@ -4043,27 +4043,10 @@ function getRecentActions() {
 function renderRecentActionsView() {
     console.log('⏮️ Rendering recent actions view...');
     
-    // Hide All Tasks specific UI elements
-    const allTasksControls = document.querySelector('.all-tasks-controls');
-    if (allTasksControls) {
-        allTasksControls.style.display = 'none';
-    }
-    
-    // Update the section title
-    const tasksTitle = document.getElementById('tasks-title');
-    if (tasksTitle) {
-        tasksTitle.textContent = '⏮️ Recent Actions';
-    }
-    
-    // Hide the Add/Review/Expand/Collapse buttons
-    const viewControls = document.querySelector('.view-controls');
-    if (viewControls) {
-        viewControls.style.display = 'none';
-    }
-    
-    const container = document.getElementById('tasksContainer');
-    if (!container) {
-        console.error('Tasks container not found');
+    // Get the main tasks view container and replace ALL content
+    const tasksView = document.getElementById('tasks-view');
+    if (!tasksView) {
+        console.error('Tasks view container not found');
         return;
     }
     
@@ -4078,7 +4061,10 @@ function renderRecentActionsView() {
     console.log(`⏮️ Found ${recentActions.length} recent actions`);
     
     if (recentActions.length === 0) {
-        container.innerHTML = `
+        tasksView.innerHTML = `
+            <div class="section-header">
+                <h3>⏮️ Recent Actions</h3>
+            </div>
             <div class="no-tasks-today" style="text-align: center; padding: 40px; color: #666;">
                 <div style="font-size: 48px; margin-bottom: 16px;">⏮️</div>
                 <h3>No Recent Actions</h3>
@@ -4101,6 +4087,9 @@ function renderRecentActionsView() {
     const undoCount = recentActions.filter(a => a.type === 'undo').length;
     
     let html = `
+        <div class="section-header">
+            <h3>⏮️ Recent Actions</h3>
+        </div>
         <div class="recent-actions-header" style="padding: 20px; background: linear-gradient(135deg, #6f42c1, #563d7c); color: white; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(111, 66, 193, 0.2);">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                 <div>
@@ -4178,30 +4167,15 @@ function renderRecentActionsView() {
     
     html += '</div>';
     
-    container.innerHTML = html;
+    tasksView.innerHTML = html;
 }
 
 /**
- * Helper function to restore All Tasks UI elements
+ * Helper function to restore All Tasks UI (no longer needed as All Tasks renders its own complete HTML)
  */
 function restoreAllTasksUI() {
-    // Show All Tasks specific UI elements
-    const allTasksControls = document.querySelector('.all-tasks-controls');
-    if (allTasksControls) {
-        allTasksControls.style.display = '';
-    }
-    
-    // Restore the section title
-    const tasksTitle = document.getElementById('tasks-title');
-    if (tasksTitle) {
-        tasksTitle.textContent = '📋 All Tasks';
-    }
-    
-    // Show the Add/Review/Expand/Collapse buttons
-    const viewControls = document.querySelector('.view-controls');
-    if (viewControls) {
-        viewControls.style.display = '';
-    }
+    // No longer needed - All Tasks view renders complete HTML structure
+    // This function kept for compatibility
 }
 
 /**
