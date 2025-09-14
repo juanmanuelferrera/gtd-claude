@@ -4889,9 +4889,10 @@ function activateTemplateSelector() {
             return;
         }
         
-        // Get template filter buttons from Today view
-        templateButtons = Array.from(document.querySelectorAll('#todayTemplateFilters button.filter-btn'));
-        console.log('📋 Found template filter buttons:', templateButtons.length);
+        // Get ALL buttons from Today view (templates + clear)
+        // This includes both filter-btn and filter-clear classes
+        templateButtons = Array.from(document.querySelectorAll('#todayTemplateFilters button'));
+        console.log('📋 Found template buttons (including Clear):', templateButtons.length);
         
         if (templateButtons.length === 0) {
             console.log('❌ No template filters available - template nav remains inactive');
@@ -4911,7 +4912,7 @@ function activateTemplateSelector() {
         
         // Show user feedback about template selection
         const templateName = templateButtons[0].textContent;
-        console.log(`🎯 Template navigation active. Applied: ${templateName}. Use ← → arrows to navigate, ESC to exit.`);
+        console.log(`🎯 Template navigation active. Applied: ${templateName}. Use ← → arrows to navigate (includes Clear button), ESC to exit.`);
     } catch (error) {
         console.error('❌ Error in activateTemplateSelector:', error);
         templateNavActive = false; // Reset on error
@@ -4919,8 +4920,13 @@ function activateTemplateSelector() {
 }
 
 function clickTemplateButton(button) {
-    console.log('🔘 Applying template filter:', button.textContent);
-    // Simulate click on the template filter button (preserves existing click behavior)
+    // Check if this is the Clear button
+    if (button.classList.contains('filter-clear')) {
+        console.log('🔴 Clearing template filter');
+    } else {
+        console.log('🔘 Applying template filter:', button.textContent);
+    }
+    // Simulate click on the button (works for both template and clear buttons)
     button.click();
 }
 
@@ -5006,7 +5012,7 @@ function exitTemplateNavigation() {
 
 function clearAllTemplateHighlights() {
     // Safeguard function to clear any template button highlights that might be stuck
-    const allTemplateButtons = document.querySelectorAll('#todayTemplateFilters button.filter-btn');
+    const allTemplateButtons = document.querySelectorAll('#todayTemplateFilters button');
     allTemplateButtons.forEach(btn => {
         try {
             btn.style.outline = '';
