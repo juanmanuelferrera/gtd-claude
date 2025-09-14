@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fix-header-plus-and-date]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-dynamic-date-navigation]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -6098,26 +6098,100 @@
         console.log('✅ FAB mobile position script loaded');
     });
     
-    // Update mobile date display
+    // Current viewing date (starts as today)
+    let currentViewingDate = new Date();
+    
+    // Update mobile date display with current viewing date
     function updateMobileDateDisplay() {
         const mobileDateDisplay = document.getElementById('mobileDateDisplay');
+        const dynamicHeaderTitle = document.getElementById('dynamicHeaderTitle');
+        
         if (mobileDateDisplay) {
-            const today = new Date();
             const options = { 
                 weekday: 'short', 
                 month: 'short', 
                 day: 'numeric'
             };
-            const dateStr = today.toLocaleDateString('en-US', options);
+            const dateStr = currentViewingDate.toLocaleDateString('en-US', options);
             mobileDateDisplay.textContent = dateStr;
+            
+            // Make date clickable to return to today
+            mobileDateDisplay.style.cursor = 'pointer';
+            mobileDateDisplay.onclick = function() {
+                goToToday();
+            };
+            
             console.log('📅 Mobile date display updated:', dateStr);
+        }
+        
+        // Update main header with current month
+        if (dynamicHeaderTitle) {
+            const today = new Date();
+            const isToday = currentViewingDate.toDateString() === today.toDateString();
+            
+            if (isToday) {
+                dynamicHeaderTitle.textContent = 'Today';
+            } else {
+                const monthOptions = { month: 'long' };
+                const monthName = currentViewingDate.toLocaleDateString('en-US', monthOptions);
+                dynamicHeaderTitle.textContent = monthName;
+            }
+            console.log('📅 Header updated:', dynamicHeaderTitle.textContent);
         }
     }
     
-    // Update date display when page loads
-    document.addEventListener('DOMContentLoaded', function() {
+    // Go to today's date
+    function goToToday() {
+        currentViewingDate = new Date();
         updateMobileDateDisplay();
-        console.log('✅ Mobile date display script loaded');
+        
+        // Trigger today view if available
+        if (typeof showView === 'function') {
+            showView('today');
+        }
+        console.log('🏠 Returned to today');
+    }
+    
+    // Override previous/next day functions to update our date
+    function previousDay() {
+        currentViewingDate.setDate(currentViewingDate.getDate() - 1);
+        updateMobileDateDisplay();
+        
+        // Call original function if it exists
+        if (window.originalPreviousDay) {
+            window.originalPreviousDay();
+        }
+        console.log('⬅️ Previous day:', currentViewingDate.toDateString());
+    }
+    
+    function nextDay() {
+        currentViewingDate.setDate(currentViewingDate.getDate() + 1);
+        updateMobileDateDisplay();
+        
+        // Call original function if it exists
+        if (window.originalNextDay) {
+            window.originalNextDay();
+        }
+        console.log('➡️ Next day:', currentViewingDate.toDateString());
+    }
+    
+    // Store original functions and override
+    document.addEventListener('DOMContentLoaded', function() {
+        // Store original functions if they exist
+        if (typeof window.previousDay === 'function') {
+            window.originalPreviousDay = window.previousDay;
+        }
+        if (typeof window.nextDay === 'function') {
+            window.originalNextDay = window.nextDay;
+        }
+        
+        // Override with our functions
+        window.previousDay = previousDay;
+        window.nextDay = nextDay;
+        window.goToToday = goToToday;
+        
+        updateMobileDateDisplay();
+        console.log('✅ Dynamic date navigation system loaded');
     });
     </script>
 
