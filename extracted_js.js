@@ -8762,31 +8762,25 @@
         function updateDesktopDateTime() {
             const dayPicker = document.getElementById('desktopDayPicker');
             const monthPicker = document.getElementById('desktopMonthPicker');
-            const hourPicker = document.getElementById('desktopHourPicker');
             const display = document.getElementById('desktopSelectedDisplay');
             
-            if (!dayPicker || !monthPicker || !hourPicker || !display) return;
+            if (!dayPicker || !monthPicker || !display) return;
             
             const selectedDay = dayPicker.value;
             const selectedMonth = monthPicker.value;
-            const selectedTime = hourPicker.value;
             
             // Get the full date from the selected day option
             const selectedOption = dayPicker.options[dayPicker.selectedIndex];
             const fullDate = selectedOption.getAttribute('data-full-date');
             
-            if (fullDate) {
+            if (fullDate && selectedDay && selectedMonth !== undefined) {
                 selectedDate = fullDate;
-                if (selectedTime) {
-                    const [hour, minute] = selectedTime.split(':');
-                    selectedHour = hour;
-                    selectedMinute = minute;
-                    display.textContent = `${selectedOption.textContent} ${monthPicker.options[monthPicker.selectedIndex].textContent} at ${selectedTime}`;
-                } else {
-                    selectedHour = null;
-                    selectedMinute = null;
-                    display.textContent = `${selectedOption.textContent} ${monthPicker.options[monthPicker.selectedIndex].textContent} (no time)`;
-                }
+                // Desktop version only sets date, no time
+                selectedHour = null;
+                selectedMinute = null;
+                display.textContent = `${selectedOption.textContent} ${monthPicker.options[monthPicker.selectedIndex].textContent}`;
+            } else {
+                display.textContent = 'Select date';
             }
         }
         

@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-template-clear-FIXED]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-desktop-calendar]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -4747,20 +4747,20 @@
 
     <!-- Custom Date/Time Picker Modal -->
     <div id="dateTimeModal" class="modal" onclick="closeDateTimeModal(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-        <!-- Desktop Version -->
-        <div class="modal-content desktop-only" onclick="event.stopPropagation()" style="width: 90%; max-width: 380px; height: 50vh; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3); padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        <!-- Desktop Version - Simple Calendar Only -->
+        <div class="modal-content desktop-only" onclick="event.stopPropagation()" style="width: 90%; max-width: 320px; height: auto; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3); padding: 0; overflow: hidden; display: flex; flex-direction: column;">
             <!-- Header -->
             <div style="background: rgba(255,255,255,0.1); padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2);">
-                <h3 style="margin: 0; color: white; font-size: 18px; font-weight: 600;">Select Date & Time</h3>
+                <h3 style="margin: 0; color: white; font-size: 18px; font-weight: 600;">📅 Select Date</h3>
             </div>
             
-            <!-- Scrollable Pickers -->
-            <div style="flex: 1; padding: 15px; display: flex; gap: 12px;">
+            <!-- Date Pickers Only -->
+            <div style="padding: 20px; display: flex; gap: 15px; justify-content: center;">
                 <!-- Day Picker -->
                 <div style="flex: 1;">
                     <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">DAY</label>
-                    <select id="desktopDayPicker" style="width: 100%; height: 100px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
-                            size="4" onchange="updateDesktopDateTime()">
+                    <select id="desktopDayPicker" style="width: 100%; height: 120px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
+                            size="5" onchange="updateDesktopDateTime()">
                         <!-- Days will be populated by JS -->
                     </select>
                 </div>
@@ -4768,8 +4768,8 @@
                 <!-- Month Picker -->
                 <div style="flex: 1;">
                     <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">MONTH</label>
-                    <select id="desktopMonthPicker" style="width: 100%; height: 100px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
-                            size="4" onchange="updateDesktopDateTime()">
+                    <select id="desktopMonthPicker" style="width: 100%; height: 120px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
+                            size="5" onchange="updateDesktopDateTime()">
                         <option value="0">JAN</option>
                         <option value="1">FEB</option>
                         <option value="2">MAR</option>
@@ -4782,32 +4782,6 @@
                         <option value="9">OCT</option>
                         <option value="10">NOV</option>
                         <option value="11">DEC</option>
-                    </select>
-                </div>
-                
-                <!-- Hour Picker -->
-                <div style="flex: 1;">
-                    <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">TIME</label>
-                    <select id="desktopHourPicker" style="width: 100%; height: 100px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
-                            size="4" onchange="updateDesktopDateTime()">
-                        <option value="">--</option>
-                        <option value="06:00">6 AM</option>
-                        <option value="07:00">7 AM</option>
-                        <option value="08:00">8 AM</option>
-                        <option value="09:00">9 AM</option>
-                        <option value="10:00">10 AM</option>
-                        <option value="11:00">11 AM</option>
-                        <option value="12:00">12 PM</option>
-                        <option value="13:00">1 PM</option>
-                        <option value="14:00">2 PM</option>
-                        <option value="15:00">3 PM</option>
-                        <option value="16:00">4 PM</option>
-                        <option value="17:00">5 PM</option>
-                        <option value="18:00">6 PM</option>
-                        <option value="19:00">7 PM</option>
-                        <option value="20:00">8 PM</option>
-                        <option value="21:00">9 PM</option>
-                        <option value="22:00">10 PM</option>
                     </select>
                 </div>
             </div>
@@ -5999,8 +5973,7 @@
     <script src="js/missing-functions.js?v=20250914-clearall-fixed"></script>
     <script src="js/natural-language.js?v=1736363000"></script>
     <script src="js/patches.js?v=1736363000"></script>
-    <!-- TEMPORARILY DISABLED: extracted_js.js has syntax errors -->
-    <!-- <script src="extracted_js.js?v=20250912-properly-closed-v2"></script> -->
+    <script src="extracted_js.js?v=20250914-desktop-calendar"></script>
     
     <!-- Tawk.to Live Chat Integration with automatic language detection -->
 
