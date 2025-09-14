@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-keyboard-7-8]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-keyboard-numbers-visible]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -3924,28 +3924,28 @@
             
             <div class="main-nav">
             <button class="nav-btn active" onclick="showView('today')" id="nav-today" tabindex="1">
-                📋 Today
+                📋 Today <span style="opacity: 0.7; font-size: 11px; color: #666;">1</span>
             </button>
             <button class="nav-btn" onclick="showView('week')" id="nav-week" tabindex="2" data-translate="Week">
-                📊 Week
+                📊 Week <span style="opacity: 0.7; font-size: 11px; color: #666;">2</span>
             </button>
             <button class="nav-btn" onclick="showView('calendar')" id="nav-calendar" tabindex="3" data-translate="Month">
-                📆 Month
+                📆 Month <span style="opacity: 0.7; font-size: 11px; color: #666;">3</span>
             </button>
             <button class="nav-btn" onclick="showView('all'); setTimeout(() => { const searchInput = document.getElementById('allTasksSearchInput'); if (searchInput) searchInput.focus(); }, 100);" id="nav-all" tabindex="4">
-                🔍 Search
+                🔍 Search <span style="opacity: 0.7; font-size: 11px; color: #666;">4</span>
             </button>
             <button class="nav-btn" onclick="showView('lists')" id="nav-lists" tabindex="5">
-                📂 Lists
+                📂 Lists <span style="opacity: 0.7; font-size: 11px; color: #666;">5</span>
             </button>
             <button class="nav-btn" onclick="showView('repeat')" id="nav-repeat" tabindex="6">
-                🔄 Repeat
+                🔄 Repeat <span style="opacity: 0.7; font-size: 11px; color: #666;">6</span>
             </button>
             <button class="nav-btn" onclick="showView('recent-actions')" id="nav-recent-actions" tabindex="7">
-                ⏮️ Recent Actions
+                ⏮️ Recent Actions <span style="opacity: 0.7; font-size: 11px; color: #666;">7</span>
             </button>
             <button class="nav-btn" onclick="showView('settings')" id="nav-settings" tabindex="9">
-                ⚙️ Settings
+                ⚙️ Settings <span style="opacity: 0.7; font-size: 11px; color: #666;">8</span>
             </button>
             </div>
             
@@ -4063,7 +4063,6 @@
                 <div class="view-controls desktop-only">
                     <div style="display: flex; gap: 4px; align-items: center; flex-wrap: nowrap;">
                         <input type="text" id="todayTaskSearch" placeholder="🔍 Day" style="padding: 6px 6px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 10px; width: 100%; max-width: 100px; flex-shrink: 1;" oninput="searchTodayTasks()">
-                        <button class="btn btn-primary btn-small" onclick="openAddTaskModal()" style="background: #ff6b35; border-color: #ff6b35; padding: 6px 6px; font-size: 10px; flex-shrink: 0;" data-translate="+ Add">+ Add</button>
                         <button class="btn btn-success btn-small" onclick="openTaskImportModal()" style="background: #28a745; border-color: #28a745; padding: 6px 6px; font-size: 10px; flex-shrink: 0;" title="Import multiple tasks">📥 Bulk</button>
                         <button class="btn btn-small" onclick="previousDay()" style="padding: 8px 4px; font-size: 8px; flex-shrink: 0;">← Prev</button>
                         <button class="btn btn-primary btn-small" onclick="goToToday()" style="background: #dc3545; border-color: #dc3545; padding: 8px 12px; font-size: 10px; flex-shrink: 0;">🔥 Today</button>
