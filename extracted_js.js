@@ -9679,7 +9679,7 @@
             
             if (!searchTerm.trim()) {
                 // If search is empty, show all tasks for the month
-                renderCalendarView();
+                renderCalendar();
                 return;
             }
             
@@ -9709,7 +9709,7 @@
             // Use existing renderCalendarView logic but with filtered tasks
             const tempTasks = tasks;
             tasks = tasksToShow;
-            renderCalendarView();
+            renderCalendar();
             tasks = tempTasks;
         }
         // Quick search functions for Month view
@@ -10104,7 +10104,7 @@
             window.currentMonthSearchTerm = null;
             
             // Re-render month view to normal state
-            renderCalendarView();
+            renderCalendar();
         }
         // Go to task function - navigates to the appropriate view and highlights the task
         function goToTask(taskId) {
@@ -11548,7 +11548,7 @@
                 } else if (currentView === 'week') {
                     renderWeekView();
                 } else if (currentView === 'calendar') {
-                    renderCalendarView();
+                    renderCalendar();
                 } else if (currentView === 'all') {
                     performAllTasksSearch();
                 }
@@ -11650,7 +11650,7 @@
                 } else if (currentView === 'week') {
                     renderWeekView();
                 } else if (currentView === 'calendar') {
-                    renderCalendarView();
+                    renderCalendar();
                 } else if (currentView === 'all') {
                     performAllTasksSearch();
                 }
@@ -11719,7 +11719,7 @@
                 } else if (currentView === 'week') {
                     renderWeekView();
                 } else if (currentView === 'calendar') {
-                    renderCalendarView();
+                    renderCalendar();
                 } else if (currentView === 'all') {
                     performAllTasksSearch();
                 }
@@ -12764,8 +12764,8 @@
                     taskElement.title = task.title; // Native tooltip
                     taskElement.draggable = true;
                     
-                    taskElement.addEventListener('dragstart', handleDragStart);
-                    taskElement.addEventListener('dragend', handleDragEnd);
+                    taskElement.addEventListener('dragstart', handleCalendarDragStart);
+                    taskElement.addEventListener('dragend', handleCalendarDragEnd);
                     taskElement.addEventListener('click', (e) => {
                         e.stopPropagation();
                         editTask(task.id);
@@ -13062,8 +13062,8 @@
                         e.stopPropagation();
                         editTask(task.id);
                     });
-                    taskElement.addEventListener('dragstart', handleDragStart);
-                    taskElement.addEventListener('dragend', handleDragEnd);
+                    taskElement.addEventListener('dragstart', handleCalendarDragStart);
+                    taskElement.addEventListener('dragend', handleCalendarDragEnd);
                     
                     dayElement.appendChild(taskElement);
                 });
@@ -13363,7 +13363,7 @@
                 if (monthTasks.length > 0) {
                     currentDate = new Date(searchDate);
                     console.log('⬅️ Found previous month with tasks:', year + '-' + (month + 1), `(${monthTasks.length} tasks)`);
-                    renderCalendarView();
+                    renderCalendar();
                     return;
                 }
             } while (maxMonths > 0);
@@ -13393,7 +13393,7 @@
                 if (monthTasks.length > 0) {
                     currentDate = new Date(searchDate);
                     console.log('➡️ Found next month with tasks:', year + '-' + (month + 1), `(${monthTasks.length} tasks)`);
-                    renderCalendarView();
+                    renderCalendar();
                     return;
                 }
             } while (maxMonths > 0);
@@ -17104,7 +17104,7 @@
                         showStatsView();
                         break;
                     case 'calendar':
-                        renderCalendarView();
+                        renderCalendar();
                         break;
                     case 'search':
                         // Re-apply current search if any
@@ -23296,6 +23296,58 @@
                 slot.classList.remove('drag-over');
             });
         }
+        
+        // Calendar/Month view drag handlers (based on Today view)
+        function handleCalendarDragStart(event) {
+            const taskId = event.target.dataset.taskId;
+            console.log('🔄 Calendar drag started for task ID:', taskId);
+            draggedTask = tasks.find(t => t.id === taskId);
+            
+            if (!draggedTask) {
+                console.error('❌ Calendar: Task not found for drag:', taskId);
+                console.log('Available task IDs:', tasks.map(t => t.id));
+                return;
+            }
+            
+            console.log('✅ Calendar: Found dragged task:', draggedTask.title);
+            
+            event.target.classList.add('dragging');
+            
+            // Store drag data
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', taskId);
+            
+            // Add dragging-active class to calendar grid for visual effects
+            const calendarGrid = document.getElementById('calendarGrid');
+            if (calendarGrid) {
+                calendarGrid.classList.add('dragging-active');
+            }
+            
+            // Prevent default click behavior during drag
+            event.stopPropagation();
+            
+            console.log('🔄 Calendar: Started dragging task:', draggedTask.title);
+        }
+        
+        function handleCalendarDragEnd(event) {
+            console.log('🔄 Calendar drag ended');
+            event.target.classList.remove('dragging');
+            draggedTask = null;
+            
+            // Remove dragging-active class from calendar grid
+            const calendarGrid = document.getElementById('calendarGrid');
+            if (calendarGrid) {
+                calendarGrid.classList.remove('dragging-active');
+            }
+            
+            // Clean up any remaining drag over styles
+            document.querySelectorAll('.calendar-day').forEach(day => {
+                day.classList.remove('drop-target');
+            });
+            
+            console.log('🔄 Calendar: Drag cleanup completed');
+        }
+        
         function handleTodayDragOver(event) {
             event.preventDefault();
             event.dataTransfer.dropEffect = 'move';
