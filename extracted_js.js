@@ -12764,8 +12764,8 @@
                     taskElement.title = task.title; // Native tooltip
                     taskElement.draggable = true;
                     
-                    taskElement.addEventListener('dragstart', handleCalendarDragStart);
-                    taskElement.addEventListener('dragend', handleCalendarDragEnd);
+                    taskElement.addEventListener('dragstart', handleDragStart);
+                    taskElement.addEventListener('dragend', handleDragEnd);
                     taskElement.addEventListener('click', (e) => {
                         e.stopPropagation();
                         editTask(task.id);
@@ -13062,8 +13062,8 @@
                         e.stopPropagation();
                         editTask(task.id);
                     });
-                    taskElement.addEventListener('dragstart', handleCalendarDragStart);
-                    taskElement.addEventListener('dragend', handleCalendarDragEnd);
+                    taskElement.addEventListener('dragstart', handleDragStart);
+                    taskElement.addEventListener('dragend', handleDragEnd);
                     
                     dayElement.appendChild(taskElement);
                 });
