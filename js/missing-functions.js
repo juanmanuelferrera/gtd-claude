@@ -4043,6 +4043,24 @@ function getRecentActions() {
 function renderRecentActionsView() {
     console.log('⏮️ Rendering recent actions view...');
     
+    // Hide All Tasks specific UI elements
+    const allTasksControls = document.querySelector('.all-tasks-controls');
+    if (allTasksControls) {
+        allTasksControls.style.display = 'none';
+    }
+    
+    // Update the section title
+    const tasksTitle = document.getElementById('tasks-title');
+    if (tasksTitle) {
+        tasksTitle.textContent = '⏮️ Recent Actions';
+    }
+    
+    // Hide the Add/Review/Expand/Collapse buttons
+    const viewControls = document.querySelector('.view-controls');
+    if (viewControls) {
+        viewControls.style.display = 'none';
+    }
+    
     const container = document.getElementById('tasksContainer');
     if (!container) {
         console.error('Tasks container not found');
@@ -4161,6 +4179,29 @@ function renderRecentActionsView() {
     html += '</div>';
     
     container.innerHTML = html;
+}
+
+/**
+ * Helper function to restore All Tasks UI elements
+ */
+function restoreAllTasksUI() {
+    // Show All Tasks specific UI elements
+    const allTasksControls = document.querySelector('.all-tasks-controls');
+    if (allTasksControls) {
+        allTasksControls.style.display = '';
+    }
+    
+    // Restore the section title
+    const tasksTitle = document.getElementById('tasks-title');
+    if (tasksTitle) {
+        tasksTitle.textContent = '📋 All Tasks';
+    }
+    
+    // Show the Add/Review/Expand/Collapse buttons
+    const viewControls = document.querySelector('.view-controls');
+    if (viewControls) {
+        viewControls.style.display = '';
+    }
 }
 
 /**

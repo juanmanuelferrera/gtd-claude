@@ -3990,6 +3990,12 @@ function renderWeekView() {
  */
 function renderAllTasksView() {
     console.log('🔍 DEBUG: renderAllTasksView called');
+    
+    // Restore All Tasks UI elements (in case we're coming from Recent Actions)
+    if (typeof restoreAllTasksUI === 'function') {
+        restoreAllTasksUI();
+    }
+    
     // Don't call showView to avoid recursion - just perform the search
     if (typeof performAllTasksSearch === 'function') {
         console.log('🔍 DEBUG: About to call performAllTasksSearch');
