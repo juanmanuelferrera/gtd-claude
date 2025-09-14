@@ -462,11 +462,22 @@ function getCurrentTodayDate() {
 
 function updateMobileDateHeader() {
     const headerTitle = document.getElementById('mobileHeaderTitle');
-    if (headerTitle && currentView === 'today') {
-        const currentDate = getCurrentTodayDate();
-        const monthNames = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+    if (headerTitle) {
+        // Get current date based on what's being viewed
+        let currentDate = getCurrentTodayDate();
+        
+        // Use window.currentTodayDate if available (for navigation consistency)
+        if (window.currentTodayDate) {
+            currentDate = window.currentTodayDate;
+        }
+        
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         const monthName = monthNames[currentDate.getMonth()];
-        headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold;">${monthName}</span>`;
+        
+        // Make month clickable to return to today
+        headerTitle.innerHTML = `<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold; color: #007aff; text-decoration: none;">${monthName}</span>`;
+        
+        console.log('📱 Mobile header updated to:', monthName, 'for date:', currentDate.toDateString());
     }
     
     // Also update the mobile date display between Ant/Sig buttons
