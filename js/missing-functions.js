@@ -4250,9 +4250,12 @@ window.handleMobileTemplateFilter = handleMobileTemplateFilter;
 
 // Clear today template filter
 function clearTodayTemplateFilter() {
+    console.log('🔍 CLEAR ALL TEMPLATE BUTTON CLICKED!');
     if (typeof window.clearTodayTemplateFilter_original === 'function') {
+        console.log('🔍 Using original clearTodayTemplateFilter function');
         window.clearTodayTemplateFilter_original();
     } else {
+        console.log('🔍 Using fallback clearTodayTemplateFilter implementation');
         // Fallback implementation
         const allTasks = document.querySelectorAll('#todaySchedule .time-slot-task');
         allTasks.forEach(taskElement => {
