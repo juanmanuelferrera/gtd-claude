@@ -4411,6 +4411,13 @@ function setupCollapseExpandKeyboardSupport() {
                         toggleAllTimeSlots();
                     }
                     break;
+                case 'z':
+                    e.preventDefault();
+                    console.log('🎹 Keyboard: Undo last action');
+                    if (typeof performUndo === 'function') {
+                        performUndo();
+                    }
+                    break;
             }
         }
         
@@ -4427,7 +4434,7 @@ function setupCollapseExpandKeyboardSupport() {
         }
     });
     
-    console.log('🎹 Keyboard shortcuts initialized: Ctrl+E (expand), Ctrl+C (collapse), Ctrl+T (toggle time blocks)');
+    console.log('🎹 Keyboard shortcuts initialized: Ctrl+E (expand), Ctrl+C (collapse), Ctrl+T (toggle time blocks), Ctrl+Z (undo)');
 }
 
 // Initialize keyboard support on page load
