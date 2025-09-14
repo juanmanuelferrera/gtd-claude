@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fix-date-display-nav]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fix-invalid-date]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -6111,12 +6111,20 @@
             // PRIORITY: Check currentTodayDate (used by navigation system)
             if (window.currentTodayDate && !dateFound) {
                 try {
-                    currentDate = new Date(window.currentTodayDate);
+                    // If it's already a Date object, use it directly, otherwise create new Date
+                    if (window.currentTodayDate instanceof Date) {
+                        currentDate = window.currentTodayDate;
+                    } else {
+                        currentDate = new Date(window.currentTodayDate);
+                    }
+                    
                     if (!isNaN(currentDate.getTime())) {
                         dateFound = true;
-                        console.log('📅 Using window.currentTodayDate:', window.currentTodayDate);
+                        console.log('📅 Using window.currentTodayDate:', window.currentTodayDate, 'Type:', typeof window.currentTodayDate);
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.log('❌ Error parsing currentTodayDate:', e);
+                }
             }
             
             // Check various global date variables that might exist
@@ -6166,6 +6174,12 @@
             
             if (!dateFound) {
                 console.log('📅 Using current date (no app date found)');
+            }
+            
+            // Final validation - if date is still invalid, use today
+            if (isNaN(currentDate.getTime())) {
+                console.log('❌ Date is invalid, falling back to today');
+                currentDate = new Date();
             }
             
             const options = { 
