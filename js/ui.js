@@ -473,14 +473,50 @@ function getCurrentTodayDate() {
 
 function updateMobileDateHeader() {
     try {
+        console.log('🔄 updateMobileDateHeader() called');
         const headerTitle = document.getElementById('mobileHeaderTitle');
         if (headerTitle) {
-            // Get current date based on what's being viewed
-            let currentDate = getCurrentTodayDate();
+            console.log('📱 Mobile header element found');
             
-            // Use window.currentTodayDate if available and it's a Date object (for navigation consistency)
-            if (window.currentTodayDate && window.currentTodayDate instanceof Date) {
-                currentDate = window.currentTodayDate;
+            // Use the same reliable date checking pattern as updateMobileDateDisplay
+            let currentDate = new Date();
+            let dateFound = false;
+            
+            // PRIORITY: Check currentTodayDate (used by navigation system)
+            if (window.currentTodayDate && !dateFound) {
+                try {
+                    // If it's already a Date object, use it directly, otherwise create new Date
+                    if (window.currentTodayDate instanceof Date) {
+                        currentDate = window.currentTodayDate;
+                    } else {
+                        currentDate = new Date(window.currentTodayDate);
+                    }
+                    
+                    if (!isNaN(currentDate.getTime())) {
+                        dateFound = true;
+                        console.log('📅 Using window.currentTodayDate for month:', currentDate.toDateString());
+                    }
+                } catch (e) {
+                    console.log('❌ Error parsing currentTodayDate for month:', e);
+                }
+            }
+            
+            // Fallback to currentTodayDate variable if available
+            if (!dateFound && typeof currentTodayDate !== 'undefined') {
+                try {
+                    if (currentTodayDate instanceof Date) {
+                        currentDate = currentTodayDate;
+                    } else {
+                        currentDate = new Date(currentTodayDate);
+                    }
+                    
+                    if (!isNaN(currentDate.getTime())) {
+                        dateFound = true;
+                        console.log('📅 Using currentTodayDate variable for month:', currentDate.toDateString());
+                    }
+                } catch (e) {
+                    console.log('❌ Error parsing currentTodayDate variable for month:', e);
+                }
             }
             
             const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -489,7 +525,7 @@ function updateMobileDateHeader() {
             // Make month clickable to return to today
             headerTitle.innerHTML = '<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold; color: #007aff;">' + monthName + '</span>';
             
-            console.log('📱 Mobile header updated to:', monthName);
+            console.log('📱 Mobile header updated to:', monthName, 'from date:', currentDate.toDateString());
         }
         
         // Also update the mobile date display between Ant/Sig buttons
