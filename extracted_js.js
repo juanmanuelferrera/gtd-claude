@@ -933,6 +933,9 @@
             // Don't translate immediately - wait for DOM to be ready
         }
         
+        // Expose translateUI to global scope for use by missing-functions.js
+        window.translateUI = translateUI;
+        
         // CRITICAL: Define authentication functions FIRST before any other code
         const API_BASE = window.location.hostname.includes('localhost') 
             ? 'http://localhost:8787' 
