@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fab-inline-fix]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fab-zindex-fix]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -3733,8 +3733,7 @@
         /* Mobile floating add button positioning */
         @media (max-width: 768px) {
             .floating-add-btn, #fabAddTask {
-                bottom: calc(200px + 20px) !important; /* 200px bottom nav + 20px spacing */
-                bottom: calc(200px + 20px + env(safe-area-inset-bottom, 0px)) !important; /* Add safe area */
+                bottom: 150px !important; /* Simple fixed value above mobile nav */
                 right: 20px !important; /* Closer to edge on mobile */
                 width: 56px !important; /* Keep consistent size */
                 height: 56px !important; /* Match width exactly for perfect circle */
@@ -3746,16 +3745,18 @@
                 font-size: 26px !important;
                 flex-shrink: 0 !important; /* Prevent flexbox compression */
                 aspect-ratio: 1 !important; /* Modern CSS for perfect square ratio */
+                z-index: 1001 !important; /* Above mobile nav */
             }
         }
         
         /* Landscape mobile adjustments */
         @media (max-width: 768px) and (orientation: landscape) {
             .floating-add-btn, #fabAddTask {
-                bottom: calc(80px + 16px + env(safe-area-inset-bottom, 0px)) !important; /* Shorter nav + spacing */
+                bottom: 100px !important; /* Fixed value for landscape */
                 width: 48px !important; /* Even smaller in landscape */
                 height: 48px !important;
                 font-size: 24px !important;
+                z-index: 1001 !important; /* Above mobile nav */
             }
         }
         
@@ -6096,7 +6097,7 @@
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
         transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        z-index: 1000;
+        z-index: 1001;
         display: flex;
         align-items: center;
         justify-content: center;
