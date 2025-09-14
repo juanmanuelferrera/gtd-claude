@@ -176,7 +176,7 @@ class DragDropManager {
         const oldDate = task.dueDate;
         
         try {
-            // Update task
+            // Update task data immediately
             task.dueDate = newDate;
             task.updatedAt = new Date().toISOString();
             
@@ -190,20 +190,28 @@ class DragDropManager {
                 }
             }
             
-            // Save and sync
-            await this.saveAndSync();
-            
-            // Refresh current view
+            // IMMEDIATE VISUAL FEEDBACK: Refresh view right away
+            console.log(`🎯 Providing immediate visual feedback for drag and drop to ${newDate}`);
             this.refreshCurrentView();
             
-            // Show feedback
-            const formattedOldDate = oldDate ? DateUtils.formatDateForDisplay(oldDate) : 'No date';
-            const formattedNewDate = DateUtils.formatDateForDisplay(newDate);
-            ModalManager.alert(`Task moved from ${formattedOldDate} to ${formattedNewDate}`, 'success');
+            // Show success feedback immediately
+            const formattedOldDate = oldDate ? (oldDate === newDate ? 'same date' : new Date(oldDate).toLocaleDateString()) : 'No date';
+            const formattedNewDate = new Date(newDate).toLocaleDateString();
+            if (typeof showInlineNotification === 'function') {
+                showInlineNotification(`Task moved to ${formattedNewDate}`, 'success');
+            }
+            
+            // Then save and sync in background
+            await this.saveAndSync();
             
         } catch (error) {
             console.error('Error updating task date:', error);
-            ModalManager.alert('Failed to move task', 'error');
+            if (typeof showInlineNotification === 'function') {
+                showInlineNotification('Failed to move task', 'error');
+            }
+            // Revert the change on error
+            task.dueDate = oldDate;
+            this.refreshCurrentView();
         }
     }
 
@@ -211,7 +219,10 @@ class DragDropManager {
      * Update task time and sync
      */
     async updateTaskTime(task, newTime) {
+        const oldTime = task.dueTime;
+        
         try {
+            // Update task data immediately
             task.dueTime = newTime;
             task.updatedAt = new Date().toISOString();
             
@@ -225,14 +236,26 @@ class DragDropManager {
                 }
             }
             
-            await this.saveAndSync();
+            // IMMEDIATE VISUAL FEEDBACK: Refresh view right away
+            console.log(`🎯 Providing immediate visual feedback for time change to ${newTime}`);
             this.refreshCurrentView();
             
-            ModalManager.alert(`Task time updated to ${newTime}`, 'success');
+            // Show success feedback immediately
+            if (typeof showInlineNotification === 'function') {
+                showInlineNotification(`Task time updated to ${newTime}`, 'success');
+            }
+            
+            // Then save and sync in background
+            await this.saveAndSync();
             
         } catch (error) {
             console.error('Error updating task time:', error);
-            ModalManager.alert('Failed to update task time', 'error');
+            if (typeof showInlineNotification === 'function') {
+                showInlineNotification('Failed to update task time', 'error');
+            }
+            // Revert the change on error
+            task.dueTime = oldTime;
+            this.refreshCurrentView();
         }
     }
 
