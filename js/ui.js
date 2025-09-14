@@ -855,6 +855,8 @@ function initializeKeyboardNavigation() {
                 case 'T':
                     console.log('🔄 T pressed during template navigation - toggling off');
                     e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation(); // Prevent any further handling
                     exitTemplateNavigation();
                     return;
                 case 'Escape':
@@ -954,13 +956,14 @@ function initializeKeyboardNavigation() {
                 showView('settings');
                 break;
             case 't':
-                console.log('✅ T key pressed');
+                console.log('✅ T key pressed in general handler, templateNavActive:', templateNavActive);
                 e.preventDefault();
+                e.stopPropagation();
                 if (templateNavActive) {
-                    console.log('🔄 T pressed again - exiting template navigation');
+                    console.log('🔄 T pressed - template nav is active, exiting');
                     exitTemplateNavigation();
                 } else {
-                    console.log('🏷️ Activating template navigation');
+                    console.log('🏷️ T pressed - template nav is inactive, activating');
                     activateTemplateSelector();
                 }
                 break;
@@ -4882,7 +4885,7 @@ function activateTemplateSelector() {
             setTimeout(() => {
                 console.log('⏱️ View rendered, now activating template selector');
                 activateTemplateSelector();
-            }, 100);
+            }, 150); // Slightly longer delay for view to fully render
             return;
         }
         
