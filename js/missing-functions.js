@@ -4251,21 +4251,25 @@ window.handleMobileTemplateFilter = handleMobileTemplateFilter;
 // Clear today template filter
 function clearTodayTemplateFilter() {
     console.log('🔍 CLEAR ALL TEMPLATE BUTTON CLICKED!');
-    if (typeof window.clearTodayTemplateFilter_original === 'function') {
-        console.log('🔍 Using original clearTodayTemplateFilter function');
-        window.clearTodayTemplateFilter_original();
+    console.log('🔍 Using proper clearTodayTemplateFilter implementation');
+    
+    // Clear the active template filter
+    window.activeTodayTemplateFilter = null;
+    
+    // Reset the mobile dropdown to "All tasks"
+    const mobileFilter = document.getElementById('todayMobileFilter');
+    if (mobileFilter) {
+        mobileFilter.value = '';
+    }
+    
+    // Re-render the current view to show all tasks
+    if (typeof renderTodayView === 'function') {
+        renderTodayView();
+    } else if (typeof renderAllTasksView === 'function') {
+        renderAllTasksView();
     } else {
-        console.log('🔍 Using fallback clearTodayTemplateFilter implementation');
-        // Fallback implementation
-        const allTasks = document.querySelectorAll('#todaySchedule .time-slot-task');
-        allTasks.forEach(taskElement => {
-            taskElement.style.display = 'block';
-            taskElement.style.opacity = '1';
-        });
-        const timeBlocks = document.querySelectorAll('#todaySchedule .time-block');
-        timeBlocks.forEach(block => {
-            block.style.display = 'block';
-        });
+        console.log('🔍 No render function available, reloading page');
+        location.reload();
     }
 }
 window.clearTodayTemplateFilter = clearTodayTemplateFilter;
