@@ -3861,9 +3861,13 @@ function renderWeekView() {
  * Render All Tasks View
  */
 function renderAllTasksView() {
+    console.log('🔍 DEBUG: renderAllTasksView called');
     // Don't call showView to avoid recursion - just perform the search
     if (typeof performAllTasksSearch === 'function') {
+        console.log('🔍 DEBUG: About to call performAllTasksSearch');
         performAllTasksSearch();
+    } else {
+        console.log('🔍 DEBUG: performAllTasksSearch function not found!');
     }
 }
 

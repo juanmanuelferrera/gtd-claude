@@ -18256,6 +18256,7 @@
             performAllTasksSearch();
         }
         function performAllTasksSearch() {
+            console.log('🔍 DEBUG: performAllTasksSearch called');
             
             const searchInputElement = document.getElementById('allTasksSearchInput');
             
