@@ -480,6 +480,8 @@ function updateMobileDateHeader() {
  */
 function goToToday() {
     currentTodayDate = new Date();
+    // Sync with global window variable for other components
+    window.currentTodayDate = currentTodayDate;
     if (currentView === 'today') {
         updateMobileDateHeader();
         renderCurrentView();
@@ -534,7 +536,11 @@ function nextWeek() {
  * Day navigation functions
  */
 function previousDay() {
+    console.log('🔙 previousDay() called - before:', currentTodayDate.toDateString());
     currentTodayDate.setDate(currentTodayDate.getDate() - 1);
+    // Sync with global window variable for other components
+    window.currentTodayDate = currentTodayDate;
+    console.log('🔙 previousDay() - after:', currentTodayDate.toDateString(), 'window.currentTodayDate:', window.currentTodayDate.toDateString());
     updateMobileDateHeader();
     if (typeof renderTodayView === 'function') {
         renderTodayView();
@@ -542,7 +548,11 @@ function previousDay() {
 }
 
 function nextDay() {
+    console.log('▶️ nextDay() called - before:', currentTodayDate.toDateString());
     currentTodayDate.setDate(currentTodayDate.getDate() + 1);
+    // Sync with global window variable for other components
+    window.currentTodayDate = currentTodayDate;
+    console.log('▶️ nextDay() - after:', currentTodayDate.toDateString(), 'window.currentTodayDate:', window.currentTodayDate.toDateString());
     updateMobileDateHeader();
     if (typeof renderTodayView === 'function') {
         renderTodayView();
