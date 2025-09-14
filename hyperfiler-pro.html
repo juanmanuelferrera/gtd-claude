@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-sidebar-no-scroll]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-undo-short-name]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -217,13 +217,16 @@
                 background: transparent !important;
                 color: #2d3748 !important;
                 font-weight: 500;
-                padding: 14px 12px;
+                padding: 14px 8px;
                 border-radius: 8px;
-                font-size: 14px;
+                font-size: 13px;
                 margin-bottom: 3px;
                 flex: unset;
                 text-align: left;
                 box-sizing: border-box;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
                 min-height: 44px;
                 border: none !important;
                 transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -243,7 +246,7 @@
                 font-weight: 600;
                 box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25) !important;
                 border: none !important;
-                padding-left: 12px;
+                padding-left: 8px;
             }
             
             .nav-btn.active::before {
@@ -263,7 +266,7 @@
                 background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
                 color: #475569;
                 font-weight: 500;
-                padding: 12px 12px;
+                padding: 10px 8px;
                 border: 1px solid #e2e8f0;
                 border-radius: 6px;
                 font-size: 13px;
@@ -3907,7 +3910,7 @@
         </button>
         <button class="mobile-more-item" onclick="provideFeedback(this); switchToMobileView('recent-actions'); hideMobileMoreMenu();">
             <div class="mobile-more-icon">⏮️</div>
-            <div>Recent Actions</div>
+            <div>Undo</div>
         </button>
         <div style="border-top: 1px solid #e0e0e0; margin: 8px 0; padding-top: 8px;">
             <div style="text-align: center; font-size: 12px; color: #666; margin-bottom: 8px;">Language / Idioma</div>
@@ -3951,7 +3954,7 @@
                 🔄 Repeat <span style="opacity: 0.7; font-size: 11px; color: #666;">6</span>
             </button>
             <button class="nav-btn" onclick="showView('recent-actions')" id="nav-recent-actions" tabindex="7">
-                ⏮️ Recent Actions <span style="opacity: 0.7; font-size: 11px; color: #666;">7</span>
+                ⏮️ Undo <span style="opacity: 0.7; font-size: 11px; color: #666;">7</span>
             </button>
             <button class="nav-btn" onclick="showView('settings')" id="nav-settings" tabindex="9">
                 ⚙️ Settings <span style="opacity: 0.7; font-size: 11px; color: #666;">8</span>
@@ -4295,7 +4298,7 @@
                             🖨️ Print
                         </button>
                         <button class="btn btn-secondary btn-small" onclick="showView('recent-actions')" id="recentActionsBtn" style="background: #6f42c1; color: white; border-color: #6f42c1; font-weight: 600; font-size: 11px; padding: 8px 6px;">
-                            ⏮️ Recent Actions
+                            ⏮️ Undo
                         </button>
                         <span id="selectedCount" class="selected-count" style="display: none; font-size: 11px;">0 selected</span>
                     </div>
