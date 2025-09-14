@@ -882,6 +882,11 @@ function performAllTasksSearch() {
     
     let filteredTasks = tasks;
     
+    // First, exclude deleted tasks (they should only appear in Trash view)
+    filteredTasks = filteredTasks.filter(task => {
+        return task.status !== 'deleted';
+    });
+    
     // Apply search term filter
     if (searchTerm) {
         filteredTasks = filteredTasks.filter(task => {
@@ -3954,9 +3959,21 @@ function printSearchResults() {
 }
 
 function openTrash() {
-    console.log('Opening trash...');
-    alert('Trash functionality not yet implemented');
+    console.log('🗑️ Opening trash modal...');
+    const trashModal = document.getElementById('trashModal');
+    if (trashModal) {
+        trashModal.style.display = 'block';
+        // Use existing trash rendering function if available
+        if (typeof renderTrash === 'function') {
+            renderTrash();
+        } else if (typeof loadModalTrash === 'function') {
+            loadModalTrash();
+        }
+    } else {
+        console.error('Trash modal not found');
+    }
 }
+
 
 // Keyboard support for collapse/expand functionality
 function setupCollapseExpandKeyboardSupport() {
