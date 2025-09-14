@@ -3368,8 +3368,9 @@ function insertTemplateToTask(template) {
     titleInput.focus();
     titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
     
-    // Trigger input event to ensure any listeners are notified
-    titleInput.dispatchEvent(new Event('input', { bubbles: true }));
+    // Don't trigger input event to prevent natural language parser from removing templates
+    // Only trigger change event for any other listeners
+    console.log('⚠️ Not triggering input event to preserve templates');
     titleInput.dispatchEvent(new Event('change', { bubbles: true }));
     
     console.log('🎯 Multiple template support - templates accumulate in title field');

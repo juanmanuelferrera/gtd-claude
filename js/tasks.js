@@ -1253,8 +1253,9 @@ function insertTemplateToTask(template) {
         titleInput.focus();
         titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
         
-        // Trigger events
-        titleInput.dispatchEvent(new Event('input', { bubbles: true }));
+        // Don't trigger input event to prevent natural language parser from removing templates
+        // Only trigger change event for any other listeners
+        console.log('⚠️ Not triggering input event to preserve templates');
         titleInput.dispatchEvent(new Event('change', { bubbles: true }));
     } else {
         console.error('❌ editTaskTitle input not found');
