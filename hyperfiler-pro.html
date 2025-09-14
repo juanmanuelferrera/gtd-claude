@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-no-horizontal-scroll]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-sidebar-no-scroll]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -217,12 +217,13 @@
                 background: transparent !important;
                 color: #2d3748 !important;
                 font-weight: 500;
-                padding: 14px 20px;
+                padding: 14px 12px;
                 border-radius: 8px;
-                font-size: 15px;
+                font-size: 14px;
                 margin-bottom: 3px;
                 flex: unset;
                 text-align: left;
+                box-sizing: border-box;
                 min-height: 44px;
                 border: none !important;
                 transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -242,7 +243,7 @@
                 font-weight: 600;
                 box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25) !important;
                 border: none !important;
-                padding-left: 20px;
+                padding-left: 12px;
             }
             
             .nav-btn.active::before {
@@ -262,7 +263,7 @@
                 background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
                 color: #475569;
                 font-weight: 500;
-                padding: 12px 20px;
+                padding: 12px 12px;
                 border: 1px solid #e2e8f0;
                 border-radius: 6px;
                 font-size: 13px;
@@ -3923,7 +3924,7 @@
         <!-- Sidebar Navigation -->
         <div class="desktop-sidebar desktop-only">
             <!-- Sidebar Header -->
-            <div style="padding: 0 16px 20px 16px; border-bottom: 1px solid var(--things-border); margin-bottom: 16px;">
+            <div style="padding: 0 12px 20px 12px; border-bottom: 1px solid var(--things-border); margin-bottom: 16px;">
                 <h2 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: var(--things-text);">⚡ HyperFiler Pro</h2>
                 <div id="sidebarUserInfo" style="font-size: 13px; color: var(--things-text-secondary); display: none;">
                     Welcome, user
@@ -3958,7 +3959,7 @@
             </div>
             
             <!-- Sidebar Action Buttons -->
-            <div style="padding: 16px; border-top: 1px solid var(--things-border); margin-top: 20px;">
+            <div style="padding: 12px; border-top: 1px solid var(--things-border); margin-top: 20px;">
                 <!-- Action Buttons -->
                 <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
                     <button onclick="quickBackupJSON()" class="action-btn" style="
