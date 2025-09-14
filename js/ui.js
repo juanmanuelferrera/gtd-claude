@@ -472,42 +472,32 @@ function getCurrentTodayDate() {
 }
 
 function updateMobileDateHeader() {
-    console.log('🔍 updateMobileDateHeader() called');
-    const headerTitle = document.getElementById('mobileHeaderTitle');
-    console.log('🔍 headerTitle element:', headerTitle);
-    
-    if (headerTitle) {
-        console.log('🔍 Current headerTitle content before update:', headerTitle.innerHTML);
-        
-        // Get current date based on what's being viewed
-        let currentDate = getCurrentTodayDate();
-        console.log('🔍 getCurrentTodayDate():', currentDate);
-        
-        // Use window.currentTodayDate if available (for navigation consistency)
-        if (window.currentTodayDate) {
-            currentDate = window.currentTodayDate;
-            console.log('🔍 Using window.currentTodayDate:', currentDate);
+    try {
+        const headerTitle = document.getElementById('mobileHeaderTitle');
+        if (headerTitle) {
+            // Get current date based on what's being viewed
+            let currentDate = getCurrentTodayDate();
+            
+            // Use window.currentTodayDate if available and it's a Date object (for navigation consistency)
+            if (window.currentTodayDate && window.currentTodayDate instanceof Date) {
+                currentDate = window.currentTodayDate;
+            }
+            
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const monthName = monthNames[currentDate.getMonth()];
+            
+            // Make month clickable to return to today
+            headerTitle.innerHTML = '<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold; color: #007aff;">' + monthName + '</span>';
+            
+            console.log('📱 Mobile header updated to:', monthName);
         }
         
-        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        const monthName = monthNames[currentDate.getMonth()];
-        console.log('🔍 Month name generated:', monthName, 'from month index:', currentDate.getMonth());
-        
-        // Make month clickable to return to today
-        const newContent = `<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold; color: #007aff; text-decoration: none;">${monthName}</span>`;
-        console.log('🔍 Setting new content:', newContent);
-        headerTitle.innerHTML = newContent;
-        
-        // Verify the content was set
-        console.log('🔍 Content after update:', headerTitle.innerHTML);
-        console.log('📱 Mobile header updated to:', monthName, 'for date:', currentDate.toDateString());
-    } else {
-        console.log('❌ mobileHeaderTitle element not found!');
-    }
-    
-    // Also update the mobile date display between Ant/Sig buttons
-    if (typeof updateMobileDateDisplay === 'function') {
-        updateMobileDateDisplay();
+        // Also update the mobile date display between Ant/Sig buttons
+        if (typeof updateMobileDateDisplay === 'function') {
+            updateMobileDateDisplay();
+        }
+    } catch (error) {
+        console.error('Error in updateMobileDateHeader:', error);
     }
 }
 

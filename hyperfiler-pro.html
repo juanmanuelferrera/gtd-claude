@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-aggressive-debug]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fix-blank-screen]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -3306,15 +3306,9 @@
                 font-size: 16px;
                 font-weight: 600;
                 flex: 1;
-                text-transform: uppercase;
                 text-align: center;
                 line-height: 1.1;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                color: #007aff !important;
+                color: #007aff;
             }
             
             .mobile-header-btn {
@@ -5968,7 +5962,7 @@
     <script src="js/utils.js?v=1757614969"></script>
     <script src="js/auth.js?v=1736363000"></script>
     <script src="js/tasks.js?v=1736363000"></script>
-    <script src="js/ui.js?v=20250914-fix-header-conflicts"></script>
+    <script src="js/ui.js?v=20250914-fix-blank-screen"></script>
     <script src="js/sync.js?v=1736363000"></script>
     <script src="js/missing-functions.js?v=20250914-time-grid-compact"></script>
     <script src="js/natural-language.js?v=1736363000"></script>
@@ -6344,43 +6338,24 @@
         // Initial update
         updateMobileDateDisplay();
         
-        // Initialize mobile header with current month - multiple attempts
+        // Initialize mobile header with current month
         setTimeout(function() {
-            console.log('🔧 FORCE: Attempting to set mobile header directly');
-            const headerElement = document.getElementById('mobileHeaderTitle');
-            console.log('🔧 FORCE: Header element found:', headerElement);
-            
-            if (headerElement) {
-                console.log('🔧 FORCE: Current content:', headerElement.innerHTML);
-                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                const currentMonth = monthNames[new Date().getMonth()];
-                const newContent = `<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold; color: #007aff; text-decoration: none; display: inline-block;">${currentMonth}</span>`;
+            try {
+                const headerElement = document.getElementById('mobileHeaderTitle');
+                if (headerElement) {
+                    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                    const currentMonth = monthNames[new Date().getMonth()];
+                    headerElement.innerHTML = '<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold; color: #007aff;">' + currentMonth + '</span>';
+                    console.log('📱 Mobile header set to:', currentMonth);
+                }
                 
-                headerElement.innerHTML = newContent;
-                console.log('🔧 FORCE: Set content to:', newContent);
-                console.log('🔧 FORCE: Content after setting:', headerElement.innerHTML);
-                console.log('🔧 FORCE: Element styles:', window.getComputedStyle(headerElement));
-            } else {
-                console.log('🔧 FORCE: Header element NOT FOUND!');
-            }
-            
-            if (typeof updateMobileDateHeader === 'function') {
-                updateMobileDateHeader();
-                console.log('📱 Mobile header initialized via updateMobileDateHeader');
+                if (typeof updateMobileDateHeader === 'function') {
+                    updateMobileDateHeader();
+                }
+            } catch (error) {
+                console.error('Error setting mobile header:', error);
             }
         }, 500);
-        
-        // Try again after 2 seconds in case there are timing issues
-        setTimeout(function() {
-            console.log('🔧 FORCE: Second attempt at 2s');
-            const headerElement = document.getElementById('mobileHeaderTitle');
-            if (headerElement) {
-                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                const currentMonth = monthNames[new Date().getMonth()];
-                headerElement.innerHTML = `<span onclick="goToToday()" style="cursor: pointer; font-size: 18px; font-weight: bold; color: #007aff; text-decoration: none;">${currentMonth}</span>`;
-                console.log('🔧 FORCE: Second attempt - set to:', currentMonth);
-            }
-        }, 2000);
         
         // Hook into button clicks
         setTimeout(hookIntoNavigationButtons, 1000);
