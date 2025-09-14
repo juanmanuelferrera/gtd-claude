@@ -828,9 +828,9 @@ function showOptimisticFeedback(message, type = 'info', duration = 3000) {
  * Keyboard navigation support
  */
 function initializeKeyboardNavigation() {
-    console.log('🎹 initializeKeyboardNavigation called - T key should work now');
+    console.log('🎹 initializeKeyboardNavigation called - adding keyboard listener');
     document.addEventListener('keydown', (e) => {
-        console.log('🔑 Key pressed:', e.key, 'Target:', e.target.tagName);
+        console.log('🔑 Key pressed:', e.key, 'Target:', e.target.tagName, 'Prevented:', e.defaultPrevented);
         // Handle template navigation first
         if (templateNavActive) {
             switch (e.key) {
@@ -852,36 +852,46 @@ function initializeKeyboardNavigation() {
         
         // Only handle keyboard shortcuts when not typing in inputs
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            console.log('🚫 Ignoring key because typing in:', e.target.tagName);
             return;
         }
         
+        console.log('⌨️ Processing shortcut key:', e.key.toLowerCase());
         switch (e.key.toLowerCase()) {
             case 'd':
+                console.log('✅ D key - switching to Today view');
                 showView('today');
                 break;
             case 'w':
+                console.log('✅ W key - switching to Week view');
                 showView('week');
                 break;
             case 'm':
+                console.log('✅ M key - switching to Month view');
                 showView('calendar');
                 break;
             case 's':
+                console.log('✅ S key - switching to Search view');
                 showView('all');
                 break;
             case 'l':
+                console.log('✅ L key - switching to Lists view');
                 showView('lists');
                 break;
             case 'r':
+                console.log('✅ R key - switching to Repeat view');
                 showView('repeat');
                 break;
             case 'u':
+                console.log('✅ U key - switching to Undo view');
                 showView('recent-actions');
                 break;
             case 'x':
+                console.log('✅ X key - switching to Settings view');
                 showView('settings');
                 break;
             case 't':
-                console.log('🔑 T key pressed, activating template selector...');
+                console.log('✅ T key - activating template navigation');
                 e.preventDefault();
                 activateTemplateSelector();
                 break;
@@ -902,6 +912,9 @@ function initializeKeyboardNavigation() {
                         closeModal(modal.id);
                     }
                 });
+                break;
+            default:
+                console.log('🔍 Unhandled key:', e.key.toLowerCase());
                 break;
         }
     });
