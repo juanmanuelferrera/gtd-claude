@@ -4784,22 +4784,33 @@ let selectedButtonIndex = 0;
 let templateButtons = [];
 
 function activateTemplateSelector() {
-    console.log('🏷️ T key pressed - activating first template button');
+    console.log('🏷️ T key pressed - activating first template filter');
     
     try {
-        // Get template buttons from the DOM
-        templateButtons = Array.from(document.querySelectorAll('#templateButtons button'));
-        console.log('📋 Found template buttons:', templateButtons.length);
+        // First ensure we're in Today view
+        if (window.currentView !== 'today') {
+            console.log('📅 Switching to Today view for template navigation');
+            showView('today');
+            // Wait for view to render before proceeding
+            setTimeout(() => {
+                activateTemplateSelector();
+            }, 100);
+            return;
+        }
+        
+        // Get template filter buttons from Today view
+        templateButtons = Array.from(document.querySelectorAll('#todayTemplateFilters button.filter-btn'));
+        console.log('📋 Found template filter buttons:', templateButtons.length);
         
         if (templateButtons.length === 0) {
-            console.log('❌ No template buttons available - template nav remains inactive');
-            console.log('💡 No templates available. Create templates using @tags in your tasks.');
+            console.log('❌ No template filters available - template nav remains inactive');
+            console.log('💡 No template filters available. Create templates using @tags in your tasks.');
             templateNavActive = false; // Ensure it stays false
             return;
         }
         
-        // Activate first template button
-        console.log('✅ Activating template navigation mode');
+        // Activate first template filter button
+        console.log('✅ Activating template filter navigation mode');
         templateNavActive = true;
         selectedButtonIndex = 0;
         
@@ -4809,7 +4820,7 @@ function activateTemplateSelector() {
         
         // Show user feedback about template selection
         const templateName = templateButtons[0].textContent;
-        console.log(`🎯 Template navigation active. Selected: ${templateName}. Use ← → arrows to navigate, T to exit.`);
+        console.log(`🎯 Template filter navigation active. Selected: ${templateName}. Use ← → arrows to navigate, T to exit.`);
     } catch (error) {
         console.error('❌ Error in activateTemplateSelector:', error);
         templateNavActive = false; // Reset on error
@@ -4817,8 +4828,8 @@ function activateTemplateSelector() {
 }
 
 function clickTemplateButton(button) {
-    console.log('🔘 Auto-clicking template button via T key navigation:', button.textContent);
-    // Simulate click on the template button (preserves existing click behavior)
+    console.log('🔘 Auto-clicking template filter button via T key navigation:', button.textContent);
+    // Simulate click on the template filter button (preserves existing click behavior)
     button.click();
 }
 
