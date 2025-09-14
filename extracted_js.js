@@ -8356,13 +8356,28 @@
                 selectedMinute = null;
             }
             
-            // Skip old calendar generation - using new mobile-style pickers
+            // Detect device type and show appropriate version
+            const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
-            // Initialize mobile pickers
-            initializeMobileDatePickers();
-            
-            // Initialize desktop pickers
-            initializeDesktopDatePickers();
+            if (isMobile) {
+                console.log('📱 Detected mobile device - showing mobile version');
+                // Initialize mobile pickers
+                initializeMobileDatePickers();
+                // Show mobile version, hide desktop version
+                const mobileModal = document.querySelector('.modal-content.mobile-only');
+                const desktopModal = document.querySelector('.modal-content.desktop-only');
+                if (mobileModal) mobileModal.style.display = 'block';
+                if (desktopModal) desktopModal.style.display = 'none';
+            } else {
+                console.log('🖥️ Detected desktop device - showing desktop version');
+                // Initialize desktop pickers only
+                initializeDesktopDatePickers();
+                // Show desktop version, hide mobile version
+                const mobileModal = document.querySelector('.modal-content.mobile-only');
+                const desktopModal = document.querySelector('.modal-content.desktop-only');
+                if (mobileModal) mobileModal.style.display = 'none';
+                if (desktopModal) desktopModal.style.display = 'block';
+            }
             
             // Show modal
             const modal = document.getElementById('dateTimeModal');
