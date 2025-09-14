@@ -3336,27 +3336,35 @@ function renderTemplateButtons() {
 
 // Insert template into task title input
 function insertTemplateToTask(template) {
-    console.log('🏷️ insertTemplateToTask called with:', template);
+    console.log('🏷️ [missing-functions.js] insertTemplateToTask called with:', template);
     const titleInput = document.getElementById('editTaskTitle');
+    const notesInput = document.getElementById('editTaskNotes');
+    
     if (!titleInput) {
         console.error('❌ editTaskTitle input not found');
         return;
     }
     
+    // Check which element has focus
+    const activeElement = document.activeElement;
+    console.log('🎯 Active element:', activeElement?.id || 'none');
+    
     const currentValue = titleInput.value.trim();
-    console.log('📝 Current value before template insertion:', currentValue);
+    console.log('📝 Current title value before insertion:', currentValue);
     console.log('📝 Template to insert:', template);
     
     // Always append with space, supporting multiple templates
     if (currentValue) {
         titleInput.value = currentValue + ' ' + template;
-        console.log('✅ Appended template to existing content');
+        console.log('✅ Appended template to existing title');
     } else {
         titleInput.value = template;
-        console.log('✅ Set template as initial content');
+        console.log('✅ Set template as initial title');
     }
     
-    console.log('✅ New value after template insertion:', titleInput.value);
+    console.log('✅ New title value after insertion:', titleInput.value);
+    
+    // Force focus back to title input
     titleInput.focus();
     titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
     
@@ -3364,10 +3372,10 @@ function insertTemplateToTask(template) {
     titleInput.dispatchEvent(new Event('input', { bubbles: true }));
     titleInput.dispatchEvent(new Event('change', { bubbles: true }));
     
-    console.log('🎯 Multiple template support enabled - templates should accumulate');
+    console.log('🎯 Multiple template support - templates accumulate in title field');
 }
 
-// Make function globally accessible
+// Override any previous definition
 window.insertTemplateToTask = insertTemplateToTask;
 
 // Delete template

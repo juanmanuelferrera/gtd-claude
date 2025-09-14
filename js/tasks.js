@@ -1225,22 +1225,39 @@ function renderTemplateButtons() {
 }
 
 function insertTemplateToTask(template) {
+    console.log('🏷️ [tasks.js] insertTemplateToTask called with:', template);
     const titleInput = document.getElementById('editTaskTitle');
+    const notesInput = document.getElementById('editTaskNotes');
+    
+    // Check which element has focus
+    const activeElement = document.activeElement;
+    console.log('🎯 Active element:', activeElement?.id || 'none');
+    
+    // Always insert into title field for templates
     if (titleInput) {
-        const currentValue = titleInput.value;
-        const cursorPosition = titleInput.selectionStart;
+        const currentValue = titleInput.value.trim();
+        console.log('📝 Current title value:', currentValue);
         
-        // Insert template at cursor position
-        const beforeCursor = currentValue.substring(0, cursorPosition);
-        const afterCursor = currentValue.substring(cursorPosition);
-        const newValue = beforeCursor + template + ' ' + afterCursor;
+        // Append template with space, supporting multiple templates
+        if (currentValue) {
+            titleInput.value = currentValue + ' ' + template;
+            console.log('✅ Appended template to title');
+        } else {
+            titleInput.value = template;
+            console.log('✅ Set template as title');
+        }
         
-        titleInput.value = newValue;
+        console.log('📍 New title value:', titleInput.value);
         
-        // Move cursor after the inserted template
-        const newCursorPosition = cursorPosition + template.length + 1;
-        titleInput.setSelectionRange(newCursorPosition, newCursorPosition);
+        // Ensure focus stays on title input
         titleInput.focus();
+        titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
+        
+        // Trigger events
+        titleInput.dispatchEvent(new Event('input', { bubbles: true }));
+        titleInput.dispatchEvent(new Event('change', { bubbles: true }));
+    } else {
+        console.error('❌ editTaskTitle input not found');
     }
 }
 
