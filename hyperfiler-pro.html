@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-force-month-header]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-simple-month-fix]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -6192,6 +6192,24 @@
             const dateStr = currentDate.toLocaleDateString('en-US', options);
             console.log('📅 Setting mobile date display text to:', dateStr, 'from date:', currentDate.toDateString());
             mobileDateDisplay.textContent = dateStr;
+            
+            // ALSO UPDATE MOBILE HEADER MONTH using the same simple pattern
+            const mobileHeaderTitle = document.getElementById('mobileHeaderTitle');
+            if (mobileHeaderTitle) {
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                const monthName = monthNames[currentDate.getMonth()];
+                mobileHeaderTitle.textContent = monthName;
+                mobileHeaderTitle.style.cursor = 'pointer';
+                mobileHeaderTitle.style.color = '#007aff';
+                mobileHeaderTitle.style.fontWeight = 'bold';
+                mobileHeaderTitle.onclick = function() {
+                    console.log('📅 Month clicked - going to today');
+                    const todayDate = new Date();
+                    window.currentTodayDate = todayDate;
+                    goToToday();
+                };
+                console.log('📱 Month header set to:', monthName, 'using same pattern as date');
+            }
             
             // Make date clickable to return to today
             mobileDateDisplay.style.cursor = 'pointer';
