@@ -4056,19 +4056,32 @@ function renderWeekView() {
             taskElement.title = task.title; // Native tooltip for full text
             taskElement.draggable = true;
             
-            // Click and drag events
-            taskElement.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (typeof editTask === 'function') {
-                    editTask(task.id);
-                }
-            });
+            // Drag-aware click and drag events - prevents click interference with drag
+            let weekTaskDragging = false;
+            
             if (typeof handleDragStart === 'function') {
-                taskElement.addEventListener('dragstart', handleDragStart);
+                taskElement.addEventListener('dragstart', (e) => {
+                    weekTaskDragging = true;
+                    handleDragStart(e);
+                });
             }
             if (typeof handleDragEnd === 'function') {
-                taskElement.addEventListener('dragend', handleDragEnd);
+                taskElement.addEventListener('dragend', (e) => {
+                    handleDragEnd(e);
+                    setTimeout(() => { weekTaskDragging = false; }, 10);
+                });
             }
+            
+            taskElement.addEventListener('click', (e) => {
+                if (!weekTaskDragging) {
+                    e.stopPropagation();
+                    if (typeof editTask === 'function') {
+                        editTask(task.id);
+                    }
+                } else {
+                    console.log('🚫 Skipping click handler - drag operation detected');
+                }
+            });
             
             dayElement.appendChild(taskElement);
             console.log(`DEBUG: Week day ${dateStr}: appended task "${task.title}" to dayElement`);
@@ -4828,10 +4841,36 @@ function renderCalendar() {
             } else {
                 console.warn('⚠️ handleDragEnd not available for calendar task:', task.title);
             }
+            
+            // Drag-aware click handler for calendar tasks
+            let calendarTaskDragging = false;
+            
+            // Override the drag handlers to include our tracking
+            if (typeof handleDragStart === 'function') {
+                taskElement.removeEventListener('dragstart', handleDragStart);
+                taskElement.addEventListener('dragstart', (e) => {
+                    calendarTaskDragging = true;
+                    console.log('🎯 CALENDAR DRAG START - setting dragging flag');
+                    handleDragStart(e);
+                });
+            }
+            if (typeof handleDragEnd === 'function') {
+                taskElement.removeEventListener('dragend', handleDragEnd);
+                taskElement.addEventListener('dragend', (e) => {
+                    console.log('🎯 CALENDAR DRAG END - clearing dragging flag in 10ms');
+                    handleDragEnd(e);
+                    setTimeout(() => { calendarTaskDragging = false; }, 10);
+                });
+            }
+            
             taskElement.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (typeof editTask === 'function') {
-                    editTask(task.id);
+                if (!calendarTaskDragging) {
+                    e.stopPropagation();
+                    if (typeof editTask === 'function') {
+                        editTask(task.id);
+                    }
+                } else {
+                    console.log('🚫 Skipping calendar click handler - drag operation detected');
                 }
             });
             
