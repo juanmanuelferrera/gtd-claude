@@ -3959,18 +3959,292 @@ function printSearchResults() {
 }
 
 function openTrash() {
-    console.log('🗑️ Opening trash modal...');
-    const trashModal = document.getElementById('trashModal');
-    if (trashModal) {
-        trashModal.style.display = 'block';
-        // Use existing trash rendering function if available
-        if (typeof renderTrash === 'function') {
-            renderTrash();
-        } else if (typeof loadModalTrash === 'function') {
-            loadModalTrash();
+    console.log('🗑️ Opening trash view...');
+    if (typeof showView === 'function') {
+        showView('trash');
+    }
+}
+
+/**
+ * Render Trash View - shows deleted tasks with restore/permanently delete options
+ */
+function renderTrashView() {
+    console.log('🗑️ Rendering trash view...');
+    
+    const container = document.getElementById('tasksContainer');
+    if (!container) {
+        console.error('Tasks container not found');
+        return;
+    }
+    
+    if (!Array.isArray(tasks)) {
+        console.error('Tasks array not properly initialized');
+        return;
+    }
+    
+    // Get all deleted tasks
+    const deletedTasks = tasks.filter(task => task.status === 'deleted');
+    
+    console.log(`🗑️ Found ${deletedTasks.length} deleted tasks`);
+    
+    if (deletedTasks.length === 0) {
+        container.innerHTML = `
+            <div class="no-tasks-today" style="text-align: center; padding: 40px; color: #666;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🗑️</div>
+                <h3>Trash is Empty</h3>
+                <p style="color: #999; margin-bottom: 20px;">No deleted tasks to show. When you delete tasks, they'll appear here.</p>
+                <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+                    <button onclick="showView('today')" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                        🔥 Go to Today
+                    </button>
+                    <button onclick="showView('all')" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                        🔍 All Tasks
+                    </button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Sort deleted tasks by deletion date (most recent first)
+    deletedTasks.sort((a, b) => {
+        const aDeleted = a.deletedAt || a.updatedAt || '0';
+        const bDeleted = b.deletedAt || b.updatedAt || '0';
+        return new Date(bDeleted) - new Date(aDeleted);
+    });
+    
+    let html = `
+        <div class="trash-header" style="padding: 20px; background: linear-gradient(135deg, #dc3545, #c82333); color: white; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <div>
+                    <h2 style="margin: 0; font-size: 24px; font-weight: 700; display: flex; align-items: center;">
+                        <span style="margin-right: 12px; font-size: 28px;">🗑️</span>
+                        Trash
+                    </h2>
+                    <p style="margin: 4px 0 0 0; opacity: 0.9; font-size: 16px;">${deletedTasks.length} deleted task${deletedTasks.length !== 1 ? 's' : ''}</p>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="restoreAllTasks()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                        ↩️ Restore All
+                    </button>
+                    <button onclick="emptyTrash()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                        🗑️ Empty Trash
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="trash-tasks" style="display: grid; gap: 16px;">
+    `;
+    
+    deletedTasks.forEach(task => {
+        const deletedDate = task.deletedAt ? new Date(task.deletedAt).toLocaleDateString() : 'Unknown';
+        const dueDate = task.dueDate || 'No date';
+        const dueTime = task.dueTime ? ` at ${task.dueTime}` : '';
+        
+        html += `
+            <div class="trash-task-card" style="background: #fff; border: 1px solid #e9ecef; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 16px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'">
+                <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #dc3545;"></div>
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+                    <div style="flex: 1; padding-right: 16px;">
+                        <h3 style="margin: 0 0 8px 0; color: #333; font-size: 18px; font-weight: 600; text-decoration: line-through; opacity: 0.7;">
+                            ${task.isEvent ? '🔴 ' : ''}${task.title || 'Untitled Task'}
+                        </h3>
+                        ${task.notes ? `<p style="margin: 0 0 12px 0; color: #666; font-size: 14px; line-height: 1.5; opacity: 0.8;">${task.notes.substring(0, 200)}${task.notes.length > 200 ? '...' : ''}</p>` : ''}
+                        <div style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: #888; margin-bottom: 16px;">
+                            <span style="display: flex; align-items: center;">
+                                <span style="margin-right: 4px;">📅</span>
+                                Due: ${dueDate}${dueTime}
+                            </span>
+                            <span style="display: flex; align-items: center;">
+                                <span style="margin-right: 4px;">🗑️</span>
+                                Deleted: ${deletedDate}
+                            </span>
+                            ${task.isEvent ? '<span style="display: flex; align-items: center;"><span style="margin-right: 4px;">🔴</span>Event</span>' : ''}
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid #f0f0f0; padding-top: 16px;">
+                    <button onclick="restoreTask('${task.id}')" style="background: #28a745; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
+                        <span>↩️</span> Restore
+                    </button>
+                    <button onclick="permanentlyDeleteTask('${task.id}')" style="background: #dc3545; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
+                        <span>🗑️</span> Delete Forever
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    
+    container.innerHTML = html;
+}
+
+/**
+ * Restore a task from trash
+ */
+function restoreTask(taskId) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) {
+        console.error('Task not found:', taskId);
+        return;
+    }
+    
+    if (task.status !== 'deleted') {
+        console.error('Task is not deleted:', taskId);
+        return;
+    }
+    
+    // Restore the task
+    task.status = 'pending';
+    task.deletedAt = null;
+    task.updatedAt = new Date().toISOString();
+    
+    console.log('✅ Task restored from trash:', task.title);
+    
+    // Save and sync
+    if (typeof saveTasks === 'function') {
+        saveTasks();
+    }
+    if (typeof uploadAllTasks === 'function') {
+        uploadAllTasks();
+    }
+    
+    // Refresh trash view
+    renderTrashView();
+    
+    // Show success message
+    if (typeof showInlineNotification === 'function') {
+        showInlineNotification(`Task restored: ${task.title}`, 'success');
+    }
+}
+
+/**
+ * Restore all tasks from trash
+ */
+function restoreAllTasks() {
+    const deletedTasks = tasks.filter(task => task.status === 'deleted');
+    
+    if (deletedTasks.length === 0) {
+        if (typeof showInlineNotification === 'function') {
+            showInlineNotification('No tasks to restore', 'info');
         }
-    } else {
-        console.error('Trash modal not found');
+        return;
+    }
+    
+    // Confirm restoring all
+    if (!confirm(`Are you sure you want to restore all ${deletedTasks.length} tasks from trash?`)) {
+        return;
+    }
+    
+    // Restore all deleted tasks
+    deletedTasks.forEach(task => {
+        task.status = 'pending';
+        task.deletedAt = null;
+        task.updatedAt = new Date().toISOString();
+    });
+    
+    console.log(`✅ Restored ${deletedTasks.length} tasks from trash`);
+    
+    // Save and sync
+    if (typeof saveTasks === 'function') {
+        saveTasks();
+    }
+    if (typeof uploadAllTasks === 'function') {
+        uploadAllTasks();
+    }
+    
+    // Refresh trash view
+    renderTrashView();
+    
+    // Show success message
+    if (typeof showInlineNotification === 'function') {
+        showInlineNotification(`Restored ${deletedTasks.length} tasks from trash`, 'success');
+    }
+}
+
+/**
+ * Permanently delete a task (cannot be undone)
+ */
+function permanentlyDeleteTask(taskId) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) {
+        console.error('Task not found:', taskId);
+        return;
+    }
+    
+    const taskTitle = task.title || 'Untitled Task';
+    
+    // Confirm permanent deletion
+    if (!confirm(`Are you sure you want to permanently delete "${taskTitle}"? This cannot be undone.`)) {
+        return;
+    }
+    
+    // Remove task from array
+    const taskIndex = tasks.indexOf(task);
+    if (taskIndex > -1) {
+        tasks.splice(taskIndex, 1);
+        console.log('🗑️ Task permanently deleted:', taskTitle);
+        
+        // Save and sync
+        if (typeof saveTasks === 'function') {
+            saveTasks();
+        }
+        if (typeof uploadAllTasks === 'function') {
+            uploadAllTasks();
+        }
+        
+        // Refresh trash view
+        renderTrashView();
+        
+        // Show success message
+        if (typeof showInlineNotification === 'function') {
+            showInlineNotification(`Task permanently deleted: ${taskTitle}`, 'success');
+        }
+    }
+}
+
+/**
+ * Empty the entire trash (permanently delete all deleted tasks)
+ */
+function emptyTrash() {
+    const deletedTasks = tasks.filter(task => task.status === 'deleted');
+    
+    if (deletedTasks.length === 0) {
+        if (typeof showInlineNotification === 'function') {
+            showInlineNotification('Trash is already empty', 'info');
+        }
+        return;
+    }
+    
+    // Confirm emptying trash
+    if (!confirm(`Are you sure you want to permanently delete all ${deletedTasks.length} tasks in trash? This cannot be undone.`)) {
+        return;
+    }
+    
+    // Remove all deleted tasks
+    for (let i = tasks.length - 1; i >= 0; i--) {
+        if (tasks[i].status === 'deleted') {
+            tasks.splice(i, 1);
+        }
+    }
+    
+    console.log(`🗑️ Emptied trash: ${deletedTasks.length} tasks permanently deleted`);
+    
+    // Save and sync
+    if (typeof saveTasks === 'function') {
+        saveTasks();
+    }
+    if (typeof uploadAllTasks === 'function') {
+        uploadAllTasks();
+    }
+    
+    // Refresh trash view
+    renderTrashView();
+    
+    // Show success message
+    if (typeof showInlineNotification === 'function') {
+        showInlineNotification(`Trash emptied: ${deletedTasks.length} tasks permanently deleted`, 'success');
     }
 }
 

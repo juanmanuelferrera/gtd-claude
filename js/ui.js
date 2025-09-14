@@ -152,6 +152,12 @@ function showView(viewName, preserveDate = false) {
                 renderTasks(viewName);
             }
             break;
+        case 'trash':
+            console.log('showView: switching to trash view');
+            if (typeof renderTrashView === 'function') {
+                renderTrashView();
+            }
+            break;
         default:
             if (typeof renderTasks === 'function') {
                 renderTasks(viewName);
@@ -189,7 +195,8 @@ function switchToMobileView(viewName) {
         'calendar': { key: 'HeaderMonth', emoji: '🗓️' },
         'all': { key: 'HeaderSearch', emoji: '🔍' },
         'repeat': { key: 'HeaderRecurring', emoji: '🔄' },
-        'lists': { key: 'HeaderLists', emoji: '📝' }
+        'lists': { key: 'HeaderLists', emoji: '📝' },
+        'trash': { key: 'HeaderTrash', emoji: '🗑️' }
     };
     
     const headerTitle = document.getElementById('mobileHeaderTitle');
@@ -307,6 +314,11 @@ function renderCurrentView() {
         case 'stats':
             if (typeof renderStats === 'function') {
                 renderStats();
+            }
+            break;
+        case 'trash':
+            if (typeof renderTrashView === 'function') {
+                renderTrashView();
             }
             break;
         case 'search':
