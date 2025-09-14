@@ -4097,10 +4097,10 @@
             <div id="todayTemplateFiltersMobile" class="mobile-only" style="margin-bottom: 15px; padding: 8px; margin-top: 5px; background: #f9f9f9; border: 1px solid #ddd; min-height: 40px; border-radius: 8px;">
                 <!-- Dynamic template filters will be generated here for mobile -->
                 <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                    <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="var sel=this.value; document.querySelectorAll('.time-slot-task,[data-task-id]').forEach(function(el){if(!sel){el.style.display='block'}else{el.style.display=el.textContent.toLowerCase().includes(sel.toLowerCase())?'block':'none'}});">
+                    <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">
                         <option value="">All tasks</option>
                     </select>
-                    <button onclick="document.getElementById('todayMobileFilter').value=''; document.querySelectorAll('.time-slot-task,[data-task-id]').forEach(function(el){el.style.display='block'});" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">✖ Clear</button>
+                    <button onclick="clearTodayTemplateFilter()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">✖ Clear</button>
                     <button onclick="renderTodayView()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">🔄</button>
                 </div>
                 <div style="font-size: 11px; color: #999; margin-top: 4px;">Waiting for tasks to load...</div>
@@ -6387,10 +6387,10 @@
                 
                 container.innerHTML = `
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="var sel=this.value; document.querySelectorAll('.time-slot-task,[data-task-id]').forEach(function(el){if(!sel){el.style.display='block'}else{el.style.display=el.textContent.toLowerCase().includes(sel.toLowerCase())?'block':'none'}});">
+                        <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">
                             ` + optionsHtml + `
                         </select>
-                        <button onclick="document.getElementById('todayMobileFilter').value=''; document.querySelectorAll('.time-slot-task,[data-task-id]').forEach(function(el){el.style.display='block'});" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">Clear All</button>
+                        <button onclick="clearTodayTemplateFilter()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">Clear All</button>
                     </div>
                 `;
             }
