@@ -829,29 +829,6 @@ function showOptimisticFeedback(message, type = 'info', duration = 3000) {
  */
 function initializeKeyboardNavigation() {
     document.addEventListener('keydown', (e) => {
-        // Handle template selector navigation first
-        if (templateSelectorActive) {
-            switch (e.key) {
-                case 'ArrowLeft':
-                    e.preventDefault();
-                    navigateTemplateSelector('left');
-                    return;
-                case 'ArrowRight':
-                    e.preventDefault();
-                    navigateTemplateSelector('right');
-                    return;
-                case 'Enter':
-                    e.preventDefault();
-                    selectCurrentTemplate();
-                    return;
-                case 'Escape':
-                    e.preventDefault();
-                    closeTemplateSelector();
-                    return;
-            }
-            return; // Don't process other keys when template selector is active
-        }
-        
         // Only handle keyboard shortcuts when not typing in inputs
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
             return;
@@ -884,18 +861,13 @@ function initializeKeyboardNavigation() {
                 break;
             case 't':
                 e.preventDefault();
-                activateTemplateSelector();
+                activateFirstTemplate();
                 break;
             case '/':
                 e.preventDefault();
                 showView('search');
                 break;
             case 'Escape':
-                // Close template selector if active
-                if (templateSelectorActive) {
-                    closeTemplateSelector();
-                    return;
-                }
                 // Close any open modals
                 const openModals = document.querySelectorAll('[style*="display: block"]');
                 openModals.forEach(modal => {
@@ -4755,24 +4727,20 @@ function initializeUI() {
 }
 
 /**
- * Template selector functionality
+ * Simple template activation - just use first available template
  */
-let templateSelectorActive = false;
-let selectedTemplateIndex = 0;
-let availableTemplates = [];
-
-function activateTemplateSelector() {
+function activateFirstTemplate() {
     // Get available templates
-    availableTemplates = [];
+    let availableTemplates = [];
     
-    // Add custom templates
+    // Add custom templates first (they have priority)
     if (window.customTemplates && window.customTemplates.length > 0) {
         availableTemplates = [...window.customTemplates];
     }
     
-    // Add extracted templates from existing tasks
-    const extractedTemplates = new Set();
-    if (window.tasks) {
+    // If no custom templates, get extracted templates from existing tasks
+    if (availableTemplates.length === 0 && window.tasks) {
+        const extractedTemplates = new Set();
         window.tasks.forEach(task => {
             const text = `${task.title || ''} ${task.notes || ''}`;
             const templateMatches = text.match(/@\w+/g);
@@ -4780,103 +4748,24 @@ function activateTemplateSelector() {
                 templateMatches.forEach(template => extractedTemplates.add(template));
             }
         });
+        availableTemplates = Array.from(extractedTemplates);
     }
-    
-    // Merge with custom templates (avoid duplicates)
-    extractedTemplates.forEach(template => {
-        if (!availableTemplates.includes(template)) {
-            availableTemplates.push(template);
-        }
-    });
     
     if (availableTemplates.length === 0) {
         showMessage('No templates available. Create templates using @tags in your tasks.', 'info');
         return;
     }
     
-    templateSelectorActive = true;
-    selectedTemplateIndex = 0;
-    showTemplateSelector();
-}
-
-function showTemplateSelector() {
-    // Create or update template selector overlay
-    let overlay = document.getElementById('templateSelectorOverlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'templateSelectorOverlay';
-        overlay.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            z-index: 10000;
-            min-width: 300px;
-            text-align: center;
-        `;
-        document.body.appendChild(overlay);
-    }
-    
-    let html = '<h3 style="margin: 0 0 15px 0; font-size: 18px;">📋 Select Template</h3>';
-    html += '<div style="margin-bottom: 15px; font-size: 12px; opacity: 0.8;">Use ← → arrows to navigate, Enter to select, Esc to cancel</div>';
-    
-    availableTemplates.forEach((template, index) => {
-        const isSelected = index === selectedTemplateIndex;
-        html += `<div style="
-            padding: 10px 15px;
-            margin: 5px 0;
-            background: ${isSelected ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'};
-            border-radius: 8px;
-            border: 2px solid ${isSelected ? 'rgba(255,255,255,0.8)' : 'transparent'};
-            font-weight: ${isSelected ? 'bold' : 'normal'};
-            transition: all 0.2s ease;
-        ">${template}</div>`;
-    });
-    
-    overlay.innerHTML = html;
-}
-
-function navigateTemplateSelector(direction) {
-    if (!templateSelectorActive) return;
-    
-    if (direction === 'left' && selectedTemplateIndex > 0) {
-        selectedTemplateIndex--;
-    } else if (direction === 'right' && selectedTemplateIndex < availableTemplates.length - 1) {
-        selectedTemplateIndex++;
-    }
-    
-    showTemplateSelector();
-}
-
-function selectCurrentTemplate() {
-    if (!templateSelectorActive || selectedTemplateIndex >= availableTemplates.length) return;
-    
-    const selectedTemplate = availableTemplates[selectedTemplateIndex];
-    closeTemplateSelector();
+    // Use first template
+    const firstTemplate = availableTemplates[0];
     
     // Insert template into active field
     if (typeof insertTemplateToTask === 'function') {
-        insertTemplateToTask(selectedTemplate);
-        showMessage(`Template "${selectedTemplate}" inserted`, 'success');
+        insertTemplateToTask(firstTemplate);
+        showMessage(`Template "${firstTemplate}" inserted`, 'success');
     } else {
         // Fallback - just show the template
-        showMessage(`Selected template: ${selectedTemplate}`, 'info');
-    }
-}
-
-function closeTemplateSelector() {
-    templateSelectorActive = false;
-    selectedTemplateIndex = 0;
-    availableTemplates = [];
-    
-    const overlay = document.getElementById('templateSelectorOverlay');
-    if (overlay) {
-        overlay.remove();
+        showMessage(`First template: ${firstTemplate}`, 'info');
     }
 }
 
