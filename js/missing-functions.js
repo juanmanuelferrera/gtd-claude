@@ -4184,6 +4184,16 @@ window.openTrash = openTrash;
 window.handleJsonImportFile = handleJsonImportFile;
 window.handleTextImportFile = handleTextImportFile;
 
+// Handle mobile dropdown template filter selection for All Tasks view
+function handleAllTasksMobileTemplateFilter(selectedValue) {
+    if (selectedValue === '') {
+        clearAllTasksTemplateFilter();
+    } else {
+        filterAllTasksByTemplate(selectedValue);
+    }
+}
+window.handleAllTasksMobileTemplateFilter = handleAllTasksMobileTemplateFilter;
+
 // Global variables
 window.selectedTasks = selectedTasks;
 window.activeAllTasksTemplateFilter = activeAllTasksTemplateFilter;

@@ -20527,6 +20527,7 @@
         // Generate dynamic template filter buttons for All Tasks view
         function renderAllTasksTemplateFilters(allTasks) {
             const container = document.getElementById('allTasksTemplateFilters');
+            const mobileContainer = document.getElementById('allTasksTemplateFiltersMobile');
             if (!container) return;
             
             // Extract all templates used in all tasks
@@ -20542,6 +20543,7 @@
             });
             
             let html = '';
+            let mobileHtml = '';
             
             // Show/hide the separate Clear button
             const clearButton = document.querySelector('.selection-controls .filter-clear');
@@ -20552,7 +20554,7 @@
                     clearButton.style.display = 'inline-block';
                 }
                 
-                // Add template buttons
+                // Add template buttons (desktop)
                 Array.from(templatesInUse).sort().forEach(template => {
                     const displayName = template;
                     const title = `Filter by template: ${template}`;
@@ -20562,6 +20564,24 @@
                 });
                 
                 html += `<button class="filter-btn filter-no-filter" onclick="clearAllTasksTemplateFilter()" title="Exit filter mode and return to normal view">➡️ Exit Filters</button>`;
+                
+                // Mobile template dropdown
+                if (mobileContainer) {
+                    const sortedTemplates = Array.from(templatesInUse).sort();
+                    mobileHtml += '<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">';
+                    mobileHtml += '<select id="allTasksMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="handleAllTasksMobileTemplateFilter(this.value)">';
+                    mobileHtml += '<option value="">All Tasks</option>';
+                    
+                    sortedTemplates.forEach(template => {
+                        const displayName = template;
+                        const isActive = activeAllTasksTemplateFilter === template ? 'selected' : '';
+                        mobileHtml += `<option value="${template}" ${isActive}>${displayName}</option>`;
+                    });
+                    
+                    mobileHtml += '</select>';
+                    mobileHtml += `<button onclick="clearAllTasksTemplateFilter()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">✖ Clear</button>`;
+                    mobileHtml += '</div>';
+                }
             } else {
                 // Hide the separate Clear button when no templates
                 if (clearButton) {
@@ -20570,6 +20590,10 @@
             }
             
             container.innerHTML = html;
+            if (mobileContainer) {
+                mobileContainer.innerHTML = mobileHtml;
+                mobileContainer.style.display = templatesInUse.size > 0 ? 'block' : 'none';
+            }
             
             // Restore active filter button state after re-rendering
             if (activeAllTasksTemplateFilter) {
@@ -20645,6 +20669,12 @@
             // Update button states
             updateAllTasksTemplateButtonStates(null);
             
+            // Reset mobile dropdown
+            const mobileDropdown = document.getElementById('allTasksMobileFilter');
+            if (mobileDropdown) {
+                mobileDropdown.value = '';
+            }
+            
             // Hide the separate Clear button since no filters are active
             const clearButton = document.querySelector('.selection-controls .filter-clear');
             if (clearButton) {
@@ -20699,6 +20729,15 @@
         function showAllTasksNoFilterTasks() {
             // Exit filter mode completely - return to normal unfiltered state
             clearAllTasksTemplateFilter();
+        }
+        
+        // Handle mobile dropdown template filter selection for All Tasks view
+        function handleAllTasksMobileTemplateFilter(selectedValue) {
+            if (selectedValue === '') {
+                clearAllTasksTemplateFilter();
+            } else {
+                filterAllTasksByTemplate(selectedValue);
+            }
         }
         // Render Today View with time blocks
         function renderTodayView() {
