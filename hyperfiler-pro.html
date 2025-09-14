@@ -8,7 +8,7 @@
     <title>⚡ HyperFiler Pro 🚀 - v1.3.0</title>
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-fix-stuck-dropdown-filter]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.0 [Deploy-20250914-persistent-template-buttons-modal]');
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -6414,9 +6414,39 @@
         console.log('🔗 Mobile filter clearing hooked into day navigation');
     }
 
+    // Ensure templates are loaded and rendered properly
+    function ensureTemplatesLoaded() {
+        // Load templates from localStorage if they exist
+        const saved = localStorage.getItem('gtdTemplates');
+        if (saved) {
+            try {
+                window.customTemplates = JSON.parse(saved);
+                console.log('📋 Loaded templates from localStorage:', window.customTemplates.length);
+            } catch (error) {
+                console.error('Error loading templates:', error);
+                window.customTemplates = [];
+            }
+        } else {
+            // Initialize with default templates if none exist
+            window.customTemplates = window.customTemplates || [];
+            console.log('📋 No saved templates, using defaults');
+        }
+        
+        // Render template buttons if container exists
+        if (typeof renderTemplateButtons === 'function') {
+            setTimeout(() => {
+                renderTemplateButtons();
+                console.log('📋 Template buttons rendered');
+            }, 100);
+        }
+    }
+
     // Initialize everything
     document.addEventListener('DOMContentLoaded', function() {
         window.goToToday = goToToday;
+        
+        // Ensure templates are properly loaded and displayed
+        setTimeout(ensureTemplatesLoaded, 500);
         
         // Initial update
         updateMobileDateDisplay();
@@ -6445,6 +6475,39 @@
         
         // Hook into day navigation for mobile filter clearing
         setTimeout(hookIntoDayNavigation, 1500);
+        
+        // Hook into modal opening to ensure templates are rendered
+        setTimeout(() => {
+            const originalOpenAddTaskModal = window.openAddTaskModal;
+            if (originalOpenAddTaskModal) {
+                window.openAddTaskModal = function(dateStr) {
+                    const result = originalOpenAddTaskModal(dateStr);
+                    // Ensure templates are rendered when modal opens
+                    setTimeout(() => {
+                        if (typeof renderTemplateButtons === 'function') {
+                            renderTemplateButtons();
+                            console.log('📋 Templates force-rendered on modal open');
+                        }
+                    }, 100);
+                    return result;
+                };
+            }
+            
+            const originalOpenEditTaskModal = window.openEditTaskModal;
+            if (originalOpenEditTaskModal) {
+                window.openEditTaskModal = function(taskId) {
+                    const result = originalOpenEditTaskModal(taskId);
+                    // Ensure templates are rendered when modal opens
+                    setTimeout(() => {
+                        if (typeof renderTemplateButtons === 'function') {
+                            renderTemplateButtons();
+                            console.log('📋 Templates force-rendered on edit modal open');
+                        }
+                    }, 100);
+                    return result;
+                };
+            }
+        }, 2000);
         
         // Setup observer for automatic updates
         setTimeout(setupDateObserver, 1000);
