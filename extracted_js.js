@@ -12612,10 +12612,14 @@
         }
         // Calendar rendering
         function renderCalendar() {
+            console.log('🎨 renderCalendar() CALLED - Starting render');
             const grid = document.getElementById('calendarGrid');
             const monthTitle = document.getElementById('currentMonth');
             
-            if (!grid || !monthTitle) return;
+            if (!grid || !monthTitle) {
+                console.error('❌ renderCalendar FAILED - grid or monthTitle not found');
+                return;
+            }
             
             // Update the month display
             updateCurrentMonthDisplay();
@@ -15089,51 +15093,33 @@
             e.preventDefault();
             e.currentTarget.classList.remove('drop-target');
             
+            console.log('🎯 handleDrop STARTED');
+            
             // Store task reference immediately to avoid race condition with dragEnd
             const taskToMove = draggedTask;
             
             if (!taskToMove) {
-                console.error('No draggedTask found in handleDrop');
+                console.error('❌ No draggedTask found in handleDrop');
                 return;
             }
             
-            const dropTarget = e.currentTarget;
-            const newDate = dropTarget.dataset.date;
+            const newDate = e.currentTarget.dataset.date;
             if (!newDate) {
-                console.error('No date found on drop target');
+                console.error('❌ No date found on drop target');
                 return;
             }
             
             if (newDate === taskToMove.dueDate) {
+                console.log('⚠️ Task already on this date, skipping');
                 return;
             }
             
-            // Get the dragged element
-            const draggedElement = document.querySelector('.calendar-task-item.dragging') || 
-                                 document.querySelector('.week-task-item.dragging');
-            
-            // Store task info for logging
             const taskTitle = taskToMove.title;
             const taskId = taskToMove.id;
             
             console.log('📅 Moving task:', taskTitle, 'from', taskToMove.dueDate, 'to', newDate);
             
             try {
-                // FIRST: Immediately move the DOM element for instant visual feedback
-                if (draggedElement && dropTarget) {
-                    // Clone the element for the new location
-                    const clonedElement = draggedElement.cloneNode(true);
-                    clonedElement.classList.remove('dragging');
-                    
-                    // Add to the new day
-                    dropTarget.appendChild(clonedElement);
-                    
-                    // Remove the original element
-                    draggedElement.remove();
-                    
-                    console.log('✅ DOM element moved immediately');
-                }
-                
                 // Update task date in data
                 taskToMove.dueDate = newDate;
                 taskToMove.updatedAt = new Date().toISOString();
@@ -15143,38 +15129,56 @@
                 if (existingIndex >= 0) {
                     tasks[existingIndex] = taskToMove;
                     console.log('✅ Updated task in array at index:', existingIndex);
+                } else {
+                    console.error('❌ Task not found in tasks array!');
                 }
                 
                 // Save to localStorage immediately
                 saveTasksToLocalStorage();
                 sortTasks();
                 
-                // Do a FULL re-render after a short delay to ensure proper state
-                setTimeout(() => {
-                    console.log('🔄 Full re-render after DOM update');
+                console.log('🔄 About to refresh view:', currentView);
+                
+                // Simple direct render based on view
+                if (currentView === 'calendar') {
+                    console.log('📅 Calling renderCalendar() directly...');
                     
-                    if (currentView === 'today') {
-                        renderTodayView();
-                    } else if (currentView === 'week') {
-                        // Clear filters for clean render
-                        const weekSearchInput = document.getElementById('weekTaskSearch');
-                        if (weekSearchInput) weekSearchInput.value = '';
-                        activeWeekTemplateFilter = null;
-                        window.currentWeekFilteredTasks = null;
-                        window.currentWeekSearchTerm = null;
-                        renderWeekView();
-                    } else if (currentView === 'calendar') {
-                        // Clear filters for clean render
-                        const monthSearchInput = document.getElementById('monthTaskSearch');
-                        if (monthSearchInput) monthSearchInput.value = '';
-                        activeMonthTemplateFilter = null;
-                        window.currentMonthFilteredTasks = null;
-                        window.currentMonthSearchTerm = null;
-                        renderCalendar();
-                    } else {
-                        renderCurrentView();
-                    }
-                }, 100);
+                    // Try to render normally
+                    renderCalendar();
+                    
+                    // BRUTE FORCE: If task still not visible, force complete refresh
+                    setTimeout(() => {
+                        const movedTaskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+                        if (!movedTaskElement || movedTaskElement.closest(`[data-date="${newDate}"]`) === null) {
+                            console.warn('⚠️ Task not visible after render, forcing complete refresh');
+                            // Force re-render by toggling view
+                            showView('week');
+                            setTimeout(() => showView('calendar'), 10);
+                        }
+                    }, 200);
+                    
+                    console.log('✅ renderCalendar() completed');
+                } else if (currentView === 'week') {
+                    console.log('📅 Calling renderWeekView() directly...');
+                    renderWeekView();
+                    
+                    // BRUTE FORCE: If task still not visible, force complete refresh
+                    setTimeout(() => {
+                        const movedTaskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+                        if (!movedTaskElement || movedTaskElement.closest(`[data-date="${newDate}"]`) === null) {
+                            console.warn('⚠️ Task not visible after render, forcing complete refresh');
+                            // Force re-render by toggling view
+                            showView('calendar');
+                            setTimeout(() => showView('week'), 10);
+                        }
+                    }, 200);
+                    
+                    console.log('✅ renderWeekView() completed');
+                } else if (currentView === 'today') {
+                    renderTodayView();
+                } else {
+                    renderCurrentView();
+                }
                 
                 // Sync to cloud in background (don't await)
                 uploadAllTasks().then(() => {
