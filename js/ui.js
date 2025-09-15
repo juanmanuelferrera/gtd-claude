@@ -3821,52 +3821,81 @@ function renderTodayView() {
                         <span style="font-size: 20px;">${blockName === 'Morning' ? '🌅' : '🌆'}</span>
                         <strong style="font-size: 16px; color: #d63384;">${blockName} Overview</strong>
                         <span style="margin-left: auto; font-size: 13px; color: #666; font-weight: normal; padding: 4px 8px; background: rgba(255, 107, 53, 0.1); border-radius: 12px;">
-                            ${block.start} - ${block.end} (${block.duration}) • ${block.tasks.length} tasks
+                            ${block.start} - ${block.end} (${block.duration}) • ${block.taskCount || 0} tasks
                         </span>
                     </div>
                     <div class="time-block-content" id="content-mega-${blockId}" ${isCollapsed ? 'style="display: none;"' : 'style="padding: 8px 16px 16px 16px;"'}>`;
             
-            // Show overview/summary of tasks in mega block
-            if (block.tasks.length > 0) {
-                // Group tasks by time for better overview
-                const tasksByTime = {};
-                const untimedTasks = [];
+            // Render individual time blocks nested inside mega blocks
+            const fourteenHour = '14:00';
+            const megaTimeSlots = {};
+            
+            // Filter time slots for this mega block
+            Object.keys(timeSlots).forEach(time => {
+                if (blockName === 'Morning' && time < fourteenHour) {
+                    megaTimeSlots[time] = timeSlots[time];
+                } else if (blockName === 'Evening' && time >= fourteenHour) {
+                    megaTimeSlots[time] = timeSlots[time];
+                }
+            });
+            
+            const megaSortedTimes = Object.keys(megaTimeSlots).sort();
+            
+            // Render nested time blocks
+            megaSortedTimes.forEach(time => {
+                const isCurrentTime = isViewingToday && time === currentTimeSlot;
                 
-                block.tasks.forEach(task => {
-                    if (task.time) {
-                        if (!tasksByTime[task.time]) {
-                            tasksByTime[task.time] = [];
-                        }
-                        tasksByTime[task.time].push(task);
-                    } else {
-                        untimedTasks.push(task);
-                    }
+                html += `
+                    <div class="time-block nested-time-block" 
+                         data-time="${time}"
+                         ondragover="handleTimeSlotDragOver(event)"
+                         ondrop="handleTimeSlotDrop(event, '${time}')"
+                         ondragenter="handleTimeSlotDragEnter(event)"
+                         ondragleave="handleTimeSlotDragLeave(event)"
+                         style="margin: 8px 0; border: 1px solid rgba(255, 107, 53, 0.3); border-radius: 8px; background: rgba(255, 255, 255, 0.7);">
+                        <div class="time-block-header ${isCurrentTime ? 'current-time' : ''}" onclick="toggleTimeBlock('${time}')" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(255, 107, 53, 0.05);">
+                            <span id="arrow-${time}" class="group-arrow">▼</span>
+                            🕐 ${time}
+                            <span style="margin-left: auto; font-size: 11px; color: #999;">${megaTimeSlots[time].length} task${megaTimeSlots[time].length !== 1 ? 's' : ''}</span>
+                            ${isCurrentTime ? '<span style="margin-left: 8px; font-size: 12px; color: #ff6b35;">← Current Time</span>' : ''}
+                        </div>
+                        <div class="time-block-content" id="content-${time}" style="padding: 8px 12px;">`;
+                
+                megaTimeSlots[time].forEach(task => {
+                    html += renderTaskCard(task);
                 });
                 
-                // Show timed tasks summary
-                const sortedTimes = Object.keys(tasksByTime).sort();
-                if (sortedTimes.length > 0) {
-                    html += `<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">`;
-                    sortedTimes.forEach(time => {
-                        const count = tasksByTime[time].length;
-                        html += `<div style="padding: 4px 8px; background: rgba(255, 107, 53, 0.1); border-radius: 16px; font-size: 12px; color: #666;">
-                                    🕐 ${time} (${count} task${count > 1 ? 's' : ''})
-                                 </div>`;
-                    });
-                    html += `</div>`;
-                }
+                html += `
+                        </div>
+                    </div>`;
+            });
+            
+            // Add untimed tasks to Morning mega block
+            if (blockName === 'Morning' && untimedTasks.length > 0) {
+                const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
+                const isUntimedCollapsed = collapseStates['untimed'] === true;
                 
-                // Show untimed tasks count
-                if (untimedTasks.length > 0) {
-                    html += `<div style="padding: 4px 8px; background: rgba(108, 117, 125, 0.1); border-radius: 16px; font-size: 12px; color: #666; display: inline-block; margin-bottom: 8px;">
-                                📋 ${untimedTasks.length} untimed task${untimedTasks.length > 1 ? 's' : ''}
-                             </div>`;
-                }
+                html += `
+                    <div class="time-block nested-time-block" 
+                         style="margin: 8px 0; border: 1px solid rgba(108, 117, 125, 0.3); border-radius: 8px; background: rgba(255, 255, 255, 0.7);">
+                        <div class="time-block-header" onclick="toggleTimeBlock('untimed')" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(108, 117, 125, 0.05);">
+                            <span id="arrow-untimed" class="group-arrow">${isUntimedCollapsed ? '▶' : '▼'}</span>
+                            📋 No Specific Time
+                            <span style="margin-left: auto; font-size: 11px; color: #999;">${untimedTasks.length} task${untimedTasks.length !== 1 ? 's' : ''}</span>
+                        </div>
+                        <div class="time-block-content" id="content-untimed" style="display: ${isUntimedCollapsed ? 'none' : 'block'}; padding: 8px 12px;">`;
                 
-                html += `<div style="margin-top: 8px; padding: 8px; background: rgba(255, 107, 53, 0.05); border-radius: 6px; font-size: 11px; text-align: center; color: #666;">
-                            💡 Detailed tasks are shown in individual time blocks below
-                         </div>`;
-            } else {
+                untimedTasks.forEach(task => {
+                    html += renderTaskCard(task);
+                });
+                
+                html += `
+                        </div>
+                    </div>`;
+            }
+            
+            // Show message if no time blocks in this mega block
+            if (megaSortedTimes.length === 0 && (blockName !== 'Morning' || untimedTasks.length === 0)) {
                 html += `
                     <div style="padding: 12px; text-align: center; color: #666; font-style: italic;">
                         <p>🎯 Dedicated ${blockName.toLowerCase()} time block</p>
@@ -3880,80 +3909,8 @@ function renderTodayView() {
         });
     }
 
-    // Render individual time slots (keeping original time blocks)
-    sortedTimes.forEach(time => {
-        // Tasks are already filtered to exclude deleted ones, no sorting needed by status
-        
-        // Check if this is the current time slot
-        const isCurrentTime = isViewingToday && time === currentTimeSlot;
-            
-        console.log(`🕐 Checking slot ${time}: isCurrentTime = ${isCurrentTime} (currentTimeSlot: ${currentTimeSlot})`);
-        
-        if (isCurrentTime) {
-            console.log('🕐 ✅ HIGHLIGHTING current time slot:', time);
-        }
-        
-        html += `
-            <div class="time-block" 
-                 data-time="${time}"
-                 ondragover="handleTimeSlotDragOver(event)"
-                 ondrop="handleTimeSlotDrop(event, '${time}')"
-                 ondragenter="handleTimeSlotDragEnter(event)"
-                 ondragleave="handleTimeSlotDragLeave(event)"
-                 style="min-height: 60px; position: relative;">
-                <div class="time-block-header ${isCurrentTime ? 'current-time' : ''}" onclick="toggleTimeBlock('${time}')" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                    <span id="arrow-${time}" class="group-arrow">▼</span>
-                    🕐 ${time}
-                    ${isCurrentTime ? '<span style="margin-left: auto; font-size: 12px; padding-right: 8px;">← Current Time</span>' : ''}
-                </div>
-                <div class="time-block-content" id="content-${time}">`;
-        
-        timeSlots[time].forEach(task => {
-            html += renderTaskCard(task);
-        });
-        
-        html += `
-                </div>
-            </div>`;
-    });
-    
-    // Render untimed tasks (keeping original untimed section)
-    if (untimedTasks.length > 0) {
-        // Check collapse state from localStorage
-        const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
-        const isCollapsed = collapseStates['untimed'] === true;
-        console.log('🔄 ui.js - No Specific Time section - reading collapse state:', isCollapsed, 'from localStorage:', collapseStates);
-        
-        // Check if "No Specific Time" should be highlighted as current time
-        // This only happens when viewing today AND there are no timed slots at all
-        const isNoTimeCurrentTime = isViewingToday && sortedTimes.length === 0;
-            
-        console.log('🕐 No Time section check:', {
-            isNoTimeCurrentTime,
-            hasTimedSlots: sortedTimes.length > 0,
-            currentTimeAfterLast: currentTime > sortedTimes[sortedTimes.length - 1],
-            currentTimeBeforeFirst: currentTime < sortedTimes[0],
-            firstSlot: sortedTimes[0],
-            lastSlot: sortedTimes[sortedTimes.length - 1]
-        });
-        
-        html += `
-            <div class="time-block">
-                <div class="time-block-header ${isNoTimeCurrentTime ? 'current-time' : ''}" onclick="toggleTimeBlock('untimed')" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                    <span id="arrow-untimed" class="group-arrow" aria-expanded="${!isCollapsed}" aria-label="${isCollapsed ? 'Expand' : 'Collapse'} No Specific Time section">${isCollapsed ? '▶' : '▼'}</span>
-                    📋 No Specific Time
-                    ${isNoTimeCurrentTime ? '<span style="margin-left: auto; font-size: 12px; padding-right: 8px;">← Current Time</span>' : ''}
-                </div>
-                <div class="time-block-content" id="content-untimed" style="display: ${isCollapsed ? 'none' : 'block'};">`;
-        
-        untimedTasks.forEach(task => {
-            html += renderTaskCard(task);
-        });
-        
-        html += `
-                </div>
-            </div>`;
-    }
+    // Time blocks are now nested inside mega blocks above
+    // No separate time blocks section needed
     
     html += '</div>';
     container.innerHTML = html;
