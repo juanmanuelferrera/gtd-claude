@@ -1421,9 +1421,16 @@ function openDateTimeModal() {
         
         if (desktopDateInput) {
             desktopDateInput.value = defaultDate;
+            console.log('📅 Set date input to:', defaultDate);
+        } else {
+            console.error('❌ desktopDateInput not found');
         }
+        
         if (desktopTimeInput) {
             desktopTimeInput.value = defaultTime;
+            console.log('⏰ Set time input to:', defaultTime);
+        } else {
+            console.error('❌ desktopTimeInput not found');
         }
         
         // Detect device type and show appropriate version
