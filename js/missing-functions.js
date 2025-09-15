@@ -1405,6 +1405,10 @@ function openDateTimeModal() {
     console.log('🔧 DEBUG: openDateTimeModal called (from missing-functions.js)');
     const modal = document.getElementById('dateTimeModal');
     if (modal) {
+        // Store the current task ID for when we save
+        window.currentDateTimeTaskId = window.currentEditTaskId;
+        console.log('📝 Setting currentDateTimeTaskId:', window.currentDateTimeTaskId);
+        
         // Get current values or set defaults
         const currentDate = document.getElementById('editTaskDateOnly').value;
         const currentTime = document.getElementById('editTaskTimeOnly').value;
@@ -4819,16 +4823,7 @@ function highlightSelectedTime() {
 function applyCalendarDateTime() {
     console.log('✅ Applying calendar datetime:', selectedModalDate, selectedModalTime);
     
-    // Update the current task being edited
-    const taskId = window.currentDateTimeTaskId;
-    if (taskId) {
-        if (selectedModalDate) {
-            updateTaskDate(taskId, selectedModalDate, { stopPropagation: () => {} });
-        }
-        if (selectedModalTime) {
-            updateTaskTime(taskId, selectedModalTime, { stopPropagation: () => {} });
-        }
-    }
+    // Note: We'll update the task later when we save all fields together
     
     // Update the display in the task modal
     const dateTimeDisplay = document.getElementById('dateTimeDisplay');
@@ -4871,11 +4866,14 @@ function applyCalendarDateTime() {
     
     // Always try to save and close the edit task modal
     const taskModal = document.getElementById('taskModal');
-    const taskIdToSave = window.currentEditTaskId || window.currentDateTimeTaskId;
+    // Try multiple ways to find the task ID
+    const taskIdToSave = window.currentEditTaskId || window.currentDateTimeTaskId || window.currentTaskId;
     
     // If we have a task ID, save the task
     if (taskIdToSave) {
         console.log('💾 Saving task from calendar Set button:', taskIdToSave);
+        console.log('📅 Date to save:', selectedModalDate);
+        console.log('⏰ Time to save:', selectedModalTime);
         
         // Get the task
         const task = tasks.find(t => t.id === taskIdToSave);
