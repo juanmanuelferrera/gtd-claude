@@ -4914,33 +4914,50 @@ function applyCalendarDateTime() {
 window.initCalendarModal = initCalendarModal;
 
 // Mega Time Blocks functionality
-function calculateMegaTimeBlocks(timeSlots) {
+function calculateMegaTimeBlocks(timeSlots, untimedTasks) {
     console.log('🕰️ Calculating mega time blocks for time slots:', timeSlots);
     
     const sortedTimes = Object.keys(timeSlots).sort();
     const megaTimeBlocks = {};
+    const fourteenHour = '14:00';
+    
+    // Collect all tasks for assignment to mega blocks
+    const allTasks = [];
+    Object.keys(timeSlots).forEach(time => {
+        timeSlots[time].forEach(task => {
+            allTasks.push({...task, time});
+        });
+    });
+    
+    // Add untimed tasks
+    if (untimedTasks) {
+        untimedTasks.forEach(task => {
+            allTasks.push({...task, time: null});
+        });
+    }
     
     if (sortedTimes.length === 0) {
-        // If no time slots, create default mega blocks
+        // If no time slots, create default mega blocks without tasks (untimed tasks stay separate)
         megaTimeBlocks['Morning'] = {
             start: '08:00',
             end: '14:00',
-            tasks: []
+            tasks: [],
+            duration: calculateDuration('08:00', '14:00')
         };
         megaTimeBlocks['Evening'] = {
             start: '14:00', 
             end: '22:00',
-            tasks: []
+            tasks: [],
+            duration: calculateDuration('14:00', '22:00')
         };
         return megaTimeBlocks;
     }
     
     const firstTaskTime = sortedTimes[0];
-    const fourteenHour = '14:00';
     
-    // Morning mega block: before first task, but not past 14:00
+    // Morning mega block: empty block for planning (untimed tasks stay in their own section)
     const morningEnd = firstTaskTime < fourteenHour ? firstTaskTime : fourteenHour;
-    if (morningEnd > '06:00') { // Only create if there's meaningful morning time
+    if (morningEnd > '06:00') {
         megaTimeBlocks['Morning'] = {
             start: '08:00',
             end: morningEnd,
@@ -4949,18 +4966,19 @@ function calculateMegaTimeBlocks(timeSlots) {
         };
     }
     
-    // Evening mega block: after 14:00
+    // Evening mega block: empty block for planning
     const eveningTaskTimes = sortedTimes.filter(time => time >= fourteenHour);
-    const eveningStart = eveningTaskTimes.length > 0 ? eveningTaskTimes[eveningTaskTimes.length - 1] : fourteenHour;
+    const lastEveningTime = eveningTaskTimes.length > 0 ? eveningTaskTimes[eveningTaskTimes.length - 1] : fourteenHour;
+    const eveningStart = lastEveningTime === fourteenHour ? fourteenHour : addTimeBuffer(lastEveningTime);
     
     megaTimeBlocks['Evening'] = {
-        start: eveningStart === fourteenHour ? fourteenHour : addTimeBuffer(eveningStart),
+        start: eveningStart,
         end: '22:00',
         tasks: [],
-        duration: calculateDuration(eveningStart === fourteenHour ? fourteenHour : addTimeBuffer(eveningStart), '22:00')
+        duration: calculateDuration(eveningStart, '22:00')
     };
     
-    console.log('🕰️ Generated mega time blocks:', megaTimeBlocks);
+    console.log('🕰️ Generated mega time blocks with tasks:', megaTimeBlocks);
     return megaTimeBlocks;
 }
 
