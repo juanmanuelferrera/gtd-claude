@@ -1825,97 +1825,7 @@ function handleTextImportFile(event) {
     reader.readAsText(file);
 }
 
-async function addNewTemplate() {
-    console.log('🏷️ addNewTemplate called');
-    const input = document.getElementById('newTemplateInput');
-    if (!input) {
-        console.error('❌ newTemplateInput not found');
-        return;
-    }
-    
-    let template = input.value.trim();
-    if (!template) {
-        console.log('⚠️ No template text entered');
-        return;
-    }
-    
-    // Ensure template starts with @
-    if (!template.startsWith('@')) {
-        template = '@' + template;
-    }
-    
-    // Remove any spaces
-    template = template.replace(/\s/g, '');
-    
-    console.log('📝 Adding template:', template);
-    console.log('📝 Template includes @?', template.includes('@'));
-    
-    // Initialize customTemplates if needed
-    if (typeof window.customTemplates === 'undefined') {
-        window.customTemplates = [];
-    }
-    
-    // Check if template already exists
-    if (window.customTemplates.includes(template)) {
-        alert('Template already exists');
-        return;
-    }
-    
-    // Add template
-    window.customTemplates.push(template);
-    console.log('📝 Template added to array:', template);
-    console.log('📝 Full customTemplates array:', window.customTemplates);
-    console.log('✅ Template added, current templates:', window.customTemplates);
-    
-    // Ensure global customTemplates variable is also updated
-    if (typeof window.customTemplates !== 'undefined' && Array.isArray(window.customTemplates)) {
-        window.customTemplates = [...window.customTemplates];
-        // Sync with global customTemplates variable used by renderTemplateButtons
-        if (typeof customTemplates !== 'undefined') {
-            customTemplates.splice(0, customTemplates.length, ...window.customTemplates);
-            console.log('🔄 Synced global customTemplates:', customTemplates);
-        } else {
-            window.customTemplates = window.customTemplates;
-            console.log('🔄 Set global customTemplates reference');
-        }
-    }
-    
-    // Save templates persistently
-    if (typeof saveTemplates === 'function') {
-        console.log('💾 Saving templates...');
-        await saveTemplates();
-    } else {
-        // Fallback: save directly to localStorage
-        console.log('💾 Saving templates to localStorage (fallback)...');
-        localStorage.setItem('gtd_custom_templates', JSON.stringify(window.customTemplates));
-    }
-    
-    // Clear input
-    input.value = '';
-    
-    // Force re-render template buttons multiple times
-    console.log('🔄 About to render template buttons...');
-    if (typeof renderTemplateButtons === 'function') {
-        console.log('🔄 Rendering template buttons immediately...');
-        renderTemplateButtons();
-        
-        // Add delayed renders to ensure it works
-        setTimeout(() => {
-            console.log('🔄 Rendering template buttons (100ms delay)...');
-            renderTemplateButtons();
-        }, 100);
-        
-        setTimeout(() => {
-            console.log('🔄 Rendering template buttons (500ms delay)...');
-            renderTemplateButtons();
-        }, 500);
-    } else {
-        console.error('❌ renderTemplateButtons function not available');
-    }
-}
-
-// Make function globally accessible
-window.addNewTemplate = addNewTemplate;
+// Template function handled by extracted_js.js - removed duplicate
 
 /**
  * Emergency function to recover lists from server
@@ -3803,7 +3713,7 @@ function showListSelectionForTXTImport() {
     // Placeholder for TXT import
 }
 
-// Handle TXT file import for Lists View
+// Handle TXT file import for Lists View - supports both simple and structured import
 async function handleNewTXTImport(event) {
     console.log('📋 Starting TXT import for Lists View');
     
@@ -3820,91 +3730,17 @@ async function handleNewTXTImport(event) {
             return;
         }
         
-        // Check if we have any lists to import into
-        await loadListSections();
-        let availableLists = [];
-        listSections.forEach(section => {
-            if (section.lists && section.lists.length > 0) {
-                section.lists.forEach(list => {
-                    availableLists.push({
-                        sectionId: section.id,
-                        listId: list.id,
-                        sectionName: section.name,
-                        listName: list.name,
-                        itemCount: list.items ? list.items.length : 0
-                    });
-                });
-            }
-        });
+        // Detect if this is structured format (contains # or ## lines)
+        const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+        const hasStructuredFormat = lines.some(line => line.startsWith('# ') || line.startsWith('## '));
         
-        if (availableLists.length === 0) {
-            alert('❌ No lists found. Please create a list first before importing.');
-            return;
+        if (hasStructuredFormat) {
+            // Use structured import
+            await importStructuredTXTDirect(text);
+        } else {
+            // Use simple import - show list selection
+            await importSimpleTXTDirect(text);
         }
-        
-        // Show simple selection dialog for target list
-        let listOptions = availableLists.map(list => 
-            `${list.sectionName} → ${list.listName} (${list.itemCount} items)`
-        ).join('\n');
-        
-        const selectedIndex = prompt(
-            `📋 Choose target list (enter number 1-${availableLists.length}):\n\n` +
-            availableLists.map((list, index) => 
-                `${index + 1}. ${list.sectionName} → ${list.listName} (${list.itemCount} items)`
-            ).join('\n')
-        );
-        
-        const listIndex = parseInt(selectedIndex) - 1;
-        if (isNaN(listIndex) || listIndex < 0 || listIndex >= availableLists.length) {
-            alert('❌ Invalid selection. Import cancelled.');
-            return;
-        }
-        
-        const targetList = availableLists[listIndex];
-        
-        // Find the target section and list
-        const section = listSections.find(s => s.id === targetList.sectionId);
-        const list = section.lists.find(l => l.id === targetList.listId);
-        
-        if (!section || !list) {
-            alert('❌ Could not find target list. Import cancelled.');
-            return;
-        }
-        
-        // Parse the text file - each line becomes an item
-        const lines = text.split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length > 0);
-        
-        if (lines.length === 0) {
-            alert('❌ No valid content found in the file.');
-            return;
-        }
-        
-        // Add items to the list
-        let addedCount = 0;
-        lines.forEach(line => {
-            const newItem = {
-                id: Date.now() + Math.random(),
-                text: line,
-                completed: false,
-                createdAt: new Date().toISOString()
-            };
-            
-            if (!list.items) list.items = [];
-            list.items.push(newItem);
-            addedCount++;
-        });
-        
-        // Save changes
-        await saveListSections();
-        
-        // Refresh the Lists View if currently viewing it
-        if (currentView === 'lists') {
-            renderListsView();
-        }
-        
-        alert(`✅ Successfully imported ${addedCount} items to "${targetList.sectionName} → ${targetList.listName}".`);
         
         // Clear the file input
         event.target.value = '';
@@ -3913,6 +3749,211 @@ async function handleNewTXTImport(event) {
         console.error('❌ Error importing TXT file:', error);
         alert('❌ Error importing file: ' + error.message);
     }
+}
+
+// Simple TXT import - select existing list
+async function importSimpleTXTDirect(text) {
+    // Check if we have any lists to import into
+    await loadListSections();
+    let availableLists = [];
+    listSections.forEach(section => {
+        if (section.lists && section.lists.length > 0) {
+            section.lists.forEach(list => {
+                availableLists.push({
+                    sectionId: section.id,
+                    listId: list.id,
+                    sectionName: section.name,
+                    listName: list.name,
+                    itemCount: list.items ? list.items.length : 0
+                });
+            });
+        }
+    });
+    
+    if (availableLists.length === 0) {
+        alert('❌ No lists found. Please create a list first before importing, or use structured format (# Section, ## List) to create new ones.');
+        return;
+    }
+    
+    // Show simple selection dialog for target list
+    const selectedIndex = prompt(
+        `📋 Simple Import - Choose target list (enter number 1-${availableLists.length}):\n\n` +
+        availableLists.map((list, index) => 
+            `${index + 1}. ${list.sectionName} → ${list.listName} (${list.itemCount} items)`
+        ).join('\n')
+    );
+    
+    const listIndex = parseInt(selectedIndex) - 1;
+    if (isNaN(listIndex) || listIndex < 0 || listIndex >= availableLists.length) {
+        alert('❌ Invalid selection. Import cancelled.');
+        return;
+    }
+    
+    const targetList = availableLists[listIndex];
+    
+    // Find the target section and list
+    const section = listSections.find(s => s.id === targetList.sectionId);
+    const list = section.lists.find(l => l.id === targetList.listId);
+    
+    if (!section || !list) {
+        alert('❌ Could not find target list. Import cancelled.');
+        return;
+    }
+    
+    // Parse the text file - each line becomes an item
+    const lines = text.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+    
+    if (lines.length === 0) {
+        alert('❌ No valid content found in the file.');
+        return;
+    }
+    
+    // Add items to the list
+    let addedCount = 0;
+    lines.forEach(line => {
+        const newItem = {
+            id: Date.now() + Math.random(),
+            text: line,
+            completed: false,
+            createdAt: new Date().toISOString()
+        };
+        
+        if (!list.items) list.items = [];
+        list.items.push(newItem);
+        addedCount++;
+    });
+    
+    // Save changes
+    await saveListSections();
+    
+    // Refresh the Lists View if currently viewing it
+    if (currentView === 'lists') {
+        renderListsView();
+    }
+    
+    alert(`✅ Successfully imported ${addedCount} items to "${targetList.sectionName} → ${targetList.listName}".`);
+}
+
+// Structured TXT import - create sections, lists, and items automatically
+async function importStructuredTXTDirect(text) {
+    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    
+    if (lines.length === 0) {
+        alert('❌ The TXT file is empty or contains no valid content.');
+        return;
+    }
+    
+    await loadListSections();
+    let currentSection = null;
+    let currentList = null;
+    let addedSections = 0;
+    let addedLists = 0;
+    let addedItems = 0;
+    
+    for (const line of lines) {
+        if (line.startsWith('# ')) {
+            // Section header
+            const sectionName = line.substring(2).trim();
+            
+            // Find existing section or create new one
+            currentSection = listSections.find(s => s.name === sectionName);
+            if (!currentSection) {
+                currentSection = {
+                    id: Date.now().toString() + Math.random(),
+                    name: sectionName,
+                    lists: [],
+                    collapsed: false,
+                    createdAt: new Date().toISOString(),
+                    order: listSections.length
+                };
+                listSections.push(currentSection);
+                addedSections++;
+            }
+            currentList = null; // Reset current list when entering new section
+            
+        } else if (line.startsWith('## ')) {
+            // List header
+            const listName = line.substring(3).trim();
+            
+            if (!currentSection) {
+                // Create default section if none exists
+                currentSection = {
+                    id: Date.now().toString() + Math.random(),
+                    name: 'Imported',
+                    lists: [],
+                    collapsed: false,
+                    createdAt: new Date().toISOString(),
+                    order: listSections.length
+                };
+                listSections.push(currentSection);
+                addedSections++;
+            }
+            
+            // Find existing list in current section or create new one
+            currentList = currentSection.lists.find(l => l.name === listName);
+            if (!currentList) {
+                currentList = {
+                    id: Date.now().toString() + Math.random(),
+                    name: listName,
+                    items: [],
+                    createdAt: new Date().toISOString()
+                };
+                currentSection.lists.push(currentList);
+                addedLists++;
+            }
+            
+        } else {
+            // Regular item
+            if (!currentList) {
+                // Create default section and list if none exists
+                if (!currentSection) {
+                    currentSection = {
+                        id: Date.now().toString() + Math.random(),
+                        name: 'Imported',
+                        lists: [],
+                        collapsed: false,
+                        createdAt: new Date().toISOString(),
+                        order: listSections.length
+                    };
+                    listSections.push(currentSection);
+                    addedSections++;
+                }
+                
+                currentList = {
+                    id: Date.now().toString() + Math.random(),
+                    name: 'Items',
+                    items: [],
+                    createdAt: new Date().toISOString()
+                };
+                currentSection.lists.push(currentList);
+                addedLists++;
+            }
+            
+            // Add item to current list
+            const newItem = {
+                id: Date.now() + Math.random(),
+                text: line,
+                completed: false,
+                createdAt: new Date().toISOString()
+            };
+            
+            if (!currentList.items) currentList.items = [];
+            currentList.items.push(newItem);
+            addedItems++;
+        }
+    }
+    
+    // Save changes
+    await saveListSections();
+    
+    // Refresh the Lists View if currently viewing it
+    if (currentView === 'lists') {
+        renderListsView();
+    }
+    
+    alert(`✅ Structured import complete!\nAdded ${addedSections} sections, ${addedLists} lists, and ${addedItems} items.`);
 }
 
 // Quick Backup and Import JSON functions
@@ -4618,7 +4659,6 @@ window.applyMobileDateTime = applyMobileDateTime;
 window.openBulkTimeModal = openBulkTimeModal;
 window.triggerImageUpload = triggerImageUpload;
 window.handleImageUpload = handleImageUpload;
-window.addNewTemplate = addNewTemplate;
 window.resetTaskTitle = resetTaskTitle;
 
 // Helper function to parse time strings for comparison
