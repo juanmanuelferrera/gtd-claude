@@ -936,6 +936,13 @@
         // Expose translateUI to global scope for use by missing-functions.js
         window.translateUI = translateUI;
         
+        // Expose switchLanguage to global scope (override the one in missing-functions.js)
+        window.switchLanguage = switchLanguage;
+        
+        // Expose other language-related functions
+        window.updateLanguageButtonStyles = updateLanguageButtonStyles;
+        window.updateHeaderLanguageButton = updateHeaderLanguageButton;
+        
         // CRITICAL: Define authentication functions FIRST before any other code
         const API_BASE = window.location.hostname.includes('localhost') 
             ? 'http://localhost:8787' 
