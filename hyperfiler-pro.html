@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.2 [Deploy-20250915-step2-service-worker]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.2 [Deploy-20250915-step3-offline-sync]');
     
     // Register Service Worker for offline support
     if ('serviceWorker' in navigator) {
@@ -6028,6 +6028,7 @@
     <script src="js/tasks.js?v=20250914-undo-limit-5"></script>
     <script src="js/ui.js?v=20250914-drag-fix-FINAL"></script>
     <script src="js/sync.js?v=1736363000"></script>
+    <script src="js/offline-sync.js?v=20250915-step3"></script>
     <script src="js/missing-functions.js?v=20250915-full-save-fix"></script>
     <script src="js/natural-language.js?v=1736363000"></script>
     <script src="js/patches.js?v=1736363000"></script>
@@ -6584,6 +6585,18 @@
         
         // Also update periodically to catch any missed changes
         setInterval(updateMobileDateDisplay, 5000);
+        
+        // Initialize offline sync system (Step 3 - PWA)
+        if (typeof window.offlineSync !== 'undefined' && window.offlineSync.initialize) {
+            setTimeout(() => {
+                try {
+                    window.offlineSync.initialize();
+                    console.log('🔄 Offline sync system initialized');
+                } catch (error) {
+                    console.error('❌ Failed to initialize offline sync:', error);
+                }
+            }, 1000); // Wait for other systems to load first
+        }
         
         console.log('✅ Non-intrusive date display system loaded');
     });

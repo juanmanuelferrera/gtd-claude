@@ -2,7 +2,7 @@
 // Version 1.0 - App Shell Caching Only
 
 const CACHE_NAME = 'hyperfiler-v1.3.2-shell';
-const CACHE_VERSION = '20250915-step2';
+const CACHE_VERSION = '20250915-step3';
 
 // App Shell - Critical files for offline functionality
 const APP_SHELL = [
@@ -12,6 +12,7 @@ const APP_SHELL = [
   '/js/ui.js', 
   '/js/missing-functions.js',
   '/js/sync.js',
+  '/js/offline-sync.js',
   '/js/auth.js',
   '/js/natural-language.js',
   '/js/patches.js',
