@@ -15128,51 +15128,71 @@
                     console.log('✅ Updated task in array at index:', existingIndex);
                 }
                 
-                // Save to localStorage
+                // Save to localStorage immediately
                 saveTasksToLocalStorage();
-                
-                // Sync to cloud
-                await uploadAllTasks();
-                    
                 sortTasks();
                 
-                console.log('🔄 Refreshing view:', currentView);
+                console.log('🔄 Refreshing view IMMEDIATELY:', currentView);
                 
-                // Refresh views based on current view
+                // IMMEDIATELY refresh views BEFORE cloud sync
                 if (currentView === 'today') {
                     renderTodayView();
                 } else if (currentView === 'week') {
                     renderWeekView();
                 } else if (currentView === 'calendar') {
                     renderCalendar();
-                    console.log('✅ Calendar view refreshed');
+                    console.log('✅ Calendar view refreshed IMMEDIATELY');
                 } else {
                     renderCurrentView();
                 }
                 
-                // Show brief success notification
+                // Sync to cloud in background (don't await)
+                uploadAllTasks().then(() => {
+                    console.log('☁️ Cloud sync completed in background');
+                }).catch(err => {
+                    console.error('☁️ Cloud sync failed:', err);
+                });
+                
+                // Show smaller, less intrusive success notification
                 const notification = document.createElement('div');
                 notification.style.cssText = `
                     position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #d4edda;
-                    border: 1px solid #c3e6cb;
-                    color: #155724;
-                    padding: 10px 15px;
-                    border-radius: 5px;
-                    z-index: 1000;
-                    font-size: 14px;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(40, 167, 69, 0.95);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    z-index: 10000;
+                    font-size: 13px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                    animation: slideUp 0.3s ease-out;
                 `;
-                notification.textContent = `✅ Moved "${taskTitle}" to ${formatDate(newDate)}`;
+                notification.textContent = `✓ Moved to ${formatDate(newDate)}`;
                 document.body.appendChild(notification);
                 
-                // Remove notification after 3 seconds
+                // Add animation
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes slideUp {
+                        from { transform: translateX(-50%) translateY(100%); opacity: 0; }
+                        to { transform: translateX(-50%) translateY(0); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Remove notification after 2 seconds
                 setTimeout(() => {
                     if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
+                        notification.style.animation = 'slideUp 0.3s ease-out reverse';
+                        setTimeout(() => {
+                            if (notification.parentNode) {
+                                notification.parentNode.removeChild(notification);
+                            }
+                        }, 300);
                     }
-                }, 3000);
+                }, 2000);
                 
             } catch (error) {
                 console.error('❌ Error moving task:', error);
