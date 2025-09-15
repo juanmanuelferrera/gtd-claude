@@ -9212,6 +9212,9 @@
                 setTimeout(() => { window.justModifiedTasks = false; }, 5000);
             }
         }
+        
+        // Make deleteRepeatSeries globally available
+        window.deleteRepeatSeries = deleteRepeatSeries;
         // Refresh repeat view
         function refreshRepeatView() {
             renderRepeatView();
