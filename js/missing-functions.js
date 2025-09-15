@@ -1415,7 +1415,7 @@ function openDateTimeModal() {
         const defaultDate = currentDate || getLocalDateString(new Date());
         const defaultTime = currentTime || '';
         
-        // Initialize the new iOS-style inputs
+        // Initialize the simple inputs
         const desktopDateInput = document.getElementById('desktopDateInput');
         const desktopTimeInput = document.getElementById('desktopTimeInput');
         
@@ -1425,9 +1425,6 @@ function openDateTimeModal() {
         if (desktopTimeInput) {
             desktopTimeInput.value = defaultTime;
         }
-        
-        // Update the preview
-        updateSimpleDateTime();
         
         // Detect device type and show appropriate version
         const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -4672,49 +4669,10 @@ window.applyDesktopDateTime = applyDesktopDateTime;
 window.applyMobileDateTime = applyMobileDateTime;
 window.openBulkTimeModal = openBulkTimeModal;
 
-// New simplified iOS-style date/time functions
+// Simplified date/time function
 function updateSimpleDateTime() {
-    const dateInput = document.getElementById('desktopDateInput');
-    const timeInput = document.getElementById('desktopTimeInput');
-    const preview = document.getElementById('desktopDateTimePreview');
-    
-    if (!dateInput || !timeInput || !preview) return;
-    
-    const date = dateInput.value;
-    const time = timeInput.value;
-    
-    if (date && time) {
-        const dateObj = new Date(date + 'T' + time);
-        const formattedDate = dateObj.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
-        const formattedTime = dateObj.toLocaleTimeString('en-US', { 
-            hour: 'numeric', 
-            minute: '2-digit', 
-            hour12: true 
-        });
-        preview.textContent = `${formattedDate} at ${formattedTime}`;
-    } else if (date) {
-        const dateObj = new Date(date);
-        const formattedDate = dateObj.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
-        preview.textContent = `${formattedDate} (no time)`;
-    } else if (time) {
-        preview.textContent = `Today at ${new Date('2000-01-01T' + time).toLocaleTimeString('en-US', { 
-            hour: 'numeric', 
-            minute: '2-digit', 
-            hour12: true 
-        })}`;
-    } else {
-        preview.textContent = 'No date selected';
-    }
+    // Simple function - no preview needed since modal is so simple now
+    console.log('📅 Date/time inputs updated');
 }
 
 function setQuickTime(timeString) {
@@ -4805,6 +4763,157 @@ window.updateSimpleDateTime = updateSimpleDateTime;
 window.setQuickTime = setQuickTime;
 window.clearDateTime = clearDateTime;
 window.applySimpleDateTime = applySimpleDateTime;
+
+// Mobile swipe gesture functions
+function toggleMobileTimeDropdown(taskId, event) {
+    console.log('📱 Mobile swipe right detected - moving task to tomorrow:', taskId);
+    
+    // Find the task element
+    const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+    if (!taskElement) {
+        console.error('❌ Task element not found:', taskId);
+        return;
+    }
+    
+    // Show visual feedback - task moving to tomorrow
+    showSwipeToTomorrowFeedback(taskElement, taskId);
+}
+
+function showSwipeToTomorrowFeedback(taskElement, taskId) {
+    // Create and show visual feedback overlay
+    const originalText = taskElement.innerHTML;
+    const originalBackground = taskElement.style.background;
+    
+    // Add visual cue that task is moving to tomorrow
+    taskElement.style.transition = 'all 0.3s ease';
+    taskElement.style.background = 'linear-gradient(45deg, #4CAF50, #66BB6A)';
+    taskElement.style.color = 'white';
+    taskElement.style.transform = 'scale(0.95)';
+    
+    // Create temporary overlay with feedback
+    const overlay = document.createElement('div');
+    overlay.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; font-weight: 600;">
+            <span style="font-size: 16px;">📅</span>
+            <span>Moving to Tomorrow</span>
+            <div style="width: 20px; height: 20px; border: 2px solid white; border-top: 2px solid transparent; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+        </div>
+        <style>
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
+    `;
+    overlay.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(76, 175, 80, 0.95);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        z-index: 100;
+        backdrop-filter: blur(2px);
+    `;
+    
+    // Make task element relative for overlay positioning
+    const originalPosition = taskElement.style.position;
+    taskElement.style.position = 'relative';
+    taskElement.appendChild(overlay);
+    
+    // Delay the task by 1 day after visual feedback
+    setTimeout(async () => {
+        try {
+            // Actually delay the task by 1 day
+            await delayTaskByDays(taskId, 1);
+            
+            // Show success feedback
+            overlay.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; font-weight: 600;">
+                    <span style="font-size: 16px;">✅</span>
+                    <span>Moved to Tomorrow!</span>
+                </div>
+            `;
+            overlay.style.background = 'rgba(76, 175, 80, 0.95)';
+            
+            // Hide overlay after success message
+            setTimeout(() => {
+                // Restore original appearance
+                taskElement.style.background = originalBackground;
+                taskElement.style.color = '';
+                taskElement.style.transform = '';
+                taskElement.style.position = originalPosition;
+                
+                // Remove overlay
+                if (overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+                
+                // Refresh the view to show updated task
+                if (typeof renderCurrentView === 'function') {
+                    renderCurrentView();
+                }
+            }, 800);
+            
+        } catch (error) {
+            console.error('❌ Error delaying task:', error);
+            
+            // Show error feedback
+            overlay.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; font-weight: 600;">
+                    <span style="font-size: 16px;">❌</span>
+                    <span>Failed to move</span>
+                </div>
+            `;
+            overlay.style.background = 'rgba(244, 67, 54, 0.95)';
+            
+            // Restore original appearance after error
+            setTimeout(() => {
+                taskElement.style.background = originalBackground;
+                taskElement.style.color = '';
+                taskElement.style.transform = '';
+                taskElement.style.position = originalPosition;
+                
+                if (overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+            }, 1500);
+        }
+    }, 1000);
+}
+
+async function delayTaskByDays(taskId, days) {
+    console.log(`📅 Delaying task ${taskId} by ${days} days`);
+    
+    // Find the task in the current tasks array
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) {
+        throw new Error('Task not found: ' + taskId);
+    }
+    
+    // Calculate new date
+    const currentDate = task.dueDate ? new Date(task.dueDate) : new Date();
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() + days);
+    
+    // Update the task
+    task.dueDate = getLocalDateString(newDate);
+    
+    // Save tasks
+    await saveTasks();
+    
+    console.log(`✅ Task ${taskId} delayed to ${task.dueDate}`);
+}
+
+// Make mobile swipe functions globally available
+window.toggleMobileTimeDropdown = toggleMobileTimeDropdown;
+window.showSwipeToTomorrowFeedback = showSwipeToTomorrowFeedback;
+window.delayTaskByDays = delayTaskByDays;
 window.triggerImageUpload = triggerImageUpload;
 window.handleImageUpload = handleImageUpload;
 window.resetTaskTitle = resetTaskTitle;

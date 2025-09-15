@@ -5171,13 +5171,83 @@
                     currentSwipeElement.style.transform = `translateX(${limitedDeltaX * 0.4}px)`;
                     currentSwipeElement.style.transition = 'none';
                     
-                    // Show action hint
+                    // Show enhanced action hints
                     if (deltaX > 30) {
-                        currentSwipeElement.style.background = 'rgba(255, 193, 7, 0.15)';
+                        // Swiping right - show "Move to Tomorrow" indication
+                        currentSwipeElement.style.background = 'linear-gradient(90deg, rgba(76, 175, 80, 0.8), rgba(76, 175, 80, 0.2))';
+                        currentSwipeElement.style.boxShadow = '2px 0 8px rgba(76, 175, 80, 0.4)';
+                        
+                        // Add or update visual hint
+                        let hint = currentSwipeElement.querySelector('.swipe-hint');
+                        if (!hint) {
+                            hint = document.createElement('div');
+                            hint.className = 'swipe-hint';
+                            hint.style.cssText = `
+                                position: absolute;
+                                left: 15px;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                color: white;
+                                font-size: 13px;
+                                font-weight: 700;
+                                pointer-events: none;
+                                z-index: 10;
+                                text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+                                display: flex;
+                                align-items: center;
+                                gap: 6px;
+                            `;
+                            currentSwipeElement.style.position = 'relative';
+                            currentSwipeElement.appendChild(hint);
+                        }
+                        hint.innerHTML = `
+                            <span style="font-size: 16px;">📅</span>
+                            <span>Tomorrow</span>
+                        `;
+                        hint.style.opacity = Math.min(1, Math.abs(limitedDeltaX) / 60);
+                        
                     } else if (deltaX < -30) {
-                        currentSwipeElement.style.background = 'rgba(220, 53, 69, 0.15)';
+                        // Swiping left - show "Delete" indication
+                        currentSwipeElement.style.background = 'linear-gradient(90deg, rgba(244, 67, 54, 0.2), rgba(244, 67, 54, 0.8))';
+                        currentSwipeElement.style.boxShadow = '-2px 0 8px rgba(244, 67, 54, 0.4)';
+                        
+                        // Add or update visual hint
+                        let hint = currentSwipeElement.querySelector('.swipe-hint');
+                        if (!hint) {
+                            hint = document.createElement('div');
+                            hint.className = 'swipe-hint';
+                            hint.style.cssText = `
+                                position: absolute;
+                                right: 15px;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                color: white;
+                                font-size: 13px;
+                                font-weight: 700;
+                                pointer-events: none;
+                                z-index: 10;
+                                text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+                                display: flex;
+                                align-items: center;
+                                gap: 6px;
+                            `;
+                            currentSwipeElement.style.position = 'relative';
+                            currentSwipeElement.appendChild(hint);
+                        }
+                        hint.innerHTML = `
+                            <span style="font-size: 16px;">🗑️</span>
+                            <span>Delete</span>
+                        `;
+                        hint.style.opacity = Math.min(1, Math.abs(limitedDeltaX) / 60);
+                        
                     } else {
+                        // Reset background when not swiping enough
                         currentSwipeElement.style.background = '';
+                        currentSwipeElement.style.boxShadow = '';
+                        const hint = currentSwipeElement.querySelector('.swipe-hint');
+                        if (hint) {
+                            hint.remove();
+                        }
                     }
                 }
             }
