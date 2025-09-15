@@ -4845,78 +4845,40 @@ function applyCalendarDateTime() {
     // Close the date/time modal
     closeDateTimeModal();
     
-    // Always try to save and close the edit task modal
+    // Save and close the edit task modal if it's open
     const taskModal = document.getElementById('taskModal');
-    // Try multiple ways to find the task ID
-    const taskIdToSave = window.currentEditTaskId || window.currentDateTimeTaskId || window.currentTaskId;
-    
-    // If we have a task ID, save the task
-    if (taskIdToSave) {
-        console.log('💾 Saving task from calendar Set button:', taskIdToSave);
-        console.log('📅 Date to save:', window.selectedModalDate);
-        console.log('⏰ Time to save:', window.selectedModalTime);
-        
-        // Get the task - check both string and number comparisons
-        console.log('🔍 Looking for task with ID:', taskIdToSave, 'Type:', typeof taskIdToSave);
-        console.log('🔍 Available task IDs:', tasks.map(t => ({ id: t.id, type: typeof t.id, title: t.title.substring(0, 30) })));
-        
-        let task = tasks.find(t => t.id === taskIdToSave);
-        // Try again with string/number conversion
-        if (!task) {
-            task = tasks.find(t => t.id == taskIdToSave); // Loose equality
-        }
-        
+    if (taskModal && taskModal.style.display !== 'none' && window.currentEditTaskId) {
+        // Get the task
+        const task = tasks.find(t => t.id === window.currentEditTaskId);
         if (task) {
-            console.log('✅ Found task:', task.title);
             // Save all the field values
             const titleInput = document.getElementById('editTaskTitle');
             const notesInput = document.getElementById('editTaskNotes');
             const isEventInput = document.getElementById('editTaskIsEvent');
             const repeatInput = document.getElementById('editTaskRepeat');
             
-            // Save title and notes
-            if (titleInput && titleInput.value) task.title = titleInput.value;
+            if (titleInput) task.title = titleInput.value;
             if (notesInput) task.notes = notesInput.value;
             if (isEventInput) task.isEvent = isEventInput.checked;
             if (repeatInput) task.repeat = repeatInput.value;
             
-            // Date and time from calendar modal
-            if (window.selectedModalDate) {
-                task.date = window.selectedModalDate;
-                console.log('📅 Updated date:', window.selectedModalDate);
-            }
-            if (window.selectedModalTime) {
-                task.time = window.selectedModalTime;
-                console.log('⏰ Updated time:', window.selectedModalTime);
-            }
-            
-            console.log('✅ Task updated:', {
-                title: task.title,
-                date: task.date,
-                time: task.time,
-                notes: task.notes?.substring(0, 50)
-            });
+            // Date and time are already set by the calendar modal
+            if (selectedModalDate) task.date = selectedModalDate;
+            if (selectedModalTime) task.time = selectedModalTime;
             
             // Save tasks to localStorage
             saveTasks();
             
-            // Refresh the view
+            // Re-render the view
             if (typeof renderCurrentView === 'function') {
                 renderCurrentView();
             }
-        } else {
-            console.error('❌ Task not found with ID:', taskIdToSave);
-            console.error('❌ Available task IDs:', tasks.map(t => t.id));
         }
-    } else {
-        console.warn('⚠️ No task ID found to save');
-        console.warn('⚠️ currentEditTaskId:', window.currentEditTaskId);
-        console.warn('⚠️ currentDateTimeTaskId:', window.currentDateTimeTaskId);
+        
+        // Close the modal
+        taskModal.style.display = 'none';
+        window.currentEditTaskId = null;
     }
-    
-    // Don't close the task modal - just update the display to show new date/time
-    // The user should stay in the edit modal to continue editing other fields
-    console.log('✅ Date/time set, returning to edit modal');
 }
 
 // Make calendar functions globally available
