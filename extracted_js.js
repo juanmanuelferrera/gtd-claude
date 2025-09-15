@@ -15138,10 +15138,33 @@
                 if (currentView === 'today') {
                     renderTodayView();
                 } else if (currentView === 'week') {
+                    // Clear week filters too
+                    const weekSearchInput = document.getElementById('weekTaskSearch');
+                    if (weekSearchInput) {
+                        weekSearchInput.value = '';
+                    }
+                    activeWeekTemplateFilter = null;
+                    window.currentWeekFilteredTasks = null;
+                    window.currentWeekSearchTerm = null;
                     renderWeekView();
                 } else if (currentView === 'calendar') {
+                    // CRITICAL: Clear ALL filters before rendering so the moved task appears!
+                    // Clear search
+                    const monthSearchInput = document.getElementById('monthTaskSearch');
+                    if (monthSearchInput) {
+                        monthSearchInput.value = '';
+                    }
+                    
+                    // Clear template filter
+                    activeMonthTemplateFilter = null;
+                    
+                    // Clear filtered tasks cache
+                    window.currentMonthFilteredTasks = null;
+                    window.currentMonthSearchTerm = null;
+                    
+                    // Now render with all tasks visible
                     renderCalendar();
-                    console.log('✅ Calendar view refreshed IMMEDIATELY');
+                    console.log('✅ Calendar view refreshed IMMEDIATELY (filters cleared)');
                 } else {
                     renderCurrentView();
                 }
