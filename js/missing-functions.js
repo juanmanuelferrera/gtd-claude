@@ -4845,13 +4845,24 @@ function applyCalendarDateTime() {
     // Close the date/time modal
     closeDateTimeModal();
     
-    // Update the display in the edit modal but keep it open
+    // Save all changes and close both modals
     const taskModal = document.getElementById('taskModal');
     if (taskModal && taskModal.style.display !== 'none' && window.currentEditTaskId) {
         // Get the task
         const task = tasks.find(t => t.id === window.currentEditTaskId);
         if (task) {
-            // Update the date and time fields in the task
+            // Save all the field values from the edit modal
+            const titleInput = document.getElementById('editTaskTitle');
+            const notesInput = document.getElementById('editTaskNotes');
+            const isEventInput = document.getElementById('editTaskIsEvent');
+            const repeatInput = document.getElementById('editTaskRepeat');
+            
+            if (titleInput) task.title = titleInput.value;
+            if (notesInput) task.notes = notesInput.value;
+            if (isEventInput) task.isEvent = isEventInput.checked;
+            if (repeatInput) task.repeat = repeatInput.value;
+            
+            // Update the date and time from calendar modal
             if (window.selectedModalDate) task.date = window.selectedModalDate;
             if (window.selectedModalTime) task.time = window.selectedModalTime;
             
@@ -4864,8 +4875,10 @@ function applyCalendarDateTime() {
             }
         }
         
-        // Don't close the modal - keep it open so user can continue editing other fields
-        console.log('✅ Date/time set, staying in edit modal');
+        // Close the edit modal and clear the task ID
+        taskModal.style.display = 'none';
+        window.currentEditTaskId = null;
+        console.log('✅ Set button: saved changes and closed both modals');
     }
 }
 
