@@ -4847,45 +4847,47 @@ function applyCalendarDateTime() {
     
     // Save all changes and close both modals
     const taskModal = document.getElementById('taskModal');
-    if (taskModal && taskModal.style.display !== 'none' && window.currentEditTaskId) {
-        // Get the task
-        const task = tasks.find(t => t.id === window.currentEditTaskId);
-        if (task) {
-            // Save all the field values from the edit modal
-            const titleInput = document.getElementById('editTaskTitle');
-            const notesInput = document.getElementById('editTaskNotes');
-            const isEventInput = document.getElementById('editTaskIsEvent');
-            const repeatInput = document.getElementById('editTaskRepeat');
-            
-            if (titleInput) task.title = titleInput.value;
-            if (notesInput) task.notes = notesInput.value;
-            if (isEventInput) task.isEvent = isEventInput.checked;
-            if (repeatInput) task.repeat = repeatInput.value;
-            
-            // Update the date and time from calendar modal
-            if (window.selectedModalDate) task.date = window.selectedModalDate;
-            if (window.selectedModalTime) task.time = window.selectedModalTime;
-            
-            // Save tasks to localStorage
-            saveTasks();
-            
-            // Re-render the view
-            if (typeof renderCurrentView === 'function') {
-                renderCurrentView();
+    
+    // Always close the edit modal if it's visible, regardless of currentEditTaskId
+    if (taskModal && taskModal.style.display !== 'none') {
+        // Try to save the task if we have access to it
+        const taskIdToSave = window.currentEditTaskId || window.currentDateTimeTaskId;
+        if (taskIdToSave) {
+            // Get the task
+            const task = tasks.find(t => t.id == taskIdToSave); // Use loose equality
+            if (task) {
+                // Save all the field values from the edit modal
+                const titleInput = document.getElementById('editTaskTitle');
+                const notesInput = document.getElementById('editTaskNotes');
+                const isEventInput = document.getElementById('editTaskIsEvent');
+                const repeatInput = document.getElementById('editTaskRepeat');
+                
+                if (titleInput) task.title = titleInput.value;
+                if (notesInput) task.notes = notesInput.value;
+                if (isEventInput) task.isEvent = isEventInput.checked;
+                if (repeatInput) task.repeat = repeatInput.value;
+                
+                // Update the date and time from calendar modal
+                if (window.selectedModalDate) task.date = window.selectedModalDate;
+                if (window.selectedModalTime) task.time = window.selectedModalTime;
+                
+                // Save tasks to localStorage
+                saveTasks();
+                
+                // Re-render the view
+                if (typeof renderCurrentView === 'function') {
+                    renderCurrentView();
+                }
             }
         }
         
-        // Close the edit modal immediately and clear the task ID
+        // Always close the edit modal regardless of save success
         taskModal.style.display = 'none';
         taskModal.classList.add('hidden');
         window.currentEditTaskId = null;
+        window.currentDateTimeTaskId = null;
         
-        // Also try to close using any other methods
-        if (typeof closeTaskModal === 'function') {
-            closeTaskModal();
-        }
-        
-        console.log('✅ Set button: saved changes and closed both modals');
+        console.log('✅ Set button: closed both modals');
     }
 }
 
