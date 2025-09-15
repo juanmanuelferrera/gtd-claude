@@ -1159,6 +1159,8 @@
         let currentTodayDate = new Date();
         let draggedTask = null;
         let currentEditTaskId = null;
+        // Expose currentEditTaskId globally for calendar modal
+        window.currentEditTaskId = null;
         let undoStack = [];
         let maxUndoSteps = 10;
         // SECURITY: Client-side input validation functions
@@ -3570,6 +3572,7 @@
             
             // Set other modal properties without delays
             currentEditTaskId = null;
+            window.currentEditTaskId = null;
             const modalTitle = document.querySelector('#taskModal h3');
             if (modalTitle) {
                 modalTitle.textContent = '➕ Add New Task';
@@ -14164,6 +14167,7 @@
             console.log('✅ Found task:', task);
             
             currentEditTaskId = taskId;
+            window.currentEditTaskId = taskId;
             
             // Reset manual time flag when opening edit modal
             window.manualTimeSet = false;
@@ -14301,6 +14305,7 @@
             if (event && event.target !== event.currentTarget) return;
             document.getElementById('taskModal').style.display = 'none';
             currentEditTaskId = null;
+            window.currentEditTaskId = null;
         }
         async function deleteTaskFromModal() {
             if (!currentEditTaskId) return;
@@ -22057,6 +22062,7 @@
             
             // Set global variable to indicate we're adding, not editing
             currentEditTaskId = null;
+            window.currentEditTaskId = null;
             
             // Show the modal
             document.getElementById('taskModal').style.display = 'block';
