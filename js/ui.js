@@ -3825,20 +3825,26 @@ function renderTodayView() {
                         <span style="font-size: 18px;">${blockName === 'Morning' ? '🌅' : '🌆'}</span>
                         <strong>${blockName} Mega Block</strong>
                         <span style="margin-left: auto; font-size: 12px; color: #666; font-weight: normal;">
-                            ${block.start} - ${block.end} (${block.duration})
+                            ${block.start} - ${block.end} (${block.duration}) • ${block.tasks.length} tasks
                         </span>
                     </div>
                     <div class="time-block-content" id="content-mega-${blockId}" ${isCollapsed ? 'style="display: none;"' : ''}>`;
             
-            // Show planning message for mega blocks
-            html += `
-                <div style="padding: 16px; text-align: center; color: #666; font-style: italic;">
-                    <p>🎯 Dedicated ${blockName.toLowerCase()} time block</p>
-                    <p style="font-size: 12px; margin-top: 8px;">Perfect for focused work, planning, or ${blockName === 'Morning' ? 'morning routines' : 'evening wind-down'}</p>
-                    <div style="margin-top: 12px; padding: 8px; background: rgba(255, 107, 53, 0.05); border-radius: 4px; font-size: 11px;">
-                        💡 Tip: This is a dedicated time slot for deep work and planning. Untimed tasks remain in their own section below.
-                    </div>
-                </div>`;
+            // Render tasks in the mega block
+            if (block.tasks.length > 0) {
+                block.tasks.forEach(task => {
+                    html += renderTaskCard(task);
+                });
+            } else {
+                html += `
+                    <div style="padding: 16px; text-align: center; color: #666; font-style: italic;">
+                        <p>🎯 Dedicated ${blockName.toLowerCase()} time block</p>
+                        <p style="font-size: 12px; margin-top: 8px;">Perfect for focused work, planning, or ${blockName === 'Morning' ? 'morning routines' : 'evening wind-down'}</p>
+                        <div style="margin-top: 12px; padding: 8px; background: rgba(255, 107, 53, 0.05); border-radius: 4px; font-size: 11px;">
+                            💡 Tip: This is a dedicated time slot for deep work and planning.
+                        </div>
+                    </div>`;
+            }
             
             html += `
                     </div>
@@ -3846,8 +3852,33 @@ function renderTodayView() {
         });
     }
 
-    // Render time slots
-    sortedTimes.forEach(time => {
+    // Filter out tasks that are already in mega blocks to avoid duplication
+    let filteredTimeSlots = {};
+    if (isViewingToday) {
+        const megaTimeBlocks = calculateMegaTimeBlocks(timeSlots, untimedTasks);
+        const tasksInMegaBlocks = new Set();
+        
+        // Collect all task IDs that are in mega blocks
+        Object.values(megaTimeBlocks).forEach(block => {
+            block.tasks.forEach(task => {
+                tasksInMegaBlocks.add(task.id);
+            });
+        });
+        
+        // Filter timeSlots to remove tasks that are in mega blocks
+        Object.keys(timeSlots).forEach(time => {
+            const filteredTasks = timeSlots[time].filter(task => !tasksInMegaBlocks.has(task.id));
+            if (filteredTasks.length > 0) {
+                filteredTimeSlots[time] = filteredTasks;
+            }
+        });
+    } else {
+        filteredTimeSlots = timeSlots;
+    }
+
+    // Render time slots (filtered to avoid duplicates with mega blocks)
+    const filteredSortedTimes = Object.keys(filteredTimeSlots).sort();
+    filteredSortedTimes.forEach(time => {
         // Tasks are already filtered to exclude deleted ones, no sorting needed by status
         
         // Check if this is the current time slot
@@ -3874,7 +3905,7 @@ function renderTodayView() {
                 </div>
                 <div class="time-block-content" id="content-${time}">`;
         
-        timeSlots[time].forEach(task => {
+        filteredTimeSlots[time].forEach(task => {
             html += renderTaskCard(task);
         });
         
@@ -3883,8 +3914,25 @@ function renderTodayView() {
             </div>`;
     });
     
-    // Render untimed tasks
-    if (untimedTasks.length > 0) {
+    // Filter untimed tasks to avoid showing them in mega blocks AND untimed section
+    let filteredUntimedTasks = untimedTasks;
+    if (isViewingToday) {
+        const megaTimeBlocks = calculateMegaTimeBlocks(timeSlots, untimedTasks);
+        const tasksInMegaBlocks = new Set();
+        
+        // Collect all task IDs that are in mega blocks
+        Object.values(megaTimeBlocks).forEach(block => {
+            block.tasks.forEach(task => {
+                tasksInMegaBlocks.add(task.id);
+            });
+        });
+        
+        // Filter untimed tasks to remove those already in mega blocks
+        filteredUntimedTasks = untimedTasks.filter(task => !tasksInMegaBlocks.has(task.id));
+    }
+
+    // Render untimed tasks (filtered to avoid duplicates)
+    if (filteredUntimedTasks.length > 0) {
         // Check collapse state from localStorage
         const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
         const isCollapsed = collapseStates['untimed'] === true;
@@ -3912,7 +3960,7 @@ function renderTodayView() {
                 </div>
                 <div class="time-block-content" id="content-untimed" style="display: ${isCollapsed ? 'none' : 'block'};">`;
         
-        untimedTasks.forEach(task => {
+        filteredUntimedTasks.forEach(task => {
             html += renderTaskCard(task);
         });
         
