@@ -3781,6 +3781,40 @@ function renderTodayView() {
         }
     }
 
+    // Calculate and render mega time blocks
+    if (isViewingToday) {
+        const megaTimeBlocks = calculateMegaTimeBlocks(timeSlots);
+        
+        Object.keys(megaTimeBlocks).forEach(blockName => {
+            const block = megaTimeBlocks[blockName];
+            const blockId = blockName.toLowerCase();
+            
+            // Check collapse state
+            const collapseStates = JSON.parse(localStorage.getItem('timeblock_collapse_states') || '{}');
+            const isCollapsed = collapseStates[blockId] === true;
+            
+            html += `
+                <div class="time-block mega-time-block" 
+                     data-time="mega-${blockId}"
+                     style="min-height: 80px; position: relative; border: 2px solid #ff6b35; border-radius: 8px; margin-bottom: 16px; background: linear-gradient(145deg, #fff8f5, #fffef9);">
+                    <div class="time-block-header" onclick="toggleTimeBlock('mega-${blockId}')" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 12px; background: rgba(255, 107, 53, 0.1); border-radius: 6px 6px 0 0;">
+                        <span id="arrow-mega-${blockId}" class="group-arrow">${isCollapsed ? '▶' : '▼'}</span>
+                        <span style="font-size: 18px;">${blockName === 'Morning' ? '🌅' : '🌆'}</span>
+                        <strong>${blockName} Mega Block</strong>
+                        <span style="margin-left: auto; font-size: 12px; color: #666; font-weight: normal;">
+                            ${block.start} - ${block.end} (${block.duration})
+                        </span>
+                    </div>
+                    <div class="time-block-content" id="content-mega-${blockId}" ${isCollapsed ? 'style="display: none;"' : ''}>
+                        <div style="padding: 16px; text-align: center; color: #666; font-style: italic;">
+                            <p>🎯 Dedicated ${blockName.toLowerCase()} time block</p>
+                            <p style="font-size: 12px; margin-top: 8px;">Perfect for focused work, planning, or ${blockName === 'Morning' ? 'morning routines' : 'evening wind-down'}</p>
+                        </div>
+                    </div>
+                </div>`;
+        });
+    }
+
     // Render time slots
     sortedTimes.forEach(time => {
         // Tasks are already filtered to exclude deleted ones, no sorting needed by status
