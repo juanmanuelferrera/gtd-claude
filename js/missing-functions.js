@@ -1415,23 +1415,8 @@ function openDateTimeModal() {
         const defaultDate = currentDate || getLocalDateString(new Date());
         const defaultTime = currentTime || '';
         
-        // Initialize the simple inputs
-        const desktopDateInput = document.getElementById('desktopDateInput');
-        const desktopTimeInput = document.getElementById('desktopTimeInput');
-        
-        if (desktopDateInput) {
-            desktopDateInput.value = defaultDate;
-            console.log('📅 Set date input to:', defaultDate);
-        } else {
-            console.error('❌ desktopDateInput not found');
-        }
-        
-        if (desktopTimeInput) {
-            desktopTimeInput.value = defaultTime;
-            console.log('⏰ Set time input to:', defaultTime);
-        } else {
-            console.error('❌ desktopTimeInput not found');
-        }
+        // Initialize the calendar modal
+        initCalendarModal(defaultDate, defaultTime);
         
         // Detect device type and show appropriate version
         const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -4676,52 +4661,180 @@ window.applyDesktopDateTime = applyDesktopDateTime;
 window.applyMobileDateTime = applyMobileDateTime;
 window.openBulkTimeModal = openBulkTimeModal;
 
-// Simplified date/time function
-function updateSimpleDateTime() {
-    // Simple function - no preview needed since modal is so simple now
-    console.log('📅 Date/time inputs updated');
+// Calendar and Time picker variables
+let modalCalendarDate = new Date();
+let selectedModalDate = '';
+let selectedModalTime = '';
+
+// Initialize calendar modal
+function initCalendarModal(currentDate, currentTime) {
+    console.log('🗓️ Initializing calendar modal with:', currentDate, currentTime);
+    
+    // Set current selections
+    selectedModalDate = currentDate || getLocalDateString(new Date());
+    selectedModalTime = currentTime || '';
+    
+    // Set calendar to show the selected month
+    if (currentDate) {
+        modalCalendarDate = new Date(currentDate);
+    } else {
+        modalCalendarDate = new Date();
+    }
+    
+    renderCalendarModal();
+    highlightSelectedTime();
 }
 
-function setQuickTime(timeString) {
-    const timeInput = document.getElementById('desktopTimeInput');
-    if (timeInput) {
-        timeInput.value = timeString;
-        updateSimpleDateTime();
+// Render the calendar grid
+function renderCalendarModal() {
+    const titleEl = document.getElementById('modalCalendarTitle');
+    const daysEl = document.getElementById('modalCalendarDays');
+    
+    if (!titleEl || !daysEl) return;
+    
+    // Update month title
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+    titleEl.textContent = `${monthNames[modalCalendarDate.getMonth()]} ${modalCalendarDate.getFullYear()}`;
+    
+    // Clear previous days
+    daysEl.innerHTML = '';
+    
+    // Get calendar info
+    const year = modalCalendarDate.getFullYear();
+    const month = modalCalendarDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    
+    // Generate 42 days (6 weeks)
+    for (let i = 0; i < 42; i++) {
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + i);
+        
+        const dayElement = document.createElement('button');
+        const dayNum = date.getDate();
+        const isCurrentMonth = date.getMonth() === month;
+        const isToday = date.toDateString() === new Date().toDateString();
+        const isSelected = selectedModalDate === getLocalDateString(date);
+        
+        dayElement.textContent = dayNum;
+        dayElement.onclick = () => selectCalendarDate(getLocalDateString(date));
+        
+        // Styling
+        let styles = 'width: 100%; aspect-ratio: 1; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s ease;';
+        
+        if (!isCurrentMonth) {
+            styles += 'color: #ccc; background: transparent;';
+        } else if (isSelected) {
+            styles += 'background: #007aff; color: white;';
+        } else if (isToday) {
+            styles += 'background: #ff3b30; color: white;';
+        } else {
+            styles += 'background: transparent; color: #333;';
+        }
+        
+        dayElement.style.cssText = styles;
+        dayElement.onmouseover = () => {
+            if (!isSelected && isCurrentMonth) {
+                dayElement.style.background = '#f0f0f0';
+            }
+        };
+        dayElement.onmouseout = () => {
+            if (!isSelected && isCurrentMonth && !isToday) {
+                dayElement.style.background = 'transparent';
+            }
+        };
+        
+        daysEl.appendChild(dayElement);
     }
 }
 
-function clearDateTime() {
-    const dateInput = document.getElementById('desktopDateInput');
-    const timeInput = document.getElementById('desktopTimeInput');
-    
-    if (dateInput) dateInput.value = '';
-    if (timeInput) timeInput.value = '';
-    updateSimpleDateTime();
+// Navigate calendar months
+function navigateCalendar(direction) {
+    modalCalendarDate.setMonth(modalCalendarDate.getMonth() + direction);
+    renderCalendarModal();
 }
 
-function applySimpleDateTime() {
-    const dateInput = document.getElementById('desktopDateInput');
-    const timeInput = document.getElementById('desktopTimeInput');
-    
-    const selectedDate = dateInput ? dateInput.value : '';
-    const selectedTime = timeInput ? timeInput.value : '';
+// Go to today
+function goToCalendarToday() {
+    modalCalendarDate = new Date();
+    selectedModalDate = getLocalDateString(new Date());
+    renderCalendarModal();
+    highlightSelectedTime();
+}
+
+// Select calendar date
+function selectCalendarDate(dateStr) {
+    console.log('📅 Selected date:', dateStr);
+    selectedModalDate = dateStr;
+    renderCalendarModal();
+}
+
+// Select time slot
+function selectTime(timeStr) {
+    console.log('⏰ Selected time:', timeStr);
+    selectedModalTime = timeStr;
+    highlightSelectedTime();
+}
+
+// Clear selected time
+function clearSelectedTime() {
+    console.log('🗑️ Cleared time');
+    selectedModalTime = '';
+    highlightSelectedTime();
+}
+
+// Highlight selected time button
+function highlightSelectedTime() {
+    // Reset all time buttons
+    document.querySelectorAll('.time-btn').forEach(btn => {
+        const timeValue = btn.textContent.trim();
+        
+        // Reset to default colors based on time
+        if (['06:00', '07:00', '08:00', '09:00', '10:00', '11:00'].includes(timeValue)) {
+            if (timeValue === selectedModalTime) {
+                btn.style.cssText = 'background: #007aff; color: white; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 500;';
+            } else {
+                btn.style.cssText = 'background: #e3f2fd; color: #1976d2; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 500;';
+            }
+        } else if (['12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].includes(timeValue)) {
+            if (timeValue === selectedModalTime) {
+                btn.style.cssText = 'background: #f57c00; color: white; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 500;';
+            } else {
+                btn.style.cssText = 'background: #fff3e0; color: #f57c00; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 500;';
+            }
+        } else {
+            if (timeValue === selectedModalTime) {
+                btn.style.cssText = 'background: #7b1fa2; color: white; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 500;';
+            } else {
+                btn.style.cssText = 'background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 500;';
+            }
+        }
+    });
+}
+
+// Apply calendar selection
+function applyCalendarDateTime() {
+    console.log('✅ Applying calendar datetime:', selectedModalDate, selectedModalTime);
     
     // Update the current task being edited
     const taskId = window.currentDateTimeTaskId;
     if (taskId) {
-        if (selectedDate) {
-            updateTaskDate(taskId, selectedDate, { stopPropagation: () => {} });
+        if (selectedModalDate) {
+            updateTaskDate(taskId, selectedModalDate, { stopPropagation: () => {} });
         }
-        if (selectedTime) {
-            updateTaskTime(taskId, selectedTime, { stopPropagation: () => {} });
+        if (selectedModalTime) {
+            updateTaskTime(taskId, selectedModalTime, { stopPropagation: () => {} });
         }
     }
     
     // Update the display in the task modal
     const dateTimeDisplay = document.getElementById('dateTimeDisplay');
     if (dateTimeDisplay) {
-        if (selectedDate && selectedTime) {
-            const dateObj = new Date(selectedDate + 'T' + selectedTime);
+        if (selectedModalDate && selectedModalTime) {
+            const dateObj = new Date(selectedModalDate + 'T' + selectedModalTime);
             const formattedDate = dateObj.toLocaleDateString('en-US', { 
                 month: 'short', 
                 day: 'numeric', 
@@ -4733,22 +4846,14 @@ function applySimpleDateTime() {
                 hour12: true 
             });
             dateTimeDisplay.textContent = `📅 ${formattedDate} ⏰ ${formattedTime}`;
-        } else if (selectedDate) {
-            const dateObj = new Date(selectedDate);
+        } else if (selectedModalDate) {
+            const dateObj = new Date(selectedModalDate);
             const formattedDate = dateObj.toLocaleDateString('en-US', { 
                 month: 'short', 
                 day: 'numeric', 
                 year: 'numeric' 
             });
             dateTimeDisplay.textContent = `📅 ${formattedDate}`;
-        } else if (selectedTime) {
-            const timeObj = new Date('2000-01-01T' + selectedTime);
-            const formattedTime = timeObj.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit', 
-                hour12: true 
-            });
-            dateTimeDisplay.textContent = `⏰ ${formattedTime}`;
         } else {
             dateTimeDisplay.textContent = 'Select date & time...';
         }
@@ -4758,18 +4863,23 @@ function applySimpleDateTime() {
     const editTaskDateOnly = document.getElementById('editTaskDateOnly');
     const editTaskTimeOnly = document.getElementById('editTaskTimeOnly');
     
-    if (editTaskDateOnly) editTaskDateOnly.value = selectedDate;
-    if (editTaskTimeOnly) editTaskTimeOnly.value = selectedTime;
+    if (editTaskDateOnly) editTaskDateOnly.value = selectedModalDate;
+    if (editTaskTimeOnly) editTaskTimeOnly.value = selectedModalTime;
     
     // Close the modal
     closeDateTimeModal();
 }
 
-// Make new functions globally available
-window.updateSimpleDateTime = updateSimpleDateTime;
-window.setQuickTime = setQuickTime;
-window.clearDateTime = clearDateTime;
-window.applySimpleDateTime = applySimpleDateTime;
+// Make calendar functions globally available
+window.initCalendarModal = initCalendarModal;
+window.renderCalendarModal = renderCalendarModal;
+window.navigateCalendar = navigateCalendar;
+window.goToCalendarToday = goToCalendarToday;
+window.selectCalendarDate = selectCalendarDate;
+window.selectTime = selectTime;
+window.clearSelectedTime = clearSelectedTime;
+window.highlightSelectedTime = highlightSelectedTime;
+window.applyCalendarDateTime = applyCalendarDateTime;
 
 // Mobile swipe gesture functions
 function toggleMobileTimeDropdown(taskId, event) {
