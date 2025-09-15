@@ -4496,7 +4496,7 @@ function renderRepeatView() {
                         ${series.representative.notes ? `<div style="font-size: 13px; color: #6c757d; line-height: 1.3;">${series.representative.notes.substring(0, 80)}${series.representative.notes.length > 80 ? '...' : ''}</div>` : ''}
                     </div>
                     <div style="margin-left: 16px;">
-                        <button onclick="${typeof deleteRepeatSeries === 'function' ? `deleteRepeatSeries('${series.representative.id}')` : 'return false'}" 
+                        <button onclick="deleteRepeatSeries('${series.representative.id}')" 
                                 style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; transition: background 0.2s;"
                                 onmouseover="this.style.background='#c82333'"
                                 onmouseout="this.style.background='#dc3545'"
@@ -4515,6 +4515,63 @@ function renderRepeatView() {
     html += `</div>`;
     container.innerHTML = html;
 }
+
+/**
+ * Delete recurring task series
+ */
+async function deleteRepeatSeries(taskId) {
+    const representativeTask = tasks.find(t => t.id == taskId);
+    if (!representativeTask) {
+        console.log('❌ Task not found for deletion:', taskId);
+        return;
+    }
+    
+    const taskTitle = representativeTask.title;
+    
+    if (confirm(`Delete the recurring task "${taskTitle}"?\n\nThis will remove all instances of this recurring task.`)) {
+        console.log(`🗑️ Deleting repeat series: "${taskTitle}"`);
+        
+        // Save state for undo
+        if (typeof saveStateForUndo === 'function') {
+            saveStateForUndo('delete repeat series');
+        }
+        
+        // Find and remove all tasks with the same title
+        const allTasksWithTitle = tasks.filter(task => task.title === taskTitle);
+        console.log(`🗑️ Found ${allTasksWithTitle.length} tasks to delete`);
+        
+        // Remove all tasks with the same title
+        tasks = tasks.filter(task => task.title !== taskTitle);
+        
+        // Save to localStorage and sync
+        if (typeof saveTasksToLocalStorage === 'function') {
+            saveTasksToLocalStorage();
+        }
+        window.justModifiedTasks = true;
+        
+        // Sync to server
+        try {
+            if (typeof uploadAllTasks === 'function') {
+                await uploadAllTasks();
+            }
+            console.log(`✅ Successfully deleted ${allTasksWithTitle.length} repeat tasks`);
+        } catch (error) {
+            console.error('❌ Error syncing deleted repeat tasks:', error);
+        }
+        
+        // Update all views
+        renderRepeatView();
+        if (typeof renderCurrentView === 'function') {
+            renderCurrentView();
+        }
+        
+        // Reset sync flag after delay
+        setTimeout(() => { window.justModifiedTasks = false; }, 5000);
+    }
+}
+
+// Make deleteRepeatSeries globally available
+window.deleteRepeatSeries = deleteRepeatSeries;
 
 /**
  * Render Settings View
