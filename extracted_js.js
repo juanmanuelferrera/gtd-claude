@@ -15039,7 +15039,12 @@
         }
         function handleDragEnd(e) {
             e.target.classList.remove('dragging');
-            draggedTask = null;
+            
+            // Delay clearing draggedTask to allow drop event to process
+            setTimeout(() => {
+                draggedTask = null;
+            }, 100);
+            
             document.querySelectorAll('.drop-target').forEach(el => {
                 el.classList.remove('drop-target');
             });
@@ -15084,7 +15089,10 @@
             e.preventDefault();
             e.currentTarget.classList.remove('drop-target');
             
-            if (!draggedTask) {
+            // Store task reference immediately to avoid race condition with dragEnd
+            const taskToMove = draggedTask;
+            
+            if (!taskToMove) {
                 console.error('No draggedTask found in handleDrop');
                 return;
             }
@@ -15095,26 +15103,29 @@
                 return;
             }
             
-            if (newDate === draggedTask.dueDate) {
+            if (newDate === taskToMove.dueDate) {
                 return;
             }
             
-            // Store task info before async operations (draggedTask can become null)
-            const taskTitle = draggedTask.title;
-            const taskId = draggedTask.id;
+            // Store task info for logging
+            const taskTitle = taskToMove.title;
+            const taskId = taskToMove.id;
             
             const newDateObj = new Date(newDate);
-            const oldDate = draggedTask.dueDate ? new Date(draggedTask.dueDate) : null;
+            const oldDate = taskToMove.dueDate ? new Date(taskToMove.dueDate) : null;
+            
+            console.log('📅 Moving task:', taskTitle, 'from', taskToMove.dueDate, 'to', newDate);
             
             try {
                 // Update task date
-                draggedTask.dueDate = newDate;
-                draggedTask.updatedAt = new Date().toISOString();
+                taskToMove.dueDate = newDate;
+                taskToMove.updatedAt = new Date().toISOString();
                 
                 // Update in memory tasks array
-                const existingIndex = tasks.findIndex(t => t.id === draggedTask.id);
+                const existingIndex = tasks.findIndex(t => t.id === taskToMove.id);
                 if (existingIndex >= 0) {
-                    tasks[existingIndex] = draggedTask;
+                    tasks[existingIndex] = taskToMove;
+                    console.log('✅ Updated task in array at index:', existingIndex);
                 }
                 
                 // Save to localStorage
@@ -15125,6 +15136,8 @@
                     
                 sortTasks();
                 
+                console.log('🔄 Refreshing view:', currentView);
+                
                 // Refresh views based on current view
                 if (currentView === 'today') {
                     renderTodayView();
@@ -15132,6 +15145,7 @@
                     renderWeekView();
                 } else if (currentView === 'calendar') {
                     renderCalendar();
+                    console.log('✅ Calendar view refreshed');
                 } else {
                     renderCurrentView();
                 }
