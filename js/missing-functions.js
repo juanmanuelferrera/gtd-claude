@@ -1415,6 +1415,20 @@ function openDateTimeModal() {
         const defaultDate = currentDate || getLocalDateString(new Date());
         const defaultTime = currentTime || '';
         
+        // Initialize the new iOS-style inputs
+        const desktopDateInput = document.getElementById('desktopDateInput');
+        const desktopTimeInput = document.getElementById('desktopTimeInput');
+        
+        if (desktopDateInput) {
+            desktopDateInput.value = defaultDate;
+        }
+        if (desktopTimeInput) {
+            desktopTimeInput.value = defaultTime;
+        }
+        
+        // Update the preview
+        updateSimpleDateTime();
+        
         // Detect device type and show appropriate version
         const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
@@ -4657,6 +4671,140 @@ window.closeDateTimeModal = closeDateTimeModal;
 window.applyDesktopDateTime = applyDesktopDateTime;
 window.applyMobileDateTime = applyMobileDateTime;
 window.openBulkTimeModal = openBulkTimeModal;
+
+// New simplified iOS-style date/time functions
+function updateSimpleDateTime() {
+    const dateInput = document.getElementById('desktopDateInput');
+    const timeInput = document.getElementById('desktopTimeInput');
+    const preview = document.getElementById('desktopDateTimePreview');
+    
+    if (!dateInput || !timeInput || !preview) return;
+    
+    const date = dateInput.value;
+    const time = timeInput.value;
+    
+    if (date && time) {
+        const dateObj = new Date(date + 'T' + time);
+        const formattedDate = dateObj.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        const formattedTime = dateObj.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            hour12: true 
+        });
+        preview.textContent = `${formattedDate} at ${formattedTime}`;
+    } else if (date) {
+        const dateObj = new Date(date);
+        const formattedDate = dateObj.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        preview.textContent = `${formattedDate} (no time)`;
+    } else if (time) {
+        preview.textContent = `Today at ${new Date('2000-01-01T' + time).toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            hour12: true 
+        })}`;
+    } else {
+        preview.textContent = 'No date selected';
+    }
+}
+
+function setQuickTime(timeString) {
+    const timeInput = document.getElementById('desktopTimeInput');
+    if (timeInput) {
+        timeInput.value = timeString;
+        updateSimpleDateTime();
+    }
+}
+
+function clearDateTime() {
+    const dateInput = document.getElementById('desktopDateInput');
+    const timeInput = document.getElementById('desktopTimeInput');
+    
+    if (dateInput) dateInput.value = '';
+    if (timeInput) timeInput.value = '';
+    updateSimpleDateTime();
+}
+
+function applySimpleDateTime() {
+    const dateInput = document.getElementById('desktopDateInput');
+    const timeInput = document.getElementById('desktopTimeInput');
+    
+    const selectedDate = dateInput ? dateInput.value : '';
+    const selectedTime = timeInput ? timeInput.value : '';
+    
+    // Update the current task being edited
+    const taskId = window.currentDateTimeTaskId;
+    if (taskId) {
+        if (selectedDate) {
+            updateTaskDate(taskId, selectedDate, { stopPropagation: () => {} });
+        }
+        if (selectedTime) {
+            updateTaskTime(taskId, selectedTime, { stopPropagation: () => {} });
+        }
+    }
+    
+    // Update the display in the task modal
+    const dateTimeDisplay = document.getElementById('dateTimeDisplay');
+    if (dateTimeDisplay) {
+        if (selectedDate && selectedTime) {
+            const dateObj = new Date(selectedDate + 'T' + selectedTime);
+            const formattedDate = dateObj.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+            const formattedTime = dateObj.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit', 
+                hour12: true 
+            });
+            dateTimeDisplay.textContent = `📅 ${formattedDate} ⏰ ${formattedTime}`;
+        } else if (selectedDate) {
+            const dateObj = new Date(selectedDate);
+            const formattedDate = dateObj.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+            dateTimeDisplay.textContent = `📅 ${formattedDate}`;
+        } else if (selectedTime) {
+            const timeObj = new Date('2000-01-01T' + selectedTime);
+            const formattedTime = timeObj.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit', 
+                hour12: true 
+            });
+            dateTimeDisplay.textContent = `⏰ ${formattedTime}`;
+        } else {
+            dateTimeDisplay.textContent = 'Select date & time...';
+        }
+    }
+    
+    // Update the hidden inputs in the task modal
+    const editTaskDateOnly = document.getElementById('editTaskDateOnly');
+    const editTaskTimeOnly = document.getElementById('editTaskTimeOnly');
+    
+    if (editTaskDateOnly) editTaskDateOnly.value = selectedDate;
+    if (editTaskTimeOnly) editTaskTimeOnly.value = selectedTime;
+    
+    // Close the modal
+    closeDateTimeModal();
+}
+
+// Make new functions globally available
+window.updateSimpleDateTime = updateSimpleDateTime;
+window.setQuickTime = setQuickTime;
+window.clearDateTime = clearDateTime;
+window.applySimpleDateTime = applySimpleDateTime;
 window.triggerImageUpload = triggerImageUpload;
 window.handleImageUpload = handleImageUpload;
 window.resetTaskTitle = resetTaskTitle;
