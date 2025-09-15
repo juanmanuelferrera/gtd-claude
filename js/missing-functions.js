@@ -4872,6 +4872,8 @@ function applyCalendarDateTime() {
     // Save and close the edit task modal if it's open
     const taskModal = document.getElementById('taskModal');
     if (taskModal && taskModal.style.display !== 'none' && window.currentEditTaskId) {
+        console.log('💾 Saving task from calendar Set button:', window.currentEditTaskId);
+        
         // Get the task
         const task = tasks.find(t => t.id === window.currentEditTaskId);
         if (task) {
@@ -4881,14 +4883,32 @@ function applyCalendarDateTime() {
             const isEventInput = document.getElementById('editTaskIsEvent');
             const repeatInput = document.getElementById('editTaskRepeat');
             
-            if (titleInput) task.title = titleInput.value;
+            // Store original values for comparison
+            const originalTitle = task.title;
+            const originalDate = task.date;
+            const originalTime = task.time;
+            
+            if (titleInput && titleInput.value) task.title = titleInput.value;
             if (notesInput) task.notes = notesInput.value;
             if (isEventInput) task.isEvent = isEventInput.checked;
             if (repeatInput) task.repeat = repeatInput.value;
             
-            // Date and time are already set by the calendar modal
-            if (selectedModalDate) task.date = selectedModalDate;
-            if (selectedModalTime) task.time = selectedModalTime;
+            // Date and time from calendar modal
+            if (selectedModalDate) {
+                task.date = selectedModalDate;
+                console.log('📅 Updated date:', selectedModalDate);
+            }
+            if (selectedModalTime) {
+                task.time = selectedModalTime;
+                console.log('⏰ Updated time:', selectedModalTime);
+            }
+            
+            console.log('✅ Task updated:', {
+                title: task.title,
+                date: task.date,
+                time: task.time,
+                notes: task.notes?.substring(0, 50)
+            });
             
             // Save tasks to localStorage
             saveTasks();
@@ -4899,9 +4919,12 @@ function applyCalendarDateTime() {
             }
         }
         
-        // Close the modal
-        taskModal.style.display = 'none';
-        window.currentEditTaskId = null;
+        // Close the modal after a small delay to ensure save completes
+        setTimeout(() => {
+            taskModal.style.display = 'none';
+            window.currentEditTaskId = null;
+            console.log('✅ Edit modal closed');
+        }, 50);
     }
 }
 
