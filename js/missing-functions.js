@@ -4866,8 +4866,15 @@ function applyCalendarDateTime() {
     if (editTaskDateOnly) editTaskDateOnly.value = selectedModalDate;
     if (editTaskTimeOnly) editTaskTimeOnly.value = selectedModalTime;
     
-    // Close the modal
+    // Close the date/time modal
     closeDateTimeModal();
+    
+    // Also close the edit task modal
+    const taskModal = document.getElementById('taskModal');
+    if (taskModal && taskModal.style.display !== 'none') {
+        taskModal.style.display = 'none';
+        window.currentEditTaskId = null;
+    }
 }
 
 // Make calendar functions globally available
