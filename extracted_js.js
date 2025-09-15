@@ -15097,7 +15097,8 @@
                 return;
             }
             
-            const newDate = e.currentTarget.dataset.date;
+            const dropTarget = e.currentTarget;
+            const newDate = dropTarget.dataset.date;
             if (!newDate) {
                 console.error('No date found on drop target');
                 return;
@@ -15107,17 +15108,33 @@
                 return;
             }
             
+            // Get the dragged element
+            const draggedElement = document.querySelector('.calendar-task-item.dragging') || 
+                                 document.querySelector('.week-task-item.dragging');
+            
             // Store task info for logging
             const taskTitle = taskToMove.title;
             const taskId = taskToMove.id;
             
-            const newDateObj = new Date(newDate);
-            const oldDate = taskToMove.dueDate ? new Date(taskToMove.dueDate) : null;
-            
             console.log('📅 Moving task:', taskTitle, 'from', taskToMove.dueDate, 'to', newDate);
             
             try {
-                // Update task date
+                // FIRST: Immediately move the DOM element for instant visual feedback
+                if (draggedElement && dropTarget) {
+                    // Clone the element for the new location
+                    const clonedElement = draggedElement.cloneNode(true);
+                    clonedElement.classList.remove('dragging');
+                    
+                    // Add to the new day
+                    dropTarget.appendChild(clonedElement);
+                    
+                    // Remove the original element
+                    draggedElement.remove();
+                    
+                    console.log('✅ DOM element moved immediately');
+                }
+                
+                // Update task date in data
                 taskToMove.dueDate = newDate;
                 taskToMove.updatedAt = new Date().toISOString();
                 
@@ -15132,42 +15149,32 @@
                 saveTasksToLocalStorage();
                 sortTasks();
                 
-                console.log('🔄 Refreshing view IMMEDIATELY:', currentView);
-                
-                // IMMEDIATELY refresh views BEFORE cloud sync
-                if (currentView === 'today') {
-                    renderTodayView();
-                } else if (currentView === 'week') {
-                    // Clear week filters too
-                    const weekSearchInput = document.getElementById('weekTaskSearch');
-                    if (weekSearchInput) {
-                        weekSearchInput.value = '';
+                // Do a FULL re-render after a short delay to ensure proper state
+                setTimeout(() => {
+                    console.log('🔄 Full re-render after DOM update');
+                    
+                    if (currentView === 'today') {
+                        renderTodayView();
+                    } else if (currentView === 'week') {
+                        // Clear filters for clean render
+                        const weekSearchInput = document.getElementById('weekTaskSearch');
+                        if (weekSearchInput) weekSearchInput.value = '';
+                        activeWeekTemplateFilter = null;
+                        window.currentWeekFilteredTasks = null;
+                        window.currentWeekSearchTerm = null;
+                        renderWeekView();
+                    } else if (currentView === 'calendar') {
+                        // Clear filters for clean render
+                        const monthSearchInput = document.getElementById('monthTaskSearch');
+                        if (monthSearchInput) monthSearchInput.value = '';
+                        activeMonthTemplateFilter = null;
+                        window.currentMonthFilteredTasks = null;
+                        window.currentMonthSearchTerm = null;
+                        renderCalendar();
+                    } else {
+                        renderCurrentView();
                     }
-                    activeWeekTemplateFilter = null;
-                    window.currentWeekFilteredTasks = null;
-                    window.currentWeekSearchTerm = null;
-                    renderWeekView();
-                } else if (currentView === 'calendar') {
-                    // CRITICAL: Clear ALL filters before rendering so the moved task appears!
-                    // Clear search
-                    const monthSearchInput = document.getElementById('monthTaskSearch');
-                    if (monthSearchInput) {
-                        monthSearchInput.value = '';
-                    }
-                    
-                    // Clear template filter
-                    activeMonthTemplateFilter = null;
-                    
-                    // Clear filtered tasks cache
-                    window.currentMonthFilteredTasks = null;
-                    window.currentMonthSearchTerm = null;
-                    
-                    // Now render with all tasks visible
-                    renderCalendar();
-                    console.log('✅ Calendar view refreshed IMMEDIATELY (filters cleared)');
-                } else {
-                    renderCurrentView();
-                }
+                }, 100);
                 
                 // Sync to cloud in background (don't await)
                 uploadAllTasks().then(() => {
