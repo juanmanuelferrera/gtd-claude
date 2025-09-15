@@ -3803,6 +3803,118 @@ function showListSelectionForTXTImport() {
     // Placeholder for TXT import
 }
 
+// Handle TXT file import for Lists View
+async function handleNewTXTImport(event) {
+    console.log('📋 Starting TXT import for Lists View');
+    
+    const file = event.target.files[0];
+    if (!file) {
+        console.log('❌ No file selected');
+        return;
+    }
+    
+    try {
+        const text = await file.text();
+        if (!text.trim()) {
+            alert('❌ The selected file is empty.');
+            return;
+        }
+        
+        // Check if we have any lists to import into
+        await loadListSections();
+        let availableLists = [];
+        listSections.forEach(section => {
+            if (section.lists && section.lists.length > 0) {
+                section.lists.forEach(list => {
+                    availableLists.push({
+                        sectionId: section.id,
+                        listId: list.id,
+                        sectionName: section.name,
+                        listName: list.name,
+                        itemCount: list.items ? list.items.length : 0
+                    });
+                });
+            }
+        });
+        
+        if (availableLists.length === 0) {
+            alert('❌ No lists found. Please create a list first before importing.');
+            return;
+        }
+        
+        // Show simple selection dialog for target list
+        let listOptions = availableLists.map(list => 
+            `${list.sectionName} → ${list.listName} (${list.itemCount} items)`
+        ).join('\n');
+        
+        const selectedIndex = prompt(
+            `📋 Choose target list (enter number 1-${availableLists.length}):\n\n` +
+            availableLists.map((list, index) => 
+                `${index + 1}. ${list.sectionName} → ${list.listName} (${list.itemCount} items)`
+            ).join('\n')
+        );
+        
+        const listIndex = parseInt(selectedIndex) - 1;
+        if (isNaN(listIndex) || listIndex < 0 || listIndex >= availableLists.length) {
+            alert('❌ Invalid selection. Import cancelled.');
+            return;
+        }
+        
+        const targetList = availableLists[listIndex];
+        
+        // Find the target section and list
+        const section = listSections.find(s => s.id === targetList.sectionId);
+        const list = section.lists.find(l => l.id === targetList.listId);
+        
+        if (!section || !list) {
+            alert('❌ Could not find target list. Import cancelled.');
+            return;
+        }
+        
+        // Parse the text file - each line becomes an item
+        const lines = text.split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+        
+        if (lines.length === 0) {
+            alert('❌ No valid content found in the file.');
+            return;
+        }
+        
+        // Add items to the list
+        let addedCount = 0;
+        lines.forEach(line => {
+            const newItem = {
+                id: Date.now() + Math.random(),
+                text: line,
+                completed: false,
+                createdAt: new Date().toISOString()
+            };
+            
+            if (!list.items) list.items = [];
+            list.items.push(newItem);
+            addedCount++;
+        });
+        
+        // Save changes
+        await saveListSections();
+        
+        // Refresh the Lists View if currently viewing it
+        if (currentView === 'lists') {
+            renderListsView();
+        }
+        
+        alert(`✅ Successfully imported ${addedCount} items to "${targetList.sectionName} → ${targetList.listName}".`);
+        
+        // Clear the file input
+        event.target.value = '';
+        
+    } catch (error) {
+        console.error('❌ Error importing TXT file:', error);
+        alert('❌ Error importing file: ' + error.message);
+    }
+}
+
 // Quick Backup and Import JSON functions
 function quickBackupJSON() {
     try {
@@ -4866,6 +4978,7 @@ function isTaskOverdue(task) {
 }
 window.isTaskOverdue = isTaskOverdue;
 window.showListSelectionForTXTImport = showListSelectionForTXTImport;
+window.handleNewTXTImport = handleNewTXTImport;
 window.downloadTodayHtml = downloadTodayHtml;
 window.exportRepeatHtml = exportRepeatHtml;
 window.printSearchResults = printSearchResults;
