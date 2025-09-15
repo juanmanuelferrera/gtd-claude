@@ -15,6 +15,7 @@ let mobileMoreMenuOpen = false;
  */
 function showView(viewName, preserveDate = false) {
     currentView = viewName;
+    window.currentView = viewName; // Fix: Also update global window.currentView for drag handlers
     
     // Reset task selection when changing views
     if (typeof resetTaskSelection === 'function') {
