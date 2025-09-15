@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.2 [Deploy-20250915-step3-offline-sync]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v1.3.2 [Deploy-20250915-step4-network-status]');
     
     // Register Service Worker for offline support
     if ('serviceWorker' in navigator) {
@@ -6029,6 +6029,7 @@
     <script src="js/ui.js?v=20250914-drag-fix-FINAL"></script>
     <script src="js/sync.js?v=1736363000"></script>
     <script src="js/offline-sync.js?v=20250915-step3"></script>
+    <script src="js/network-status.js?v=20250915-step4"></script>
     <script src="js/missing-functions.js?v=20250915-full-save-fix"></script>
     <script src="js/natural-language.js?v=1736363000"></script>
     <script src="js/patches.js?v=1736363000"></script>
@@ -6585,6 +6586,18 @@
         
         // Also update periodically to catch any missed changes
         setInterval(updateMobileDateDisplay, 5000);
+        
+        // Initialize network status detection (Step 4 - PWA)
+        if (typeof window.networkStatus !== 'undefined' && window.networkStatus.initialize) {
+            setTimeout(() => {
+                try {
+                    window.networkStatus.initialize();
+                    console.log('🌐 Network status detection initialized');
+                } catch (error) {
+                    console.error('❌ Failed to initialize network status:', error);
+                }
+            }, 500); // Initialize early for other systems to use
+        }
         
         // Initialize offline sync system (Step 3 - PWA)
         if (typeof window.offlineSync !== 'undefined' && window.offlineSync.initialize) {
