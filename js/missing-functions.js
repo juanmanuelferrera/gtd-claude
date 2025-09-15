@@ -4875,12 +4875,17 @@ function applyCalendarDateTime() {
             }
         }
         
-        // Close the edit modal and clear the task ID with a slight delay
-        setTimeout(() => {
-            taskModal.style.display = 'none';
-            window.currentEditTaskId = null;
-            console.log('✅ Set button: saved changes and closed both modals');
-        }, 50);
+        // Close the edit modal immediately and clear the task ID
+        taskModal.style.display = 'none';
+        taskModal.classList.add('hidden');
+        window.currentEditTaskId = null;
+        
+        // Also try to close using any other methods
+        if (typeof closeTaskModal === 'function') {
+            closeTaskModal();
+        }
+        
+        console.log('✅ Set button: saved changes and closed both modals');
     }
 }
 
