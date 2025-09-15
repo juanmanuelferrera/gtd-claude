@@ -2634,19 +2634,48 @@ async function handleDrop(e) {
         
         // Force immediate UI refresh for all views
         console.log('🔄 Force refreshing UI after drag and drop');
+        console.log('🔍 Current view:', window.currentView);
         
-        // Force re-render the current view immediately
-        setTimeout(() => {
-            if (window.currentView === 'today' && typeof renderTodayView === 'function') {
-                renderTodayView();
-            } else if (window.currentView === 'week' && typeof renderWeekView === 'function') {
-                renderWeekView();
-            } else if (window.currentView === 'calendar' && typeof renderCalendar === 'function') {
-                renderCalendar();
-            } else if (typeof renderCurrentView === 'function') {
-                renderCurrentView();
+        // IMMEDIATE render without delay + clear filters
+        if (window.currentView === 'today' && typeof renderTodayView === 'function') {
+            console.log('📅 Rendering today view immediately');
+            renderTodayView();
+        } else if (window.currentView === 'week' && typeof renderWeekView === 'function') {
+            console.log('📅 Rendering week view immediately');
+            // Clear week filters
+            const weekSearchInput = document.getElementById('weekTaskSearch');
+            if (weekSearchInput) weekSearchInput.value = '';
+            if (typeof activeWeekTemplateFilter !== 'undefined') {
+                activeWeekTemplateFilter = null;
             }
-        }, 10); // Minimal delay to ensure DOM updates are processed
+            renderWeekView();
+        } else if (window.currentView === 'calendar' && typeof renderCalendar === 'function') {
+            console.log('📅 Rendering calendar view immediately');
+            
+            // Clear month filters BEFORE rendering
+            const monthSearchInput = document.getElementById('monthTaskSearch');
+            if (monthSearchInput) {
+                monthSearchInput.value = '';
+                console.log('🧹 Cleared month search filter');
+            }
+            if (typeof activeMonthTemplateFilter !== 'undefined') {
+                activeMonthTemplateFilter = null;
+                console.log('🧹 Cleared month template filter');
+            }
+            if (typeof window !== 'undefined') {
+                window.currentMonthFilteredTasks = null;
+                window.currentMonthSearchTerm = null;
+                console.log('🧹 Cleared month filtered tasks cache');
+            }
+            
+            renderCalendar();
+            console.log('✅ Calendar rendered successfully');
+        } else if (typeof renderCurrentView === 'function') {
+            console.log('📅 Rendering current view as fallback');
+            renderCurrentView();
+        } else {
+            console.error('❌ No render function available!');
+        }
         
         // Show brief success notification
         const notification = document.createElement('div');
