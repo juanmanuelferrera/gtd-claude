@@ -4875,10 +4875,12 @@ function applyCalendarDateTime() {
             }
         }
         
-        // Close the edit modal and clear the task ID
-        taskModal.style.display = 'none';
-        window.currentEditTaskId = null;
-        console.log('✅ Set button: saved changes and closed both modals');
+        // Close the edit modal and clear the task ID with a slight delay
+        setTimeout(() => {
+            taskModal.style.display = 'none';
+            window.currentEditTaskId = null;
+            console.log('✅ Set button: saved changes and closed both modals');
+        }, 50);
     }
 }
 
