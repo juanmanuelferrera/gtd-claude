@@ -4850,34 +4850,53 @@ function applyCalendarDateTime() {
     
     // Always close the edit modal if it's visible, regardless of currentEditTaskId
     if (taskModal && taskModal.style.display !== 'none') {
-        // Try to save the task if we have access to it
-        const taskIdToSave = window.currentEditTaskId || window.currentDateTimeTaskId;
-        if (taskIdToSave) {
-            // Get the task
-            const task = tasks.find(t => t.id == taskIdToSave); // Use loose equality
-            if (task) {
-                // Save all the field values from the edit modal
-                const titleInput = document.getElementById('editTaskTitle');
-                const notesInput = document.getElementById('editTaskNotes');
-                const isEventInput = document.getElementById('editTaskIsEvent');
-                const repeatInput = document.getElementById('editTaskRepeat');
-                
-                if (titleInput) task.title = titleInput.value;
-                if (notesInput) task.notes = notesInput.value;
-                if (isEventInput) task.isEvent = isEventInput.checked;
-                if (repeatInput) task.repeat = repeatInput.value;
-                
-                // Update the date and time from calendar modal
-                if (window.selectedModalDate) task.date = window.selectedModalDate;
-                if (window.selectedModalTime) task.time = window.selectedModalTime;
-                
-                // Save tasks to localStorage
-                saveTasks();
-                
-                // Re-render the view
-                if (typeof renderCurrentView === 'function') {
-                    renderCurrentView();
+        // Try to save the task - use the global function that already handles saving
+        console.log('🔄 Set button: attempting to save task changes...');
+        
+        // Use the existing saveTaskEdit function if available
+        if (typeof saveTaskEdit === 'function') {
+            console.log('💾 Using saveTaskEdit function');
+            saveTaskEdit();
+        } else {
+            // Fallback manual save
+            const taskIdToSave = window.currentEditTaskId || window.currentDateTimeTaskId;
+            console.log('💾 Manual save with taskId:', taskIdToSave);
+            
+            if (taskIdToSave) {
+                // Get the task
+                const task = tasks.find(t => t.id == taskIdToSave); // Use loose equality
+                if (task) {
+                    console.log('✅ Found task to save:', task.title);
+                    
+                    // Save all the field values from the edit modal
+                    const titleInput = document.getElementById('editTaskTitle');
+                    const notesInput = document.getElementById('editTaskNotes');
+                    const isEventInput = document.getElementById('editTaskIsEvent');
+                    const repeatInput = document.getElementById('editTaskRepeat');
+                    
+                    if (titleInput) task.title = titleInput.value;
+                    if (notesInput) task.notes = notesInput.value;
+                    if (isEventInput) task.isEvent = isEventInput.checked;
+                    if (repeatInput) task.repeat = repeatInput.value;
+                    
+                    // Update the date and time from calendar modal
+                    if (window.selectedModalDate) task.date = window.selectedModalDate;
+                    if (window.selectedModalTime) task.time = window.selectedModalTime;
+                    
+                    console.log('💾 Saving task with date:', task.date, 'time:', task.time);
+                    
+                    // Save tasks to localStorage
+                    saveTasks();
+                    
+                    // Re-render the view
+                    if (typeof renderCurrentView === 'function') {
+                        renderCurrentView();
+                    }
+                } else {
+                    console.error('❌ Task not found with ID:', taskIdToSave);
                 }
+            } else {
+                console.error('❌ No task ID available for saving');
             }
         }
         
