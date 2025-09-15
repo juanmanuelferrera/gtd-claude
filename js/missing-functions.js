@@ -4869,13 +4869,16 @@ function applyCalendarDateTime() {
     // Close the date/time modal
     closeDateTimeModal();
     
-    // Save and close the edit task modal if it's open
+    // Always try to save and close the edit task modal
     const taskModal = document.getElementById('taskModal');
-    if (taskModal && taskModal.style.display !== 'none' && window.currentEditTaskId) {
-        console.log('💾 Saving task from calendar Set button:', window.currentEditTaskId);
+    const taskIdToSave = window.currentEditTaskId || window.currentDateTimeTaskId;
+    
+    // If we have a task ID, save the task
+    if (taskIdToSave) {
+        console.log('💾 Saving task from calendar Set button:', taskIdToSave);
         
         // Get the task
-        const task = tasks.find(t => t.id === window.currentEditTaskId);
+        const task = tasks.find(t => t.id === taskIdToSave);
         if (task) {
             // Save all the field values
             const titleInput = document.getElementById('editTaskTitle');
@@ -4883,11 +4886,7 @@ function applyCalendarDateTime() {
             const isEventInput = document.getElementById('editTaskIsEvent');
             const repeatInput = document.getElementById('editTaskRepeat');
             
-            // Store original values for comparison
-            const originalTitle = task.title;
-            const originalDate = task.date;
-            const originalTime = task.time;
-            
+            // Save title and notes
             if (titleInput && titleInput.value) task.title = titleInput.value;
             if (notesInput) task.notes = notesInput.value;
             if (isEventInput) task.isEvent = isEventInput.checked;
@@ -4918,11 +4917,14 @@ function applyCalendarDateTime() {
                 renderCurrentView();
             }
         }
-        
-        // Close the modal after a small delay to ensure save completes
+    }
+    
+    // Always close the task modal if it's open
+    if (taskModal && taskModal.style.display !== 'none') {
         setTimeout(() => {
             taskModal.style.display = 'none';
             window.currentEditTaskId = null;
+            window.currentDateTimeTaskId = null;
             console.log('✅ Edit modal closed');
         }, 50);
     }
