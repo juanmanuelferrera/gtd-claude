@@ -4869,11 +4869,20 @@ function applyCalendarDateTime() {
     // Close the date/time modal
     closeDateTimeModal();
     
-    // Also close the edit task modal
+    // Save and close the edit task modal if it's open
     const taskModal = document.getElementById('taskModal');
     if (taskModal && taskModal.style.display !== 'none') {
-        taskModal.style.display = 'none';
-        window.currentEditTaskId = null;
+        // Trigger save by calling the blur event on the title field
+        const titleInput = document.getElementById('editTaskTitle');
+        if (titleInput) {
+            titleInput.blur();
+        }
+        
+        // Give a small delay for save to complete, then close
+        setTimeout(() => {
+            taskModal.style.display = 'none';
+            window.currentEditTaskId = null;
+        }, 100);
     }
 }
 
