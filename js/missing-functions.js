@@ -4723,7 +4723,7 @@ function renderCalendarModal() {
         dayElement.onclick = () => selectCalendarDate(getLocalDateString(date));
         
         // Styling
-        let styles = 'width: 100%; aspect-ratio: 1; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s ease;';
+        let styles = 'width: 100%; aspect-ratio: 1; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.2s ease;';
         
         if (!isCurrentMonth) {
             styles += 'color: #ccc; background: transparent;';
@@ -4795,21 +4795,21 @@ function highlightSelectedTime() {
         // Reset to default colors based on time
         if (['06:00', '07:00', '08:00', '09:00', '10:00', '11:00'].includes(timeValue)) {
             if (timeValue === selectedModalTime) {
-                btn.style.cssText = 'background: #007aff; color: white; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 500;';
+                btn.style.cssText = 'background: #007aff; color: white; border: none; border-radius: 6px; padding: 8px 6px; cursor: pointer; font-size: 11px; font-weight: 500;';
             } else {
-                btn.style.cssText = 'background: #e3f2fd; color: #1976d2; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 500;';
+                btn.style.cssText = 'background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; padding: 8px 6px; cursor: pointer; font-size: 11px; font-weight: 500;';
             }
         } else if (['12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].includes(timeValue)) {
             if (timeValue === selectedModalTime) {
-                btn.style.cssText = 'background: #f57c00; color: white; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 500;';
+                btn.style.cssText = 'background: #f57c00; color: white; border: none; border-radius: 6px; padding: 8px 6px; cursor: pointer; font-size: 11px; font-weight: 500;';
             } else {
-                btn.style.cssText = 'background: #fff3e0; color: #f57c00; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 500;';
+                btn.style.cssText = 'background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; padding: 8px 6px; cursor: pointer; font-size: 11px; font-weight: 500;';
             }
         } else {
             if (timeValue === selectedModalTime) {
-                btn.style.cssText = 'background: #7b1fa2; color: white; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 500;';
+                btn.style.cssText = 'background: #7b1fa2; color: white; border: none; border-radius: 6px; padding: 8px 6px; cursor: pointer; font-size: 11px; font-weight: 500;';
             } else {
-                btn.style.cssText = 'background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 500;';
+                btn.style.cssText = 'background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 6px; padding: 8px 6px; cursor: pointer; font-size: 11px; font-weight: 500;';
             }
         }
     });
