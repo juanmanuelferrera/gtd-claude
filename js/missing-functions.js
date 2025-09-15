@@ -4871,18 +4871,37 @@ function applyCalendarDateTime() {
     
     // Save and close the edit task modal if it's open
     const taskModal = document.getElementById('taskModal');
-    if (taskModal && taskModal.style.display !== 'none') {
-        // Trigger save by calling the blur event on the title field
-        const titleInput = document.getElementById('editTaskTitle');
-        if (titleInput) {
-            titleInput.blur();
+    if (taskModal && taskModal.style.display !== 'none' && window.currentEditTaskId) {
+        // Get the task
+        const task = tasks.find(t => t.id === window.currentEditTaskId);
+        if (task) {
+            // Save all the field values
+            const titleInput = document.getElementById('editTaskTitle');
+            const notesInput = document.getElementById('editTaskNotes');
+            const isEventInput = document.getElementById('editTaskIsEvent');
+            const repeatInput = document.getElementById('editTaskRepeat');
+            
+            if (titleInput) task.title = titleInput.value;
+            if (notesInput) task.notes = notesInput.value;
+            if (isEventInput) task.isEvent = isEventInput.checked;
+            if (repeatInput) task.repeat = repeatInput.value;
+            
+            // Date and time are already set by the calendar modal
+            if (selectedModalDate) task.date = selectedModalDate;
+            if (selectedModalTime) task.time = selectedModalTime;
+            
+            // Save tasks to localStorage
+            saveTasks();
+            
+            // Refresh the view
+            if (typeof renderCurrentView === 'function') {
+                renderCurrentView();
+            }
         }
         
-        // Give a small delay for save to complete, then close
-        setTimeout(() => {
-            taskModal.style.display = 'none';
-            window.currentEditTaskId = null;
-        }, 100);
+        // Close the modal
+        taskModal.style.display = 'none';
+        window.currentEditTaskId = null;
     }
 }
 
