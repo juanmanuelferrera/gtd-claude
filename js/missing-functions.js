@@ -4902,7 +4902,7 @@ function applyCalendarDateTime() {
         
         // Always close the edit modal regardless of save success
         taskModal.style.display = 'none';
-        taskModal.classList.add('hidden');
+        // Don't add hidden class as it might interfere with future modal operations
         window.currentEditTaskId = null;
         window.currentDateTimeTaskId = null;
         
