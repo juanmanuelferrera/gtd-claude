@@ -1425,34 +1425,14 @@ function openDateTimeModal() {
         // Detect device type and show appropriate version
         const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        if (isMobile) {
-            console.log('📱 Detected mobile device - showing mobile version');
-            // Show mobile version, hide desktop version
-            const mobileModal = document.querySelector('.modal-content.mobile-only');
-            const desktopModal = document.querySelector('.modal-content.desktop-only');
-            if (mobileModal) mobileModal.style.display = 'block';
-            if (desktopModal) desktopModal.style.display = 'none';
-            
-            // Initialize mobile pickers
-            if (typeof initializeMobileDatePickers === 'function') {
-                initializeMobileDatePickers();
-            }
-        } else {
-            console.log('🖥️ Detected desktop device - showing desktop version');
-            // Show desktop version, hide mobile version
-            const mobileModal = document.querySelector('.modal-content.mobile-only');
-            const desktopModal = document.querySelector('.modal-content.desktop-only');
-            if (mobileModal) mobileModal.style.display = 'none';
-            if (desktopModal) desktopModal.style.display = 'block';
-            
-            // Initialize desktop pickers (date only)
-            if (typeof initializeDesktopDatePickers === 'function') {
-                initializeDesktopDatePickers();
-            } else {
-                // Fallback initialization
-                initializeDateTimePickers(defaultDate, defaultTime);
-            }
-        }
+        // Always show horizontal desktop version regardless of device
+        console.log('🖥️ Always showing horizontal desktop calendar + time picker version');
+        
+        // Force show desktop version, hide mobile version
+        const mobileModal = document.querySelector('.modal-content.mobile-only');
+        const desktopModal = document.querySelector('.modal-content.desktop-only');
+        if (mobileModal) mobileModal.style.display = 'none';
+        if (desktopModal) desktopModal.style.display = 'block';
         
         modal.style.display = 'block';
         console.log('Modal should be visible now');
@@ -4934,15 +4914,9 @@ function applyCalendarDateTime() {
         console.warn('⚠️ currentDateTimeTaskId:', window.currentDateTimeTaskId);
     }
     
-    // Always close the task modal if it's open
-    if (taskModal && taskModal.style.display !== 'none') {
-        setTimeout(() => {
-            taskModal.style.display = 'none';
-            window.currentEditTaskId = null;
-            window.currentDateTimeTaskId = null;
-            console.log('✅ Edit modal closed');
-        }, 50);
-    }
+    // Don't close the task modal - just update the display to show new date/time
+    // The user should stay in the edit modal to continue editing other fields
+    console.log('✅ Date/time set, returning to edit modal');
 }
 
 // Make calendar functions globally available
