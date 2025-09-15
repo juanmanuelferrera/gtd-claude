@@ -4667,16 +4667,17 @@ window.openBulkTimeModal = openBulkTimeModal;
 
 // Calendar and Time picker variables
 let modalCalendarDate = new Date();
-let selectedModalDate = '';
-let selectedModalTime = '';
+// Use window variables to ensure they're accessible globally
+window.selectedModalDate = '';
+window.selectedModalTime = '';
 
 // Initialize calendar modal
 function initCalendarModal(currentDate, currentTime) {
     console.log('🗓️ Initializing calendar modal with:', currentDate, currentTime);
     
     // Set current selections
-    selectedModalDate = currentDate || getLocalDateString(new Date());
-    selectedModalTime = currentTime || '';
+    window.selectedModalDate = currentDate || getLocalDateString(new Date());
+    window.selectedModalTime = currentTime || '';
     
     // Set calendar to show the selected month
     if (currentDate) {
@@ -4721,7 +4722,7 @@ function renderCalendarModal() {
         const dayNum = date.getDate();
         const isCurrentMonth = date.getMonth() === month;
         const isToday = date.toDateString() === new Date().toDateString();
-        const isSelected = selectedModalDate === getLocalDateString(date);
+        const isSelected = window.selectedModalDate === getLocalDateString(date);
         
         dayElement.textContent = dayNum;
         dayElement.onclick = () => selectCalendarDate(getLocalDateString(date));
@@ -4764,7 +4765,7 @@ function navigateCalendar(direction) {
 // Go to today
 function goToCalendarToday() {
     modalCalendarDate = new Date();
-    selectedModalDate = getLocalDateString(new Date());
+    window.selectedModalDate = getLocalDateString(new Date());
     renderCalendarModal();
     highlightSelectedTime();
 }
@@ -4772,21 +4773,21 @@ function goToCalendarToday() {
 // Select calendar date
 function selectCalendarDate(dateStr) {
     console.log('📅 Selected date:', dateStr);
-    selectedModalDate = dateStr;
+    window.selectedModalDate = dateStr;
     renderCalendarModal();
 }
 
 // Select time slot
 function selectTime(timeStr) {
     console.log('⏰ Selected time:', timeStr);
-    selectedModalTime = timeStr;
+    window.selectedModalTime = timeStr;
     highlightSelectedTime();
 }
 
 // Clear selected time
 function clearSelectedTime() {
     console.log('🗑️ Cleared time');
-    selectedModalTime = '';
+    window.selectedModalTime = '';
     highlightSelectedTime();
 }
 
@@ -4798,22 +4799,22 @@ function highlightSelectedTime() {
         
         // Reset to default colors based on time
         if (['06:00', '07:00', '08:00', '09:00', '10:00', '11:00'].includes(timeValue)) {
-            if (timeValue === selectedModalTime) {
-                btn.style.cssText = 'background: #007aff; color: white; border: none; border-radius: 6px; padding: 10px 8px; cursor: pointer; font-size: 11px; font-weight: 500;';
+            if (timeValue === window.selectedModalTime) {
+                btn.style.cssText = 'background: #007aff; color: white; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;';
             } else {
-                btn.style.cssText = 'background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; padding: 10px 8px; cursor: pointer; font-size: 11px; font-weight: 500;';
+                btn.style.cssText = 'background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;';
             }
         } else if (['12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].includes(timeValue)) {
-            if (timeValue === selectedModalTime) {
-                btn.style.cssText = 'background: #f57c00; color: white; border: none; border-radius: 6px; padding: 10px 8px; cursor: pointer; font-size: 11px; font-weight: 500;';
+            if (timeValue === window.selectedModalTime) {
+                btn.style.cssText = 'background: #f57c00; color: white; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;';
             } else {
-                btn.style.cssText = 'background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; padding: 10px 8px; cursor: pointer; font-size: 11px; font-weight: 500;';
+                btn.style.cssText = 'background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;';
             }
         } else {
-            if (timeValue === selectedModalTime) {
-                btn.style.cssText = 'background: #7b1fa2; color: white; border: none; border-radius: 6px; padding: 10px 8px; cursor: pointer; font-size: 11px; font-weight: 500;';
+            if (timeValue === window.selectedModalTime) {
+                btn.style.cssText = 'background: #7b1fa2; color: white; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;';
             } else {
-                btn.style.cssText = 'background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 6px; padding: 10px 8px; cursor: pointer; font-size: 11px; font-weight: 500;';
+                btn.style.cssText = 'background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;';
             }
         }
     });
@@ -4821,15 +4822,15 @@ function highlightSelectedTime() {
 
 // Apply calendar selection
 function applyCalendarDateTime() {
-    console.log('✅ Applying calendar datetime:', selectedModalDate, selectedModalTime);
+    console.log('✅ Applying calendar datetime:', window.selectedModalDate, window.selectedModalTime);
     
     // Note: We'll update the task later when we save all fields together
     
     // Update the display in the task modal
     const dateTimeDisplay = document.getElementById('dateTimeDisplay');
     if (dateTimeDisplay) {
-        if (selectedModalDate && selectedModalTime) {
-            const dateObj = new Date(selectedModalDate + 'T' + selectedModalTime);
+        if (window.selectedModalDate && window.selectedModalTime) {
+            const dateObj = new Date(window.selectedModalDate + 'T' + window.selectedModalTime);
             const formattedDate = dateObj.toLocaleDateString('en-US', { 
                 month: 'short', 
                 day: 'numeric', 
@@ -4841,8 +4842,8 @@ function applyCalendarDateTime() {
                 hour12: true 
             });
             dateTimeDisplay.textContent = `📅 ${formattedDate} ⏰ ${formattedTime}`;
-        } else if (selectedModalDate) {
-            const dateObj = new Date(selectedModalDate);
+        } else if (window.selectedModalDate) {
+            const dateObj = new Date(window.selectedModalDate);
             const formattedDate = dateObj.toLocaleDateString('en-US', { 
                 month: 'short', 
                 day: 'numeric', 
@@ -4858,8 +4859,8 @@ function applyCalendarDateTime() {
     const editTaskDateOnly = document.getElementById('editTaskDateOnly');
     const editTaskTimeOnly = document.getElementById('editTaskTimeOnly');
     
-    if (editTaskDateOnly) editTaskDateOnly.value = selectedModalDate;
-    if (editTaskTimeOnly) editTaskTimeOnly.value = selectedModalTime;
+    if (editTaskDateOnly) editTaskDateOnly.value = window.selectedModalDate;
+    if (editTaskTimeOnly) editTaskTimeOnly.value = window.selectedModalTime;
     
     // Close the date/time modal
     closeDateTimeModal();
@@ -4872,12 +4873,21 @@ function applyCalendarDateTime() {
     // If we have a task ID, save the task
     if (taskIdToSave) {
         console.log('💾 Saving task from calendar Set button:', taskIdToSave);
-        console.log('📅 Date to save:', selectedModalDate);
-        console.log('⏰ Time to save:', selectedModalTime);
+        console.log('📅 Date to save:', window.selectedModalDate);
+        console.log('⏰ Time to save:', window.selectedModalTime);
         
-        // Get the task
-        const task = tasks.find(t => t.id === taskIdToSave);
+        // Get the task - check both string and number comparisons
+        console.log('🔍 Looking for task with ID:', taskIdToSave, 'Type:', typeof taskIdToSave);
+        console.log('🔍 Available task IDs:', tasks.map(t => ({ id: t.id, type: typeof t.id, title: t.title.substring(0, 30) })));
+        
+        let task = tasks.find(t => t.id === taskIdToSave);
+        // Try again with string/number conversion
+        if (!task) {
+            task = tasks.find(t => t.id == taskIdToSave); // Loose equality
+        }
+        
         if (task) {
+            console.log('✅ Found task:', task.title);
             // Save all the field values
             const titleInput = document.getElementById('editTaskTitle');
             const notesInput = document.getElementById('editTaskNotes');
@@ -4891,13 +4901,13 @@ function applyCalendarDateTime() {
             if (repeatInput) task.repeat = repeatInput.value;
             
             // Date and time from calendar modal
-            if (selectedModalDate) {
-                task.date = selectedModalDate;
-                console.log('📅 Updated date:', selectedModalDate);
+            if (window.selectedModalDate) {
+                task.date = window.selectedModalDate;
+                console.log('📅 Updated date:', window.selectedModalDate);
             }
-            if (selectedModalTime) {
-                task.time = selectedModalTime;
-                console.log('⏰ Updated time:', selectedModalTime);
+            if (window.selectedModalTime) {
+                task.time = window.selectedModalTime;
+                console.log('⏰ Updated time:', window.selectedModalTime);
             }
             
             console.log('✅ Task updated:', {
@@ -4914,7 +4924,14 @@ function applyCalendarDateTime() {
             if (typeof renderCurrentView === 'function') {
                 renderCurrentView();
             }
+        } else {
+            console.error('❌ Task not found with ID:', taskIdToSave);
+            console.error('❌ Available task IDs:', tasks.map(t => t.id));
         }
+    } else {
+        console.warn('⚠️ No task ID found to save');
+        console.warn('⚠️ currentEditTaskId:', window.currentEditTaskId);
+        console.warn('⚠️ currentDateTimeTaskId:', window.currentDateTimeTaskId);
     }
     
     // Always close the task modal if it's open
