@@ -1,0 +1,67 @@
+{
+  "name": "HyperFiler Pro",
+  "short_name": "HyperFiler",
+  "description": "Advanced task management and productivity app with offline capabilities",
+  "start_url": "/hyperfiler-pro.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff6b35",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["productivity", "utilities", "business"],
+  "icons": [
+    {
+      "src": "https://hyperfiler.pages.dev/favicon.ico",
+      "sizes": "16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiNmZjZiMzUiLz4KPHN2ZyB4PSI0OCIgeT0iNDgiIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+CjxwYXRoIGQ9Im05IDExIDMgM0wyMiA0IDQgMjJsNi0zIDMtMyIvPgo8L3N2Zz4KPC9zdmc+",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iNjQiIGZpbGw9IiNmZjZiMzUiLz4KPHN2ZyB4PSIxMjgiIHk9IjEyOCIgd2lkdGg9IjI1NiIgaGVpZ2h0PSIyNTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPgo8cGF0aCBkPSJtOSAxMSAzIDNMMjIgNCA0IDIybDYtMyAzLTMiLz4KPC9zdmc+Cjwvc3ZnPg==",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add New Task",
+      "short_name": "New Task",
+      "description": "Quickly add a new task",
+      "url": "/hyperfiler-pro.html#new",
+      "icons": [
+        {
+          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwN2FmZiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJhMTAgMTAgMCAxIDAgMTAgMTBBMTAgMTAgMCAwIDAgMTIgMnptNSA5aC00djRhMSAxIDAgMCAxLTIgMHYtNEg3YTEgMSAwIDAgMSAwLTJoNFY1YTEgMSAwIDAgMSAyIDB2NGg0YTEgMSAwIDAgMSAwIDJ6Ii8+Cjwvc3ZnPg==",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Today's Tasks",
+      "short_name": "Today",
+      "description": "View today's tasks",
+      "url": "/hyperfiler-pro.html#today",
+      "icons": [
+        {
+          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzI4YTc0NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE5IDRoLTFWM2ExIDEgMCAwIDAtMiAwdjFINVYzYTEgMSAwIDAgMC0yIDB2MUgzYTMgMyAwIDAgMC0zIDN2MTJhMyAzIDAgMCAwIDMgM2gxNmEzIDMgMCAwIDAgMy0zVjdhMyAzIDAgMCAwLTMtM3ptMSA0djJINHYtMmgxNnptMCAxNEg0di04aDE2djh6Ii8+Cjwvc3ZnPg==",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjU2OCIgdmlld0JveD0iMCAwIDMyMCA1NjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iNTY4IiBmaWxsPSIjZjhmOWZhIi8+CjxyZWN0IHg9IjE2IiB5PSI2NCIgd2lkdGg9IjI4OCIgaGVpZ2h0PSI0OCIgcng9IjgiIGZpbGw9IiNmZjZiMzUiLz4KPHR5cGUgeD0iMzIiIHk9Ijg4IiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZvbnQtd2VpZ2h0PSI2MDAiPkh5cGVyRmlsZXIgUHJvPC90ZXh0Pgo8cmVjdCB4PSIxNiIgeT0iMTI4IiB3aWR0aD0iMjg4IiBoZWlnaHQ9IjY0IiByeD0iOCIgZmlsbD0id2hpdGUiIHN0cm9rZT0iI2UzZTNlMyIvPgo8cmVjdCB4PSIzMiIgeT0iMTQ0IiB3aWR0aD0iMjU2IiBoZWlnaHQ9IjE2IiByeD0iNCIgZmlsbD0iI2Y1ZjVmNSIvPgo8cmVjdCB4PSIzMiIgeT0iMTY4IiB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE2IiByeD0iNCIgZmlsbD0iI2YwZjBmMCIvPgo8cmVjdCB4PSIxNiIgeT0iMjA4IiB3aWR0aD0iMjg4IiBoZWlnaHQ9IjY0IiByeD0iOCIgZmlsbD0id2hpdGUiIHN0cm9rZT0iI2UzZTNlMyIvPgo8cmVjdCB4PSIzMiIgeT0iMjI0IiB3aWR0aD0iMjU2IiBoZWlnaHQ9IjE2IiByeD0iNCIgZmlsbD0iI2Y1ZjVmNSIvPgo8cmVjdCB4PSIzMiIgeT0iMjQ4IiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjE2IiByeD0iNCIgZmlsbD0iI2YwZjBmMCIvPgo8L3N2Zz4=",
+      "sizes": "320x568",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ]
+}
