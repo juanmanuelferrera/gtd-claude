@@ -1349,45 +1349,73 @@ function searchMonthTasks() {
     
     console.log(`🔍 Month search: "${searchTerm}" found ${filteredTasks.length} tasks`);
     
-    // Clear all day cells
-    const dayCells = document.querySelectorAll('.calendar-day');
+    // Clear all task items from calendar days
+    const calendarGrid = document.getElementById('calendarGrid');
+    if (!calendarGrid) return;
+    
+    const dayCells = calendarGrid.querySelectorAll('.calendar-day');
     dayCells.forEach(cell => {
-        const tasksContainer = cell.querySelector('.day-tasks');
-        if (tasksContainer) {
-            tasksContainer.innerHTML = '';
+        // Remove all task items but keep the day number
+        const taskItems = cell.querySelectorAll('.calendar-task-item');
+        taskItems.forEach(item => item.remove());
+    });
+    
+    // Group filtered tasks by date
+    const tasksByDate = {};
+    filteredTasks.forEach(task => {
+        const dateStr = task.dueDate.split('T')[0];
+        if (!tasksByDate[dateStr]) {
+            tasksByDate[dateStr] = [];
         }
+        tasksByDate[dateStr].push(task);
     });
     
     // Add filtered tasks to their respective days
-    filteredTasks.forEach(task => {
-        const taskDate = new Date(task.dueDate);
+    Object.entries(tasksByDate).forEach(([dateStr, dayTasks]) => {
+        const taskDate = new Date(dateStr + 'T00:00:00');
         const day = taskDate.getDate();
         
         // Find the day cell for this date
         const dayCell = Array.from(dayCells).find(cell => {
-            const dayNumber = cell.querySelector('.day-number');
+            const dayNumber = cell.querySelector('.calendar-day-number');
             return dayNumber && parseInt(dayNumber.textContent) === day;
         });
         
         if (dayCell) {
-            const tasksContainer = dayCell.querySelector('.day-tasks') || createTasksContainer(dayCell);
-            const taskElement = document.createElement('div');
-            taskElement.className = 'day-task';
-            taskElement.innerHTML = `
-                <div class="task-time">${task.dueTime || ''}</div>
-                <div class="task-title">${task.title}</div>
-            `;
-            taskElement.onclick = () => openEditTaskModal(task);
-            tasksContainer.appendChild(taskElement);
+            // Sort tasks for this day
+            const sortedTasks = [...dayTasks].sort((a, b) => {
+                if (a.isEvent !== b.isEvent) return b.isEvent ? 1 : -1;
+                const timeA = a.dueTime || '99:99';
+                const timeB = b.dueTime || '99:99';
+                return timeA.localeCompare(timeB);
+            });
+            
+            // Add task items
+            sortedTasks.forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = task.isEvent ? 'calendar-task-item event' : 'calendar-task-item';
+                
+                const titlePrefix = task.isEvent ? '🔴 ' : '';
+                const maxChars = 25;
+                let displayText = titlePrefix + task.title;
+                
+                if (task.title.length > maxChars) {
+                    displayText = titlePrefix + task.title.substring(0, maxChars) + '...';
+                }
+                
+                taskElement.textContent = displayText;
+                taskElement.style.cursor = 'pointer';
+                taskElement.onclick = (e) => {
+                    e.stopPropagation();
+                    if (typeof openEditTaskModal === 'function') {
+                        openEditTaskModal(task);
+                    }
+                };
+                
+                dayCell.appendChild(taskElement);
+            });
         }
     });
-    
-    function createTasksContainer(dayCell) {
-        const container = document.createElement('div');
-        container.className = 'day-tasks';
-        dayCell.appendChild(container);
-        return container;
-    }
 }
 
 function searchWeekTasks() {
@@ -1404,10 +1432,22 @@ function searchWeekTasks() {
         return;
     }
     
-    // Get current week date range
-    const weekStart = getMonday(currentWeekDate);
+    // Get current week date range using the same method as renderWeekView
+    let weekStart;
+    if (typeof getMonday === 'function') {
+        weekStart = getMonday(currentWeekDate);
+    } else {
+        // Fallback calculation
+        weekStart = new Date(currentWeekDate);
+        const day = weekStart.getDay();
+        const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1);
+        weekStart.setDate(diff);
+        weekStart.setHours(0, 0, 0, 0);
+    }
+    
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
     
     // Filter tasks for current week that match search term
     const filteredTasks = tasks.filter(task => {
@@ -1424,36 +1464,72 @@ function searchWeekTasks() {
     
     console.log(`🔍 Week search: "${searchTerm}" found ${filteredTasks.length} tasks`);
     
-    // Clear all week day cells
+    // Clear all task items from week grid
     const weekGrid = document.getElementById('weekGrid');
-    if (weekGrid) {
-        const dayCells = weekGrid.querySelectorAll('.week-day-content');
-        dayCells.forEach(cell => {
-            // Clear existing tasks but keep the header
-            const dayHeader = cell.querySelector('h4');
-            cell.innerHTML = '';
-            if (dayHeader) {
-                cell.appendChild(dayHeader);
-            }
-        });
+    if (!weekGrid) return;
+    
+    // Remove all existing task items
+    const taskItems = weekGrid.querySelectorAll('.week-task-item');
+    taskItems.forEach(item => item.remove());
+    
+    // Group filtered tasks by date
+    const tasksByDate = {};
+    filteredTasks.forEach(task => {
+        const dateStr = task.dueDate.split('T')[0];
+        if (!tasksByDate[dateStr]) {
+            tasksByDate[dateStr] = [];
+        }
+        tasksByDate[dateStr].push(task);
+    });
+    
+    // Add filtered tasks to their respective days
+    for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(weekStart);
+        currentDate.setDate(currentDate.getDate() + i);
+        const dateStr = currentDate.toISOString().split('T')[0];
+        const dayElement = weekGrid.children[i];
         
-        // Add filtered tasks to their respective days
-        filteredTasks.forEach(task => {
-            const taskDate = new Date(task.dueDate);
-            const dayIndex = (taskDate.getDay() + 6) % 7; // Convert to Monday=0 index
-            const dayCell = dayCells[dayIndex];
+        if (dayElement && tasksByDate[dateStr]) {
+            // Sort tasks for this day
+            const sortedTasks = [...tasksByDate[dateStr]].sort((a, b) => {
+                if (a.isEvent !== b.isEvent) return b.isEvent ? 1 : -1;
+                const timeA = a.dueTime || '99:99';
+                const timeB = b.dueTime || '99:99';
+                return timeA.localeCompare(timeB);
+            });
             
-            if (dayCell) {
+            // Add task items
+            sortedTasks.forEach(task => {
                 const taskElement = document.createElement('div');
-                taskElement.className = 'week-task';
-                taskElement.innerHTML = `
-                    <span class="task-time">${task.dueTime || ''}</span>
-                    <span class="task-title">${task.title}</span>
-                `;
-                taskElement.onclick = () => openEditTaskModal(task);
-                dayCell.appendChild(taskElement);
-            }
-        });
+                taskElement.className = task.isEvent ? 'week-task-item event' : 'week-task-item';
+                
+                const titlePrefix = task.isEvent ? '🔴 ' : '';
+                const maxChars = 30;
+                let displayText = titlePrefix + task.title;
+                
+                if (task.title.length > maxChars) {
+                    displayText = titlePrefix + task.title.substring(0, maxChars) + '...';
+                }
+                
+                taskElement.textContent = displayText;
+                taskElement.style.cursor = 'pointer';
+                taskElement.onclick = (e) => {
+                    e.stopPropagation();
+                    if (typeof openEditTaskModal === 'function') {
+                        openEditTaskModal(task);
+                    }
+                };
+                
+                // Add drag functionality if available
+                if (typeof setupTaskDragging === 'function') {
+                    taskElement.draggable = true;
+                    taskElement.addEventListener('dragstart', (e) => handleDragStart(e, task));
+                    taskElement.addEventListener('dragend', handleDragEnd);
+                }
+                
+                dayElement.appendChild(taskElement);
+            });
+        }
     }
 }
 
