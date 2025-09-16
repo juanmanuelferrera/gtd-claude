@@ -96,7 +96,9 @@ function showView(viewName, preserveDate = false) {
             }
             break;
         case 'week':
-            if (typeof renderWeekView === 'function') {
+            if (typeof safeRenderWeekView === 'function') {
+                safeRenderWeekView();
+            } else if (typeof renderWeekView === 'function') {
                 renderWeekView();
             }
             if (typeof highlightCurrentDay === 'function') {
@@ -287,7 +289,9 @@ function renderCurrentView() {
             }
             break;
         case 'week':
-            if (typeof renderWeekView === 'function') {
+            if (typeof safeRenderWeekView === 'function') {
+                safeRenderWeekView();
+            } else if (typeof renderWeekView === 'function') {
                 renderWeekView();
             }
             if (typeof highlightCurrentDay === 'function') {
@@ -605,14 +609,18 @@ function getMonday(date) {
 
 function previousWeek() {
     currentWeekDate.setDate(currentWeekDate.getDate() - 7);
-    if (typeof renderWeekView === 'function') {
+    if (typeof safeRenderWeekView === 'function') {
+        safeRenderWeekView();
+    } else if (typeof renderWeekView === 'function') {
         renderWeekView();
     }
 }
 
 function nextWeek() {
     currentWeekDate.setDate(currentWeekDate.getDate() + 7);
-    if (typeof renderWeekView === 'function') {
+    if (typeof safeRenderWeekView === 'function') {
+        safeRenderWeekView();
+    } else if (typeof renderWeekView === 'function') {
         renderWeekView();
     }
 }
@@ -3880,24 +3888,88 @@ function renderTodayView() {
 }
 
 /**
+ * Safe wrapper for week view rendering with timeout
+ */
+function safeRenderWeekView() {
+    console.log('🔄 Starting safe week view render...');
+    
+    // Set a timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+        console.error('⏰ Week view rendering timed out');
+        const grid = document.getElementById('weekGrid');
+        const weekTitle = document.getElementById('currentWeek');
+        
+        if (grid && weekTitle) {
+            grid.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Week view took too long to load.<br><button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #007AFF; color: white; border: none; border-radius: 6px; cursor: pointer;">Refresh Page</button></div>';
+            weekTitle.textContent = 'Week View (Error)';
+        }
+    }, 5000); // 5 second timeout
+    
+    try {
+        renderWeekView();
+        clearTimeout(timeoutId);
+    } catch (error) {
+        clearTimeout(timeoutId);
+        console.error('❌ Error in safeRenderWeekView:', error);
+        throw error;
+    }
+}
+
+/**
  * Render Week View with calendar grid
  */
 function renderWeekView() {
-    const grid = document.getElementById('weekGrid');
-    const weekTitle = document.getElementById('currentWeek');
+    console.log('📅 Starting renderWeekView()');
     
-    if (!grid || !weekTitle) return;
-    
-    // Keep active template filter if it exists
-    
-    // Update the week display
-    updateCurrentWeekDisplay();
-    
-    // Get week range based on user preference
-    const weekRange = DateUtils.getWeekRange ? DateUtils.getWeekRange(currentWeekDate) : { start: getMonday(currentWeekDate), end: new Date() };
-    const weekStart = weekRange.start;
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
+    try {
+        const grid = document.getElementById('weekGrid');
+        const weekTitle = document.getElementById('currentWeek');
+        
+        if (!grid || !weekTitle) {
+            console.warn('❌ Week view elements not found:', { grid: !!grid, weekTitle: !!weekTitle });
+            return;
+        }
+        
+        console.log('✅ Week view elements found, proceeding...');
+        
+        // Simple Monday fallback function
+        const getSimpleMonday = (date) => {
+            const monday = new Date(date);
+            const day = monday.getDay();
+            const diff = monday.getDate() - day + (day === 0 ? -6 : 1);
+            monday.setDate(diff);
+            return monday;
+        };
+        
+        // Update the week display with error handling
+        try {
+            if (typeof updateCurrentWeekDisplay === 'function') {
+                updateCurrentWeekDisplay();
+            }
+        } catch (error) {
+            console.warn('⚠️ Error in updateCurrentWeekDisplay:', error);
+        }
+        
+        // Get week range based on user preference with fallbacks
+        let weekStart, weekEnd;
+        try {
+            if (DateUtils && DateUtils.getWeekRange) {
+                const weekRange = DateUtils.getWeekRange(currentWeekDate);
+                weekStart = weekRange.start;
+                weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6);
+            } else {
+                // Fallback to simple Monday calculation
+                weekStart = typeof getMonday === 'function' ? getMonday(currentWeekDate) : getSimpleMonday(currentWeekDate);
+                weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6);
+            }
+        } catch (error) {
+            console.warn('⚠️ Error getting week range, using fallback:', error);
+            weekStart = getSimpleMonday(currentWeekDate);
+            weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+        }
     
     const weekTasks = [];
     for (let i = 0; i < 7; i++) {
@@ -3930,14 +4002,25 @@ function renderWeekView() {
         weekTasks.push(...dayTasks);
     }
     
-    // Render template filter buttons
-    renderWeekTemplateFilters(weekTasks);
-    
-    // Set week title
-    const startStr = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const endStr = weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const year = weekStart.getFullYear();
-    weekTitle.textContent = `${startStr} - ${endStr}, ${year}`;
+        // Render template filter buttons with error handling
+        try {
+            if (typeof renderWeekTemplateFilters === 'function') {
+                renderWeekTemplateFilters(weekTasks);
+            }
+        } catch (error) {
+            console.warn('⚠️ Error in renderWeekTemplateFilters:', error);
+        }
+        
+        // Set week title
+        try {
+            const startStr = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const endStr = weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const year = weekStart.getFullYear();
+            weekTitle.textContent = `${startStr} - ${endStr}, ${year}`;
+        } catch (error) {
+            console.warn('⚠️ Error setting week title:', error);
+            weekTitle.textContent = 'Week View';
+        }
     
     // Clear grid
     grid.innerHTML = '';
@@ -4168,9 +4251,28 @@ function renderWeekView() {
         }
     }
     
-    // Update dynamic week statistics
-    if (typeof updateWeekStats === 'function') {
-        updateWeekStats();
+        // Update dynamic week statistics
+        try {
+            if (typeof updateWeekStats === 'function') {
+                updateWeekStats();
+            }
+        } catch (error) {
+            console.warn('⚠️ Error in updateWeekStats:', error);
+        }
+        
+        console.log('✅ renderWeekView completed successfully');
+        
+    } catch (error) {
+        console.error('❌ Critical error in renderWeekView:', error);
+        
+        // Fallback: Show basic week view
+        const grid = document.getElementById('weekGrid');
+        const weekTitle = document.getElementById('currentWeek');
+        
+        if (grid && weekTitle) {
+            grid.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Week view temporarily unavailable.<br>Please try refreshing the page.</div>';
+            weekTitle.textContent = 'Week View';
+        }
     }
 }
 
