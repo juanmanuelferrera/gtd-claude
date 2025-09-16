@@ -152,13 +152,20 @@ window.renderMonthTemplateFilters = renderMonthTemplateFilters;
 
 // Simple calendar dropdown picker for task cards (like time dropdown)
 function openIOSDateTimePicker(taskId, currentDate, currentTime, buttonElement) {
+    console.log('📅 Opening iOS date/time picker for task:', taskId, 'current date:', currentDate, 'current time:', currentTime);
+    
     // Remove any existing picker
     if (window.currentDateDropdown) {
-        document.body.removeChild(window.currentDateDropdown);
+        console.log('📅 Removing existing calendar dropdown');
+        try {
+            document.body.removeChild(window.currentDateDropdown);
+        } catch (e) {
+            console.warn('Warning removing old dropdown:', e);
+        }
         window.currentDateDropdown = null;
     }
     
-    console.log('📅 Opening calendar dropdown for task:', taskId);
+    console.log('📅 Creating new calendar dropdown for task:', taskId);
     
     // Get button position
     const buttonRect = buttonElement.getBoundingClientRect();
@@ -350,6 +357,14 @@ function setCalendarQuickDate(taskId, daysFromToday) {
     // Select the date
     selectCalendarDate(taskId, date.getDate());
 }
+
+// Make functions globally available for inline onclick handlers
+window.openIOSDateTimePicker = openIOSDateTimePicker;
+window.selectCalendarDate = selectCalendarDate;
+window.changeCalendarMonth = changeCalendarMonth;
+window.setCalendarToday = setCalendarToday;
+window.setCalendarQuickDate = setCalendarQuickDate;
+window.closeDateDropdown = closeDateDropdown;
 
 // Time dropdown picker - Grid Card Layout
 function openTimeDropdown(taskId, currentTime, buttonElement) {

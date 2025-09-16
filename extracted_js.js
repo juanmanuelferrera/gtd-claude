@@ -5273,11 +5273,32 @@
             if (isSwipeInProgress && Math.abs(deltaX) > 60 && swipeTime < 1000) {
                 setTimeout(() => {
                     if (deltaX > 0) {
-                        // Swipe right - open delay modal
-                        toggleMobileTimeDropdown(taskId, event);
+                        // Swipe right - delay task by 1 day
+                        console.log('📱 Swipe right detected - delaying task:', taskId);
+                        if (typeof delayTask === 'function') {
+                            delayTask(taskId, 1, event);
+                        }
                     } else {
-                        // Swipe left - delete task
-                        quickDeleteTask(taskId, event);
+                        // Swipe left - open date/time picker
+                        console.log('📱 Swipe left detected - opening calendar for task:', taskId);
+                        const task = window.tasks?.find(t => t.id === taskId) || {};
+                        try {
+                            if (typeof openIOSDateTimePicker === 'function') {
+                                openIOSDateTimePicker(taskId, task.dueDate || task.date || '', task.dueTime || task.time || '', currentSwipeElement);
+                            } else {
+                                // Fallback to date modal
+                                if (typeof populateDateTimeModal === 'function') {
+                                    populateDateTimeModal(task.date || '', task.time || '');
+                                    const modal = document.getElementById('dateTimeModal');
+                                    if (modal) {
+                                        modal.style.display = 'block';
+                                        window.currentDateTimeTaskId = taskId;
+                                    }
+                                }
+                            }
+                        } catch (error) {
+                            console.error('❌ Error opening calendar modal:', error);
+                        }
                     }
                 }, 100);
             }
