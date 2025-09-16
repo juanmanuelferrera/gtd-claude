@@ -3330,9 +3330,20 @@ function handleTouchEnd(event, taskId) {
             // Create a temporary button element if not found
             const buttonElement = taskCard.querySelector('[onclick*="openIOSDateTimePicker"]') || taskCard;
             
-            // Always try to open the picker
+            // Use the unified date/time modal (same as desktop)
             try {
-                openIOSDateTimePicker(taskId, task.dueDate || task.date || '', task.dueTime || task.time || '', buttonElement);
+                // Set the current task ID for the modal
+                window.currentDateTimeTaskId = taskId;
+                
+                // Open the unified modal using the same function as desktop edit modal
+                if (typeof populateDateTimeModal === 'function') {
+                    populateDateTimeModal(task.dueDate || task.date || '', task.dueTime || task.time || '');
+                    const modal = document.getElementById('dateTimeModal');
+                    if (modal) {
+                        modal.style.display = 'block';
+                        console.log('📅 Opened unified date/time modal for task:', taskId);
+                    }
+                }
                 
                 // Show feedback
                 taskCard.style.background = 'linear-gradient(90deg, rgba(33, 150, 243, 0.2) 0%, rgba(33, 150, 243, 0.1) 100%)';
@@ -3340,16 +3351,7 @@ function handleTouchEnd(event, taskId) {
                     taskCard.style.background = '';
                 }, 300);
             } catch (error) {
-                console.error('❌ Error opening date picker:', error);
-                // Fallback to the standard date modal
-                if (typeof populateDateTimeModal === 'function') {
-                    populateDateTimeModal(task.date || '', task.time || '');
-                    const modal = document.getElementById('dateTimeModal');
-                    if (modal) {
-                        modal.style.display = 'block';
-                        window.currentDateTimeTaskId = taskId;
-                    }
-                }
+                console.error('❌ Error opening unified date modal:', error);
             }
         }
     }

@@ -5279,25 +5279,24 @@
                             delayTask(taskId, 1, event);
                         }
                     } else {
-                        // Swipe left - open date/time picker
-                        console.log('📱 Swipe left detected - opening calendar for task:', taskId);
+                        // Swipe left - open unified date/time modal (same as desktop)
+                        console.log('📱 Swipe left detected - opening unified calendar for task:', taskId);
                         const task = window.tasks?.find(t => t.id === taskId) || {};
                         try {
-                            if (typeof openIOSDateTimePicker === 'function') {
-                                openIOSDateTimePicker(taskId, task.dueDate || task.date || '', task.dueTime || task.time || '', currentSwipeElement);
-                            } else {
-                                // Fallback to date modal
-                                if (typeof populateDateTimeModal === 'function') {
-                                    populateDateTimeModal(task.date || '', task.time || '');
-                                    const modal = document.getElementById('dateTimeModal');
-                                    if (modal) {
-                                        modal.style.display = 'block';
-                                        window.currentDateTimeTaskId = taskId;
-                                    }
+                            // Set the current task ID for the modal
+                            window.currentDateTimeTaskId = taskId;
+                            
+                            // Open the unified modal using the same function as desktop
+                            if (typeof populateDateTimeModal === 'function') {
+                                populateDateTimeModal(task.dueDate || task.date || '', task.dueTime || task.time || '');
+                                const modal = document.getElementById('dateTimeModal');
+                                if (modal) {
+                                    modal.style.display = 'block';
+                                    console.log('📅 Opened unified date/time modal for task:', taskId);
                                 }
                             }
                         } catch (error) {
-                            console.error('❌ Error opening calendar modal:', error);
+                            console.error('❌ Error opening unified calendar modal:', error);
                         }
                     }
                 }, 100);
