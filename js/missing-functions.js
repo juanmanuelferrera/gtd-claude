@@ -366,6 +366,244 @@ window.setCalendarToday = setCalendarToday;
 window.setCalendarQuickDate = setCalendarQuickDate;
 window.closeDateDropdown = closeDateDropdown;
 
+// Unified Date/Time Modal Support
+let modalSelectedDate = null;
+let modalSelectedTime = null;
+let modalCurrentMonth = new Date().getMonth();
+let modalCurrentYear = new Date().getFullYear();
+
+// Navigate calendar months
+function navigateCalendar(direction) {
+    modalCurrentMonth += direction;
+    
+    if (modalCurrentMonth < 0) {
+        modalCurrentMonth = 11;
+        modalCurrentYear--;
+    } else if (modalCurrentMonth > 11) {
+        modalCurrentMonth = 0;
+        modalCurrentYear++;
+    }
+    
+    updateCalendarDisplay();
+}
+
+// Go to today's date
+function goToCalendarToday() {
+    const today = new Date();
+    modalCurrentMonth = today.getMonth();
+    modalCurrentYear = today.getFullYear();
+    modalSelectedDate = getLocalDateString(today);
+    updateCalendarDisplay();
+    updateSelectedDisplay();
+}
+
+// Set quick date
+function setQuickDate(daysFromToday) {
+    const date = new Date();
+    date.setDate(date.getDate() + daysFromToday);
+    modalSelectedDate = getLocalDateString(date);
+    modalCurrentMonth = date.getMonth();
+    modalCurrentYear = date.getFullYear();
+    updateCalendarDisplay();
+    updateSelectedDisplay();
+}
+
+// Select time
+function selectTime(time) {
+    modalSelectedTime = time;
+    
+    // Update visual state of time buttons
+    document.querySelectorAll('.time-btn').forEach(btn => {
+        if (btn.textContent === time) {
+            btn.style.background = '#007AFF';
+            btn.style.color = 'white';
+        } else {
+            // Reset to original colors based on time period
+            const hour = parseInt(time.split(':')[0]);
+            if (hour < 12) {
+                btn.style.background = '#e3f2fd';
+                btn.style.color = '#1976d2';
+            } else if (hour < 18) {
+                btn.style.background = '#fff3e0';
+                btn.style.color = '#f57c00';
+            } else {
+                btn.style.background = '#f3e5f5';
+                btn.style.color = '#7b1fa2';
+            }
+        }
+    });
+    
+    updateSelectedDisplay();
+}
+
+// Clear selected time
+function clearSelectedTime() {
+    modalSelectedTime = null;
+    
+    // Reset all time button styles
+    document.querySelectorAll('.time-btn').forEach(btn => {
+        const btnTime = btn.textContent;
+        const hour = parseInt(btnTime.split(':')[0]);
+        if (hour < 12) {
+            btn.style.background = '#e3f2fd';
+            btn.style.color = '#1976d2';
+        } else if (hour < 18) {
+            btn.style.background = '#fff3e0';
+            btn.style.color = '#f57c00';
+        } else {
+            btn.style.background = '#f3e5f5';
+            btn.style.color = '#7b1fa2';
+        }
+    });
+    
+    updateSelectedDisplay();
+}
+
+// Update calendar display
+function updateCalendarDisplay() {
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    // Update title
+    const titleElement = document.getElementById('modalCalendarTitle');
+    if (titleElement) {
+        titleElement.textContent = `${monthNames[modalCurrentMonth]} ${modalCurrentYear}`;
+    }
+    
+    // Update calendar days
+    const daysElement = document.getElementById('modalCalendarDays');
+    if (daysElement) {
+        const firstDay = new Date(modalCurrentYear, modalCurrentMonth, 1).getDay();
+        const daysInMonth = new Date(modalCurrentYear, modalCurrentMonth + 1, 0).getDate();
+        const today = new Date();
+        const todayStr = getLocalDateString(today);
+        
+        let html = '';
+        
+        // Empty cells for days before month starts
+        for (let i = 0; i < firstDay; i++) {
+            html += '<div style="padding: 12px;"></div>';
+        }
+        
+        // Days of the month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${modalCurrentYear}-${(modalCurrentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+            const isToday = dateStr === todayStr;
+            const isSelected = dateStr === modalSelectedDate;
+            
+            let style = 'padding: 12px; text-align: center; cursor: pointer; border-radius: 8px; font-size: 14px; font-weight: 500;';
+            
+            if (isSelected) {
+                style += ' background: #007AFF; color: white;';
+            } else if (isToday) {
+                style += ' background: #e3f2fd; color: #1976d2; font-weight: 600;';
+            } else {
+                style += ' background: transparent; color: #495057;';
+            }
+            
+            html += `<div onclick="selectCalendarDay('${dateStr}')" 
+                         style="${style}"
+                         onmouseover="if(!'${isSelected}') { this.style.background='#f8f9fa'; }"
+                         onmouseout="if(!'${isSelected}') { this.style.background='${isToday ? '#e3f2fd' : 'transparent'}'; }">
+                        ${day}
+                    </div>`;
+        }
+        
+        daysElement.innerHTML = html;
+    }
+}
+
+// Select calendar day
+function selectCalendarDay(dateStr) {
+    modalSelectedDate = dateStr;
+    updateCalendarDisplay();
+    updateSelectedDisplay();
+}
+
+// Update selected display
+function updateSelectedDisplay() {
+    const displayElement = document.getElementById('selectedDateTimeDisplay');
+    if (displayElement) {
+        if (modalSelectedDate || modalSelectedTime) {
+            const datePart = modalSelectedDate ? formatDateForDisplay(modalSelectedDate) : 'No date';
+            const timePart = modalSelectedTime ? modalSelectedTime : 'No time';
+            displayElement.textContent = `${datePart} at ${timePart}`;
+            displayElement.style.color = '#007AFF';
+            displayElement.style.fontWeight = '600';
+        } else {
+            displayElement.textContent = 'Select date and time';
+            displayElement.style.color = '#495057';
+            displayElement.style.fontWeight = '500';
+        }
+    }
+}
+
+// Format date for display
+function formatDateForDisplay(dateStr) {
+    try {
+        const date = new Date(dateStr + 'T00:00:00');
+        return date.toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+    } catch (e) {
+        return dateStr;
+    }
+}
+
+// Apply selected date/time
+function applyDateTime() {
+    if (modalSelectedDate) {
+        // Update the current task with selected date/time
+        if (window.currentDateTimeTaskId) {
+            updateTaskDate(window.currentDateTimeTaskId, modalSelectedDate, { stopPropagation: () => {} });
+            if (modalSelectedTime) {
+                updateTaskTime(window.currentDateTimeTaskId, modalSelectedTime, { stopPropagation: () => {} });
+            }
+        }
+    }
+    
+    closeDateTimeModal();
+}
+
+// Initialize modal when opened
+function initUnifiedDateTimeModal(currentDate, currentTime) {
+    // Reset selections
+    modalSelectedDate = currentDate || null;
+    modalSelectedTime = currentTime || null;
+    
+    // Set current month/year to the selected date or today
+    if (currentDate) {
+        const date = new Date(currentDate + 'T00:00:00');
+        modalCurrentMonth = date.getMonth();
+        modalCurrentYear = date.getFullYear();
+    } else {
+        const today = new Date();
+        modalCurrentMonth = today.getMonth();
+        modalCurrentYear = today.getFullYear();
+    }
+    
+    // Update displays
+    updateCalendarDisplay();
+    updateSelectedDisplay();
+    
+    // Update time button if time is selected
+    if (modalSelectedTime) {
+        selectTime(modalSelectedTime);
+    }
+}
+
+// Make unified modal functions globally available
+window.navigateCalendar = navigateCalendar;
+window.goToCalendarToday = goToCalendarToday;
+window.setQuickDate = setQuickDate;
+window.selectTime = selectTime;
+window.clearSelectedTime = clearSelectedTime;
+window.selectCalendarDay = selectCalendarDay;
+window.applyDateTime = applyDateTime;
+window.initUnifiedDateTimeModal = initUnifiedDateTimeModal;
+
 // Time dropdown picker - Grid Card Layout
 function openTimeDropdown(taskId, currentTime, buttonElement) {
     // Remove any existing picker
@@ -3389,48 +3627,14 @@ function openAddTaskModal(dateStr) {
 
 // Date/Time Modal Functions
 function populateDateTimeModal(currentDate, currentTime) {
-    // Store current values
+    console.log('📅 Populating unified date/time modal with:', currentDate, currentTime);
+    
+    // Initialize the unified modal
+    initUnifiedDateTimeModal(currentDate, currentTime);
+    
+    // Legacy support - store current values for backwards compatibility
     window.selectedModalDate = currentDate;
     window.selectedModalTime = currentTime;
-    
-    // Replace day picker with calendar grid
-    const dayPickerContainer = document.getElementById('desktopDayPicker')?.parentElement || document.getElementById('mobileDayPicker')?.parentElement;
-    if (dayPickerContainer) {
-        const currentDateObj = currentDate ? new Date(currentDate) : new Date();
-        const year = currentDateObj.getFullYear();
-        const month = currentDateObj.getMonth();
-        
-        dayPickerContainer.innerHTML = `
-            <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">CALENDAR</label>
-            <div style="background: rgba(255,255,255,0.9); border-radius: 12px; padding: 8px; backdrop-filter: blur(10px);">
-                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 11px; text-align: center;">
-                    <div style="font-weight: bold; color: #666;">M</div>
-                    <div style="font-weight: bold; color: #666;">T</div>
-                    <div style="font-weight: bold; color: #666;">W</div>
-                    <div style="font-weight: bold; color: #666;">T</div>
-                    <div style="font-weight: bold; color: #666;">F</div>
-                    <div style="font-weight: bold; color: #666;">S</div>
-                    <div style="font-weight: bold; color: #666;">S</div>
-                    <!-- Calendar grid placeholder -->
-                </div>
-            </div>
-        `;
-    }
-    
-    // Populate month picker
-    const monthPicker = document.getElementById('desktopMonthPicker') || document.getElementById('mobileMonthPicker');
-    if (monthPicker && currentDate) {
-        const date = new Date(currentDate);
-        monthPicker.value = date.getMonth();
-    }
-    
-    // Populate hour picker
-    const hourPicker = document.getElementById('desktopHourPicker') || document.getElementById('mobileHourPicker');
-    if (hourPicker) {
-        hourPicker.value = currentTime || '';
-    }
-    
-    updateDateTimeDisplay();
 }
 
 

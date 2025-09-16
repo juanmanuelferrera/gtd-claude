@@ -4766,42 +4766,44 @@
 
     <!-- Custom Date/Time Picker Modal -->
     <div id="dateTimeModal" class="modal" onclick="closeDateTimeModal(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-        <!-- Desktop Version - Horizontal Calendar + Time Picker -->
-        <div class="modal-content desktop-only" onclick="event.stopPropagation()" style="width: 90%; max-width: 560px; height: auto; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 12px; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15); padding: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+        <!-- Unified Responsive Date/Time Modal -->
+        <div class="modal-content" onclick="event.stopPropagation()" style="width: 90%; max-width: 460px; height: auto; max-height: 85vh; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); padding: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
             
-            <!-- Main Content - Horizontal Layout -->
-            <div style="display: flex;">
+            <!-- Modal Header -->
+            <div style="background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); color: white; padding: 20px; text-align: center; border-radius: 16px 16px 0 0;">
+                <h3 style="margin: 0; font-size: 18px; font-weight: 600;">📅 Select Date & Time</h3>
+            </div>
+
+            <!-- Main Content -->
+            <div style="padding: 24px; overflow-y: auto; max-height: calc(85vh - 140px);">
                 
-                <!-- Left Side - Calendar -->
-                <div style="flex: 1; border-right: 1px solid #f0f0f0;">
+                <!-- Calendar Section -->
+                <div style="margin-bottom: 24px;">
                     <!-- Calendar Header -->
-                    <div style="padding: 16px 20px 12px 20px; text-align: center;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 12px;">
-                            <div style="width: 20px; height: 20px; background: #ff3b30; border-radius: 3px; display: flex; align-items: center; justify-content: center;">
-                                <span style="color: white; font-size: 10px; font-weight: bold;">17</span>
-                            </div>
-                            <h3 id="modalCalendarTitle" style="margin: 0; color: #1d1d1f; font-size: 16px; font-weight: 600;">September 2025</h3>
-                        </div>
-                        
-                        <!-- Month Navigation -->
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                            <button onclick="navigateCalendar(-1)" style="background: #f5f5f5; border: none; border-radius: 6px; padding: 6px 12px; color: #333; cursor: pointer; font-size: 12px;">‹ Prev</button>
-                            <button onclick="goToCalendarToday()" style="background: #007aff; border: none; border-radius: 6px; padding: 6px 12px; color: white; cursor: pointer; font-size: 12px; font-weight: 500;">Today</button>
-                            <button onclick="navigateCalendar(1)" style="background: #f5f5f5; border: none; border-radius: 6px; padding: 6px 12px; color: #333; cursor: pointer; font-size: 12px;">Next ›</button>
-                        </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                        <button onclick="navigateCalendar(-1)" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 8px 12px; color: #495057; cursor: pointer; font-size: 14px; display: flex; align-items: center;">‹</button>
+                        <h4 id="modalCalendarTitle" style="margin: 0; color: #212529; font-size: 16px; font-weight: 600;">September 2025</h4>
+                        <button onclick="navigateCalendar(1)" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 8px 12px; color: #495057; cursor: pointer; font-size: 14px; display: flex; align-items: center;">›</button>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+                        <button onclick="goToCalendarToday()" style="background: #007AFF; border: none; border-radius: 8px; padding: 8px 16px; color: white; cursor: pointer; font-size: 12px; font-weight: 500;">Today</button>
+                        <button onclick="setQuickDate(1)" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 8px 16px; color: #495057; cursor: pointer; font-size: 12px;">Tomorrow</button>
+                        <button onclick="setQuickDate(7)" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 8px 16px; color: #495057; cursor: pointer; font-size: 12px;">Next Week</button>
                     </div>
                     
                     <!-- Calendar Grid -->
-                    <div style="padding: 0 20px 16px 20px;">
+                    <div>
                         <!-- Day Headers -->
-                        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 6px;">
-                            <div style="text-align: center; font-size: 10px; color: #666; font-weight: 500; padding: 4px 0;">Su</div>
-                            <div style="text-align: center; font-size: 10px; color: #666; font-weight: 500; padding: 4px 0;">Mo</div>
-                            <div style="text-align: center; font-size: 10px; color: #666; font-weight: 500; padding: 4px 0;">Tu</div>
-                            <div style="text-align: center; font-size: 10px; color: #666; font-weight: 500; padding: 4px 0;">We</div>
-                            <div style="text-align: center; font-size: 10px; color: #666; font-weight: 500; padding: 4px 0;">Th</div>
-                            <div style="text-align: center; font-size: 10px; color: #666; font-weight: 500; padding: 4px 0;">Fr</div>
-                            <div style="text-align: center; font-size: 10px; color: #666; font-weight: 500; padding: 4px 0;">Sa</div>
+                        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 8px;">
+                            <div style="text-align: center; font-size: 12px; color: #6c757d; font-weight: 500; padding: 8px 0;">Su</div>
+                            <div style="text-align: center; font-size: 12px; color: #6c757d; font-weight: 500; padding: 8px 0;">Mo</div>
+                            <div style="text-align: center; font-size: 12px; color: #6c757d; font-weight: 500; padding: 8px 0;">Tu</div>
+                            <div style="text-align: center; font-size: 12px; color: #6c757d; font-weight: 500; padding: 8px 0;">We</div>
+                            <div style="text-align: center; font-size: 12px; color: #6c757d; font-weight: 500; padding: 8px 0;">Th</div>
+                            <div style="text-align: center; font-size: 12px; color: #6c757d; font-weight: 500; padding: 8px 0;">Fr</div>
+                            <div style="text-align: center; font-size: 12px; color: #6c757d; font-weight: 500; padding: 8px 0;">Sa</div>
                         </div>
                         
                         <!-- Calendar Days -->
@@ -4810,125 +4812,54 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Right Side - Time Picker -->
-                <div style="flex: 1;">
-                    <div style="padding: 16px 20px;">
-                        <!-- Clear Time Button -->
-                        <button onclick="clearSelectedTime()" style="width: 100%; background: #f5f5f5; border: none; border-radius: 6px; padding: 8px; margin-bottom: 12px; color: #666; cursor: pointer; font-size: 12px;">
-                            ✕ Clear Time (Untimed)
-                        </button>
+
+                <!-- Time Section -->
+                <div style="margin-bottom: 24px;">
+                    <h5 style="margin: 0 0 12px 0; color: #495057; font-size: 14px; font-weight: 600;">Time (Optional)</h5>
+                    
+                    <!-- Clear Time -->
+                    <button onclick="clearSelectedTime()" style="width: 100%; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 12px; margin-bottom: 12px; color: #6c757d; cursor: pointer; font-size: 13px;">
+                        ✕ No specific time
+                    </button>
+                    
+                    <!-- Time Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 8px;">
+                        <!-- Morning -->
+                        <button onclick="selectTime('06:00')" class="time-btn" style="background: #e3f2fd; color: #1976d2; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">06:00</button>
+                        <button onclick="selectTime('07:00')" class="time-btn" style="background: #e3f2fd; color: #1976d2; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">07:00</button>
+                        <button onclick="selectTime('08:00')" class="time-btn" style="background: #e3f2fd; color: #1976d2; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">08:00</button>
+                        <button onclick="selectTime('09:00')" class="time-btn" style="background: #e3f2fd; color: #1976d2; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">09:00</button>
+                        <button onclick="selectTime('10:00')" class="time-btn" style="background: #e3f2fd; color: #1976d2; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">10:00</button>
+                        <button onclick="selectTime('11:00')" class="time-btn" style="background: #e3f2fd; color: #1976d2; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">11:00</button>
                         
-                        <!-- Time Slots -->
-                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
-                            <!-- Morning (Blue) -->
-                            <button onclick="selectTime('06:00')" class="time-btn morning" style="background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">06:00</button>
-                            <button onclick="selectTime('07:00')" class="time-btn morning" style="background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">07:00</button>
-                            <button onclick="selectTime('08:00')" class="time-btn morning" style="background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">08:00</button>
-                            <button onclick="selectTime('09:00')" class="time-btn morning" style="background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">09:00</button>
-                            <button onclick="selectTime('10:00')" class="time-btn morning" style="background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">10:00</button>
-                            <button onclick="selectTime('11:00')" class="time-btn morning" style="background: #007aff; color: white; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">11:00</button>
-                            
-                            <!-- Afternoon (Orange) -->
-                            <button onclick="selectTime('12:00')" class="time-btn afternoon" style="background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">12:00</button>
-                            <button onclick="selectTime('13:00')" class="time-btn afternoon" style="background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">13:00</button>
-                            <button onclick="selectTime('14:00')" class="time-btn afternoon" style="background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">14:00</button>
-                            <button onclick="selectTime('15:00')" class="time-btn afternoon" style="background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">15:00</button>
-                            <button onclick="selectTime('16:00')" class="time-btn afternoon" style="background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">16:00</button>
-                            <button onclick="selectTime('17:00')" class="time-btn afternoon" style="background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">17:00</button>
-                            
-                            <!-- Evening (Purple) -->
-                            <button onclick="selectTime('18:00')" class="time-btn evening" style="background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">18:00</button>
-                            <button onclick="selectTime('19:00')" class="time-btn evening" style="background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">19:00</button>
-                            <button onclick="selectTime('20:00')" class="time-btn evening" style="background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">20:00</button>
-                            <button onclick="selectTime('21:00')" class="time-btn evening" style="background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">21:00</button>
-                            <button onclick="selectTime('22:00')" class="time-btn evening" style="background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 6px; padding: 14px 8px; cursor: pointer; font-size: 11px; font-weight: 500;">22:00</button>
-                        </div>
+                        <!-- Afternoon -->
+                        <button onclick="selectTime('12:00')" class="time-btn" style="background: #fff3e0; color: #f57c00; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">12:00</button>
+                        <button onclick="selectTime('13:00')" class="time-btn" style="background: #fff3e0; color: #f57c00; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">13:00</button>
+                        <button onclick="selectTime('14:00')" class="time-btn" style="background: #fff3e0; color: #f57c00; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">14:00</button>
+                        <button onclick="selectTime('15:00')" class="time-btn" style="background: #fff3e0; color: #f57c00; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">15:00</button>
+                        <button onclick="selectTime('16:00')" class="time-btn" style="background: #fff3e0; color: #f57c00; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">16:00</button>
+                        <button onclick="selectTime('17:00')" class="time-btn" style="background: #fff3e0; color: #f57c00; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">17:00</button>
                         
-                        <!-- Action Buttons -->
-                        <div style="margin-top: 16px; display: flex; gap: 12px;">
-                            <button onclick="closeDateTimeModal()" style="flex: 1; background: #f5f5f5; color: #333; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 13px;">Cancel</button>
-                            <button onclick="applyCalendarDateTime()" style="flex: 1; background: #007aff; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 13px;">Set</button>
-                        </div>
+                        <!-- Evening -->
+                        <button onclick="selectTime('18:00')" class="time-btn" style="background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">18:00</button>
+                        <button onclick="selectTime('19:00')" class="time-btn" style="background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">19:00</button>
+                        <button onclick="selectTime('20:00')" class="time-btn" style="background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">20:00</button>
+                        <button onclick="selectTime('21:00')" class="time-btn" style="background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">21:00</button>
+                        <button onclick="selectTime('22:00')" class="time-btn" style="background: #f3e5f5; color: #7b1fa2; border: none; border-radius: 8px; padding: 12px 8px; cursor: pointer; font-size: 12px; font-weight: 500;">22:00</button>
                     </div>
                 </div>
-                
-            </div>
-        </div>
-        
-        <!-- Mobile Version - Beautiful Scrollers -->
-        <div class="modal-content mobile-only" onclick="event.stopPropagation()" style="width: 90%; max-width: 380px; height: 50vh; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3); padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-            <!-- Header -->
-            <div style="background: rgba(255,255,255,0.1); padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2);">
-                <h3 style="margin: 0; color: white; font-size: 18px; font-weight: 600;">📅 Select Date & Time</h3>
-            </div>
-            
-            <!-- Scrollable Pickers -->
-            <div style="flex: 1; padding: 15px; display: flex; gap: 12px;">
-                <!-- Day Picker -->
-                <div style="flex: 1;">
-                    <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">DAY</label>
-                    <select id="mobileDayPicker" style="width: 100%; height: 100px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
-                            size="4" onchange="updateMobileDateTime()" onfocus="clearDateTimeModalTimeout()" onblur="setDateTimeModalTimeout()">
-                        <!-- Days will be populated by JS -->
-                    </select>
-                </div>
-                
-                <!-- Month Picker -->
-                <div style="flex: 1;">
-                    <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">MONTH</label>
-                    <select id="mobileMonthPicker" style="width: 100%; height: 100px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
-                            size="4" onchange="updateMobileDateTime()" onfocus="clearDateTimeModalTimeout()" onblur="setDateTimeModalTimeout()">
-                        <option value="0">JAN</option>
-                        <option value="1">FEB</option>
-                        <option value="2">MAR</option>
-                        <option value="3">APR</option>
-                        <option value="4">MAY</option>
-                        <option value="5">JUN</option>
-                        <option value="6">JUL</option>
-                        <option value="7">AUG</option>
-                        <option value="8">SEP</option>
-                        <option value="9">OCT</option>
-                        <option value="10">NOV</option>
-                        <option value="11">DEC</option>
-                    </select>
-                </div>
-                
-                <!-- Hour Picker -->
-                <div style="flex: 1;">
-                    <label style="display: block; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-align: center; font-weight: 600;">TIME</label>
-                    <select id="mobileHourPicker" style="width: 100%; height: 100px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; background: rgba(255,255,255,0.9); padding: 8px; text-align: center; backdrop-filter: blur(10px);" 
-                            size="4" onchange="updateMobileDateTime()" onfocus="clearDateTimeModalTimeout()" onblur="setDateTimeModalTimeout()">
-                        <option value="">--</option>
-                        <option value="06:00">6 AM</option>
-                        <option value="07:00">7 AM</option>
-                        <option value="08:00">8 AM</option>
-                        <option value="09:00">9 AM</option>
-                        <option value="10:00">10 AM</option>
-                        <option value="11:00">11 AM</option>
-                        <option value="12:00">12 PM</option>
-                        <option value="13:00">1 PM</option>
-                        <option value="14:00">2 PM</option>
-                        <option value="15:00">3 PM</option>
-                        <option value="16:00">4 PM</option>
-                        <option value="17:00">5 PM</option>
-                        <option value="18:00">6 PM</option>
-                        <option value="19:00">7 PM</option>
-                        <option value="20:00">8 PM</option>
-                        <option value="21:00">9 PM</option>
-                        <option value="22:00">10 PM</option>
-                    </select>
-                </div>
-            </div>
-            
-            <!-- Selected Display -->
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
-                <div id="mobileSelectedDisplay" style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 12px; text-align: center; color: white; font-weight: 600; font-size: 14px; backdrop-filter: blur(10px);">
+
+                <!-- Selected Display -->
+                <div id="selectedDateTimeDisplay" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 16px; text-align: center; color: #495057; font-weight: 500; margin-bottom: 20px;">
                     Select date and time
                 </div>
-                <div style="display: flex; gap: 12px; margin-top: 15px;">
-                    <button onclick="closeDateTimeModal()" style="flex: 1; background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; backdrop-filter: blur(10px);">Cancel</button>
-                    <button onclick="applyMobileDateTime()" style="flex: 1; background: rgba(255,255,255,0.9); color: #667eea; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(255,255,255,0.3);">Apply</button>
+            </div>
+
+            <!-- Footer Actions -->
+            <div style="background: #f8f9fa; padding: 16px 24px; border-radius: 0 0 16px 16px; border-top: 1px solid #e9ecef;">
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="closeDateTimeModal()" style="flex: 1; background: white; color: #6c757d; border: 1px solid #e9ecef; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">Cancel</button>
+                    <button onclick="applyDateTime()" style="flex: 1; background: #007AFF; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">Apply</button>
                 </div>
             </div>
         </div>
