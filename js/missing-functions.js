@@ -410,7 +410,13 @@ function setQuickDate(daysFromToday) {
 
 // Select time
 function selectTime(time) {
+    console.log('🕐 Time selected:', time);
+    
+    // Update unified modal variables
     modalSelectedTime = time;
+    
+    // Update legacy modal variables for backward compatibility
+    window.selectedModalTime = time;
     
     // Update visual state of time buttons
     document.querySelectorAll('.time-btn').forEach(btn => {
@@ -434,11 +440,18 @@ function selectTime(time) {
     });
     
     updateSelectedDisplay();
+    console.log('✅ Time selection updated');
 }
 
 // Clear selected time
 function clearSelectedTime() {
+    console.log('🚫 Clearing selected time');
+    
+    // Update unified modal variables
     modalSelectedTime = null;
+    
+    // Update legacy modal variables for backward compatibility
+    window.selectedModalTime = '';
     
     // Reset all time button styles
     document.querySelectorAll('.time-btn').forEach(btn => {
@@ -457,6 +470,7 @@ function clearSelectedTime() {
     });
     
     updateSelectedDisplay();
+    console.log('✅ Time cleared');
 }
 
 // Update calendar display
@@ -515,9 +529,19 @@ function updateCalendarDisplay() {
 
 // Select calendar day
 function selectCalendarDay(dateStr) {
+    console.log('📅 Calendar day selected:', dateStr);
+    
+    // Update unified modal variables
     modalSelectedDate = dateStr;
+    
+    // Update legacy modal variables for backward compatibility
+    window.selectedModalDate = dateStr;
+    
+    // Update displays
     updateCalendarDisplay();
     updateSelectedDisplay();
+    
+    console.log('✅ Calendar day selection updated');
 }
 
 // Update selected display
@@ -554,34 +578,44 @@ function formatDateForDisplay(dateStr) {
 
 // Apply selected date/time
 function applyDateTime() {
-    console.log('📅 Applying date/time:', { date: modalSelectedDate, time: modalSelectedTime, taskId: window.currentDateTimeTaskId });
+    console.log('📅 Applying date/time:', { 
+        date: modalSelectedDate, 
+        time: modalSelectedTime, 
+        taskId: window.currentDateTimeTaskId,
+        legacyDate: window.selectedModalDate,
+        legacyTime: window.selectedModalTime
+    });
     
     try {
+        // Use the date/time from either the unified modal or legacy modal variables
+        const selectedDate = modalSelectedDate || window.selectedModalDate;
+        const selectedTime = modalSelectedTime || window.selectedModalTime;
+        
         if (window.currentDateTimeTaskId) {
             const taskId = window.currentDateTimeTaskId;
             
             // Update date if selected
-            if (modalSelectedDate) {
-                console.log('📅 Updating task date:', taskId, modalSelectedDate);
+            if (selectedDate) {
+                console.log('📅 Updating task date:', taskId, selectedDate);
                 if (typeof updateTaskDate === 'function') {
-                    updateTaskDate(taskId, modalSelectedDate, { stopPropagation: () => {} });
+                    updateTaskDate(taskId, selectedDate, { stopPropagation: () => {} });
                 } else {
                     console.warn('⚠️ updateTaskDate function not available');
                 }
             }
             
             // Update time if selected
-            if (modalSelectedTime) {
-                console.log('🕐 Updating task time:', taskId, modalSelectedTime);
+            if (selectedTime) {
+                console.log('🕐 Updating task time:', taskId, selectedTime);
                 if (typeof updateTaskTime === 'function') {
-                    updateTaskTime(taskId, modalSelectedTime, { stopPropagation: () => {} });
+                    updateTaskTime(taskId, selectedTime, { stopPropagation: () => {} });
                 } else {
                     console.warn('⚠️ updateTaskTime function not available');
                 }
             }
             
             // Clear time if user explicitly chose "No specific time"
-            if (modalSelectedDate && !modalSelectedTime) {
+            if (selectedDate && !selectedTime) {
                 console.log('🚫 Clearing task time:', taskId);
                 if (typeof updateTaskTime === 'function') {
                     updateTaskTime(taskId, '', { stopPropagation: () => {} });
