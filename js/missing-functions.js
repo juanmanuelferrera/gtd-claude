@@ -1320,18 +1320,141 @@ function searchMonthTasks() {
     const searchInputElement = document.getElementById('monthTaskSearch');
     if (!searchInputElement) return;
     
-    const searchTerm = searchInputElement.value.toLowerCase();
-    // Month search logic would go here
-    console.log('Month search:', searchTerm);
+    const searchTerm = searchInputElement.value.toLowerCase().trim();
+    
+    if (!searchTerm) {
+        // If search is empty, re-render the calendar to show all tasks
+        if (typeof renderCalendar === 'function') {
+            renderCalendar();
+        }
+        return;
+    }
+    
+    // Get current month date range
+    const currentMonth = currentCalendarDate.getMonth();
+    const currentYear = currentCalendarDate.getFullYear();
+    
+    // Filter tasks for current month that match search term
+    const filteredTasks = tasks.filter(task => {
+        if (!task.dueDate) return false;
+        
+        const taskDate = new Date(task.dueDate);
+        const isInMonth = taskDate.getMonth() === currentMonth && taskDate.getFullYear() === currentYear;
+        const matchesSearch = task.title.toLowerCase().includes(searchTerm) || 
+                            (task.notes && task.notes.toLowerCase().includes(searchTerm)) ||
+                            (task.project && task.project.toLowerCase().includes(searchTerm));
+        
+        return isInMonth && matchesSearch;
+    });
+    
+    console.log(`🔍 Month search: "${searchTerm}" found ${filteredTasks.length} tasks`);
+    
+    // Clear all day cells
+    const dayCells = document.querySelectorAll('.calendar-day');
+    dayCells.forEach(cell => {
+        const tasksContainer = cell.querySelector('.day-tasks');
+        if (tasksContainer) {
+            tasksContainer.innerHTML = '';
+        }
+    });
+    
+    // Add filtered tasks to their respective days
+    filteredTasks.forEach(task => {
+        const taskDate = new Date(task.dueDate);
+        const day = taskDate.getDate();
+        
+        // Find the day cell for this date
+        const dayCell = Array.from(dayCells).find(cell => {
+            const dayNumber = cell.querySelector('.day-number');
+            return dayNumber && parseInt(dayNumber.textContent) === day;
+        });
+        
+        if (dayCell) {
+            const tasksContainer = dayCell.querySelector('.day-tasks') || createTasksContainer(dayCell);
+            const taskElement = document.createElement('div');
+            taskElement.className = 'day-task';
+            taskElement.innerHTML = `
+                <div class="task-time">${task.dueTime || ''}</div>
+                <div class="task-title">${task.title}</div>
+            `;
+            taskElement.onclick = () => openEditTaskModal(task);
+            tasksContainer.appendChild(taskElement);
+        }
+    });
+    
+    function createTasksContainer(dayCell) {
+        const container = document.createElement('div');
+        container.className = 'day-tasks';
+        dayCell.appendChild(container);
+        return container;
+    }
 }
 
 function searchWeekTasks() {
     const searchInputElement = document.getElementById('weekTaskSearch');
     if (!searchInputElement) return;
     
-    const searchTerm = searchInputElement.value.toLowerCase();
-    // Week search logic would go here
-    console.log('Week search:', searchTerm);
+    const searchTerm = searchInputElement.value.toLowerCase().trim();
+    
+    if (!searchTerm) {
+        // If search is empty, re-render the week view to show all tasks
+        if (typeof renderWeekView === 'function') {
+            renderWeekView();
+        }
+        return;
+    }
+    
+    // Get current week date range
+    const weekStart = getMonday(currentWeekDate);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    
+    // Filter tasks for current week that match search term
+    const filteredTasks = tasks.filter(task => {
+        if (!task.dueDate) return false;
+        
+        const taskDate = new Date(task.dueDate);
+        const isInWeek = taskDate >= weekStart && taskDate <= weekEnd;
+        const matchesSearch = task.title.toLowerCase().includes(searchTerm) || 
+                            (task.notes && task.notes.toLowerCase().includes(searchTerm)) ||
+                            (task.project && task.project.toLowerCase().includes(searchTerm));
+        
+        return isInWeek && matchesSearch;
+    });
+    
+    console.log(`🔍 Week search: "${searchTerm}" found ${filteredTasks.length} tasks`);
+    
+    // Clear all week day cells
+    const weekGrid = document.getElementById('weekGrid');
+    if (weekGrid) {
+        const dayCells = weekGrid.querySelectorAll('.week-day-content');
+        dayCells.forEach(cell => {
+            // Clear existing tasks but keep the header
+            const dayHeader = cell.querySelector('h4');
+            cell.innerHTML = '';
+            if (dayHeader) {
+                cell.appendChild(dayHeader);
+            }
+        });
+        
+        // Add filtered tasks to their respective days
+        filteredTasks.forEach(task => {
+            const taskDate = new Date(task.dueDate);
+            const dayIndex = (taskDate.getDay() + 6) % 7; // Convert to Monday=0 index
+            const dayCell = dayCells[dayIndex];
+            
+            if (dayCell) {
+                const taskElement = document.createElement('div');
+                taskElement.className = 'week-task';
+                taskElement.innerHTML = `
+                    <span class="task-time">${task.dueTime || ''}</span>
+                    <span class="task-title">${task.title}</span>
+                `;
+                taskElement.onclick = () => openEditTaskModal(task);
+                dayCell.appendChild(taskElement);
+            }
+        });
+    }
 }
 
 function searchRepeatTasks() {
