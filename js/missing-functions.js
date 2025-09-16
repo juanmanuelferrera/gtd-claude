@@ -531,7 +531,7 @@ function updateSelectedDisplay() {
             displayElement.style.color = '#007AFF';
             displayElement.style.fontWeight = '600';
         } else {
-            displayElement.textContent = 'Select date and time';
+            displayElement.textContent = '';
             displayElement.style.color = '#495057';
             displayElement.style.fontWeight = '500';
         }
@@ -554,14 +554,59 @@ function formatDateForDisplay(dateStr) {
 
 // Apply selected date/time
 function applyDateTime() {
-    if (modalSelectedDate) {
-        // Update the current task with selected date/time
+    console.log('📅 Applying date/time:', { date: modalSelectedDate, time: modalSelectedTime, taskId: window.currentDateTimeTaskId });
+    
+    try {
         if (window.currentDateTimeTaskId) {
-            updateTaskDate(window.currentDateTimeTaskId, modalSelectedDate, { stopPropagation: () => {} });
-            if (modalSelectedTime) {
-                updateTaskTime(window.currentDateTimeTaskId, modalSelectedTime, { stopPropagation: () => {} });
+            const taskId = window.currentDateTimeTaskId;
+            
+            // Update date if selected
+            if (modalSelectedDate) {
+                console.log('📅 Updating task date:', taskId, modalSelectedDate);
+                if (typeof updateTaskDate === 'function') {
+                    updateTaskDate(taskId, modalSelectedDate, { stopPropagation: () => {} });
+                } else {
+                    console.warn('⚠️ updateTaskDate function not available');
+                }
             }
+            
+            // Update time if selected
+            if (modalSelectedTime) {
+                console.log('🕐 Updating task time:', taskId, modalSelectedTime);
+                if (typeof updateTaskTime === 'function') {
+                    updateTaskTime(taskId, modalSelectedTime, { stopPropagation: () => {} });
+                } else {
+                    console.warn('⚠️ updateTaskTime function not available');
+                }
+            }
+            
+            // Clear time if user explicitly chose "No specific time"
+            if (modalSelectedDate && !modalSelectedTime) {
+                console.log('🚫 Clearing task time:', taskId);
+                if (typeof updateTaskTime === 'function') {
+                    updateTaskTime(taskId, '', { stopPropagation: () => {} });
+                }
+            }
+            
+            // Refresh current view to show changes
+            setTimeout(() => {
+                if (window.currentView === 'today' && typeof renderTodayView === 'function') {
+                    renderTodayView();
+                } else if (window.currentView === 'week' && typeof safeRenderWeekView === 'function') {
+                    safeRenderWeekView();
+                } else if (window.currentView === 'calendar' && typeof renderCalendar === 'function') {
+                    renderCalendar();
+                } else if (window.currentView === 'allTasks' && typeof renderAllTasksView === 'function') {
+                    renderAllTasksView();
+                }
+            }, 100);
+            
+            console.log('✅ Date/time applied successfully');
+        } else {
+            console.warn('⚠️ No task ID set for date/time update');
         }
+    } catch (error) {
+        console.error('❌ Error applying date/time:', error);
     }
     
     closeDateTimeModal();
