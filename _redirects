@@ -1,2 +1,6 @@
-/app    /hyperfiler-pro.html   200
-/*      /index.html            200
+# HyperFiler Pro App URLs
+/app                    /hyperfiler-pro.html   200
+/hyperfiler-pro         /hyperfiler-pro.html   200
+
+# Root and catch-all
+/*                      /index.html            200
