@@ -1,8 +1,8 @@
 // Service Worker for HyperFiler Pro
 // Version 1.0 - App Shell Caching Only
 
-const CACHE_NAME = 'hyperfiler-v1.3.2-shell';
-const CACHE_VERSION = '20250915-step5';
+const CACHE_NAME = 'hyperfiler-v1.3.3-shell';
+const CACHE_VERSION = '20250916-safari-fix';
 
 // App Shell - Critical files for offline functionality
 const APP_SHELL = [
@@ -21,7 +21,7 @@ const APP_SHELL = [
   '/extracted_js.js'
 ];
 
-console.log('🔧 Service Worker loading - HyperFiler Pro v1.3.2');
+console.log('🔧 Service Worker loading - HyperFiler Pro v1.3.3 (Safari Fix)');
 
 // Install event - Cache app shell
 self.addEventListener('install', (event) => {
@@ -82,18 +82,27 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
+  // IMPORTANT: Skip service worker for root path and index pages to avoid redirect issues
+  if (url.pathname === '/' || 
+      url.pathname === '/index.html' || 
+      url.pathname === '/index-es.html' ||
+      url.pathname.endsWith('/')) {
+    console.log('🔄 Service Worker: Skipping root/index path to avoid redirects:', url.pathname);
+    return; // Let browser handle normally - fixes Safari mobile issue
+  }
+  
   // API requests - always go to network (preserve "server wins" logic)
   if (url.pathname.includes('/api/')) {
     console.log('🌐 Service Worker: API request - using network only:', url.pathname);
     return; // Let browser handle normally
   }
   
-  // App shell files - cache first
+  // App shell files - cache first (only for specific app files)
   if (APP_SHELL.some(shellFile => url.pathname.endsWith(shellFile.replace('/', '')))) {
     console.log('💾 Service Worker: App shell request - cache first:', url.pathname);
     
     event.respondWith(
-      caches.match(event.request)
+      caches.match(event.request, { ignoreSearch: true })
         .then((cachedResponse) => {
           if (cachedResponse) {
             console.log('✅ Service Worker: Serving from cache:', url.pathname);
@@ -101,10 +110,10 @@ self.addEventListener('fetch', (event) => {
           }
           
           console.log('🌐 Service Worker: Cache miss, fetching from network:', url.pathname);
-          return fetch(event.request)
+          return fetch(event.request, { redirect: 'follow' })
             .then((response) => {
-              // Cache the response for future use
-              if (response.status === 200) {
+              // Only cache successful responses (not redirects)
+              if (response.status === 200 && response.type === 'basic') {
                 const responseClone = response.clone();
                 caches.open(CACHE_NAME)
                   .then((cache) => {
