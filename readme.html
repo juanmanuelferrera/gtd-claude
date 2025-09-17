@@ -980,16 +980,23 @@
             // Scroll to first match if found
             if (firstMatch) {
                 setTimeout(() => {
-                    firstMatch.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'center'
+                    // Get the position of the first match
+                    const rect = firstMatch.getBoundingClientRect();
+                    const headerHeight = 80; // Account for fixed header
+                    const offsetY = window.pageYOffset + rect.top - headerHeight;
+                    
+                    // Scroll to the calculated position
+                    window.scrollTo({
+                        top: offsetY,
+                        behavior: 'smooth'
                     });
+                    
                     // Add a visual indicator
                     firstMatch.style.animation = 'pulse 1s ease-out';
                     setTimeout(() => {
                         firstMatch.style.animation = '';
                     }, 1000);
-                }, 300); // Wait for expansion animation
+                }, 500); // Wait longer for expansion animation
             }
             
             resultsDiv.innerHTML = matchCount > 0 ? 
