@@ -29,23 +29,22 @@ function createNetworkStatusIndicator() {
     statusIndicator.id = 'networkStatusIndicator';
     statusIndicator.style.cssText = `
         position: fixed;
-        top: 12px;
-        right: 72px;
+        top: 14px;
+        right: 80px;
         z-index: 9999;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
+        padding: 4px;
+        border-radius: 50%;
+        font-size: 16px;
         display: flex;
         align-items: center;
-        gap: 6px;
+        justify-content: center;
         transition: all 0.3s ease;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        background: transparent;
+        border: none;
         cursor: pointer;
         user-select: none;
+        width: 24px;
+        height: 24px;
     `;
     
     // Add click handler for manual refresh
@@ -79,16 +78,21 @@ function updateNetworkStatusIndicator(networkStatus) {
     };
     
     statusIndicator.innerHTML = `
-        <span style="font-size: 14px;">${indicator.icon}</span>
-        <span>${indicator.text}</span>
+        <span style="font-size: 16px;">${indicator.icon}</span>
     `;
     
-    statusIndicator.style.backgroundColor = `${indicator.color}20`;
+    statusIndicator.style.backgroundColor = `transparent`;
     statusIndicator.style.color = indicator.color;
-    statusIndicator.style.borderColor = `${indicator.color}30`;
+    statusIndicator.style.borderColor = `transparent`;
+    statusIndicator.style.padding = '4px';
     
-    // Add tooltip
-    statusIndicator.title = `Network: ${indicator.text} (click to refresh)`;
+    // Add tooltip based on status
+    const statusText = indicator.status === 'offline' ? 'Offline' : 
+                      indicator.status === 'online' ? 'Online - Excellent' :
+                      indicator.status === 'online-good' ? 'Online - Good' :
+                      indicator.status === 'online-poor' ? 'Online - Poor' : 
+                      'Checking...';
+    statusIndicator.title = `Network: ${statusText} (click to refresh)`;
 }
 
 /**
