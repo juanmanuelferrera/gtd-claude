@@ -1,8 +1,8 @@
 // Service Worker for HyperFiler Pro
 // Version 1.0 - App Shell Caching Only
 
-const CACHE_NAME = 'hyperfiler-v1.3.4-shell';
-const CACHE_VERSION = '20250916-login-fix';
+const CACHE_NAME = 'hyperfiler-v1.3.5-shell';
+const CACHE_VERSION = '20250916-redirect-fix';
 
 // App Shell - Critical files for offline functionality
 const APP_SHELL = [
@@ -21,7 +21,7 @@ const APP_SHELL = [
   '/extracted_js.js'
 ];
 
-console.log('🔧 Service Worker loading - HyperFiler Pro v1.3.4 (Login Fix)');
+console.log('🔧 Service Worker loading - HyperFiler Pro v1.3.5 (Redirect Fix)');
 
 // Install event - Cache app shell
 self.addEventListener('install', (event) => {
@@ -82,24 +82,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // IMPORTANT: Skip service worker for root path and index pages to avoid redirect issues
+  // IMPORTANT: Skip service worker for problematic paths to avoid redirect issues
   if (url.pathname === '/' || 
       url.pathname === '/index.html' || 
       url.pathname === '/index-es.html' ||
+      url.pathname === '/hyperfiler-pro' ||
+      url.pathname === '/hyperfiler-pro.' ||
+      url.pathname === '/hyperfiler-pro.html' ||
       url.pathname.endsWith('/')) {
-    console.log('🔄 Service Worker: Skipping root/index path to avoid redirects:', url.pathname);
-    return; // Let browser handle normally - fixes Safari mobile issue
-  }
-  
-  // Special handling for hyperfiler-pro.html to avoid redirect issues
-  if (url.pathname === '/hyperfiler-pro' || url.pathname === '/hyperfiler-pro.') {
-    console.log('🔄 Service Worker: Fixing hyperfiler-pro path:', url.pathname);
-    event.respondWith(
-      fetch('/hyperfiler-pro.html', { redirect: 'follow' })
-        .then(response => response)
-        .catch(() => caches.match('/hyperfiler-pro.html'))
-    );
-    return;
+    console.log('🔄 Service Worker: Bypassing service worker for path to avoid redirects:', url.pathname);
+    return; // Let browser handle normally - fixes redirect issues
   }
   
   // API requests - always go to network (preserve "server wins" logic)
