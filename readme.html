@@ -456,6 +456,21 @@
                 font-size: 24px;
             }
         }
+        
+        @keyframes pulse {
+            0% { 
+                box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 20px 10px rgba(37, 99, 235, 0);
+                transform: scale(1.02);
+            }
+            100% { 
+                box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body>
@@ -932,6 +947,7 @@
             const searchTerms = query.toLowerCase().split(' ').filter(term => term.length >= 2);
             const faqContainers = document.querySelectorAll('.faq-container');
             let matchCount = 0;
+            let firstMatch = null;
             
             faqContainers.forEach(container => {
                 const question = container.querySelector('.faq-question').textContent.toLowerCase();
@@ -944,6 +960,11 @@
                     container.classList.add('search-matched');
                     matchCount++;
                     
+                    // Store first match for scrolling
+                    if (!firstMatch) {
+                        firstMatch = container;
+                    }
+                    
                     // Highlight matching text
                     const contentElement = container.querySelector('.faq-content');
                     highlightText(contentElement, searchTerms);
@@ -955,6 +976,21 @@
                     }
                 }
             });
+            
+            // Scroll to first match if found
+            if (firstMatch) {
+                setTimeout(() => {
+                    firstMatch.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center'
+                    });
+                    // Add a visual indicator
+                    firstMatch.style.animation = 'pulse 1s ease-out';
+                    setTimeout(() => {
+                        firstMatch.style.animation = '';
+                    }, 1000);
+                }, 300); // Wait for expansion animation
+            }
             
             resultsDiv.innerHTML = matchCount > 0 ? 
                 `Found ${matchCount} matching section${matchCount > 1 ? 's' : ''}` : 
