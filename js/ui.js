@@ -3379,6 +3379,30 @@ function updateCurrentTodayDisplay() {
         const formattedDate = currentTodayDate.toLocaleDateString('en-US', options);
         displayElement.textContent = formattedDate;
     }
+    
+    // Update the TODAY header to show fire emoji only on actual current day
+    updateTodayHeader();
+}
+
+/**
+ * Update the TODAY header based on whether we're viewing the actual current day
+ */
+function updateTodayHeader() {
+    const todayHeaderElement = document.querySelector('[data-translate="TODAY"]');
+    if (todayHeaderElement) {
+        const actualToday = new Date();
+        const isActualToday = currentTodayDate.toDateString() === actualToday.toDateString();
+        
+        if (isActualToday) {
+            // Show fire emoji and TODAY text when viewing actual current day
+            todayHeaderElement.innerHTML = '🔥 TODAY';
+        } else {
+            // Show just the date without fire emoji when viewing other days
+            const options = { weekday: 'short', month: 'short', day: 'numeric' };
+            const dateStr = currentTodayDate.toLocaleDateString('en-US', options);
+            todayHeaderElement.innerHTML = dateStr;
+        }
+    }
 }
 
 /**
@@ -5439,6 +5463,9 @@ async function saveListSections() {
 // Make functions globally available
 window.toggleListSection = toggleListSection;
 window.saveListSections = saveListSections;
+
+// Export the updateTodayHeader function
+window.updateTodayHeader = updateTodayHeader;
 
 // Force mobile header update immediately when script loads
 console.log('🚀 UI.js loaded - forcing mobile header update');
