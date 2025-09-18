@@ -8618,9 +8618,18 @@
         // Select date
         function selectDate(year, month, day) {
             selectedDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+            console.log('🗓️ DEBUG: selectDate called with:', year, month, day, '-> selectedDate:', selectedDate);
             
-            // Only navigate to Today view if NOT editing a task (to prevent unwanted redirects)
-            if (!currentEditTaskId) {
+            // If we're in edit mode, update the display and auto-apply
+            if (currentEditTaskId) {
+                console.log('🗓️ DEBUG: In edit mode, updating display and auto-applying');
+                updateSelectedDateTimeDisplay();
+                // Auto-apply the selected date so user doesn't have to click Apply
+                setTimeout(() => {
+                    console.log('🗓️ DEBUG: Auto-applying selected date');
+                    applyDateTime();
+                }, 100);
+            } else {
                 // Navigate to Today view for the selected date
                 const selectedDateObj = new Date(year, month, day);
                 currentTodayDate = selectedDateObj;
@@ -8703,14 +8712,22 @@
         }
         // Apply selected date and time from modal
         function applyDateTime() {
+            console.log('🗓️ DEBUG: applyDateTime called');
+            console.log('🗓️ DEBUG: selectedDate:', selectedDate, 'selectedHour:', selectedHour, 'selectedMinute:', selectedMinute);
+            
             let timeValue = '';
             if (selectedHour && selectedMinute) {
                 timeValue = `${selectedHour}:${selectedMinute}`;
             }
             
+            console.log('🗓️ DEBUG: timeValue:', timeValue);
+            
             // Update hidden inputs
             document.getElementById('editTaskDateOnly').value = selectedDate || '';
             document.getElementById('editTaskTimeOnly').value = timeValue;
+            
+            console.log('🗓️ DEBUG: Set editTaskDateOnly to:', document.getElementById('editTaskDateOnly').value);
+            console.log('🗓️ DEBUG: Set editTaskTimeOnly to:', document.getElementById('editTaskTimeOnly').value);
             
             // Mark that user has manually set the time
             window.manualTimeSet = true;
@@ -8730,6 +8747,54 @@
                 saveTaskEdit();
             }, 100);
         }
+        
+        // Select time function for time buttons
+        function selectTime(timeStr) {
+            console.log('🗓️ DEBUG: selectTime called with:', timeStr);
+            const [hour, minute] = timeStr.split(':');
+            selectedHour = hour;
+            selectedMinute = minute;
+            
+            console.log('🗓️ DEBUG: Set selectedHour:', selectedHour, 'selectedMinute:', selectedMinute);
+            updateSelectedDateTimeDisplay();
+            
+            // If we're in edit mode and have a date selected, auto-apply
+            if (currentEditTaskId && selectedDate) {
+                setTimeout(() => {
+                    console.log('🗓️ DEBUG: Auto-applying time selection');
+                    applyDateTime();
+                }, 100);
+            }
+        }
+        
+        // Update the selected date/time display
+        function updateSelectedDateTimeDisplay() {
+            const display = document.getElementById('selectedDateTimeDisplay');
+            console.log('🗓️ DEBUG: updateSelectedDateTimeDisplay called, display element:', !!display);
+            if (!display) return;
+            
+            let displayText = '';
+            
+            if (selectedDate) {
+                const dateObj = new Date(selectedDate);
+                displayText = `📅 ${dateObj.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                })}`;
+                
+                if (selectedHour && selectedMinute) {
+                    displayText += ` at ${selectedHour}:${selectedMinute}`;
+                }
+            } else {
+                displayText = 'No date selected';
+            }
+            
+            console.log('🗓️ DEBUG: Setting display text to:', displayText);
+            display.textContent = displayText;
+        }
+        
         // Mobile quick date functions
         function selectQuickDate(type) {
             const today = new Date();
@@ -14453,8 +14518,12 @@
                 const dateValue = document.getElementById('editTaskDateOnly').value;
                 const timeValue = document.getElementById('editTaskTimeOnly').value;
                 
+                console.log('💾 DEBUG: Reading date/time from form - dateValue:', dateValue, 'timeValue:', timeValue);
+                
                 const dueDate = dateValue || null;
                 const dueTime = timeValue || null;
+                
+                console.log('💾 DEBUG: Final dueDate:', dueDate, 'dueTime:', dueTime);
                 
                 // Repeat task configuration validated
                 
