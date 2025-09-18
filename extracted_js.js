@@ -8591,23 +8591,10 @@
             selectedDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
             console.log('🗓️ DEBUG: selectDate called with:', year, month, day, '-> selectedDate:', selectedDate);
             
-            // If we're in edit mode, update the display and auto-apply
+            // If we're in edit mode, just update the calendar display
             if (currentEditTaskId) {
-                console.log('🗓️ DEBUG: In edit mode, updating display and auto-applying');
+                console.log('🗓️ DEBUG: In edit mode, updating calendar display');
                 updateSelectedDateTimeDisplay();
-                // Auto-apply the selected date and immediately update display
-                applyDateTime();
-                // Also directly update the display button text
-                const button = document.getElementById('dateTimeDisplay');
-                if (button && selectedDate) {
-                    const date = new Date(selectedDate);
-                    const dateStr = date.toLocaleDateString('en-US', { 
-                        weekday: 'short', 
-                        month: 'short', 
-                        day: 'numeric' 
-                    });
-                    button.textContent = `${dateStr} (no time)`;
-                }
             } else {
                 // Navigate to Today view for the selected date
                 const selectedDateObj = new Date(year, month, day);
@@ -8691,46 +8678,56 @@
         }
         // Apply selected date and time from modal
         function applyDateTime() {
-            console.log('🗓️ DEBUG: applyDateTime called');
-            console.log('🗓️ DEBUG: selectedDate:', selectedDate, 'selectedHour:', selectedHour, 'selectedMinute:', selectedMinute);
+            console.log('🗓️ APPLY: Starting with selectedDate:', selectedDate, 'selectedHour:', selectedHour, 'selectedMinute:', selectedMinute);
             
+            // Build time value
             let timeValue = '';
             if (selectedHour && selectedMinute) {
                 timeValue = `${selectedHour}:${selectedMinute}`;
             }
             
-            console.log('🗓️ DEBUG: timeValue:', timeValue);
-            
-            // Update hidden inputs
+            // Update the form fields that will be saved
             document.getElementById('editTaskDateOnly').value = selectedDate || '';
             document.getElementById('editTaskTimeOnly').value = timeValue;
             
-            console.log('🗓️ DEBUG: Set editTaskDateOnly to:', document.getElementById('editTaskDateOnly').value);
-            console.log('🗓️ DEBUG: Set editTaskTimeOnly to:', document.getElementById('editTaskTimeOnly').value);
-            
-            // Mark that user has manually set the date/time
-            window.manualTimeSet = true;
-            window.manualDateSet = true;
-            console.log('🗓️ DEBUG: Set manualTimeSet and manualDateSet to true');
-            
-            // Update display button with slight delay to ensure fields are set
-            console.log('🗓️ DEBUG: About to call updateDateTimeDisplay');
-            setTimeout(() => {
-                updateDateTimeDisplay();
-                console.log('🗓️ DEBUG: Called updateDateTimeDisplay with delay');
-            }, 50);
-            
-            // Update actual form fields
+            // Update legacy fields for compatibility
             document.getElementById('editTaskDate').value = selectedDate || '';
             document.getElementById('editTaskTime').value = timeValue;
             
-            // Close date/time modal
+            // Mark as manually set to prevent natural language override
+            window.manualTimeSet = true;
+            window.manualDateSet = true;
+            
+            // Update the display button immediately
+            const button = document.getElementById('dateTimeDisplay');
+            if (button) {
+                if (selectedDate) {
+                    const date = new Date(selectedDate);
+                    const dateStr = date.toLocaleDateString('en-US', { 
+                        weekday: 'short', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+                    
+                    if (timeValue) {
+                        // Format time to 12-hour format
+                        const [hours, minutes] = timeValue.split(':');
+                        const hour12 = parseInt(hours) === 0 ? 12 : parseInt(hours) > 12 ? parseInt(hours) - 12 : parseInt(hours);
+                        const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+                        button.textContent = `${dateStr} at ${hour12}:${minutes} ${ampm}`;
+                    } else {
+                        button.textContent = `${dateStr} (no time)`;
+                    }
+                    console.log('🗓️ APPLY: Updated button text to:', button.textContent);
+                } else {
+                    button.textContent = 'Select date & time...';
+                }
+            }
+            
+            // Close the modal
             closeDateTimeModal();
             
-            // Automatically save the task and close main modal
-            setTimeout(() => {
-                saveTaskEdit();
-            }, 100);
+            console.log('🗓️ APPLY: Complete - Date/time applied and display updated');
         }
         
         // Select time function for time buttons
@@ -8741,15 +8738,9 @@
             selectedMinute = minute;
             
             console.log('🗓️ DEBUG: Set selectedHour:', selectedHour, 'selectedMinute:', selectedMinute);
-            updateSelectedDateTimeDisplay();
             
-            // If we're in edit mode and have a date selected, auto-apply
-            if (currentEditTaskId && selectedDate) {
-                setTimeout(() => {
-                    console.log('🗓️ DEBUG: Auto-applying time selection');
-                    applyDateTime();
-                }, 100);
-            }
+            // Update the calendar display to show selected time
+            updateSelectedDateTimeDisplay();
         }
         
         // Update the selected date/time display
