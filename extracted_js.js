@@ -8595,11 +8595,19 @@
             if (currentEditTaskId) {
                 console.log('🗓️ DEBUG: In edit mode, updating display and auto-applying');
                 updateSelectedDateTimeDisplay();
-                // Auto-apply the selected date so user doesn't have to click Apply
-                setTimeout(() => {
-                    console.log('🗓️ DEBUG: Auto-applying selected date');
-                    applyDateTime();
-                }, 100);
+                // Auto-apply the selected date and immediately update display
+                applyDateTime();
+                // Also directly update the display button text
+                const button = document.getElementById('dateTimeDisplay');
+                if (button && selectedDate) {
+                    const date = new Date(selectedDate);
+                    const dateStr = date.toLocaleDateString('en-US', { 
+                        weekday: 'short', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+                    button.textContent = `${dateStr} (no time)`;
+                }
             } else {
                 // Navigate to Today view for the selected date
                 const selectedDateObj = new Date(year, month, day);
