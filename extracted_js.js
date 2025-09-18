@@ -8218,36 +8218,7 @@
             closeDateTimePicker();
         }
         
-        // Update the display button text
-        function updateDateTimeDisplay() {
-            const display = document.getElementById('dateTimeDisplay');
-            
-            // If dateTimeDisplay element doesn't exist, this is likely using the new datetime-local input
-            if (!display) {
-                return;
-            }
-            
-            const dateValue = document.getElementById('editTaskDate').value;
-            const timeValue = document.getElementById('editTaskTime').value;
-            
-            if (!dateValue) {
-                display.textContent = 'Select date & time...';
-                return;
-            }
-            
-            const date = new Date(dateValue);
-            const dateStr = date.toLocaleDateString('en-US', { 
-                weekday: 'short', 
-                month: 'short', 
-                day: 'numeric' 
-            });
-            
-            if (timeValue) {
-                display.textContent = `${dateStr} at ${timeValue}`;
-            } else {
-                display.textContent = `${dateStr} (no time)`;
-            }
-        }
+        // REMOVED: Duplicate updateDateTimeDisplay function - using the correct one at line 8976 instead
         
         // Populate time options (legacy function for compatibility)
         function populateTimeOptions() {
@@ -8978,6 +8949,10 @@
             const timeValue = document.getElementById('editTaskTimeOnly').value;
             const button = document.getElementById('dateTimeDisplay');
             
+            console.log('🗓️ DEBUG: updateDateTimeDisplay called');
+            console.log('🗓️ DEBUG: dateValue:', dateValue, 'timeValue:', timeValue);
+            console.log('🗓️ DEBUG: button element:', !!button);
+            
             if (dateValue && timeValue) {
                 const date = new Date(dateValue);
                 const dateStr = date.toLocaleDateString('en-US', { 
@@ -8993,6 +8968,7 @@
                 const formattedTime = `${hour12}:${minutes} ${ampm}`;
                 
                 button.textContent = `${dateStr} at ${formattedTime}`;
+                console.log('🗓️ DEBUG: Set button text to:', button.textContent);
             } else if (dateValue) {
                 const date = new Date(dateValue);
                 const dateStr = date.toLocaleDateString('en-US', { 
@@ -9001,8 +8977,10 @@
                     day: 'numeric' 
                 });
                 button.textContent = `${dateStr} (no time)`;
+                console.log('🗓️ DEBUG: Set button text to:', button.textContent);
             } else {
                 button.textContent = 'Select date & time...';
+                console.log('🗓️ DEBUG: Set button text to default:', button.textContent);
             }
         }
         // Navigation and view management
