@@ -4745,6 +4745,10 @@ function renderRecentActionsView() {
         tasksView.innerHTML = `
             <div class="section-header">
                 <h3>⏮️ Recent Actions</h3>
+                <div class="view-controls">
+                    <input type="text" id="recentActionsSearchInput" placeholder="🔍 Search actions..." style="padding: 6px 12px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 11px; width: 200px; margin-right: 8px;" oninput="searchRecentActions()">
+                    <button class="btn btn-secondary btn-small" onclick="refreshRecentActionsView()" style="background: #6c757d; border-color: #6c757d;">🔄 Refresh</button>
+                </div>
             </div>
             <div class="no-tasks-today" style="text-align: center; padding: 40px; color: #666;">
                 <div style="font-size: 48px; margin-bottom: 16px;">⏮️</div>
@@ -4770,6 +4774,10 @@ function renderRecentActionsView() {
     let html = `
         <div class="section-header">
             <h3>⏮️ Recent Actions</h3>
+            <div class="view-controls">
+                <input type="text" id="recentActionsSearchInput" placeholder="🔍 Search actions..." style="padding: 6px 12px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 11px; width: 200px; margin-right: 8px;" oninput="searchRecentActions()">
+                <button class="btn btn-secondary btn-small" onclick="refreshRecentActionsView()" style="background: #6c757d; border-color: #6c757d;">🔄 Refresh</button>
+            </div>
         </div>
         <div class="recent-actions-header" style="padding: 20px; background: linear-gradient(135deg, #6f42c1, #563d7c); color: white; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(111, 66, 193, 0.2);">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
@@ -5149,6 +5157,69 @@ window.importTasks = importTasks;
 window.clearAllTasks = clearAllTasks;
 window.performUndo = performUndo;
 window.refreshUndoView = refreshUndoView;
+
+// Search functionality for Recent Actions
+function searchRecentActions() {
+    const searchInput = document.getElementById('recentActionsSearchInput');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    
+    // Get all action items
+    const actionItems = document.querySelectorAll('.recent-actions-list > div');
+    
+    if (!searchTerm) {
+        // Show all items if search is empty
+        actionItems.forEach(item => {
+            item.style.display = 'block';
+        });
+        return;
+    }
+    
+    // Filter items based on search term
+    actionItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function refreshRecentActionsView() {
+    renderRecentActionsView();
+}
+
+window.searchRecentActions = searchRecentActions;
+window.refreshRecentActionsView = refreshRecentActionsView;
+
+// Search functionality for Undo History
+function searchUndoHistory() {
+    const searchInput = document.getElementById('undoSearchInput');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    
+    // Get all undo items
+    const undoItems = document.querySelectorAll('#undoList > div');
+    
+    if (!searchTerm) {
+        // Show all items if search is empty
+        undoItems.forEach(item => {
+            item.style.display = 'block';
+        });
+        return;
+    }
+    
+    // Filter items based on search term
+    undoItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+window.searchUndoHistory = searchUndoHistory;
 window.checkAllBackups = checkAllBackups;
 window.createEmergencyBackup = createEmergencyBackup;
 window.openDateTimeModal = openDateTimeModal;
