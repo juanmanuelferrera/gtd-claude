@@ -207,7 +207,7 @@ function initializeNetworkStatus() {
 function getNetworkIndicator() {
     if (!isOnline) {
         return {
-            icon: '🌐',
+            icon: '',
             text: '',
             color: '#dc2626', // Red
             status: 'offline'
@@ -217,35 +217,35 @@ function getNetworkIndicator() {
     switch (connectionQuality) {
         case 'excellent':
             return {
-                icon: '🌐',
+                icon: '',
                 text: '',
                 color: '#059669', // Green
                 status: 'online'
             };
         case 'good':
             return {
-                icon: '🌐',
+                icon: '',
                 text: '',
                 color: '#059669', // Green
                 status: 'online'
             };
         case 'fair':
             return {
-                icon: '🌐',
+                icon: '',
                 text: '',
                 color: '#d97706', // Amber
                 status: 'online'
             };
         case 'poor':
             return {
-                icon: '🌐',
+                icon: '',
                 text: '',
                 color: '#dc2626', // Red
                 status: 'online-poor'
             };
         default:
             return {
-                icon: '🌐',
+                icon: '',
                 text: '',
                 color: '#6b7280', // Gray
                 status: 'checking'
