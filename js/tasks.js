@@ -489,6 +489,7 @@ function editTask(taskId, event) {
     }
     console.log('✅ Found task:', task);
     
+    window.currentEditTaskId = taskId;
     currentEditTaskId = taskId;
     
     // Reset manual time flag when opening edit modal

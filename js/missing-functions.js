@@ -635,6 +635,21 @@ function applyDateTime() {
                 }
             }, 100);
             
+            // Update the edit modal display fields
+            const dateField = document.getElementById('editTaskDateOnly');
+            const timeField = document.getElementById('editTaskTimeOnly');
+            if (dateField && selectedDate) {
+                dateField.value = selectedDate;
+            }
+            if (timeField) {
+                timeField.value = selectedTime || '';
+            }
+            
+            // Update the display button to show the new date/time
+            if (typeof updateDateTimeDisplay === 'function') {
+                updateDateTimeDisplay();
+            }
+            
             console.log('✅ Date/time applied successfully');
         } else {
             console.warn('⚠️ No task ID set for date/time update');
