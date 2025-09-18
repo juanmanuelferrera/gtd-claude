@@ -4790,10 +4790,13 @@ function renderRecentActionsView() {
                 </div>
                 <div style="display: flex; gap: 12px;">
                     ${deletedCount > 0 ? `<button onclick="restoreAllDeletedTasks()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                        ↩️ Restore All Deleted (${deletedCount})
+                        Restore All Deleted (${deletedCount})
+                    </button>` : ''}
+                    ${deletedCount > 0 ? `<button onclick="deleteAllDeletedTasks()" style="background: rgba(220,53,69,0.8); color: white; border: 1px solid rgba(220,53,69,0.9); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(220,53,69,0.9)'" onmouseout="this.style.background='rgba(220,53,69,0.8)'">
+                        Delete All (${deletedCount})
                     </button>` : ''}
                     ${undoCount > 0 ? `<button onclick="undoAllActions()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                        ↩️ Undo All (${undoCount})
+                        Undo All (${undoCount})
                     </button>` : ''}
                 </div>
             </div>
@@ -4943,6 +4946,45 @@ function restoreAllDeletedTasks() {
     // Show success message
     if (typeof showInlineNotification === 'function') {
         showInlineNotification(`${deletedTasks.length} tasks restored`, 'success');
+    }
+}
+
+function deleteAllDeletedTasks() {
+    const deletedTasks = tasks.filter(task => task.status === 'deleted');
+    
+    if (deletedTasks.length === 0) {
+        if (typeof showInlineNotification === 'function') {
+            showInlineNotification('No deleted tasks to permanently delete', 'info');
+        }
+        return;
+    }
+    
+    // Confirm permanent deletion
+    if (!confirm(`Permanently delete all ${deletedTasks.length} deleted tasks? This action cannot be undone.`)) {
+        return;
+    }
+    
+    // Remove all deleted tasks from the tasks array
+    const originalTaskCount = tasks.length;
+    tasks = tasks.filter(task => task.status !== 'deleted');
+    const removedCount = originalTaskCount - tasks.length;
+    
+    console.log(`🗑️ Permanently deleted ${removedCount} tasks from Recent Actions`);
+    
+    // Save and sync
+    if (typeof saveTasks === 'function') {
+        saveTasks();
+    }
+    if (typeof uploadAllTasks === 'function') {
+        uploadAllTasks();
+    }
+    
+    // Refresh Recent Actions view
+    renderRecentActionsView();
+    
+    // Show success message
+    if (typeof showInlineNotification === 'function') {
+        showInlineNotification(`${removedCount} tasks permanently deleted`, 'success');
     }
 }
 
@@ -5219,10 +5261,13 @@ function renderFilteredActions(actions, searchTerm = '') {
                 </div>
                 <div style="display: flex; gap: 12px;">
                     ${deletedCount > 0 ? `<button onclick="restoreAllDeletedTasks()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                        ↩️ Restore All Deleted (${deletedCount})
+                        Restore All Deleted (${deletedCount})
+                    </button>` : ''}
+                    ${deletedCount > 0 ? `<button onclick="deleteAllDeletedTasks()" style="background: rgba(220,53,69,0.8); color: white; border: 1px solid rgba(220,53,69,0.9); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(220,53,69,0.9)'" onmouseout="this.style.background='rgba(220,53,69,0.8)'">
+                        Delete All (${deletedCount})
                     </button>` : ''}
                     ${undoCount > 0 ? `<button onclick="undoAllActions()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                        ↩️ Undo All (${undoCount})
+                        Undo All (${undoCount})
                     </button>` : ''}
                 </div>
             </div>
@@ -5315,6 +5360,7 @@ function refreshRecentActionsView() {
 window.searchRecentActions = searchRecentActions;
 window.refreshRecentActionsView = refreshRecentActionsView;
 window.renderFilteredActions = renderFilteredActions;
+window.deleteAllDeletedTasks = deleteAllDeletedTasks;
 
 // Search functionality for Undo History
 function searchUndoHistory() {
