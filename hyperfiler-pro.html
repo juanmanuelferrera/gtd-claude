@@ -1136,8 +1136,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
             border-bottom: 2px solid #eee;
         }
 
@@ -4102,19 +4102,19 @@
                 </div>
                 
                 <!-- VERSION 3: Mobile view controls - Compact -->
-                <div class="view-controls mobile-only" style="padding: 8px; display: flex; justify-content: center; align-items: center; background: transparent !important; border: none !important; margin-bottom: 2px !important; gap: 8px;">
+                <div class="view-controls mobile-only" style="padding: 4px; display: flex; justify-content: center; align-items: center; background: transparent !important; border: none !important; margin-bottom: 2px !important; gap: 6px;">
                     <button class="btn btn-small" onclick="previousDay()" style="padding: 10px 4px !important; font-size: 8px !important; height: auto !important;">← Ant.</button>
                     <div id="mobileDateDisplay" style="padding: 10px 12px; font-size: 14px; font-weight: bold; color: #333; background: #f8f9fa; border-radius: 6px; border: 1px solid #e1e5e9; white-space: nowrap;"></div>
                     <button class="btn btn-small" onclick="nextDay()" style="padding: 10px 4px !important; font-size: 8px !important; height: auto !important;">Sig. →</button>
                 </div>
             </div>
             <!-- Desktop filter controls -->
-            <div id="todayTemplateFilters" class="desktop-only" style="margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
+            <div id="todayTemplateFilters" class="desktop-only" style="margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
                 <!-- Dynamic template filters will be generated here -->
             </div>
             
             <!-- Mobile filter controls -->
-            <div id="todayTemplateFiltersMobile" class="mobile-only" style="margin-bottom: 15px; padding: 8px; margin-top: 5px; background: #f9f9f9; border: 1px solid #ddd; min-height: 40px; border-radius: 8px;">
+            <div id="todayTemplateFiltersMobile" class="mobile-only" style="margin-bottom: 8px; padding: 6px; margin-top: 2px; background: #f9f9f9; border: 1px solid #ddd; min-height: 32px; border-radius: 6px;">
                 <!-- Dynamic template filters will be generated here for mobile -->
                 <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                     <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">
@@ -4245,12 +4245,12 @@
                 </div>
             </div>
             <!-- Desktop filter controls -->
-            <div id="weekTemplateFilters" class="desktop-only" style="margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
+            <div id="weekTemplateFilters" class="desktop-only" style="margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
                 <!-- Dynamic template filters will be generated here -->
             </div>
             
             <!-- Mobile filter controls -->
-            <div id="weekTemplateFiltersMobile" class="mobile-only" style="margin-bottom: 15px; padding: 0px 8px; background: transparent !important; border: none !important; margin-top: -4px !important;">
+            <div id="weekTemplateFiltersMobile" class="mobile-only" style="margin-bottom: 8px; padding: 0px 8px; background: transparent !important; border: none !important; margin-top: -2px !important;">
                 <!-- Dynamic template filters will be generated here for mobile -->
             </div>
             <div class="week-grid" id="weekGrid">
