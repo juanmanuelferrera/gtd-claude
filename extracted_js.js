@@ -8705,8 +8705,12 @@
             window.manualDateSet = true;
             console.log('🗓️ DEBUG: Set manualTimeSet and manualDateSet to true');
             
-            // Update display button
-            updateDateTimeDisplay();
+            // Update display button with slight delay to ensure fields are set
+            console.log('🗓️ DEBUG: About to call updateDateTimeDisplay');
+            setTimeout(() => {
+                updateDateTimeDisplay();
+                console.log('🗓️ DEBUG: Called updateDateTimeDisplay with delay');
+            }, 50);
             
             // Update actual form fields
             document.getElementById('editTaskDate').value = selectedDate || '';
