@@ -6452,6 +6452,205 @@ async function saveListSections() {
     }
 }
 
+/**
+ * Delete All Data - Double Security Confirmation System
+ */
+function initiateDeleteAllData() {
+    console.log('🚨 Delete All Data initiated - showing first confirmation');
+    
+    // First confirmation
+    const firstConfirmation = confirm(
+        "⚠️ WARNING: This will permanently delete ALL your data!\n\n" +
+        "This includes:\n" +
+        "• All tasks and events\n" +
+        "• All lists and sections\n" +
+        "• All templates and settings\n" +
+        "• All backup data\n\n" +
+        "This action CANNOT be undone.\n\n" +
+        "Are you absolutely sure you want to continue?"
+    );
+    
+    if (!firstConfirmation) {
+        console.log('❌ Delete All Data cancelled at first confirmation');
+        return;
+    }
+    
+    // Show phrase confirmation modal
+    showDeleteConfirmationModal();
+}
+
+function showDeleteConfirmationModal() {
+    console.log('🔒 Showing phrase confirmation modal');
+    
+    // Create modal HTML
+    const modalHTML = `
+        <div id="deleteConfirmationModal" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        ">
+            <div style="
+                background: white;
+                padding: 30px;
+                border-radius: 12px;
+                max-width: 500px;
+                width: 90%;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                border: 3px solid #dc3545;
+            ">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 48px; margin-bottom: 10px;">⚠️</div>
+                    <h3 style="margin: 0 0 10px 0; color: #dc3545; font-size: 20px;">FINAL WARNING</h3>
+                    <p style="margin: 0; color: #666; font-size: 14px;">This action will destroy all your data permanently</p>
+                </div>
+                
+                <div style="background: #fff5f5; padding: 20px; border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 20px;">
+                    <p style="margin: 0 0 15px 0; color: #7f1d1d; font-size: 14px; line-height: 1.5;">
+                        To confirm deletion, please type the exact phrase below:
+                    </p>
+                    <div style="background: white; padding: 12px; border-radius: 6px; border: 2px solid #dc3545; margin-bottom: 15px;">
+                        <strong style="color: #dc3545; font-family: monospace; font-size: 16px;">DELETE ALL MY DATA</strong>
+                    </div>
+                    <input type="text" id="deleteConfirmationInput" placeholder="Type the phrase exactly..." 
+                           style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; font-family: monospace;">
+                </div>
+                
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button onclick="cancelDeleteAllData()" 
+                            style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                        Cancel
+                    </button>
+                    <button onclick="confirmDeleteAllData()" 
+                            style="background: #dc3545; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                        Delete Everything
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Focus the input
+    setTimeout(() => {
+        const input = document.getElementById('deleteConfirmationInput');
+        if (input) {
+            input.focus();
+            // Allow Enter key to submit
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    confirmDeleteAllData();
+                }
+            });
+        }
+    }, 100);
+}
+
+function cancelDeleteAllData() {
+    console.log('❌ Delete All Data cancelled at phrase confirmation');
+    const modal = document.getElementById('deleteConfirmationModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function confirmDeleteAllData() {
+    const input = document.getElementById('deleteConfirmationInput');
+    const enteredPhrase = input ? input.value.trim() : '';
+    const requiredPhrase = 'DELETE ALL MY DATA';
+    
+    console.log('🔍 Checking phrase:', enteredPhrase, 'vs required:', requiredPhrase);
+    
+    if (enteredPhrase !== requiredPhrase) {
+        // Shake the input and show error
+        input.style.borderColor = '#dc3545';
+        input.style.background = '#fff5f5';
+        input.style.animation = 'shake 0.5s';
+        
+        // Add shake animation if not exists
+        if (!document.querySelector('#shakeStyle')) {
+            const style = document.createElement('style');
+            style.id = 'shakeStyle';
+            style.textContent = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-5px); }
+                    75% { transform: translateX(5px); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        alert('❌ Incorrect phrase. Please type exactly: DELETE ALL MY DATA');
+        input.select();
+        return;
+    }
+    
+    // Phrase is correct - proceed with deletion
+    console.log('🚨 Phrase confirmed - proceeding with data deletion');
+    executeDeleteAllData();
+}
+
+function executeDeleteAllData() {
+    console.log('🗑️ Executing complete data deletion...');
+    
+    try {
+        // Clear all localStorage data
+        const keysToDelete = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key) {
+                keysToDelete.push(key);
+            }
+        }
+        
+        keysToDelete.forEach(key => {
+            localStorage.removeItem(key);
+            console.log('🗑️ Deleted localStorage key:', key);
+        });
+        
+        // Clear all sessionStorage data
+        sessionStorage.clear();
+        console.log('🗑️ Cleared sessionStorage');
+        
+        // Reset global variables
+        if (typeof window.tasks !== 'undefined') {
+            window.tasks = [];
+        }
+        if (typeof window.undoStack !== 'undefined') {
+            window.undoStack = [];
+        }
+        if (typeof window.eventTaskIds !== 'undefined') {
+            window.eventTaskIds = new Set();
+        }
+        
+        // Close modal
+        const modal = document.getElementById('deleteConfirmationModal');
+        if (modal) {
+            modal.remove();
+        }
+        
+        // Show success message and reload
+        alert('✅ All data has been permanently deleted.\n\nThe page will now reload to reset the application.');
+        
+        console.log('🔄 Reloading page after data deletion');
+        window.location.reload();
+        
+    } catch (error) {
+        console.error('❌ Error during data deletion:', error);
+        alert('❌ An error occurred during deletion. Please try again or contact support.');
+    }
+}
+
 // Export global functions
 window.handleAddItemKeyPress = handleAddItemKeyPress;
 window.saveListSections = saveListSections;
@@ -6461,5 +6660,8 @@ window.convertEntireListToTasks = convertEntireListToTasks;
 window.deleteCompletedListItems = deleteCompletedListItems;
 window.closeListItemsModal = closeListItemsModal;
 window.convertSelectedItemsToTasks = convertSelectedItemsToTasks;
+window.initiateDeleteAllData = initiateDeleteAllData;
+window.cancelDeleteAllData = cancelDeleteAllData;
+window.confirmDeleteAllData = confirmDeleteAllData;
 
 console.log('✅ Missing functions module loaded with', Object.keys(window).filter(k => typeof window[k] === 'function' && (k.startsWith('open') || k.startsWith('perform') || k.startsWith('search') || k.startsWith('handle'))).length, 'functions');
