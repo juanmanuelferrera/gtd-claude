@@ -8729,8 +8729,10 @@
             console.log('🗓️ DEBUG: Set editTaskDateOnly to:', document.getElementById('editTaskDateOnly').value);
             console.log('🗓️ DEBUG: Set editTaskTimeOnly to:', document.getElementById('editTaskTimeOnly').value);
             
-            // Mark that user has manually set the time
+            // Mark that user has manually set the date/time
             window.manualTimeSet = true;
+            window.manualDateSet = true;
+            console.log('🗓️ DEBUG: Set manualTimeSet and manualDateSet to true');
             
             // Update display button
             updateDateTimeDisplay();
@@ -14254,8 +14256,10 @@
             currentEditTaskId = taskId;
             window.currentEditTaskId = taskId;
             
-            // Reset manual time flag when opening edit modal
+            // Reset manual date/time flags when opening edit modal
             window.manualTimeSet = false;
+            window.manualDateSet = false;
+            console.log('🗓️ DEBUG: Reset manual flags on modal open');
             
             document.getElementById('editTaskTitle').value = task.title;
             document.getElementById('editTaskIsEvent').checked = task.isEvent || false;
@@ -14499,10 +14503,21 @@
                 const repeatType = document.getElementById('editTaskRepeat').value;
                 
                 // Apply natural language parsing to clean up title one final time
+                // But don't override manually set date/time values
                 const parsed = parseNaturalLanguage(title);
                 if (parsed) {
                     console.log('💾 Final parsing cleanup:', parsed);
                     title = parsed.title;
+                    
+                    // Only apply parsed date/time if not manually set
+                    if (parsed.date && !window.manualDateSet && !dueDate) {
+                        console.log('💾 Applying parsed date (not manually set):', parsed.date);
+                        const dueDate = parsed.date;
+                    }
+                    if (parsed.time && !window.manualTimeSet && !dueTime) {
+                        console.log('💾 Applying parsed time (not manually set):', parsed.time);
+                        const dueTime = parsed.time;
+                    }
                 }
                 
                 console.log('💾 Form data collected:', {title, notes, isEvent, repeatType});
@@ -15519,8 +15534,8 @@
                 parseTimeout = setTimeout(() => {
                     const parsed = parseNaturalLanguage(input);
                     if (parsed) {
-                        // Auto-fill date field
-                        if (parsed.date) {
+                        // Auto-fill date field only if user hasn't manually set it
+                        if (parsed.date && !window.manualDateSet) {
                             const dateField = document.getElementById('editTaskDateOnly');
                             if (dateField) {
                                 dateField.value = parsed.date;
@@ -15566,8 +15581,8 @@
                         console.log('📋 Processing pasted text:', input);
                         const parsed = parseNaturalLanguage(input.trim());
                         if (parsed) {
-                            // Auto-fill fields based on parsed data
-                            if (parsed.date) {
+                            // Auto-fill fields based on parsed data only if user hasn't manually set them
+                            if (parsed.date && !window.manualDateSet) {
                                 const dateField = document.getElementById('editTaskDateOnly');
                                 if (dateField) {
                                     dateField.value = parsed.date;
