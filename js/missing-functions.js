@@ -5158,31 +5158,154 @@ window.clearAllTasks = clearAllTasks;
 window.performUndo = performUndo;
 window.refreshUndoView = refreshUndoView;
 
-// Search functionality for Recent Actions
+// Search functionality for Recent Actions - searches through ALL saved actions
 function searchRecentActions() {
     const searchInput = document.getElementById('recentActionsSearchInput');
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
     
-    // Get all action items
-    const actionItems = document.querySelectorAll('.recent-actions-list > div');
+    // Get ALL recent actions (not just displayed ones)
+    const allActions = getRecentActions();
     
-    if (!searchTerm) {
-        // Show all items if search is empty
-        actionItems.forEach(item => {
-            item.style.display = 'block';
+    let filteredActions = allActions;
+    if (searchTerm) {
+        // Filter actions based on search term
+        filteredActions = allActions.filter(action => {
+            const searchableText = [
+                action.title || '',
+                action.description || '',
+                action.type || '',
+                new Date(action.timestamp).toLocaleDateString(),
+                new Date(action.timestamp).toLocaleTimeString()
+            ].join(' ').toLowerCase();
+            
+            return searchableText.includes(searchTerm);
         });
-        return;
     }
     
-    // Filter items based on search term
-    actionItems.forEach(item => {
-        const text = item.textContent.toLowerCase();
-        if (text.includes(searchTerm)) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
-        }
-    });
+    // Re-render the actions list with filtered results
+    renderFilteredActions(filteredActions, searchTerm);
+}
+
+// Render filtered actions (separate from full view render)
+function renderFilteredActions(actions, searchTerm = '') {
+    const tasksView = document.getElementById('tasks-view');
+    if (!tasksView) return;
+    
+    // Count different action types
+    const deletedCount = actions.filter(a => a.type === 'delete').length;
+    const undoCount = actions.filter(a => a.type === 'undo').length;
+    
+    let resultText = '';
+    if (searchTerm) {
+        resultText = ` - ${actions.length} result${actions.length !== 1 ? 's' : ''} for "${searchTerm}"`;
+    }
+    
+    let html = `
+        <div class="section-header">
+            <h3>⏮️ Recent Actions</h3>
+            <div class="view-controls">
+                <input type="text" id="recentActionsSearchInput" placeholder="🔍 Search actions..." value="${searchTerm}" style="padding: 6px 12px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 11px; width: 200px; margin-right: 8px;" oninput="searchRecentActions()">
+                <button class="btn btn-secondary btn-small" onclick="refreshRecentActionsView()" style="background: #6c757d; border-color: #6c757d;">🔄 Refresh</button>
+            </div>
+        </div>
+        <div class="recent-actions-header" style="padding: 20px; background: linear-gradient(135deg, #6f42c1, #563d7c); color: white; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(111, 66, 193, 0.2);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <div>
+                    <h2 style="margin: 0; font-size: 24px; font-weight: 700; display: flex; align-items: center;">
+                        <span style="margin-right: 12px; font-size: 28px;">⏮️</span>
+                        Recent Actions${resultText}
+                    </h2>
+                    <p style="margin: 4px 0 0 0; opacity: 0.9; font-size: 16px;">${actions.length} action${actions.length !== 1 ? 's' : ''}</p>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    ${deletedCount > 0 ? `<button onclick="restoreAllDeletedTasks()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                        ↩️ Restore All Deleted (${deletedCount})
+                    </button>` : ''}
+                    ${undoCount > 0 ? `<button onclick="undoAllActions()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                        ↩️ Undo All (${undoCount})
+                    </button>` : ''}
+                </div>
+            </div>
+        </div>
+        <div class="recent-actions-list" style="display: grid; gap: 16px;">
+    `;
+    
+    if (actions.length === 0) {
+        html += `
+            <div class="no-results" style="text-align: center; padding: 40px; color: #666;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                <h3>No results found</h3>
+                <p style="color: #999; margin-bottom: 20px;">${searchTerm ? `No actions match "${searchTerm}"` : 'No recent actions available'}</p>
+                ${searchTerm ? `<button onclick="document.getElementById('recentActionsSearchInput').value=''; searchRecentActions();" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">Clear Search</button>` : ''}
+            </div>
+        `;
+    } else {
+        actions.forEach(action => {
+            const actionDate = new Date(action.timestamp).toLocaleDateString();
+            const actionTime = new Date(action.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // Action-specific styling and content
+            let borderColor = '#e1e5e9';
+            let bgColor = '#ffffff';
+            let actionButtons = '';
+            
+            if (action.type === 'delete') {
+                borderColor = '#dc3545';
+                bgColor = '#fff5f5';
+                actionButtons = `
+                    <button onclick="restoreDeletedTask('${action.task.id}')" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 8px;">
+                        ↩️ Restore
+                    </button>
+                    <button onclick="permanentlyDeleteTask('${action.task.id}')" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                        🗑️ Delete Forever
+                    </button>
+                `;
+            } else if (action.type === 'undo') {
+                borderColor = '#6f42c1';
+                bgColor = '#f8f6ff';
+                actionButtons = `
+                    <button onclick="undoSpecificAction(${action.stackIndex})" style="background: #6f42c1; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                        ↩️ Undo to This Point
+                    </button>
+                `;
+            }
+            
+            html += `
+                <div style="background: ${bgColor}; border: 2px solid ${borderColor}; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 20px; margin-right: 12px;">${action.icon}</span>
+                                <div>
+                                    <h4 style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${action.title}</h4>
+                                    <p style="margin: 2px 0 0 0; color: #666; font-size: 14px;">${action.description}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="text-align: right; color: #999; font-size: 12px; min-width: 120px;">
+                            <div>${actionDate}</div>
+                            <div style="font-weight: 600; color: #666;">${actionTime}</div>
+                        </div>
+                    </div>
+                    ${actionButtons ? `<div style="display: flex; gap: 8px; justify-content: flex-end;">${actionButtons}</div>` : ''}
+                </div>
+            `;
+        });
+    }
+    
+    html += `
+        </div>
+    `;
+    
+    tasksView.innerHTML = html;
+    
+    // Re-focus search input if it was focused
+    const searchInput = document.getElementById('recentActionsSearchInput');
+    if (searchInput && searchTerm) {
+        searchInput.focus();
+        // Set cursor to end
+        searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+    }
 }
 
 function refreshRecentActionsView() {
@@ -5191,6 +5314,7 @@ function refreshRecentActionsView() {
 
 window.searchRecentActions = searchRecentActions;
 window.refreshRecentActionsView = refreshRecentActionsView;
+window.renderFilteredActions = renderFilteredActions;
 
 // Search functionality for Undo History
 function searchUndoHistory() {
