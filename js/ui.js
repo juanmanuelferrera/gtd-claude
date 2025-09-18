@@ -3397,10 +3397,8 @@ function updateTodayHeader() {
             // Show fire emoji and TODAY text when viewing actual current day
             todayHeaderElement.innerHTML = '🔥 TODAY';
         } else {
-            // Show just the date without fire emoji when viewing other days
-            const options = { weekday: 'short', month: 'short', day: 'numeric' };
-            const dateStr = currentTodayDate.toLocaleDateString('en-US', options);
-            todayHeaderElement.innerHTML = dateStr;
+            // Hide the header text when viewing other days (date shown in red box below)
+            todayHeaderElement.innerHTML = '';
         }
     }
 }
