@@ -805,6 +805,11 @@
             dataTranslateElements.forEach(element => {
                 const key = element.getAttribute('data-translate');
                 if (key) {
+                    // Skip the TODAY header - it's handled by updateTodayHeader() in ui.js
+                    if (key === 'TODAY') {
+                        return;
+                    }
+                    
                     const translated = translateText(key);
                     
                     // Use regex extraction for all elements (same as Week tab)
