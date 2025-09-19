@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v2.1.0 [Deploy-20250918-DELETE-ALL-DATA]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v2.1.0 [Deploy-20250919-DELETE-ALL-VISIBLE]');
     
     // Register Service Worker for offline support
     if ('serviceWorker' in navigator) {
@@ -4425,9 +4425,23 @@
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <button class="btn btn-secondary" onclick="exportTasks()" style="padding: 10px 20px; background: #28a745; border-color: #28a745; color: white;">📤 Export Data</button>
                         <button class="btn btn-secondary" onclick="importTasks()" style="padding: 10px 20px; background: #007bff; border-color: #007bff; color: white;">📥 Import Data</button>
-                        <button class="btn btn-secondary" onclick="console.log('🔍 BUTTON CLICKED!'); clearAllTasks()" style="padding: 10px 20px; background: #dc3545; border-color: #dc3545; color: white;">🗑️ Clear All</button>
+                        <button class="btn btn-secondary" onclick="console.log('🔍 BUTTON CLICKED!'); clearAllTasks()" style="padding: 10px 20px; background: #dc3545; border-color: #dc3545; color: white;">Clear All</button>
                         <button class="btn btn-secondary" onclick="performUndo()" style="padding: 10px 20px; background: #ffc107; border-color: #ffc107; color: #212529;">↶ Undo Last</button>
                     </div>
+                </div>
+                
+                <!-- Danger Zone -->
+                <div style="margin-top: 40px; padding: 20px; background: #fff5f5; border: 2px solid #feb2b2; border-radius: 8px;">
+                    <h4 style="color: #e53e3e; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        ⚠️ Danger Zone
+                    </h4>
+                    <p style="margin-bottom: 15px; color: #718096; font-size: 14px;">
+                        This action cannot be undone. All your tasks, settings, and data will be permanently deleted.
+                    </p>
+                    <button class="btn btn-danger" onclick="initiateDeleteAllData()" 
+                            style="padding: 12px 24px; background: #e53e3e; border-color: #e53e3e; color: white; font-weight: 600;">
+                        Delete All Data
+                    </button>
                 </div>
             </div>
             
@@ -5961,7 +5975,7 @@
     <script src="js/offline-sync.js?v=20250915-step3"></script>
     <script src="js/network-status.js?v=20250918-no-world-emoji"></script>
     <script src="js/offline-ui.js?v=20250917-icon-only"></script>
-    <script src="js/missing-functions.js?v=20250918-delete-all-data"></script>
+    <script src="js/missing-functions.js?v=20250919-delete-all-visible"></script>
     <script src="js/natural-language.js?v=1736363000"></script>
     <script src="js/patches.js?v=1736363000"></script>
     <script src="extracted_js.js?v=20250918-translation-fix"></script>
