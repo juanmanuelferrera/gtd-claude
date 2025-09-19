@@ -1536,3 +1536,7 @@ function sortTasks() {
         return new Date(b.createdAt) - new Date(a.createdAt);
     });
 }
+
+// Export functions to window for external access
+window.editTask = editTask;
+window.openEditTaskModal = editTask; // Alias for compatibility

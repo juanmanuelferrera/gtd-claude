@@ -5408,9 +5408,13 @@ window.selectedModalTime = '';
 function initCalendarModal(currentDate, currentTime) {
     console.log('🗓️ Initializing calendar modal with:', currentDate, currentTime);
     
-    // Set current selections
+    // Set current selections for both legacy and unified systems
     window.selectedModalDate = currentDate || getLocalDateString(new Date());
     window.selectedModalTime = currentTime || '';
+    
+    // Also set the unified modal variables
+    modalSelectedDate = currentDate || getLocalDateString(new Date());
+    modalSelectedTime = currentTime || '';
     
     // Set calendar to show the selected month
     if (currentDate) {
@@ -5421,6 +5425,11 @@ function initCalendarModal(currentDate, currentTime) {
     
     renderCalendarModal();
     highlightSelectedTime();
+    
+    // Update the date/time display in the edit modal
+    if (typeof updateDateTimeDisplay === 'function') {
+        updateDateTimeDisplay();
+    }
 }
 
 // Render the calendar grid
