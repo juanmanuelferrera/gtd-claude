@@ -13567,8 +13567,11 @@
             renderTodayView();
         }
         function updateCurrentTodayDisplay() {
+            console.log('🚀 FUNCTION CALLED: updateCurrentTodayDisplay()');
             const displayElement = document.getElementById('currentTodayDate');
             const todayLabel = document.getElementById('todayLabelPrefix');
+            
+            console.log('🔍 Elements found - displayElement:', !!displayElement, 'todayLabel:', !!todayLabel);
             
             if (displayElement) {
                 // Desktop red strip: Show full date format (e.g., "Monday, October 21, 2024")
@@ -13582,14 +13585,24 @@
                     ? currentTodayDate.toLocaleDateString('es-ES', fullOptions)
                     : currentTodayDate.toLocaleDateString('en-US', fullOptions);
                 displayElement.textContent = fullDate;
+                console.log('📅 Date display updated to:', fullDate);
             }
             
             // Show/hide TODAY label based on whether it's actually today
             if (todayLabel) {
                 const today = new Date();
                 const isToday = currentTodayDate.toDateString() === today.toDateString();
+                console.log('🔥 TODAY CHECK - currentTodayDate:', currentTodayDate);
+                console.log('🔥 TODAY CHECK - today:', today);
+                console.log('🔥 TODAY CHECK - currentDate string:', currentTodayDate.toDateString());
+                console.log('🔥 TODAY CHECK - today string:', today.toDateString());
+                console.log('🔥 TODAY CHECK - isToday result:', isToday);
+                
                 todayLabel.style.display = isToday ? 'inline-block' : 'none';
-                console.log('🔥 TODAY label update - isToday:', isToday, 'currentDate:', currentTodayDate.toDateString(), 'actualToday:', today.toDateString());
+                console.log('🔥 TODAY DISPLAY set to:', isToday ? 'inline-block' : 'none');
+                console.log('🔥 TODAY ACTUAL computed style:', window.getComputedStyle(todayLabel).display);
+            } else {
+                console.log('❌ TODAY LABEL ELEMENT NOT FOUND!');
             }
             
             // Update mobile date display only
