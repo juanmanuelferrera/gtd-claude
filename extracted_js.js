@@ -13587,9 +13587,12 @@
             // Show/hide TODAY label based on whether it's actually today
             if (todayLabel) {
                 const today = new Date();
-                const isToday = currentTodayDate.toDateString() === today.toDateString();
+                // Compare using local date strings to avoid timezone issues
+                const currentDateStr = getLocalDateString(currentTodayDate);
+                const todayDateStr = getLocalDateString(today);
+                const isToday = currentDateStr === todayDateStr;
                 todayLabel.style.display = isToday ? 'inline-block' : 'none';
-                console.log('🔥 TODAY label update - isToday:', isToday, 'currentDate:', currentTodayDate.toDateString(), 'actualToday:', today.toDateString());
+                console.log('🔥 TODAY label update - isToday:', isToday, 'currentDate:', currentDateStr, 'actualToday:', todayDateStr);
             }
             
             // Update mobile date display only
