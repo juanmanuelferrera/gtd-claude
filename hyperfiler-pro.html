@@ -1177,7 +1177,29 @@
 
         .view-controls {
             display: flex;
-            gap: 8px;
+        }
+        
+        /* Enhanced header button styling */
+        .view-controls .btn {
+            height: 36px;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .view-controls .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .view-controls input[type="text"] {
+            height: 36px;
+            min-height: 36px;
+            box-sizing: border-box;
         }
 
         .task-group {
@@ -4085,19 +4107,19 @@
 
         <!-- Today View -->
         <div id="today-view" class="tasks-section">
-            <div class="section-header">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <div class="desktop-only" style="display: flex; align-items: center; gap: 12px;">
                     <h3 data-translate="TODAY">🔥 TODAY</h3>
                     <h4 id="currentTodayDate" style="margin: 0; font-size: 16px; font-weight: 600; color: white; letter-spacing: 0.5px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); padding: 8px 16px; border-radius: 6px; box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);">Loading...</h4>
                 </div>
-                <div class="view-controls desktop-only">
-                    <div style="display: flex; gap: 4px; align-items: center; flex-wrap: nowrap;">
-                        <input type="text" id="todayTaskSearch" placeholder="🔍 Day" style="padding: 6px 6px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 10px; width: 100%; max-width: 100px; flex-shrink: 1;" oninput="searchTodayTasks()">
-                        <button class="btn btn-success btn-small" onclick="openTaskImportModal()" style="background: #28a745; border-color: #28a745; padding: 6px 6px; font-size: 10px; flex-shrink: 0;" title="Import multiple tasks">📥 Bulk</button>
-                        <button class="btn btn-small" onclick="previousDay()" style="padding: 8px 4px; font-size: 8px; flex-shrink: 0;">← Prev</button>
-                        <button class="btn btn-primary btn-small" onclick="goToToday()" style="background: #dc3545; border-color: #dc3545; padding: 8px 12px; font-size: 10px; flex-shrink: 0;">🔥 Today</button>
-                        <button class="btn btn-small" onclick="nextDay()" style="padding: 8px 4px; font-size: 8px; flex-shrink: 0;">Next →</button>
-                        <button class="move-current-time-btn" onclick="moveAllTasksToCurrentTime()" title="Move all today's tasks to current time block" style="padding: 6px 6px; font-size: 10px; flex-shrink: 0; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">🕐 Now</button>
+                <div class="view-controls desktop-only" style="flex-shrink: 0;">
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: nowrap;">
+                        <input type="text" id="todayTaskSearch" placeholder="🔍 Day" style="padding: 8px 10px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 12px; width: 100px; min-width: 80px; flex-shrink: 1;" oninput="searchTodayTasks()">
+                        <button class="btn btn-success btn-small" onclick="openTaskImportModal()" style="background: #28a745; border-color: #28a745; padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;" title="Import multiple tasks">📥 Bulk</button>
+                        <button class="btn btn-small" onclick="previousDay()" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;">← Prev</button>
+                        <button class="btn btn-primary btn-small" onclick="goToToday()" style="background: #dc3545; border-color: #dc3545; padding: 8px 14px; font-size: 12px; flex-shrink: 0; border-radius: 6px; font-weight: 600;">🔥 Today</button>
+                        <button class="btn btn-small" onclick="nextDay()" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;">Next →</button>
+                        <button class="move-current-time-btn" onclick="moveAllTasksToCurrentTime()" title="Move all today's tasks to current time block" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">🕐 Now</button>
                     </div>
                 </div>
                 
