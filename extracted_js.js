@@ -13588,7 +13588,8 @@
             if (todayLabel) {
                 const today = new Date();
                 const isToday = currentTodayDate.toDateString() === today.toDateString();
-                todayLabel.style.display = isToday ? 'block' : 'none';
+                todayLabel.style.display = isToday ? 'inline-block' : 'none';
+                console.log('🔥 TODAY label update - isToday:', isToday, 'currentDate:', currentTodayDate.toDateString(), 'actualToday:', today.toDateString());
             }
             
             // Update mobile date display only
