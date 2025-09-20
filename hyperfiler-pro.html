@@ -4107,9 +4107,11 @@
 
         <!-- Today View -->
         <div id="today-view" class="tasks-section">
-            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <div class="desktop-only" style="display: flex; align-items: center; gap: 12px;">
-                    <h3 data-translate="TODAY">🔥 TODAY</h3>
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; min-height: 40px;">
+                <div class="desktop-only" style="display: flex; align-items: center; gap: 16px;">
+                    <!-- TODAY label when applicable -->
+                    <h3 id="todayLabelPrefix" style="margin: 0; display: none; color: #FF4136; font-size: 20px;">🔥 TODAY</h3>
+                    <!-- Date badge always visible -->
                     <h4 id="currentTodayDate" style="margin: 0; font-size: 16px; font-weight: 600; color: white; letter-spacing: 0.5px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); padding: 8px 16px; border-radius: 6px; box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);">Loading...</h4>
                 </div>
                 <div class="view-controls desktop-only" style="flex-shrink: 0;">

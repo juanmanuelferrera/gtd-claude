@@ -13568,6 +13568,8 @@
         }
         function updateCurrentTodayDisplay() {
             const displayElement = document.getElementById('currentTodayDate');
+            const todayLabel = document.getElementById('todayLabelPrefix');
+            
             if (displayElement) {
                 // Desktop red strip: Show full date format (e.g., "Monday, October 21, 2024")
                 const fullOptions = { 
@@ -13580,6 +13582,13 @@
                     ? currentTodayDate.toLocaleDateString('es-ES', fullOptions)
                     : currentTodayDate.toLocaleDateString('en-US', fullOptions);
                 displayElement.textContent = fullDate;
+            }
+            
+            // Show/hide TODAY label based on whether it's actually today
+            if (todayLabel) {
+                const today = new Date();
+                const isToday = currentTodayDate.toDateString() === today.toDateString();
+                todayLabel.style.display = isToday ? 'block' : 'none';
             }
             
             // Update mobile date display only
