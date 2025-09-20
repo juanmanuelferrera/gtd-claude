@@ -13567,12 +13567,8 @@
             renderTodayView();
         }
         function updateCurrentTodayDisplay() {
-            console.log('🔥 DEBUG: updateCurrentTodayDisplay() called');
             const displayElement = document.getElementById('currentTodayDate');
             const todayLabel = document.getElementById('todayLabelPrefix');
-            
-            console.log('🔥 DEBUG: displayElement found:', !!displayElement);
-            console.log('🔥 DEBUG: todayLabel found:', !!todayLabel);
             
             if (displayElement) {
                 // Desktop red strip: Show full date format (e.g., "Monday, October 21, 2024")
@@ -13586,7 +13582,6 @@
                     ? currentTodayDate.toLocaleDateString('es-ES', fullOptions)
                     : currentTodayDate.toLocaleDateString('en-US', fullOptions);
                 displayElement.textContent = fullDate;
-                console.log('🔥 DEBUG: Date set to:', fullDate);
             }
             
             // Show/hide TODAY label based on whether it's actually today
@@ -13597,17 +13592,7 @@
                 const todayDateStr = getLocalDateString(today);
                 const isToday = currentDateStr === todayDateStr;
                 
-                console.log('🔥 DEBUG: currentTodayDate:', currentTodayDate);
-                console.log('🔥 DEBUG: today:', today);
-                console.log('🔥 DEBUG: currentDateStr:', currentDateStr);
-                console.log('🔥 DEBUG: todayDateStr:', todayDateStr);
-                console.log('🔥 DEBUG: isToday:', isToday);
-                
                 todayLabel.style.display = isToday ? 'inline-block' : 'none';
-                console.log('🔥 DEBUG: Set display to:', isToday ? 'inline-block' : 'none');
-                console.log('🔥 DEBUG: Actual computed style:', window.getComputedStyle(todayLabel).display);
-            } else {
-                console.log('🔥 DEBUG: todayLabel element not found!');
             }
             
             // Update mobile date display only
