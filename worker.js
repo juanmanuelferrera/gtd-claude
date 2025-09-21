@@ -1023,29 +1023,15 @@ async function handleAuthRegister(request, env, corsHeaders) {
     
     await stmt.bind(userId, email, hashedPassword).run();
     
-    // Create 60-day trial subscription
-    const trialEndDate = new Date();
-    trialEndDate.setDate(trialEndDate.getDate() + 60); // 60 days trial
-    
-    const subscriptionId = crypto.randomUUID();
-    const subStmt = env.DB.prepare(`
-      INSERT INTO user_subscriptions 
-      (id, user_id, user_email, plan_name, status, current_period_start, current_period_end, expiration_email_sent, created_at, updated_at)
-      VALUES (?, ?, ?, 'trial', 'active', datetime('now'), ?, 0, datetime('now'), datetime('now'))
-    `);
-    await subStmt.bind(subscriptionId, userId, email, trialEndDate.toISOString()).run();
+    // User must purchase - no trial subscription created
     
     // Generate JWT token
     const token = await generateJWT({ userId, email }, env.JWT_SECRET);
     
-    // Send welcome email with credentials
-    const emailHtml = await generatePromoEmailHTML(
+    // Send welcome email with credentials  
+    const emailHtml = await generateWelcomeEmailHTML(
       email, 
-      tempPassword, 
-      'TRIAL', 
-      60, 
-      trialEndDate.toLocaleDateString(),
-      null, // No stripe customer ID for trial accounts
+      tempPassword,
       env
     );
     
@@ -1057,10 +1043,9 @@ async function handleAuthRegister(request, env, corsHeaders) {
     );
 
     return new Response(JSON.stringify({ 
-      message: 'User created successfully with 60-day trial',
+      message: 'User created successfully - purchase required',
       user: { id: userId, email },
       token,
-      trialEnd: trialEndDate.toISOString(),
       password: tempPassword, // Return password for immediate use
       email_sent: emailResult.success
     }), {
