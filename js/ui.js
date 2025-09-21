@@ -724,6 +724,7 @@ function nextMonthSmart() {
  * Display update functions
  */
 function updateCurrentTodayDisplay() {
+    console.log('🔍 DEBUG: updateCurrentTodayDisplay FIRST VERSION (line 726) executing');
     const todayDateElement = document.getElementById('todayDate');
     if (todayDateElement) {
         const options = { 
@@ -3369,6 +3370,7 @@ function handleTouchEnd(event, taskId) {
  * Update the date display in the Today view header
  */
 function updateCurrentTodayDisplay() {
+    console.log('🔍 DEBUG: updateCurrentTodayDisplay SECOND VERSION (line 3371) executing');
     const displayElement = document.getElementById('currentTodayDate');
     if (displayElement) {
         const options = {
@@ -3381,6 +3383,7 @@ function updateCurrentTodayDisplay() {
     }
     
     // Update the TODAY header to show fire emoji only on actual current day
+    console.log('🔍 DEBUG: About to call updateTodayHeader()');
     updateTodayHeader();
 }
 
@@ -3388,18 +3391,28 @@ function updateCurrentTodayDisplay() {
  * Update the TODAY header based on whether we're viewing the actual current day
  */
 function updateTodayHeader() {
+    console.log('🔥 DEBUG: updateTodayHeader() function executing');
     const todayHeaderElement = document.querySelector('[data-translate="TODAY"]');
+    console.log('🔥 DEBUG: todayHeaderElement found:', todayHeaderElement);
+    
     if (todayHeaderElement) {
         const actualToday = new Date();
         const isActualToday = currentTodayDate.toDateString() === actualToday.toDateString();
+        console.log('🔥 DEBUG: actualToday:', actualToday.toDateString());
+        console.log('🔥 DEBUG: currentTodayDate:', currentTodayDate.toDateString());
+        console.log('🔥 DEBUG: isActualToday:', isActualToday);
         
         if (isActualToday) {
             // Show fire emoji and TODAY text when viewing actual current day
+            console.log('🔥 DEBUG: Setting TODAY label to show');
             todayHeaderElement.innerHTML = '🔥 TODAY';
         } else {
             // Hide the header text when viewing other days (date shown in red box below)
+            console.log('🔥 DEBUG: Hiding TODAY label');
             todayHeaderElement.innerHTML = '';
         }
+    } else {
+        console.log('🔥 DEBUG: todayHeaderElement NOT FOUND!');
     }
 }
 
