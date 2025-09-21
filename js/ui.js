@@ -3406,10 +3406,12 @@ function updateTodayHeader() {
             // Show fire emoji and TODAY text when viewing actual current day
             console.log('🔥 DEBUG: Setting TODAY label to show');
             todayHeaderElement.innerHTML = '🔥 TODAY';
+            todayHeaderElement.style.display = 'block';
         } else {
             // Hide the header text when viewing other days (date shown in red box below)
             console.log('🔥 DEBUG: Hiding TODAY label');
             todayHeaderElement.innerHTML = '';
+            todayHeaderElement.style.display = 'none';
         }
     } else {
         console.log('🔥 DEBUG: todayHeaderElement NOT FOUND!');
