@@ -1974,6 +1974,7 @@ function unicodeSafeBase64Encode(str) {
 
 // Helper: Generate JWT (simplified)
 async function generateJWT(payload, secret) {
+  console.log('🔍 generateJWT called with secret type:', typeof secret, 'length:', secret?.length, 'truthy:', !!secret);
   const header = { alg: 'HS256', typ: 'JWT' };
   const exp = Math.floor(Date.now() / 1000) + (24 * 60 * 60); // 24 hours
   const fullPayload = { ...payload, exp };
