@@ -638,11 +638,14 @@ function applyDateTime() {
             // Update the edit modal display fields
             const dateField = document.getElementById('editTaskDateOnly');
             const timeField = document.getElementById('editTaskTimeOnly');
+            console.log('📝 Updating hidden form fields:', { dateField: !!dateField, timeField: !!timeField, selectedDate, selectedTime });
             if (dateField && selectedDate) {
                 dateField.value = selectedDate;
+                console.log('✅ Set editTaskDateOnly to:', dateField.value);
             }
             if (timeField) {
                 timeField.value = selectedTime || '';
+                console.log('✅ Set editTaskTimeOnly to:', timeField.value);
             }
             
             // Update the display button to show the new date/time
