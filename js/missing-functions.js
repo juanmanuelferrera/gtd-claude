@@ -5516,6 +5516,7 @@ function goToCalendarToday() {
 function selectCalendarDate(dateStr) {
     console.log('📅 Selected date:', dateStr);
     window.selectedModalDate = dateStr;
+    modalSelectedDate = dateStr;  // Also update the unified modal variable
     renderCalendarModal();
 }
 
@@ -5523,6 +5524,7 @@ function selectCalendarDate(dateStr) {
 function selectTime(timeStr) {
     console.log('⏰ Selected time:', timeStr);
     window.selectedModalTime = timeStr;
+    modalSelectedTime = timeStr;  // Also update the unified modal variable
     highlightSelectedTime();
 }
 
