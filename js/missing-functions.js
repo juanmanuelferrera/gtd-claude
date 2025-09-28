@@ -305,16 +305,34 @@ function closeDateDropdown() {
 
 // Select a specific date in calendar
 function selectCalendarDate(taskId, day) {
-    const dateString = `${window.currentCalendarYear}-${(window.currentCalendarMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-    console.log('📅 Selected date:', dateString);
+    console.log('📅 selectCalendarDate called with taskId:', taskId, 'day:', day);
+    console.log('📅 currentCalendarYear:', window.currentCalendarYear);
+    console.log('📅 currentCalendarMonth:', window.currentCalendarMonth);
     
-    // Update task date
-    updateTaskDate(taskId, dateString, { stopPropagation: () => {} });
-    
-    // Close dropdown
-    closeDateDropdown();
-    
-    console.log('✅ Date updated successfully!');
+    try {
+        const dateString = `${window.currentCalendarYear}-${(window.currentCalendarMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        console.log('📅 Selected date:', dateString);
+        
+        // Find the task first
+        const task = window.tasks?.find(t => t.id === taskId);
+        if (!task) {
+            console.error('❌ Task not found with ID:', taskId);
+            return;
+        }
+        console.log('✅ Found task:', task.title);
+        
+        // Update task date
+        console.log('📅 Calling updateTaskDate...');
+        updateTaskDate(taskId, dateString, { stopPropagation: () => {} });
+        
+        // Close dropdown
+        console.log('📅 Closing dropdown...');
+        closeDateDropdown();
+        
+        console.log('✅ Date updated successfully!');
+    } catch (error) {
+        console.error('❌ Error in selectCalendarDate:', error);
+    }
 }
 
 // Change calendar month (prev/next)

@@ -302,7 +302,9 @@ function quickAddTaskWithTemplate(templateName) {
  */
 async function updateTaskDate(taskId, newDate, event) {
     console.log('🔄 updateTaskDate called with:', taskId, newDate);
-    event.stopPropagation();
+    if (event && event.stopPropagation) {
+        event.stopPropagation();
+    }
     
     try {
         const task = tasks.find(t => t.id === taskId);
@@ -320,9 +322,15 @@ async function updateTaskDate(taskId, newDate, event) {
         
         // Update task date
         task.dueDate = newDate || null;
+        task.lastModified = new Date().toISOString();
         
-        // Save to server
-        await saveTasks();
+        // Save to localStorage
+        saveTasksToLocalStorage();
+        
+        // Save to cloud
+        if (typeof uploadAllTasks === 'function') {
+            await uploadAllTasks();
+        }
         
         // Re-render current view to reposition the task
         if (typeof renderCurrentView === 'function') {
