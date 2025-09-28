@@ -5554,10 +5554,14 @@ function initCalendarModal(currentDate, currentTime) {
 
 // Render the calendar grid
 function renderCalendarModal() {
+    console.log('📅 renderCalendarModal called');
     const titleEl = document.getElementById('modalCalendarTitle');
     const daysEl = document.getElementById('modalCalendarDays');
     
-    if (!titleEl || !daysEl) return;
+    if (!titleEl || !daysEl) {
+        console.error('❌ Calendar elements not found. titleEl:', !!titleEl, 'daysEl:', !!daysEl);
+        return;
+    }
     
     // Update month title
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -5632,12 +5636,24 @@ function goToCalendarToday() {
     highlightSelectedTime();
 }
 
-// Select calendar date
+// Select calendar date (for unified modal)
 function selectCalendarDate(dateStr) {
-    console.log('📅 Selected date:', dateStr);
-    window.selectedModalDate = dateStr;
-    modalSelectedDate = dateStr;  // Also update the unified modal variable
-    renderCalendarModal();
+    console.log('📅 selectCalendarDate called for unified modal with dateStr:', dateStr);
+    console.log('📅 Current selectedModalDate before:', window.selectedModalDate);
+    
+    try {
+        window.selectedModalDate = dateStr;
+        modalSelectedDate = dateStr;  // Also update the unified modal variable
+        
+        console.log('📅 Updated selectedModalDate to:', window.selectedModalDate);
+        console.log('📅 Re-rendering calendar modal...');
+        
+        renderCalendarModal();
+        
+        console.log('✅ Calendar date selection complete');
+    } catch (error) {
+        console.error('❌ Error in selectCalendarDate:', error);
+    }
 }
 
 // Select time slot
