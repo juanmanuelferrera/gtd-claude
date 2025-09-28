@@ -764,10 +764,14 @@ function applyDateTime() {
             if (dateField && selectedDate) {
                 dateField.value = selectedDate;
                 console.log('✅ Set editTaskDateOnly to:', dateField.value);
+                // Mark that date was manually set
+                window.manualDateSet = true;
             }
             if (timeField) {
                 timeField.value = selectedTime || '';
                 console.log('✅ Set editTaskTimeOnly to:', timeField.value);
+                // Mark that time was manually set
+                window.manualTimeSet = true;
             }
             
             // Update the display button to show the new date/time
