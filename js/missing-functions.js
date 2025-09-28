@@ -694,7 +694,7 @@ function formatDateForDisplay(dateStr) {
 }
 
 // Apply selected date/time
-function applyDateTime() {
+async function applyDateTime() {
     console.log('📅 Applying date/time:', { 
         date: modalSelectedDate, 
         time: modalSelectedTime, 
@@ -781,6 +781,12 @@ function applyDateTime() {
             }
             
             console.log('✅ Date/time applied successfully');
+            
+            // Auto-save the task after applying date/time
+            if (typeof saveTaskEdit === 'function') {
+                console.log('💾 Auto-saving task after date/time change');
+                await saveTaskEdit();
+            }
         } else {
             console.warn('⚠️ No task ID set for date/time update');
         }
