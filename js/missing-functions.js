@@ -248,7 +248,7 @@ function openIOSDateTimePicker(taskId, currentDate, currentTime, buttonElement) 
                     style += ' background: transparent; color: #333;';
                 }
                 
-                return `<div onclick="selectCalendarDate('${taskId}', ${day})" 
+                return `<div onclick="selectInlineCalendarDate('${taskId}', ${day})" 
                              style="${style}"
                              onmouseover="if(!this.style.color.includes('white')) { this.style.background='#f0f8ff'; }"
                              onmouseout="if(!this.style.color.includes('white')) { this.style.background='${isToday ? '#e3f2fd' : 'transparent'}'; }">
@@ -303,8 +303,8 @@ function closeDateDropdown() {
     }
 }
 
-// Select a specific date in calendar
-function selectCalendarDate(taskId, day) {
+// Select a specific date in inline calendar dropdown
+function selectInlineCalendarDate(taskId, day) {
     console.log('📅 selectCalendarDate called with taskId:', taskId, 'day:', day);
     console.log('📅 currentCalendarYear:', window.currentCalendarYear);
     console.log('📅 currentCalendarMonth:', window.currentCalendarMonth);
@@ -372,12 +372,12 @@ function setCalendarQuickDate(taskId, daysFromToday) {
     window.currentCalendarYear = date.getFullYear();
     
     // Select the date
-    selectCalendarDate(taskId, date.getDate());
+    selectInlineCalendarDate(taskId, date.getDate());
 }
 
 // Make functions globally available for inline onclick handlers
 window.openIOSDateTimePicker = openIOSDateTimePicker;
-window.selectCalendarDate = selectCalendarDate;
+window.selectInlineCalendarDate = selectInlineCalendarDate;
 window.changeCalendarMonth = changeCalendarMonth;
 window.setCalendarToday = setCalendarToday;
 window.setCalendarQuickDate = setCalendarQuickDate;
