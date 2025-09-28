@@ -337,6 +337,7 @@ function selectInlineCalendarDate(taskId, day) {
 
 // Change calendar month (prev/next)
 function changeCalendarMonth(taskId, direction) {
+    console.log('📅 Changing calendar month, direction:', direction);
     window.currentCalendarMonth += direction;
     
     if (window.currentCalendarMonth < 0) {
@@ -347,10 +348,107 @@ function changeCalendarMonth(taskId, direction) {
         window.currentCalendarYear++;
     }
     
-    // Refresh calendar
+    console.log('📅 New month/year:', window.currentCalendarMonth, window.currentCalendarYear);
+    
+    // Re-render the calendar without closing it
+    refreshInlineCalendar(taskId);
+}
+
+// Refresh inline calendar display without closing it
+function refreshInlineCalendar(taskId) {
+    console.log('📅 Refreshing inline calendar for task:', taskId);
+    
+    // Find the calendar container in the overlay
+    if (!window.currentDateDropdown) {
+        console.error('❌ No calendar dropdown found');
+        return;
+    }
+    
+    const calendar = window.currentDateDropdown.querySelector('div[style*="background: white"]');
+    if (!calendar) {
+        console.error('❌ Calendar element not found');
+        return;
+    }
+    
+    // Get current task
     const currentTask = window.tasks?.find(t => t.id === taskId);
-    const currentDate = currentTask?.dueDate || getLocalDateString(new Date());
-    openIOSDateTimePicker(taskId, currentDate, '', document.querySelector(`[onclick*="openIOSDateTimePicker('${taskId}'"]`));
+    const currentDate = currentTask?.dueDate;
+    
+    // Rebuild calendar HTML
+    const today = new Date();
+    const currentYear = window.currentCalendarYear;
+    const currentMonth = window.currentCalendarMonth;
+    const currentDay = currentDate ? new Date(currentDate + 'T00:00:00').getDate() : null;
+    const todayDay = today.getDate();
+    const todayMonth = today.getMonth();
+    const todayYear = today.getFullYear();
+    
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+    const daysOfWeek = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    
+    const html = `
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+            <div style="font-weight: 600; font-size: 16px; color: #333; margin-bottom: 8px;">
+                📅 ${monthNames[currentMonth]} ${currentYear}
+            </div>
+            <div style="display: flex; gap: 6px; justify-content: center;">
+                <button onclick="changeCalendarMonth('${taskId}', -1)" style="background: #f0f0f0; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 12px;">‹ Prev</button>
+                <button onclick="setCalendarToday('${taskId}')" style="background: #007AFF; color: white; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 12px;">Today</button>
+                <button onclick="changeCalendarMonth('${taskId}', 1)" style="background: #f0f0f0; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 12px;">Next ›</button>
+            </div>
+        </div>
+        
+        <!-- Calendar Grid -->
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;">
+            ${daysOfWeek.map(day => 
+                `<div style="text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 600; color: #666;">${day}</div>`
+            ).join('')}
+            
+            ${Array(firstDay).fill().map(() => 
+                `<div style="padding: 8px;"></div>`
+            ).join('')}
+            
+            ${Array.from({length: daysInMonth}, (_, i) => {
+                const day = i + 1;
+                const isToday = day === todayDay && currentMonth === todayMonth && currentYear === todayYear;
+                const isSelected = day === currentDay && currentMonth === (currentDate ? new Date(currentDate + 'T00:00:00').getMonth() : null) && currentYear === (currentDate ? new Date(currentDate + 'T00:00:00').getFullYear() : null);
+                
+                let style = 'padding: 8px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 500;';
+                
+                if (isSelected) {
+                    style += ' background: #007AFF; color: white;';
+                } else if (isToday) {
+                    style += ' background: #e3f2fd; color: #1976d2; font-weight: 600;';
+                } else {
+                    style += ' background: transparent; color: #333;';
+                }
+                
+                return `<div onclick="selectInlineCalendarDate('${taskId}', ${day})" 
+                             style="${style}"
+                             onmouseover="if(!this.style.color.includes('white')) { this.style.background='#f0f8ff'; }"
+                             onmouseout="if(!this.style.color.includes('white')) { this.style.background='${isToday ? '#e3f2fd' : 'transparent'}'; }">
+                            ${day}
+                        </div>`;
+            }).join('')}
+        </div>
+        
+        <!-- Quick Actions -->
+        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
+            <div style="display: flex; gap: 6px;">
+                <button onclick="setCalendarQuickDate('${taskId}', 0)" style="flex: 1; padding: 8px; background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">Today</button>
+                <button onclick="setCalendarQuickDate('${taskId}', 1)" style="flex: 1; padding: 8px; background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">Tomorrow</button>
+                <button onclick="setCalendarQuickDate('${taskId}', 7)" style="flex: 1; padding: 8px; background: #e8f5e8; color: #388e3c; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">+1W</button>
+            </div>
+        </div>
+    `;
+    
+    calendar.innerHTML = html;
+    console.log('✅ Calendar refreshed');
 }
 
 // Set calendar to today
@@ -359,8 +457,9 @@ function setCalendarToday(taskId) {
     window.currentCalendarMonth = today.getMonth();
     window.currentCalendarYear = today.getFullYear();
     
-    // Select today's date
-    selectCalendarDate(taskId, today.getDate());
+    // Refresh and select today's date
+    refreshInlineCalendar(taskId);
+    selectInlineCalendarDate(taskId, today.getDate());
 }
 
 // Quick date selection for calendar
@@ -378,6 +477,7 @@ function setCalendarQuickDate(taskId, daysFromToday) {
 // Make functions globally available for inline onclick handlers
 window.openIOSDateTimePicker = openIOSDateTimePicker;
 window.selectInlineCalendarDate = selectInlineCalendarDate;
+window.refreshInlineCalendar = refreshInlineCalendar;
 window.changeCalendarMonth = changeCalendarMonth;
 window.setCalendarToday = setCalendarToday;
 window.setCalendarQuickDate = setCalendarQuickDate;
