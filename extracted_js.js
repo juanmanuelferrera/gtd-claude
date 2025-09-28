@@ -2645,7 +2645,7 @@
                     
                     // Store auth data
                     localStorage.setItem('authToken', result.token);
-                    localStorage.setItem('authTokenExpiry', String(Date.now() + (30 * 24 * 60 * 60 * 1000))); // 30 days
+                    localStorage.setItem('authTokenExpiry', String(Date.now() + (60 * 24 * 60 * 60 * 1000))); // 60 days
                     localStorage.setItem('userEmail', email);
                     localStorage.setItem('userId', result.user?.id);
                     
@@ -4318,7 +4318,7 @@
                 
                 // Store tokens
                 localStorage.setItem('authToken', loginResult.token);
-                localStorage.setItem('authTokenExpiry', String(Date.now() + (30 * 24 * 60 * 60 * 1000)));
+                localStorage.setItem('authTokenExpiry', String(Date.now() + (60 * 24 * 60 * 60 * 1000)));
                 localStorage.setItem('userEmail', loginResult.user.email);
                 localStorage.setItem('userId', loginResult.user.id);
                 
