@@ -220,6 +220,15 @@ function openIOSDateTimePicker(taskId, currentDate, currentTime, buttonElement) 
             </div>
         </div>
         
+        <!-- Quick Actions -->
+        <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+            <div style="display: flex; gap: 6px;">
+                <button onclick="setCalendarQuickDate('${taskId}', 0)" style="flex: 1; padding: 8px; background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">Today</button>
+                <button onclick="setCalendarQuickDate('${taskId}', 1)" style="flex: 1; padding: 8px; background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">Tomorrow</button>
+                <button onclick="setCalendarQuickDate('${taskId}', 7)" style="flex: 1; padding: 8px; background: #e8f5e8; color: #388e3c; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">+1W</button>
+            </div>
+        </div>
+        
         <!-- Calendar Grid -->
         <div id="calendar-grid-${taskId}" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;">
             <!-- Day headers -->
@@ -255,15 +264,6 @@ function openIOSDateTimePicker(taskId, currentDate, currentTime, buttonElement) 
                             ${day}
                         </div>`;
             }).join('')}
-        </div>
-        
-        <!-- Quick Actions -->
-        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
-            <div style="display: flex; gap: 6px;">
-                <button onclick="setCalendarQuickDate('${taskId}', 0)" style="flex: 1; padding: 8px; background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">Today</button>
-                <button onclick="setCalendarQuickDate('${taskId}', 1)" style="flex: 1; padding: 8px; background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">Tomorrow</button>
-                <button onclick="setCalendarQuickDate('${taskId}', 7)" style="flex: 1; padding: 8px; background: #e8f5e8; color: #388e3c; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">+1W</button>
-            </div>
         </div>
     `;
     
@@ -403,6 +403,15 @@ function refreshInlineCalendar(taskId) {
             </div>
         </div>
         
+        <!-- Quick Actions -->
+        <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+            <div style="display: flex; gap: 6px;">
+                <button onclick="setCalendarQuickDate('${taskId}', 0)" style="flex: 1; padding: 8px; background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">Today</button>
+                <button onclick="setCalendarQuickDate('${taskId}', 1)" style="flex: 1; padding: 8px; background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">Tomorrow</button>
+                <button onclick="setCalendarQuickDate('${taskId}', 7)" style="flex: 1; padding: 8px; background: #e8f5e8; color: #388e3c; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">+1W</button>
+            </div>
+        </div>
+        
         <!-- Calendar Grid -->
         <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;">
             ${daysOfWeek.map(day => 
@@ -435,15 +444,6 @@ function refreshInlineCalendar(taskId) {
                             ${day}
                         </div>`;
             }).join('')}
-        </div>
-        
-        <!-- Quick Actions -->
-        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
-            <div style="display: flex; gap: 6px;">
-                <button onclick="setCalendarQuickDate('${taskId}', 0)" style="flex: 1; padding: 8px; background: #e3f2fd; color: #1976d2; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">Today</button>
-                <button onclick="setCalendarQuickDate('${taskId}', 1)" style="flex: 1; padding: 8px; background: #fff3e0; color: #f57c00; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">Tomorrow</button>
-                <button onclick="setCalendarQuickDate('${taskId}', 7)" style="flex: 1; padding: 8px; background: #e8f5e8; color: #388e3c; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">+1W</button>
-            </div>
         </div>
     `;
     
