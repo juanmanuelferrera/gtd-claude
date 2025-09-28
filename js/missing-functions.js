@@ -746,6 +746,11 @@ function applyDateTime() {
                 } else if (window.currentView === 'week' && typeof safeRenderWeekView === 'function') {
                     safeRenderWeekView();
                 } else if (window.currentView === 'calendar' && typeof renderCalendar === 'function') {
+                    // Navigate calendar to the selected date
+                    if (selectedDate) {
+                        window.currentCalendarDate = new Date(selectedDate + 'T00:00:00');
+                        console.log('📅 Navigating calendar to:', selectedDate);
+                    }
                     renderCalendar();
                 } else if (window.currentView === 'allTasks' && typeof renderAllTasksView === 'function') {
                     renderAllTasksView();
