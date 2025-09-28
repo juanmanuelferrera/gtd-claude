@@ -5874,9 +5874,24 @@ function parseTime(timeStr) {
 
 // Move all tasks to current time block
 function moveAllTasksToCurrentTime() {
+    // Prevent multiple simultaneous executions
+    if (window.moveTasksInProgress) {
+        console.log('⚠️ Move already in progress, ignoring click');
+        return;
+    }
+    
+    window.moveTasksInProgress = true;
     console.log('🕐 Move button clicked! Starting function...');
     console.log('🔍 Debug - tasks array:', window.tasks ? window.tasks.length + ' tasks' : 'tasks array not found');
     console.log('🔍 Debug - currentTodayDate:', window.currentTodayDate);
+    
+    // Disable the button to prevent multiple clicks
+    const btn = document.querySelector('.move-current-time-btn');
+    if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+    }
     
     // Temporarily disable sync to prevent overwriting our changes
     const originalSyncEnabled = window.syncEnabled;
@@ -6165,13 +6180,17 @@ function moveAllTasksToCurrentTime() {
             console.log('📤 Final upload to ensure server has latest data');
         }
         
-        // If we moved tasks successfully, reload the page to show them
-        if (movedCount > 0) {
-            setTimeout(() => {
-                console.log('🔄 Reloading page to display moved tasks in their new time slot...');
-                window.location.reload();
-            }, 1000);
+        // Reset the progress flag
+        window.moveTasksInProgress = false;
+        
+        // Re-enable the button
+        if (btn) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
         }
+        
+        console.log('✅ Move operation completed - no page reload needed');
     }, 3000);  // Increased delay to ensure upload completes
 }
 
