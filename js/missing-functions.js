@@ -705,8 +705,9 @@ function applyDateTime() {
     
     try {
         // Use the date/time from either the unified modal or legacy modal variables
-        const selectedDate = modalSelectedDate || window.selectedModalDate;
-        const selectedTime = modalSelectedTime || window.selectedModalTime;
+        // IMPORTANT: Prioritize legacy variables since they're updated by calendar clicks
+        const selectedDate = window.selectedModalDate || modalSelectedDate;
+        const selectedTime = window.selectedModalTime || modalSelectedTime;
         
         if (window.currentDateTimeTaskId) {
             const taskId = window.currentDateTimeTaskId;
