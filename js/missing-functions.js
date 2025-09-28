@@ -314,8 +314,7 @@ function selectCalendarDate(taskId, day) {
     // Close dropdown
     closeDateDropdown();
     
-    // Show success feedback
-    showMessage('Date updated!', 'success');
+    console.log('✅ Date updated successfully!');
 }
 
 // Change calendar month (prev/next)
