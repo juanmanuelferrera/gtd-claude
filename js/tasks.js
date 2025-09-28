@@ -1279,6 +1279,38 @@ async function createNewTemplate() {
     }
 }
 
+async function addNewTemplate() {
+    const input = document.getElementById('newTemplateInput');
+    if (!input) {
+        console.error('newTemplateInput not found');
+        return;
+    }
+    
+    let template = input.value.trim();
+    
+    if (!template) return;
+    
+    if (!template.startsWith('@')) {
+        template = '@' + template;
+    }
+    
+    template = template.replace(/\s/g, '');
+    
+    if (customTemplates.includes(template)) {
+        alert('Template already exists');
+        return;
+    }
+    
+    customTemplates.push(template);
+    await saveTemplates();
+    renderTemplateButtons();
+    
+    input.value = '';
+    input.focus();
+}
+
+window.addNewTemplate = addNewTemplate;
+
 /**
  * Save state for undo functionality
  */
