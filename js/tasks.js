@@ -1320,9 +1320,20 @@ async function addNewTemplate() {
     console.log('🎨 Rendering template buttons...');
     renderTemplateButtons();
     
+    console.log('✅ Template added successfully:', template);
+    console.log('📋 Final templates array:', customTemplates);
+    
+    // Verify the button was added to DOM
+    setTimeout(() => {
+        const container = document.getElementById('templateButtons');
+        if (container) {
+            console.log('🔍 Container buttons count:', container.children.length);
+            console.log('🔍 Container HTML:', container.innerHTML.substring(0, 200));
+        }
+    }, 100);
+    
     input.value = '';
     input.focus();
-    console.log('✅ Template added successfully');
 }
 
 window.addNewTemplate = addNewTemplate;
