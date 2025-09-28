@@ -1280,33 +1280,49 @@ async function createNewTemplate() {
 }
 
 async function addNewTemplate() {
+    console.log('🎯 addNewTemplate called');
     const input = document.getElementById('newTemplateInput');
     if (!input) {
-        console.error('newTemplateInput not found');
+        console.error('❌ newTemplateInput not found');
         return;
     }
     
     let template = input.value.trim();
+    console.log('📝 Input value:', template);
     
-    if (!template) return;
+    if (!template) {
+        console.log('⚠️ Empty template, returning');
+        return;
+    }
     
     if (!template.startsWith('@')) {
         template = '@' + template;
     }
+    console.log('🏷️ Template with @ prefix:', template);
     
     template = template.replace(/\s/g, '');
+    console.log('🏷️ Template after removing spaces:', template);
     
+    console.log('📋 Current templates:', customTemplates);
     if (customTemplates.includes(template)) {
+        console.log('⚠️ Template already exists');
         alert('Template already exists');
         return;
     }
     
+    console.log('➕ Adding template to array');
     customTemplates.push(template);
+    console.log('📋 Updated templates:', customTemplates);
+    
+    console.log('💾 Saving templates...');
     await saveTemplates();
+    
+    console.log('🎨 Rendering template buttons...');
     renderTemplateButtons();
     
     input.value = '';
     input.focus();
+    console.log('✅ Template added successfully');
 }
 
 window.addNewTemplate = addNewTemplate;
