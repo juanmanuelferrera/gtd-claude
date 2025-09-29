@@ -518,10 +518,16 @@ function goToCalendarToday() {
 function setQuickDate(daysFromToday) {
     const date = new Date();
     date.setDate(date.getDate() + daysFromToday);
+    
+    // Update the unified modal variables
+    window.selectedModalDate = getLocalDateString(date);
     modalSelectedDate = getLocalDateString(date);
-    modalCurrentMonth = date.getMonth();
-    modalCurrentYear = date.getFullYear();
-    updateCalendarDisplay();
+    
+    // Update the calendar to show the selected month
+    modalCalendarDate = new Date(date);
+    
+    // Re-render the calendar modal and highlight the selected date
+    renderCalendarModal();
     updateSelectedDisplay();
 }
 
@@ -665,14 +671,18 @@ function selectCalendarDay(dateStr) {
 function updateSelectedDisplay() {
     const displayElement = document.getElementById('selectedDateTimeDisplay');
     if (displayElement) {
-        if (modalSelectedDate || modalSelectedTime) {
-            const datePart = modalSelectedDate ? formatDateForDisplay(modalSelectedDate) : 'No date';
-            const timePart = modalSelectedTime ? modalSelectedTime : 'No time';
-            displayElement.textContent = `${datePart} at ${timePart}`;
+        // Use window.selectedModalDate and window.selectedModalTime for consistency
+        const dateToUse = window.selectedModalDate || modalSelectedDate;
+        const timeToUse = window.selectedModalTime || modalSelectedTime;
+        
+        if (dateToUse || timeToUse) {
+            const datePart = dateToUse ? formatDateForDisplay(dateToUse) : 'No date';
+            const timePart = timeToUse ? timeToUse : 'No time';
+            displayElement.textContent = timeToUse ? `${datePart} at ${timePart}` : datePart;
             displayElement.style.color = '#007AFF';
             displayElement.style.fontWeight = '600';
         } else {
-            displayElement.textContent = '';
+            displayElement.textContent = 'Select a date and/or time';
             displayElement.style.color = '#495057';
             displayElement.style.fontWeight = '500';
         }
@@ -786,6 +796,12 @@ async function applyDateTime() {
             if (typeof saveTaskEdit === 'function') {
                 console.log('💾 Auto-saving task after date/time change');
                 await saveTaskEdit();
+                
+                // Close the edit modal as well since we've saved
+                console.log('🚪 Closing edit modal after saving');
+                if (typeof closeTaskModal === 'function') {
+                    closeTaskModal();
+                }
             }
         } else {
             console.warn('⚠️ No task ID set for date/time update');
