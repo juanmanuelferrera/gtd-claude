@@ -8921,6 +8921,9 @@
         }
         
         function applyMobileDateTime() {
+            // First update the mobile date/time values to set the global variables
+            updateMobileDateTime();
+            // Then apply the date/time using those global variables
             applyDateTime();
         }
         function updateDesktopDateTime() {
