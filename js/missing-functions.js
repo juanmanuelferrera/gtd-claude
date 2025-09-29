@@ -2107,18 +2107,24 @@ function openDateTimeModal() {
         window.currentDateTimeTaskId = window.currentEditTaskId;
         console.log('📝 Setting currentDateTimeTaskId:', window.currentDateTimeTaskId);
         
-        // Get current values or set defaults
+        // Get current values from the edit form fields
         const currentDate = document.getElementById('editTaskDateOnly').value;
         const currentTime = document.getElementById('editTaskTimeOnly').value;
         
         console.log('Current date:', currentDate, 'Current time:', currentTime);
         
-        // Set default to today if no date is set
-        const defaultDate = currentDate || getLocalDateString(new Date());
-        const defaultTime = currentTime || '';
+        // Clear any previously stored modal values
+        window.selectedModalDate = '';
+        window.selectedModalTime = '';
+        modalSelectedDate = null;
+        modalSelectedTime = null;
         
-        // Initialize the calendar modal
-        initCalendarModal(defaultDate, defaultTime);
+        // Only use the date/time if the task actually has them
+        const dateToUse = currentDate || '';
+        const timeToUse = currentTime || '';
+        
+        // Initialize the calendar modal with the task's actual date/time (or empty if none)
+        initCalendarModal(dateToUse, timeToUse);
         
         // Detect device type and show appropriate version
         const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -5561,12 +5567,13 @@ function initCalendarModal(currentDate, currentTime) {
     console.log('🗓️ Initializing calendar modal with:', currentDate, currentTime);
     
     // Set current selections for both legacy and unified systems
-    window.selectedModalDate = currentDate || getLocalDateString(new Date());
+    // Don't default to today - keep empty if no date provided
+    window.selectedModalDate = currentDate || '';
     window.selectedModalTime = currentTime || '';
     
     // Also set the unified modal variables
-    modalSelectedDate = currentDate || getLocalDateString(new Date());
-    modalSelectedTime = currentTime || '';
+    modalSelectedDate = currentDate || null;
+    modalSelectedTime = currentTime || null;
     
     // Set calendar to show the selected month
     if (currentDate) {

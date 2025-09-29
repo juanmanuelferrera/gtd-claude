@@ -544,13 +544,12 @@ function editTask(taskId, event) {
         repeatDropdown.style.opacity = '1';
     }
     
-    // Set date and time inputs - default to today if no date set
-    const defaultDate = task.dueDate || getLocalDateString(new Date());
-    document.getElementById('editTaskDateOnly').value = defaultDate;
+    // Set date and time inputs - only set if task has a date
+    document.getElementById('editTaskDateOnly').value = task.dueDate || '';
     document.getElementById('editTaskTimeOnly').value = task.dueTime || '';
     
     // Also update the main date/time fields
-    document.getElementById('editTaskDate').value = defaultDate;
+    document.getElementById('editTaskDate').value = task.dueDate || '';
     document.getElementById('editTaskTime').value = task.dueTime || '';
     
     // Update display and hidden fields
