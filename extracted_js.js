@@ -22388,6 +22388,11 @@
             await saveTemplates();
             renderTemplateButtons();
             
+            // Update all template filters in the UI
+            if (typeof updateCurrentTodayDisplay === 'function') {
+                updateCurrentTodayDisplay();
+            }
+            
             // Clear input
             input.value = '';
             input.focus();
@@ -22405,6 +22410,11 @@
                 customTemplates = customTemplates.filter(t => t !== template);
                 await saveTemplates();
                 renderTemplateButtons();
+                
+                // Update all template filters in the UI
+                if (typeof updateCurrentTodayDisplay === 'function') {
+                    updateCurrentTodayDisplay();
+                }
                 
                 // Also update search filter buttons if they exist
                 updateSearchFilterButtons();
