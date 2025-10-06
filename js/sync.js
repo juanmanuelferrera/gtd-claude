@@ -660,7 +660,7 @@ async function _uploadAllTemplatesInternal() {
     }
     
     try {
-        const templatesArray = typeof customTemplates !== 'undefined' ? customTemplates : [];
+        const templatesArray = window.customTemplates || [];
         console.log('📤 [ULTRA-DEBUG] customTemplates variable:', customTemplates);
         console.log('📤 [ULTRA-DEBUG] window.customTemplates:', window.customTemplates);
         console.log('📤 [ULTRA-DEBUG] Templates to upload:', templatesArray);
