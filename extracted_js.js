@@ -4962,6 +4962,13 @@
             showMobileTagSelection(taskId);
         }
         
+        // Expose mobile functions globally for onclick handlers
+        window.showMobileTagSelection = showMobileTagSelection;
+        window.toggleTag = toggleTag;
+        window.addNewTag = addNewTag;
+        window.showMobileEditTask = showMobileEditTask;
+        window.hideMobileTaskModal = hideMobileTaskModal;
+        
         // Mobile time dropdown function
         function showMobileDateTimePicker(taskId, event) {
             event.stopPropagation();
