@@ -4030,29 +4030,69 @@ window.insertTemplateToTask = insertTemplateToTask;
 
 // Delete template
 async function deleteTemplate(template) {
-    if (!window.customTemplates) return;
+    console.log('🗑️ [ULTRA-DEBUG] deleteTemplate called for:', template);
+    console.log('🗑️ [ULTRA-DEBUG] window.customTemplates before deletion:', window.customTemplates);
+    console.log('🗑️ [ULTRA-DEBUG] localStorage before deletion:', localStorage.getItem('gtdTemplates'));
     
-    window.customTemplates = window.customTemplates.filter(t => t !== template);
-    
-    // Save templates - use same key as tasks.js
-    localStorage.setItem('gtdTemplates', JSON.stringify(window.customTemplates));
-    
-    // Set flag to prevent downloads from overwriting changes
-    window.justModifiedTemplates = true;
-    
-    // Upload to server
-    if (typeof uploadAllTemplates === 'function') {
-        await uploadAllTemplates();
+    if (!window.customTemplates) {
+        console.log('🗑️ [ULTRA-DEBUG] No window.customTemplates found, returning');
+        return;
     }
     
-    // Clear flag after successful upload
+    // Filter out the template
+    const beforeLength = window.customTemplates.length;
+    window.customTemplates = window.customTemplates.filter(t => t !== template);
+    const afterLength = window.customTemplates.length;
+    
+    console.log('🗑️ [ULTRA-DEBUG] Templates before deletion:', beforeLength);
+    console.log('🗑️ [ULTRA-DEBUG] Templates after deletion:', afterLength);
+    console.log('🗑️ [ULTRA-DEBUG] Remaining templates:', window.customTemplates);
+    
+    // Save templates - use same key as tasks.js
+    const templatesJSON = JSON.stringify(window.customTemplates);
+    localStorage.setItem('gtdTemplates', templatesJSON);
+    console.log('🗑️ [ULTRA-DEBUG] Saved to localStorage:', templatesJSON);
+    
+    // Set persistent protection flag that survives page reload
+    const protectionData = {
+        flag: true,
+        timestamp: Date.now(),
+        action: 'template_deletion',
+        deletedTemplate: template
+    };
+    localStorage.setItem('templateProtection', JSON.stringify(protectionData));
+    window.justModifiedTemplates = true;
+    console.log('🗑️ [ULTRA-DEBUG] Set protection flag in localStorage and memory');
+    
+    // Upload to server with detailed logging
+    if (typeof uploadAllTemplates === 'function') {
+        console.log('🗑️ [ULTRA-DEBUG] Starting uploadAllTemplates...');
+        try {
+            await uploadAllTemplates();
+            console.log('🗑️ [ULTRA-DEBUG] uploadAllTemplates completed successfully');
+        } catch (error) {
+            console.error('🗑️ [ULTRA-DEBUG] uploadAllTemplates failed:', error);
+        }
+    } else {
+        console.error('🗑️ [ULTRA-DEBUG] uploadAllTemplates function not found!');
+    }
+    
+    // Clear memory flag after delay, but keep localStorage protection longer
     setTimeout(() => {
         window.justModifiedTemplates = false;
-        console.log('🔓 Cleared justModifiedTemplates flag');
-    }, 10000); // 10-second protection
+        console.log('🗑️ [ULTRA-DEBUG] Cleared memory justModifiedTemplates flag');
+    }, 10000);
+    
+    // Clear localStorage protection after longer delay
+    setTimeout(() => {
+        localStorage.removeItem('templateProtection');
+        console.log('🗑️ [ULTRA-DEBUG] Cleared localStorage templateProtection flag');
+    }, 30000); // 30-second protection
     
     // Re-render template buttons
+    console.log('🗑️ [ULTRA-DEBUG] Re-rendering template buttons...');
     renderTemplateButtons();
+    console.log('🗑️ [ULTRA-DEBUG] deleteTemplate completed');
 }
 
 // Open Add Task Modal

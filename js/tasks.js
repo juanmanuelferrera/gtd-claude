@@ -1118,15 +1118,35 @@ function openAddTaskModal(dateStr) {
  * Template Management Functions
  */
 function loadTemplates() {
+    console.log('🔄 [ULTRA-DEBUG] loadTemplates called from tasks.js');
     const saved = localStorage.getItem('gtdTemplates');
+    console.log('🔄 [ULTRA-DEBUG] localStorage gtdTemplates value:', saved);
+    console.log('🔄 [ULTRA-DEBUG] localStorage gtdTemplates type:', typeof saved);
+    console.log('🔄 [ULTRA-DEBUG] saved !== null:', saved !== null);
+    
     if (saved !== null) {
         // Templates have been saved before (could be empty array if user deleted all)
-        customTemplates = JSON.parse(saved);
+        try {
+            customTemplates = JSON.parse(saved);
+            console.log('🔄 [ULTRA-DEBUG] Parsed templates from localStorage:', customTemplates);
+            console.log('🔄 [ULTRA-DEBUG] customTemplates length:', customTemplates.length);
+        } catch (error) {
+            console.error('🔄 [ULTRA-DEBUG] Error parsing templates:', error);
+            customTemplates = [];
+        }
     } else {
         // First time - no templates saved yet, use defaults
+        console.log('🔄 [ULTRA-DEBUG] No templates in localStorage, using defaults');
         customTemplates = ['@casa', '@recados', '@vedicvault', '@facebook', '@theonething'];
     }
+    
+    // Sync to window.customTemplates
+    window.customTemplates = customTemplates;
+    console.log('🔄 [ULTRA-DEBUG] Synced to window.customTemplates:', window.customTemplates);
+    console.log('🔄 [ULTRA-DEBUG] Final customTemplates:', customTemplates);
+    
     renderTemplateButtons();
+    console.log('🔄 [ULTRA-DEBUG] loadTemplates completed');
 }
 
 async function saveTemplates() {

@@ -13,14 +13,20 @@ if (typeof window.listSections === 'undefined') {
 }
 
 if (typeof window.customTemplates === 'undefined') {
+    console.log('🌐 [ULTRA-DEBUG] Initializing window.customTemplates from globals.js');
     // Load templates from localStorage
     try {
         const stored = localStorage.getItem('gtdTemplates');
+        console.log('🌐 [ULTRA-DEBUG] localStorage gtdTemplates from globals.js:', stored);
         window.customTemplates = stored ? JSON.parse(stored) : [];
+        console.log('🌐 [ULTRA-DEBUG] Set window.customTemplates to:', window.customTemplates);
+        console.log('🌐 [ULTRA-DEBUG] window.customTemplates length:', window.customTemplates.length);
     } catch (error) {
-        console.error('Error loading templates:', error);
+        console.error('🌐 [ULTRA-DEBUG] Error loading templates in globals.js:', error);
         window.customTemplates = [];
     }
+} else {
+    console.log('🌐 [ULTRA-DEBUG] window.customTemplates already defined:', window.customTemplates);
 }
 
 if (typeof window.currentView === 'undefined') {
