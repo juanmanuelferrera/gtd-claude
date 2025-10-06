@@ -26012,7 +26012,6 @@
                 }
             }, 1000);
         });
-    
 
         // Weekly Support Reminder System
         function checkSupportReminder() {
