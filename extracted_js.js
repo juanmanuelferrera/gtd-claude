@@ -22282,12 +22282,21 @@
         }
         // Render template buttons in modal
         function renderTemplateButtons() {
-            const container = document.getElementById('templateButtons');
-            if (!container) return;
+            console.log('🔧 renderTemplateButtons called');
+            console.log('📋 customTemplates array:', customTemplates);
+            console.log('📋 customTemplates length:', customTemplates.length);
             
+            const container = document.getElementById('templateButtons');
+            if (!container) {
+                console.log('❌ templateButtons container not found');
+                return;
+            }
+            
+            console.log('✅ templateButtons container found:', container);
             container.innerHTML = '';
             
-            customTemplates.forEach(template => {
+            customTemplates.forEach((template, index) => {
+                console.log(`🔄 Processing template ${index + 1}/${customTemplates.length}: "${template}"`);
                 const button = document.createElement('button');
                 button.type = 'button';
                 button.className = 'template-btn';
@@ -22337,8 +22346,13 @@
                     await deleteTemplate(template);
                 });
                 
+                console.log(`➕ Adding button for template "${template}" to container`);
                 container.appendChild(button);
+                console.log(`✅ Button added. Container now has ${container.children.length} buttons`);
             });
+            
+            console.log(`🏁 renderTemplateButtons completed. Final button count: ${container.children.length}`);
+            console.log('🔍 Final container children:', Array.from(container.children).map(btn => btn.textContent));
         }
         // Reset/clear task title
         function resetTaskTitle() {
