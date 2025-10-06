@@ -3908,17 +3908,28 @@ function renderListItems() {
 
 // Render template buttons in the Add Task modal
 function renderTemplateButtons() {
-    const container = document.getElementById('templateButtons');
-    if (!container) return;
+    console.log('🔧 [missing-functions.js] renderTemplateButtons called - THE REAL ONE');
+    console.log('📋 window.customTemplates:', window.customTemplates);
+    console.log('📋 window.customTemplates length:', window.customTemplates?.length);
     
+    const container = document.getElementById('templateButtons');
+    if (!container) {
+        console.log('❌ templateButtons container not found');
+        return;
+    }
+    
+    console.log('✅ templateButtons container found');
     container.innerHTML = '';
     
     if (!window.customTemplates || window.customTemplates.length === 0) {
+        console.log('❌ No templates found');
         container.innerHTML = '<span style="color: #999; font-size: 12px;">No templates created yet</span>';
         return;
     }
     
-    window.customTemplates.forEach(template => {
+    console.log(`🎨 About to render ${window.customTemplates.length} templates`);
+    window.customTemplates.forEach((template, index) => {
+        console.log(`🔄 Processing template ${index + 1}/${window.customTemplates.length}: "${template}"`);
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'template-btn';
@@ -3965,8 +3976,13 @@ function renderTemplateButtons() {
             await deleteTemplate(template);
         });
         
+        console.log(`➕ Adding button for template "${template}" to container`);
         container.appendChild(button);
+        console.log(`✅ Button added. Container now has ${container.children.length} buttons`);
     });
+    
+    console.log(`🏁 renderTemplateButtons completed. Final button count: ${container.children.length}`);
+    console.log('🔍 Final container children:', Array.from(container.children).map(btn => btn.textContent));
 }
 
 // Insert template into task title input
