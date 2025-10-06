@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v2.0.3 [STABLE] - Build 20250106-desktop-tags-fix');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v2.0.3 [STABLE] - Build 20250106-keydown-fix');
     
     // Register Service Worker for offline support
     if ('serviceWorker' in navigator) {
@@ -6013,7 +6013,7 @@
         
         // N Key handler
         document.addEventListener('keydown', function(event) {
-            if (event.key.toLowerCase() === 'n' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+            if (event.key && event.key.toLowerCase() === 'n' && !event.ctrlKey && !event.metaKey && !event.altKey) {
                 // Only trigger if not typing in an input field
                 const activeElement = document.activeElement;
                 const isTyping = activeElement && (
