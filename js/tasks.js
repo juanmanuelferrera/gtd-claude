@@ -1284,6 +1284,11 @@ function insertTemplateToTask(template) {
 
 async function deleteTemplate(template) {
     customTemplates = customTemplates.filter(t => t !== template);
+    // SYNC FIX: Also update window.customTemplates for renderTemplateButtons  
+    if (typeof window.customTemplates !== 'undefined') {
+        window.customTemplates = window.customTemplates.filter(t => t !== template);
+        console.log('🔄 Synced deletion to window.customTemplates:', window.customTemplates.length);
+    }
     await saveTemplates();
     renderTemplateButtons();
 }
