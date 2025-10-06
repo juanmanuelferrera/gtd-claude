@@ -15,7 +15,7 @@ if (typeof window.listSections === 'undefined') {
 if (typeof window.customTemplates === 'undefined') {
     // Load templates from localStorage
     try {
-        const stored = localStorage.getItem('gtd_custom_templates');
+        const stored = localStorage.getItem('gtdTemplates');
         window.customTemplates = stored ? JSON.parse(stored) : [];
     } catch (error) {
         console.error('Error loading templates:', error);

@@ -2433,7 +2433,7 @@ function handleJsonImportFile(event) {
                         console.log(`➕ ADD: Added ${importData.templates.length} templates to existing data`);
                     }
                 }
-                localStorage.setItem('gtd_custom_templates', JSON.stringify(window.customTemplates));
+                localStorage.setItem('gtdTemplates', JSON.stringify(window.customTemplates));
             }
             
             // Force sync to server after import
@@ -2849,7 +2849,7 @@ async function forceImportJSONOverwrite() {
                     if (typeof window.customTemplates !== 'undefined') {
                         window.customTemplates.length = 0;
                         window.customTemplates.push(...templates);
-                        localStorage.setItem('gtd_custom_templates', JSON.stringify(window.customTemplates));
+                        localStorage.setItem('gtdTemplates', JSON.stringify(window.customTemplates));
                         console.log(`✅ OVERWRITE: Replaced with ${templates.length} templates`);
                     }
                 }
@@ -4034,8 +4034,8 @@ async function deleteTemplate(template) {
     
     window.customTemplates = window.customTemplates.filter(t => t !== template);
     
-    // Save templates
-    localStorage.setItem('gtd_custom_templates', JSON.stringify(window.customTemplates));
+    // Save templates - use same key as tasks.js
+    localStorage.setItem('gtdTemplates', JSON.stringify(window.customTemplates));
     
     // Upload to server
     if (typeof uploadAllTemplates === 'function') {
