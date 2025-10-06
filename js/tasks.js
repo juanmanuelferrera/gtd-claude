@@ -1147,13 +1147,22 @@ async function saveTemplates() {
 }
 
 function renderTemplateButtons() {
-    const container = document.getElementById('templateButtons');
-    if (!container) return;
+    console.log('🔧 renderTemplateButtons called - DEBUGGING');
+    console.log('📋 customTemplates array:', customTemplates);
+    console.log('📋 customTemplates length:', customTemplates.length);
     
+    const container = document.getElementById('templateButtons');
+    if (!container) {
+        console.log('❌ templateButtons container not found');
+        return;
+    }
+    
+    console.log('✅ templateButtons container found:', container);
     container.innerHTML = '';
     
     console.log('🎨 Rendering templates:', customTemplates);
-    customTemplates.forEach(template => {
+    customTemplates.forEach((template, index) => {
+        console.log(`🔄 Processing template ${index + 1}/${customTemplates.length}: "${template}"`);
         console.log('🎨 Rendering template button:', template, 'includes @:', template.includes('@'));
         const button = document.createElement('button');
         button.type = 'button';
@@ -1214,8 +1223,12 @@ function renderTemplateButtons() {
             }
         });
         
+        console.log(`➕ Adding button for template "${template}" to container`);
         container.appendChild(button);
+        console.log(`✅ Button added. Container now has ${container.children.length} buttons`);
     });
+    
+    console.log(`🏁 Template buttons rendered. Container has ${container.children.length} buttons before adding "Add" button`);
     
     // Add new template button
     const addButton = document.createElement('button');
@@ -1225,7 +1238,10 @@ function renderTemplateButtons() {
     addButton.title = 'Add new template';
     addButton.addEventListener('click', createNewTemplate);
     
+    console.log('➕ Adding "Add" button to container');
     container.appendChild(addButton);
+    console.log(`🏁 renderTemplateButtons completed. Final button count: ${container.children.length}`);
+    console.log('🔍 Final container children:', Array.from(container.children).map(btn => btn.textContent));
 }
 
 function insertTemplateToTask(template) {
