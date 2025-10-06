@@ -1119,10 +1119,11 @@ function openAddTaskModal(dateStr) {
  */
 function loadTemplates() {
     const saved = localStorage.getItem('gtdTemplates');
-    if (saved) {
+    if (saved !== null) {
+        // Templates have been saved before (could be empty array if user deleted all)
         customTemplates = JSON.parse(saved);
     } else {
-        // Default templates
+        // First time - no templates saved yet, use defaults
         customTemplates = ['@casa', '@recados', '@vedicvault', '@facebook', '@theonething'];
     }
     renderTemplateButtons();
