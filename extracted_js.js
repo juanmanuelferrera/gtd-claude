@@ -2531,7 +2531,9 @@
                             <form onsubmit="handleInlineLogin(event)" style="text-align: left;">
                                 <div style="margin-bottom: 20px;">
                                     <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 600;">Email</label>
-                                    <input type="email" id="email" required style="
+                                    <input type="email" id="email" required 
+                                        autocomplete="username email" 
+                                        style="
                                         width: 100%;
                                         padding: 12px;
                                         border: 2px solid #ddd;
@@ -2543,7 +2545,9 @@
                                 
                                 <div style="margin-bottom: 30px;">
                                     <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 600;">Password</label>
-                                    <input type="password" id="password" required style="
+                                    <input type="password" id="password" required 
+                                        autocomplete="current-password" 
+                                        style="
                                         width: 100%;
                                         padding: 12px;
                                         border: 2px solid #ddd;
