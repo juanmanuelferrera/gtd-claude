@@ -26088,5 +26088,4 @@
                 }
             }, 10000); // Wait 10 seconds to ensure everything is loaded
         });
-    
     }
