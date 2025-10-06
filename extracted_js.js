@@ -2183,7 +2183,7 @@
         // Authentication check state management
         let lastAuthCheck = 0;
         let lastAuthenticationState = false;
-        const AUTH_CHECK_COOLDOWN = 2000; // 2 seconds cooldown
+        const AUTH_CHECK_COOLDOWN = 60000; // 60 seconds cooldown (reduced from 2 seconds to prevent frequent auth checks)
         
         // Check authentication and subscription status
         async function checkAuthAndSubscription() {
@@ -2233,19 +2233,28 @@
                             } else {
                                 clearAuthData();
                                 lastAuthenticationState = false;
-                                showAccessDenied('login');
+                                // Only show login prompt once, not on every check
+                                if (!window.accessDeniedShown) {
+                                    showAccessDenied('login');
+                                }
                                 return false;
                             }
                         } catch (error) {
                             console.error('❌ Mobile Safari auth validation failed:', error);
                             clearAuthData();
                             lastAuthenticationState = false;
-                            showAccessDenied('login');  
+                            // Only show login prompt once, not on every check
+                            if (!window.accessDeniedShown) {
+                                showAccessDenied('login');
+                            }
                             return false;
                         }
                     } else {
                         lastAuthenticationState = false;
-                        showAccessDenied('login');
+                        // Only show login prompt once, not on every check
+                        if (!window.accessDeniedShown) {
+                            showAccessDenied('login');
+                        }
                         return false;
                     }
                 }
@@ -2305,7 +2314,10 @@
                     
                     // If no valid session, clear auth data and show login form
                     clearAuthData();
-                    showAccessDenied('login');
+                    // Only show login prompt once, not on every check
+                    if (!window.accessDeniedShown) {
+                        showAccessDenied('login');
+                    }
                     return false;
                 }
                 const userInfo = await response.json();
@@ -2429,7 +2441,10 @@
             } catch (error) {
                 console.error('Auth check failed:', error);
                 lastAuthenticationState = false;
-                showAccessDenied('error');
+                // Only show error prompt once, not on every check
+                if (!window.accessDeniedShown) {
+                    showAccessDenied('error');
+                }
                 return false;
             }
         }
