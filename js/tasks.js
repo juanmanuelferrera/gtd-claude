@@ -1335,6 +1335,11 @@ async function addNewTemplate() {
     
     console.log('➕ Adding template to array');
     customTemplates.push(template);
+    // SYNC FIX: Also update window.customTemplates for renderTemplateButtons
+    if (typeof window.customTemplates !== 'undefined') {
+        window.customTemplates.push(template);
+        console.log('🔄 Synced to window.customTemplates:', window.customTemplates.length);
+    }
     console.log('📋 Updated templates:', customTemplates);
     
     console.log('💾 Saving templates...');
