@@ -22392,6 +22392,13 @@
             input.value = '';
             input.focus();
         }
+        
+        // Expose desktop template functions globally for onclick handlers
+        window.addNewTemplate = addNewTemplate;
+        window.resetTaskTitle = resetTaskTitle;
+        window.insertTemplateToTask = insertTemplateToTask;
+        window.deleteTemplate = deleteTemplate;
+        
         // Delete template
         async function deleteTemplate(template) {
             if (confirm(`Delete template "${template}"?`)) {
