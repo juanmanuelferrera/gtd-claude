@@ -4037,10 +4037,19 @@ async function deleteTemplate(template) {
     // Save templates - use same key as tasks.js
     localStorage.setItem('gtdTemplates', JSON.stringify(window.customTemplates));
     
+    // Set flag to prevent downloads from overwriting changes
+    window.justModifiedTemplates = true;
+    
     // Upload to server
     if (typeof uploadAllTemplates === 'function') {
         await uploadAllTemplates();
     }
+    
+    // Clear flag after successful upload
+    setTimeout(() => {
+        window.justModifiedTemplates = false;
+        console.log('🔓 Cleared justModifiedTemplates flag');
+    }, 10000); // 10-second protection
     
     // Re-render template buttons
     renderTemplateButtons();
