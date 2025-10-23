@@ -26074,7 +26074,7 @@
             }
         }
         
-        // Start the reminder system 
+        // Start the reminder system
         document.addEventListener('DOMContentLoaded', () => {
             // Wait for page to be fully loaded and interactive
             setTimeout(() => {
