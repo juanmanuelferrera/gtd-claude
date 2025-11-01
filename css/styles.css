@@ -84,34 +84,46 @@
             --space-24: 96px;
 
             /* === Typography === */
+            /* Following UI Designer specifications for rapid implementation */
 
             /* Font Families */
             --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
             --font-mono: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', 'Courier New', monospace;
 
             /* Font Sizes */
-            --font-size-xs: 12px;
-            --font-size-sm: 14px;
-            --font-size-base: 16px;
-            --font-size-lg: 18px;
-            --font-size-xl: 20px;
-            --font-size-2xl: 24px;
-            --font-size-3xl: 30px;
-            --font-size-4xl: 36px;
-            --font-size-5xl: 48px;
+            --font-size-xs: 12px;      /* Tiny: Captions */
+            --font-size-sm: 14px;      /* Small: Secondary text */
+            --font-size-base: 16px;    /* Body: Default text */
+            --font-size-lg: 18px;      /* Enhanced body */
+            --font-size-xl: 20px;      /* H3: Card titles */
+            --font-size-2xl: 24px;     /* H2: Section headers */
+            --font-size-3xl: 30px;     /* H1: Page titles */
+            --font-size-4xl: 36px;     /* Display: Hero headlines */
+            --font-size-5xl: 48px;     /* Extra large display */
 
-            /* Font Weights */
-            --font-weight-normal: 400;
-            --font-weight-medium: 500;
-            --font-weight-semibold: 600;
-            --font-weight-bold: 700;
+            /* Line Heights (matched to UI Designer spec) */
+            --line-height-tiny: 16px;      /* 12px/16px - Captions */
+            --line-height-small: 20px;     /* 14px/20px - Secondary */
+            --line-height-body: 24px;      /* 16px/24px - Body */
+            --line-height-h3: 28px;        /* 20px/28px - Card titles */
+            --line-height-h2: 32px;        /* 24px/32px - Section headers */
+            --line-height-h1: 36px;        /* 30px/36px - Page titles */
+            --line-height-display: 40px;   /* 36px/40px - Hero headlines */
 
-            /* Line Heights */
+            /* Legacy line heights (keep for compatibility) */
             --line-height-tight: 1.25;
             --line-height-snug: 1.375;
             --line-height-normal: 1.5;
             --line-height-relaxed: 1.625;
             --line-height-loose: 2;
+
+            /* Font Weights */
+            --font-weight-light: 300;      /* Light weight for mixing */
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            --font-weight-black: 900;      /* Extra bold for hero text */
 
             /* Letter Spacing */
             --letter-spacing-tight: -0.01em;
@@ -129,12 +141,24 @@
             --radius-full: 9999px;
 
             /* === Shadows === */
+            /* Following UI Designer specifications for floating elements */
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+
+            /* Floating element shadows (more pronounced for modern UI) */
+            --shadow-float: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+            --shadow-float-lg: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
+            --shadow-float-xl: 0 12px 32px rgba(0, 0, 0, 0.15), 0 6px 12px rgba(0, 0, 0, 0.08);
+
+            /* Colored shadows for accent elements */
+            --shadow-primary: 0 4px 12px rgba(59, 130, 246, 0.3);
+            --shadow-success: 0 4px 12px rgba(16, 185, 129, 0.3);
+            --shadow-warning: 0 4px 12px rgba(245, 158, 11, 0.3);
+            --shadow-error: 0 4px 12px rgba(239, 68, 68, 0.3);
 
             /* === Transitions === */
             --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -180,6 +204,35 @@
 
             /* Glass highlight (inner glow effect) */
             --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+
+            /* === Modern Gradient System === */
+            /* Subtle gradients for backgrounds and hero sections */
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --gradient-error: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --gradient-ocean: linear-gradient(135deg, #667eea 0%, #3b82f6 100%);
+            --gradient-sunset: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            --gradient-forest: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-twilight: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+
+            /* Mesh backgrounds (trendy multi-color gradients) */
+            --gradient-mesh: radial-gradient(at 40% 20%, hsla(28,100%,74%,0.3) 0px, transparent 50%),
+                            radial-gradient(at 80% 0%, hsla(189,100%,56%,0.3) 0px, transparent 50%),
+                            radial-gradient(at 0% 50%, hsla(355,100%,93%,0.3) 0px, transparent 50%);
+
+            /* Gradient overlays (for hero sections and cards) */
+            --gradient-overlay-dark: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
+            --gradient-overlay-light: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 100%);
+
+            /* === Micro-Interaction Helpers === */
+            /* Scale transforms for buttons and interactive elements */
+            --scale-press: scale(0.95);
+            --scale-hover: scale(1.02);
+            --scale-active: scale(0.98);
+
+            /* Bounce animation for delightful interactions */
+            --bounce-timing: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
             /* === Z-Index Scale === */
             --z-index-dropdown: 1000;
@@ -799,6 +852,250 @@
             box-shadow: var(--glass-shadow-lg), var(--glass-highlight);
             transform: translateY(-2px);
             transition: all var(--transition-base);
+        }
+
+        /* ========== TYPOGRAPHY UTILITY CLASSES ========== */
+        /* Following UI Designer specifications for rapid implementation */
+
+        .text-display {
+            font-size: var(--font-size-4xl);
+            line-height: var(--line-height-display);
+            font-weight: var(--font-weight-bold);
+            letter-spacing: var(--letter-spacing-tight);
+        }
+
+        .text-h1 {
+            font-size: var(--font-size-3xl);
+            line-height: var(--line-height-h1);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .text-h2 {
+            font-size: var(--font-size-2xl);
+            line-height: var(--line-height-h2);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .text-h3 {
+            font-size: var(--font-size-xl);
+            line-height: var(--line-height-h3);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .text-body {
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-body);
+            font-weight: var(--font-weight-normal);
+        }
+
+        .text-small {
+            font-size: var(--font-size-sm);
+            line-height: var(--line-height-small);
+            font-weight: var(--font-weight-normal);
+        }
+
+        .text-tiny {
+            font-size: var(--font-size-xs);
+            line-height: var(--line-height-tiny);
+            font-weight: var(--font-weight-normal);
+        }
+
+        /* ========== FLOATING ELEMENT UTILITIES ========== */
+
+        .floating {
+            box-shadow: var(--shadow-float);
+            transition: all var(--transition-base);
+        }
+
+        .floating:hover {
+            box-shadow: var(--shadow-float-lg);
+            transform: translateY(-2px);
+        }
+
+        .floating-lg {
+            box-shadow: var(--shadow-float-lg);
+        }
+
+        .floating-xl {
+            box-shadow: var(--shadow-float-xl);
+        }
+
+        /* ========== COMPONENT STATE UTILITIES ========== */
+
+        /* Interactive button states */
+        .btn-interactive {
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .btn-interactive:hover {
+            transform: var(--scale-hover);
+            box-shadow: var(--shadow-float);
+        }
+
+        .btn-interactive:active {
+            transform: var(--scale-press);
+        }
+
+        .btn-interactive:focus {
+            outline: 2px solid var(--color-primary-500);
+            outline-offset: 2px;
+        }
+
+        .btn-interactive:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Loading state */
+        .is-loading {
+            position: relative;
+            color: transparent !important;
+            pointer-events: none;
+        }
+
+        .is-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            margin: -8px 0 0 -8px;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner 0.6s linear infinite;
+        }
+
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error state */
+        .has-error {
+            border-color: var(--color-error) !important;
+            box-shadow: 0 0 0 3px var(--color-error-light);
+        }
+
+        /* Success state */
+        .has-success {
+            border-color: var(--color-success) !important;
+            box-shadow: 0 0 0 3px var(--color-success-light);
+        }
+
+        /* ========== SKELETON LOADING STATES ========== */
+
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                var(--color-gray-200) 0%,
+                var(--color-gray-100) 50%,
+                var(--color-gray-200) 100%
+            );
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s ease-in-out infinite;
+            border-radius: var(--radius-md);
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-text {
+            height: var(--line-height-body);
+            margin: var(--space-2) 0;
+        }
+
+        .skeleton-title {
+            height: var(--line-height-h2);
+            margin: var(--space-3) 0;
+            width: 60%;
+        }
+
+        .skeleton-card {
+            height: 120px;
+            margin: var(--space-4) 0;
+        }
+
+        /* ========== MICRO-ANIMATIONS ========== */
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Animation utility classes */
+        .animate-fadeIn { animation: fadeIn var(--transition-base) ease-out; }
+        .animate-fadeInUp { animation: fadeInUp var(--transition-slow) ease-out; }
+        .animate-fadeInDown { animation: fadeInDown var(--transition-slow) ease-out; }
+        .animate-scaleIn { animation: scaleIn var(--transition-base) var(--bounce-timing); }
+        .animate-bounce { animation: bounce 1s ease-in-out infinite; }
+        .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+
+        /* ========== GRADIENT UTILITIES ========== */
+
+        .gradient-primary { background: var(--gradient-primary); }
+        .gradient-success { background: var(--gradient-success); }
+        .gradient-warning { background: var(--gradient-warning); }
+        .gradient-error { background: var(--gradient-error); }
+        .gradient-ocean { background: var(--gradient-ocean); }
+        .gradient-sunset { background: var(--gradient-sunset); }
+        .gradient-forest { background: var(--gradient-forest); }
+        .gradient-twilight { background: var(--gradient-twilight); }
+        .gradient-mesh { background: var(--gradient-mesh); }
+
+        /* Gradient text effect */
+        .text-gradient {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         /* ========== THINGS APP DESIGN SYSTEM ========== */
@@ -1510,16 +1807,25 @@
             color: var(--color-text-tertiary);
             font-size: var(--font-size-xs);
             border-radius: var(--radius-md);
+            /* UI Designer interactive states */
+            transition: all var(--transition-fast);
+            cursor: pointer;
         }
 
         .mobile-nav-btn:hover {
             background: var(--color-gray-100);
             color: var(--color-text-primary);
+            transform: var(--scale-hover);
+        }
+
+        .mobile-nav-btn:active {
+            transform: var(--scale-press);
         }
 
         .mobile-nav-btn.active {
             color: var(--color-primary-600);
             background: var(--color-primary-50);
+            box-shadow: var(--shadow-primary);
         }
 
         .settings-tab-btn {
@@ -2423,17 +2729,21 @@
         }
 
         .no-tasks-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #333;
-            margin: 0 0 12px 0;
+            /* Using UI Designer typography system */
+            font-size: var(--font-size-2xl);
+            line-height: var(--line-height-h2);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text-primary);
+            margin: 0 0 var(--space-3) 0;
+            letter-spacing: var(--letter-spacing-tight);
         }
 
         .no-tasks-message {
-            font-size: 16px;
-            color: #666;
-            margin: 0 0 30px 0;
-            line-height: 1.6;
+            /* Using UI Designer typography system */
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-body);
+            color: var(--color-text-secondary);
+            margin: 0 0 var(--space-8) 0;
         }
 
         .no-tasks-cta {
@@ -5092,12 +5402,14 @@
             }
             
             .mobile-header-title {
-                font-size: 16px;
-                font-weight: 600;
+                /* UI Designer typography system */
+                font-size: var(--font-size-base);
+                line-height: var(--line-height-body);
+                font-weight: var(--font-weight-semibold);
                 flex: 1;
                 text-align: center;
-                line-height: 1.1;
-                color: #007aff;
+                color: var(--color-primary-600);
+                transition: color var(--transition-fast);
             }
             
             .mobile-header-btn {
@@ -5158,17 +5470,23 @@
                 font-size: 11px;
                 font-weight: 600;
                 cursor: pointer;
-                transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring */
-                border-radius: 8px;
+                /* UI Designer transitions for smooth interactions */
+                transition: all var(--transition-base);
+                border-radius: var(--radius-lg);
                 flex: 1;
                 max-width: 80px;
-                box-shadow: 0 1px 3px var(--things-shadow);
+                box-shadow: var(--shadow-sm);
             }
-            
+
+            .mobile-nav-btn:active {
+                transform: var(--scale-press);
+            }
+
             .mobile-nav-btn.active {
                 color: var(--things-accent);
                 background: rgba(46, 91, 255, 0.1); /* Things blue tint */
-                box-shadow: 0 2px 8px rgba(46, 91, 255, 0.2);
+                box-shadow: var(--shadow-primary);
+                transform: var(--scale-hover);
             }
             
             .mobile-nav-btn:hover {
@@ -5305,9 +5623,17 @@
             left: 0;
             right: 0;
             height: 64px;
-            z-index: 9999;
+            z-index: var(--z-index-sticky);
             display: none; /* Hidden by default, shown on mobile */
             overflow: hidden;
+            /* UI Designer floating shadow for modern feel */
+            box-shadow: var(--shadow-float);
+            transition: box-shadow var(--transition-base);
+        }
+
+        /* Enhanced floating effect on scroll */
+        .modern-app-header.scrolled {
+            box-shadow: var(--shadow-float-lg);
         }
         
         /* Gradient Background */
@@ -5344,27 +5670,29 @@
             width: 100%;
             height: 36px;
             background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px) saturate(180%);
-            -webkit-backdrop-filter: blur(10px) saturate(180%);
+            backdrop-filter: var(--glass-blur-md) saturate(180%);
+            -webkit-backdrop-filter: var(--glass-blur-md) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            padding: 0 16px;
-            font-size: 14px;
+            border-radius: var(--radius-full);
+            padding: 0 var(--space-4);
+            font-size: var(--font-size-sm);
+            line-height: var(--line-height-small);
             color: white;
             outline: none;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            transition: all var(--transition-base);
+            font-family: var(--font-sans);
         }
-        
-        .header-search-input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: 400;
-        }
-        
+
         .header-search-input:focus {
             background: rgba(255, 255, 255, 0.25);
             border-color: rgba(255, 255, 255, 0.5);
+            transform: var(--scale-hover);
             box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+        }
+
+        .header-search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: var(--font-weight-normal);
         }
         
         /* Title Wrapper */
@@ -5375,16 +5703,17 @@
             text-align: center;
         }
         
-        /* Dynamic Title */
+        /* Dynamic Title - UI Designer system with floating text effect */
         .header-title {
-            font-size: 18px;
-            font-weight: 600;
+            font-size: var(--font-size-lg);
+            line-height: var(--line-height-h3);
+            font-weight: var(--font-weight-semibold);
             color: white;
             margin: 0;
-            letter-spacing: -0.5px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            transition: opacity 0.3s ease;
+            letter-spacing: var(--letter-spacing-tight);
+            font-family: var(--font-sans);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            transition: all var(--transition-base);
         }
         
         /* Add Button */
