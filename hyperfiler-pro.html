@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    console.log('🚀 HYPERFILER v4.3.12 - SPACING FIX [' + new Date().toISOString() + ']');
+    console.log('🚀 HYPERFILER v4.3.13 - RESTORE VISIBILITY + SPACING [' + new Date().toISOString() + ']');
     console.log('🖥️ Viewport Width: ' + window.innerWidth + 'px | Height: ' + window.innerHeight + 'px');
     console.log('📱 Device Type: ' + (window.innerWidth > 768 ? 'DESKTOP' : 'MOBILE') + ' (breakpoint: 769px)');
     
@@ -32,7 +32,7 @@
     // Diagnostic: Check branding visibility after DOM loads
     window.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
-            const branding = document.getElementById('hyperfiler-branding-v4312');
+            const branding = document.getElementById('hyperfiler-branding-v4313');
             if (branding) {
                 const styles = window.getComputedStyle(branding);
                 console.log('✅ Branding element found:', branding);
@@ -215,18 +215,18 @@
     <div class="desktop-layout">
         <!-- Sidebar Navigation -->
         <div class="desktop-sidebar desktop-only">
-            <!-- Sidebar Branded Header v4.3.12 FIX SPACING -->
-            <div id="hyperfiler-branding-v4312" data-version="4.3.12" style="
+            <!-- Sidebar Branded Header v4.3.13 RESTORE VISIBILITY -->
+            <div id="hyperfiler-branding-v4313" data-version="4.3.13" style="
                 padding: 16px 10px;
                 border-bottom: 1px solid rgba(0, 122, 255, 0.2);
                 background: linear-gradient(135deg, rgba(0, 122, 255, 0.08) 0%, rgba(0, 122, 255, 0.03) 100%) !important;
                 border-radius: 8px;
-                margin: 0 8px 24px 8px;
+                margin: 8px 8px 20px 8px;
                 display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
                 position: relative !important;
-                z-index: 1 !important;
+                z-index: 9999 !important;
                 min-height: 88px !important;
                 box-shadow: 0 2px 8px rgba(0, 122, 255, 0.1);
             ">
@@ -249,7 +249,7 @@
                     letter-spacing: 0.5px;
                     text-align: center;
                 ">
-                    v4.3.12
+                    v4.3.13
                 </div>
                 <div id="sidebarUserInfo" style="
                     font-size: 13px;

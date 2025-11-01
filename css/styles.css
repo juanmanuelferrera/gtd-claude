@@ -4748,12 +4748,24 @@
             #hyperfiler-branding-v439,
             #hyperfiler-branding-v4310,
             #hyperfiler-branding-v4311,
-            #hyperfiler-branding-v4312 {
+            #hyperfiler-branding-v4312,
+            #hyperfiler-branding-v4313 {
                 display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
                 position: relative !important;
-                z-index: 1 !important;
+                z-index: 9999 !important;
+            }
+
+            /* Fix main-nav positioning to prevent overlap with branding */
+            .desktop-sidebar .main-nav {
+                position: relative !important;
+                top: auto !important;
+                left: auto !important;
+                width: 100% !important;
+                height: auto !important;
+                margin-top: 0 !important;
+                padding-top: 0 !important;
             }
 
             /* Ensure desktop navigation takes full width */
