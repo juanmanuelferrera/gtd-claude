@@ -69,30 +69,74 @@ function updateNetworkStatusIndicator(networkStatus) {
     if (!statusIndicator) {
         createNetworkStatusIndicator();
     }
-    
+
     const indicator = window.networkStatus ? window.networkStatus.getIndicator() : {
         icon: '❓',
         text: 'Unknown',
         color: '#6b7280',
         status: 'unknown'
     };
-    
+
     statusIndicator.innerHTML = `
         <span style="font-size: 16px;">${indicator.icon}</span>
     `;
-    
+
     statusIndicator.style.backgroundColor = `transparent`;
     statusIndicator.style.color = indicator.color;
     statusIndicator.style.borderColor = `transparent`;
     statusIndicator.style.padding = '4px';
-    
+
     // Add tooltip based on status
-    const statusText = indicator.status === 'offline' ? 'Offline' : 
+    const statusText = indicator.status === 'offline' ? 'Offline' :
                       indicator.status === 'online' ? 'Online - Excellent' :
                       indicator.status === 'online-good' ? 'Online - Good' :
-                      indicator.status === 'online-poor' ? 'Online - Poor' : 
+                      indicator.status === 'online-poor' ? 'Online - Poor' :
                       'Checking...';
     statusIndicator.title = `Network: ${statusText} (click to refresh)`;
+
+    // Show enhanced badge when offline
+    showEnhancedNetworkBadge(indicator.status);
+}
+
+/**
+ * Show enhanced network status badge (appears when offline)
+ */
+function showEnhancedNetworkBadge(status) {
+    // Remove existing badge
+    const existingBadge = document.getElementById('enhanced-network-badge');
+    if (existingBadge) {
+        existingBadge.remove();
+    }
+
+    // Only show enhanced badge when offline or poor connection
+    if (status !== 'offline' && status !== 'online-poor') {
+        return;
+    }
+
+    const badge = document.createElement('div');
+    badge.id = 'enhanced-network-badge';
+    badge.className = `network-status ${status === 'offline' ? 'offline' : 'online'}`;
+
+    const dotClass = status === 'offline' ? 'network-status-dot' : 'network-status-dot';
+    const text = status === 'offline' ? 'Offline Mode' : 'Poor Connection';
+
+    badge.innerHTML = `
+        <div class="${dotClass}"></div>
+        <span>${text}</span>
+    `;
+
+    document.body.appendChild(badge);
+    badge.style.display = 'flex';
+
+    // Auto-hide after 5 seconds if connection improves
+    if (status === 'online-poor') {
+        setTimeout(() => {
+            if (badge && badge.parentNode) {
+                badge.style.opacity = '0';
+                setTimeout(() => badge.remove(), 300);
+            }
+        }, 5000);
+    }
 }
 
 /**

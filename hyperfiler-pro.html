@@ -2101,6 +2101,78 @@
             font-weight: 500;
         }
 
+        /* Network Status Indicator */
+        .network-status {
+            position: fixed;
+            bottom: 80px;
+            right: 16px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 999;
+            transition: all 0.3s ease;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .network-status.online {
+            color: #28a745;
+            border: 2px solid #28a745;
+        }
+
+        .network-status.offline {
+            color: #dc3545;
+            border: 2px solid #dc3545;
+        }
+
+        .network-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .network-status.online .network-status-dot {
+            background: #28a745;
+        }
+
+        .network-status.offline .network-status-dot {
+            background: #dc3545;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Desktop positioning */
+        @media (min-width: 769px) {
+            .network-status {
+                bottom: 16px;
+                right: 16px;
+            }
+        }
+
         /* Today View Time Blocks */
         .time-block {
             background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
