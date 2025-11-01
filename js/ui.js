@@ -304,11 +304,29 @@ function showLoadingState() {
     const content = document.getElementById(currentViewId) || document.getElementById('today-view');
 
     if (content) {
-        // Use skeleton loaders instead of static loading message
-        content.innerHTML = generateSkeletonLoader(5);
+        // Show spinner with skeleton loaders for comprehensive loading feedback
+        content.innerHTML = `
+            <div class="spinner-container">
+                <div class="spinner"></div>
+                <div class="spinner-text">Loading tasks...</div>
+            </div>
+        `;
     } else {
         console.warn('Could not find content element for loading state');
     }
+}
+
+/**
+ * Create inline spinner HTML
+ */
+function createSpinner(size = 'default', text = '') {
+    const sizeClass = size === 'small' ? 'spinner-small' : size === 'large' ? 'spinner-large' : '';
+    return `
+        <div class="spinner-container">
+            <div class="spinner ${sizeClass}"></div>
+            ${text ? `<div class="spinner-text">${text}</div>` : ''}
+        </div>
+    `;
 }
 
 /**

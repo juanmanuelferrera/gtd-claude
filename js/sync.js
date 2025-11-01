@@ -867,29 +867,43 @@ function showSyncStatus(message, type) {
             position: fixed;
             top: 10px;
             right: 10px;
-            padding: 5px 10px;
-            border-radius: 4px;
+            padding: 8px 12px;
+            border-radius: 6px;
             font-size: 12px;
             z-index: 10000;
             color: white;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-weight: 500;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         `;
         document.body.appendChild(syncIndicator);
     }
-    
-    syncIndicator.textContent = message;
-    syncIndicator.style.backgroundColor = type === 'success' ? '#4CAF50' : 
+
+    // Add spinner for 'info' type (syncing)
+    if (type === 'info') {
+        syncIndicator.innerHTML = `
+            <div class="spinner spinner-small" style="border-color: rgba(255,255,255,0.3); border-top-color: white;"></div>
+            <span>${message}</span>
+        `;
+    } else {
+        syncIndicator.innerHTML = `<span>${message}</span>`;
+    }
+
+    syncIndicator.style.backgroundColor = type === 'success' ? '#4CAF50' :
                                          type === 'error' ? '#f44336' : '#2196F3';
-    syncIndicator.style.display = 'block';
-    
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-        if (syncIndicator) {
-            syncIndicator.style.display = 'none';
-        }
-    }, 3000);
+    syncIndicator.style.display = 'flex';
+
+    // Auto-hide after 3 seconds (except for info which stays until replaced)
+    if (type !== 'info') {
+        setTimeout(() => {
+            if (syncIndicator) {
+                syncIndicator.style.display = 'none';
+            }
+        }, 3000);
+    }
 }
 
 /**
