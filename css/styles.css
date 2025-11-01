@@ -1617,6 +1617,7 @@
             padding: 5px 8px;
             margin: 3px 0;
             font-size: 11px;
+            color: #1565c0; /* Ensure dark blue text */
             cursor: grab;
             max-width: 100%;
             overflow: hidden;
@@ -2148,6 +2149,7 @@
             -webkit-backdrop-filter: var(--glass-blur-sm);
             border: var(--glass-border-light);
             border-left: 4px solid var(--things-border); /* Restore colored left border */
+            color: #2c3e50; /* Ensure dark text for readability */
 
             transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring easing */
             cursor: pointer;
@@ -4166,6 +4168,7 @@
             padding: 16px 24px;
             display: flex;
             align-items: center;
+            color: #2c3e50; /* Ensure dark text */
             transition: all 0.2s ease;
             cursor: move;
             position: relative;
