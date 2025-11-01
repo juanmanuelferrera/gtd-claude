@@ -492,6 +492,28 @@
             color: #fecaca !important;
         }
 
+        /* Time block headers in dark mode */
+        .dark-mode .time-block-header {
+            background: #334155 !important;
+            color: #f1f5f9 !important;
+            border-color: #475569 !important;
+        }
+
+        .dark-mode .time-block {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+
+        .dark-mode .time-block-content.empty {
+            background: #1e293b !important;
+            color: #94a3b8 !important;
+        }
+
+        .dark-mode .time-block-content.empty:hover {
+            background: #334155 !important;
+            color: #60a5fa !important;
+        }
+
         /* Dark mode toggle button styling - with glass morphism */
         .dark-mode-toggle {
             position: fixed;
