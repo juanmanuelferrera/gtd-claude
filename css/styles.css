@@ -985,6 +985,148 @@
             box-shadow: 0 0 0 3px var(--color-success-light);
         }
 
+        /* ========== ENHANCED FORM INPUT STATES ========== */
+
+        /* Base input styling improvements */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"],
+        input[type="time"],
+        input[type="number"],
+        textarea,
+        select {
+            transition: all var(--transition-base);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-2) var(--space-3);
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-body);
+            background: var(--color-white);
+            color: var(--color-text-primary);
+        }
+
+        /* Focus state with animated ring */
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="date"]:focus,
+        input[type="time"]:focus,
+        input[type="number"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--color-primary-500);
+            box-shadow: 0 0 0 3px var(--color-primary-100);
+            transform: translateY(-1px);
+        }
+
+        /* Hover state */
+        input[type="text"]:hover:not(:focus):not(:disabled),
+        input[type="email"]:hover:not(:focus):not(:disabled),
+        input[type="password"]:hover:not(:focus):not(:disabled),
+        input[type="date"]:hover:not(:focus):not(:disabled),
+        input[type="time"]:hover:not(:focus):not(:disabled),
+        input[type="number"]:hover:not(:focus):not(:disabled),
+        textarea:hover:not(:focus):not(:disabled),
+        select:hover:not(:focus):not(:disabled) {
+            border-color: var(--color-gray-400);
+        }
+
+        /* Error state for inputs */
+        input.has-error,
+        textarea.has-error,
+        select.has-error {
+            border-color: var(--color-error) !important;
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        input.has-error:focus,
+        textarea.has-error:focus,
+        select.has-error:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+            animation: shake 0.3s ease-in-out;
+        }
+
+        /* Success state for inputs */
+        input.has-success,
+        textarea.has-success,
+        select.has-success {
+            border-color: var(--color-success) !important;
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        input.has-success:focus,
+        textarea.has-success:focus,
+        select.has-success:focus {
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Disabled state */
+        input:disabled,
+        textarea:disabled,
+        select:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: var(--color-gray-100);
+        }
+
+        /* Validation message styles */
+        .input-error-message {
+            display: block;
+            color: var(--color-error);
+            font-size: var(--font-size-sm);
+            margin-top: var(--space-1);
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .input-success-message {
+            display: block;
+            color: var(--color-success);
+            font-size: var(--font-size-sm);
+            margin-top: var(--space-1);
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        /* Input with icon container */
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon input {
+            padding-left: var(--space-10);
+        }
+
+        .input-with-icon .input-icon {
+            position: absolute;
+            left: var(--space-3);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-gray-500);
+            pointer-events: none;
+        }
+
+        .input-with-icon input:focus + .input-icon {
+            color: var(--color-primary-500);
+        }
+
+        /* Shake animation for errors */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
+        /* Search input enhancements */
+        input[type="text"][placeholder*="🔍"],
+        input[type="text"][placeholder*="Search"] {
+            padding-left: var(--space-10);
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: var(--space-3) center;
+            background-size: 16px;
+        }
+
         /* ========== SKELETON LOADING STATES ========== */
 
         .skeleton {
