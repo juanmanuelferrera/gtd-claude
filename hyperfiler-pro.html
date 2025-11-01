@@ -3913,24 +3913,24 @@
 
     <!-- Collapsible Mobile Navigation -->
     <div class="mobile-only mobile-bottom-nav" id="mobileBottomNav">
-        <button class="mobile-nav-btn active" onclick="provideFeedback(this); switchToMobileView('today')" id="mobileNavToday">
-            <div class="mobile-nav-icon">🔥</div>
+        <button class="mobile-nav-btn active" onclick="provideFeedback(this); switchToMobileView('today')" id="mobileNavToday" aria-label="Today view">
+            <div class="mobile-nav-icon" aria-hidden="true">🔥</div>
             <div data-translate="Today">Today</div>
         </button>
-        <button class="mobile-nav-btn" id="mobileBottomAddBtn" onclick="provideFeedback(this); openAddTaskModalMobile()">
-            <div class="mobile-nav-icon">➕</div>
+        <button class="mobile-nav-btn" id="mobileBottomAddBtn" onclick="provideFeedback(this); openAddTaskModalMobile()" aria-label="Add new task">
+            <div class="mobile-nav-icon" aria-hidden="true">➕</div>
             <div data-translate="Add">Add</div>
         </button>
-        <button class="mobile-nav-btn" onclick="provideFeedback(this); switchToMobileView('week')" id="mobileNavWeek">
-            <div class="mobile-nav-icon">📅</div>
+        <button class="mobile-nav-btn" onclick="provideFeedback(this); switchToMobileView('week')" id="mobileNavWeek" aria-label="Week view">
+            <div class="mobile-nav-icon" aria-hidden="true">📅</div>
             <div data-translate="Week">Week</div>
         </button>
-        <button class="mobile-nav-btn" onclick="provideFeedback(this); switchToMobileView('lists')" id="mobileNavLists">
-            <div class="mobile-nav-icon">📝</div>
+        <button class="mobile-nav-btn" onclick="provideFeedback(this); switchToMobileView('lists')" id="mobileNavLists" aria-label="Lists view">
+            <div class="mobile-nav-icon" aria-hidden="true">📝</div>
             <div data-translate="Lists">Lists</div>
         </button>
-        <button class="mobile-nav-btn" onclick="provideFeedback(this); toggleMobileMoreMenu()" id="mobileNavMore">
-            <div class="mobile-nav-icon">⋯</div>
+        <button class="mobile-nav-btn" onclick="provideFeedback(this); toggleMobileMoreMenu()" id="mobileNavMore" aria-label="More options">
+            <div class="mobile-nav-icon" aria-hidden="true">⋯</div>
             <div data-translate="More">More</div>
         </button>
     </div>
@@ -4703,7 +4703,7 @@
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #1E4FE6 0%, #42a5f5 100%); color: white; padding: 20px 24px; position: relative;">
                 <h3 style="margin: 0; font-size: 18px; font-weight: 600;" id="modalTitle">✏️ Edit Task</h3>
-                <button onclick="closeTaskModal()" style="position: absolute; top: 50%; right: 20px; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s ease;">&times;</button>
+                <button onclick="closeTaskModal()" aria-label="Close task modal" style="position: absolute; top: 50%; right: 20px; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s ease;">&times;</button>
             </div>
             
             <!-- Modal Body -->
@@ -4911,7 +4911,7 @@
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
                 <h3 style="margin: 0; font-size: 18px; font-weight: 600;">⌨️ Keyboard Shortcuts</h3>
-                    <button onclick="closeShortcutsModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;">&times;</button>
+                    <button onclick="closeShortcutsModal()" aria-label="Close keyboard shortcuts" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;">&times;</button>
             </div>
             
             <!-- Modal Body -->
@@ -5053,7 +5053,7 @@
             <div style="background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
                 <h3 style="margin: 0; font-size: 18px; font-weight: 600;">📊 Statistics</h3>
                 <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Task performance overview</p>
-                <button onclick="closeStatsModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;">&times;</button>
+                <button onclick="closeStatsModal()" aria-label="Close statistics" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;">&times;</button>
             </div>
             
             <!-- Modal Body -->
@@ -5081,7 +5081,7 @@
             <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
                 <h3 style="margin: 0; font-size: 18px; font-weight: 600;">💾 Select Backup to Restore</h3>
                 <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Choose which backup you want to restore</p>
-                <button onclick="closeBackupSelection()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;">&times;</button>
+                <button onclick="closeBackupSelection()" aria-label="Close backup selection" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;">&times;</button>
             </div>
             
             <!-- Modal Body -->
@@ -5109,7 +5109,7 @@
                 <h3 style="margin: 0; font-size: 18px; font-weight: 600;">
                     📥 <span data-translate="Import Tasks">Import Tasks</span>
                 </h3>
-                <button onclick="closeTaskImportModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; line-height: 1;" title="Close">×</button>
+                <button onclick="closeTaskImportModal()" aria-label="Close import tasks" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; line-height: 1;" title="Close">×</button>
             </div>
             
             <!-- Modal Body -->
@@ -5280,7 +5280,7 @@
                         <h3 style="margin: 0; font-size: 20px; font-weight: 600;">⚙️ Settings / Ajustes</h3>
                         <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Configure your preferences</p>
                     </div>
-                    <button onclick="closeSettings()" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button>
+                    <button onclick="closeSettings()" aria-label="Close settings" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button>
                 </div>
                 
                 <!-- Tab Navigation -->
@@ -5809,7 +5809,7 @@
                 <h3 style="margin: 0; font-size: 18px; font-weight: 600;">
                     📥 <span data-translate="Quick Import">Quick Import</span>
                 </h3>
-                <button onclick="closeQuickImportModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; line-height: 1;" title="Close">×</button>
+                <button onclick="closeQuickImportModal()" aria-label="Close quick import" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; line-height: 1;" title="Close">×</button>
             </div>
             
             <!-- Modal Body -->
