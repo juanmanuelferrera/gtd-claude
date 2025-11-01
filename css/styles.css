@@ -149,6 +149,38 @@
             --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
             --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
+            /* === Glass Morphism === */
+
+            /* Glass backgrounds (translucent with alpha channel) */
+            --glass-bg-light: rgba(255, 255, 255, 0.7);
+            --glass-bg-medium: rgba(255, 255, 255, 0.5);
+            --glass-bg-dark: rgba(255, 255, 255, 0.3);
+
+            --glass-bg-primary: rgba(59, 130, 246, 0.15);
+            --glass-bg-success: rgba(16, 185, 129, 0.15);
+            --glass-bg-warning: rgba(245, 158, 11, 0.15);
+            --glass-bg-error: rgba(239, 68, 68, 0.15);
+
+            /* Blur strength */
+            --glass-blur-sm: blur(8px);
+            --glass-blur-md: blur(12px);
+            --glass-blur-lg: blur(16px);
+            --glass-blur-xl: blur(24px);
+
+            /* Glass borders (subtle gradient borders) */
+            --glass-border-light: 1px solid rgba(255, 255, 255, 0.3);
+            --glass-border-medium: 1px solid rgba(255, 255, 255, 0.2);
+            --glass-border-dark: 1px solid rgba(255, 255, 255, 0.1);
+
+            /* Glass shadows (softer, more diffused) */
+            --glass-shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.1);
+            --glass-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --glass-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.15);
+            --glass-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.18);
+
+            /* Glass highlight (inner glow effect) */
+            --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+
             /* === Z-Index Scale === */
             --z-index-dropdown: 1000;
             --z-index-sticky: 1020;
@@ -223,6 +255,27 @@
                 --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -2px rgba(0, 0, 0, 0.5);
                 --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 10px 10px -5px rgba(0, 0, 0, 0.6);
                 --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+
+                /* Glass Morphism - Dark mode variants */
+                --glass-bg-light: rgba(30, 41, 59, 0.7);
+                --glass-bg-medium: rgba(30, 41, 59, 0.5);
+                --glass-bg-dark: rgba(30, 41, 59, 0.3);
+
+                --glass-bg-primary: rgba(96, 165, 250, 0.2);
+                --glass-bg-success: rgba(34, 197, 94, 0.2);
+                --glass-bg-warning: rgba(234, 179, 8, 0.2);
+                --glass-bg-error: rgba(239, 68, 68, 0.2);
+
+                --glass-border-light: 1px solid rgba(255, 255, 255, 0.15);
+                --glass-border-medium: 1px solid rgba(255, 255, 255, 0.1);
+                --glass-border-dark: 1px solid rgba(255, 255, 255, 0.05);
+
+                --glass-shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.4);
+                --glass-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+                --glass-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+                --glass-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.7);
+
+                --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
             }
         }
 
@@ -277,31 +330,58 @@
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -2px rgba(0, 0, 0, 0.5);
             --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 10px 10px -5px rgba(0, 0, 0, 0.6);
             --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+
+            /* Glass Morphism - Dark mode variants */
+            --glass-bg-light: rgba(30, 41, 59, 0.7);
+            --glass-bg-medium: rgba(30, 41, 59, 0.5);
+            --glass-bg-dark: rgba(30, 41, 59, 0.3);
+
+            --glass-bg-primary: rgba(96, 165, 250, 0.2);
+            --glass-bg-success: rgba(34, 197, 94, 0.2);
+            --glass-bg-warning: rgba(234, 179, 8, 0.2);
+            --glass-bg-error: rgba(239, 68, 68, 0.2);
+
+            --glass-border-light: 1px solid rgba(255, 255, 255, 0.15);
+            --glass-border-medium: 1px solid rgba(255, 255, 255, 0.1);
+            --glass-border-dark: 1px solid rgba(255, 255, 255, 0.05);
+
+            --glass-shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.4);
+            --glass-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+            --glass-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+            --glass-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.7);
+
+            --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
-        /* Dark mode toggle button styling */
+        /* Dark mode toggle button styling - with glass morphism */
         .dark-mode-toggle {
             position: fixed;
             top: 12px;
             right: 120px;
             z-index: 9998;
             padding: 6px 12px;
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
+
+            /* Glass morphism effect */
+            background: var(--glass-bg-light);
+            backdrop-filter: var(--glass-blur-md);
+            -webkit-backdrop-filter: var(--glass-blur-md);
+            border: var(--glass-border-light);
+            box-shadow: var(--glass-shadow-md), var(--glass-highlight);
+
             border-radius: var(--radius-md);
             color: var(--color-text-primary);
             font-size: var(--font-size-sm);
             cursor: pointer;
             transition: all var(--transition-base);
-            box-shadow: var(--shadow-sm);
             display: flex;
             align-items: center;
             gap: var(--space-1);
         }
 
         .dark-mode-toggle:hover {
-            background: var(--color-gray-100);
-            box-shadow: var(--shadow-md);
+            background: var(--glass-bg-medium);
+            box-shadow: var(--glass-shadow-lg), var(--glass-highlight);
+            transform: translateY(-2px);
         }
 
         @media (max-width: 768px) {
@@ -380,6 +460,85 @@
             z-index: var(--z-index-modal);
 
         */
+
+        /* ========== GLASS MORPHISM EFFECTS ========== */
+
+        /* Glass morphism utility classes for modern frosted glass effects */
+
+        .glass {
+            background: var(--glass-bg-light);
+            backdrop-filter: var(--glass-blur-md);
+            -webkit-backdrop-filter: var(--glass-blur-md);
+            border: var(--glass-border-light);
+            box-shadow: var(--glass-shadow-md), var(--glass-highlight);
+        }
+
+        .glass-light {
+            background: var(--glass-bg-light);
+            backdrop-filter: var(--glass-blur-sm);
+            -webkit-backdrop-filter: var(--glass-blur-sm);
+            border: var(--glass-border-light);
+            box-shadow: var(--glass-shadow-sm), var(--glass-highlight);
+        }
+
+        .glass-medium {
+            background: var(--glass-bg-medium);
+            backdrop-filter: var(--glass-blur-md);
+            -webkit-backdrop-filter: var(--glass-blur-md);
+            border: var(--glass-border-medium);
+            box-shadow: var(--glass-shadow-md), var(--glass-highlight);
+        }
+
+        .glass-strong {
+            background: var(--glass-bg-dark);
+            backdrop-filter: var(--glass-blur-lg);
+            -webkit-backdrop-filter: var(--glass-blur-lg);
+            border: var(--glass-border-dark);
+            box-shadow: var(--glass-shadow-lg), var(--glass-highlight);
+        }
+
+        /* Glass morphism with color tints */
+
+        .glass-primary {
+            background: var(--glass-bg-primary);
+            backdrop-filter: var(--glass-blur-md);
+            -webkit-backdrop-filter: var(--glass-blur-md);
+            border: var(--glass-border-light);
+            box-shadow: var(--glass-shadow-md), var(--glass-highlight);
+        }
+
+        .glass-success {
+            background: var(--glass-bg-success);
+            backdrop-filter: var(--glass-blur-md);
+            -webkit-backdrop-filter: var(--glass-blur-md);
+            border: var(--glass-border-light);
+            box-shadow: var(--glass-shadow-md), var(--glass-highlight);
+        }
+
+        .glass-warning {
+            background: var(--glass-bg-warning);
+            backdrop-filter: var(--glass-blur-md);
+            -webkit-backdrop-filter: var(--glass-blur-md);
+            border: var(--glass-border-light);
+            box-shadow: var(--glass-shadow-md), var(--glass-highlight);
+        }
+
+        .glass-error {
+            background: var(--glass-bg-error);
+            backdrop-filter: var(--glass-blur-md);
+            -webkit-backdrop-filter: var(--glass-blur-md);
+            border: var(--glass-border-light);
+            box-shadow: var(--glass-shadow-md), var(--glass-highlight);
+        }
+
+        /* Glass morphism hover effects */
+
+        .glass-hover:hover {
+            background: var(--glass-bg-medium);
+            box-shadow: var(--glass-shadow-lg), var(--glass-highlight);
+            transform: translateY(-2px);
+            transition: all var(--transition-base);
+        }
 
         /* ========== THINGS APP DESIGN SYSTEM ========== */
         :root {
@@ -2770,10 +2929,15 @@
         }
 
         .toast {
-            background: white;
+            /* Glass morphism effect for modern floating appearance */
+            background: var(--glass-bg-light);
+            backdrop-filter: var(--glass-blur-md);
+            -webkit-backdrop-filter: var(--glass-blur-md);
+            border: var(--glass-border-light);
+            box-shadow: var(--glass-shadow-lg), var(--glass-highlight);
+
             border-radius: 12px;
             padding: 16px 20px;
-            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: flex-start;
             gap: 12px;
@@ -2783,8 +2947,6 @@
             animation: toastSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
             border-left: 4px solid;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
         @media (max-width: 768px) {
@@ -2959,13 +3121,18 @@
         }
 
         .keyboard-shortcuts-modal {
-            background: white;
+            /* Glass morphism for modal background */
+            background: var(--glass-bg-light);
+            backdrop-filter: var(--glass-blur-lg);
+            -webkit-backdrop-filter: var(--glass-blur-lg);
+            border: var(--glass-border-light);
+            box-shadow: var(--glass-shadow-xl), var(--glass-highlight);
+
             border-radius: 16px;
             max-width: 700px;
             width: 100%;
             max-height: 85vh;
             overflow-y: auto;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
             animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
@@ -3083,18 +3250,21 @@
         }
 
         .keyboard-key {
-            background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%);
-            border: 1px solid #d1d5db;
+            /* Subtle glass effect for keyboard keys */
+            background: var(--glass-bg-light);
+            backdrop-filter: var(--glass-blur-sm);
+            -webkit-backdrop-filter: var(--glass-blur-sm);
+            border: 1px solid var(--color-border);
             border-bottom-width: 3px;
             border-radius: 6px;
             padding: 6px 12px;
             font-size: 14px;
             font-weight: 600;
             font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
-            color: #1f2937;
+            color: var(--color-text-primary);
             min-width: 32px;
             text-align: center;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            box-shadow: var(--glass-shadow-sm), var(--glass-highlight);
         }
 
         .keyboard-key-combo {
@@ -3239,9 +3409,17 @@
         }
 
         .floating-add-btn {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            /* Glass morphism with success tint */
+            background: var(--glass-bg-success);
+            backdrop-filter: var(--glass-blur-md);
+            -webkit-backdrop-filter: var(--glass-blur-md);
+            border: var(--glass-border-light);
+            box-shadow: var(--glass-shadow-md), var(--glass-highlight);
+
+            /* Gradient overlay for enhanced visual depth */
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.8) 0%, rgba(32, 201, 151, 0.8) 100%);
+
             color: white;
-            border: none;
             border-radius: 50px;
             padding: 16px 32px;
             bottom: 30px; /* Default bottom position for desktop */
@@ -3251,21 +3429,20 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-            transition: all 0.3s ease;
+            transition: all var(--transition-base);
             position: relative;
             overflow: hidden;
         }
 
         .floating-add-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+            transform: translateY(-3px);
+            box-shadow: var(--glass-shadow-lg), var(--glass-highlight);
+            background: linear-gradient(135deg, rgba(33, 136, 56, 0.9) 0%, rgba(30, 126, 52, 0.9) 100%);
         }
 
         .floating-add-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 10px rgba(40, 167, 69, 0.3);
+            transform: translateY(-1px);
+            box-shadow: var(--glass-shadow-sm), var(--glass-highlight);
         }
 
         .add-icon {
@@ -3360,29 +3537,37 @@
             box-shadow: 0 3px 6px rgba(23,162,184,0.4);
         }
 
-        /* Floating Add Task Button */
+        /* Floating Add Task Button - with glass morphism */
         .floating-add-task {
             position: fixed;
             bottom: 20px;
             right: 20px;
             width: 56px; /* Apple HIG recommended size */
             height: 56px;
-            background: var(--things-accent); /* Things blue */
+
+            /* Glass morphism with primary tint */
+            background: var(--glass-bg-primary);
+            backdrop-filter: var(--glass-blur-md);
+            -webkit-backdrop-filter: var(--glass-blur-md);
+            border: var(--glass-border-light);
+            box-shadow: var(--glass-shadow-md), var(--glass-highlight);
+
+            /* Gradient overlay for Things blue aesthetic */
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.8) 0%, rgba(46, 91, 255, 0.8) 100%);
+
             border-radius: 50%;
-            box-shadow: 0 4px 16px rgba(46, 91, 255, 0.3); /* Things-style shadow */
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            border: none;
-            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring */
+            transition: all var(--transition-base);
         }
 
         .floating-add-task:hover {
-            transform: scale(1.05) translateY(-2px); /* Subtle Things-like scale */
-            box-shadow: 0 6px 20px rgba(46, 91, 255, 0.4); /* Elevated Things shadow */
-            background: #1A47CC; /* Darker Things blue on hover */
+            transform: scale(1.08) translateY(-3px);
+            box-shadow: var(--glass-shadow-lg), var(--glass-highlight);
+            background: linear-gradient(135deg, rgba(26, 71, 204, 0.9) 0%, rgba(46, 91, 255, 0.9) 100%);
         }
 
         .floating-add-icon {
