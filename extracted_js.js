@@ -13116,6 +13116,7 @@
                     gradient = '#56ab2f 0%, #a8e6cf 100%'; // Green for high productivity
                 } else if (productivity >= 60) {
                     gradient = '#f093fb 0%, #f5576c 100%'; // Pink for medium productivity
+                }
                 monthStats.style.background = `linear-gradient(135deg, ${gradient})`;
             }
         }
@@ -26088,3 +26089,5 @@
                 }
             }, 10000); // Wait 10 seconds to ensure everything is loaded
         });
+
+}
