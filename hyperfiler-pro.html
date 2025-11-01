@@ -2353,6 +2353,230 @@
             }
         }
 
+        /* Keyboard Shortcuts Help Modal */
+        .keyboard-shortcuts-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 10001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .keyboard-shortcuts-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .keyboard-shortcuts-modal {
+            background: white;
+            border-radius: 16px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+            animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: scale(0.9) translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .keyboard-shortcuts-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 24px 32px;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .keyboard-shortcuts-header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .keyboard-shortcuts-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 24px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .keyboard-shortcuts-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .keyboard-shortcuts-content {
+            padding: 32px;
+        }
+
+        .keyboard-shortcuts-section {
+            margin-bottom: 32px;
+        }
+
+        .keyboard-shortcuts-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .keyboard-shortcuts-section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .keyboard-shortcuts-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .keyboard-shortcuts-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .keyboard-shortcut-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .keyboard-shortcut-item:hover {
+            background: #f3f4f6;
+            transform: translateX(4px);
+        }
+
+        .keyboard-shortcut-label {
+            font-size: 14px;
+            color: #4b5563;
+            flex: 1;
+        }
+
+        .keyboard-shortcut-keys {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .keyboard-key {
+            background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%);
+            border: 1px solid #d1d5db;
+            border-bottom-width: 3px;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            color: #1f2937;
+            min-width: 32px;
+            text-align: center;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .keyboard-key-combo {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .keyboard-key-separator {
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        .keyboard-shortcuts-footer {
+            background: #f9fafb;
+            padding: 20px 32px;
+            border-radius: 0 0 16px 16px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .keyboard-shortcuts-footer p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .keyboard-shortcuts-footer strong {
+            color: #3b82f6;
+            font-weight: 700;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .keyboard-shortcuts-modal {
+                max-height: 90vh;
+                margin: 10px;
+            }
+
+            .keyboard-shortcuts-header {
+                padding: 20px;
+            }
+
+            .keyboard-shortcuts-header h2 {
+                font-size: 20px;
+            }
+
+            .keyboard-shortcuts-content {
+                padding: 20px;
+            }
+
+            .keyboard-shortcuts-section {
+                margin-bottom: 24px;
+            }
+        }
+
         /* Today View Time Blocks */
         .time-block {
             background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
@@ -6433,6 +6657,7 @@
     <script src="js/globals.js?v=20250106-ULTRA-DEBUG"></script>
     <script src="js/utils.js?v=1757614969"></script>
     <script src="js/toast.js?v=20250101-toast-system"></script>
+    <script src="js/keyboard-shortcuts.js?v=20250101-shortcuts-help"></script>
     <script src="js/auth.js?v=1736363000"></script>
     <script src="js/tasks.js?v=20250106-ULTRA-DEBUG"></script>
     <script src="js/ui.js?v=20250921-today-fixed"></script>
