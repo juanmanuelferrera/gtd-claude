@@ -11,6 +11,46 @@ let currentTodayDate = new Date();
 let mobileMoreMenuOpen = false;
 
 /**
+ * Generate skeleton loader HTML
+ */
+function generateSkeletonLoader(count = 3) {
+    let html = '<div class="skeleton-container">';
+    for (let i = 0; i < count; i++) {
+        html += `
+            <div class="skeleton-task-card">
+                <div class="skeleton-loader skeleton-title"></div>
+                <div class="skeleton-loader skeleton-meta"></div>
+            </div>
+        `;
+    }
+    html += '</div>';
+    return html;
+}
+
+/**
+ * Show skeleton loaders in a container
+ */
+function showSkeletonLoader(containerId, count = 3) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        container.innerHTML = generateSkeletonLoader(count);
+    }
+}
+
+/**
+ * Hide skeleton loader and show content
+ */
+function hideSkeletonLoader(containerId, content) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        // Small delay for smooth transition
+        setTimeout(() => {
+            container.innerHTML = content;
+        }, 200);
+    }
+}
+
+/**
  * Show a specific view and update navigation
  */
 function showView(viewName, preserveDate = false) {
@@ -262,14 +302,10 @@ function showLoadingState() {
     // Find the currently visible view or default to today-view
     const currentViewId = currentView + '-view';
     const content = document.getElementById(currentViewId) || document.getElementById('today-view');
-    
+
     if (content) {
-        content.innerHTML = `
-            <div style="display: flex; justify-content: center; align-items: center; height: 200px; flex-direction: column; color: #666;">
-                <div style="font-size: 24px; margin-bottom: 10px;">⏳</div>
-                <div>Syncing...</div>
-            </div>
-        `;
+        // Use skeleton loaders instead of static loading message
+        content.innerHTML = generateSkeletonLoader(5);
     } else {
         console.warn('Could not find content element for loading state');
     }
@@ -1138,66 +1174,72 @@ function renderTasks(viewType) {
         performAllTasksSearch();
         return;
     }
-    
+
     // For other view types, use the original logic
     console.log('renderTasks called with viewType:', viewType);
     console.log('Total tasks:', tasks.length);
-    
+
     const container = document.getElementById('tasksContainer');
-    
+
     if (!container) {
         console.error('tasksContainer not found');
         return;
     }
-    
-    let filteredTasks = [];
-    
-    if (viewType === 'today') {
-        const today = getLocalDateString();
-        filteredTasks = tasks.filter(task => task.dueDate === today);
-    } else if (viewType === 'week') {
-        const today = new Date();
-        const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - today.getDay());
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        
-        const weekStartStr = getLocalDateString(weekStart);
-        const weekEndStr = getLocalDateString(weekEnd);
-        
-        filteredTasks = tasks.filter(task => {
-            return task.dueDate && task.dueDate >= weekStartStr && task.dueDate <= weekEndStr;
-        });
-    } else {
-        filteredTasks = tasks;
-    }
-    
-    if (filteredTasks.length === 0) {
-        container.innerHTML = '<div class="no-tasks"><p>📝 No tasks found for this view.</p></div>';
-        return;
-    }
-    
-    // Group tasks by date
-    const taskGroups = groupTasksByDate(filteredTasks);
-    
-    let html = '';
-    for (const [dateKey, groupData] of Object.entries(taskGroups)) {
-        const groupTasks = groupData.tasks;
-        html += `
-            <div class="task-group" id="group-${dateKey}">
-                <h4 class="group-header" onclick="toggleGroup('${dateKey}')">
-                    <span class="group-icon">📁</span>
-                    <span class="group-title">${getGroupTitle(dateKey)}</span>
-                    <span class="group-count">(${groupTasks.length})</span>
-                </h4>
-                <div class="group-content" id="content-${dateKey}">
-                    ${groupTasks.map(task => renderTaskCard(task)).join('')}
+
+    // Show skeleton loader while processing
+    showSkeletonLoader('tasksContainer', 5);
+
+    // Process tasks with small delay to show skeleton loader
+    setTimeout(() => {
+        let filteredTasks = [];
+
+        if (viewType === 'today') {
+            const today = getLocalDateString();
+            filteredTasks = tasks.filter(task => task.dueDate === today);
+        } else if (viewType === 'week') {
+            const today = new Date();
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - today.getDay());
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+
+            const weekStartStr = getLocalDateString(weekStart);
+            const weekEndStr = getLocalDateString(weekEnd);
+
+            filteredTasks = tasks.filter(task => {
+                return task.dueDate && task.dueDate >= weekStartStr && task.dueDate <= weekEndStr;
+            });
+        } else {
+            filteredTasks = tasks;
+        }
+
+        if (filteredTasks.length === 0) {
+            hideSkeletonLoader('tasksContainer', '<div class="no-tasks"><p>📝 No tasks found for this view.</p></div>');
+            return;
+        }
+
+        // Group tasks by date
+        const taskGroups = groupTasksByDate(filteredTasks);
+
+        let html = '';
+        for (const [dateKey, groupData] of Object.entries(taskGroups)) {
+            const groupTasks = groupData.tasks;
+            html += `
+                <div class="task-group" id="group-${dateKey}">
+                    <h4 class="group-header" onclick="toggleGroup('${dateKey}')">
+                        <span class="group-icon">📁</span>
+                        <span class="group-title">${getGroupTitle(dateKey)}</span>
+                        <span class="group-count">(${groupTasks.length})</span>
+                    </h4>
+                    <div class="group-content" id="content-${dateKey}">
+                        ${groupTasks.map(task => renderTaskCard(task)).join('')}
+                    </div>
                 </div>
-            </div>
-        `;
-    }
-    
-    container.innerHTML = html;
+            `;
+        }
+
+        hideSkeletonLoader('tasksContainer', html);
+    }, 100);
 }
 
 /**
@@ -4368,10 +4410,10 @@ function loadListSections() {
 function renderListsView() {
     loadListSections();
     console.log('📋 Lists view - listSections:', window.listSections);
-    
+
     const container = document.getElementById('listsContainer');
     const emptyState = document.getElementById('noListSections');
-    
+
     if (!container) {
         console.error('listsContainer not found');
         return;
@@ -4380,17 +4422,22 @@ function renderListsView() {
         console.error('noListSections not found');
         return;
     }
-    
-    const listSections = typeof window.listSections !== 'undefined' ? window.listSections : [];
-    console.log('📋 Rendering', listSections.length, 'list sections');
-    
-    if (listSections.length === 0) {
-        container.innerHTML = '';
-        emptyState.style.display = 'block';
-        return;
-    }
-    
-    emptyState.style.display = 'none';
+
+    // Show skeleton loader while processing
+    showSkeletonLoader('listsContainer', 4);
+
+    // Process lists with small delay to show skeleton loader
+    setTimeout(() => {
+        const listSections = typeof window.listSections !== 'undefined' ? window.listSections : [];
+        console.log('📋 Rendering', listSections.length, 'list sections');
+
+        if (listSections.length === 0) {
+            hideSkeletonLoader('listsContainer', '');
+            emptyState.style.display = 'block';
+            return;
+        }
+
+        emptyState.style.display = 'none';
     
     // Use manual order if sections have been reordered, otherwise sort alphabetically
     const sortedSections = listSections.some(s => s.order !== undefined) ? 
@@ -4435,9 +4482,10 @@ function renderListsView() {
                 </div>
             </div>
         `;
-    });
-    
-    container.innerHTML = html;
+        });
+
+        hideSkeletonLoader('listsContainer', html);
+    }, 100);
 }
 
 /**
