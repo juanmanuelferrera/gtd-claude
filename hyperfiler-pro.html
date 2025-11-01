@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    console.log('🚀 HYPERFILER v4.3.17 - ABSOLUTE TOP [' + new Date().toISOString() + ']');
+    console.log('🚀 HYPERFILER v4.3.18 - Lists Recovery [Deploy-20251101] [' + new Date().toISOString() + ']');
     console.log('🖥️ Viewport Width: ' + window.innerWidth + 'px | Height: ' + window.innerHeight + 'px');
     console.log('📱 Device Type: ' + (window.innerWidth > 768 ? 'DESKTOP' : 'MOBILE') + ' (breakpoint: 769px)');
     
@@ -690,6 +690,10 @@
                     <button class="no-tasks-cta" onclick="openCreateSectionModal()">
                         <span>➕</span>
                         <span>Create First Section</span>
+                    </button>
+                    <button class="no-tasks-cta" onclick="recoverListsFromCloud()" style="background: #007bff; margin-top: 12px;">
+                        <span>🔄</span>
+                        <span>Recover from Cloud</span>
                     </button>
                 </div>
             </div>
@@ -2303,7 +2307,136 @@
     <script src="js/patches.js?v=1736363000"></script>
     <script src="extracted_js.js?v=v4.2.2-STABLE"></script>
     <script src="js/missing-functions.js?v=20250106-ULTRA-DEBUG"></script>
-    
+
+    <!-- LISTS RECOVERY FUNCTION -->
+    <script>
+    /**
+     * Force recovery of Lists from cloud server
+     * This function bypasses normal safety checks to recover lost data
+     */
+    async function recoverListsFromCloud() {
+        console.log('🔍 === LISTS RECOVERY STARTED ===');
+
+        // Check if user is logged in
+        if (!window.currentUser?.user?.id) {
+            alert('❌ Not logged in. Please log in first.');
+            console.error('❌ Recovery blocked: No user credentials');
+            return;
+        }
+
+        try {
+            // Show loading state
+            const recoverBtn = event?.target?.closest('button');
+            if (recoverBtn) {
+                recoverBtn.disabled = true;
+                recoverBtn.innerHTML = '<span>⏳</span><span>Recovering...</span>';
+            }
+
+            console.log('📡 Fetching lists from server...');
+            console.log('User ID:', window.currentUser.user.id);
+            console.log('API Base:', window.API_BASE);
+
+            // Get auth token
+            const authToken = window.currentUser?.token || localStorage.getItem('authToken');
+            if (!authToken) {
+                throw new Error('No auth token available');
+            }
+
+            // Direct fetch from server (bypass sync lock and safety checks)
+            const response = await fetch(`${window.API_BASE}/lists/${window.currentUser.user.id}`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('📡 Server response status:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Server error ${response.status}: ${errorText}`);
+            }
+
+            const data = await response.json();
+            const serverLists = data.listSections || [];
+
+            console.log(`📊 Server returned ${serverLists.length} list sections`);
+
+            if (serverLists.length === 0) {
+                // No data on server
+                alert('⚠️ No Lists found on server.\n\nThe server has no list data to recover.\n\nPossible reasons:\n- Data was never synced to cloud\n- Data was cleared from server\n\nCheck for backup JSON files from "Export All" or "Quick Backup" features.');
+                console.warn('⚠️ Server has no list data');
+            } else {
+                // Data found! Restore it
+                console.log('✅ Found lists on server! Details:', serverLists);
+
+                // Check current local state
+                const localCount = window.listSections?.length || 0;
+                console.log(`📊 Current local lists: ${localCount}`);
+                console.log(`📊 Server lists: ${serverLists.length}`);
+
+                // Confirm recovery if we're replacing existing data
+                let shouldRecover = true;
+                if (localCount > 0) {
+                    shouldRecover = confirm(
+                        `Found ${serverLists.length} list sections on server!\n\n` +
+                        `Local storage currently has ${localCount} sections.\n\n` +
+                        `Replace local data with server data?`
+                    );
+                }
+
+                if (shouldRecover) {
+                    // FORCE RECOVERY: Bypass all safety checks
+                    console.log('💾 Restoring lists from server...');
+
+                    // Update both memory and localStorage
+                    window.listSections = serverLists;
+                    localStorage.setItem('gtd_list_sections', JSON.stringify(serverLists));
+
+                    console.log('✅ Lists restored to memory and localStorage');
+
+                    // Re-render the lists view
+                    if (typeof renderListsView === 'function') {
+                        console.log('🎨 Re-rendering Lists view...');
+                        renderListsView();
+                    }
+
+                    // Upload to ensure server stays in sync
+                    if (typeof uploadAllLists === 'function') {
+                        console.log('📤 Re-syncing to server...');
+                        await uploadAllLists();
+                    }
+
+                    alert(`🎉 SUCCESS!\n\nRecovered ${serverLists.length} list sections from cloud!`);
+                    console.log('🎉 === RECOVERY COMPLETE ===');
+                } else {
+                    console.log('❌ Recovery cancelled by user');
+                }
+            }
+
+            // Restore button state
+            if (recoverBtn) {
+                recoverBtn.disabled = false;
+                recoverBtn.innerHTML = '<span>🔄</span><span>Recover from Cloud</span>';
+            }
+
+        } catch (error) {
+            console.error('❌ Recovery failed:', error);
+            alert(`❌ Recovery failed:\n\n${error.message}\n\nCheck browser console for details.`);
+
+            // Restore button state
+            const recoverBtn = event?.target?.closest('button');
+            if (recoverBtn) {
+                recoverBtn.disabled = false;
+                recoverBtn.innerHTML = '<span>🔄</span><span>Recover from Cloud</span>';
+            }
+        }
+    }
+
+    // Make function globally available
+    window.recoverListsFromCloud = recoverListsFromCloud;
+    </script>
+
     <!-- Tawk.to Live Chat Integration with automatic language detection -->
 
     <!-- N KEY & ENTER KEY HANDLERS -->
