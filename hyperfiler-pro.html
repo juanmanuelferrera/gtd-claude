@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v4.2.5 [Week Red + Search Normalized]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v4.3.0 [Full ARIA Accessibility]');
     
     // Register Service Worker for offline support
     if ('serviceWorker' in navigator) {
@@ -64,6 +64,7 @@
 
     <link rel="stylesheet" href="css/styles.css?v=20250101-glassmorphism-v2">
     <script src="js/dark-mode.js?v=20250101-dark-mode"></script>
+    <script src="js/aria-enhancements.js?v=20250101-aria-v1"></script>
 </head>
 <body>
     <!-- Modern Mobile App Header with Gradient & Glass Morphism -->
@@ -315,7 +316,7 @@
             <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; min-height: 40px;">
                 <div class="desktop-only" style="display: flex; align-items: center; gap: 16px;">
                     <!-- TODAY label when applicable -->
-                    <h3 id="todayLabelPrefix" data-translate="TODAY" style="margin: 0; display: none; color: #FF4136; font-size: 20px;">🔥 TODAY</h3>
+                    <h3 id="today-view-heading" data-translate="TODAY" style="margin: 0; display: none; color: #FF4136; font-size: 20px;">🔥 TODAY</h3>
                     <!-- Date badge always visible -->
                     <h4 id="currentTodayDate" style="margin: 0; font-size: 16px; font-weight: 600; color: white; letter-spacing: 0.5px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); padding: 8px 16px; border-radius: 6px; box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);">Loading...</h4>
                 </div>
@@ -407,7 +408,7 @@
         <!-- Calendar View -->
         <div id="calendar-view" class="calendar-section hidden">
             <div class="section-header">
-                <h3 class="desktop-only" data-translate="MONTH">🗓️ MONTH</h3>
+                <h3 id="calendar-view-heading" class="desktop-only" data-translate="MONTH">🗓️ MONTH</h3>
                 <div class="view-controls desktop-only">
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: nowrap;">
                         <input type="text" id="monthTaskSearch" placeholder="🔍 Month" style="padding: 8px 10px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 12px; width: 100px; min-width: 80px; flex-shrink: 1;" oninput="searchMonthTasks()">
@@ -445,7 +446,7 @@
         <!-- Week View -->
         <div id="week-view" class="calendar-section">
             <div class="section-header">
-                <h3 class="desktop-only" data-translate="WEEK">📅 WEEK</h3>
+                <h3 id="week-view-heading" class="desktop-only" data-translate="WEEK">📅 WEEK</h3>
                 <div class="view-controls desktop-only">
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: nowrap;">
                         <input type="text" id="weekTaskSearch" placeholder="🔍 Week" style="padding: 8px 10px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 12px; width: 100px; min-width: 80px; flex-shrink: 1;" oninput="searchWeekTasks()">
