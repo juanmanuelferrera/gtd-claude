@@ -567,6 +567,39 @@
             color: #60a5fa !important;
         }
 
+        /* Lists view dark mode overrides */
+        .dark-mode .list-section {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+
+        .dark-mode .list-section-content {
+            background: #1e293b !important;
+        }
+
+        .dark-mode .list-section-content > div {
+            background: #1e293b !important;
+        }
+
+        .dark-mode .list-container {
+            background: #1e293b !important;
+        }
+
+        .dark-mode .list-item {
+            background: #1e293b !important;
+            color: #f1f5f9 !important;
+            border-color: #334155 !important;
+        }
+
+        .dark-mode .list-item:hover {
+            background: #334155 !important;
+        }
+
+        .dark-mode .empty-list-section {
+            background: #1e293b !important;
+            color: #94a3b8 !important;
+        }
+
         /* Modal-specific dark mode overrides */
         .dark-mode .modal label,
         .dark-mode .modal [style*="color: #333"],
@@ -2566,22 +2599,22 @@
 
         .task-card {
             border-left: 4px solid var(--things-border);
-            padding: 16px 20px; /* Things generous padding */
+            padding: var(--space-4) var(--space-5);
             border-bottom: 1px solid var(--things-border);
 
-            /* Subtle glassmorphism for modern depth */
+            /* UI Designer: Subtle glassmorphism with floating shadow */
             background: var(--glass-bg-light);
             backdrop-filter: var(--glass-blur-sm);
             -webkit-backdrop-filter: var(--glass-blur-sm);
             border: var(--glass-border-light);
             border-left: 4px solid var(--things-border); /* Restore colored left border */
-            color: #2c3e50; /* Ensure dark text for readability */
+            color: var(--color-text-primary);
+            box-shadow: var(--shadow-float);
+            border-radius: var(--radius-lg);
 
-            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring easing */
+            transition: all var(--transition-base);
             cursor: pointer;
-            margin-bottom: 8px; /* Things rhythm spacing */
-            border-radius: 8px; /* Soft corners like Things */
-            box-shadow: var(--glass-shadow-sm);
+            margin-bottom: var(--space-2);
         }
 
         .task-card:last-child {
@@ -2592,8 +2625,9 @@
             background: var(--glass-bg-medium);
             backdrop-filter: var(--glass-blur-md);
             -webkit-backdrop-filter: var(--glass-blur-md);
-            transform: translateY(-2px); /* Subtle lift like Things */
-            box-shadow: var(--glass-shadow-md);
+            /* UI Designer: Enhanced floating effect on hover */
+            transform: translateY(-2px) var(--scale-hover);
+            box-shadow: var(--shadow-float-lg);
         }
 
         .task-card.completed {
@@ -2680,19 +2714,26 @@
 
         .no-tasks {
             text-align: center;
-            color: #666;
-            padding: 60px 40px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-            border-radius: 16px;
-            margin: 40px auto;
+            color: var(--color-text-secondary);
+            padding: var(--space-16) var(--space-10);
+            /* UI Designer: subtle mesh gradient for personality */
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%),
+                        var(--gradient-mesh);
+            background-blend-mode: overlay;
+            border-radius: var(--radius-2xl);
+            margin: var(--space-10) auto;
             max-width: 500px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            box-shadow: var(--shadow-float-lg);
+            /* Smooth entrance animation */
+            animation: fadeInUp var(--transition-slow) ease-out;
         }
 
         .no-tasks-illustration {
             font-size: 72px;
-            margin-bottom: 20px;
+            margin-bottom: var(--space-5);
             opacity: 0.9;
+            /* Subtle bounce to draw attention */
+            animation: bounce 2s ease-in-out infinite;
         }
 
         .no-tasks-title {
@@ -2714,28 +2755,29 @@
         }
 
         .no-tasks-cta {
-            background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);
+            /* UI Designer gradient system with interactive states */
+            background: var(--gradient-sunset);
             color: white;
             border: none;
-            padding: 14px 32px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: var(--space-3) var(--space-8);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-semibold);
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-float), var(--shadow-warning);
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--space-2);
         }
 
         .no-tasks-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+            transform: translateY(-2px) var(--scale-hover);
+            box-shadow: var(--shadow-float-lg), 0 8px 20px rgba(245, 158, 11, 0.4);
         }
 
         .no-tasks-cta:active {
-            transform: translateY(0);
+            transform: var(--scale-press);
         }
 
         .export-section {
@@ -2769,22 +2811,25 @@
         }
 
         .modal-content {
-            /* Glassmorphism for modal dialogs */
+            /* UI Designer: Glassmorphism with floating shadow and entrance animation */
             background: var(--glass-bg-light);
             backdrop-filter: var(--glass-blur-lg);
             -webkit-backdrop-filter: var(--glass-blur-lg);
             border: var(--glass-border-light);
-            box-shadow: var(--glass-shadow-xl);
+            box-shadow: var(--shadow-float-xl), var(--glass-shadow-xl);
 
             margin: 2vh auto;
             padding: 0;
-            border-radius: 12px;
+            border-radius: var(--radius-2xl);
             max-width: 500px;
             width: 90%;
             max-height: 96vh;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
+
+            /* Smooth entrance animation */
+            animation: scaleIn var(--transition-base) var(--bounce-timing);
         }
 
         .modal-header {
@@ -5610,7 +5655,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, #2E5BFF 0%, #1E4FE6 100%);
+            /* UI Designer gradient system */
+            background: var(--gradient-ocean);
             opacity: 1;
         }
         
