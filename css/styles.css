@@ -353,6 +353,76 @@
             --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
+        /* ========== DARK MODE DIRECT OVERRIDES ========== */
+        /* These rules override hardcoded colors throughout the app */
+
+        .dark-mode body,
+        .dark-mode html {
+            background: #0f172a !important;
+            color: #f1f5f9 !important;
+        }
+
+        /* Override white backgrounds */
+        .dark-mode .task-card,
+        .dark-mode .list-item,
+        .dark-mode .modal-content,
+        .dark-mode .sidebar,
+        .dark-mode .header,
+        .dark-mode .panel,
+        .dark-mode [style*="background: white"],
+        .dark-mode [style*="background:#fff"],
+        .dark-mode [style*="background: #fff"] {
+            background: #1e293b !important;
+        }
+
+        /* Override light gray backgrounds */
+        .dark-mode [style*="background: #f8f9fa"],
+        .dark-mode [style*="background:#f8f9fa"],
+        .dark-mode [style*="background: #f5f5f5"],
+        .dark-mode [style*="background:#f5f5f5"],
+        .dark-mode [style*="background: #f9fafb"],
+        .dark-mode [style*="background:#f9fafb"] {
+            background: #0f172a !important;
+        }
+
+        /* Override dark text colors */
+        .dark-mode [style*="color: #333"],
+        .dark-mode [style*="color:#333"],
+        .dark-mode [style*="color: #1f2937"],
+        .dark-mode [style*="color:#1f2937"],
+        .dark-mode [style*="color: black"],
+        .dark-mode [style*="color:#000"] {
+            color: #f1f5f9 !important;
+        }
+
+        /* Override borders */
+        .dark-mode [style*="border-color"],
+        .dark-mode .task-card,
+        .dark-mode .list-item {
+            border-color: #334155 !important;
+        }
+
+        /* Override inputs and textareas */
+        .dark-mode input,
+        .dark-mode textarea,
+        .dark-mode select {
+            background: #1e293b !important;
+            color: #f1f5f9 !important;
+            border-color: #334155 !important;
+        }
+
+        .dark-mode input::placeholder,
+        .dark-mode textarea::placeholder {
+            color: #94a3b8 !important;
+        }
+
+        /* Override buttons */
+        .dark-mode button:not(.btn-primary):not(.btn-success):not(.btn-danger):not(.btn-warning) {
+            background: #334155 !important;
+            color: #f1f5f9 !important;
+            border-color: #475569 !important;
+        }
+
         /* Dark mode toggle button styling - with glass morphism */
         .dark-mode-toggle {
             position: fixed;
