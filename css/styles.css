@@ -1774,16 +1774,25 @@
             color: var(--color-text-tertiary);
             font-size: var(--font-size-xs);
             border-radius: var(--radius-md);
+            /* UI Designer interactive states */
+            transition: all var(--transition-fast);
+            cursor: pointer;
         }
 
         .mobile-nav-btn:hover {
             background: var(--color-gray-100);
             color: var(--color-text-primary);
+            transform: var(--scale-hover);
+        }
+
+        .mobile-nav-btn:active {
+            transform: var(--scale-press);
         }
 
         .mobile-nav-btn.active {
             color: var(--color-primary-600);
             background: var(--color-primary-50);
+            box-shadow: var(--shadow-primary);
         }
 
         .settings-tab-btn {
@@ -2687,17 +2696,21 @@
         }
 
         .no-tasks-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #333;
-            margin: 0 0 12px 0;
+            /* Using UI Designer typography system */
+            font-size: var(--font-size-2xl);
+            line-height: var(--line-height-h2);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text-primary);
+            margin: 0 0 var(--space-3) 0;
+            letter-spacing: var(--letter-spacing-tight);
         }
 
         .no-tasks-message {
-            font-size: 16px;
-            color: #666;
-            margin: 0 0 30px 0;
-            line-height: 1.6;
+            /* Using UI Designer typography system */
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-body);
+            color: var(--color-text-secondary);
+            margin: 0 0 var(--space-8) 0;
         }
 
         .no-tasks-cta {
@@ -5356,12 +5369,14 @@
             }
             
             .mobile-header-title {
-                font-size: 16px;
-                font-weight: 600;
+                /* UI Designer typography system */
+                font-size: var(--font-size-base);
+                line-height: var(--line-height-body);
+                font-weight: var(--font-weight-semibold);
                 flex: 1;
                 text-align: center;
-                line-height: 1.1;
-                color: #007aff;
+                color: var(--color-primary-600);
+                transition: color var(--transition-fast);
             }
             
             .mobile-header-btn {
@@ -5422,17 +5437,23 @@
                 font-size: 11px;
                 font-weight: 600;
                 cursor: pointer;
-                transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring */
-                border-radius: 8px;
+                /* UI Designer transitions for smooth interactions */
+                transition: all var(--transition-base);
+                border-radius: var(--radius-lg);
                 flex: 1;
                 max-width: 80px;
-                box-shadow: 0 1px 3px var(--things-shadow);
+                box-shadow: var(--shadow-sm);
             }
-            
+
+            .mobile-nav-btn:active {
+                transform: var(--scale-press);
+            }
+
             .mobile-nav-btn.active {
                 color: var(--things-accent);
                 background: rgba(46, 91, 255, 0.1); /* Things blue tint */
-                box-shadow: 0 2px 8px rgba(46, 91, 255, 0.2);
+                box-shadow: var(--shadow-primary);
+                transform: var(--scale-hover);
             }
             
             .mobile-nav-btn:hover {
@@ -5569,9 +5590,17 @@
             left: 0;
             right: 0;
             height: 64px;
-            z-index: 9999;
+            z-index: var(--z-index-sticky);
             display: none; /* Hidden by default, shown on mobile */
             overflow: hidden;
+            /* UI Designer floating shadow for modern feel */
+            box-shadow: var(--shadow-float);
+            transition: box-shadow var(--transition-base);
+        }
+
+        /* Enhanced floating effect on scroll */
+        .modern-app-header.scrolled {
+            box-shadow: var(--shadow-float-lg);
         }
         
         /* Gradient Background */
@@ -5608,27 +5637,29 @@
             width: 100%;
             height: 36px;
             background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px) saturate(180%);
-            -webkit-backdrop-filter: blur(10px) saturate(180%);
+            backdrop-filter: var(--glass-blur-md) saturate(180%);
+            -webkit-backdrop-filter: var(--glass-blur-md) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            padding: 0 16px;
-            font-size: 14px;
+            border-radius: var(--radius-full);
+            padding: 0 var(--space-4);
+            font-size: var(--font-size-sm);
+            line-height: var(--line-height-small);
             color: white;
             outline: none;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            transition: all var(--transition-base);
+            font-family: var(--font-sans);
         }
-        
-        .header-search-input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: 400;
-        }
-        
+
         .header-search-input:focus {
             background: rgba(255, 255, 255, 0.25);
             border-color: rgba(255, 255, 255, 0.5);
+            transform: var(--scale-hover);
             box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+        }
+
+        .header-search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: var(--font-weight-normal);
         }
         
         /* Title Wrapper */
@@ -5639,16 +5670,17 @@
             text-align: center;
         }
         
-        /* Dynamic Title */
+        /* Dynamic Title - UI Designer system with floating text effect */
         .header-title {
-            font-size: 18px;
-            font-weight: 600;
+            font-size: var(--font-size-lg);
+            line-height: var(--line-height-h3);
+            font-weight: var(--font-weight-semibold);
             color: white;
             margin: 0;
-            letter-spacing: -0.5px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            transition: opacity 0.3s ease;
+            letter-spacing: var(--letter-spacing-tight);
+            font-family: var(--font-sans);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            transition: all var(--transition-base);
         }
         
         /* Add Button */
