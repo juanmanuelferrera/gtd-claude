@@ -12763,7 +12763,7 @@
             return `
                 <div class="${cardClass}" onclick="editTask('${task.id}')" data-task-id="${task.id}">
                     <div class="task-header">
-                        <div class="task-title">${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}</div>
+                        <div class="task-title" title="${task.title}${task.notes ? ' - ' + task.notes : ''}">${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}</div>
                     </div>
                     
                     <div class="task-meta">
@@ -17140,8 +17140,8 @@
                         timeSlots[time].forEach(task => {
                             htmlContent += `
             <div class="task-item">
-                <div class="task-title">${renderTaskTitle(task, '', task.isEvent ? '<span class="event-badge">EVENT</span>' : '')}</div>
-                ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
+                <div class="task-title" title="${task.title}${task.notes ? ' - ' + task.notes : ''}">${renderTaskTitle(task, '', task.isEvent ? '<span class="event-badge">EVENT</span>' : '')}</div>
+                ${task.notes ? `<div class="task-notes" title="${task.notes}">${task.notes}</div>` : ''}
             </div>
 `;
                         });
@@ -17157,8 +17157,8 @@
                         untimedTasks.forEach(task => {
                             htmlContent += `
             <div class="task-item">
-                <div class="task-title">${renderTaskTitle(task, '', task.isEvent ? '<span class="event-badge">EVENT</span>' : '')}</div>
-                ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
+                <div class="task-title" title="${task.title}${task.notes ? ' - ' + task.notes : ''}">${renderTaskTitle(task, '', task.isEvent ? '<span class="event-badge">EVENT</span>' : '')}</div>
+                ${task.notes ? `<div class="task-notes" title="${task.notes}">${task.notes}</div>` : ''}
             </div>
 `;
                         });
@@ -21289,7 +21289,7 @@
                      style="cursor: pointer; position: relative; overflow: hidden;">
                     <div class="task-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="task-content" style="flex: 1; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 4px; gap: 1px;">
-                            <div class="task-title" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.15; font-weight: 400; font-size: 16px;">
+                            <div class="task-title" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.15; font-weight: 400; font-size: 16px;" title="${task.title}${task.notes ? ' - ' + task.notes : ''}">
                                 ${task.isEvent ? '🔴 ' : ''}
                                 ${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}
                                 ${isMovedFromPast ? `<span class="overdue-badge" title="Atrasada desde ${formatDateForDisplay(task.originalDueDate)}" style="background: #ff4757; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">📅 ${formatDateForDisplay(task.originalDueDate)}</span>` : ''}
