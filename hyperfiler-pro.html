@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    console.log('🚀 HYPERFILER v4.3.7 LOADED - Desktop & Mobile Branding Active [' + new Date().toISOString() + ']');
+    console.log('🚀 HYPERFILER v4.3.8 LOADED - FORCE CACHE REFRESH - Desktop & Mobile Branding Active [' + new Date().toISOString() + ']');
     
     // Register Service Worker for offline support
     if ('serviceWorker' in navigator) {
@@ -62,7 +62,7 @@
     });
     </script>
 
-    <link rel="stylesheet" href="css/styles.css?v=20250111-v437-branding">
+    <link rel="stylesheet" href="css/styles.css?v=20250111-v438-force">
     <script src="js/dark-mode.js?v=20250101-dark-mode"></script>
     <script src="js/aria-enhancements.js?v=20250101-aria-v1"></script>
 </head>
@@ -172,14 +172,17 @@
     <div class="desktop-layout">
         <!-- Sidebar Navigation -->
         <div class="desktop-sidebar desktop-only">
-            <!-- Sidebar Branded Header v4.3.7 -->
-            <div style="
+            <!-- Sidebar Branded Header v4.3.8 CACHE BUST -->
+            <div id="hyperfiler-branding-v438" data-version="4.3.8" style="
                 padding: 16px 10px;
                 border-bottom: 1px solid var(--things-border);
                 margin-bottom: 12px;
                 background: rgba(0, 122, 255, 0.05);
                 border-radius: 8px;
                 margin: 0 8px 16px 8px;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
             ">
                 <h1 style="
                     margin: 0 0 6px 0;
@@ -200,7 +203,7 @@
                     letter-spacing: 0.5px;
                     text-align: center;
                 ">
-                    v4.3.7
+                    v4.3.8
                 </div>
                 <div id="sidebarUserInfo" style="
                     font-size: 13px;
