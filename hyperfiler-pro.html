@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v4.2.3 [Button Standardization]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v4.2.4 [Button Reorder]');
     
     // Register Service Worker for offline support
     if ('serviceWorker' in navigator) {
@@ -412,15 +412,15 @@
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: nowrap;">
                         <input type="text" id="monthTaskSearch" placeholder="🔍 Month" style="padding: 8px 10px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 12px; width: 100px; min-width: 80px; flex-shrink: 1;" oninput="searchMonthTasks()">
                         <button class="btn btn-small" onclick="previousMonth()" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;">← Prev</button>
-                        <button class="btn btn-small" onclick="nextMonth()" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;">Next →</button>
                         <button class="btn btn-primary btn-small" onclick="goToCurrentMonth()" style="background: #34c759; border-color: #34c759; padding: 8px 14px; font-size: 12px; flex-shrink: 0; border-radius: 6px; font-weight: 600;">📍 Month</button>
+                        <button class="btn btn-small" onclick="nextMonth()" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;">Next →</button>
                     </div>
                 </div>
                 
                 <!-- VERSION 3: Mobile month controls -->
                 <div class="view-controls mobile-only" style="padding: 10px; display: flex; justify-content: center; align-items: center; background: rgba(255,255,255,0.9); border-radius: 8px; margin-bottom: 10px; gap: 8px;">
                     <button class="btn btn-small" onclick="previousMonth()" style="padding: 8px 12px; font-size: 14px;">← Prev</button>
-                    <button class="btn btn-secondary btn-small" onclick="goToCurrentMonth()" style="padding: 8px 12px; font-size: 14px;">📍 Month</button>
+                    <button class="btn btn-primary btn-small" onclick="goToCurrentMonth()" style="background: #34c759; border-color: #34c759; padding: 8px 12px; font-size: 14px; font-weight: 600;">📍 Month</button>
                     <button class="btn btn-small" onclick="nextMonth()" style="padding: 8px 12px; font-size: 14px;">Next →</button>
                 </div>
             </div>
@@ -450,8 +450,8 @@
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: nowrap;">
                         <input type="text" id="weekTaskSearch" placeholder="🔍 Week" style="padding: 8px 10px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 12px; width: 100px; min-width: 80px; flex-shrink: 1;" oninput="searchWeekTasks()">
                         <button class="btn btn-small" onclick="previousWeek()" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;">← Prev</button>
-                        <button class="btn btn-small" onclick="nextWeek()" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;">Next →</button>
                         <button class="btn btn-primary btn-small" onclick="goToCurrentWeek()" style="background: #2E5BFF; border-color: #2E5BFF; padding: 8px 14px; font-size: 12px; flex-shrink: 0; border-radius: 6px; font-weight: 600;">📍 Week</button>
+                        <button class="btn btn-small" onclick="nextWeek()" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;">Next →</button>
                     </div>
                 </div>
             </div>
