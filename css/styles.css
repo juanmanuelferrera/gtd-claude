@@ -84,46 +84,34 @@
             --space-24: 96px;
 
             /* === Typography === */
-            /* Following UI Designer specifications for rapid implementation */
 
             /* Font Families */
             --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
             --font-mono: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', 'Courier New', monospace;
 
             /* Font Sizes */
-            --font-size-xs: 12px;      /* Tiny: Captions */
-            --font-size-sm: 14px;      /* Small: Secondary text */
-            --font-size-base: 16px;    /* Body: Default text */
-            --font-size-lg: 18px;      /* Enhanced body */
-            --font-size-xl: 20px;      /* H3: Card titles */
-            --font-size-2xl: 24px;     /* H2: Section headers */
-            --font-size-3xl: 30px;     /* H1: Page titles */
-            --font-size-4xl: 36px;     /* Display: Hero headlines */
-            --font-size-5xl: 48px;     /* Extra large display */
+            --font-size-xs: 12px;
+            --font-size-sm: 14px;
+            --font-size-base: 16px;
+            --font-size-lg: 18px;
+            --font-size-xl: 20px;
+            --font-size-2xl: 24px;
+            --font-size-3xl: 30px;
+            --font-size-4xl: 36px;
+            --font-size-5xl: 48px;
 
-            /* Line Heights (matched to UI Designer spec) */
-            --line-height-tiny: 16px;      /* 12px/16px - Captions */
-            --line-height-small: 20px;     /* 14px/20px - Secondary */
-            --line-height-body: 24px;      /* 16px/24px - Body */
-            --line-height-h3: 28px;        /* 20px/28px - Card titles */
-            --line-height-h2: 32px;        /* 24px/32px - Section headers */
-            --line-height-h1: 36px;        /* 30px/36px - Page titles */
-            --line-height-display: 40px;   /* 36px/40px - Hero headlines */
+            /* Font Weights */
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
 
-            /* Legacy line heights (keep for compatibility) */
+            /* Line Heights */
             --line-height-tight: 1.25;
             --line-height-snug: 1.375;
             --line-height-normal: 1.5;
             --line-height-relaxed: 1.625;
             --line-height-loose: 2;
-
-            /* Font Weights */
-            --font-weight-light: 300;      /* Light weight for mixing */
-            --font-weight-normal: 400;
-            --font-weight-medium: 500;
-            --font-weight-semibold: 600;
-            --font-weight-bold: 700;
-            --font-weight-black: 900;      /* Extra bold for hero text */
 
             /* Letter Spacing */
             --letter-spacing-tight: -0.01em;
@@ -141,24 +129,12 @@
             --radius-full: 9999px;
 
             /* === Shadows === */
-            /* Following UI Designer specifications for floating elements */
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-
-            /* Floating element shadows (more pronounced for modern UI) */
-            --shadow-float: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
-            --shadow-float-lg: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
-            --shadow-float-xl: 0 12px 32px rgba(0, 0, 0, 0.15), 0 6px 12px rgba(0, 0, 0, 0.08);
-
-            /* Colored shadows for accent elements */
-            --shadow-primary: 0 4px 12px rgba(59, 130, 246, 0.3);
-            --shadow-success: 0 4px 12px rgba(16, 185, 129, 0.3);
-            --shadow-warning: 0 4px 12px rgba(245, 158, 11, 0.3);
-            --shadow-error: 0 4px 12px rgba(239, 68, 68, 0.3);
 
             /* === Transitions === */
             --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -204,35 +180,6 @@
 
             /* Glass highlight (inner glow effect) */
             --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.4);
-
-            /* === Modern Gradient System === */
-            /* Subtle gradients for backgrounds and hero sections */
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            --gradient-error: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            --gradient-ocean: linear-gradient(135deg, #667eea 0%, #3b82f6 100%);
-            --gradient-sunset: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
-            --gradient-forest: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            --gradient-twilight: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-
-            /* Mesh backgrounds (trendy multi-color gradients) */
-            --gradient-mesh: radial-gradient(at 40% 20%, hsla(28,100%,74%,0.3) 0px, transparent 50%),
-                            radial-gradient(at 80% 0%, hsla(189,100%,56%,0.3) 0px, transparent 50%),
-                            radial-gradient(at 0% 50%, hsla(355,100%,93%,0.3) 0px, transparent 50%);
-
-            /* Gradient overlays (for hero sections and cards) */
-            --gradient-overlay-dark: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
-            --gradient-overlay-light: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 100%);
-
-            /* === Micro-Interaction Helpers === */
-            /* Scale transforms for buttons and interactive elements */
-            --scale-press: scale(0.95);
-            --scale-hover: scale(1.02);
-            --scale-active: scale(0.98);
-
-            /* Bounce animation for delightful interactions */
-            --bounce-timing: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
             /* === Z-Index Scale === */
             --z-index-dropdown: 1000;
@@ -567,39 +514,6 @@
             color: #60a5fa !important;
         }
 
-        /* Lists view dark mode overrides */
-        .dark-mode .list-section {
-            background: #1e293b !important;
-            border-color: #334155 !important;
-        }
-
-        .dark-mode .list-section-content {
-            background: #1e293b !important;
-        }
-
-        .dark-mode .list-section-content > div {
-            background: #1e293b !important;
-        }
-
-        .dark-mode .list-container {
-            background: #1e293b !important;
-        }
-
-        .dark-mode .list-item {
-            background: #1e293b !important;
-            color: #f1f5f9 !important;
-            border-color: #334155 !important;
-        }
-
-        .dark-mode .list-item:hover {
-            background: #334155 !important;
-        }
-
-        .dark-mode .empty-list-section {
-            background: #1e293b !important;
-            color: #94a3b8 !important;
-        }
-
         /* Modal-specific dark mode overrides */
         .dark-mode .modal label,
         .dark-mode .modal [style*="color: #333"],
@@ -852,250 +766,6 @@
             box-shadow: var(--glass-shadow-lg), var(--glass-highlight);
             transform: translateY(-2px);
             transition: all var(--transition-base);
-        }
-
-        /* ========== TYPOGRAPHY UTILITY CLASSES ========== */
-        /* Following UI Designer specifications for rapid implementation */
-
-        .text-display {
-            font-size: var(--font-size-4xl);
-            line-height: var(--line-height-display);
-            font-weight: var(--font-weight-bold);
-            letter-spacing: var(--letter-spacing-tight);
-        }
-
-        .text-h1 {
-            font-size: var(--font-size-3xl);
-            line-height: var(--line-height-h1);
-            font-weight: var(--font-weight-bold);
-        }
-
-        .text-h2 {
-            font-size: var(--font-size-2xl);
-            line-height: var(--line-height-h2);
-            font-weight: var(--font-weight-semibold);
-        }
-
-        .text-h3 {
-            font-size: var(--font-size-xl);
-            line-height: var(--line-height-h3);
-            font-weight: var(--font-weight-semibold);
-        }
-
-        .text-body {
-            font-size: var(--font-size-base);
-            line-height: var(--line-height-body);
-            font-weight: var(--font-weight-normal);
-        }
-
-        .text-small {
-            font-size: var(--font-size-sm);
-            line-height: var(--line-height-small);
-            font-weight: var(--font-weight-normal);
-        }
-
-        .text-tiny {
-            font-size: var(--font-size-xs);
-            line-height: var(--line-height-tiny);
-            font-weight: var(--font-weight-normal);
-        }
-
-        /* ========== FLOATING ELEMENT UTILITIES ========== */
-
-        .floating {
-            box-shadow: var(--shadow-float);
-            transition: all var(--transition-base);
-        }
-
-        .floating:hover {
-            box-shadow: var(--shadow-float-lg);
-            transform: translateY(-2px);
-        }
-
-        .floating-lg {
-            box-shadow: var(--shadow-float-lg);
-        }
-
-        .floating-xl {
-            box-shadow: var(--shadow-float-xl);
-        }
-
-        /* ========== COMPONENT STATE UTILITIES ========== */
-
-        /* Interactive button states */
-        .btn-interactive {
-            transition: all var(--transition-fast);
-            cursor: pointer;
-        }
-
-        .btn-interactive:hover {
-            transform: var(--scale-hover);
-            box-shadow: var(--shadow-float);
-        }
-
-        .btn-interactive:active {
-            transform: var(--scale-press);
-        }
-
-        .btn-interactive:focus {
-            outline: 2px solid var(--color-primary-500);
-            outline-offset: 2px;
-        }
-
-        .btn-interactive:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        /* Loading state */
-        .is-loading {
-            position: relative;
-            color: transparent !important;
-            pointer-events: none;
-        }
-
-        .is-loading::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 16px;
-            height: 16px;
-            margin: -8px 0 0 -8px;
-            border: 2px solid currentColor;
-            border-right-color: transparent;
-            border-radius: 50%;
-            animation: spinner 0.6s linear infinite;
-        }
-
-        @keyframes spinner {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Error state */
-        .has-error {
-            border-color: var(--color-error) !important;
-            box-shadow: 0 0 0 3px var(--color-error-light);
-        }
-
-        /* Success state */
-        .has-success {
-            border-color: var(--color-success) !important;
-            box-shadow: 0 0 0 3px var(--color-success-light);
-        }
-
-        /* ========== SKELETON LOADING STATES ========== */
-
-        .skeleton {
-            background: linear-gradient(
-                90deg,
-                var(--color-gray-200) 0%,
-                var(--color-gray-100) 50%,
-                var(--color-gray-200) 100%
-            );
-            background-size: 200% 100%;
-            animation: skeleton-loading 1.5s ease-in-out infinite;
-            border-radius: var(--radius-md);
-        }
-
-        @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .skeleton-text {
-            height: var(--line-height-body);
-            margin: var(--space-2) 0;
-        }
-
-        .skeleton-title {
-            height: var(--line-height-h2);
-            margin: var(--space-3) 0;
-            width: 60%;
-        }
-
-        .skeleton-card {
-            height: 120px;
-            margin: var(--space-4) 0;
-        }
-
-        /* ========== MICRO-ANIMATIONS ========== */
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes scaleIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* Animation utility classes */
-        .animate-fadeIn { animation: fadeIn var(--transition-base) ease-out; }
-        .animate-fadeInUp { animation: fadeInUp var(--transition-slow) ease-out; }
-        .animate-fadeInDown { animation: fadeInDown var(--transition-slow) ease-out; }
-        .animate-scaleIn { animation: scaleIn var(--transition-base) var(--bounce-timing); }
-        .animate-bounce { animation: bounce 1s ease-in-out infinite; }
-        .animate-pulse { animation: pulse 2s ease-in-out infinite; }
-
-        /* ========== GRADIENT UTILITIES ========== */
-
-        .gradient-primary { background: var(--gradient-primary); }
-        .gradient-success { background: var(--gradient-success); }
-        .gradient-warning { background: var(--gradient-warning); }
-        .gradient-error { background: var(--gradient-error); }
-        .gradient-ocean { background: var(--gradient-ocean); }
-        .gradient-sunset { background: var(--gradient-sunset); }
-        .gradient-forest { background: var(--gradient-forest); }
-        .gradient-twilight { background: var(--gradient-twilight); }
-        .gradient-mesh { background: var(--gradient-mesh); }
-
-        /* Gradient text effect */
-        .text-gradient {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         /* ========== THINGS APP DESIGN SYSTEM ========== */
@@ -1807,25 +1477,16 @@
             color: var(--color-text-tertiary);
             font-size: var(--font-size-xs);
             border-radius: var(--radius-md);
-            /* UI Designer interactive states */
-            transition: all var(--transition-fast);
-            cursor: pointer;
         }
 
         .mobile-nav-btn:hover {
             background: var(--color-gray-100);
             color: var(--color-text-primary);
-            transform: var(--scale-hover);
-        }
-
-        .mobile-nav-btn:active {
-            transform: var(--scale-press);
         }
 
         .mobile-nav-btn.active {
             color: var(--color-primary-600);
             background: var(--color-primary-50);
-            box-shadow: var(--shadow-primary);
         }
 
         .settings-tab-btn {
@@ -2599,22 +2260,22 @@
 
         .task-card {
             border-left: 4px solid var(--things-border);
-            padding: var(--space-4) var(--space-5);
+            padding: 16px 20px; /* Things generous padding */
             border-bottom: 1px solid var(--things-border);
 
-            /* UI Designer: Subtle glassmorphism with floating shadow */
+            /* Subtle glassmorphism for modern depth */
             background: var(--glass-bg-light);
             backdrop-filter: var(--glass-blur-sm);
             -webkit-backdrop-filter: var(--glass-blur-sm);
             border: var(--glass-border-light);
             border-left: 4px solid var(--things-border); /* Restore colored left border */
-            color: var(--color-text-primary);
-            box-shadow: var(--shadow-float);
-            border-radius: var(--radius-lg);
+            color: #2c3e50; /* Ensure dark text for readability */
 
-            transition: all var(--transition-base);
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring easing */
             cursor: pointer;
-            margin-bottom: var(--space-2);
+            margin-bottom: 8px; /* Things rhythm spacing */
+            border-radius: 8px; /* Soft corners like Things */
+            box-shadow: var(--glass-shadow-sm);
         }
 
         .task-card:last-child {
@@ -2625,9 +2286,8 @@
             background: var(--glass-bg-medium);
             backdrop-filter: var(--glass-blur-md);
             -webkit-backdrop-filter: var(--glass-blur-md);
-            /* UI Designer: Enhanced floating effect on hover */
-            transform: translateY(-2px) var(--scale-hover);
-            box-shadow: var(--shadow-float-lg);
+            transform: translateY(-2px); /* Subtle lift like Things */
+            box-shadow: var(--glass-shadow-md);
         }
 
         .task-card.completed {
@@ -2714,70 +2374,58 @@
 
         .no-tasks {
             text-align: center;
-            color: var(--color-text-secondary);
-            padding: var(--space-16) var(--space-10);
-            /* UI Designer: subtle mesh gradient for personality */
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%),
-                        var(--gradient-mesh);
-            background-blend-mode: overlay;
-            border-radius: var(--radius-2xl);
-            margin: var(--space-10) auto;
+            color: #666;
+            padding: 60px 40px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 16px;
+            margin: 40px auto;
             max-width: 500px;
-            box-shadow: var(--shadow-float-lg);
-            /* Smooth entrance animation */
-            animation: fadeInUp var(--transition-slow) ease-out;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
         }
 
         .no-tasks-illustration {
             font-size: 72px;
-            margin-bottom: var(--space-5);
+            margin-bottom: 20px;
             opacity: 0.9;
-            /* Subtle bounce to draw attention */
-            animation: bounce 2s ease-in-out infinite;
         }
 
         .no-tasks-title {
-            /* Using UI Designer typography system */
-            font-size: var(--font-size-2xl);
-            line-height: var(--line-height-h2);
-            font-weight: var(--font-weight-semibold);
-            color: var(--color-text-primary);
-            margin: 0 0 var(--space-3) 0;
-            letter-spacing: var(--letter-spacing-tight);
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 12px 0;
         }
 
         .no-tasks-message {
-            /* Using UI Designer typography system */
-            font-size: var(--font-size-base);
-            line-height: var(--line-height-body);
-            color: var(--color-text-secondary);
-            margin: 0 0 var(--space-8) 0;
+            font-size: 16px;
+            color: #666;
+            margin: 0 0 30px 0;
+            line-height: 1.6;
         }
 
         .no-tasks-cta {
-            /* UI Designer gradient system with interactive states */
-            background: var(--gradient-sunset);
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);
             color: white;
             border: none;
-            padding: var(--space-3) var(--space-8);
-            border-radius: var(--radius-lg);
-            font-size: var(--font-size-base);
-            font-weight: var(--font-weight-semibold);
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all var(--transition-base);
-            box-shadow: var(--shadow-float), var(--shadow-warning);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
             display: inline-flex;
             align-items: center;
-            gap: var(--space-2);
+            gap: 8px;
         }
 
         .no-tasks-cta:hover {
-            transform: translateY(-2px) var(--scale-hover);
-            box-shadow: var(--shadow-float-lg), 0 8px 20px rgba(245, 158, 11, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
         }
 
         .no-tasks-cta:active {
-            transform: var(--scale-press);
+            transform: translateY(0);
         }
 
         .export-section {
@@ -2811,25 +2459,22 @@
         }
 
         .modal-content {
-            /* UI Designer: Glassmorphism with floating shadow and entrance animation */
+            /* Glassmorphism for modal dialogs */
             background: var(--glass-bg-light);
             backdrop-filter: var(--glass-blur-lg);
             -webkit-backdrop-filter: var(--glass-blur-lg);
             border: var(--glass-border-light);
-            box-shadow: var(--shadow-float-xl), var(--glass-shadow-xl);
+            box-shadow: var(--glass-shadow-xl);
 
             margin: 2vh auto;
             padding: 0;
-            border-radius: var(--radius-2xl);
+            border-radius: 12px;
             max-width: 500px;
             width: 90%;
             max-height: 96vh;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-
-            /* Smooth entrance animation */
-            animation: scaleIn var(--transition-base) var(--bounce-timing);
         }
 
         .modal-header {
@@ -5414,14 +5059,12 @@
             }
             
             .mobile-header-title {
-                /* UI Designer typography system */
-                font-size: var(--font-size-base);
-                line-height: var(--line-height-body);
-                font-weight: var(--font-weight-semibold);
+                font-size: 16px;
+                font-weight: 600;
                 flex: 1;
                 text-align: center;
-                color: var(--color-primary-600);
-                transition: color var(--transition-fast);
+                line-height: 1.1;
+                color: #007aff;
             }
             
             .mobile-header-btn {
@@ -5482,23 +5125,17 @@
                 font-size: 11px;
                 font-weight: 600;
                 cursor: pointer;
-                /* UI Designer transitions for smooth interactions */
-                transition: all var(--transition-base);
-                border-radius: var(--radius-lg);
+                transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* iOS spring */
+                border-radius: 8px;
                 flex: 1;
                 max-width: 80px;
-                box-shadow: var(--shadow-sm);
+                box-shadow: 0 1px 3px var(--things-shadow);
             }
-
-            .mobile-nav-btn:active {
-                transform: var(--scale-press);
-            }
-
+            
             .mobile-nav-btn.active {
                 color: var(--things-accent);
                 background: rgba(46, 91, 255, 0.1); /* Things blue tint */
-                box-shadow: var(--shadow-primary);
-                transform: var(--scale-hover);
+                box-shadow: 0 2px 8px rgba(46, 91, 255, 0.2);
             }
             
             .mobile-nav-btn:hover {
@@ -5635,17 +5272,9 @@
             left: 0;
             right: 0;
             height: 64px;
-            z-index: var(--z-index-sticky);
+            z-index: 9999;
             display: none; /* Hidden by default, shown on mobile */
             overflow: hidden;
-            /* UI Designer floating shadow for modern feel */
-            box-shadow: var(--shadow-float);
-            transition: box-shadow var(--transition-base);
-        }
-
-        /* Enhanced floating effect on scroll */
-        .modern-app-header.scrolled {
-            box-shadow: var(--shadow-float-lg);
         }
         
         /* Gradient Background */
@@ -5655,8 +5284,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            /* UI Designer gradient system */
-            background: var(--gradient-ocean);
+            background: linear-gradient(135deg, #2E5BFF 0%, #1E4FE6 100%);
             opacity: 1;
         }
         
@@ -5683,29 +5311,27 @@
             width: 100%;
             height: 36px;
             background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: var(--glass-blur-md) saturate(180%);
-            -webkit-backdrop-filter: var(--glass-blur-md) saturate(180%);
+            backdrop-filter: blur(10px) saturate(180%);
+            -webkit-backdrop-filter: blur(10px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: var(--radius-full);
-            padding: 0 var(--space-4);
-            font-size: var(--font-size-sm);
-            line-height: var(--line-height-small);
+            border-radius: 20px;
+            padding: 0 16px;
+            font-size: 14px;
             color: white;
             outline: none;
-            transition: all var(--transition-base);
-            font-family: var(--font-sans);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
         }
-
+        
+        .header-search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+        }
+        
         .header-search-input:focus {
             background: rgba(255, 255, 255, 0.25);
             border-color: rgba(255, 255, 255, 0.5);
-            transform: var(--scale-hover);
             box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
-        }
-
-        .header-search-input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: var(--font-weight-normal);
         }
         
         /* Title Wrapper */
@@ -5716,17 +5342,16 @@
             text-align: center;
         }
         
-        /* Dynamic Title - UI Designer system with floating text effect */
+        /* Dynamic Title */
         .header-title {
-            font-size: var(--font-size-lg);
-            line-height: var(--line-height-h3);
-            font-weight: var(--font-weight-semibold);
+            font-size: 18px;
+            font-weight: 600;
             color: white;
             margin: 0;
-            letter-spacing: var(--letter-spacing-tight);
-            font-family: var(--font-sans);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-            transition: all var(--transition-base);
+            letter-spacing: -0.5px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.3s ease;
         }
         
         /* Add Button */
