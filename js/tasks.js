@@ -740,7 +740,11 @@ async function deleteTaskFromModal() {
         
     } catch (error) {
         console.error('❌ Error deleting task from modal:', error);
-        alert('Error deleting task. Please try again.');
+        if (window.toast) {
+            toast.error('Failed to delete task. Please try again.');
+        } else {
+            alert('Error deleting task. Please try again.');
+        }
     }
 }
 
@@ -771,7 +775,11 @@ async function saveTaskEdit() {
         
         if (!title) {
             console.log('❌ No title provided');
-            alert('Please enter a task title');
+            if (window.toast) {
+                toast.warning('Please enter a task title');
+            } else {
+                alert('Please enter a task title');
+            }
             isSaving = false;
             return;
         }
@@ -1018,12 +1026,21 @@ async function saveTaskEdit() {
         setTimeout(() => {
             window.justModifiedTasks = false;
         }, 10000);
-        
+
         console.log('✅ Task saved successfully');
-        
+
+        // Show success toast
+        if (window.toast) {
+            toast.success(isNewTask ? 'Task created successfully' : 'Task updated successfully');
+        }
+
     } catch (error) {
         console.error('❌ Error saving task:', error);
-        alert('Error saving task. Please try again.');
+        if (window.toast) {
+            toast.error('Failed to save task. Please try again.');
+        } else {
+            alert('Error saving task. Please try again.');
+        }
     } finally {
         isSaving = false;
     }
@@ -1323,7 +1340,11 @@ async function createNewTemplate() {
             await saveTemplates();
             renderTemplateButtons();
         } else {
-            alert('Template already exists!');
+            if (window.toast) {
+                toast.warning('Template already exists');
+            } else {
+                alert('Template already exists!');
+            }
         }
     }
 }
@@ -1355,7 +1376,11 @@ async function addNewTemplate() {
     console.log('📋 Current templates:', customTemplates);
     if (customTemplates.includes(template)) {
         console.log('⚠️ Template already exists');
-        alert('Template already exists');
+        if (window.toast) {
+            toast.warning('Template already exists');
+        } else {
+            alert('Template already exists');
+        }
         return;
     }
     
@@ -1532,7 +1557,12 @@ async function deleteTask(taskId, event) {
         if (typeof renderCurrentView === 'function') {
             renderCurrentView();
         }
-        
+
+        // Show success toast
+        if (window.toast) {
+            toast.success('Task deleted successfully');
+        }
+
         // Background sync
         window.justModifiedTasks = true;
         setTimeout(async () => {
@@ -1551,7 +1581,11 @@ async function deleteTask(taskId, event) {
         
     } catch (error) {
         console.error('🗑️ Error deleting task:', error);
-        alert('❌ Error deleting task. Please try again.');
+        if (window.toast) {
+            toast.error('Failed to delete task. Please try again.');
+        } else {
+            alert('❌ Error deleting task. Please try again.');
+        }
     }
 }
 
@@ -1598,7 +1632,13 @@ async function delayTask(taskId, days, event) {
         if (typeof renderCurrentView === 'function') {
             renderCurrentView();
         }
-        
+
+        // Show success toast
+        if (window.toast) {
+            const daysText = days === 1 ? 'day' : 'days';
+            toast.success(`Task delayed by ${days} ${daysText}`);
+        }
+
         // Background sync
         window.justModifiedTasks = true;
         setTimeout(async () => {
@@ -1617,7 +1657,11 @@ async function delayTask(taskId, days, event) {
         
     } catch (error) {
         console.error('Error delaying task:', error);
-        alert('❌ Error delaying task. Please try again.');
+        if (window.toast) {
+            toast.error('Failed to delay task. Please try again.');
+        } else {
+            alert('❌ Error delaying task. Please try again.');
+        }
     }
 }
 
