@@ -22,18 +22,16 @@ function initializeDarkMode() {
     // Check system preference
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    // Priority: saved preference > system preference
+    // Priority: saved preference > light mode default (not system preference)
     if (savedMode !== null) {
         // User has explicitly chosen a mode
         isDarkMode = savedMode === 'true';
         console.log('🌙 Using saved preference:', isDarkMode ? 'dark' : 'light');
-    } else if (prefersDark) {
-        // Use system preference
-        isDarkMode = true;
-        console.log('🌙 Using system preference: dark');
     } else {
+        // Default to LIGHT mode (ignoring system preference)
         isDarkMode = false;
-        console.log('🌙 Using system preference: light');
+        localStorage.setItem('darkMode', 'false');
+        console.log('🌙 Defaulting to light mode (system pref ignored)');
     }
 
     // Apply the mode
