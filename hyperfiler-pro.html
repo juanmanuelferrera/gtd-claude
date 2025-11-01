@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v4.2.4 [Button Reorder]');
+    console.log('🔥 HTML FILE LOADED - HyperFiler Pro v4.2.5 [Week Red + Search Normalized]');
     
     // Register Service Worker for offline support
     if ('serviceWorker' in navigator) {
@@ -290,7 +290,7 @@
                     <h3 class="desktop-only" style="color: #1E4FE6; margin: 0;">🔍 Search Tasks</h3>
                     <div style="display: flex; gap: 8px; align-items: center;">
                         <input type="text" id="searchInput" placeholder="🔍 Search by title, notes, or date..." style="padding: 8px 12px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 12px; max-width: 300px;" onkeyup="performSearch()">
-                        <button class="btn btn-primary btn-small" onclick="openAddTaskModal()" style="background: #ff6b35; border-color: #ff6b35;" data-translate="+ Add Task">+ Add Task</button>
+                        <button class="btn btn-primary btn-small" onclick="openAddTaskModal()" style="background: #ff6b35; border-color: #ff6b35; padding: 8px 12px; font-size: 12px; border-radius: 6px; font-weight: 600;" data-translate="+ Add Task">+ Add Task</button>
                     </div>
                 </div>
                 
@@ -450,7 +450,7 @@
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: nowrap;">
                         <input type="text" id="weekTaskSearch" placeholder="🔍 Week" style="padding: 8px 10px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 12px; width: 100px; min-width: 80px; flex-shrink: 1;" oninput="searchWeekTasks()">
                         <button class="btn btn-small" onclick="previousWeek()" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;">← Prev</button>
-                        <button class="btn btn-primary btn-small" onclick="goToCurrentWeek()" style="background: #2E5BFF; border-color: #2E5BFF; padding: 8px 14px; font-size: 12px; flex-shrink: 0; border-radius: 6px; font-weight: 600;">📍 Week</button>
+                        <button class="btn btn-primary btn-small" onclick="goToCurrentWeek()" style="background: #dc3545; border-color: #dc3545; padding: 8px 14px; font-size: 12px; flex-shrink: 0; border-radius: 6px; font-weight: 600;">📍 Week</button>
                         <button class="btn btn-small" onclick="nextWeek()" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;">Next →</button>
                     </div>
                 </div>
