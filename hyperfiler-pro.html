@@ -12,7 +12,9 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    console.log('🚀 HYPERFILER v4.3.8 LOADED - FORCE CACHE REFRESH - Desktop & Mobile Branding Active [' + new Date().toISOString() + ']');
+    console.log('🚀 HYPERFILER v4.3.9 LOADED - SIDEBAR VISIBILITY FIX [' + new Date().toISOString() + ']');
+    console.log('🖥️ Viewport Width: ' + window.innerWidth + 'px | Height: ' + window.innerHeight + 'px');
+    console.log('📱 Device Type: ' + (window.innerWidth > 768 ? 'DESKTOP' : 'MOBILE') + ' (breakpoint: 769px)');
     
     // Register Service Worker for offline support
     if ('serviceWorker' in navigator) {
@@ -26,7 +28,33 @@
                 });
         });
     }
-    
+
+    // Diagnostic: Check branding visibility after DOM loads
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            const branding = document.getElementById('hyperfiler-branding-v439');
+            if (branding) {
+                const styles = window.getComputedStyle(branding);
+                console.log('✅ Branding element found:', branding);
+                console.log('🎨 Computed display:', styles.display);
+                console.log('🎨 Computed visibility:', styles.visibility);
+                console.log('🎨 Computed opacity:', styles.opacity);
+                console.log('🎨 Dimensions:', branding.offsetWidth + 'x' + branding.offsetHeight + 'px');
+
+                const sidebar = branding.closest('.desktop-sidebar');
+                if (sidebar) {
+                    const sidebarStyles = window.getComputedStyle(sidebar);
+                    console.log('🗂️ Sidebar display:', sidebarStyles.display);
+                    console.log('🗂️ Sidebar dimensions:', sidebar.offsetWidth + 'x' + sidebar.offsetHeight + 'px');
+                } else {
+                    console.error('❌ Sidebar parent not found');
+                }
+            } else {
+                console.error('❌ Branding element NOT found in DOM');
+            }
+        }, 500);
+    });
+
     // Emergency fix - run after page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -62,7 +90,7 @@
     });
     </script>
 
-    <link rel="stylesheet" href="css/styles.css?v=20250111-v438-force">
+    <link rel="stylesheet" href="css/styles.css?v=20250111-v439-sidebar-fix">
     <script src="js/dark-mode.js?v=20250101-dark-mode"></script>
     <script src="js/aria-enhancements.js?v=20250101-aria-v1"></script>
 </head>
@@ -172,8 +200,8 @@
     <div class="desktop-layout">
         <!-- Sidebar Navigation -->
         <div class="desktop-sidebar desktop-only">
-            <!-- Sidebar Branded Header v4.3.8 CACHE BUST -->
-            <div id="hyperfiler-branding-v438" data-version="4.3.8" style="
+            <!-- Sidebar Branded Header v4.3.9 CACHE BUST - VISIBILITY FIX -->
+            <div id="hyperfiler-branding-v439" data-version="4.3.9" style="
                 padding: 16px 10px;
                 border-bottom: 1px solid var(--things-border);
                 margin-bottom: 12px;
@@ -203,7 +231,7 @@
                     letter-spacing: 0.5px;
                     text-align: center;
                 ">
-                    v4.3.8
+                    v4.3.9
                 </div>
                 <div id="sidebarUserInfo" style="
                     font-size: 13px;
