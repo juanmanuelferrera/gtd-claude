@@ -691,10 +691,6 @@
                         <span>➕</span>
                         <span>Create First Section</span>
                     </button>
-                    <button class="no-tasks-cta" onclick="recoverListsFromServer()" style="background: #007bff; margin-top: 12px;">
-                        <span>🔄</span>
-                        <span>Recover from Cloud</span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -2307,60 +2303,7 @@
     <script src="js/patches.js?v=1736363000"></script>
     <script src="extracted_js.js?v=v4.2.2-STABLE"></script>
     <script src="js/missing-functions.js?v=20250106-ULTRA-DEBUG"></script>
-
-    <!-- LISTS RECOVERY FUNCTION -->
-    <script>
-    async function recoverListsFromServer() {
-        console.log('🔍 === LISTS RECOVERY STARTED ===');
-
-        if (!window.currentUser?.user?.id) {
-            alert('❌ Not logged in. Please log in first.');
-            return;
-        }
-
-        try {
-            const authToken = localStorage.getItem('authToken');
-            const userId = window.currentUser.user.id;
-
-            console.log('📡 Fetching lists from server...');
-            const response = await fetch(`${window.API_BASE}/lists/${userId}`, {
-                headers: {'Authorization': `Bearer ${authToken}`}
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const serverLists = data.listSections || [];
-
-                console.log(`📊 Server returned ${serverLists.length} list sections`);
-
-                if (serverLists.length > 0) {
-                    console.log('✅ Found lists on server! Restoring...');
-                    window.listSections = serverLists;
-                    localStorage.setItem('gtd_list_sections', JSON.stringify(serverLists));
-
-                    // Re-render lists view
-                    if (typeof renderListsView === 'function') {
-                        renderListsView();
-                    }
-
-                    alert(`🎉 SUCCESS! Recovered ${serverLists.length} list sections from cloud!`);
-                    console.log('🎉 === RECOVERY COMPLETE ===');
-                } else {
-                    alert('⚠️ No lists found on server. Data may be permanently lost.\n\nCheck for backup JSON files from "Export All" or "Quick Backup".');
-                    console.log('⚠️ Server has no list data');
-                }
-            } else {
-                const errorText = await response.text();
-                console.error('❌ Server error:', response.status, errorText);
-                alert(`❌ Server error: ${response.status}\n\nCheck console for details.`);
-            }
-        } catch (error) {
-            console.error('❌ Recovery error:', error);
-            alert(`❌ Recovery failed: ${error.message}\n\nCheck console for details.`);
-        }
-    }
-    </script>
-
+    
     <!-- Tawk.to Live Chat Integration with automatic language detection -->
 
     <!-- N KEY & ENTER KEY HANDLERS -->
