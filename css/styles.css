@@ -4741,7 +4741,7 @@
             /* CRITICAL: Force show desktop sidebar on all desktop screens */
             .desktop-sidebar.desktop-only {
                 display: block !important;
-                padding-top: 4px !important;
+                padding-top: 0 !important;
             }
 
             /* CRITICAL: Always show Hyperfiler branding on desktop screens */
@@ -4752,7 +4752,8 @@
             #hyperfiler-branding-v4312,
             #hyperfiler-branding-v4313,
             #hyperfiler-branding-v4314,
-            #hyperfiler-branding-v4315 {
+            #hyperfiler-branding-v4315,
+            #hyperfiler-branding-v4316 {
                 display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
