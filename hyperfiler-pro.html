@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>⚡ HyperFiler Pro 🚀 - v2.0.3 STABLE</title>
@@ -3434,7 +3434,9 @@
             /* Add body padding for fixed mobile navigation - MOBILE ONLY */
             body {
                 padding-top: calc(64px + env(safe-area-inset-top, 0px)) !important; /* Height of mobile header with safe area */
-                padding-bottom: 80px !important; /* Height of mobile bottom nav */
+                padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important; /* Height of mobile bottom nav with safe area */
+                padding-left: env(safe-area-inset-left, 0px) !important; /* Safe area for left edge (landscape) */
+                padding-right: env(safe-area-inset-right, 0px) !important; /* Safe area for right edge (landscape) */
             }
             
             .container {
@@ -3459,6 +3461,8 @@
                 justify-content: space-between;
                 padding: 0 16px; /* Things edge padding */
                 padding-top: env(safe-area-inset-top, 8px); /* Add safe area support */
+                padding-left: calc(16px + env(safe-area-inset-left, 0px)); /* Safe area for left edge */
+                padding-right: calc(16px + env(safe-area-inset-right, 0px)); /* Safe area for right edge */
                 z-index: 1000;
                 box-shadow: 0 1px 3px var(--things-shadow); /* Things subtle shadow */
                 backdrop-filter: blur(10px); /* iOS-style blur */
@@ -3518,6 +3522,9 @@
                 display: flex;
                 align-items: center;
                 justify-content: space-around;
+                padding-bottom: env(safe-area-inset-bottom, 0px); /* Add safe area support for home indicator */
+                padding-left: env(safe-area-inset-left, 0px); /* Safe area for left edge */
+                padding-right: env(safe-area-inset-right, 0px); /* Safe area for right edge */
                 z-index: 1000;
                 box-shadow: 0 -1px 3px var(--things-shadow); /* Things subtle shadow */
                 backdrop-filter: blur(10px); /* iOS-style blur */
