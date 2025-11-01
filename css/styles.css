@@ -5431,6 +5431,31 @@
         .header-title.animating {
             animation: titleFadeIn 0.3s ease-out;
         }
+
+        /* Rocket emoji animation */
+        @keyframes rocketFloat {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-3px) rotate(-2deg);
+            }
+            50% {
+                transform: translateY(-5px) rotate(0deg);
+            }
+            75% {
+                transform: translateY(-3px) rotate(2deg);
+            }
+        }
+
+        .rocket-emoji {
+            animation: rocketFloat 2.5s ease-in-out infinite;
+            transform-origin: center center;
+        }
+
+        .rocket-emoji:hover {
+            animation: rocketFloat 0.8s ease-in-out infinite;
+        }
         
         /* Mobile Task Actions - Simplified Single Button */
         
