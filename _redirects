@@ -1,6 +1,5 @@
-# HyperFiler Pro App URLs - Direct access to files
+# HyperFiler Pro App - Use /app for the application
 /app                    /hyperfiler-pro.html   200
-/hyperfiler-pro         /hyperfiler-pro.html   200
 
-# Root and catch-all
-/*                      /index.html            200
+# Root only (not catch-all to avoid loop)
+/                       /index.html            200
