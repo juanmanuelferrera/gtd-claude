@@ -4747,12 +4747,13 @@
             #hyperfiler-branding-v438,
             #hyperfiler-branding-v439,
             #hyperfiler-branding-v4310,
-            #hyperfiler-branding-v4311 {
+            #hyperfiler-branding-v4311,
+            #hyperfiler-branding-v4312 {
                 display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
                 position: relative !important;
-                z-index: 9999 !important;
+                z-index: 1 !important;
             }
 
             /* Ensure desktop navigation takes full width */
