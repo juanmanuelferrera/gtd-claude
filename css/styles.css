@@ -514,6 +514,73 @@
             color: #60a5fa !important;
         }
 
+        /* Modal-specific dark mode overrides */
+        .dark-mode .modal label,
+        .dark-mode .modal [style*="color: #333"],
+        .dark-mode .modal [style*="font-weight: 600"] {
+            color: #f1f5f9 !important;
+        }
+
+        /* Helper text and secondary text in modals */
+        .dark-mode .modal [style*="color: #6c757d"],
+        .dark-mode .modal [style*="color:#6c757d"],
+        .dark-mode .modal [style*="color: #666"],
+        .dark-mode .modal [style*="color:#666"] {
+            color: #94a3b8 !important;
+        }
+
+        /* Modal inputs, textareas, selects with borders */
+        .dark-mode .modal input[type="text"],
+        .dark-mode .modal textarea,
+        .dark-mode .modal select,
+        .dark-mode .modal button[style*="background: transparent"] {
+            background: #0f172a !important;
+            color: #f1f5f9 !important;
+            border-color: #475569 !important;
+        }
+
+        /* Select dropdown options */
+        .dark-mode .modal select option {
+            background: #1e293b !important;
+            color: #f1f5f9 !important;
+        }
+
+        /* Template container and footer backgrounds */
+        .dark-mode .modal [style*="background: #f8f9fa"],
+        .dark-mode .modal [style*="background:#f8f9fa"] {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+        }
+
+        /* Modal border overrides */
+        .dark-mode .modal [style*="border: 2px solid #e1e5e9"],
+        .dark-mode .modal [style*="border: 1px solid #e1e5e9"],
+        .dark-mode .modal [style*="border: 1px solid #dee2e6"],
+        .dark-mode .modal [style*="border: 1px solid #e9ecef"],
+        .dark-mode .modal [style*="border-top: 1px solid #e1e5e9"] {
+            border-color: #475569 !important;
+        }
+
+        /* Input placeholders in dark mode */
+        .dark-mode .modal input::placeholder,
+        .dark-mode .modal textarea::placeholder {
+            color: #64748b !important;
+            opacity: 1;
+        }
+
+        /* Week view day headers in dark mode */
+        .dark-mode .week-day-name {
+            color: #cbd5e1 !important;
+        }
+
+        .dark-mode .week-day-number {
+            color: #f1f5f9 !important;
+        }
+
+        .dark-mode .week-day-header {
+            border-color: #334155 !important;
+        }
+
         /* Dark mode toggle button styling - with glass morphism */
         .dark-mode-toggle {
             position: fixed;
