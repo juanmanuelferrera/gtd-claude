@@ -514,6 +514,39 @@
             color: #60a5fa !important;
         }
 
+        /* Lists view dark mode overrides */
+        .dark-mode .list-section {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+
+        .dark-mode .list-section-content {
+            background: #1e293b !important;
+        }
+
+        .dark-mode .list-section-content > div {
+            background: #1e293b !important;
+        }
+
+        .dark-mode .list-container {
+            background: #1e293b !important;
+        }
+
+        .dark-mode .list-item {
+            background: #1e293b !important;
+            color: #f1f5f9 !important;
+            border-color: #334155 !important;
+        }
+
+        .dark-mode .list-item:hover {
+            background: #334155 !important;
+        }
+
+        .dark-mode .empty-list-section {
+            background: #1e293b !important;
+            color: #94a3b8 !important;
+        }
+
         /* Modal-specific dark mode overrides */
         .dark-mode .modal label,
         .dark-mode .modal [style*="color: #333"],
