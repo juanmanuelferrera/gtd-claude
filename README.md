@@ -1,8 +1,8 @@
-# ⚡ HyperFiler Pro - v2.0 🚀
+# ⚡ HyperFiler Pro - v4.4.2 🚀
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-2.0-blue)
+![Version](https://img.shields.io/badge/version-4.4.2-blue)
 ![Status](https://img.shields.io/badge/status-active-success)
 ![PWA](https://img.shields.io/badge/PWA-ready-brightgreen)
 ![GTD](https://img.shields.io/badge/GTD-powered-orange)
