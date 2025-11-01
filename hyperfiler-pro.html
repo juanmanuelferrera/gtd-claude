@@ -1394,9 +1394,57 @@
         .no-tasks {
             text-align: center;
             color: #666;
-            padding: 40px;
-            background: transparent;
+            padding: 60px 40px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 16px;
+            margin: 40px auto;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .no-tasks-illustration {
+            font-size: 72px;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .no-tasks-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 12px 0;
+        }
+
+        .no-tasks-message {
+            font-size: 16px;
+            color: #666;
+            margin: 0 0 30px 0;
+            line-height: 1.6;
+        }
+
+        .no-tasks-cta {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
             border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .no-tasks-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+        }
+
+        .no-tasks-cta:active {
+            transform: translateY(0);
         }
 
         .export-section {
@@ -2854,33 +2902,54 @@
         }
 
         .empty-list-section {
-            padding: 40px 24px;
+            padding: 50px 24px;
             text-align: center;
             color: #6c757d;
+            background: linear-gradient(135deg, #f3e7f7 0%, #ffffff 100%);
+            border-radius: 12px;
+            margin: 16px;
+        }
+
+        .empty-list-section .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.8;
         }
 
         .empty-list-section h4 {
             margin: 0 0 10px 0;
             color: #9B59B6;
+            font-size: 20px;
         }
 
         .empty-list-section p {
-            margin: 0 0 20px 0;
+            margin: 0 0 24px 0;
             font-size: 14px;
+            line-height: 1.5;
         }
 
         .add-list-btn {
-            background: #9B59B6;
+            background: linear-gradient(135deg, #9B59B6 0%, #b370cf 100%);
             color: white;
             border: none;
-            padding: 12px 20px;
+            padding: 12px 24px;
             border-radius: 8px;
             cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s ease;
+            font-weight: 600;
+            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+        }
+
+        .add-list-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(155, 89, 182, 0.4);
+        }
+
+        .add-list-btn:active {
+            transform: translateY(0);
         }
 
         .add-list-btn:hover {
@@ -4403,7 +4472,13 @@
             
             <div id="tasksContainer">
                 <div class="no-tasks" id="noTasks">
-                    <p>📝 No tasks yet. Add your first task above!</p>
+                    <div class="no-tasks-illustration">🎯</div>
+                    <h3 class="no-tasks-title">No Tasks Yet!</h3>
+                    <p class="no-tasks-message">Start organizing your day by adding your first task. You've got this!</p>
+                    <button class="no-tasks-cta" onclick="openAddTaskModal()">
+                        <span>➕</span>
+                        <span>Add Your First Task</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -4444,10 +4519,14 @@
                 </div>
                 
                 <!-- Empty state -->
-                <div id="noListSections" class="empty-state" style="display: none;">
-                    <h4>📝 No List Sections Yet</h4>
-                    <p>Create your first list section to organize your lists by categories.</p>
-                    <button class="btn btn-primary" onclick="openCreateSectionModal()" style="background: #9B59B6; border-color: #9B59B6;">+ Create First Section</button>
+                <div id="noListSections" class="no-tasks" style="display: none;">
+                    <div class="no-tasks-illustration">🗂️</div>
+                    <h3 class="no-tasks-title">No Sections Yet!</h3>
+                    <p class="no-tasks-message">Organize your lists by creating sections for different categories like Work, Personal, or Projects.</p>
+                    <button class="no-tasks-cta" onclick="openCreateSectionModal()">
+                        <span>➕</span>
+                        <span>Create First Section</span>
+                    </button>
                 </div>
             </div>
         </div>

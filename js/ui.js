@@ -1214,7 +1214,18 @@ function renderTasks(viewType) {
         }
 
         if (filteredTasks.length === 0) {
-            hideSkeletonLoader('tasksContainer', '<div class="no-tasks"><p>📝 No tasks found for this view.</p></div>');
+            const emptyStateHTML = `
+                <div class="no-tasks">
+                    <div class="no-tasks-illustration">✨</div>
+                    <h3 class="no-tasks-title">All Clear!</h3>
+                    <p class="no-tasks-message">No tasks scheduled for this view. Time to plan ahead or enjoy your free time!</p>
+                    <button class="no-tasks-cta" onclick="openAddTaskModal()">
+                        <span>➕</span>
+                        <span>Add a Task</span>
+                    </button>
+                </div>
+            `;
+            hideSkeletonLoader('tasksContainer', emptyStateHTML);
             return;
         }
 
@@ -2845,7 +2856,17 @@ function renderTasksWithSelection(filteredTasks) {
     }
     
     if (filteredTasks.length === 0) {
-        container.innerHTML = '<div class="no-tasks"><p>📝 No tasks found matching your search criteria.</p></div>';
+        container.innerHTML = `
+            <div class="no-tasks">
+                <div class="no-tasks-illustration">🔍</div>
+                <h3 class="no-tasks-title">No Results Found</h3>
+                <p class="no-tasks-message">We couldn't find any tasks matching your search. Try different keywords or add a new task!</p>
+                <button class="no-tasks-cta" onclick="openAddTaskModal()">
+                    <span>➕</span>
+                    <span>Add New Task</span>
+                </button>
+            </div>
+        `;
         return;
     }
     
@@ -4495,10 +4516,12 @@ function renderListsInSection(section) {
     if (!section.lists || section.lists.length === 0) {
         return `
             <div class="empty-list-section">
-                <h4>📝 No Lists Yet</h4>
-                <p>Create your first list in this section.</p>
+                <div class="empty-icon">📋</div>
+                <h4>No Lists Yet</h4>
+                <p>Start organizing by creating your first list in this section!</p>
                 <button class="add-list-btn" onclick="${typeof openCreateListModal === 'function' ? `openCreateListModal('${section.id}')` : 'return false'}">
-                    + Add First List
+                    <span>➕</span>
+                    <span>Create First List</span>
                 </button>
             </div>
         `;
