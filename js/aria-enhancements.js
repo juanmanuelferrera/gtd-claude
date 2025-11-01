@@ -385,11 +385,25 @@ const observer = new MutationObserver((mutations) => {
     });
 });
 
-// Start observing the document for task card additions
-observer.observe(document.body, {
-    childList: true,
-    subtree: true
-});
+// Start observing the document for task card additions (after DOM is ready)
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (document.body) {
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+    });
+} else {
+    // DOM is already ready
+    if (document.body) {
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+}
 
 console.log('✅ ARIA Accessibility System ready');
 console.log('💡 Screen reader support enabled');
