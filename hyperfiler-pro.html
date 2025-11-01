@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    console.log('🚀 HYPERFILER v4.3.9 LOADED - SIDEBAR VISIBILITY FIX [' + new Date().toISOString() + ']');
+    console.log('🚀 HYPERFILER v4.3.10 ULTRA-VISIBLE BRANDING TEST [' + new Date().toISOString() + ']');
     console.log('🖥️ Viewport Width: ' + window.innerWidth + 'px | Height: ' + window.innerHeight + 'px');
     console.log('📱 Device Type: ' + (window.innerWidth > 768 ? 'DESKTOP' : 'MOBILE') + ' (breakpoint: 769px)');
     
@@ -32,7 +32,7 @@
     // Diagnostic: Check branding visibility after DOM loads
     window.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
-            const branding = document.getElementById('hyperfiler-branding-v439');
+            const branding = document.getElementById('hyperfiler-branding-v4310');
             if (branding) {
                 const styles = window.getComputedStyle(branding);
                 console.log('✅ Branding element found:', branding);
@@ -46,6 +46,21 @@
                     const sidebarStyles = window.getComputedStyle(sidebar);
                     console.log('🗂️ Sidebar display:', sidebarStyles.display);
                     console.log('🗂️ Sidebar dimensions:', sidebar.offsetWidth + 'x' + sidebar.offsetHeight + 'px');
+                    console.log('🗂️ Sidebar scrollTop:', sidebar.scrollTop);
+
+                    // FORCE SCROLL TO TOP TO REVEAL BRANDING
+                    sidebar.scrollTop = 0;
+                    console.log('🔝 Forced sidebar scroll to top');
+
+                    // Check position on screen
+                    const rect = branding.getBoundingClientRect();
+                    console.log('📍 Branding screen position:', {
+                        top: rect.top,
+                        left: rect.left,
+                        bottom: rect.bottom,
+                        right: rect.right,
+                        inViewport: rect.top >= 0 && rect.top < window.innerHeight
+                    });
                 } else {
                     console.error('❌ Sidebar parent not found');
                 }
@@ -90,7 +105,7 @@
     });
     </script>
 
-    <link rel="stylesheet" href="css/styles.css?v=20250111-v439-sidebar-fix">
+    <link rel="stylesheet" href="css/styles.css?v=20250111-v4310-yellow-test">
     <script src="js/dark-mode.js?v=20250101-dark-mode"></script>
     <script src="js/aria-enhancements.js?v=20250101-aria-v1"></script>
 </head>
@@ -200,17 +215,20 @@
     <div class="desktop-layout">
         <!-- Sidebar Navigation -->
         <div class="desktop-sidebar desktop-only">
-            <!-- Sidebar Branded Header v4.3.9 CACHE BUST - VISIBILITY FIX -->
-            <div id="hyperfiler-branding-v439" data-version="4.3.9" style="
+            <!-- Sidebar Branded Header v4.3.10 ULTRA-VISIBLE TEST -->
+            <div id="hyperfiler-branding-v4310" data-version="4.3.10" style="
                 padding: 16px 10px;
-                border-bottom: 1px solid var(--things-border);
+                border: 3px solid #ff0000;
                 margin-bottom: 12px;
-                background: rgba(0, 122, 255, 0.05);
+                background: #ffff00 !important;
                 border-radius: 8px;
                 margin: 0 8px 16px 8px;
                 display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
+                position: relative !important;
+                z-index: 9999 !important;
+                min-height: 88px !important;
             ">
                 <h1 style="
                     margin: 0 0 6px 0;
@@ -231,7 +249,7 @@
                     letter-spacing: 0.5px;
                     text-align: center;
                 ">
-                    v4.3.9
+                    v4.3.10
                 </div>
                 <div id="sidebarUserInfo" style="
                     font-size: 13px;

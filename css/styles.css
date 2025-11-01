@@ -4745,10 +4745,13 @@
 
             /* CRITICAL: Always show Hyperfiler branding on desktop screens */
             #hyperfiler-branding-v438,
-            #hyperfiler-branding-v439 {
+            #hyperfiler-branding-v439,
+            #hyperfiler-branding-v4310 {
                 display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
+                position: relative !important;
+                z-index: 9999 !important;
             }
 
             /* Ensure desktop navigation takes full width */
