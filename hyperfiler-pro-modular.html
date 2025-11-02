@@ -19,26 +19,81 @@
     <div id="test-results"></div>
 
     <script>
-    // Test sanitization after modules load
+    // Test all modules after they load
     window.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             const results = document.getElementById('test-results');
+            let testsPassed = 0;
+            let testsFailed = 0;
 
+            // Test sanitization module
             if (typeof window.sanitizeHTML === 'function') {
                 results.innerHTML += '<p>✅ sanitizeHTML loaded</p>';
-
-                // Test it
                 const test = window.sanitizeHTML('<script>alert("test")</script>Hello');
-                results.innerHTML += `<p>✅ sanitizeHTML works: "${test}"</p>`;
+                if (test === 'Hello') {
+                    results.innerHTML += `<p>✅ sanitizeHTML works correctly</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ sanitizeHTML failed: got "${test}"</p>`;
+                    testsFailed++;
+                }
             } else {
                 results.innerHTML += '<p>❌ sanitizeHTML NOT loaded</p>';
+                testsFailed++;
             }
 
             if (typeof window.sanitizeInput === 'function') {
                 results.innerHTML += '<p>✅ sanitizeInput loaded</p>';
+                testsPassed++;
             } else {
                 results.innerHTML += '<p>❌ sanitizeInput NOT loaded</p>';
+                testsFailed++;
             }
+
+            // Test utils module
+            const utilFunctions = [
+                'normalizeDueTime',
+                'escapeHtml',
+                'formatDate',
+                'formatDateForFilename',
+                'formatTime',
+                'getLocalDateString',
+                'validateTaskInput',
+                'validateTaskTitle',
+                'validateTaskNotes'
+            ];
+
+            utilFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            // Test actual functionality
+            const dateTest = window.getLocalDateString(new Date('2025-01-15'));
+            if (dateTest === '2025-01-15') {
+                results.innerHTML += '<p>✅ getLocalDateString works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getLocalDateString failed: got "${dateTest}"</p>`;
+                testsFailed++;
+            }
+
+            const timeNormTest = window.normalizeDueTime('00:00');
+            if (timeNormTest === null) {
+                results.innerHTML += '<p>✅ normalizeDueTime works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ normalizeDueTime failed: got "${timeNormTest}"</p>`;
+                testsFailed++;
+            }
+
+            // Summary
+            results.innerHTML += `<hr><p><strong>Tests: ${testsPassed} passed, ${testsFailed} failed</strong></p>`;
         }, 1000);
     });
     </script>

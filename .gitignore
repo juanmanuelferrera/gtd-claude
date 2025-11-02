@@ -5,7 +5,7 @@ npm-debug.log*
 # Wrangler development files (for Pages deployment)
 .wrangler/
 wrangler.toml
-src/
+# src/ - Removed to allow tracking modular JavaScript architecture
 migrations/
 
 # Environment files
