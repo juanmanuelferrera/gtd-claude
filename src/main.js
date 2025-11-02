@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.19 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.20 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -50,6 +50,42 @@ import {
     isTaskActive,
     getTaskStatusText
 } from './modules/features/tasks.js';
+import {
+    loadEventRegistry,
+    saveEventRegistry,
+    markAsEvent,
+    unmarkAsEvent,
+    isRegisteredEvent,
+    healEventProperties,
+    cleanEventRegistry,
+    saveTasksToLocalStorage,
+    animateTaskCompletion,
+    loadTasksFromLocalStorage,
+    quickAddTaskWithTemplate,
+    updateTaskDate,
+    openDatePicker,
+    openTimePicker,
+    updateTaskTime,
+    duplicateTask,
+    editTask,
+    closeTaskModal,
+    deleteTaskFromModal,
+    saveTaskEdit,
+    openAddTaskModal,
+    loadTemplates,
+    saveTemplates,
+    renderTemplateButtons,
+    insertTemplateToTask,
+    deleteTemplate,
+    createNewTemplate,
+    addNewTemplate,
+    saveStateForUndo,
+    toggleTaskComplete,
+    toggleTaskStatus,
+    deleteTask,
+    delayTask,
+    sortTasks
+} from './modules/features/task-management.js';
 import {
     translations,
     getCurrentLanguage,
@@ -618,9 +654,44 @@ window.syncAll = syncAll;
 window.canSync = canSync;
 window.forceResync = forceResync;
 window.ensureSyncInitialized = ensureSyncInitialized;
+window.loadEventRegistry = loadEventRegistry;
+window.saveEventRegistry = saveEventRegistry;
+window.markAsEvent = markAsEvent;
+window.unmarkAsEvent = unmarkAsEvent;
+window.isRegisteredEvent = isRegisteredEvent;
+window.healEventProperties = healEventProperties;
+window.cleanEventRegistry = cleanEventRegistry;
+window.saveTasksToLocalStorage = saveTasksToLocalStorage;
+window.animateTaskCompletion = animateTaskCompletion;
+window.loadTasksFromLocalStorage = loadTasksFromLocalStorage;
+window.quickAddTaskWithTemplate = quickAddTaskWithTemplate;
+window.updateTaskDate = updateTaskDate;
+window.openDatePicker = openDatePicker;
+window.openTimePicker = openTimePicker;
+window.updateTaskTime = updateTaskTime;
+window.duplicateTask = duplicateTask;
+window.editTask = editTask;
+window.openEditTaskModal = editTask; // Alias for compatibility
+window.closeTaskModal = closeTaskModal;
+window.deleteTaskFromModal = deleteTaskFromModal;
+window.saveTaskEdit = saveTaskEdit;
+window.openAddTaskModal = openAddTaskModal;
+window.loadTemplates = loadTemplates;
+window.saveTemplates = saveTemplates;
+window.renderTemplateButtons = renderTemplateButtons;
+window.insertTemplateToTask = insertTemplateToTask;
+window.deleteTemplate = deleteTemplate;
+window.createNewTemplate = createNewTemplate;
+window.addNewTemplate = addNewTemplate;
+window.saveStateForUndo = saveStateForUndo;
+window.toggleTaskComplete = toggleTaskComplete;
+window.toggleTaskStatus = toggleTaskStatus;
+window.deleteTask = deleteTask;
+window.delayTask = delayTask;
+window.sortTasks = sortTasks;
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language, offline-sync, offline-ui, auth, sync');
+console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language, offline-sync, offline-ui, auth, sync, task-management');
 
 // Initialize global state
 initializeGlobals();

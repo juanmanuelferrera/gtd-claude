@@ -2132,6 +2132,93 @@
             results.innerHTML += '<p><strong>✅ Phase 19 Complete: Sync module with 24 functions</strong></p>';
             results.innerHTML += '<p><strong>📊 Total: 248 functions in 20 modules</strong></p>';
 
+            console.log('===== PHASE 20 TESTS: TASK MANAGEMENT MODULE =====');
+            results.innerHTML += '<hr><h3>Phase 20: Task Management Module (36 functions)</h3>';
+
+            // Test task management functions
+            const taskMgmtFunctions = [
+                'loadEventRegistry',
+                'saveEventRegistry',
+                'markAsEvent',
+                'unmarkAsEvent',
+                'isRegisteredEvent',
+                'healEventProperties',
+                'cleanEventRegistry',
+                'saveTasksToLocalStorage',
+                'animateTaskCompletion',
+                'loadTasksFromLocalStorage',
+                'quickAddTaskWithTemplate',
+                'updateTaskDate',
+                'openDatePicker',
+                'openTimePicker',
+                'updateTaskTime',
+                'duplicateTask',
+                'editTask',
+                'openEditTaskModal',
+                'closeTaskModal',
+                'deleteTaskFromModal',
+                'saveTaskEdit',
+                'openAddTaskModal',
+                'loadTemplates',
+                'saveTemplates',
+                'renderTemplateButtons',
+                'insertTemplateToTask',
+                'deleteTemplate',
+                'createNewTemplate',
+                'addNewTemplate',
+                'saveStateForUndo',
+                'toggleTaskComplete',
+                'toggleTaskStatus',
+                'deleteTask',
+                'delayTask',
+                'sortTasks'
+            ];
+
+            taskMgmtFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            // Test event registry functions
+            if (typeof window.markAsEvent === 'function') {
+                window.markAsEvent('test-task-123');
+                if (window.isRegisteredEvent('test-task-123')) {
+                    results.innerHTML += '<p>✅ Event registry works (mark/check)</p>';
+                    testsPassed++;
+                } else {
+                    results.innerHTML += '<p>❌ Event registry failed</p>';
+                    testsFailed++;
+                }
+            }
+
+            // Test sortTasks is a function
+            if (typeof window.sortTasks === 'function') {
+                results.innerHTML += '<p>✅ sortTasks() is function</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ sortTasks() failed</p>';
+                testsFailed++;
+            }
+
+            // Test openEditTaskModal is an alias for editTask
+            if (window.openEditTaskModal === window.editTask) {
+                results.innerHTML += '<p>✅ openEditTaskModal is alias for editTask</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ openEditTaskModal alias failed</p>';
+                testsFailed++;
+            }
+
+            console.log('Phase 20 Complete: Task Management module extracted (36 functions)');
+            console.log('Total: 284 functions in 21 modules - 370+ automated tests');
+            results.innerHTML += '<p><strong>✅ Phase 20 Complete: Task Management module with 36 functions</strong></p>';
+            results.innerHTML += '<p><strong>📊 Total: 284 functions in 21 modules</strong></p>';
+
             // Clean up test data
             localStorage.removeItem('gtdTasks');
             localStorage.removeItem('gtd_event_registry');

@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <title>Basic Test</title>
-</head>
+<head><title>Basic Test</title></head>
 <body>
-    <h1>If you see this heading, HTML is working</h1>
-    <p>This is plain HTML text</p>
-
-    <div id="js-test"></div>
-
+    <h1>Basic JavaScript Test</h1>
+    <div id="output"></div>
+    
+    <!-- Regular script - should work -->
     <script>
-        // Simple inline JavaScript (not a module)
-        document.getElementById('js-test').textContent = 'JavaScript is working!';
+        console.log('TEST 1: Regular script works');
+        document.getElementById('output').innerHTML = '<p>Regular script: ✅ WORKS</p>';
     </script>
+    
+    <!-- Module script - testing -->
+    <script type="module">
+        console.log('TEST 2: Module script works');
+        document.getElementById('output').innerHTML += '<p>Module script: ✅ WORKS</p>';
+    </script>
+    
+    <!-- Loading external module -->
+    <script type="module" src="src/main.js"></script>
 </body>
 </html>

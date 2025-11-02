@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><title>Minimal Test</title></head>
+<body>
+    <h1>Minimal Module Test</h1>
+    <div id="output"></div>
+    
+    <script>
+        console.log('PAGE LOADED');
+        document.getElementById('output').innerHTML = '<p>Page loaded</p>';
+        
+        setTimeout(() => {
+            console.log('Checking after 2 seconds...');
+            const output = document.getElementById('output');
+            output.innerHTML += '<p>sanitizeHTML type: ' + typeof window.sanitizeHTML + '</p>';
+        }, 2000);
+    </script>
+    
+    <script type="module" src="src/main-minimal.js"></script>
+</body>
+</html>

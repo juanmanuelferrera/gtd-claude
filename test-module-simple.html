@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Module Test</title>
+</head>
+<body>
+    <h1>Simple Module Test</h1>
+    <div id="output"></div>
+    
+    <script>
+        // Log immediately
+        console.log('TEST: HTML loaded');
+        document.getElementById('output').innerHTML = '<p>HTML loaded</p>';
+        
+        // Check after module should load
+        setTimeout(() => {
+            console.log('TEST: Checking window object...');
+            console.log('window.sanitizeHTML exists?', typeof window.sanitizeHTML);
+            console.log('window.sortTasks exists?', typeof window.sortTasks);
+            
+            const output = document.getElementById('output');
+            output.innerHTML += '<p>sanitizeHTML: ' + typeof window.sanitizeHTML + '</p>';
+            output.innerHTML += '<p>sortTasks: ' + typeof window.sortTasks + '</p>';
+            
+            // List all window properties that might be our functions
+            const ourFunctions = [];
+            for (let key in window) {
+                if (key.includes('Task') || key.includes('sanitize') || key.includes('Template')) {
+                    ourFunctions.push(key);
+                }
+            }
+            output.innerHTML += '<p>Found functions: ' + ourFunctions.join(', ') + '</p>';
+        }, 2000);
+    </script>
+    
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>
