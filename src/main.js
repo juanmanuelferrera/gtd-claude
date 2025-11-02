@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.16 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.17 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -230,6 +230,24 @@ import {
     offlineAwareTaskDeletion,
     initializeOfflineSync
 } from './modules/features/offline-sync.js';
+import {
+    TOAST_DURATION,
+    STATUS_UPDATE_INTERVAL,
+    createNetworkStatusIndicator,
+    updateNetworkStatusIndicator,
+    showEnhancedNetworkBadge,
+    createOfflineQueueIndicator,
+    updateOfflineQueueIndicator,
+    showOfflineQueueDetails,
+    showOfflineToast,
+    handleNetworkStatusChange,
+    handleOfflineStatusChange,
+    showConnectionProblem,
+    showSyncSuccess,
+    showSyncError,
+    adjustForMobile,
+    initializeOfflineUI
+} from './modules/ui/offline-ui.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -470,9 +488,41 @@ window.offlineSync = {
     // Constants
     OPERATIONS: QUEUE_OPERATIONS
 };
+window.TOAST_DURATION = TOAST_DURATION;
+window.STATUS_UPDATE_INTERVAL = STATUS_UPDATE_INTERVAL;
+window.createNetworkStatusIndicator = createNetworkStatusIndicator;
+window.updateNetworkStatusIndicator = updateNetworkStatusIndicator;
+window.showEnhancedNetworkBadge = showEnhancedNetworkBadge;
+window.createOfflineQueueIndicator = createOfflineQueueIndicator;
+window.updateOfflineQueueIndicator = updateOfflineQueueIndicator;
+window.showOfflineQueueDetails = showOfflineQueueDetails;
+window.showOfflineToast = showOfflineToast;
+window.handleNetworkStatusChange = handleNetworkStatusChange;
+window.handleOfflineStatusChange = handleOfflineStatusChange;
+window.showConnectionProblem = showConnectionProblem;
+window.showSyncSuccess = showSyncSuccess;
+window.showSyncError = showSyncError;
+window.adjustForMobile = adjustForMobile;
+window.initializeOfflineUI = initializeOfflineUI;
+
+// Create offlineUI convenience object for backward compatibility
+window.offlineUI = {
+    // Toast notifications
+    showToast: showOfflineToast,
+    showConnectionProblem: showConnectionProblem,
+    showSyncSuccess: showSyncSuccess,
+    showSyncError: showSyncError,
+    // Queue details
+    showQueueDetails: showOfflineQueueDetails,
+    // Manual updates
+    updateNetworkIndicator: updateNetworkStatusIndicator,
+    updateQueueIndicator: updateOfflineQueueIndicator,
+    // Initialization
+    initialize: initializeOfflineUI
+};
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language, offline-sync');
+console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language, offline-sync, offline-ui');
 
 // Initialize global state
 initializeGlobals();

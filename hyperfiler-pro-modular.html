@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v4.5.16 Modular (TEST)</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.17 Modular (TEST)</title>
 
     <script>
-    console.log('🧪 TESTING MODULAR VERSION - v4.5.16');
-    console.log('Phase 16 Complete: Offline Sync module extracted (15 functions)');
-    console.log('Total: 190 functions in 17 modules - 260+ automated tests');
+    console.log('🧪 TESTING MODULAR VERSION - v4.5.17');
+    console.log('Phase 17 Complete: Offline UI module extracted (14 functions)');
+    console.log('Total: 204 functions in 18 modules - 270+ automated tests');
     </script>
 
     <link rel="stylesheet" href="css/styles.css">
@@ -1909,6 +1909,68 @@
                 testsPassed++;
             } else {
                 results.innerHTML += '<p>❌ offlineSync.getQueue() failed</p>';
+                testsFailed++;
+            }
+
+            // Test offline-ui functionality
+            const offlineUIFunctions = [
+                'createNetworkStatusIndicator',
+                'updateNetworkStatusIndicator',
+                'showEnhancedNetworkBadge',
+                'createOfflineQueueIndicator',
+                'updateOfflineQueueIndicator',
+                'showOfflineQueueDetails',
+                'showOfflineToast',
+                'handleNetworkStatusChange',
+                'handleOfflineStatusChange',
+                'showConnectionProblem',
+                'showSyncSuccess',
+                'showSyncError',
+                'adjustForMobile',
+                'initializeOfflineUI'
+            ];
+
+            offlineUIFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            // Test constants
+            if (typeof window.TOAST_DURATION === 'number') {
+                results.innerHTML += '<p>✅ TOAST_DURATION constant loaded</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ TOAST_DURATION NOT loaded</p>';
+                testsFailed++;
+            }
+
+            if (typeof window.STATUS_UPDATE_INTERVAL === 'number') {
+                results.innerHTML += '<p>✅ STATUS_UPDATE_INTERVAL constant loaded</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ STATUS_UPDATE_INTERVAL NOT loaded</p>';
+                testsFailed++;
+            }
+
+            // Test offlineUI object API
+            if (window.offlineUI && typeof window.offlineUI.showToast === 'function') {
+                results.innerHTML += '<p>✅ offlineUI object created with showToast</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ offlineUI object missing</p>';
+                testsFailed++;
+            }
+
+            if (typeof window.offlineUI.initialize === 'function') {
+                results.innerHTML += '<p>✅ offlineUI.initialize() exists</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ offlineUI.initialize() missing</p>';
                 testsFailed++;
             }
 
