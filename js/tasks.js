@@ -758,8 +758,11 @@ async function saveTaskEdit() {
         return; // Already saving, prevent duplicate
     }
     isSaving = true;
-    
+
     try {
+        // Determine if this is a new task or editing existing
+        const isNewTask = !currentEditTaskId;
+
         console.log('💾 Getting form data...');
         // Get form data and sanitize inputs
         let title = sanitizeInput(document.getElementById('editTaskTitle').value.trim());
