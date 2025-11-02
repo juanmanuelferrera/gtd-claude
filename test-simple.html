@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Module Test</title>
+</head>
+<body>
+    <h1>Simple Module Test</h1>
+    <div id="output"></div>
+
+    <script type="module">
+        import { sanitizeHTML } from './src/modules/core/sanitization.js';
+
+        const output = document.getElementById('output');
+        output.innerHTML = '<p>✅ Page loaded</p>';
+
+        if (typeof sanitizeHTML === 'function') {
+            output.innerHTML += '<p>✅ Module loaded successfully!</p>';
+            const result = sanitizeHTML('<scr' + 'ipt>bad</scr' + 'ipt>Good');
+            output.innerHTML += `<p>✅ Function works: "${result}"</p>`;
+        } else {
+            output.innerHTML += '<p>❌ Module failed to load</p>';
+        }
+    </script>
+</body>
+</html>

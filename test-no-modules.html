@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Without Modules</title>
+</head>
+<body>
+    <h1>Test Without Modules</h1>
+    <div id="output"></div>
+
+    <script>
+        // Inline the sanitization function (no module import)
+        function sanitizeHTML(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        const output = document.getElementById('output');
+        output.innerHTML = '<p>Page loaded</p>';
+
+        if (typeof sanitizeHTML === 'function') {
+            output.innerHTML += '<p>Function exists</p>';
+            const result = sanitizeHTML('<script>bad</script>Good');
+            output.innerHTML += '<p>Function works: "' + result + '"</p>';
+        } else {
+            output.innerHTML += '<p>Function failed</p>';
+        }
+    </script>
+</body>
+</html>

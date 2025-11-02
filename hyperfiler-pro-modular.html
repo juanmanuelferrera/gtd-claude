@@ -29,9 +29,10 @@
             // Test sanitization module
             if (typeof window.sanitizeHTML === 'function') {
                 results.innerHTML += '<p>✅ sanitizeHTML loaded</p>';
-                const test = window.sanitizeHTML('<script>alert("test")</script>Hello');
-                if (test === 'Hello') {
-                    results.innerHTML += `<p>✅ sanitizeHTML works correctly</p>`;
+                const test = window.sanitizeHTML('Hello<test>World');
+                // sanitizeHTML escapes HTML, so < becomes &lt;
+                if (test.includes('&lt;') && test.includes('&gt;')) {
+                    results.innerHTML += `<p>✅ sanitizeHTML escapes HTML correctly</p>`;
                     testsPassed++;
                 } else {
                     results.innerHTML += `<p>❌ sanitizeHTML failed: got "${test}"</p>`;
