@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.8 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.10 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -133,6 +133,21 @@ import {
     getUndoHistory,
     getUndoState
 } from './modules/features/undo.js';
+import {
+    TOAST_CONFIG,
+    TOAST_TYPES,
+    initializeToastContainer,
+    createToast,
+    showToast,
+    hideToast,
+    showSuccessToast,
+    showErrorToast,
+    showWarningToast,
+    showInfoToast,
+    clearAllToasts,
+    getActiveToastCount,
+    getToastContainer
+} from './modules/ui/notifications.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -247,9 +262,32 @@ window.clearAllStacks = clearAllStacks;
 window.setMaxUndoSteps = setMaxUndoSteps;
 window.getUndoHistory = getUndoHistory;
 window.getUndoState = getUndoState;
+window.TOAST_CONFIG = TOAST_CONFIG;
+window.TOAST_TYPES = TOAST_TYPES;
+window.initializeToastContainer = initializeToastContainer;
+window.createToast = createToast;
+window.showToast = showToast;
+window.hideToast = hideToast;
+window.showSuccessToast = showSuccessToast;
+window.showErrorToast = showErrorToast;
+window.showWarningToast = showWarningToast;
+window.showInfoToast = showInfoToast;
+window.clearAllToasts = clearAllToasts;
+window.getActiveToastCount = getActiveToastCount;
+window.getToastContainer = getToastContainer;
+
+// Create toast convenience object for backward compatibility
+window.toast = {
+    success: showSuccessToast,
+    error: showErrorToast,
+    warning: showWarningToast,
+    info: showInfoToast,
+    show: showToast,
+    clearAll: clearAllToasts
+};
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo');
+console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications');
 
 // TODO: Gradually import more modules as we migrate functions
 // import { TaskManager } from './modules/features/tasks.js';

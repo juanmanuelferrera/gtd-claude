@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v4.5.8 Modular (TEST)</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.10 Modular (TEST)</title>
 
     <script>
-    console.log('🧪 TESTING MODULAR VERSION - v4.5.8');
-    console.log('Phase 9 Complete: Undo module extracted (14 functions)');
-    console.log('Total: 114 functions in 10 modules - 170+ automated tests');
+    console.log('🧪 TESTING MODULAR VERSION - v4.5.10');
+    console.log('Phase 10 Complete: Notifications module extracted (13 functions)');
+    console.log('Total: 127 functions in 11 modules - 190+ automated tests');
     </script>
 
     <link rel="stylesheet" href="css/styles.css">
@@ -197,6 +197,21 @@
                 'getUndoState'
             ];
 
+            // Test notifications module
+            const notificationFunctions = [
+                'initializeToastContainer',
+                'createToast',
+                'showToast',
+                'hideToast',
+                'showSuccessToast',
+                'showErrorToast',
+                'showWarningToast',
+                'showInfoToast',
+                'clearAllToasts',
+                'getActiveToastCount',
+                'getToastContainer'
+            ];
+
             utilFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
@@ -283,6 +298,37 @@
                     testsPassed++;
                 } else {
                     results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            notificationFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            // Test toast object exists
+            if (typeof window.toast === 'object') {
+                results.innerHTML += '<p>✅ toast object loaded</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ toast object NOT loaded</p>';
+                testsFailed++;
+            }
+
+            // Test toast methods
+            const toastMethods = ['success', 'error', 'warning', 'info', 'show', 'clearAll'];
+            toastMethods.forEach(method => {
+                if (typeof window.toast[method] === 'function') {
+                    results.innerHTML += `<p>✅ toast.${method} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ toast.${method} NOT loaded</p>`;
                     testsFailed++;
                 }
             });
@@ -1085,6 +1131,93 @@
                 testsPassed++;
             } else {
                 results.innerHTML += '<p>❌ setMaxUndoSteps failed</p>';
+                testsFailed++;
+            }
+
+            // Test notification functionality
+            const toastContainer = window.initializeToastContainer();
+            if (toastContainer && toastContainer.className === 'toast-container') {
+                results.innerHTML += '<p>✅ initializeToastContainer creates container</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ initializeToastContainer failed</p>';
+                testsFailed++;
+            }
+
+            const testToast = window.createToast({
+                type: 'info',
+                message: 'Test message',
+                duration: 0
+            });
+            if (testToast && testToast.className.includes('toast-info')) {
+                results.innerHTML += '<p>✅ createToast creates toast element</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ createToast failed</p>';
+                testsFailed++;
+            }
+
+            const successToast = window.toast.success('Success test');
+            if (successToast && successToast.className.includes('toast-success')) {
+                results.innerHTML += '<p>✅ toast.success creates success toast</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ toast.success failed</p>';
+                testsFailed++;
+            }
+
+            const errorToast = window.toast.error('Error test');
+            if (errorToast && errorToast.className.includes('toast-error')) {
+                results.innerHTML += '<p>✅ toast.error creates error toast</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ toast.error failed</p>';
+                testsFailed++;
+            }
+
+            const warningToast = window.toast.warning('Warning test');
+            if (warningToast && warningToast.className.includes('toast-warning')) {
+                results.innerHTML += '<p>✅ toast.warning creates warning toast</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ toast.warning failed</p>';
+                testsFailed++;
+            }
+
+            const infoToast = window.toast.info('Info test');
+            if (infoToast && infoToast.className.includes('toast-info')) {
+                results.innerHTML += '<p>✅ toast.info creates info toast</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ toast.info failed</p>';
+                testsFailed++;
+            }
+
+            const toastCount = window.getActiveToastCount();
+            if (toastCount > 0) {
+                results.innerHTML += `<p>✅ getActiveToastCount returns ${toastCount} toasts</p>`;
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getActiveToastCount failed</p>';
+                testsFailed++;
+            }
+
+            window.clearAllToasts();
+            const clearedCount = window.getActiveToastCount();
+            if (clearedCount === 0) {
+                results.innerHTML += '<p>✅ clearAllToasts clears all toasts</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ clearAllToasts failed: ${clearedCount} toasts remaining</p>`;
+                testsFailed++;
+            }
+
+            const containerAfterClear = window.getToastContainer();
+            if (containerAfterClear === null) {
+                results.innerHTML += '<p>✅ Container removed after clearing all toasts</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ Container should be null after clearing all toasts</p>';
                 testsFailed++;
             }
 
