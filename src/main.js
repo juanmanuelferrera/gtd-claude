@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.20 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.21 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -319,6 +319,46 @@ import {
     forceResync,
     ensureSyncInitialized
 } from './modules/features/sync.js';
+import {
+    // View Management (11)
+    showView, switchToMobileView, renderCurrentView, showLoadingState,
+    createSpinner, generateSkeletonLoader, showSkeletonLoader, hideSkeletonLoader,
+    openSearchView, openSettingsView, showSettingsTab,
+    // Navigation (20)
+    goBack, goToToday, goToCurrentWeek, goToCurrentMonth,
+    previousDay, nextDay, previousWeek, nextWeek, previousMonth, nextMonth,
+    previousWeekSmart, nextWeekSmart, previousMonthSmart, nextMonthSmart,
+    getMonday, getCurrentTodayDate, updateMobileDateHeader,
+    updateMobileNavigation, toggleMobileMoreMenu, hideMobileMoreMenu,
+    // Date/Time Display (3)
+    updateCurrentTodayDisplay, updateCurrentWeekDisplay, updateCurrentMonthDisplay,
+    // Rendering (17)
+    renderTodayView, renderWeekView, safeRenderWeekView, renderCalendar,
+    renderAllTasksView, renderRepeatView, renderListsView, renderSettingsView,
+    renderTasks, renderTaskCard, renderStats, updateTodayHeader,
+    groupTasksByDate, getGroupTitle, toggleGroup,
+    loadListSections, renderListsInSection,
+    // Template Filtering (8)
+    renderTodayTemplateFilters, activateTemplateSelector, navigateTemplateButtons,
+    exitTemplateNavigation, highlightTemplateButton, clickTemplateButton,
+    clearAllTemplateFilters, clearAllTemplateHighlights,
+    // Bulk Selection (7)
+    renderTasksWithSelection, toggleTaskSelection, toggleSelectAll,
+    updateBulkSelectionUI, clearAllSelections, delaySelectedTasks, deleteSelectedTasks,
+    // Task Operations (3)
+    completeTask, performAllTasksSearch, verifyTaskFunctions,
+    // Import/Export (4)
+    openTaskImportModal, closeTaskImportModal, importTasksFromTextarea, downloadTextFile,
+    // Review/Reports (11)
+    openReviewFormatModal, closeReviewFormatModal, generateReviewWithSelectedFormats,
+    generateTasksReview, generateSimpleTasksReview, generatePlainTextReport,
+    generateSimplePlainTextReport, generateOrgModeReport, generateSimpleOrgModeReport,
+    openPrintableReport, openHTMLReport,
+    // Utilities (11)
+    showModal, closeModal, showInlineNotification, showOptimisticFeedback,
+    initializeKeyboardNavigation, handleTouchStart, handleTouchMove, handleTouchEnd,
+    initializeUI, forceTaskMigration, fixBulkTaskIds
+} from './modules/ui/ui-components.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -677,8 +717,105 @@ window.deleteTask = deleteTask;
 window.delayTask = delayTask;
 window.sortTasks = sortTasks;
 
+// UI Components Module (Phase 21)
+window.showView = showView;
+window.switchToMobileView = switchToMobileView;
+window.renderCurrentView = renderCurrentView;
+window.showLoadingState = showLoadingState;
+window.createSpinner = createSpinner;
+window.generateSkeletonLoader = generateSkeletonLoader;
+window.showSkeletonLoader = showSkeletonLoader;
+window.hideSkeletonLoader = hideSkeletonLoader;
+window.openSearchView = openSearchView;
+window.openSettingsView = openSettingsView;
+window.showSettingsTab = showSettingsTab;
+window.goBack = goBack;
+window.goToToday = goToToday;
+window.goToCurrentWeek = goToCurrentWeek;
+window.goToCurrentMonth = goToCurrentMonth;
+window.previousDay = previousDay;
+window.nextDay = nextDay;
+window.previousWeek = previousWeek;
+window.nextWeek = nextWeek;
+window.previousMonth = previousMonth;
+window.nextMonth = nextMonth;
+window.previousWeekSmart = previousWeekSmart;
+window.nextWeekSmart = nextWeekSmart;
+window.previousMonthSmart = previousMonthSmart;
+window.nextMonthSmart = nextMonthSmart;
+window.getMonday = getMonday;
+window.getCurrentTodayDate = getCurrentTodayDate;
+window.updateMobileDateHeader = updateMobileDateHeader;
+window.updateMobileNavigation = updateMobileNavigation;
+window.toggleMobileMoreMenu = toggleMobileMoreMenu;
+window.hideMobileMoreMenu = hideMobileMoreMenu;
+window.updateCurrentTodayDisplay = updateCurrentTodayDisplay;
+window.updateCurrentWeekDisplay = updateCurrentWeekDisplay;
+window.updateCurrentMonthDisplay = updateCurrentMonthDisplay;
+window.renderTodayView = renderTodayView;
+window.renderWeekView = renderWeekView;
+window.safeRenderWeekView = safeRenderWeekView;
+window.renderCalendar = renderCalendar;
+window.renderAllTasksView = renderAllTasksView;
+window.renderRepeatView = renderRepeatView;
+window.renderListsView = renderListsView;
+window.renderSettingsView = renderSettingsView;
+window.renderTasks = renderTasks;
+window.renderTaskCard = renderTaskCard;
+window.renderStats = renderStats;
+window.updateTodayHeader = updateTodayHeader;
+window.groupTasksByDate = groupTasksByDate;
+window.getGroupTitle = getGroupTitle;
+window.toggleGroup = toggleGroup;
+window.loadListSections = loadListSections;
+window.renderListsInSection = renderListsInSection;
+window.renderTodayTemplateFilters = renderTodayTemplateFilters;
+window.activateTemplateSelector = activateTemplateSelector;
+window.navigateTemplateButtons = navigateTemplateButtons;
+window.exitTemplateNavigation = exitTemplateNavigation;
+window.highlightTemplateButton = highlightTemplateButton;
+window.clickTemplateButton = clickTemplateButton;
+window.clearAllTemplateFilters = clearAllTemplateFilters;
+window.clearAllTemplateHighlights = clearAllTemplateHighlights;
+window.renderTasksWithSelection = renderTasksWithSelection;
+window.toggleTaskSelection = toggleTaskSelection;
+window.toggleSelectAll = toggleSelectAll;
+window.updateBulkSelectionUI = updateBulkSelectionUI;
+window.clearAllSelections = clearAllSelections;
+window.delaySelectedTasks = delaySelectedTasks;
+window.deleteSelectedTasks = deleteSelectedTasks;
+window.completeTask = completeTask;
+window.performAllTasksSearch = performAllTasksSearch;
+window.verifyTaskFunctions = verifyTaskFunctions;
+window.openTaskImportModal = openTaskImportModal;
+window.closeTaskImportModal = closeTaskImportModal;
+window.importTasksFromTextarea = importTasksFromTextarea;
+window.downloadTextFile = downloadTextFile;
+window.openReviewFormatModal = openReviewFormatModal;
+window.closeReviewFormatModal = closeReviewFormatModal;
+window.generateReviewWithSelectedFormats = generateReviewWithSelectedFormats;
+window.generateTasksReview = generateTasksReview;
+window.generateSimpleTasksReview = generateSimpleTasksReview;
+window.generatePlainTextReport = generatePlainTextReport;
+window.generateSimplePlainTextReport = generateSimplePlainTextReport;
+window.generateOrgModeReport = generateOrgModeReport;
+window.generateSimpleOrgModeReport = generateSimpleOrgModeReport;
+window.openPrintableReport = openPrintableReport;
+window.openHTMLReport = openHTMLReport;
+window.showModal = showModal;
+window.closeModal = closeModal;
+window.showInlineNotification = showInlineNotification;
+window.showOptimisticFeedback = showOptimisticFeedback;
+window.initializeKeyboardNavigation = initializeKeyboardNavigation;
+window.handleTouchStart = handleTouchStart;
+window.handleTouchMove = handleTouchMove;
+window.handleTouchEnd = handleTouchEnd;
+window.initializeUI = initializeUI;
+window.forceTaskMigration = forceTaskMigration;
+window.fixBulkTaskIds = fixBulkTaskIds;
+
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language, offline-sync, offline-ui, auth, sync, task-management');
+console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language, offline-sync, offline-ui, auth, sync, task-management, ui-components');
 
 // Initialize global state
 initializeGlobals();

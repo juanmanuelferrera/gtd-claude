@@ -2214,10 +2214,113 @@
                 testsFailed++;
             }
 
-            console.log('Phase 20 Complete: Task Management module extracted (36 functions)');
-            console.log('Total: 284 functions in 21 modules - 370+ automated tests');
-            results.innerHTML += '<p><strong>✅ Phase 20 Complete: Task Management module with 36 functions</strong></p>';
-            results.innerHTML += '<p><strong>📊 Total: 284 functions in 21 modules</strong></p>';
+            console.log('===== PHASE 21 TESTS: UI COMPONENTS MODULE =====');
+            results.innerHTML += '<hr><h3>Phase 21: UI Components Module (92 functions)</h3>';
+
+            // Test UI component functions
+            const uiComponentFunctions = [
+                // View Management (11)
+                'showView', 'switchToMobileView', 'renderCurrentView', 'showLoadingState',
+                'createSpinner', 'generateSkeletonLoader', 'showSkeletonLoader', 'hideSkeletonLoader',
+                'openSearchView', 'openSettingsView', 'showSettingsTab',
+                // Navigation (20)
+                'goBack', 'goToToday', 'goToCurrentWeek', 'goToCurrentMonth',
+                'previousDay', 'nextDay', 'previousWeek', 'nextWeek', 'previousMonth', 'nextMonth',
+                'previousWeekSmart', 'nextWeekSmart', 'previousMonthSmart', 'nextMonthSmart',
+                'getMonday', 'getCurrentTodayDate', 'updateMobileDateHeader',
+                'updateMobileNavigation', 'toggleMobileMoreMenu', 'hideMobileMoreMenu',
+                // Date/Time Display (3)
+                'updateCurrentTodayDisplay', 'updateCurrentWeekDisplay', 'updateCurrentMonthDisplay',
+                // Rendering (17)
+                'renderTodayView', 'renderWeekView', 'safeRenderWeekView', 'renderCalendar',
+                'renderAllTasksView', 'renderRepeatView', 'renderListsView', 'renderSettingsView',
+                'renderTasks', 'renderTaskCard', 'renderStats', 'updateTodayHeader',
+                'groupTasksByDate', 'getGroupTitle', 'toggleGroup',
+                'loadListSections', 'renderListsInSection',
+                // Template Filtering (8)
+                'renderTodayTemplateFilters', 'activateTemplateSelector', 'navigateTemplateButtons',
+                'exitTemplateNavigation', 'highlightTemplateButton', 'clickTemplateButton',
+                'clearAllTemplateFilters', 'clearAllTemplateHighlights',
+                // Bulk Selection (7)
+                'renderTasksWithSelection', 'toggleTaskSelection', 'toggleSelectAll',
+                'updateBulkSelectionUI', 'clearAllSelections', 'delaySelectedTasks', 'deleteSelectedTasks',
+                // Task Operations (3)
+                'completeTask', 'performAllTasksSearch', 'verifyTaskFunctions',
+                // Import/Export (4)
+                'openTaskImportModal', 'closeTaskImportModal', 'importTasksFromTextarea', 'downloadTextFile',
+                // Review/Reports (11)
+                'openReviewFormatModal', 'closeReviewFormatModal', 'generateReviewWithSelectedFormats',
+                'generateTasksReview', 'generateSimpleTasksReview', 'generatePlainTextReport',
+                'generateSimplePlainTextReport', 'generateOrgModeReport', 'generateSimpleOrgModeReport',
+                'openPrintableReport', 'openHTMLReport',
+                // Utilities (11)
+                'showModal', 'closeModal', 'showInlineNotification', 'showOptimisticFeedback',
+                'initializeKeyboardNavigation', 'handleTouchStart', 'handleTouchMove', 'handleTouchEnd',
+                'initializeUI', 'forceTaskMigration', 'fixBulkTaskIds'
+            ];
+
+            uiComponentFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            // Test skeleton loader generation
+            if (typeof window.generateSkeletonLoader === 'function') {
+                const skeletonHTML = window.generateSkeletonLoader(2);
+                if (skeletonHTML && skeletonHTML.includes('skeleton-container') && skeletonHTML.includes('skeleton-task-card')) {
+                    results.innerHTML += '<p>✅ generateSkeletonLoader creates correct HTML</p>';
+                    testsPassed++;
+                } else {
+                    results.innerHTML += '<p>❌ generateSkeletonLoader HTML structure failed</p>';
+                    testsFailed++;
+                }
+            }
+
+            // Test createSpinner
+            if (typeof window.createSpinner === 'function') {
+                const spinner = window.createSpinner();
+                if (spinner && spinner.includes('spinner')) {
+                    results.innerHTML += '<p>✅ createSpinner creates spinner HTML</p>';
+                    testsPassed++;
+                } else {
+                    results.innerHTML += '<p>❌ createSpinner failed</p>';
+                    testsFailed++;
+                }
+            }
+
+            // Test getCurrentTodayDate
+            if (typeof window.getCurrentTodayDate === 'function') {
+                const todayDate = window.getCurrentTodayDate();
+                if (todayDate instanceof Date) {
+                    results.innerHTML += '<p>✅ getCurrentTodayDate returns Date object</p>';
+                    testsPassed++;
+                } else {
+                    results.innerHTML += '<p>❌ getCurrentTodayDate failed</p>';
+                    testsFailed++;
+                }
+            }
+
+            // Test getMonday
+            if (typeof window.getMonday === 'function') {
+                const monday = window.getMonday(new Date('2025-11-05'));
+                if (monday instanceof Date) {
+                    results.innerHTML += '<p>✅ getMonday returns Date object</p>';
+                    testsPassed++;
+                } else {
+                    results.innerHTML += '<p>❌ getMonday failed</p>';
+                    testsFailed++;
+                }
+            }
+
+            console.log('Phase 21 Complete: UI Components module extracted (92 functions)');
+            console.log('Total: 376 functions in 22 modules - 470+ automated tests');
+            results.innerHTML += '<p><strong>✅ Phase 21 Complete: UI Components module with 92 functions</strong></p>';
+            results.innerHTML += '<p><strong>📊 Total: 376 functions in 22 modules</strong></p>';
 
             // Clean up test data
             localStorage.removeItem('gtdTasks');
