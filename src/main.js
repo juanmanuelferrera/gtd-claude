@@ -72,11 +72,8 @@ import {
     deleteTaskFromModal,
     saveTaskEdit,
     openAddTaskModal,
-    loadTemplates,
-    saveTemplates,
     renderTemplateButtons,
     insertTemplateToTask,
-    deleteTemplate,
     createNewTemplate,
     addNewTemplate,
     saveStateForUndo,
@@ -99,16 +96,6 @@ import {
     getTranslationStats
 } from './modules/core/i18n.js';
 import {
-    saveTasksToLocalStorage,
-    loadTasksFromLocalStorage,
-    sortTasks,
-    loadEventRegistry,
-    saveEventRegistry,
-    markAsEvent,
-    unmarkAsEvent,
-    isRegisteredEvent,
-    healEventProperties,
-    cleanEventRegistry,
     filterTasksByDateRange,
     filterTasksByStatus,
     searchTasks,
