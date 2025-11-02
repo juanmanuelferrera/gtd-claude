@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v4.5.13 Modular (TEST)</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.14 Modular (TEST)</title>
 
     <script>
-    console.log('🧪 TESTING MODULAR VERSION - v4.5.13');
-    console.log('Phase 13 Complete: Network Status module extracted (14 functions)');
-    console.log('Total: 158 functions in 14 modules - 230+ automated tests');
+    console.log('🧪 TESTING MODULAR VERSION - v4.5.14');
+    console.log('Phase 14 Complete: Natural Language module extracted (10 functions)');
+    console.log('Total: 168 functions in 15 modules - 240+ automated tests');
     </script>
 
     <link rel="stylesheet" href="css/styles.css">
@@ -1518,6 +1518,163 @@
                 testsPassed++;
             } else {
                 results.innerHTML += '<p>❌ networkStatus.isOnline() failed</p>';
+                testsFailed++;
+            }
+
+            // Test natural language processing functionality
+            const nlFunctions = [
+                'getDateForRelative',
+                'getDateForWeekday',
+                'getDateForRelativePeriod',
+                'normalizeTime',
+                'extractMetadata',
+                'NL_PATTERNS',
+                'parseNaturalLanguage',
+                'applyParsedData',
+                'setupNaturalLanguageInput',
+                'initializeNaturalLanguage'
+            ];
+
+            nlFunctions.forEach(funcName => {
+                if (funcName === 'NL_PATTERNS') {
+                    if (Array.isArray(window[funcName])) {
+                        results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                        testsPassed++;
+                    } else {
+                        results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                        testsFailed++;
+                    }
+                } else {
+                    if (typeof window[funcName] === 'function') {
+                        results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                        testsPassed++;
+                    } else {
+                        results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                        testsFailed++;
+                    }
+                }
+            });
+
+            // Test getDateForRelative
+            const todayDate = window.getDateForRelative('today');
+            if (todayDate && todayDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                results.innerHTML += '<p>✅ getDateForRelative works for "today"</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getDateForRelative failed: got "${todayDate}"</p>`;
+                testsFailed++;
+            }
+
+            const tomorrowDate = window.getDateForRelative('tomorrow');
+            if (tomorrowDate && tomorrowDate.match(/^\d{4}-\d{2}-\d{2}$/) && tomorrowDate > todayDate) {
+                results.innerHTML += '<p>✅ getDateForRelative works for "tomorrow"</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getDateForRelative tomorrow failed: got "${tomorrowDate}"</p>`;
+                testsFailed++;
+            }
+
+            // Test getDateForWeekday
+            const mondayDate = window.getDateForWeekday('monday');
+            if (mondayDate && mondayDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                results.innerHTML += '<p>✅ getDateForWeekday works for "monday"</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getDateForWeekday failed: got "${mondayDate}"</p>`;
+                testsFailed++;
+            }
+
+            // Test getDateForRelativePeriod
+            const in3Days = window.getDateForRelativePeriod('3', 'days');
+            if (in3Days && in3Days.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                results.innerHTML += '<p>✅ getDateForRelativePeriod works for "3 days"</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getDateForRelativePeriod failed: got "${in3Days}"</p>`;
+                testsFailed++;
+            }
+
+            const inAWeek = window.getDateForRelativePeriod('a', 'week');
+            if (inAWeek && inAWeek.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                results.innerHTML += '<p>✅ getDateForRelativePeriod works for "a week"</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getDateForRelativePeriod "a week" failed: got "${inAWeek}"</p>`;
+                testsFailed++;
+            }
+
+            // Test normalizeTime
+            const time1 = window.normalizeTime('6pm');
+            if (time1 === '18:00') {
+                results.innerHTML += '<p>✅ normalizeTime converts "6pm" to "18:00"</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ normalizeTime failed: got "${time1}"</p>`;
+                testsFailed++;
+            }
+
+            const time2 = window.normalizeTime('9am');
+            if (time2 === '09:00') {
+                results.innerHTML += '<p>✅ normalizeTime converts "9am" to "09:00"</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ normalizeTime failed: got "${time2}"</p>`;
+                testsFailed++;
+            }
+
+            const time3 = window.normalizeTime('12pm');
+            if (time3 === '12:00') {
+                results.innerHTML += '<p>✅ normalizeTime converts "12pm" to "12:00"</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ normalizeTime 12pm failed: got "${time3}"</p>`;
+                testsFailed++;
+            }
+
+            // Test extractMetadata
+            const metadata1 = window.extractMetadata('Task title @work #urgent !!!');
+            if (metadata1.cleanText === 'Task title' && metadata1.priority === 3 && metadata1.tags.length === 2) {
+                results.innerHTML += '<p>✅ extractMetadata extracts tags and priority</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ extractMetadata failed: got "${JSON.stringify(metadata1)}"</p>`;
+                testsFailed++;
+            }
+
+            // Test parseNaturalLanguage
+            const parsed1 = window.parseNaturalLanguage('Meeting tomorrow at 6pm');
+            if (parsed1 && parsed1.title === 'Meeting' && parsed1.date && parsed1.time === '18:00') {
+                results.innerHTML += '<p>✅ parseNaturalLanguage parses "Meeting tomorrow at 6pm"</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ parseNaturalLanguage failed: got "${JSON.stringify(parsed1)}"</p>`;
+                testsFailed++;
+            }
+
+            const parsed2 = window.parseNaturalLanguage('Call John monday 9am');
+            if (parsed2 && parsed2.title === 'Call John' && parsed2.date && parsed2.time === '09:00') {
+                results.innerHTML += '<p>✅ parseNaturalLanguage parses "Call John monday 9am"</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ parseNaturalLanguage monday failed: got "${JSON.stringify(parsed2)}"</p>`;
+                testsFailed++;
+            }
+
+            const parsed3 = window.parseNaturalLanguage('Buy groceries today');
+            if (parsed3 && parsed3.title === 'Buy groceries' && parsed3.date) {
+                results.innerHTML += '<p>✅ parseNaturalLanguage parses "Buy groceries today"</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ parseNaturalLanguage today failed: got "${JSON.stringify(parsed3)}"</p>`;
+                testsFailed++;
+            }
+
+            const parsed4 = window.parseNaturalLanguage('Report in 3 days at 2pm');
+            if (parsed4 && parsed4.title === 'Report' && parsed4.date && parsed4.time === '14:00') {
+                results.innerHTML += '<p>✅ parseNaturalLanguage parses "Report in 3 days at 2pm"</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ parseNaturalLanguage relative period failed: got "${JSON.stringify(parsed4)}"</p>`;
                 testsFailed++;
             }
 

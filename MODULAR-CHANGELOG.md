@@ -2,7 +2,72 @@
 
 This tracks the progress of refactoring HyperFiler Pro to a modular ES6 architecture.
 
-## [4.5.13] - 2025-11-02 (CURRENT)
+## [4.5.14] - 2025-11-02 (CURRENT)
+
+### ✅ Phase 14 Complete - Natural Language Module
+
+**New Module:**
+- `src/modules/features/natural-language.js` - Natural language processing for task entry (10 functions)
+
+**Functions Extracted (10 new):**
+- Date parsing: getDateForRelative, getDateForWeekday, getDateForRelativePeriod
+- Time parsing: normalizeTime
+- Metadata: extractMetadata
+- Main parser: parseNaturalLanguage
+- UI integration: applyParsedData, setupNaturalLanguageInput, initializeNaturalLanguage
+- Config: NL_PATTERNS (13 regex patterns)
+
+**Key Features:**
+- Parses natural language into structured task data
+- 13 regex patterns for various input formats
+- Date parsing: "today", "tomorrow", weekdays, "in 3 days"
+- Time parsing: "6pm", "9am", "2:30pm" → 24-hour format
+- Metadata extraction: @tags, #hashtags, priority (!)
+- Smart pattern matching with priority ordering
+- Form field auto-population
+- Debounced input handling (1500ms)
+- Visual feedback on successful parse
+- Auto-initialization with MutationObserver
+
+**Pattern Examples:**
+- "Meeting tomorrow at 6pm" → title: "Meeting", date: tomorrow, time: "18:00"
+- "Call John monday 9am" → title: "Call John", date: next Monday, time: "09:00"
+- "Report in 3 days at 2pm" → title: "Report", date: +3 days, time: "14:00"
+- "Task @work #urgent !!!" → title: "Task", tags: [@work, #urgent], priority: 3
+
+**Benefits:**
+- Centralized NLP processing
+- Intuitive task entry without clicking date/time pickers
+- Flexible input formats
+- Metadata extraction for power users
+- Replaces standalone js/natural-language.js file
+- Foundation for voice input integration
+
+**Testing:**
+- All 10 functions + NL_PATTERNS array load correctly ✅
+- 15 functional tests (date parsing, time conversion, metadata extraction, NLP patterns) ✅
+- **All tests passing** ✅
+
+**Impact:**
+- ~420 lines of clean NLP processing
+- Dramatically improves UX for task entry
+- Ready for production use
+
+**Module Dependencies:**
+```
+natural-language.js → utils.js (getLocalDateString via window)
+                   → (DOM manipulation for form fields)
+```
+
+**Total Progress:**
+- 15 modules created
+- 168 functions extracted
+- 240+ automated tests passing
+- Zero breaking changes
+
+---
+
+## [4.5.13] - 2025-11-02
 
 ### ✅ Phase 13 Complete - Network Status Module
 

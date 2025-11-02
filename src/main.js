@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.13 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.14 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -189,6 +189,18 @@ import {
     isCurrentlyOnline,
     getConnectionQuality
 } from './modules/features/network-status.js';
+import {
+    getDateForRelative,
+    getDateForWeekday,
+    getDateForRelativePeriod,
+    normalizeTime,
+    extractMetadata,
+    NL_PATTERNS,
+    parseNaturalLanguage,
+    applyParsedData,
+    setupNaturalLanguageInput,
+    initializeNaturalLanguage
+} from './modules/features/natural-language.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -375,9 +387,19 @@ window.networkStatus = {
     shouldShowOfflineIndicators: shouldShowOfflineIndicators,
     initialize: initializeNetworkStatus
 };
+window.getDateForRelative = getDateForRelative;
+window.getDateForWeekday = getDateForWeekday;
+window.getDateForRelativePeriod = getDateForRelativePeriod;
+window.normalizeTime = normalizeTime;
+window.extractMetadata = extractMetadata;
+window.NL_PATTERNS = NL_PATTERNS;
+window.parseNaturalLanguage = parseNaturalLanguage;
+window.applyParsedData = applyParsedData;
+window.setupNaturalLanguageInput = setupNaturalLanguageInput;
+window.initializeNaturalLanguage = initializeNaturalLanguage;
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status');
+console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language');
 
 // TODO: Gradually import more modules as we migrate functions
 // import { TaskManager } from './modules/features/tasks.js';
