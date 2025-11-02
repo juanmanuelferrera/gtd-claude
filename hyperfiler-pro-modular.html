@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v4.5.7 Modular (TEST)</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.8 Modular (TEST)</title>
 
     <script>
-    console.log('🧪 TESTING MODULAR VERSION - v4.5.7');
-    console.log('Phase 8 Complete: Export/Import module extracted (17 functions)');
-    console.log('Total: 100 functions in 9 modules - 156+ automated tests');
+    console.log('🧪 TESTING MODULAR VERSION - v4.5.8');
+    console.log('Phase 9 Complete: Undo module extracted (14 functions)');
+    console.log('Total: 114 functions in 10 modules - 170+ automated tests');
     </script>
 
     <link rel="stylesheet" href="css/styles.css">
@@ -179,6 +179,24 @@
                 'copyToClipboard'
             ];
 
+            // Test undo module
+            const undoFunctions = [
+                'createUndoManager',
+                'saveState',
+                'undo',
+                'redo',
+                'canUndo',
+                'canRedo',
+                'getUndoStack',
+                'getRedoStack',
+                'clearUndoStack',
+                'clearRedoStack',
+                'clearAllStacks',
+                'setMaxUndoSteps',
+                'getUndoHistory',
+                'getUndoState'
+            ];
+
             utilFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
@@ -250,6 +268,16 @@
             });
 
             exportImportFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            undoFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
                     testsPassed++;
@@ -899,6 +927,164 @@
                 testsPassed++;
             } else {
                 results.innerHTML += '<p>❌ isJSONFile rejection failed</p>';
+                testsFailed++;
+            }
+
+            // Test undo functionality
+            const undoManager = window.createUndoManager(5);
+            if (undoManager && undoManager.maxSteps === 5 && undoManager.undoStack.length === 0) {
+                results.innerHTML += '<p>✅ createUndoManager works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ createUndoManager failed</p>';
+                testsFailed++;
+            }
+
+            const state1 = { value: 'first' };
+            const state2 = { value: 'second' };
+            const state3 = { value: 'third' };
+
+            window.saveState(undoManager, state1, 'set first');
+            window.saveState(undoManager, state2, 'set second');
+            window.saveState(undoManager, state3, 'set third');
+
+            if (undoManager.undoStack.length === 3) {
+                results.innerHTML += '<p>✅ saveState adds to undo stack</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ saveState failed: stack length ${undoManager.undoStack.length}</p>`;
+                testsFailed++;
+            }
+
+            const canUndoTest = window.canUndo(undoManager);
+            if (canUndoTest === true) {
+                results.innerHTML += '<p>✅ canUndo returns true when undo available</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ canUndo failed</p>';
+                testsFailed++;
+            }
+
+            const canRedoTest = window.canRedo(undoManager);
+            if (canRedoTest === false) {
+                results.innerHTML += '<p>✅ canRedo returns false when no redo available</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ canRedo failed</p>';
+                testsFailed++;
+            }
+
+            const undoResult = window.undo(undoManager, state3);
+            if (undoResult && undoResult.value === 'second') {
+                results.innerHTML += '<p>✅ undo restores previous state</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ undo failed: got ${JSON.stringify(undoResult)}</p>`;
+                testsFailed++;
+            }
+
+            if (undoManager.undoStack.length === 2 && undoManager.redoStack.length === 1) {
+                results.innerHTML += '<p>✅ undo moves state to redo stack</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ undo stack management failed: undo=${undoManager.undoStack.length}, redo=${undoManager.redoStack.length}</p>`;
+                testsFailed++;
+            }
+
+            const redoResult = window.redo(undoManager, undoResult);
+            if (redoResult && redoResult.value === 'third') {
+                results.innerHTML += '<p>✅ redo restores forward state</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ redo failed: got ${JSON.stringify(redoResult)}</p>`;
+                testsFailed++;
+            }
+
+            const undoStack = window.getUndoStack(undoManager);
+            if (Array.isArray(undoStack) && undoStack.length === 3) {
+                results.innerHTML += '<p>✅ getUndoStack returns copy of stack</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getUndoStack failed</p>';
+                testsFailed++;
+            }
+
+            const redoStack = window.getRedoStack(undoManager);
+            if (Array.isArray(redoStack) && redoStack.length === 0) {
+                results.innerHTML += '<p>✅ getRedoStack returns copy of stack</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getRedoStack failed</p>';
+                testsFailed++;
+            }
+
+            const history = window.getUndoHistory(undoManager);
+            if (history && history.undoCount === 3 && history.canUndo === true) {
+                results.innerHTML += '<p>✅ getUndoHistory returns summary</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getUndoHistory failed</p>';
+                testsFailed++;
+            }
+
+            const undoState = window.getUndoState(undoManager, 0);
+            if (undoState && undoState.action === 'set third') {
+                results.innerHTML += '<p>✅ getUndoState retrieves specific state</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getUndoState failed</p>';
+                testsFailed++;
+            }
+
+            window.clearRedoStack(undoManager);
+            if (undoManager.redoStack.length === 0) {
+                results.innerHTML += '<p>✅ clearRedoStack works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ clearRedoStack failed</p>';
+                testsFailed++;
+            }
+
+            window.clearUndoStack(undoManager);
+            if (undoManager.undoStack.length === 0) {
+                results.innerHTML += '<p>✅ clearUndoStack works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ clearUndoStack failed</p>';
+                testsFailed++;
+            }
+
+            const freshManager = window.createUndoManager(10);
+            window.saveState(freshManager, { test: 1 }, 'action 1');
+            window.saveState(freshManager, { test: 2 }, 'action 2');
+            window.clearAllStacks(freshManager);
+            if (freshManager.undoStack.length === 0 && freshManager.redoStack.length === 0) {
+                results.innerHTML += '<p>✅ clearAllStacks clears both stacks</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ clearAllStacks failed</p>';
+                testsFailed++;
+            }
+
+            const maxStepManager = window.createUndoManager(3);
+            window.saveState(maxStepManager, { n: 1 }, 'a1');
+            window.saveState(maxStepManager, { n: 2 }, 'a2');
+            window.saveState(maxStepManager, { n: 3 }, 'a3');
+            window.saveState(maxStepManager, { n: 4 }, 'a4');
+            if (maxStepManager.undoStack.length === 3) {
+                results.innerHTML += '<p>✅ undo stack respects maxSteps limit</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ maxSteps enforcement failed: got ${maxStepManager.undoStack.length} items</p>`;
+                testsFailed++;
+            }
+
+            window.setMaxUndoSteps(maxStepManager, 2);
+            if (maxStepManager.maxSteps === 2 && maxStepManager.undoStack.length === 2) {
+                results.innerHTML += '<p>✅ setMaxUndoSteps updates limit and trims stack</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ setMaxUndoSteps failed</p>';
                 testsFailed++;
             }
 

@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.7 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.8 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -117,6 +117,22 @@ import {
     isTextFile,
     copyToClipboard
 } from './modules/features/export-import.js';
+import {
+    createUndoManager,
+    saveState,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    getUndoStack,
+    getRedoStack,
+    clearUndoStack,
+    clearRedoStack,
+    clearAllStacks,
+    setMaxUndoSteps,
+    getUndoHistory,
+    getUndoState
+} from './modules/features/undo.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -217,9 +233,23 @@ window.getFileExtension = getFileExtension;
 window.isJSONFile = isJSONFile;
 window.isTextFile = isTextFile;
 window.copyToClipboard = copyToClipboard;
+window.createUndoManager = createUndoManager;
+window.saveState = saveState;
+window.undo = undo;
+window.redo = redo;
+window.canUndo = canUndo;
+window.canRedo = canRedo;
+window.getUndoStack = getUndoStack;
+window.getRedoStack = getRedoStack;
+window.clearUndoStack = clearUndoStack;
+window.clearRedoStack = clearRedoStack;
+window.clearAllStacks = clearAllStacks;
+window.setMaxUndoSteps = setMaxUndoSteps;
+window.getUndoHistory = getUndoHistory;
+window.getUndoState = getUndoState;
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import');
+console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo');
 
 // TODO: Gradually import more modules as we migrate functions
 // import { TaskManager } from './modules/features/tasks.js';
