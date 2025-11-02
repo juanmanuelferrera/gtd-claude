@@ -2,7 +2,59 @@
 
 This tracks the progress of refactoring HyperFiler Pro to a modular ES6 architecture.
 
-## [4.5.11] - 2025-11-02 (CURRENT)
+## [4.5.12] - 2025-11-02 (CURRENT)
+
+### ✅ Phase 12 Complete - Keyboard Shortcuts Module
+
+**New Module:**
+- `src/modules/ui/keyboard-shortcuts.js` - Help modal showing all keyboard shortcuts (7 functions)
+
+**Functions Extracted (7 new):**
+- Modal: createKeyboardShortcutsModal, showKeyboardShortcutsModal, closeKeyboardShortcutsModal
+- Controls: toggleKeyboardShortcutsModal, isKeyboardShortcutsModalOpen
+- Config: getKeyboardShortcuts, initializeKeyboardShortcutsHelp
+- Data: KEYBOARD_SHORTCUTS (config object)
+
+**Key Features:**
+- Help modal triggered by "?" key
+- 4 shortcut categories: Navigation, Date Navigation, Templates, General
+- Beautiful modal with organized sections
+- ARIA accessibility (dialog role, focus trap)
+- Close on Esc or overlay click
+- Auto-initialization with DOM ready detection
+- Prevents trigger when typing in input fields
+
+**Benefits:**
+- Centralized keyboard shortcuts documentation
+- Consistent help UI across app
+- Easy to update shortcuts configuration
+- Accessibility built-in
+- Replaces standalone js/keyboard-shortcuts.js file
+
+**Testing:**
+- All 7 functions + config object load correctly ✅
+- 6 functional tests (config, modal state, show, close, toggle) ✅
+- **All tests passing** ✅
+
+**Impact:**
+- ~230 lines of clean help modal system
+- Foundation for discoverable UI
+- Ready for production use
+
+**Module Dependencies:**
+```
+keyboard-shortcuts.js → (no dependencies - pure UI)
+```
+
+**Total Progress:**
+- 13 modules created
+- 144 functions extracted
+- 217+ automated tests passing
+- Zero breaking changes
+
+---
+
+## [4.5.11] - 2025-11-02
 
 ### ✅ Phase 11 Complete - Dark Mode Module
 

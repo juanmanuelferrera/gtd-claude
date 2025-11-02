@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v4.5.11 Modular (TEST)</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.12 Modular (TEST)</title>
 
     <script>
-    console.log('🧪 TESTING MODULAR VERSION - v4.5.11');
-    console.log('Phase 11 Complete: Dark Mode module extracted (10 functions)');
-    console.log('Total: 137 functions in 12 modules - 205+ automated tests');
+    console.log('🧪 TESTING MODULAR VERSION - v4.5.12');
+    console.log('Phase 12 Complete: Keyboard Shortcuts module extracted (7 functions)');
+    console.log('Total: 144 functions in 13 modules - 217+ automated tests');
     </script>
 
     <link rel="stylesheet" href="css/styles.css">
@@ -226,6 +226,17 @@
                 'disableDarkMode'
             ];
 
+            // Test keyboard-shortcuts module
+            const keyboardShortcutsFunctions = [
+                'createKeyboardShortcutsModal',
+                'showKeyboardShortcutsModal',
+                'closeKeyboardShortcutsModal',
+                'toggleKeyboardShortcutsModal',
+                'isKeyboardShortcutsModalOpen',
+                'getKeyboardShortcuts',
+                'initializeKeyboardShortcutsHelp'
+            ];
+
             utilFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
@@ -356,6 +367,25 @@
                     testsFailed++;
                 }
             });
+
+            keyboardShortcutsFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            // Test KEYBOARD_SHORTCUTS config exists
+            if (typeof window.KEYBOARD_SHORTCUTS === 'object') {
+                results.innerHTML += '<p>✅ KEYBOARD_SHORTCUTS config loaded</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ KEYBOARD_SHORTCUTS config NOT loaded</p>';
+                testsFailed++;
+            }
 
             // Test actual functionality
             const dateTest = window.getLocalDateString(new Date('2025-01-15'));
@@ -1300,6 +1330,61 @@
                 testsPassed++;
             } else {
                 results.innerHTML += '<p>❌ disableDarkMode failed</p>';
+                testsFailed++;
+            }
+
+            // Test keyboard shortcuts functionality
+            const shortcutsConfig = window.getKeyboardShortcuts();
+            if (shortcutsConfig && shortcutsConfig.navigation && shortcutsConfig.general) {
+                results.innerHTML += '<p>✅ getKeyboardShortcuts returns config object</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getKeyboardShortcuts failed</p>';
+                testsFailed++;
+            }
+
+            const isModalOpenBefore = window.isKeyboardShortcutsModalOpen();
+            if (isModalOpenBefore === false) {
+                results.innerHTML += '<p>✅ isKeyboardShortcutsModalOpen returns false initially</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isKeyboardShortcutsModalOpen should be false initially</p>';
+                testsFailed++;
+            }
+
+            const showResult = window.showKeyboardShortcutsModal();
+            if (showResult === true && window.isKeyboardShortcutsModalOpen() === true) {
+                results.innerHTML += '<p>✅ showKeyboardShortcutsModal opens modal</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ showKeyboardShortcutsModal failed</p>';
+                testsFailed++;
+            }
+
+            const closeResult = window.closeKeyboardShortcutsModal();
+            if (closeResult === true && window.isKeyboardShortcutsModalOpen() === false) {
+                results.innerHTML += '<p>✅ closeKeyboardShortcutsModal closes modal</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ closeKeyboardShortcutsModal failed</p>';
+                testsFailed++;
+            }
+
+            const toggleResult = window.toggleKeyboardShortcutsModal();
+            if (toggleResult === true && window.isKeyboardShortcutsModalOpen() === true) {
+                results.innerHTML += '<p>✅ toggleKeyboardShortcutsModal opens modal</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ toggleKeyboardShortcutsModal failed</p>';
+                testsFailed++;
+            }
+
+            const toggleResult2 = window.toggleKeyboardShortcutsModal();
+            if (toggleResult2 === false && window.isKeyboardShortcutsModalOpen() === false) {
+                results.innerHTML += '<p>✅ toggleKeyboardShortcutsModal closes modal</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ toggleKeyboardShortcutsModal close failed</p>';
                 testsFailed++;
             }
 

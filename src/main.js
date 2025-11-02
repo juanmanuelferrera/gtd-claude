@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.11 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.12 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -160,6 +160,16 @@ import {
     enableDarkMode,
     disableDarkMode
 } from './modules/ui/dark-mode.js';
+import {
+    KEYBOARD_SHORTCUTS,
+    createKeyboardShortcutsModal,
+    showKeyboardShortcutsModal,
+    closeKeyboardShortcutsModal,
+    toggleKeyboardShortcutsModal,
+    isKeyboardShortcutsModalOpen,
+    getKeyboardShortcuts,
+    initializeKeyboardShortcutsHelp
+} from './modules/ui/keyboard-shortcuts.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -307,9 +317,17 @@ window.getDarkModeState = getDarkModeState;
 window.isDarkModeEnabled = isDarkModeEnabled;
 window.enableDarkMode = enableDarkMode;
 window.disableDarkMode = disableDarkMode;
+window.KEYBOARD_SHORTCUTS = KEYBOARD_SHORTCUTS;
+window.createKeyboardShortcutsModal = createKeyboardShortcutsModal;
+window.showKeyboardShortcutsModal = showKeyboardShortcutsModal;
+window.closeKeyboardShortcutsModal = closeKeyboardShortcutsModal;
+window.toggleKeyboardShortcutsModal = toggleKeyboardShortcutsModal;
+window.isKeyboardShortcutsModalOpen = isKeyboardShortcutsModalOpen;
+window.getKeyboardShortcuts = getKeyboardShortcuts;
+window.initializeKeyboardShortcutsHelp = initializeKeyboardShortcutsHelp;
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode');
+console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts');
 
 // TODO: Gradually import more modules as we migrate functions
 // import { TaskManager } from './modules/features/tasks.js';
