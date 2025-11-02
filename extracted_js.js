@@ -9128,8 +9128,16 @@
             } else if (viewName === 'settings') {
                 renderSettingsView();
             } else if (viewName === 'search') {
-                document.getElementById('searchInput').focus();
-                performSearch(); // Show all tasks initially
+                // Render search view first, then focus
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput && searchInput.value.trim()) {
+                    performSearch(); // If there's a search term, perform search
+                } else {
+                    renderSearchView(); // Otherwise show empty search state
+                }
+                if (searchInput) {
+                    searchInput.focus();
+                }
             } else if (viewName === 'all') {
                 console.log('showView: switching to all tasks view');
                 renderTasks(viewName);
