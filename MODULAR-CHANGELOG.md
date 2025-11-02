@@ -2,7 +2,53 @@
 
 This tracks the progress of refactoring HyperFiler Pro to a modular ES6 architecture.
 
-## [4.5.21] - 2025-11-02 (CURRENT)
+## [4.5.22] - 2025-11-02 (CURRENT)
+
+### ✅ Phase 22 Complete - Missing Functions Module
+
+**New Module:**
+- `src/modules/features/missing-functions.js` - All remaining functions (154 exported functions)
+
+**Functions Extracted (154 exported):**
+- **Date/Time Pickers & Calendar (40):** openDateTimeModal, closeDateTimeModal, populateDateTimeModal, updateDateTimeDisplay, initUnifiedDateTimeModal, initializeDateTimePickers, openIOSDateTimePicker, openTimeDropdown, closeTimeDropdown, selectTime, clearSelectedTime, highlightSelectedTime, setTimeAndClose, clearTimeAndClose, setTimeQuick, toggleMobileTimeDropdown, closeDateDropdown, selectInlineCalendarDate, changeCalendarMonth, refreshInlineCalendar, setCalendarToday, setCalendarQuickDate, navigateCalendar, goToCalendarToday, setQuickDate, selectAndSetCalendarDay, updateCalendarDisplay, selectCalendarDay, updateSelectedDisplay, formatDateForDisplay, selectCalendarDate, selectModalDate, initCalendarModal, renderCalendarModal, populateDayPicker, applyCalendarDateTime, applyDesktopDateTime, applyMobileDateTime, updateDesktopDateTime
+- **Template Filters (12):** renderWeekTemplateFilters, renderMonthTemplateFilters, filterWeekByTemplate, clearWeekTemplateFilter, filterMonthByTemplate, clearMonthTemplateFilter, filterTodayByTemplate, clearTodayTemplateFilter, clearAllTasksTemplateFilter, handleMobileTemplateFilter, handleAllTasksMobileTemplateFilter, renderTemplateButtonsSection
+- **Search (12):** performSearch, autoExpandSectionsWithResults, performMobileSearch, searchCurrentViewTasks, quickSearch, searchTodayTasks, searchMonthTasks, searchWeekTasks, searchRepeatTasks, searchRecentActions, searchUndoHistory, printSearchResults
+- **Bulk Operations (8):** applyBulkTime, openBulkTimeModal, closeBulkTimeModal, updateSelectedTasksUI, toggleTimeBlock, toggleAllTimeBlocks, toggleAllTimeSlots, moveAllTasksToCurrentTime
+- **Import/Export & Backup (17):** handleFileImport, handleJsonImportFile, handleTextImportFile, importTasks, importJSONBackup, showImportOptionsModal, closeImportModal, showListSelectionForTXTImport, exportTasks, exportTasksJSON, exportAllTasks, exportRepeatHtml, downloadTodayHtml, quickBackupJSON, createEmergencyBackup, checkAllBackups, getBackupSettings
+- **Settings & Configuration (14):** loadSettingsValues, saveWeekStart, saveDateFormat, saveTimeFormat, getWeekStartDay, switchLanguage, toggleKeyboardOnlyMode, applyKeyboardOnlyMode, applyMobileUIVersion, applyTabDisplayMode, toggleAutoPrint, saveAutoPrintTime, updateSyncPeriod, openSettings
+- **Trash & Undo (15):** openTrash, permanentlyDeleteTask, restoreDeletedTask, deleteAllDeletedTasks, restoreAllDeletedTasks, restoreAllTasksUI, performUndo, undoLastAction, undoAllActions, undoSpecificAction, getRecentActions, refreshRecentActionsView, refreshUndoView, renderRecentActionsView, renderFilteredActions
+- **Lists Management (10):** openListModal, renderListItems, closeListItemsModal, openCreateListModal, openCreateSectionModal, toggleAllListSections, toggleAllSections, collapseAllGroups, expandAllGroups, handleAddItemKeyPress
+- **Data Management (9):** clearAllTasks, initiateDeleteAllData, confirmDeleteAllData, cancelDeleteAllData, executeDeleteAllData, showDeleteConfirmationModal, saveTasks, clearTaskModalTimeout, setTaskModalTimeout
+- **Drag & Drop (8):** handleDragStart, handleDragEnd, handleDragEnter, handleDragLeave, handleDragOver, handleTimeSlotDragEnter, handleTimeSlotDragLeave, handleTimeSlotDragOver
+- **Utilities (10):** showNotification, provideFeedback, handleUrlHash, handleImageUpload, triggerImageUpload, parseTime, setupCollapseExpandKeyboardSupport, openAddTaskModalMobile, resetTaskTitle, showSwipeToTomorrowFeedback
+
+**Key Features:**
+- **Advanced Date/Time Pickers:** Unified modal with iOS support, inline calendar, time selection
+- **Template Filtering:** View-specific template filters for Today, Week, and Month views
+- **Comprehensive Search:** Search across all views with auto-expand functionality
+- **Bulk Time Management:** Apply time to multiple tasks, move all tasks to current time
+- **Complete Import/Export:** JSON backup, text import/export, emergency backup system
+- **Settings Management:** Week start, date/time formats, language switching, UI modes
+- **Trash System:** Soft delete, permanent delete, restore with complete UI
+- **Advanced Undo:** Multi-level undo with recent actions tracking and filtering
+- **Lists & Sections:** Complete list management with collapsible sections
+- **Drag & Drop:** Task and time slot drag operations
+- **Mobile Support:** Mobile-specific modals, time dropdowns, and UI adaptations
+
+**Dependencies:**
+- Imports: escapeHtml, formatDate, getLocalDateString (core/utils.js)
+- External: Extensive window globals (will be migrated in future cleanup phase)
+
+**Total Progress:**
+- 23 modules created (17 features, 3 core, 3 ui)
+- 530 functions extracted
+- 627+ automated tests
+- Zero breaking changes
+- **All major function extraction complete!**
+
+---
+
+## [4.5.21] - 2025-11-02
 
 ### ✅ Phase 21 Complete - UI Components Module
 

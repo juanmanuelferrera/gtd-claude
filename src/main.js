@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.21 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.22 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -359,6 +359,62 @@ import {
     initializeKeyboardNavigation, handleTouchStart, handleTouchMove, handleTouchEnd,
     initializeUI, forceTaskMigration, fixBulkTaskIds
 } from './modules/ui/ui-components.js';
+import {
+    // Date/Time Pickers & Calendar
+    openDateTimeModal, closeDateTimeModal, populateDateTimeModal, updateDateTimeDisplay,
+    initUnifiedDateTimeModal, initializeDateTimePickers, openIOSDateTimePicker,
+    openTimeDropdown, closeTimeDropdown, selectTime, clearSelectedTime, highlightSelectedTime,
+    setTimeAndClose, clearTimeAndClose, setTimeQuick, toggleMobileTimeDropdown,
+    closeDateDropdown, selectInlineCalendarDate, changeCalendarMonth, refreshInlineCalendar,
+    setCalendarToday, setCalendarQuickDate, navigateCalendar, goToCalendarToday,
+    setQuickDate, selectAndSetCalendarDay, updateCalendarDisplay, selectCalendarDay,
+    updateSelectedDisplay, formatDateForDisplay, selectCalendarDate, selectModalDate,
+    initCalendarModal, renderCalendarModal, populateDayPicker,
+    applyCalendarDateTime, applyDesktopDateTime, applyMobileDateTime, updateDesktopDateTime,
+    // Template Filters
+    renderWeekTemplateFilters, renderMonthTemplateFilters, filterWeekByTemplate,
+    clearWeekTemplateFilter, filterMonthByTemplate, clearMonthTemplateFilter,
+    filterTodayByTemplate, clearTodayTemplateFilter, clearAllTasksTemplateFilter,
+    handleMobileTemplateFilter, handleAllTasksMobileTemplateFilter, renderTemplateButtonsSection,
+    // Search
+    performSearch, autoExpandSectionsWithResults, performMobileSearch,
+    searchCurrentViewTasks, quickSearch, searchTodayTasks, searchMonthTasks,
+    searchWeekTasks, searchRepeatTasks, searchRecentActions, searchUndoHistory,
+    printSearchResults,
+    // Bulk Operations
+    applyBulkTime, openBulkTimeModal, closeBulkTimeModal, updateSelectedTasksUI,
+    toggleTimeBlock, toggleAllTimeBlocks, toggleAllTimeSlots, moveAllTasksToCurrentTime,
+    // Import/Export & Backup
+    handleFileImport, handleJsonImportFile, handleTextImportFile, importTasks,
+    importJSONBackup, showImportOptionsModal, closeImportModal, showListSelectionForTXTImport,
+    exportTasks, exportTasksJSON, exportAllTasks, exportRepeatHtml, downloadTodayHtml,
+    quickBackupJSON, createEmergencyBackup, checkAllBackups, getBackupSettings,
+    // Settings & Configuration
+    loadSettingsValues, saveWeekStart, saveDateFormat, saveTimeFormat,
+    getWeekStartDay, switchLanguage, toggleKeyboardOnlyMode, applyKeyboardOnlyMode,
+    applyMobileUIVersion, applyTabDisplayMode, toggleAutoPrint, saveAutoPrintTime,
+    updateSyncPeriod, openSettings,
+    // Trash & Undo
+    openTrash, permanentlyDeleteTask, restoreDeletedTask, deleteAllDeletedTasks,
+    restoreAllDeletedTasks, restoreAllTasksUI, performUndo, undoLastAction,
+    undoAllActions, undoSpecificAction, getRecentActions, refreshRecentActionsView,
+    refreshUndoView, renderRecentActionsView, renderFilteredActions,
+    // Lists Management
+    openListModal, renderListItems, closeListItemsModal, openCreateListModal,
+    openCreateSectionModal, toggleAllListSections, toggleAllSections,
+    collapseAllGroups, expandAllGroups, handleAddItemKeyPress,
+    // Data Management
+    clearAllTasks, initiateDeleteAllData, confirmDeleteAllData, cancelDeleteAllData,
+    executeDeleteAllData, showDeleteConfirmationModal, saveTasks, clearTaskModalTimeout,
+    setTaskModalTimeout,
+    // Drag & Drop
+    handleDragStart, handleDragEnd, handleDragEnter, handleDragLeave, handleDragOver,
+    handleTimeSlotDragEnter, handleTimeSlotDragLeave, handleTimeSlotDragOver,
+    // Utilities
+    showNotification, provideFeedback, handleUrlHash, handleImageUpload, triggerImageUpload,
+    parseTime, setupCollapseExpandKeyboardSupport, openAddTaskModalMobile,
+    resetTaskTitle, showSwipeToTomorrowFeedback
+} from './modules/features/missing-functions.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -814,8 +870,164 @@ window.initializeUI = initializeUI;
 window.forceTaskMigration = forceTaskMigration;
 window.fixBulkTaskIds = fixBulkTaskIds;
 
+// Missing Functions Module (Phase 22)
+window.applyBulkTime = applyBulkTime;
+window.applyCalendarDateTime = applyCalendarDateTime;
+window.applyDesktopDateTime = applyDesktopDateTime;
+window.applyKeyboardOnlyMode = applyKeyboardOnlyMode;
+window.applyMobileDateTime = applyMobileDateTime;
+window.applyMobileUIVersion = applyMobileUIVersion;
+window.applyTabDisplayMode = applyTabDisplayMode;
+window.autoExpandSectionsWithResults = autoExpandSectionsWithResults;
+window.cancelDeleteAllData = cancelDeleteAllData;
+window.changeCalendarMonth = changeCalendarMonth;
+window.checkAllBackups = checkAllBackups;
+window.clearAllTasks = clearAllTasks;
+window.clearAllTasksTemplateFilter = clearAllTasksTemplateFilter;
+window.clearMonthTemplateFilter = clearMonthTemplateFilter;
+window.clearSelectedTime = clearSelectedTime;
+window.clearTaskModalTimeout = clearTaskModalTimeout;
+window.clearTimeAndClose = clearTimeAndClose;
+window.clearTodayTemplateFilter = clearTodayTemplateFilter;
+window.clearWeekTemplateFilter = clearWeekTemplateFilter;
+window.closeBulkTimeModal = closeBulkTimeModal;
+window.closeDateDropdown = closeDateDropdown;
+window.closeDateTimeModal = closeDateTimeModal;
+window.closeImportModal = closeImportModal;
+window.closeListItemsModal = closeListItemsModal;
+window.closeTimeDropdown = closeTimeDropdown;
+window.collapseAllGroups = collapseAllGroups;
+window.confirmDeleteAllData = confirmDeleteAllData;
+window.createEmergencyBackup = createEmergencyBackup;
+window.deleteAllDeletedTasks = deleteAllDeletedTasks;
+window.downloadTodayHtml = downloadTodayHtml;
+window.executeDeleteAllData = executeDeleteAllData;
+window.expandAllGroups = expandAllGroups;
+window.exportAllTasks = exportAllTasks;
+window.exportRepeatHtml = exportRepeatHtml;
+window.exportTasks = exportTasks;
+window.exportTasksJSON = exportTasksJSON;
+window.filterMonthByTemplate = filterMonthByTemplate;
+window.filterTodayByTemplate = filterTodayByTemplate;
+window.filterWeekByTemplate = filterWeekByTemplate;
+window.formatDateForDisplay = formatDateForDisplay;
+window.getBackupSettings = getBackupSettings;
+window.getRecentActions = getRecentActions;
+window.getWeekStartDay = getWeekStartDay;
+window.goToCalendarToday = goToCalendarToday;
+window.handleAddItemKeyPress = handleAddItemKeyPress;
+window.handleAllTasksMobileTemplateFilter = handleAllTasksMobileTemplateFilter;
+window.handleDragEnd = handleDragEnd;
+window.handleDragEnter = handleDragEnter;
+window.handleDragLeave = handleDragLeave;
+window.handleDragOver = handleDragOver;
+window.handleDragStart = handleDragStart;
+window.handleFileImport = handleFileImport;
+window.handleImageUpload = handleImageUpload;
+window.handleJsonImportFile = handleJsonImportFile;
+window.handleMobileTemplateFilter = handleMobileTemplateFilter;
+window.handleTextImportFile = handleTextImportFile;
+window.handleTimeSlotDragEnter = handleTimeSlotDragEnter;
+window.handleTimeSlotDragLeave = handleTimeSlotDragLeave;
+window.handleTimeSlotDragOver = handleTimeSlotDragOver;
+window.handleUrlHash = handleUrlHash;
+window.highlightSelectedTime = highlightSelectedTime;
+window.importJSONBackup = importJSONBackup;
+window.importTasks = importTasks;
+window.initCalendarModal = initCalendarModal;
+window.initUnifiedDateTimeModal = initUnifiedDateTimeModal;
+window.initializeDateTimePickers = initializeDateTimePickers;
+window.initiateDeleteAllData = initiateDeleteAllData;
+window.loadSettingsValues = loadSettingsValues;
+window.moveAllTasksToCurrentTime = moveAllTasksToCurrentTime;
+window.navigateCalendar = navigateCalendar;
+window.openAddTaskModalMobile = openAddTaskModalMobile;
+window.openBulkTimeModal = openBulkTimeModal;
+window.openCreateListModal = openCreateListModal;
+window.openCreateSectionModal = openCreateSectionModal;
+window.openDateTimeModal = openDateTimeModal;
+window.openIOSDateTimePicker = openIOSDateTimePicker;
+window.openListModal = openListModal;
+window.openSettings = openSettings;
+window.openTimeDropdown = openTimeDropdown;
+window.openTrash = openTrash;
+window.parseTime = parseTime;
+window.performMobileSearch = performMobileSearch;
+window.performSearch = performSearch;
+window.performUndo = performUndo;
+window.permanentlyDeleteTask = permanentlyDeleteTask;
+window.populateDateTimeModal = populateDateTimeModal;
+window.populateDayPicker = populateDayPicker;
+window.printSearchResults = printSearchResults;
+window.provideFeedback = provideFeedback;
+window.quickBackupJSON = quickBackupJSON;
+window.quickSearch = quickSearch;
+window.refreshInlineCalendar = refreshInlineCalendar;
+window.refreshRecentActionsView = refreshRecentActionsView;
+window.refreshUndoView = refreshUndoView;
+window.renderCalendarModal = renderCalendarModal;
+window.renderFilteredActions = renderFilteredActions;
+window.renderListItems = renderListItems;
+window.renderMonthTemplateFilters = renderMonthTemplateFilters;
+window.renderRecentActionsView = renderRecentActionsView;
+window.renderTemplateButtonsSection = renderTemplateButtonsSection;
+window.renderWeekTemplateFilters = renderWeekTemplateFilters;
+window.resetTaskTitle = resetTaskTitle;
+window.restoreAllDeletedTasks = restoreAllDeletedTasks;
+window.restoreAllTasksUI = restoreAllTasksUI;
+window.restoreDeletedTask = restoreDeletedTask;
+window.saveAutoPrintTime = saveAutoPrintTime;
+window.saveDateFormat = saveDateFormat;
+window.saveTasks = saveTasks;
+window.saveTimeFormat = saveTimeFormat;
+window.saveWeekStart = saveWeekStart;
+window.searchCurrentViewTasks = searchCurrentViewTasks;
+window.searchMonthTasks = searchMonthTasks;
+window.searchRecentActions = searchRecentActions;
+window.searchRepeatTasks = searchRepeatTasks;
+window.searchTodayTasks = searchTodayTasks;
+window.searchUndoHistory = searchUndoHistory;
+window.searchWeekTasks = searchWeekTasks;
+window.selectAndSetCalendarDay = selectAndSetCalendarDay;
+window.selectCalendarDate = selectCalendarDate;
+window.selectCalendarDay = selectCalendarDay;
+window.selectInlineCalendarDate = selectInlineCalendarDate;
+window.selectModalDate = selectModalDate;
+window.selectTime = selectTime;
+window.setCalendarQuickDate = setCalendarQuickDate;
+window.setCalendarToday = setCalendarToday;
+window.setQuickDate = setQuickDate;
+window.setTaskModalTimeout = setTaskModalTimeout;
+window.setTimeAndClose = setTimeAndClose;
+window.setTimeQuick = setTimeQuick;
+window.setupCollapseExpandKeyboardSupport = setupCollapseExpandKeyboardSupport;
+window.showDeleteConfirmationModal = showDeleteConfirmationModal;
+window.showImportOptionsModal = showImportOptionsModal;
+window.showListSelectionForTXTImport = showListSelectionForTXTImport;
+window.showNotification = showNotification;
+window.showSwipeToTomorrowFeedback = showSwipeToTomorrowFeedback;
+window.switchLanguage = switchLanguage;
+window.toggleAllListSections = toggleAllListSections;
+window.toggleAllSections = toggleAllSections;
+window.toggleAllTimeBlocks = toggleAllTimeBlocks;
+window.toggleAllTimeSlots = toggleAllTimeSlots;
+window.toggleAutoPrint = toggleAutoPrint;
+window.toggleKeyboardOnlyMode = toggleKeyboardOnlyMode;
+window.toggleMobileTimeDropdown = toggleMobileTimeDropdown;
+window.toggleTimeBlock = toggleTimeBlock;
+window.triggerImageUpload = triggerImageUpload;
+window.undoAllActions = undoAllActions;
+window.undoLastAction = undoLastAction;
+window.undoSpecificAction = undoSpecificAction;
+window.updateCalendarDisplay = updateCalendarDisplay;
+window.updateDateTimeDisplay = updateDateTimeDisplay;
+window.updateDesktopDateTime = updateDesktopDateTime;
+window.updateSelectedDisplay = updateSelectedDisplay;
+window.updateSelectedTasksUI = updateSelectedTasksUI;
+window.updateSyncPeriod = updateSyncPeriod;
+
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language, offline-sync, offline-ui, auth, sync, task-management, ui-components');
+console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language, offline-sync, offline-ui, auth, sync, task-management, ui-components, missing-functions');
 
 // Initialize global state
 initializeGlobals();

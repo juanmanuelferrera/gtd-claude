@@ -2318,9 +2318,118 @@
             }
 
             console.log('Phase 21 Complete: UI Components module extracted (92 functions)');
-            console.log('Total: 376 functions in 22 modules - 470+ automated tests');
-            results.innerHTML += '<p><strong>✅ Phase 21 Complete: UI Components module with 92 functions</strong></p>';
-            results.innerHTML += '<p><strong>📊 Total: 376 functions in 22 modules</strong></p>';
+
+            console.log('===== PHASE 22 TESTS: MISSING FUNCTIONS MODULE =====');
+            results.innerHTML += '<hr><h3>Phase 22: Missing Functions Module (154 functions)</h3>';
+
+            // Test all 154 missing functions
+            const missingFunctions = [
+                // Date/Time & Calendar (40)
+                'openDateTimeModal', 'closeDateTimeModal', 'populateDateTimeModal', 'updateDateTimeDisplay',
+                'initUnifiedDateTimeModal', 'initializeDateTimePickers', 'openIOSDateTimePicker',
+                'openTimeDropdown', 'closeTimeDropdown', 'selectTime', 'clearSelectedTime', 'highlightSelectedTime',
+                'setTimeAndClose', 'clearTimeAndClose', 'setTimeQuick', 'toggleMobileTimeDropdown',
+                'closeDateDropdown', 'selectInlineCalendarDate', 'changeCalendarMonth', 'refreshInlineCalendar',
+                'setCalendarToday', 'setCalendarQuickDate', 'navigateCalendar', 'goToCalendarToday',
+                'setQuickDate', 'selectAndSetCalendarDay', 'updateCalendarDisplay', 'selectCalendarDay',
+                'updateSelectedDisplay', 'formatDateForDisplay', 'selectCalendarDate', 'selectModalDate',
+                'initCalendarModal', 'renderCalendarModal', 'populateDayPicker',
+                'applyCalendarDateTime', 'applyDesktopDateTime', 'applyMobileDateTime', 'updateDesktopDateTime',
+                // Template Filters (10)
+                'renderWeekTemplateFilters', 'renderMonthTemplateFilters', 'filterWeekByTemplate',
+                'clearWeekTemplateFilter', 'filterMonthByTemplate', 'clearMonthTemplateFilter',
+                'filterTodayByTemplate', 'clearTodayTemplateFilter', 'clearAllTasksTemplateFilter',
+                'handleMobileTemplateFilter', 'handleAllTasksMobileTemplateFilter', 'renderTemplateButtonsSection',
+                // Search (15)
+                'performSearch', 'autoExpandSectionsWithResults', 'performMobileSearch',
+                'searchCurrentViewTasks', 'quickSearch', 'searchTodayTasks', 'searchMonthTasks',
+                'searchWeekTasks', 'searchRepeatTasks', 'searchRecentActions', 'searchUndoHistory',
+                'printSearchResults',
+                // Bulk Operations (10)
+                'applyBulkTime', 'openBulkTimeModal', 'closeBulkTimeModal', 'updateSelectedTasksUI',
+                'toggleTimeBlock', 'toggleAllTimeBlocks', 'toggleAllTimeSlots', 'moveAllTasksToCurrentTime',
+                // Import/Export & Backup (17)
+                'handleFileImport', 'handleJsonImportFile', 'handleTextImportFile', 'importTasks',
+                'importJSONBackup', 'showImportOptionsModal', 'closeImportModal', 'showListSelectionForTXTImport',
+                'exportTasks', 'exportTasksJSON', 'exportAllTasks', 'exportRepeatHtml', 'downloadTodayHtml',
+                'quickBackupJSON', 'createEmergencyBackup', 'checkAllBackups', 'getBackupSettings',
+                // Settings (14)
+                'loadSettingsValues', 'saveWeekStart', 'saveDateFormat', 'saveTimeFormat',
+                'getWeekStartDay', 'switchLanguage', 'toggleKeyboardOnlyMode', 'applyKeyboardOnlyMode',
+                'applyMobileUIVersion', 'applyTabDisplayMode', 'toggleAutoPrint', 'saveAutoPrintTime',
+                'updateSyncPeriod', 'openSettings',
+                // Trash & Undo (15)
+                'openTrash', 'permanentlyDeleteTask', 'restoreDeletedTask', 'deleteAllDeletedTasks',
+                'restoreAllDeletedTasks', 'restoreAllTasksUI', 'performUndo', 'undoLastAction',
+                'undoAllActions', 'undoSpecificAction', 'getRecentActions', 'refreshRecentActionsView',
+                'refreshUndoView', 'renderRecentActionsView', 'renderFilteredActions',
+                // Lists (10)
+                'openListModal', 'renderListItems', 'closeListItemsModal', 'openCreateListModal',
+                'openCreateSectionModal', 'toggleAllListSections', 'toggleAllSections',
+                'collapseAllGroups', 'expandAllGroups', 'handleAddItemKeyPress',
+                // Data (9)
+                'clearAllTasks', 'initiateDeleteAllData', 'confirmDeleteAllData', 'cancelDeleteAllData',
+                'executeDeleteAllData', 'showDeleteConfirmationModal', 'saveTasks', 'clearTaskModalTimeout',
+                'setTaskModalTimeout',
+                // Drag & Drop (8)
+                'handleDragStart', 'handleDragEnd', 'handleDragEnter', 'handleDragLeave', 'handleDragOver',
+                'handleTimeSlotDragEnter', 'handleTimeSlotDragLeave', 'handleTimeSlotDragOver',
+                // Utilities (10)
+                'showNotification', 'provideFeedback', 'handleUrlHash', 'handleImageUpload', 'triggerImageUpload',
+                'parseTime', 'setupCollapseExpandKeyboardSupport', 'openAddTaskModalMobile',
+                'resetTaskTitle', 'showSwipeToTomorrowFeedback'
+            ];
+
+            missingFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            // Test parseTime function
+            if (typeof window.parseTime === 'function') {
+                const time1 = window.parseTime('14:30');
+                if (time1 && time1.hours === 14 && time1.minutes === 30) {
+                    results.innerHTML += '<p>✅ parseTime parses 24h format correctly</p>';
+                    testsPassed++;
+                } else {
+                    results.innerHTML += '<p>❌ parseTime 24h parsing failed</p>';
+                    testsFailed++;
+                }
+            }
+
+            // Test formatDateForDisplay
+            if (typeof window.formatDateForDisplay === 'function') {
+                const formatted = window.formatDateForDisplay(new Date('2025-11-05'));
+                if (formatted && formatted.length > 0) {
+                    results.innerHTML += '<p>✅ formatDateForDisplay returns formatted date</p>';
+                    testsPassed++;
+                } else {
+                    results.innerHTML += '<p>❌ formatDateForDisplay failed</p>';
+                    testsFailed++;
+                }
+            }
+
+            // Test getWeekStartDay
+            if (typeof window.getWeekStartDay === 'function') {
+                const weekStart = window.getWeekStartDay();
+                if (typeof weekStart === 'number') {
+                    results.innerHTML += '<p>✅ getWeekStartDay returns number</p>';
+                    testsPassed++;
+                } else {
+                    results.innerHTML += '<p>❌ getWeekStartDay failed</p>';
+                    testsFailed++;
+                }
+            }
+
+            console.log('Phase 22 Complete: Missing Functions module extracted (154 functions)');
+            console.log('Total: 530 functions in 23 modules - 627+ automated tests');
+            results.innerHTML += '<p><strong>✅ Phase 22 Complete: Missing Functions module with 154 functions</strong></p>';
+            results.innerHTML += '<p><strong>📊 Total: 530 functions in 23 modules</strong></p>';
 
             // Clean up test data
             localStorage.removeItem('gtdTasks');
