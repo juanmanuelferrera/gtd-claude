@@ -66,7 +66,8 @@
                 'Repeat': 'Repeat',
                 'Undo': 'Undo',
                 'Search': 'Search',
-                
+                'Settings': 'Settings',
+
                 // Common buttons
                 'Add Task': 'Add Task',
                 'Save': 'Save',
@@ -178,7 +179,8 @@
                 'Repeat': 'Repetir',
                 'Undo': 'Deshacer',
                 'Search': 'Buscar',
-                
+                'Settings': 'Ajustes',
+
                 // Common buttons
                 'Add Task': 'Agregar Tarea',
                 'Save': 'Guardar',
@@ -484,17 +486,18 @@
         function translateUI() {
             // Translate navigation buttons with explicit emoji mapping
             const navButtons = {
-                'nav-today': { icon: '🔥', key: 'Today' },
-                'nav-week': { icon: '📅', key: 'Week' },
-                'nav-calendar': { icon: '🗓️', key: 'Month' },
-                'nav-all': { icon: '🔍', key: 'Search' },
-                'nav-lists': { icon: '📝', key: 'Lists' },
-                'nav-repeat': { icon: '🔄', key: 'Repeat' },
-                'nav-undo': { icon: '↶', key: 'Undo' }
+                'nav-today': { icon: '📋', key: 'Today', shortcut: 'D' },
+                'nav-week': { icon: '📊', key: 'Week', shortcut: 'W' },
+                'nav-calendar': { icon: '📆', key: 'Month', shortcut: 'M' },
+                'nav-all': { icon: '🔍', key: 'Search', shortcut: 'S' },
+                'nav-lists': { icon: '📂', key: 'Lists', shortcut: 'L' },
+                'nav-repeat': { icon: '🔄', key: 'Repeat', shortcut: 'R' },
+                'nav-recent-actions': { icon: '⏮️', key: 'Undo', shortcut: 'U' },
+                'nav-settings': { icon: '⚙️', key: 'Settings', shortcut: 'X' }
             };
             // Get current tab display mode to respect user preference
             const currentTabDisplayMode = localStorage.getItem('tabDisplayMode') || 'both';
-            
+
             Object.entries(navButtons).forEach(([id, config]) => {
                 const element = document.getElementById(id);
                 if (element) {
@@ -512,7 +515,8 @@
                             content = `${config.icon} ${translatedText}`;
                             break;
                     }
-                    element.textContent = content;
+                    // Preserve keyboard shortcut span
+                    element.innerHTML = `${content} <span style="opacity: 0.7; font-size: 11px; color: #666;">${config.shortcut}</span>`;
                 }
             });
             // Translate section headers
