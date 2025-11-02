@@ -16,6 +16,18 @@ import {
     validateTaskTitle,
     validateTaskNotes
 } from './modules/core/utils.js';
+import {
+    getLocal,
+    setLocal,
+    removeLocal,
+    clearLocal,
+    getSession,
+    setSession,
+    removeSession,
+    clearSession,
+    isLocalStorageAvailable,
+    isSessionStorageAvailable
+} from './modules/core/storage.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -29,9 +41,19 @@ window.getLocalDateString = getLocalDateString;
 window.validateTaskInput = validateTaskInput;
 window.validateTaskTitle = validateTaskTitle;
 window.validateTaskNotes = validateTaskNotes;
+window.getLocal = getLocal;
+window.setLocal = setLocal;
+window.removeLocal = removeLocal;
+window.clearLocal = clearLocal;
+window.getSession = getSession;
+window.setSession = setSession;
+window.removeSession = removeSession;
+window.clearSession = clearSession;
+window.isLocalStorageAvailable = isLocalStorageAvailable;
+window.isSessionStorageAvailable = isSessionStorageAvailable;
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, utils');
+console.log('📦 Modules loaded: sanitization, utils, storage');
 
 // TODO: Gradually import more modules as we migrate functions
 // import { TaskManager } from './modules/features/tasks.js';

@@ -65,7 +65,31 @@
                 'validateTaskNotes'
             ];
 
+            // Test storage module
+            const storageFunctions = [
+                'getLocal',
+                'setLocal',
+                'removeLocal',
+                'clearLocal',
+                'getSession',
+                'setSession',
+                'removeSession',
+                'clearSession',
+                'isLocalStorageAvailable',
+                'isSessionStorageAvailable'
+            ];
+
             utilFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            storageFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
                     testsPassed++;
@@ -91,6 +115,47 @@
                 testsPassed++;
             } else {
                 results.innerHTML += `<p>❌ normalizeDueTime failed: got "${timeNormTest}"</p>`;
+                testsFailed++;
+            }
+
+            // Test storage functionality
+            const testKey = '__modular_test__';
+            const testValue = { foo: 'bar', num: 42 };
+
+            const setResult = window.setLocal(testKey, testValue);
+            if (setResult) {
+                results.innerHTML += '<p>✅ setLocal works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ setLocal failed</p>';
+                testsFailed++;
+            }
+
+            const getResult = window.getLocal(testKey);
+            if (JSON.stringify(getResult) === JSON.stringify(testValue)) {
+                results.innerHTML += '<p>✅ getLocal works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getLocal failed: got ${JSON.stringify(getResult)}</p>`;
+                testsFailed++;
+            }
+
+            const removeResult = window.removeLocal(testKey);
+            const afterRemove = window.getLocal(testKey);
+            if (removeResult && afterRemove === null) {
+                results.innerHTML += '<p>✅ removeLocal works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ removeLocal failed</p>';
+                testsFailed++;
+            }
+
+            const isAvailable = window.isLocalStorageAvailable();
+            if (isAvailable === true) {
+                results.innerHTML += '<p>✅ isLocalStorageAvailable works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isLocalStorageAvailable failed</p>';
                 testsFailed++;
             }
 
