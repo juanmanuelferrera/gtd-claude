@@ -1,10 +1,19 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.14 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.15 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
+import {
+    initializeGlobals,
+    checkGlobalsInitialized,
+    resetGlobals,
+    getGlobalState,
+    getCriticalGlobalNames,
+    getAllGlobalNames,
+    isGlobalInitialized
+} from './modules/core/globals.js';
 import {
     normalizeDueTime,
     escapeHtml,
@@ -205,6 +214,13 @@ import {
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
 window.sanitizeInput = sanitizeInput;
+window.initializeGlobals = initializeGlobals;
+window.checkGlobalsInitialized = checkGlobalsInitialized;
+window.resetGlobals = resetGlobals;
+window.getGlobalState = getGlobalState;
+window.getCriticalGlobalNames = getCriticalGlobalNames;
+window.getAllGlobalNames = getAllGlobalNames;
+window.isGlobalInitialized = isGlobalInitialized;
 window.normalizeDueTime = normalizeDueTime;
 window.escapeHtml = escapeHtml;
 window.formatDate = formatDate;
@@ -399,7 +415,10 @@ window.setupNaturalLanguageInput = setupNaturalLanguageInput;
 window.initializeNaturalLanguage = initializeNaturalLanguage;
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language');
+console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language');
+
+// Initialize global state
+initializeGlobals();
 
 // TODO: Gradually import more modules as we migrate functions
 // import { TaskManager } from './modules/features/tasks.js';

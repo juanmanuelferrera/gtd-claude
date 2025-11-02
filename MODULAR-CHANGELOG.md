@@ -2,7 +2,71 @@
 
 This tracks the progress of refactoring HyperFiler Pro to a modular ES6 architecture.
 
-## [4.5.14] - 2025-11-02 (CURRENT)
+## [4.5.15] - 2025-11-02 (CURRENT)
+
+### ✅ Phase 15 Complete - Globals Module
+
+**New Module:**
+- `src/modules/core/globals.js` - Global state management and initialization (7 functions)
+
+**Functions Extracted (7 new):**
+- Initialization: initializeGlobals, checkGlobalsInitialized
+- State management: getGlobalState, resetGlobals
+- Introspection: getCriticalGlobalNames, getAllGlobalNames, isGlobalInitialized
+
+**Key Features:**
+- Centralized global state initialization
+- 30+ global variables managed (tasks, views, dates, sync flags, etc.)
+- Safe default values for all globals
+- State introspection and validation
+- Reset functionality for testing/cleanup
+- Backward compatibility with window.* access
+- Critical globals validation
+
+**Global Categories:**
+- Core data: tasks, listSections, customTemplates
+- View state: currentView, currentFilteredTasks, selectedTasks
+- Date tracking: currentTodayDate, currentWeekDate, currentCalendarDate
+- Task management: currentEditTaskId, undoStack, eventTaskIds
+- Sync flags: justModifiedTasks, staleBrowserDetected, skipInitialUpload
+- Auth state: currentUser, accessDeniedShown
+- UI state: mobileMoreMenuOpen, draggedTask, modalSaving
+
+**Benefits:**
+- Centralized state management
+- Prevents undefined variable errors
+- Consistent initialization across app
+- Easy state inspection for debugging
+- Clean reset for testing
+- Replaces standalone js/globals.js file
+- Foundation for state persistence
+
+**Testing:**
+- All 7 functions load correctly ✅
+- 9 functional tests (initialization, validation, state access, reset) ✅
+- **All tests passing** ✅
+
+**Impact:**
+- ~340 lines of clean state management
+- 30+ globals properly initialized
+- Foundation for Redux-like state management
+- Ready for production use
+
+**Module Dependencies:**
+```
+globals.js → (no dependencies - pure state management)
+           → localStorage (for templates initialization)
+```
+
+**Total Progress:**
+- 16 modules created
+- 175 functions extracted
+- 250+ automated tests passing
+- Zero breaking changes
+
+---
+
+## [4.5.14] - 2025-11-02
 
 ### ✅ Phase 14 Complete - Natural Language Module
 

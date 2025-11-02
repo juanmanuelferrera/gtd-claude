@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v4.5.14 Modular (TEST)</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.15 Modular (TEST)</title>
 
     <script>
-    console.log('🧪 TESTING MODULAR VERSION - v4.5.14');
-    console.log('Phase 14 Complete: Natural Language module extracted (10 functions)');
-    console.log('Total: 168 functions in 15 modules - 240+ automated tests');
+    console.log('🧪 TESTING MODULAR VERSION - v4.5.15');
+    console.log('Phase 15 Complete: Globals module extracted (7 functions)');
+    console.log('Total: 175 functions in 16 modules - 250+ automated tests');
     </script>
 
     <link rel="stylesheet" href="css/styles.css">
@@ -1675,6 +1675,107 @@
                 testsPassed++;
             } else {
                 results.innerHTML += `<p>❌ parseNaturalLanguage relative period failed: got "${JSON.stringify(parsed4)}"</p>`;
+                testsFailed++;
+            }
+
+            // Test globals functionality
+            const globalsFunctions = [
+                'initializeGlobals',
+                'checkGlobalsInitialized',
+                'resetGlobals',
+                'getGlobalState',
+                'getCriticalGlobalNames',
+                'getAllGlobalNames',
+                'isGlobalInitialized'
+            ];
+
+            globalsFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            // Test initializeGlobals
+            const initResult = window.initializeGlobals();
+            if (initResult === true) {
+                results.innerHTML += '<p>✅ initializeGlobals returns true</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ initializeGlobals failed</p>';
+                testsFailed++;
+            }
+
+            // Test checkGlobalsInitialized
+            const checkResult = window.checkGlobalsInitialized();
+            if (checkResult === true) {
+                results.innerHTML += '<p>✅ checkGlobalsInitialized returns true</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ checkGlobalsInitialized failed</p>';
+                testsFailed++;
+            }
+
+            // Test getCriticalGlobalNames
+            const criticalNames = window.getCriticalGlobalNames();
+            if (Array.isArray(criticalNames) && criticalNames.length > 10) {
+                results.innerHTML += `<p>✅ getCriticalGlobalNames returns ${criticalNames.length} names</p>`;
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getCriticalGlobalNames failed</p>';
+                testsFailed++;
+            }
+
+            // Test getAllGlobalNames
+            const allNames = window.getAllGlobalNames();
+            if (Array.isArray(allNames) && allNames.length > criticalNames.length) {
+                results.innerHTML += `<p>✅ getAllGlobalNames returns ${allNames.length} names</p>`;
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getAllGlobalNames failed</p>';
+                testsFailed++;
+            }
+
+            // Test isGlobalInitialized
+            const isTasksInitialized = window.isGlobalInitialized('tasks');
+            if (isTasksInitialized === true) {
+                results.innerHTML += '<p>✅ isGlobalInitialized detects "tasks" is initialized</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isGlobalInitialized failed for "tasks"</p>';
+                testsFailed++;
+            }
+
+            const isFakeInitialized = window.isGlobalInitialized('nonExistentGlobal');
+            if (isFakeInitialized === false) {
+                results.innerHTML += '<p>✅ isGlobalInitialized detects non-existent global</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isGlobalInitialized should return false for non-existent global</p>';
+                testsFailed++;
+            }
+
+            // Test getGlobalState
+            const globalState = window.getGlobalState();
+            if (globalState && typeof globalState === 'object' && Array.isArray(globalState.tasks)) {
+                results.innerHTML += '<p>✅ getGlobalState returns state object with tasks array</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getGlobalState failed</p>';
+                testsFailed++;
+            }
+
+            // Test resetGlobals
+            window.resetGlobals();
+            const stateAfterReset = window.getGlobalState();
+            if (stateAfterReset.tasks.length === 0 && stateAfterReset.currentView === 'today') {
+                results.innerHTML += '<p>✅ resetGlobals clears state correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ resetGlobals failed</p>';
                 testsFailed++;
             }
 
