@@ -6921,6 +6921,68 @@ function executeDeleteAllData() {
     }
 }
 
+/**
+ * Force pull lists from database - bypasses safety checks
+ * Use this when you know your server has the correct data
+ */
+async function forcePullListsFromDatabase() {
+    console.log('🔄 Force pulling lists from database...');
+
+    if (!window.currentUser?.user?.id) {
+        console.error('❌ Not logged in - cannot pull from database');
+        return;
+    }
+
+    try {
+        // Clear any blocking flags temporarily
+        const originalFlags = {
+            justModifiedLists: window.justModifiedLists,
+            skipNextDownload: window.skipNextDownload,
+            justRestoredBackup: window.justRestoredBackup
+        };
+
+        window.justModifiedLists = false;
+        window.skipNextDownload = false;
+        window.justRestoredBackup = false;
+        window.forceMandatoryRefresh = true;
+
+        const response = await fetch(`${window.API_BASE}/lists/${window.currentUser.user.id}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${window.currentUser.session.access_token}`
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const serverListSections = data.listSections || [];
+
+            console.log(`✅ Downloaded ${serverListSections.length} list sections from database`);
+
+            // Update localStorage and window
+            window.listSections = serverListSections;
+            localStorage.setItem('gtd_list_sections', JSON.stringify(serverListSections));
+
+            // Re-render if on Lists view
+            if (window.currentView === 'lists' && typeof renderListsView === 'function') {
+                renderListsView();
+            }
+
+            console.log('✅ Lists successfully pulled and rendered!');
+        } else {
+            console.error('❌ Failed to fetch lists:', response.status, response.statusText);
+        }
+
+        // Restore original flags
+        window.forceMandatoryRefresh = false;
+        Object.assign(window, originalFlags);
+
+    } catch (error) {
+        console.error('❌ Error pulling lists from database:', error);
+        window.forceMandatoryRefresh = false;
+    }
+}
+
 // Export global functions
 window.handleAddItemKeyPress = handleAddItemKeyPress;
 window.saveListSections = saveListSections;
@@ -6933,5 +6995,6 @@ window.convertSelectedItemsToTasks = convertSelectedItemsToTasks;
 window.initiateDeleteAllData = initiateDeleteAllData;
 window.cancelDeleteAllData = cancelDeleteAllData;
 window.confirmDeleteAllData = confirmDeleteAllData;
+window.forcePullListsFromDatabase = forcePullListsFromDatabase;
 
 console.log('✅ Missing functions module loaded with', Object.keys(window).filter(k => typeof window[k] === 'function' && (k.startsWith('open') || k.startsWith('perform') || k.startsWith('search') || k.startsWith('handle'))).length, 'functions');
