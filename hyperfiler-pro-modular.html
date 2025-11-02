@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v4.5.5 Modular (TEST)</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.6 Modular (TEST)</title>
 
     <script>
-    console.log('🧪 TESTING MODULAR VERSION - v4.5.5');
-    console.log('Phase 6 Complete: Templates module extracted (12 functions)');
-    console.log('Total: 72 functions in 7 modules - 99+ automated tests');
+    console.log('🧪 TESTING MODULAR VERSION - v4.5.6');
+    console.log('Phase 7 Complete: Task actions module extracted (11 functions)');
+    console.log('Total: 83 functions in 8 modules - 125+ automated tests');
     </script>
 
     <link rel="stylesheet" href="css/styles.css">
@@ -143,6 +143,21 @@
                 'resetToDefaults'
             ];
 
+            // Test task-actions module
+            const taskActionsFunctions = [
+                'duplicateTaskObject',
+                'calculateDelayedDate',
+                'applyDelayToTask',
+                'calculateNextRepeatDate',
+                'createNextRepeatOccurrence',
+                'prepareQuickAddTask',
+                'getDelayOptions',
+                'getRepeatOptions',
+                'isValidRepeatType',
+                'getDaysUntilDate',
+                'formatDaysUntil'
+            ];
+
             utilFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
@@ -194,6 +209,16 @@
             });
 
             templatesFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            taskActionsFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
                     testsPassed++;
@@ -614,6 +639,141 @@
                 testsPassed++;
             } else {
                 results.innerHTML += '<p>❌ saveTemplates failed</p>';
+                testsFailed++;
+            }
+
+            // Test task-actions functionality
+            const testTask = window.createTaskObject({
+                id: 'test-123',
+                title: 'Test Task',
+                dueDate: '2025-11-05',
+                images: ['img1', 'img2'],
+                repeat: 'weekly'
+            });
+
+            const duplicated = window.duplicateTaskObject(testTask);
+            if (duplicated.id !== testTask.id && duplicated.title === 'Test Task (Copy)' && duplicated.status === 'active') {
+                results.innerHTML += '<p>✅ duplicateTaskObject works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ duplicateTaskObject failed</p>';
+                testsFailed++;
+            }
+
+            const delayedDate = window.calculateDelayedDate('2025-11-05', 1);
+            if (delayedDate === '2025-11-06') {
+                results.innerHTML += '<p>✅ calculateDelayedDate works for +1 day</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ calculateDelayedDate +1 failed: got "${delayedDate}"</p>`;
+                testsFailed++;
+            }
+
+            const delayedWeek = window.calculateDelayedDate('2025-11-05', 7);
+            if (delayedWeek === '2025-11-12') {
+                results.innerHTML += '<p>✅ calculateDelayedDate works for +7 days</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ calculateDelayedDate +7 failed: got "${delayedWeek}"</p>`;
+                testsFailed++;
+            }
+
+            const delayedTask = window.applyDelayToTask(testTask, 3);
+            if (delayedTask.dueDate === '2025-11-08') {
+                results.innerHTML += '<p>✅ applyDelayToTask works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ applyDelayToTask failed: got "${delayedTask.dueDate}"</p>`;
+                testsFailed++;
+            }
+
+            const nextRepeat = window.calculateNextRepeatDate('2025-11-05', 'daily');
+            if (nextRepeat === '2025-11-06') {
+                results.innerHTML += '<p>✅ calculateNextRepeatDate works for daily</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ calculateNextRepeatDate daily failed: got "${nextRepeat}"</p>`;
+                testsFailed++;
+            }
+
+            const weeklyRepeat = window.calculateNextRepeatDate('2025-11-05', 'weekly');
+            if (weeklyRepeat === '2025-11-12') {
+                results.innerHTML += '<p>✅ calculateNextRepeatDate works for weekly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ calculateNextRepeatDate weekly failed: got "${weeklyRepeat}"</p>`;
+                testsFailed++;
+            }
+
+            const nextOccurrence = window.createNextRepeatOccurrence(testTask);
+            if (nextOccurrence && nextOccurrence.dueDate === '2025-11-12' && nextOccurrence.id !== testTask.id) {
+                results.innerHTML += '<p>✅ createNextRepeatOccurrence works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ createNextRepeatOccurrence failed</p>';
+                testsFailed++;
+            }
+
+            const quickTask = window.prepareQuickAddTask('urgent');
+            if (quickTask.title === '@ urgent' && quickTask.template === 'urgent') {
+                results.innerHTML += '<p>✅ prepareQuickAddTask works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ prepareQuickAddTask failed</p>';
+                testsFailed++;
+            }
+
+            const delayOpts = window.getDelayOptions();
+            if (Array.isArray(delayOpts) && delayOpts.length === 3) {
+                results.innerHTML += '<p>✅ getDelayOptions returns 3 options</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getDelayOptions failed</p>';
+                testsFailed++;
+            }
+
+            const repeatOpts = window.getRepeatOptions();
+            if (Array.isArray(repeatOpts) && repeatOpts.length === 6) {
+                results.innerHTML += '<p>✅ getRepeatOptions returns 6 options</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getRepeatOptions failed</p>';
+                testsFailed++;
+            }
+
+            const validRepeat = window.isValidRepeatType('weekly');
+            if (validRepeat === true) {
+                results.innerHTML += '<p>✅ isValidRepeatType works for valid type</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isValidRepeatType valid failed</p>';
+                testsFailed++;
+            }
+
+            const invalidRepeat = window.isValidRepeatType('invalid');
+            if (invalidRepeat === false) {
+                results.innerHTML += '<p>✅ isValidRepeatType rejects invalid type</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isValidRepeatType invalid failed</p>';
+                testsFailed++;
+            }
+
+            const daysUntil = window.getDaysUntilDate('2025-11-05');
+            if (typeof daysUntil === 'number') {
+                results.innerHTML += `<p>✅ getDaysUntilDate works correctly</p>`;
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getDaysUntilDate failed</p>';
+                testsFailed++;
+            }
+
+            const formatted = window.formatDaysUntil(0);
+            if (formatted === 'Today') {
+                results.innerHTML += '<p>✅ formatDaysUntil works for today</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ formatDaysUntil failed: got "${formatted}"</p>`;
                 testsFailed++;
             }
 

@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.5 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.6 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -85,6 +85,19 @@ import {
     getDefaultTemplates,
     resetToDefaults
 } from './modules/features/templates.js';
+import {
+    duplicateTaskObject,
+    calculateDelayedDate,
+    applyDelayToTask,
+    calculateNextRepeatDate,
+    createNextRepeatOccurrence,
+    prepareQuickAddTask,
+    getDelayOptions,
+    getRepeatOptions,
+    isValidRepeatType,
+    getDaysUntilDate,
+    formatDaysUntil
+} from './modules/features/task-actions.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -157,9 +170,20 @@ window.searchTemplates = searchTemplates;
 window.sortTemplates = sortTemplates;
 window.getDefaultTemplates = getDefaultTemplates;
 window.resetToDefaults = resetToDefaults;
+window.duplicateTaskObject = duplicateTaskObject;
+window.calculateDelayedDate = calculateDelayedDate;
+window.applyDelayToTask = applyDelayToTask;
+window.calculateNextRepeatDate = calculateNextRepeatDate;
+window.createNextRepeatOccurrence = createNextRepeatOccurrence;
+window.prepareQuickAddTask = prepareQuickAddTask;
+window.getDelayOptions = getDelayOptions;
+window.getRepeatOptions = getRepeatOptions;
+window.isValidRepeatType = isValidRepeatType;
+window.getDaysUntilDate = getDaysUntilDate;
+window.formatDaysUntil = formatDaysUntil;
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates');
+console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions');
 
 // TODO: Gradually import more modules as we migrate functions
 // import { TaskManager } from './modules/features/tasks.js';

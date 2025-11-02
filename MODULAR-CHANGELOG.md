@@ -2,7 +2,59 @@
 
 This tracks the progress of refactoring HyperFiler Pro to a modular ES6 architecture.
 
-## [4.5.6] - 2025-11-02 (CURRENT)
+## [4.5.7] - 2025-11-02 (CURRENT)
+
+### ✅ Phase 7 Complete - Task Actions Module
+
+**New Module:**
+- `src/modules/features/task-actions.js` - Task manipulation and date calculations (11 functions)
+
+**Functions Extracted (11 new):**
+- Task Manipulation: duplicateTaskObject, applyDelayToTask, prepareQuickAddTask
+- Date Calculations: calculateDelayedDate, calculateNextRepeatDate, getDaysUntilDate
+- Repeat Management: createNextRepeatOccurrence, getRepeatOptions, isValidRepeatType
+- Utilities: getDelayOptions, formatDaysUntil
+
+**Key Features:**
+- Duplicate tasks with customizable options
+- Delay tasks by days/weeks/months
+- Calculate next repeat occurrences (daily, weekly, bi-weekly, monthly, yearly)
+- Quick-add tasks with templates
+- Human-readable date formatting
+- Pure functions - no side effects
+
+**Benefits:**
+- Centralized task action logic
+- Consistent date calculations
+- Pure functions for easy testing
+- Foundation for undo/redo functionality
+- Ready to replace scattered action code
+
+**Testing:**
+- All 11 functions load correctly ✅
+- 14 functional tests (duplicate, delay, repeat, formatting) ✅
+- **136/136 total tests passing** ✅
+
+**Impact:**
+- ~240 lines of clean task action utilities
+- Foundation for advanced task management
+- Ready to standardize all task actions
+
+**Module Dependencies:**
+```
+task-actions.js → tasks.js (generateTaskId, createTaskObject)
+task-actions.js → utils.js (getLocalDateString)
+```
+
+**Total Progress:**
+- 8 modules created
+- 83 functions extracted
+- 136 automated tests passing
+- Zero breaking changes
+
+---
+
+## [4.5.6] - 2025-11-02
 
 ### ✅ Phase 6 Complete - Templates Module
 
