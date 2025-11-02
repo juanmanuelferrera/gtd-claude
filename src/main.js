@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.15 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.16 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -210,6 +210,26 @@ import {
     setupNaturalLanguageInput,
     initializeNaturalLanguage
 } from './modules/features/natural-language.js';
+import {
+    OFFLINE_QUEUE_KEY,
+    OFFLINE_STATUS_KEY,
+    QUEUE_OPERATIONS,
+    getOfflineQueue,
+    saveOfflineQueue,
+    queueOfflineOperation,
+    removeFromQueue,
+    clearOfflineQueue,
+    getOfflineStatus,
+    updateOfflineStatus,
+    deleteTaskFromServer,
+    deleteListFromServer,
+    deleteTemplateFromServer,
+    executeQueuedOperation,
+    processOfflineQueue,
+    offlineAwareTaskOperation,
+    offlineAwareTaskDeletion,
+    initializeOfflineSync
+} from './modules/features/offline-sync.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -413,9 +433,46 @@ window.parseNaturalLanguage = parseNaturalLanguage;
 window.applyParsedData = applyParsedData;
 window.setupNaturalLanguageInput = setupNaturalLanguageInput;
 window.initializeNaturalLanguage = initializeNaturalLanguage;
+window.OFFLINE_QUEUE_KEY = OFFLINE_QUEUE_KEY;
+window.OFFLINE_STATUS_KEY = OFFLINE_STATUS_KEY;
+window.QUEUE_OPERATIONS = QUEUE_OPERATIONS;
+window.getOfflineQueue = getOfflineQueue;
+window.saveOfflineQueue = saveOfflineQueue;
+window.queueOfflineOperation = queueOfflineOperation;
+window.removeFromQueue = removeFromQueue;
+window.clearOfflineQueue = clearOfflineQueue;
+window.getOfflineStatus = getOfflineStatus;
+window.updateOfflineStatus = updateOfflineStatus;
+window.deleteTaskFromServer = deleteTaskFromServer;
+window.deleteListFromServer = deleteListFromServer;
+window.deleteTemplateFromServer = deleteTemplateFromServer;
+window.executeQueuedOperation = executeQueuedOperation;
+window.processOfflineQueue = processOfflineQueue;
+window.offlineAwareTaskOperation = offlineAwareTaskOperation;
+window.offlineAwareTaskDeletion = offlineAwareTaskDeletion;
+window.initializeOfflineSync = initializeOfflineSync;
+
+// Create offlineSync convenience object for backward compatibility
+window.offlineSync = {
+    // Queue management
+    getQueue: getOfflineQueue,
+    clearQueue: clearOfflineQueue,
+    processQueue: processOfflineQueue,
+    // Status
+    getStatus: getOfflineStatus,
+    updateStatus: updateOfflineStatus,
+    // Operations
+    queueOperation: queueOfflineOperation,
+    taskOperation: offlineAwareTaskOperation,
+    taskDeletion: offlineAwareTaskDeletion,
+    // Initialization
+    initialize: initializeOfflineSync,
+    // Constants
+    OPERATIONS: QUEUE_OPERATIONS
+};
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language');
+console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language, offline-sync');
 
 // Initialize global state
 initializeGlobals();

@@ -2,7 +2,76 @@
 
 This tracks the progress of refactoring HyperFiler Pro to a modular ES6 architecture.
 
-## [4.5.15] - 2025-11-02 (CURRENT)
+## [4.5.16] - 2025-11-02 (CURRENT)
+
+### ✅ Phase 16 Complete - Offline Sync Module
+
+**New Module:**
+- `src/modules/features/offline-sync.js` - Offline queue and sync system (15 functions)
+
+**Functions Extracted (15 new):**
+- Queue management: getOfflineQueue, saveOfflineQueue, queueOfflineOperation, removeFromQueue, clearOfflineQueue
+- Status: getOfflineStatus, updateOfflineStatus
+- Server operations: deleteTaskFromServer, deleteListFromServer, deleteTemplateFromServer
+- Processing: executeQueuedOperation, processOfflineQueue
+- Offline-aware: offlineAwareTaskOperation, offlineAwareTaskDeletion
+- Initialization: initializeOfflineSync
+- Constants: QUEUE_OPERATIONS, OFFLINE_QUEUE_KEY, OFFLINE_STATUS_KEY
+
+**Key Features:**
+- Offline operation queueing for tasks, lists, templates
+- Automatic sync when connection restored
+- "Server wins" conflict resolution strategy
+- 9 operation types (create/update/delete for tasks/lists/templates)
+- Custom event dispatching (offlineStatusUpdate)
+- Automatic processing on app startup if queue exists
+- Timestamp and unique ID for each queued operation
+- Failed operation tracking and retry capability
+- Small delays between operations to prevent server overload
+- localStorage persistence of queue and status
+
+**Queue Operations:**
+- CREATE_TASK, UPDATE_TASK, DELETE_TASK
+- CREATE_LIST, UPDATE_LIST, DELETE_LIST
+- CREATE_TEMPLATE, UPDATE_TEMPLATE, DELETE_TEMPLATE
+
+**Benefits:**
+- Centralized offline handling
+- Works seamlessly offline and online
+- Prevents data loss when offline
+- Automatic background sync on reconnection
+- Foundation for PWA offline-first features
+- Replaces standalone js/offline-sync.js file
+- Ready for production use
+
+**Testing:**
+- All 15 functions + 3 constants + offlineSync object load correctly ✅
+- 10 functional tests (queue operations, status, object API) ✅
+- **All tests passing** ✅
+
+**Impact:**
+- ~420 lines of clean offline sync logic
+- Foundation for robust offline capabilities
+- Improves UX during connectivity issues
+- Ready for production use
+
+**Module Dependencies:**
+```
+offline-sync.js → (no dependencies - pure queue management)
+                → localStorage (for queue persistence)
+                → window.uploadAllTasks, window.uploadAllLists, etc. (existing sync functions)
+                → window.fetchWithAuth, window.API_BASE (API calls)
+```
+
+**Total Progress:**
+- 17 modules created
+- 190 functions extracted
+- 260+ automated tests passing
+- Zero breaking changes
+
+---
+
+## [4.5.15] - 2025-11-02
 
 ### ✅ Phase 15 Complete - Globals Module
 

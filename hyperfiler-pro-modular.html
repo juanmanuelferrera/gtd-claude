@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v4.5.15 Modular (TEST)</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.16 Modular (TEST)</title>
 
     <script>
-    console.log('🧪 TESTING MODULAR VERSION - v4.5.15');
-    console.log('Phase 15 Complete: Globals module extracted (7 functions)');
-    console.log('Total: 175 functions in 16 modules - 250+ automated tests');
+    console.log('🧪 TESTING MODULAR VERSION - v4.5.16');
+    console.log('Phase 16 Complete: Offline Sync module extracted (15 functions)');
+    console.log('Total: 190 functions in 17 modules - 260+ automated tests');
     </script>
 
     <link rel="stylesheet" href="css/styles.css">
@@ -1779,10 +1779,145 @@
                 testsFailed++;
             }
 
+            // Test offline-sync functionality
+            const offlineSyncFunctions = [
+                'getOfflineQueue',
+                'saveOfflineQueue',
+                'queueOfflineOperation',
+                'removeFromQueue',
+                'clearOfflineQueue',
+                'getOfflineStatus',
+                'updateOfflineStatus',
+                'deleteTaskFromServer',
+                'deleteListFromServer',
+                'deleteTemplateFromServer',
+                'executeQueuedOperation',
+                'processOfflineQueue',
+                'offlineAwareTaskOperation',
+                'offlineAwareTaskDeletion',
+                'initializeOfflineSync'
+            ];
+
+            offlineSyncFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            // Test constants
+            if (typeof window.QUEUE_OPERATIONS === 'object' && window.QUEUE_OPERATIONS.CREATE_TASK) {
+                results.innerHTML += '<p>✅ QUEUE_OPERATIONS constant loaded</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ QUEUE_OPERATIONS NOT loaded</p>';
+                testsFailed++;
+            }
+
+            if (typeof window.OFFLINE_QUEUE_KEY === 'string') {
+                results.innerHTML += '<p>✅ OFFLINE_QUEUE_KEY constant loaded</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ OFFLINE_QUEUE_KEY NOT loaded</p>';
+                testsFailed++;
+            }
+
+            // Test getOfflineQueue
+            window.clearOfflineQueue(); // Clear first
+            const emptyQueue = window.getOfflineQueue();
+            if (Array.isArray(emptyQueue) && emptyQueue.length === 0) {
+                results.innerHTML += '<p>✅ getOfflineQueue returns empty array</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getOfflineQueue failed</p>';
+                testsFailed++;
+            }
+
+            // Test queueOfflineOperation
+            const opId = window.queueOfflineOperation({
+                type: window.QUEUE_OPERATIONS.CREATE_TASK,
+                data: { id: 'test-123', title: 'Test Task' },
+                entity: 'task'
+            });
+            if (typeof opId === 'string' && opId.length > 0) {
+                results.innerHTML += '<p>✅ queueOfflineOperation returns operation ID</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ queueOfflineOperation failed</p>';
+                testsFailed++;
+            }
+
+            // Test queue has the operation
+            const queueWithOp = window.getOfflineQueue();
+            if (queueWithOp.length === 1 && queueWithOp[0].id === opId) {
+                results.innerHTML += '<p>✅ Operation added to queue correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ Operation not in queue</p>';
+                testsFailed++;
+            }
+
+            // Test getOfflineStatus
+            const offlineStatus = window.getOfflineStatus();
+            if (offlineStatus && offlineStatus.queueLength === 1 && offlineStatus.hasQueuedOperations === true) {
+                results.innerHTML += '<p>✅ getOfflineStatus returns correct status</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getOfflineStatus failed</p>';
+                testsFailed++;
+            }
+
+            // Test removeFromQueue
+            window.removeFromQueue(opId);
+            const queueAfterRemove = window.getOfflineQueue();
+            if (queueAfterRemove.length === 0) {
+                results.innerHTML += '<p>✅ removeFromQueue removes operation</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ removeFromQueue failed</p>';
+                testsFailed++;
+            }
+
+            // Test clearOfflineQueue
+            window.queueOfflineOperation({ type: 'test', data: {} });
+            window.queueOfflineOperation({ type: 'test2', data: {} });
+            window.clearOfflineQueue();
+            const clearedQueue = window.getOfflineQueue();
+            if (clearedQueue.length === 0) {
+                results.innerHTML += '<p>✅ clearOfflineQueue clears all operations</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ clearOfflineQueue failed</p>';
+                testsFailed++;
+            }
+
+            // Test offlineSync object API
+            if (window.offlineSync && typeof window.offlineSync.getQueue === 'function') {
+                results.innerHTML += '<p>✅ offlineSync object created with getQueue</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ offlineSync object missing</p>';
+                testsFailed++;
+            }
+
+            const queueViaObject = window.offlineSync.getQueue();
+            if (Array.isArray(queueViaObject)) {
+                results.innerHTML += '<p>✅ offlineSync.getQueue() works</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ offlineSync.getQueue() failed</p>';
+                testsFailed++;
+            }
+
             // Clean up test data
             localStorage.removeItem('gtdTasks');
             localStorage.removeItem('gtd_event_registry');
             localStorage.removeItem('gtdTemplates');
+            localStorage.removeItem('hyperfiler_offline_queue');
+            localStorage.removeItem('hyperfiler_offline_status');
 
             // Summary
             results.innerHTML += `<hr><p><strong>Tests: ${testsPassed} passed, ${testsFailed} failed</strong></p>`;
