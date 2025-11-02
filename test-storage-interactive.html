@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive Storage Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover { background: #0051d5; }
+        .output {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 200px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Storage Module Interactive Test</h1>
+    <p>Test the storage module functions in real-time</p>
+
+    <div class="test-box">
+        <h2>Test 1: Set and Get Data</h2>
+        <input type="text" id="testKey" placeholder="Key (e.g., myData)" value="testData">
+        <input type="text" id="testValue" placeholder="Value (e.g., Hello)" value="Hello World">
+        <br>
+        <button onclick="testSetLocal()">Set Local</button>
+        <button onclick="testGetLocal()">Get Local</button>
+        <button onclick="testRemoveLocal()">Remove Local</button>
+        <div id="output1" class="output"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>Test 2: JSON Object Storage</h2>
+        <button onclick="testObjectStorage()">Store Complex Object</button>
+        <button onclick="testGetObject()">Retrieve Object</button>
+        <div id="output2" class="output"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>Test 3: Session Storage</h2>
+        <button onclick="testSessionStorage()">Test Session Storage</button>
+        <div id="output3" class="output"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>Test 4: Feature Detection</h2>
+        <button onclick="testFeatureDetection()">Check Storage Availability</button>
+        <div id="output4" class="output"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>Test 5: View All localStorage</h2>
+        <button onclick="viewAllStorage()">View All Keys</button>
+        <button onclick="clearAllTest()">Clear Test Data</button>
+        <div id="output5" class="output"></div>
+    </div>
+
+    <script type="module">
+        import {
+            getLocal,
+            setLocal,
+            removeLocal,
+            getSession,
+            setSession,
+            isLocalStorageAvailable,
+            isSessionStorageAvailable
+        } from './src/modules/core/storage.js';
+
+        // Make functions globally available for button onclick
+        window.getLocal = getLocal;
+        window.setLocal = setLocal;
+        window.removeLocal = removeLocal;
+        window.getSession = getSession;
+        window.setSession = setSession;
+        window.isLocalStorageAvailable = isLocalStorageAvailable;
+        window.isSessionStorageAvailable = isSessionStorageAvailable;
+
+        // Test functions
+        window.testSetLocal = function() {
+            const key = document.getElementById('testKey').value;
+            const value = document.getElementById('testValue').value;
+            const result = setLocal(key, value);
+            const output = document.getElementById('output1');
+            output.innerHTML = `<span class="success">✅ Stored: "${key}" = "${value}"\nResult: ${result}</span>`;
+        };
+
+        window.testGetLocal = function() {
+            const key = document.getElementById('testKey').value;
+            const value = getLocal(key, 'NOT FOUND');
+            const output = document.getElementById('output1');
+            output.innerHTML = `<span class="success">✅ Retrieved: "${key}" = "${value}"</span>`;
+        };
+
+        window.testRemoveLocal = function() {
+            const key = document.getElementById('testKey').value;
+            const result = removeLocal(key);
+            const output = document.getElementById('output1');
+            output.innerHTML = `<span class="success">✅ Removed: "${key}"\nResult: ${result}</span>`;
+        };
+
+        window.testObjectStorage = function() {
+            const testObj = {
+                name: 'John Doe',
+                age: 30,
+                tags: ['developer', 'tester'],
+                created: new Date().toISOString()
+            };
+            const result = setLocal('testObject', testObj);
+            const output = document.getElementById('output2');
+            output.innerHTML = `<span class="success">✅ Stored complex object:\n${JSON.stringify(testObj, null, 2)}\n\nResult: ${result}</span>`;
+        };
+
+        window.testGetObject = function() {
+            const obj = getLocal('testObject', null);
+            const output = document.getElementById('output2');
+            if (obj) {
+                output.innerHTML = `<span class="success">✅ Retrieved object:\n${JSON.stringify(obj, null, 2)}</span>`;
+            } else {
+                output.innerHTML = `<span class="error">❌ Object not found. Run "Store Complex Object" first.</span>`;
+            }
+        };
+
+        window.testSessionStorage = function() {
+            const testData = { session: 'data', timestamp: Date.now() };
+            setSession('sessionTest', testData);
+            const retrieved = getSession('sessionTest');
+            const output = document.getElementById('output3');
+            output.innerHTML = `<span class="success">✅ Stored to sessionStorage:\n${JSON.stringify(testData, null, 2)}\n\n✅ Retrieved:\n${JSON.stringify(retrieved, null, 2)}</span>`;
+        };
+
+        window.testFeatureDetection = function() {
+            const localAvailable = isLocalStorageAvailable();
+            const sessionAvailable = isSessionStorageAvailable();
+            const output = document.getElementById('output4');
+            output.innerHTML = `
+<span class="success">
+✅ localStorage Available: ${localAvailable}
+✅ sessionStorage Available: ${sessionAvailable}
+
+Browser: ${navigator.userAgent.split(' ').slice(-1)[0]}
+</span>`;
+        };
+
+        window.viewAllStorage = function() {
+            const output = document.getElementById('output5');
+            let html = '<span class="success">📦 All localStorage keys:\n\n';
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = getLocal(key);
+                html += `"${key}": ${typeof value === 'object' ? JSON.stringify(value).substring(0, 100) + '...' : value}\n`;
+            }
+
+            html += `\nTotal: ${localStorage.length} items</span>`;
+            output.innerHTML = html;
+        };
+
+        window.clearAllTest = function() {
+            removeLocal('testData');
+            removeLocal('testObject');
+            removeLocal('sessionTest');
+            const output = document.getElementById('output5');
+            output.innerHTML = `<span class="success">✅ Cleared all test data</span>`;
+        };
+
+        console.log('✅ Storage module loaded - Interactive tests ready!');
+    </script>
+</body>
+</html>
