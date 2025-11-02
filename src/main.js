@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.12 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.13 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -170,6 +170,25 @@ import {
     getKeyboardShortcuts,
     initializeKeyboardShortcutsHelp
 } from './modules/ui/keyboard-shortcuts.js';
+import {
+    NETWORK_CHECK_INTERVAL,
+    CONNECTION_TIMEOUT,
+    PING_ENDPOINT,
+    addNetworkStatusListener,
+    removeNetworkStatusListener,
+    notifyNetworkStatusChange,
+    getNetworkStatus,
+    testNetworkConnectivity,
+    updateNetworkStatus,
+    handleOnlineEvent,
+    handleOfflineEvent,
+    initializeNetworkStatus,
+    getNetworkIndicator,
+    shouldShowOfflineIndicators,
+    refreshNetworkStatus,
+    isCurrentlyOnline,
+    getConnectionQuality
+} from './modules/features/network-status.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -325,9 +344,40 @@ window.toggleKeyboardShortcutsModal = toggleKeyboardShortcutsModal;
 window.isKeyboardShortcutsModalOpen = isKeyboardShortcutsModalOpen;
 window.getKeyboardShortcuts = getKeyboardShortcuts;
 window.initializeKeyboardShortcutsHelp = initializeKeyboardShortcutsHelp;
+window.NETWORK_CHECK_INTERVAL = NETWORK_CHECK_INTERVAL;
+window.CONNECTION_TIMEOUT = CONNECTION_TIMEOUT;
+window.PING_ENDPOINT = PING_ENDPOINT;
+window.addNetworkStatusListener = addNetworkStatusListener;
+window.removeNetworkStatusListener = removeNetworkStatusListener;
+window.notifyNetworkStatusChange = notifyNetworkStatusChange;
+window.getNetworkStatus = getNetworkStatus;
+window.testNetworkConnectivity = testNetworkConnectivity;
+window.updateNetworkStatus = updateNetworkStatus;
+window.handleOnlineEvent = handleOnlineEvent;
+window.handleOfflineEvent = handleOfflineEvent;
+window.initializeNetworkStatus = initializeNetworkStatus;
+window.getNetworkIndicator = getNetworkIndicator;
+window.shouldShowOfflineIndicators = shouldShowOfflineIndicators;
+window.refreshNetworkStatus = refreshNetworkStatus;
+window.isCurrentlyOnline = isCurrentlyOnline;
+window.getConnectionQuality = getConnectionQuality;
+
+// Create networkStatus convenience object for backward compatibility
+window.networkStatus = {
+    getStatus: getNetworkStatus,
+    getIndicator: getNetworkIndicator,
+    isOnline: isCurrentlyOnline,
+    getQuality: getConnectionQuality,
+    addListener: addNetworkStatusListener,
+    removeListener: removeNetworkStatusListener,
+    refresh: refreshNetworkStatus,
+    update: updateNetworkStatus,
+    shouldShowOfflineIndicators: shouldShowOfflineIndicators,
+    initialize: initializeNetworkStatus
+};
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts');
+console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status');
 
 // TODO: Gradually import more modules as we migrate functions
 // import { TaskManager } from './modules/features/tasks.js';

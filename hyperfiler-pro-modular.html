@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v4.5.12 Modular (TEST)</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.13 Modular (TEST)</title>
 
     <script>
-    console.log('🧪 TESTING MODULAR VERSION - v4.5.12');
-    console.log('Phase 12 Complete: Keyboard Shortcuts module extracted (7 functions)');
-    console.log('Total: 144 functions in 13 modules - 217+ automated tests');
+    console.log('🧪 TESTING MODULAR VERSION - v4.5.13');
+    console.log('Phase 13 Complete: Network Status module extracted (14 functions)');
+    console.log('Total: 158 functions in 14 modules - 230+ automated tests');
     </script>
 
     <link rel="stylesheet" href="css/styles.css">
@@ -237,6 +237,24 @@
                 'initializeKeyboardShortcutsHelp'
             ];
 
+            // Test network-status module
+            const networkStatusFunctions = [
+                'addNetworkStatusListener',
+                'removeNetworkStatusListener',
+                'notifyNetworkStatusChange',
+                'getNetworkStatus',
+                'testNetworkConnectivity',
+                'updateNetworkStatus',
+                'handleOnlineEvent',
+                'handleOfflineEvent',
+                'initializeNetworkStatus',
+                'getNetworkIndicator',
+                'shouldShowOfflineIndicators',
+                'refreshNetworkStatus',
+                'isCurrentlyOnline',
+                'getConnectionQuality'
+            ];
+
             utilFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
@@ -386,6 +404,37 @@
                 results.innerHTML += '<p>❌ KEYBOARD_SHORTCUTS config NOT loaded</p>';
                 testsFailed++;
             }
+
+            networkStatusFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            // Test networkStatus object exists
+            if (typeof window.networkStatus === 'object') {
+                results.innerHTML += '<p>✅ networkStatus object loaded</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ networkStatus object NOT loaded</p>';
+                testsFailed++;
+            }
+
+            // Test networkStatus methods
+            const networkStatusMethods = ['getStatus', 'getIndicator', 'isOnline', 'getQuality', 'addListener', 'removeListener', 'refresh', 'update', 'shouldShowOfflineIndicators', 'initialize'];
+            networkStatusMethods.forEach(method => {
+                if (typeof window.networkStatus[method] === 'function') {
+                    results.innerHTML += `<p>✅ networkStatus.${method} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ networkStatus.${method} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
 
             // Test actual functionality
             const dateTest = window.getLocalDateString(new Date('2025-01-15'));
@@ -1385,6 +1434,90 @@
                 testsPassed++;
             } else {
                 results.innerHTML += '<p>❌ toggleKeyboardShortcutsModal close failed</p>';
+                testsFailed++;
+            }
+
+            // Test network status functionality
+            const networkStatus = window.getNetworkStatus();
+            if (networkStatus && typeof networkStatus.isOnline === 'boolean') {
+                results.innerHTML += '<p>✅ getNetworkStatus returns status object</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getNetworkStatus failed</p>';
+                testsFailed++;
+            }
+
+            const isOnline = window.isCurrentlyOnline();
+            if (typeof isOnline === 'boolean') {
+                results.innerHTML += '<p>✅ isCurrentlyOnline returns boolean</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isCurrentlyOnline failed</p>';
+                testsFailed++;
+            }
+
+            const quality = window.getConnectionQuality();
+            if (typeof quality === 'string') {
+                results.innerHTML += `<p>✅ getConnectionQuality returns string: "${quality}"</p>`;
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getConnectionQuality failed</p>';
+                testsFailed++;
+            }
+
+            const indicator = window.getNetworkIndicator();
+            if (indicator && typeof indicator.icon === 'string' && indicator.color && indicator.status) {
+                results.innerHTML += '<p>✅ getNetworkIndicator returns indicator object</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getNetworkIndicator failed</p>';
+                testsFailed++;
+            }
+
+            const shouldShow = window.shouldShowOfflineIndicators();
+            if (typeof shouldShow === 'boolean') {
+                results.innerHTML += '<p>✅ shouldShowOfflineIndicators returns boolean</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ shouldShowOfflineIndicators failed</p>';
+                testsFailed++;
+            }
+
+            // Test listener pattern
+            let listenerCalled = false;
+            const testListener = (status) => {
+                listenerCalled = true;
+            };
+            window.addNetworkStatusListener(testListener);
+            window.notifyNetworkStatusChange({ isOnline: true, quality: 'good' });
+            if (listenerCalled) {
+                results.innerHTML += '<p>✅ addNetworkStatusListener and notifyNetworkStatusChange work</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ Network status listener failed</p>';
+                testsFailed++;
+            }
+
+            window.removeNetworkStatusListener(testListener);
+            results.innerHTML += '<p>✅ removeNetworkStatusListener works</p>';
+            testsPassed++;
+
+            // Test networkStatus object API
+            const statusViaObject = window.networkStatus.getStatus();
+            if (statusViaObject && typeof statusViaObject.isOnline === 'boolean') {
+                results.innerHTML += '<p>✅ networkStatus.getStatus() works</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ networkStatus.getStatus() failed</p>';
+                testsFailed++;
+            }
+
+            const isOnlineViaObject = window.networkStatus.isOnline();
+            if (typeof isOnlineViaObject === 'boolean') {
+                results.innerHTML += '<p>✅ networkStatus.isOnline() works</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ networkStatus.isOnline() failed</p>';
                 testsFailed++;
             }
 
