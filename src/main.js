@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.18 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.19 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -270,6 +270,32 @@ import {
     getLastAuthenticationState,
     isAuthenticated
 } from './modules/features/auth.js';
+import {
+    withSyncLock,
+    ensureCurrentUserLoaded,
+    initializeSimpleSync,
+    setupSyncEventListeners,
+    cleanupSyncEventListeners,
+    setupPeriodicSync,
+    uploadAllTasks,
+    mergeTasksWithConflictResolution,
+    downloadAllTasks,
+    smartDownloadTasks,
+    downloadTasksFromCloud,
+    pullLatestFromCloud,
+    uploadAllLists,
+    downloadAllLists,
+    uploadAllTemplates,
+    downloadAllTemplates,
+    performComprehensiveSync,
+    performStaleBrowserRecovery,
+    showSyncStatus,
+    deleteTaskFromCloud,
+    syncAll,
+    canSync,
+    forceResync,
+    ensureSyncInitialized
+} from './modules/features/sync.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -566,8 +592,35 @@ window.initializePremiumFeatures = initializePremiumFeatures;
 window.getLastAuthenticationState = getLastAuthenticationState;
 window.isAuthenticated = isAuthenticated;
 
+// Sync module
+window.withSyncLock = withSyncLock;
+window.ensureCurrentUserLoaded = ensureCurrentUserLoaded;
+window.initializeSimpleSync = initializeSimpleSync;
+window.setupSyncEventListeners = setupSyncEventListeners;
+window.cleanupSyncEventListeners = cleanupSyncEventListeners;
+window.setupPeriodicSync = setupPeriodicSync;
+window.uploadAllTasks = uploadAllTasks;
+window.mergeTasksWithConflictResolution = mergeTasksWithConflictResolution;
+window.downloadAllTasks = downloadAllTasks;
+window.smartDownloadTasks = smartDownloadTasks;
+window.downloadTasksFromCloud = downloadTasksFromCloud;
+window.pullLatestFromCloud = pullLatestFromCloud;
+window.uploadAllLists = uploadAllLists;
+window.downloadAllLists = downloadAllLists;
+window.uploadAllTemplates = uploadAllTemplates;
+window.downloadAllTemplates = downloadAllTemplates;
+window.performComprehensiveSync = performComprehensiveSync;
+window.comprehensiveSync = performComprehensiveSync; // Alias
+window.performStaleBrowserRecovery = performStaleBrowserRecovery;
+window.showSyncStatus = showSyncStatus;
+window.deleteTaskFromCloud = deleteTaskFromCloud;
+window.syncAll = syncAll;
+window.canSync = canSync;
+window.forceResync = forceResync;
+window.ensureSyncInitialized = ensureSyncInitialized;
+
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language, offline-sync, offline-ui, auth');
+console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language, offline-sync, offline-ui, auth, sync');
 
 // Initialize global state
 initializeGlobals();
