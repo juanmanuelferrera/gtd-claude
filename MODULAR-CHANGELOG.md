@@ -2,7 +2,73 @@
 
 This tracks the progress of refactoring HyperFiler Pro to a modular ES6 architecture.
 
-## [4.5.3] - 2025-11-02 (WIP)
+## [4.5.4] - 2025-11-02 (CURRENT)
+
+### ✅ Phase 4 Complete - Internationalization Module
+
+**New Module:**
+- `src/modules/core/i18n.js` - Multi-language support system (9 functions)
+
+**Functions Extracted (9 new):**
+- Language Management: getCurrentLanguage, setLanguage, getAvailableLanguages, isLanguageSupported
+- Translation: t, translateText, getLanguageTranslations
+- Advanced: addTranslations, getTranslationStats
+
+**Translation Dictionary:**
+- English (en): 70+ keys
+- Spanish (es): 150+ keys
+- Days, months, UI elements, task fields, status, buttons
+
+**Benefits:**
+- Centralized translation logic
+- Easy to extend (add new languages/keys)
+- Type-safe translation interface
+- Fallback support for missing keys
+- Runtime translation updates
+- Translation coverage statistics
+
+**Testing:**
+- All 9 functions load correctly ✅
+- 6 functional tests (language switching, translation) ✅
+- **59/59 total tests passing** ✅
+
+**Impact:**
+- ~250 lines of clean i18n system
+- Foundation for multi-language support
+- Ready for French, German, etc.
+
+**Module Dependencies:**
+```
+i18n.js → (no dependencies - pure translation logic)
+```
+
+**Total Progress:**
+- 5 modules created
+- 43 functions extracted
+- 59 automated tests passing
+- Zero breaking changes
+
+### 🚨 HOTFIX - Task Save Failure (2025-11-02)
+
+**Critical Production Bug:**
+- Error: `ReferenceError: isNewTask is not defined` at js/tasks.js:1034
+- Symptom: "Failed to save task. Please try again" for all task saves
+- Impact: Task creation and editing completely broken
+
+**Root Cause:**
+- Line 1034 used `isNewTask` variable in toast message
+- Variable was never declared in `saveTaskEdit()` function
+
+**Fix:**
+- Added `const isNewTask = !currentEditTaskId;` at js/tasks.js:764
+- Cache-busted: Changed version to `v=20251102-HOTFIX-isNewTask`
+- Deployed immediately to production
+
+**Commit:** `0f912db`
+
+---
+
+## [4.5.3] - 2025-11-02
 
 ### ✅ Phase 3 Complete - Task Utilities Module
 
