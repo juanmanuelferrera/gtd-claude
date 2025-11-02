@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.0 Modular (TEST)</title>
+
+    <script>
+    console.log('🧪 TESTING MODULAR VERSION - v4.5.0');
+    console.log('This is a test version running alongside the stable version');
+    </script>
+
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h1>🧪 Modular Version Test</h1>
+    <p>Testing ES6 modules...</p>
+
+    <div id="test-results"></div>
+
+    <script>
+    // Test sanitization after modules load
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            const results = document.getElementById('test-results');
+
+            if (typeof window.sanitizeHTML === 'function') {
+                results.innerHTML += '<p>✅ sanitizeHTML loaded</p>';
+
+                // Test it
+                const test = window.sanitizeHTML('<script>alert("test")</script>Hello');
+                results.innerHTML += `<p>✅ sanitizeHTML works: "${test}"</p>`;
+            } else {
+                results.innerHTML += '<p>❌ sanitizeHTML NOT loaded</p>';
+            }
+
+            if (typeof window.sanitizeInput === 'function') {
+                results.innerHTML += '<p>✅ sanitizeInput loaded</p>';
+            } else {
+                results.innerHTML += '<p>❌ sanitizeInput NOT loaded</p>';
+            }
+        }, 1000);
+    });
+    </script>
+
+    <!-- Load modular system using ES6 modules -->
+    <script type="module" src="src/main.js"></script>
+
+    <p style="margin-top: 40px; padding: 20px; background: #f0f0f0; border-left: 4px solid #007aff;">
+        <strong>📋 Test Checklist:</strong><br>
+        1. Open browser console<br>
+        2. Check for "Modular system initialized" message<br>
+        3. Verify no errors<br>
+        4. Test functions above
+    </p>
+</body>
+</html>
