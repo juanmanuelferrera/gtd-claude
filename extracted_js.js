@@ -18482,6 +18482,20 @@
         }
         // Navigate to add task and focus on input
         // Search functionality
+        function renderSearchView() {
+            console.log('🔍 renderSearchView called - clearing search results');
+            const searchResults = document.getElementById('searchResults');
+            const exportBtn = document.getElementById('exportHtmlBtn');
+
+            if (searchResults) {
+                searchResults.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #6c757d;"><div style="font-size: 48px; margin-bottom: 16px;">🔍</div><div style="font-size: 16px; margin-bottom: 8px;">Search your tasks</div><div style="font-size: 14px; color: #999;">Enter a keyword to find tasks</div></div>';
+            }
+
+            if (exportBtn) {
+                exportBtn.style.display = 'none';
+            }
+        }
+
         function performSearch() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
             const searchResults = document.getElementById('searchResults');
