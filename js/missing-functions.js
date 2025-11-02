@@ -7003,4 +7003,55 @@ window.cancelDeleteAllData = cancelDeleteAllData;
 window.confirmDeleteAllData = confirmDeleteAllData;
 window.forcePullListsFromDatabase = forcePullListsFromDatabase;
 
+/**
+ * Diagnostic function to check where lists are stored
+ */
+function diagnoseLists() {
+    console.log('🔍 LISTS DIAGNOSTIC REPORT');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+    // Check localStorage
+    const localStorageLists = localStorage.getItem('gtd_list_sections');
+    const parsedLocalStorage = localStorageLists ? JSON.parse(localStorageLists) : null;
+    console.log('1️⃣ localStorage (gtd_list_sections):', parsedLocalStorage);
+    console.log('   Count:', parsedLocalStorage ? parsedLocalStorage.length : 0);
+
+    // Check window.listSections
+    console.log('2️⃣ window.listSections:', window.listSections);
+    console.log('   Count:', window.listSections ? window.listSections.length : 0);
+
+    // Check if logged in
+    console.log('3️⃣ Login status:');
+    console.log('   currentUser:', window.currentUser ? '✅ Logged in' : '❌ Not logged in');
+    console.log('   User ID:', window.currentUser?.user?.id || 'N/A');
+
+    // Check API endpoint
+    console.log('4️⃣ API Configuration:');
+    console.log('   API_BASE:', window.API_BASE);
+    console.log('   Lists endpoint:', `${window.API_BASE}/lists/${window.currentUser?.user?.id || 'USER_ID'}`);
+
+    // Check auth token
+    const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+    console.log('5️⃣ Auth token:', authToken ? '✅ Present' : '❌ Missing');
+
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+    // Provide recommendations
+    if (!parsedLocalStorage || parsedLocalStorage.length === 0) {
+        console.log('⚠️ No lists found in localStorage');
+        console.log('💡 Your lists may have been cleared or never existed');
+    } else {
+        console.log(`✅ Found ${parsedLocalStorage.length} list(s) in localStorage`);
+        console.log('💡 You can upload them to database with: uploadAllLists()');
+    }
+
+    return {
+        localStorageCount: parsedLocalStorage ? parsedLocalStorage.length : 0,
+        windowCount: window.listSections ? window.listSections.length : 0,
+        loggedIn: !!window.currentUser,
+        hasAuthToken: !!authToken
+    };
+}
+window.diagnoseLists = diagnoseLists;
+
 console.log('✅ Missing functions module loaded with', Object.keys(window).filter(k => typeof window[k] === 'function' && (k.startsWith('open') || k.startsWith('perform') || k.startsWith('search') || k.startsWith('handle'))).length, 'functions');
