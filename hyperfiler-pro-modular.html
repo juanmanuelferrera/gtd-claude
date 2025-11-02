@@ -94,6 +94,19 @@
                 'getTaskStatusText'
             ];
 
+            // Test i18n module
+            const i18nFunctions = [
+                'getCurrentLanguage',
+                'setLanguage',
+                't',
+                'translateText',
+                'getAvailableLanguages',
+                'isLanguageSupported',
+                'getLanguageTranslations',
+                'addTranslations',
+                'getTranslationStats'
+            ];
+
             utilFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
@@ -115,6 +128,16 @@
             });
 
             taskFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            i18nFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
                     testsPassed++;
@@ -237,6 +260,65 @@
                 testsPassed++;
             } else {
                 results.innerHTML += `<p>❌ getTaskStatusText failed: got "${statusText}"</p>`;
+                testsFailed++;
+            }
+
+            // Test i18n functionality
+            const currentLang = window.getCurrentLanguage();
+            if (currentLang === 'en') {
+                results.innerHTML += '<p>✅ getCurrentLanguage works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getCurrentLanguage failed: got "${currentLang}"</p>`;
+                testsFailed++;
+            }
+
+            const translationEn = window.t('Today');
+            if (translationEn === 'Today') {
+                results.innerHTML += '<p>✅ t() translates correctly (en)</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ t() failed: got "${translationEn}"</p>`;
+                testsFailed++;
+            }
+
+            const langChanged = window.setLanguage('es');
+            const translationEs = window.t('Today');
+            if (langChanged && translationEs === 'Hoy') {
+                results.innerHTML += '<p>✅ setLanguage() and t() work for Spanish</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ Spanish translation failed: got "${translationEs}"</p>`;
+                testsFailed++;
+            }
+
+            // Reset to English
+            window.setLanguage('en');
+
+            const availableLangs = window.getAvailableLanguages();
+            if (Array.isArray(availableLangs) && availableLangs.length === 2) {
+                results.innerHTML += '<p>✅ getAvailableLanguages returns 2 languages</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getAvailableLanguages failed: got ${availableLangs.length} languages</p>`;
+                testsFailed++;
+            }
+
+            const langSupported = window.isLanguageSupported('es');
+            if (langSupported === true) {
+                results.innerHTML += '<p>✅ isLanguageSupported works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isLanguageSupported failed</p>';
+                testsFailed++;
+            }
+
+            const stats = window.getTranslationStats();
+            if (stats && stats.en > 0 && stats.es > 0) {
+                results.innerHTML += `<p>✅ getTranslationStats works (en: ${stats.en}, es: ${stats.es})</p>`;
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getTranslationStats failed</p>';
                 testsFailed++;
             }
 

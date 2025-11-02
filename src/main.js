@@ -41,6 +41,18 @@ import {
     isTaskActive,
     getTaskStatusText
 } from './modules/features/tasks.js';
+import {
+    translations,
+    getCurrentLanguage,
+    setLanguage,
+    t,
+    translateText,
+    getAvailableLanguages,
+    isLanguageSupported,
+    getLanguageTranslations,
+    addTranslations,
+    getTranslationStats
+} from './modules/core/i18n.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -75,9 +87,19 @@ window.isTaskFuture = isTaskFuture;
 window.isTaskCompleted = isTaskCompleted;
 window.isTaskActive = isTaskActive;
 window.getTaskStatusText = getTaskStatusText;
+window.translations = translations;
+window.getCurrentLanguage = getCurrentLanguage;
+window.setLanguage = setLanguage;
+window.t = t;
+window.translateText = translateText;
+window.getAvailableLanguages = getAvailableLanguages;
+window.isLanguageSupported = isLanguageSupported;
+window.getLanguageTranslations = getLanguageTranslations;
+window.addTranslations = addTranslations;
+window.getTranslationStats = getTranslationStats;
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, utils, storage, tasks');
+console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n');
 
 // TODO: Gradually import more modules as we migrate functions
 // import { TaskManager } from './modules/features/tasks.js';
