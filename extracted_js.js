@@ -104,6 +104,25 @@
                 'Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation': 'Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation',
                 'Mobile UI Version': 'Mobile UI Version',
                 'Enable': 'Enable',
+
+                // Settings page sections
+                'Choose your preferred language': 'Choose your preferred language',
+                'Appearance & Display': 'Appearance & Display',
+                'Customize how dates, times, and interface elements appear': 'Customize how dates, times, and interface elements appear',
+                'Productivity Tools': 'Productivity Tools',
+                'Tools to enhance your GTD workflow': 'Tools to enhance your GTD workflow',
+                'Import, export, and backup your tasks': 'Import, export, and backup your tasks',
+                'Power user features and bulk operations': 'Power user features and bulk operations',
+                'HTML Exports': 'HTML Exports',
+                'Advanced': 'Advanced',
+                'Import Tasks': 'Import Tasks',
+                'Export Tasks': 'Export Tasks',
+                'Save Backup': 'Save Backup',
+                'Bulk Import': 'Bulk Import',
+                'Mobile UI': 'Mobile UI',
+                'Text Files': 'Text Files',
+                'Data': 'Data',
+                'Shortcuts': 'Shortcuts',
                 
                 // Task fields
                 'Task Title': 'Task Title',
@@ -284,6 +303,25 @@
                 'Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation': 'Ocultar botones con atajos de teclado, forzando navegación solo por teclado',
                 'Mobile UI Version': 'Versión UI Móvil',
                 'Enable': 'Activar',
+
+                // Settings page sections
+                'Choose your preferred language': 'Elige tu idioma preferido',
+                'Appearance & Display': 'Apariencia y Visualización',
+                'Customize how dates, times, and interface elements appear': 'Personaliza cómo aparecen las fechas, horas y elementos de la interfaz',
+                'Productivity Tools': 'Herramientas de Productividad',
+                'Tools to enhance your GTD workflow': 'Herramientas para mejorar tu flujo de trabajo GTD',
+                'Import, export, and backup your tasks': 'Importa, exporta y respalda tus tareas',
+                'Power user features and bulk operations': 'Funciones avanzadas y operaciones masivas',
+                'HTML Exports': 'Exportaciones HTML',
+                'Advanced': 'Avanzado',
+                'Import Tasks': 'Importar Tareas',
+                'Export Tasks': 'Exportar Tareas',
+                'Save Backup': 'Guardar Respaldo',
+                'Bulk Import': 'Importación Masiva',
+                'Mobile UI': 'Interfaz Móvil',
+                'Text Files': 'Archivos de Texto',
+                'Data': 'Datos',
+                'Shortcuts': 'Atajos',
                 'Delete all tasks permanently - this cannot be undone': 'Eliminar todas las tareas permanentemente - esto no se puede deshacer',
                 'Delete All Tasks': 'Eliminar Todas las Tareas',
                 'No due date': 'Sin fecha de vencimiento',
@@ -24171,21 +24209,32 @@
             const currentLang = localStorage.getItem('preferredLanguage') || 'en';
             const enBtn = document.getElementById('lang-en-btn');
             const esBtn = document.getElementById('lang-es-btn');
-            
-            // Reset styles
-            enBtn.style.borderColor = '#ddd';
-            enBtn.style.background = 'none';
-            esBtn.style.borderColor = '#ddd';
-            esBtn.style.background = 'none';
-            
-            // Highlight active language
-            if (currentLang === 'en') {
-                enBtn.style.borderColor = '#1877f2';
-                enBtn.style.background = 'rgba(24, 119, 242, 0.1)';
-            } else {
-                esBtn.style.borderColor = '#1877f2';
-                esBtn.style.background = 'rgba(24, 119, 242, 0.1)';
+
+            if (!enBtn || !esBtn) {
+                console.warn('⚠️ Language buttons not found');
+                return;
             }
+
+            // Reset styles for both buttons
+            enBtn.style.borderColor = '#ddd';
+            enBtn.style.background = 'white';
+            enBtn.style.fontWeight = '500';
+            esBtn.style.borderColor = '#ddd';
+            esBtn.style.background = 'white';
+            esBtn.style.fontWeight = '500';
+
+            // Highlight active language with new design
+            if (currentLang === 'en') {
+                enBtn.style.borderColor = '#1E4FE6';
+                enBtn.style.background = '#f0f4ff';
+                enBtn.style.fontWeight = '700';
+            } else {
+                esBtn.style.borderColor = '#1E4FE6';
+                esBtn.style.background = '#f0f4ff';
+                esBtn.style.fontWeight = '700';
+            }
+
+            console.log('✅ Language button styles updated, active:', currentLang);
         }
         function updateDateFormat(format) {
             localStorage.setItem('dateFormat', format);
