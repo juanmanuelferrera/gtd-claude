@@ -424,16 +424,23 @@
             return translations[currentLanguage][key] || key;
         }
         function switchLanguage(lang) {
+            console.log('🔄 switchLanguage() called with lang:', lang);
+            console.log('  Previous language:', currentLanguage);
             currentLanguage = lang;
             localStorage.setItem('preferredLanguage', lang);
+            console.log('  Language saved to localStorage');
+            console.log('  Calling translateUI()...');
             translateUI();
+            console.log('  Calling updateLanguageButtonStyles()...');
             updateLanguageButtonStyles();
+            console.log('  Calling updateHeaderLanguageButton()...');
             updateHeaderLanguageButton();
-            
+
             // CRITICAL: Always restore emojis after language changes
             setTimeout(() => {
                 restoreMobileNavEmojis();
             }, 100);
+            console.log('✅ switchLanguage() completed');
         }
         
         function toggleLanguageHeader() {
@@ -484,6 +491,8 @@
             }
         }
         function translateUI() {
+            console.log('🌐 translateUI() called, currentLanguage:', currentLanguage);
+
             // Translate navigation buttons with explicit emoji mapping
             const navButtons = {
                 'nav-today': { icon: '📋', key: 'Today', shortcut: 'D' },
@@ -498,10 +507,12 @@
             // Get current tab display mode to respect user preference
             const currentTabDisplayMode = localStorage.getItem('tabDisplayMode') || 'both';
 
+            let translatedCount = 0;
             Object.entries(navButtons).forEach(([id, config]) => {
                 const element = document.getElementById(id);
                 if (element) {
                     const translatedText = translateText(config.key);
+                    console.log(`  Translating ${id}: "${config.key}" -> "${translatedText}"`);
                     let content;
                     switch (currentTabDisplayMode) {
                         case 'icon':
@@ -517,8 +528,12 @@
                     }
                     // Preserve keyboard shortcut span
                     element.innerHTML = `${content} <span style="opacity: 0.7; font-size: 11px; color: #666;">${config.shortcut}</span>`;
+                    translatedCount++;
+                } else {
+                    console.warn(`  ⚠️ Element not found: ${id}`);
                 }
             });
+            console.log(`✅ Translated ${translatedCount} navigation buttons`);
             // Translate section headers
             const headers = document.querySelectorAll('h3');
             headers.forEach(header => {
