@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v4.5.4 Modular (TEST)</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.5 Modular (TEST)</title>
 
     <script>
-    console.log('🧪 TESTING MODULAR VERSION - v4.5.4');
-    console.log('Phase 5 Complete: Data operations extracted (17 functions)');
-    console.log('Total: 60 functions in 6 modules - 71 automated tests');
+    console.log('🧪 TESTING MODULAR VERSION - v4.5.5');
+    console.log('Phase 6 Complete: Templates module extracted (12 functions)');
+    console.log('Total: 72 functions in 7 modules - 99+ automated tests');
     </script>
 
     <link rel="stylesheet" href="css/styles.css">
@@ -127,6 +127,22 @@
                 'getCompletedTasks'
             ];
 
+            // Test templates module
+            const templatesFunctions = [
+                'loadTemplates',
+                'saveTemplates',
+                'validateTemplate',
+                'addTemplate',
+                'deleteTemplate',
+                'hasTemplate',
+                'getTemplates',
+                'getTemplateCount',
+                'searchTemplates',
+                'sortTemplates',
+                'getDefaultTemplates',
+                'resetToDefaults'
+            ];
+
             utilFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
@@ -168,6 +184,16 @@
             });
 
             dataOpsFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            templatesFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
                     testsPassed++;
@@ -482,9 +508,119 @@
                 testsFailed++;
             }
 
+            // Test templates functionality
+            const testTemplates = window.loadTemplates();
+            if (Array.isArray(testTemplates) && testTemplates.length > 0) {
+                results.innerHTML += `<p>✅ loadTemplates works correctly (${testTemplates.length} templates loaded)</p>`;
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ loadTemplates failed</p>';
+                testsFailed++;
+            }
+
+            const validated = window.validateTemplate('test');
+            if (validated === '@test') {
+                results.innerHTML += '<p>✅ validateTemplate adds @ prefix correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ validateTemplate failed: got "${validated}"</p>`;
+                testsFailed++;
+            }
+
+            const validateSpaces = window.validateTemplate('@test with spaces');
+            if (validateSpaces === '@testwithspaces') {
+                results.innerHTML += '<p>✅ validateTemplate removes spaces correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ validateTemplate spaces failed: got "${validateSpaces}"</p>`;
+                testsFailed++;
+            }
+
+            const addResult = window.addTemplate(testTemplates, '@newtemplate');
+            if (addResult.success && addResult.templates.includes('@newtemplate')) {
+                results.innerHTML += '<p>✅ addTemplate works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ addTemplate failed</p>';
+                testsFailed++;
+            }
+
+            const addDuplicate = window.addTemplate(addResult.templates, '@newtemplate');
+            if (!addDuplicate.success && addDuplicate.message.includes('already exists')) {
+                results.innerHTML += '<p>✅ addTemplate rejects duplicates correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ addTemplate duplicate check failed</p>';
+                testsFailed++;
+            }
+
+            const hasTemplateTest = window.hasTemplate(addResult.templates, '@newtemplate');
+            if (hasTemplateTest === true) {
+                results.innerHTML += '<p>✅ hasTemplate works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ hasTemplate failed</p>';
+                testsFailed++;
+            }
+
+            const deleteResult = window.deleteTemplate(addResult.templates, '@newtemplate');
+            if (deleteResult.success && !deleteResult.templates.includes('@newtemplate')) {
+                results.innerHTML += '<p>✅ deleteTemplate works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ deleteTemplate failed</p>';
+                testsFailed++;
+            }
+
+            const countTest = window.getTemplateCount(testTemplates);
+            if (typeof countTest === 'number' && countTest > 0) {
+                results.innerHTML += `<p>✅ getTemplateCount works correctly (${countTest} templates)</p>`;
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getTemplateCount failed</p>';
+                testsFailed++;
+            }
+
+            const searchTest = window.searchTemplates(['@casa', '@recados', '@work'], 'casa');
+            if (searchTest.length === 1 && searchTest[0] === '@casa') {
+                results.innerHTML += '<p>✅ searchTemplates works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ searchTemplates failed: got ${searchTest.length} results</p>`;
+                testsFailed++;
+            }
+
+            const sortTest = window.sortTemplates(['@zzz', '@aaa', '@mmm']);
+            if (sortTest[0] === '@aaa' && sortTest[2] === '@zzz') {
+                results.innerHTML += '<p>✅ sortTemplates works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ sortTemplates failed</p>';
+                testsFailed++;
+            }
+
+            const defaults = window.getDefaultTemplates();
+            if (Array.isArray(defaults) && defaults.length === 5) {
+                results.innerHTML += '<p>✅ getDefaultTemplates returns 5 defaults</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getDefaultTemplates failed: got ${defaults.length} defaults</p>`;
+                testsFailed++;
+            }
+
+            const saveTemplatesTest = window.saveTemplates(['@test1', '@test2']);
+            if (saveTemplatesTest === true) {
+                results.innerHTML += '<p>✅ saveTemplates works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ saveTemplates failed</p>';
+                testsFailed++;
+            }
+
             // Clean up test data
             localStorage.removeItem('gtdTasks');
             localStorage.removeItem('gtd_event_registry');
+            localStorage.removeItem('gtdTemplates');
 
             // Summary
             results.innerHTML += `<hr><p><strong>Tests: ${testsPassed} passed, ${testsFailed} failed</strong></p>`;

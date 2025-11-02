@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.4 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.5 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -71,6 +71,20 @@ import {
     getActiveTasks,
     getCompletedTasks
 } from './modules/features/data-operations.js';
+import {
+    loadTemplates,
+    saveTemplates,
+    validateTemplate,
+    addTemplate,
+    deleteTemplate,
+    hasTemplate,
+    getTemplates,
+    getTemplateCount,
+    searchTemplates,
+    sortTemplates,
+    getDefaultTemplates,
+    resetToDefaults
+} from './modules/features/templates.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -131,9 +145,21 @@ window.searchTasks = searchTasks;
 window.getTasksForDate = getTasksForDate;
 window.getActiveTasks = getActiveTasks;
 window.getCompletedTasks = getCompletedTasks;
+window.loadTemplates = loadTemplates;
+window.saveTemplates = saveTemplates;
+window.validateTemplate = validateTemplate;
+window.addTemplate = addTemplate;
+window.deleteTemplate = deleteTemplate;
+window.hasTemplate = hasTemplate;
+window.getTemplates = getTemplates;
+window.getTemplateCount = getTemplateCount;
+window.searchTemplates = searchTemplates;
+window.sortTemplates = sortTemplates;
+window.getDefaultTemplates = getDefaultTemplates;
+window.resetToDefaults = resetToDefaults;
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations');
+console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates');
 
 // TODO: Gradually import more modules as we migrate functions
 // import { TaskManager } from './modules/features/tasks.js';
