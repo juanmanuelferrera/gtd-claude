@@ -6930,6 +6930,7 @@ async function forcePullListsFromDatabase() {
 
     if (!window.currentUser?.user?.id) {
         console.error('❌ Not logged in - cannot pull from database');
+        console.error('💡 Please log in first, then try again');
         return;
     }
 
@@ -6946,11 +6947,16 @@ async function forcePullListsFromDatabase() {
         window.justRestoredBackup = false;
         window.forceMandatoryRefresh = true;
 
+        // Use proper auth headers function
+        const headers = typeof getAuthHeaders === 'function' ? getAuthHeaders() : {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken') || sessionStorage.getItem('authToken')}`
+        };
+
+        console.log('📡 Fetching from:', `${window.API_BASE}/lists/${window.currentUser.user.id}`);
+
         const response = await fetch(`${window.API_BASE}/lists/${window.currentUser.user.id}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${window.currentUser.session.access_token}`
-            }
+            headers: headers
         });
 
         if (response.ok) {
