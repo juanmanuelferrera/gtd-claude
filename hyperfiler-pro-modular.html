@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v4.5.6 Modular (TEST)</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.7 Modular (TEST)</title>
 
     <script>
-    console.log('🧪 TESTING MODULAR VERSION - v4.5.6');
-    console.log('Phase 7 Complete: Task actions module extracted (11 functions)');
-    console.log('Total: 83 functions in 8 modules - 125+ automated tests');
+    console.log('🧪 TESTING MODULAR VERSION - v4.5.7');
+    console.log('Phase 8 Complete: Export/Import module extracted (17 functions)');
+    console.log('Total: 100 functions in 9 modules - 156+ automated tests');
     </script>
 
     <link rel="stylesheet" href="css/styles.css">
@@ -158,6 +158,27 @@
                 'formatDaysUntil'
             ];
 
+            // Test export-import module
+            const exportImportFunctions = [
+                'createBlob',
+                'downloadBlob',
+                'downloadTextFile',
+                'downloadJSON',
+                'downloadHTML',
+                'generateFilename',
+                'exportTasksToJSON',
+                'exportTasksToText',
+                'parseJSON',
+                'readFileAsText',
+                'importTasksFromJSON',
+                'importTasksFromText',
+                'validateTasksArray',
+                'getFileExtension',
+                'isJSONFile',
+                'isTextFile',
+                'copyToClipboard'
+            ];
+
             utilFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
@@ -219,6 +240,16 @@
             });
 
             taskActionsFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            exportImportFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
                     testsPassed++;
@@ -774,6 +805,100 @@
                 testsPassed++;
             } else {
                 results.innerHTML += `<p>❌ formatDaysUntil failed: got "${formatted}"</p>`;
+                testsFailed++;
+            }
+
+            // Test export-import functionality
+            const testBlob = window.createBlob('test content');
+            if (testBlob instanceof Blob && testBlob.type === 'text/plain;charset=utf-8') {
+                results.innerHTML += '<p>✅ createBlob works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ createBlob failed</p>';
+                testsFailed++;
+            }
+
+            const filename = window.generateFilename('test', 'json', new Date('2025-11-05'));
+            if (filename === 'test-2025-11-05.json') {
+                results.innerHTML += '<p>✅ generateFilename works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ generateFilename failed: got "${filename}"</p>`;
+                testsFailed++;
+            }
+
+            const jsonTest = window.parseJSON('{"foo": "bar"}');
+            if (jsonTest && jsonTest.foo === 'bar') {
+                results.innerHTML += '<p>✅ parseJSON works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ parseJSON failed</p>';
+                testsFailed++;
+            }
+
+            const invalidJSON = window.parseJSON('invalid json');
+            if (invalidJSON === null) {
+                results.innerHTML += '<p>✅ parseJSON handles invalid JSON correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ parseJSON invalid handling failed</p>';
+                testsFailed++;
+            }
+
+            const validTasks = window.validateTasksArray([
+                {id: '1', title: 'Test', status: 'active'},
+                {id: '2', title: 'Test 2', status: 'completed'}
+            ]);
+            if (validTasks === true) {
+                results.innerHTML += '<p>✅ validateTasksArray accepts valid tasks</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ validateTasksArray valid failed</p>';
+                testsFailed++;
+            }
+
+            const invalidTasks = window.validateTasksArray([{title: 'No ID'}]);
+            if (invalidTasks === false) {
+                results.innerHTML += '<p>✅ validateTasksArray rejects invalid tasks</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ validateTasksArray invalid failed</p>';
+                testsFailed++;
+            }
+
+            const ext = window.getFileExtension('test.json');
+            if (ext === 'json') {
+                results.innerHTML += '<p>✅ getFileExtension works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getFileExtension failed: got "${ext}"</p>`;
+                testsFailed++;
+            }
+
+            const isJSON = window.isJSONFile('data.json');
+            if (isJSON === true) {
+                results.innerHTML += '<p>✅ isJSONFile identifies JSON files</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isJSONFile failed</p>';
+                testsFailed++;
+            }
+
+            const isText = window.isTextFile('notes.txt');
+            if (isText === true) {
+                results.innerHTML += '<p>✅ isTextFile identifies text files</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isTextFile failed</p>';
+                testsFailed++;
+            }
+
+            const notJSON = window.isJSONFile('image.png');
+            if (notJSON === false) {
+                results.innerHTML += '<p>✅ isJSONFile rejects non-JSON files</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isJSONFile rejection failed</p>';
                 testsFailed++;
             }
 

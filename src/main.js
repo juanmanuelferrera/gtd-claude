@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.6 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.7 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -98,6 +98,25 @@ import {
     getDaysUntilDate,
     formatDaysUntil
 } from './modules/features/task-actions.js';
+import {
+    createBlob,
+    downloadBlob,
+    downloadTextFile,
+    downloadJSON,
+    downloadHTML,
+    generateFilename,
+    exportTasksToJSON,
+    exportTasksToText,
+    parseJSON,
+    readFileAsText,
+    importTasksFromJSON,
+    importTasksFromText,
+    validateTasksArray,
+    getFileExtension,
+    isJSONFile,
+    isTextFile,
+    copyToClipboard
+} from './modules/features/export-import.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -181,9 +200,26 @@ window.getRepeatOptions = getRepeatOptions;
 window.isValidRepeatType = isValidRepeatType;
 window.getDaysUntilDate = getDaysUntilDate;
 window.formatDaysUntil = formatDaysUntil;
+window.createBlob = createBlob;
+window.downloadBlob = downloadBlob;
+window.downloadTextFile = downloadTextFile;
+window.downloadJSON = downloadJSON;
+window.downloadHTML = downloadHTML;
+window.generateFilename = generateFilename;
+window.exportTasksToJSON = exportTasksToJSON;
+window.exportTasksToText = exportTasksToText;
+window.parseJSON = parseJSON;
+window.readFileAsText = readFileAsText;
+window.importTasksFromJSON = importTasksFromJSON;
+window.importTasksFromText = importTasksFromText;
+window.validateTasksArray = validateTasksArray;
+window.getFileExtension = getFileExtension;
+window.isJSONFile = isJSONFile;
+window.isTextFile = isTextFile;
+window.copyToClipboard = copyToClipboard;
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions');
+console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import');
 
 // TODO: Gradually import more modules as we migrate functions
 // import { TaskManager } from './modules/features/tasks.js';
