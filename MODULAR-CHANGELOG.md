@@ -2,7 +2,61 @@
 
 This tracks the progress of refactoring HyperFiler Pro to a modular ES6 architecture.
 
-## [4.5.10] - 2025-11-02 (CURRENT)
+## [4.5.11] - 2025-11-02 (CURRENT)
+
+### ✅ Phase 11 Complete - Dark Mode Module
+
+**New Module:**
+- `src/modules/ui/dark-mode.js` - System preference detection + manual toggle (10 functions)
+
+**Functions Extracted (10 new):**
+- Initialization: initializeDarkMode
+- Core: applyDarkMode, toggleDarkMode
+- State: getDarkModeState, isDarkModeEnabled
+- Controls: enableDarkMode, disableDarkMode, resetToSystemPreference
+- UI: createToggleButton, updateToggleButton
+
+**Key Features:**
+- Automatic system preference detection
+- Manual dark/light mode toggle
+- Persistent user preference (localStorage)
+- Toggle button with double-click to reset
+- Toast notifications on mode change
+- ARIA accessibility attributes
+- Defaults to light mode (system preference optional)
+
+**Benefits:**
+- Centralized theme management
+- Consistent dark mode across app
+- User preference persistence
+- Accessibility built-in
+- Easy integration with existing code
+- Replaces standalone js/dark-mode.js file
+
+**Testing:**
+- All 10 functions load correctly ✅
+- 6 functional tests (state, apply, toggle, enable, disable) ✅
+- **All tests passing** ✅
+
+**Impact:**
+- ~200 lines of clean theme management
+- Foundation for theme customization
+- Ready for production use
+
+**Module Dependencies:**
+```
+dark-mode.js → notifications.js (for toast feedback)
+```
+
+**Total Progress:**
+- 12 modules created
+- 137 functions extracted
+- 205+ automated tests passing
+- Zero breaking changes
+
+---
+
+## [4.5.10] - 2025-11-02
 
 ### ✅ Phase 10 Complete - Notifications Module
 

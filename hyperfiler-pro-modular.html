@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v4.5.10 Modular (TEST)</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.11 Modular (TEST)</title>
 
     <script>
-    console.log('🧪 TESTING MODULAR VERSION - v4.5.10');
-    console.log('Phase 10 Complete: Notifications module extracted (13 functions)');
-    console.log('Total: 127 functions in 11 modules - 190+ automated tests');
+    console.log('🧪 TESTING MODULAR VERSION - v4.5.11');
+    console.log('Phase 11 Complete: Dark Mode module extracted (10 functions)');
+    console.log('Total: 137 functions in 12 modules - 205+ automated tests');
     </script>
 
     <link rel="stylesheet" href="css/styles.css">
@@ -212,6 +212,20 @@
                 'getToastContainer'
             ];
 
+            // Test dark-mode module
+            const darkModeFunctions = [
+                'initializeDarkMode',
+                'applyDarkMode',
+                'toggleDarkMode',
+                'resetToSystemPreference',
+                'createToggleButton',
+                'updateToggleButton',
+                'getDarkModeState',
+                'isDarkModeEnabled',
+                'enableDarkMode',
+                'disableDarkMode'
+            ];
+
             utilFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
@@ -329,6 +343,16 @@
                     testsPassed++;
                 } else {
                     results.innerHTML += `<p>❌ toast.${method} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            darkModeFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
                     testsFailed++;
                 }
             });
@@ -1218,6 +1242,64 @@
                 testsPassed++;
             } else {
                 results.innerHTML += '<p>❌ Container should be null after clearing all toasts</p>';
+                testsFailed++;
+            }
+
+            // Test dark mode functionality
+            const initialDarkState = window.getDarkModeState();
+            if (initialDarkState && typeof initialDarkState.isDarkMode === 'boolean') {
+                results.innerHTML += '<p>✅ getDarkModeState returns state object</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getDarkModeState failed</p>';
+                testsFailed++;
+            }
+
+            const isDarkBefore = window.isDarkModeEnabled();
+            window.applyDarkMode(true);
+            const isDarkAfterApply = window.isDarkModeEnabled();
+            if (isDarkAfterApply === true) {
+                results.innerHTML += '<p>✅ applyDarkMode enables dark mode</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ applyDarkMode failed</p>';
+                testsFailed++;
+            }
+
+            window.applyDarkMode(false);
+            const isLightAfterApply = window.isDarkModeEnabled();
+            if (isLightAfterApply === false) {
+                results.innerHTML += '<p>✅ applyDarkMode disables dark mode</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ applyDarkMode disable failed</p>';
+                testsFailed++;
+            }
+
+            const toggled = window.toggleDarkMode();
+            if (typeof toggled === 'boolean') {
+                results.innerHTML += '<p>✅ toggleDarkMode returns boolean</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ toggleDarkMode failed</p>';
+                testsFailed++;
+            }
+
+            window.enableDarkMode();
+            if (window.isDarkModeEnabled() === true) {
+                results.innerHTML += '<p>✅ enableDarkMode works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ enableDarkMode failed</p>';
+                testsFailed++;
+            }
+
+            window.disableDarkMode();
+            if (window.isDarkModeEnabled() === false) {
+                results.innerHTML += '<p>✅ disableDarkMode works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ disableDarkMode failed</p>';
                 testsFailed++;
             }
 

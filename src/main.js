@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.10 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.11 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -148,6 +148,18 @@ import {
     getActiveToastCount,
     getToastContainer
 } from './modules/ui/notifications.js';
+import {
+    initializeDarkMode,
+    applyDarkMode,
+    toggleDarkMode,
+    resetToSystemPreference,
+    createToggleButton,
+    updateToggleButton,
+    getDarkModeState,
+    isDarkModeEnabled,
+    enableDarkMode,
+    disableDarkMode
+} from './modules/ui/dark-mode.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -285,9 +297,19 @@ window.toast = {
     show: showToast,
     clearAll: clearAllToasts
 };
+window.initializeDarkMode = initializeDarkMode;
+window.applyDarkMode = applyDarkMode;
+window.toggleDarkMode = toggleDarkMode;
+window.resetToSystemPreference = resetToSystemPreference;
+window.createToggleButton = createToggleButton;
+window.updateToggleButton = updateToggleButton;
+window.getDarkModeState = getDarkModeState;
+window.isDarkModeEnabled = isDarkModeEnabled;
+window.enableDarkMode = enableDarkMode;
+window.disableDarkMode = disableDarkMode;
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications');
+console.log('📦 Modules loaded: sanitization, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode');
 
 // TODO: Gradually import more modules as we migrate functions
 // import { TaskManager } from './modules/features/tasks.js';
