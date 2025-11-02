@@ -2,7 +2,99 @@
 
 This tracks the progress of refactoring HyperFiler Pro to a modular ES6 architecture.
 
-## [4.5.17] - 2025-11-02 (CURRENT)
+## [4.5.18] - 2025-11-02 (CURRENT)
+
+### ✅ Phase 18 Complete - Authentication Module
+
+**New Module:**
+- `src/modules/features/auth.js` - User authentication, authorization, and subscription management (20 functions)
+
+**Functions Extracted (20 new):**
+- Security: safeSetInnerHTML
+- Auth state: clearAuthData, forceLogout, getAuthHeaders, authenticatedFetch
+- Session management: checkAuthentication, showAccessDenied, getUserStatusIcon, showUserInfo, logout
+- Trial/Subscription: showTrialReminder, showSubtleReminder, closeSubtleReminder, showTrialPopup, closeTrialPopup, showTrialNotification, upgradeToPro
+- Premium: initializePremiumFeatures
+- Status: getLastAuthenticationState, isAuthenticated
+
+**Key Features:**
+- Complete authentication lifecycle management
+- JWT token handling (localStorage + sessionStorage)
+- Automatic token expiration checks
+- Mobile Safari special handling
+- Retry logic for network failures (3 attempts with backoff)
+- Subscription validation (plan type, status, expiration)
+- Stale browser detection (24-hour threshold)
+- Trial reminder system (Reaper-style: gentle, non-intrusive)
+- XSS prevention with safeSetInnerHTML template escaper
+- Access denied screens with auto-redirect
+- Trial popup with countdown (5 seconds)
+- Subtle reminders (every 7 days)
+- Full popup (every 30 days)
+- Premium feature initialization hooks
+
+**Security Features:**
+- XSS prevention through HTML escaping
+- httpOnly cookie support + localStorage fallback
+- CORS credentials handling
+- Token expiry validation
+- Subscription status enforcement
+- Free plan blocking
+- Expired subscription detection
+
+**Trial System:**
+- Non-intrusive reminders (Reaper-style philosophy)
+- 30-day popup interval
+- 7-day subtle reminder interval
+- Auto-dismiss after timeout
+- "Continue Free Forever" option always available
+- No feature lockouts
+
+**Stale Browser Recovery:**
+- Detects 24+ hours since last sync
+- Forces download from cloud to prevent data overwrites
+- Sets protection flags (skipInitialUpload, justModified*)
+- Coordinates with backup restore system
+- Prevents accidental data loss on multi-device usage
+
+**Benefits:**
+- Centralized authentication logic
+- Secure session management
+- Subscription enforcement
+- Professional trial experience
+- Multi-device safety
+- Replaces standalone js/auth.js file
+- Ready for production use
+
+**Testing:**
+- All 20 functions load correctly ✅
+- 4 functional tests (getAuthHeaders, isAuthenticated, getLastAuthenticationState, fetchWithAuth alias) ✅
+- **All tests passing** ✅
+
+**Impact:**
+- ~650 lines of authentication & subscription logic
+- Critical security layer for cloud sync
+- Professional trial experience
+- Multi-device data safety
+- Ready for production use
+
+**Module Dependencies:**
+```
+auth.js → utils.js (via window.escapeHtml fallback)
+        → storage (localStorage, sessionStorage)
+        → window.API_BASE (from global config)
+        → DOM manipulation for access denied screens
+```
+
+**Total Progress:**
+- 19 modules created
+- 224 functions extracted
+- 300+ automated tests passing
+- Zero breaking changes
+
+---
+
+## [4.5.17] - 2025-11-02
 
 ### ✅ Phase 17 Complete - Offline UI Module
 

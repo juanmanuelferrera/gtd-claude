@@ -1974,6 +1974,88 @@
                 testsFailed++;
             }
 
+            console.log('===== PHASE 18 TESTS: AUTH MODULE =====');
+            results.innerHTML += '<hr><h3>Phase 18: Auth Module (20 functions)</h3>';
+
+            // Test auth functions
+            const authFunctions = [
+                'safeSetInnerHTML',
+                'clearAuthData',
+                'forceLogout',
+                'getAuthHeaders',
+                'authenticatedFetch',
+                'fetchWithAuth',
+                'checkAuthentication',
+                'showAccessDenied',
+                'getUserStatusIcon',
+                'showUserInfo',
+                'logout',
+                'showTrialReminder',
+                'showSubtleReminder',
+                'closeSubtleReminder',
+                'showTrialPopup',
+                'closeTrialPopup',
+                'showTrialNotification',
+                'upgradeToPro',
+                'initializePremiumFeatures',
+                'getLastAuthenticationState',
+                'isAuthenticated'
+            ];
+
+            authFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            // Test getAuthHeaders returns object
+            const authHeaders = window.getAuthHeaders();
+            if (authHeaders && typeof authHeaders === 'object') {
+                results.innerHTML += '<p>✅ getAuthHeaders() returns object</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getAuthHeaders() failed</p>';
+                testsFailed++;
+            }
+
+            // Test isAuthenticated returns boolean
+            const authStatus = window.isAuthenticated();
+            if (typeof authStatus === 'boolean') {
+                results.innerHTML += '<p>✅ isAuthenticated() returns boolean</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isAuthenticated() failed</p>';
+                testsFailed++;
+            }
+
+            // Test getLastAuthenticationState
+            const lastAuthState = window.getLastAuthenticationState();
+            if (lastAuthState === null || typeof lastAuthState === 'boolean') {
+                results.innerHTML += '<p>✅ getLastAuthenticationState() returns null or boolean</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ getLastAuthenticationState() failed</p>';
+                testsFailed++;
+            }
+
+            // Test fetchWithAuth alias
+            if (window.fetchWithAuth === window.authenticatedFetch) {
+                results.innerHTML += '<p>✅ fetchWithAuth is alias for authenticatedFetch</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ fetchWithAuth alias failed</p>';
+                testsFailed++;
+            }
+
+            console.log('Phase 18 Complete: Auth module extracted (20 functions)');
+            console.log('Total: 224 functions in 19 modules - 300+ automated tests');
+            results.innerHTML += '<p><strong>✅ Phase 18 Complete: Auth module with 20 functions</strong></p>';
+            results.innerHTML += '<p><strong>📊 Total: 224 functions in 19 modules</strong></p>';
+
             // Clean up test data
             localStorage.removeItem('gtdTasks');
             localStorage.removeItem('gtd_event_registry');

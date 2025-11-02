@@ -1,7 +1,7 @@
 // HyperFiler Pro - Main Entry Point (Modular Version)
 // This will gradually replace extracted_js.js
 
-console.log('🚀 HyperFiler Pro v4.5.17 - Modular Architecture Loading...');
+console.log('🚀 HyperFiler Pro v4.5.18 - Modular Architecture Loading...');
 
 // Import core utilities
 import { sanitizeHTML, sanitizeInput } from './modules/core/sanitization.js';
@@ -248,6 +248,28 @@ import {
     adjustForMobile,
     initializeOfflineUI
 } from './modules/ui/offline-ui.js';
+import {
+    safeSetInnerHTML,
+    clearAuthData,
+    forceLogout,
+    getAuthHeaders,
+    authenticatedFetch,
+    checkAuthentication,
+    showAccessDenied,
+    getUserStatusIcon,
+    showUserInfo,
+    logout,
+    showTrialReminder,
+    showSubtleReminder,
+    closeSubtleReminder,
+    showTrialPopup,
+    closeTrialPopup,
+    showTrialNotification,
+    upgradeToPro,
+    initializePremiumFeatures,
+    getLastAuthenticationState,
+    isAuthenticated
+} from './modules/features/auth.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -521,8 +543,31 @@ window.offlineUI = {
     initialize: initializeOfflineUI
 };
 
+// Auth module
+window.safeSetInnerHTML = safeSetInnerHTML;
+window.clearAuthData = clearAuthData;
+window.forceLogout = forceLogout;
+window.getAuthHeaders = getAuthHeaders;
+window.authenticatedFetch = authenticatedFetch;
+window.fetchWithAuth = authenticatedFetch; // Alias for compatibility
+window.checkAuthentication = checkAuthentication;
+window.showAccessDenied = showAccessDenied;
+window.getUserStatusIcon = getUserStatusIcon;
+window.showUserInfo = showUserInfo;
+window.logout = logout;
+window.showTrialReminder = showTrialReminder;
+window.showSubtleReminder = showSubtleReminder;
+window.closeSubtleReminder = closeSubtleReminder;
+window.showTrialPopup = showTrialPopup;
+window.closeTrialPopup = closeTrialPopup;
+window.showTrialNotification = showTrialNotification;
+window.upgradeToPro = upgradeToPro;
+window.initializePremiumFeatures = initializePremiumFeatures;
+window.getLastAuthenticationState = getLastAuthenticationState;
+window.isAuthenticated = isAuthenticated;
+
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language, offline-sync, offline-ui');
+console.log('📦 Modules loaded: sanitization, globals, utils, storage, tasks, i18n, data-operations, templates, task-actions, export-import, undo, notifications, dark-mode, keyboard-shortcuts, network-status, natural-language, offline-sync, offline-ui, auth');
 
 // Initialize global state
 initializeGlobals();
