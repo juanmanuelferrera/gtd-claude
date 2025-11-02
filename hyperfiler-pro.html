@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>⚡ HyperFiler Pro 🚀 - v4.4.2 Stable</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.4.5 UX</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    console.log('🚀 HYPERFILER v4.4.4 - Fix search navigation [Deploy-20251102-searchfix2] [' + new Date().toISOString() + ']');
+    console.log('🚀 HYPERFILER v4.4.5 - UX: Reorganized Settings [Deploy-20251102-ux] [' + new Date().toISOString() + ']');
     console.log('🖥️ Viewport Width: ' + window.innerWidth + 'px | Height: ' + window.innerHeight + 'px');
     console.log('📱 Device Type: ' + (window.innerWidth > 768 ? 'DESKTOP' : 'MOBILE') + ' (breakpoint: 769px)');
     
@@ -216,7 +216,7 @@
         <!-- Sidebar Navigation -->
         <div class="desktop-sidebar desktop-only">
             <!-- Sidebar Branded Header v4.3.17 ABSOLUTE TOP -->
-            <div id="hyperfiler-branding-v442" data-version="4.4.2" style="
+            <div id="hyperfiler-branding-v445" data-version="4.4.5" style="
                 padding: 4px 6px;
                 border-bottom: 1px solid rgba(0, 122, 255, 0.2);
                 background: linear-gradient(135deg, rgba(0, 122, 255, 0.08) 0%, rgba(0, 122, 255, 0.03) 100%) !important;
@@ -249,7 +249,7 @@
                     letter-spacing: 0.5px;
                     text-align: center;
                 ">
-                    v4.3.17
+                    v4.4.5
                 </div>
                 <div id="sidebarUserInfo" style="
                     font-size: 13px;
@@ -1441,104 +1441,78 @@
     <!-- Settings View -->
     <div id="settings-view" class="tasks-section hidden">
         <div class="section-header">
-            <h3>Settings</h3>
+            <h3>⚙️ Settings</h3>
         </div>
-        <div class="settings-content" style="padding: 20px;">
-            <!-- Settings content will be loaded here -->
-            <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">Language / Idioma</h4>
+        <div class="settings-content" style="padding: 20px; max-width: 1200px; margin: 0 auto;">
+
+            <!-- 1. LANGUAGE -->
+            <div class="settings-section" style="padding: 24px; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <span style="font-size: 24px;">🌐</span>
+                    <h4 style="margin: 0; color: #1E4FE6; font-size: 18px; font-weight: 600;">Language / Idioma</h4>
+                </div>
+                <p style="color: #718096; font-size: 13px; margin: 0 0 16px 0;">Choose your preferred language</p>
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button onclick="switchLanguage('en')" 
-                            style="background: none; border: 2px solid #ddd; font-size: 14px; cursor: pointer; padding: 8px 16px; border-radius: 6px; transition: all 0.2s;"
+                    <button onclick="switchLanguage('en')"
+                            style="background: white; border: 2px solid #ddd; font-size: 15px; cursor: pointer; padding: 12px 24px; border-radius: 8px; transition: all 0.2s; font-weight: 500;"
+                            onmouseover="this.style.borderColor='#1E4FE6'; this.style.background='#f0f4ff';"
+                            onmouseout="this.style.borderColor='#ddd'; this.style.background='white';"
                             id="lang-en-btn">
                         🇬🇧 English
                     </button>
-                    <button onclick="switchLanguage('es')" 
-                            style="background: none; border: 2px solid #ddd; font-size: 14px; cursor: pointer; padding: 8px 16px; border-radius: 6px; transition: all 0.2s;"
+                    <button onclick="switchLanguage('es')"
+                            style="background: white; border: 2px solid #ddd; font-size: 15px; cursor: pointer; padding: 12px 24px; border-radius: 8px; transition: all 0.2s; font-weight: 500;"
+                            onmouseover="this.style.borderColor='#1E4FE6'; this.style.background='#f0f4ff';"
+                            onmouseout="this.style.borderColor='#ddd'; this.style.background='white';"
                             id="lang-es-btn">
                         🇪🇸 Español
                     </button>
                 </div>
             </div>
-            
-            <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">📊 GTD Weekly Review</h4>
-                <p style="color: #718096; font-size: 14px; margin-bottom: 15px;">Generate comprehensive task reviews following Getting Things Done methodology</p>
-                
-                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button onclick="openReviewFormatModal()" 
-                            style="background: linear-gradient(135deg, #2E5BFF 0%, #1E4FE6 100%); color: white; border: none; font-size: 14px; cursor: pointer; padding: 12px 20px; border-radius: 8px; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
-                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'"
-                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
-                        📊 Generate Weekly Review
-                    </button>
+
+            <!-- 2. APPEARANCE & DISPLAY -->
+            <div class="settings-section" style="padding: 24px; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <span style="font-size: 24px;">🎨</span>
+                    <h4 style="margin: 0; color: #1E4FE6; font-size: 18px; font-weight: 600;">Appearance & Display</h4>
                 </div>
-                <div style="margin-top: 10px; font-size: 12px; color: #a0aec0;">
-                    Choose export formats in the popup • Perfect for weekly planning sessions
-                </div>
-            </div>
-            
-            <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">Display Options</h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                    <div>
-                        <label style="font-size: 14px; color: #4a5568; font-weight: 500; margin-bottom: 5px; display: block;">Date Format:</label>
-                        <select id="dateFormatSelect" onchange="saveDateFormat()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
+                <p style="color: #718096; font-size: 13px; margin: 0 0 16px 0;">Customize how dates, times, and interface elements appear</p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                    <div style="background: white; padding: 14px; border-radius: 8px; border: 1px solid #e8ecf0;">
+                        <label style="font-size: 13px; color: #4a5568; font-weight: 600; margin-bottom: 8px; display: block;">📅 Date Format</label>
+                        <select id="dateFormatSelect" onchange="saveDateFormat()" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px; cursor: pointer;">
                             <option value="YYYY-MM-DD">YYYY-MM-DD</option>
                             <option value="MM/DD/YYYY">MM/DD/YYYY</option>
                             <option value="DD/MM/YYYY">DD/MM/YYYY</option>
                         </select>
                     </div>
-                    <div>
-                        <label style="font-size: 14px; color: #4a5568; font-weight: 500; margin-bottom: 5px; display: block;">Time Format:</label>
-                        <select id="timeFormatSelect" onchange="saveTimeFormat()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
+                    <div style="background: white; padding: 14px; border-radius: 8px; border: 1px solid #e8ecf0;">
+                        <label style="font-size: 13px; color: #4a5568; font-weight: 600; margin-bottom: 8px; display: block;">🕐 Time Format</label>
+                        <select id="timeFormatSelect" onchange="saveTimeFormat()" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px; cursor: pointer;">
                             <option value="default">Default</option>
                             <option value="12hour">12-hour (AM/PM)</option>
                             <option value="24hour">24-hour</option>
                         </select>
                     </div>
-                    <div>
-                        <label style="font-size: 14px; color: #4a5568; font-weight: 500; margin-bottom: 5px; display: block;">Week Starts On:</label>
-                        <select id="weekStartSelect" onchange="saveWeekStart()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
+                    <div style="background: white; padding: 14px; border-radius: 8px; border: 1px solid #e8ecf0;">
+                        <label style="font-size: 13px; color: #4a5568; font-weight: 600; margin-bottom: 8px; display: block;">📆 Week Starts On</label>
+                        <select id="weekStartSelect" onchange="saveWeekStart()" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px; cursor: pointer;">
                             <option value="0">Sunday</option>
                             <option value="1">Monday</option>
                         </select>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Import/Export Section -->
-            <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">📦 Import/Export</h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                    <button onclick="exportTasks()" style="background: #28a745; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
-                        📤 Export Tasks
-                    </button>
-                    <button onclick="importTasks()" style="background: #007bff; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#1A47CC'" onmouseout="this.style.background='#007bff'">
-                        📥 Import Tasks
-                    </button>
-                    <button onclick="exportTodayFiltered()" style="background: #6f42c1; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#5a2d91'" onmouseout="this.style.background='#6f42c1'">
-                        🌅 Export Today HTML
-                    </button>
-                    <button onclick="exportWeekHtml()" style="background: #fd7e14; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#e8650e'" onmouseout="this.style.background='#fd7e14'">
-                        📅 Export Week HTML
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Keyboard & Advanced Settings -->
-            <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">⌨️ Keyboard & Advanced</h4>
-                
+
                 <!-- Keyboard-Only Mode -->
-                <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #dc3545;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                <div style="padding: 16px; background: #fff8f0; border-radius: 8px; border-left: 4px solid #fd7e14;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
                         <div>
-                            <span style="font-size: 14px; font-weight: 500; color: #495057;">Keyboard-Only Mode</span>
-                            <div style="font-size: 12px; color: #6c757d; margin-top: 2px;">Hide mouse buttons, show only keyboard shortcuts</div>
+                            <span style="font-size: 14px; font-weight: 600; color: #495057;">⌨️ Keyboard-Only Mode</span>
+                            <div style="font-size: 12px; color: #6c757d; margin-top: 4px;">Hide mouse buttons, show only keyboard shortcuts</div>
                         </div>
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+K</kbd>
+                            <kbd style="background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 11px; color: #495057; font-weight: 600;">Ctrl+K</kbd>
                             <label class="toggle-switch">
                                 <input type="checkbox" id="keyboardOnlyMode" onchange="toggleKeyboardOnlyMode()">
                                 <span class="toggle-slider"></span>
@@ -1546,24 +1520,92 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Advanced Functions -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                    <button onclick="toggleMobileUIVersion()" style="background: #17a2b8; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#138496'" onmouseout="this.style.background='#17a2b8'">
-                        📱 Switch Mobile UI
+            </div>
+
+            <!-- 3. PRODUCTIVITY TOOLS -->
+            <div class="settings-section" style="padding: 24px; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <span style="font-size: 24px;">🚀</span>
+                    <h4 style="margin: 0; color: #1E4FE6; font-size: 18px; font-weight: 600;">Productivity Tools</h4>
+                </div>
+                <p style="color: #718096; font-size: 13px; margin: 0 0 16px 0;">Tools to enhance your GTD workflow</p>
+
+                <div style="background: white; padding: 18px; border-radius: 8px; border: 1px solid #e8ecf0;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span style="font-size: 20px;">📊</span>
+                        <h5 style="margin: 0; color: #2d3748; font-size: 16px; font-weight: 600;">GTD Weekly Review</h5>
+                    </div>
+                    <p style="color: #718096; font-size: 13px; margin: 0 0 14px 0;">Generate comprehensive task reviews following Getting Things Done methodology</p>
+                    <button onclick="openReviewFormatModal()"
+                            style="background: linear-gradient(135deg, #2E5BFF 0%, #1E4FE6 100%); color: white; border: none; font-size: 14px; cursor: pointer; padding: 12px 24px; border-radius: 8px; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-weight: 600;"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+                        📊 Generate Weekly Review
                     </button>
-                    <button onclick="saveBackupSettings()" style="background: #28a745; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
-                        💾 Save Backup Settings
+                    <div style="margin-top: 10px; font-size: 11px; color: #a0aec0;">
+                        Choose export formats in the popup • Perfect for weekly planning sessions
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. DATA MANAGEMENT -->
+            <div class="settings-section" style="padding: 24px; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <span style="font-size: 24px;">💾</span>
+                    <h4 style="margin: 0; color: #1E4FE6; font-size: 18px; font-weight: 600;">Data Management</h4>
+                </div>
+                <p style="color: #718096; font-size: 13px; margin: 0 0 16px 0;">Import, export, and backup your tasks</p>
+
+                <!-- Import/Export Row -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                    <button onclick="importTasks()" style="background: #007bff; color: white; border: none; padding: 14px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='#0056b3'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#007bff'; this.style.transform='translateY(0)'">
+                        <span>📥</span> Import Tasks
                     </button>
-                    <button onclick="importTasksFromTextarea()" style="background: #6f42c1; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#5a2d91'" onmouseout="this.style.background='#6f42c1'">
-                        📋 Bulk Import
+                    <button onclick="exportTasks()" style="background: #28a745; color: white; border: none; padding: 14px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='#218838'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#28a745'; this.style.transform='translateY(0)'">
+                        <span>📤</span> Export Tasks
                     </button>
-                    <button onclick="exportMonthHtml()" style="background: #fd7e14; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#e8650e'" onmouseout="this.style.background='#fd7e14'">
-                        🗓️ Export Month HTML
+                    <button onclick="saveBackupSettings()" style="background: #17a2b8; color: white; border: none; padding: 14px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='#138496'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#17a2b8'; this.style.transform='translateY(0)'">
+                        <span>💾</span> Save Backup
+                    </button>
+                </div>
+
+                <!-- HTML Export Section -->
+                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border: 1px solid #e8ecf0;">
+                    <h5 style="margin: 0 0 12px 0; color: #495057; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                        <span>📄</span> HTML Exports
+                    </h5>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
+                        <button onclick="exportTodayFiltered()" style="background: white; color: #6f42c1; border: 2px solid #6f42c1; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#6f42c1'; this.style.color='white'" onmouseout="this.style.background='white'; this.style.color='#6f42c1'">
+                            🌅 Today
+                        </button>
+                        <button onclick="exportWeekHtml()" style="background: white; color: #fd7e14; border: 2px solid #fd7e14; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#fd7e14'; this.style.color='white'" onmouseout="this.style.background='white'; this.style.color='#fd7e14'">
+                            📅 Week
+                        </button>
+                        <button onclick="exportMonthHtml()" style="background: white; color: #dc3545; border: 2px solid #dc3545; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#dc3545'; this.style.color='white'" onmouseout="this.style.background='white'; this.style.color='#dc3545'">
+                            🗓️ Month
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. ADVANCED -->
+            <div class="settings-section" style="padding: 24px; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <span style="font-size: 24px;">⚙️</span>
+                    <h4 style="margin: 0; color: #1E4FE6; font-size: 18px; font-weight: 600;">Advanced</h4>
+                </div>
+                <p style="color: #718096; font-size: 13px; margin: 0 0 16px 0;">Power user features and bulk operations</p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                    <button onclick="importTasksFromTextarea()" style="background: #6c757d; color: white; border: none; padding: 14px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='#5a6268'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#6c757d'; this.style.transform='translateY(0)'">
+                        <span>📋</span> Bulk Import
+                    </button>
+                    <button onclick="toggleMobileUIVersion()" style="background: #17a2b8; color: white; border: none; padding: 14px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='#138496'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#17a2b8'; this.style.transform='translateY(0)'">
+                        <span>📱</span> Mobile UI
                     </button>
                 </div>
             </div>
-            
+
         </div>
     </div>
 
