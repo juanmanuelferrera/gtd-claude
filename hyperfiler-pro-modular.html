@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ HyperFiler Pro 🚀 - v4.5.1 Modular (TEST)</title>
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.4 Modular (TEST)</title>
 
     <script>
-    console.log('🧪 TESTING MODULAR VERSION - v4.5.1');
-    console.log('Phase 1 Complete: Core utilities extracted (13 functions)');
-    console.log('This is a test version running alongside the stable version');
+    console.log('🧪 TESTING MODULAR VERSION - v4.5.4');
+    console.log('Phase 5 Complete: Data operations extracted (17 functions)');
+    console.log('Total: 60 functions in 6 modules - 71 automated tests');
     </script>
 
     <link rel="stylesheet" href="css/styles.css">
@@ -107,6 +107,26 @@
                 'getTranslationStats'
             ];
 
+            // Test data-operations module
+            const dataOpsFunctions = [
+                'saveTasksToLocalStorage',
+                'loadTasksFromLocalStorage',
+                'sortTasks',
+                'loadEventRegistry',
+                'saveEventRegistry',
+                'markAsEvent',
+                'unmarkAsEvent',
+                'isRegisteredEvent',
+                'healEventProperties',
+                'cleanEventRegistry',
+                'filterTasksByDateRange',
+                'filterTasksByStatus',
+                'searchTasks',
+                'getTasksForDate',
+                'getActiveTasks',
+                'getCompletedTasks'
+            ];
+
             utilFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
@@ -138,6 +158,16 @@
             });
 
             i18nFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            dataOpsFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
                     testsPassed++;
@@ -321,6 +351,140 @@
                 results.innerHTML += '<p>❌ getTranslationStats failed</p>';
                 testsFailed++;
             }
+
+            // Test data-operations functionality
+            const testTasks = [
+                window.createTaskObject({ title: 'Task 1', dueDate: '2025-11-05', status: 'active' }),
+                window.createTaskObject({ title: 'Task 2', dueDate: '2025-11-03', status: 'completed' }),
+                window.createTaskObject({ title: 'Task 3', dueDate: '2025-11-05', status: 'active' }),
+                window.createTaskObject({ title: 'Search Me', dueDate: '2025-11-10', status: 'active' })
+            ];
+
+            // Test sortTasks
+            const unsortedTasks = [...testTasks];
+            const sorted = window.sortTasks(unsortedTasks);
+            if (sorted[0].status === 'active' && sorted[sorted.length - 1].status === 'completed') {
+                results.innerHTML += '<p>✅ sortTasks works correctly (active before completed)</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ sortTasks failed</p>';
+                testsFailed++;
+            }
+
+            // Test filterTasksByStatus
+            const activeTasks = window.getActiveTasks(testTasks);
+            if (activeTasks.length === 3) {
+                results.innerHTML += '<p>✅ getActiveTasks works correctly (3 active tasks)</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getActiveTasks failed: got ${activeTasks.length} tasks</p>`;
+                testsFailed++;
+            }
+
+            const completedTasksOnly = window.getCompletedTasks(testTasks);
+            if (completedTasksOnly.length === 1) {
+                results.innerHTML += '<p>✅ getCompletedTasks works correctly (1 completed task)</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getCompletedTasks failed: got ${completedTasksOnly.length} tasks</p>`;
+                testsFailed++;
+            }
+
+            // Test getTasksForDate
+            const tasksFor1105 = window.getTasksForDate(testTasks, '2025-11-05');
+            if (tasksFor1105.length === 2) {
+                results.innerHTML += '<p>✅ getTasksForDate works correctly (2 tasks on 11/05)</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getTasksForDate failed: got ${tasksFor1105.length} tasks</p>`;
+                testsFailed++;
+            }
+
+            // Test searchTasks
+            const searchResults = window.searchTasks(testTasks, 'Search');
+            if (searchResults.length === 1 && searchResults[0].title === 'Search Me') {
+                results.innerHTML += '<p>✅ searchTasks works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ searchTasks failed: got ${searchResults.length} results</p>`;
+                testsFailed++;
+            }
+
+            // Test filterTasksByDateRange
+            const rangeResults = window.filterTasksByDateRange(testTasks, '2025-11-03', '2025-11-05');
+            if (rangeResults.length === 3) {
+                results.innerHTML += '<p>✅ filterTasksByDateRange works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ filterTasksByDateRange failed: got ${rangeResults.length} tasks</p>`;
+                testsFailed++;
+            }
+
+            // Test save/load operations
+            const saveResult = window.saveTasksToLocalStorage(testTasks);
+            if (saveResult) {
+                results.innerHTML += '<p>✅ saveTasksToLocalStorage works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ saveTasksToLocalStorage failed</p>';
+                testsFailed++;
+            }
+
+            const loadedTasks = window.loadTasksFromLocalStorage();
+            if (loadedTasks.length === 4) {
+                results.innerHTML += '<p>✅ loadTasksFromLocalStorage works correctly (4 tasks loaded)</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ loadTasksFromLocalStorage failed: got ${loadedTasks.length} tasks</p>`;
+                testsFailed++;
+            }
+
+            // Test event registry operations
+            const eventRegistry = new Set();
+            window.markAsEvent(eventRegistry, 'event-123');
+            if (eventRegistry.has('event-123')) {
+                results.innerHTML += '<p>✅ markAsEvent works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ markAsEvent failed</p>';
+                testsFailed++;
+            }
+
+            const isEvent = window.isRegisteredEvent(eventRegistry, 'event-123');
+            if (isEvent === true) {
+                results.innerHTML += '<p>✅ isRegisteredEvent works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isRegisteredEvent failed</p>';
+                testsFailed++;
+            }
+
+            window.unmarkAsEvent(eventRegistry, 'event-123');
+            if (!eventRegistry.has('event-123')) {
+                results.innerHTML += '<p>✅ unmarkAsEvent works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ unmarkAsEvent failed</p>';
+                testsFailed++;
+            }
+
+            // Test healEventProperties
+            const tasksToHeal = [
+                window.createTaskObject({ id: 'heal-1', title: 'Event Task', isEvent: false })
+            ];
+            const healRegistry = new Set(['heal-1']);
+            const healedCount = window.healEventProperties(tasksToHeal, healRegistry);
+            if (healedCount === 1 && tasksToHeal[0].isEvent === true) {
+                results.innerHTML += '<p>✅ healEventProperties works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ healEventProperties failed: healed ${healedCount}, isEvent=${tasksToHeal[0].isEvent}</p>`;
+                testsFailed++;
+            }
+
+            // Clean up test data
+            localStorage.removeItem('gtdTasks');
+            localStorage.removeItem('gtd_event_registry');
 
             // Summary
             results.innerHTML += `<hr><p><strong>Tests: ${testsPassed} passed, ${testsFailed} failed</strong></p>`;
