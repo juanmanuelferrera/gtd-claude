@@ -28,6 +28,19 @@ import {
     isLocalStorageAvailable,
     isSessionStorageAvailable
 } from './modules/core/storage.js';
+import {
+    generateTaskId,
+    createTaskObject,
+    validateTaskData,
+    cleanTaskForStorage,
+    taskHasImages,
+    isTaskOverdue,
+    isTaskToday,
+    isTaskFuture,
+    isTaskCompleted,
+    isTaskActive,
+    getTaskStatusText
+} from './modules/features/tasks.js';
 
 // Make functions globally available (for backward compatibility during migration)
 window.sanitizeHTML = sanitizeHTML;
@@ -51,9 +64,20 @@ window.removeSession = removeSession;
 window.clearSession = clearSession;
 window.isLocalStorageAvailable = isLocalStorageAvailable;
 window.isSessionStorageAvailable = isSessionStorageAvailable;
+window.generateTaskId = generateTaskId;
+window.createTaskObject = createTaskObject;
+window.validateTaskData = validateTaskData;
+window.cleanTaskForStorage = cleanTaskForStorage;
+window.taskHasImages = taskHasImages;
+window.isTaskOverdue = isTaskOverdue;
+window.isTaskToday = isTaskToday;
+window.isTaskFuture = isTaskFuture;
+window.isTaskCompleted = isTaskCompleted;
+window.isTaskActive = isTaskActive;
+window.getTaskStatusText = getTaskStatusText;
 
 console.log('✅ Modular system initialized');
-console.log('📦 Modules loaded: sanitization, utils, storage');
+console.log('📦 Modules loaded: sanitization, utils, storage, tasks');
 
 // TODO: Gradually import more modules as we migrate functions
 // import { TaskManager } from './modules/features/tasks.js';

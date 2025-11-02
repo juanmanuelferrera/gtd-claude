@@ -79,6 +79,21 @@
                 'isSessionStorageAvailable'
             ];
 
+            // Test tasks module
+            const taskFunctions = [
+                'generateTaskId',
+                'createTaskObject',
+                'validateTaskData',
+                'cleanTaskForStorage',
+                'taskHasImages',
+                'isTaskOverdue',
+                'isTaskToday',
+                'isTaskFuture',
+                'isTaskCompleted',
+                'isTaskActive',
+                'getTaskStatusText'
+            ];
+
             utilFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
@@ -90,6 +105,16 @@
             });
 
             storageFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<p>❌ ${funcName} NOT loaded</p>`;
+                    testsFailed++;
+                }
+            });
+
+            taskFunctions.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
                     results.innerHTML += `<p>✅ ${funcName} loaded</p>`;
                     testsPassed++;
@@ -156,6 +181,62 @@
                 testsPassed++;
             } else {
                 results.innerHTML += '<p>❌ isLocalStorageAvailable failed</p>';
+                testsFailed++;
+            }
+
+            // Test task functionality
+            const taskId = window.generateTaskId();
+            if (taskId && taskId.length > 0) {
+                results.innerHTML += '<p>✅ generateTaskId works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ generateTaskId failed</p>';
+                testsFailed++;
+            }
+
+            const newTask = window.createTaskObject({ title: 'Test Task', dueDate: '2025-01-15' });
+            if (newTask && newTask.title === 'Test Task' && newTask.dueDate === '2025-01-15') {
+                results.innerHTML += '<p>✅ createTaskObject works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ createTaskObject failed</p>';
+                testsFailed++;
+            }
+
+            const today = window.getLocalDateString();
+            const todayTask = window.createTaskObject({ title: 'Today Task', dueDate: today });
+            if (window.isTaskToday(todayTask) === true) {
+                results.innerHTML += '<p>✅ isTaskToday works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isTaskToday failed</p>';
+                testsFailed++;
+            }
+
+            const overdueTask = window.createTaskObject({ title: 'Old Task', dueDate: '2020-01-01', status: 'active' });
+            if (window.isTaskOverdue(overdueTask) === true) {
+                results.innerHTML += '<p>✅ isTaskOverdue works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isTaskOverdue failed</p>';
+                testsFailed++;
+            }
+
+            const completedTask = window.createTaskObject({ title: 'Done', status: 'completed' });
+            if (window.isTaskCompleted(completedTask) === true) {
+                results.innerHTML += '<p>✅ isTaskCompleted works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ isTaskCompleted failed</p>';
+                testsFailed++;
+            }
+
+            const statusText = window.getTaskStatusText(todayTask);
+            if (statusText === 'Due Today') {
+                results.innerHTML += '<p>✅ getTaskStatusText works correctly</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += `<p>❌ getTaskStatusText failed: got "${statusText}"</p>`;
                 testsFailed++;
             }
 
