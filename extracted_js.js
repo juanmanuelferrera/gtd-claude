@@ -4,6 +4,7 @@
 // NOTE: This file has complex structure that passes browser validation but fails strict Node.js parsing.
 // Linting is disabled to prevent false positives. The code executes correctly in all browsers.
 
+        console.log('🔥🔥🔥 EXTRACTED_JS.JS SCRIPT TAG IS LOADING - FIRST LINE 7');
         console.log('🚀 HyperFiler Pro v3.5 - Starting initialization...');
         window.addEventListener('error', function(e) {
             console.error('❌ UNCAUGHT ERROR:', e.message, 'at line', e.lineno, 'column', e.colno);
@@ -1000,6 +1001,8 @@
             // Don't translate immediately - wait for DOM to be ready
         }
         
+        console.log('🔥🔥🔥 ABOUT TO EXPOSE FUNCTIONS TO WINDOW - LINE 1003');
+
         // Expose translateUI to global scope for use by missing-functions.js
         window.translateUI = translateUI;
         console.log('✅ window.translateUI exposed:', typeof window.translateUI);
