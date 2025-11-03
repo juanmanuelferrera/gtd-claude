@@ -2903,35 +2903,7 @@ function resetTaskTitle() {
 }
 
 // Settings and language functions
-function switchLanguage(lang) {
-    console.log('🔧 switchLanguage called with:', lang);
-    alert('🌐 Language switching to: ' + lang); // Debug alert
-    currentLanguage = lang;
-    localStorage.setItem('preferredLanguage', lang);
-    
-    if (typeof translateUI === 'function') {
-        console.log('🔧 Calling translateUI...');
-        translateUI();
-    } else {
-        console.error('❌ translateUI function not found');
-    }
-    
-    if (typeof updateLanguageButtonStyles === 'function') {
-        console.log('🔧 Calling updateLanguageButtonStyles...');
-        updateLanguageButtonStyles();
-    } else {
-        console.log('⚠️ updateLanguageButtonStyles function not found (optional)');
-    }
-    
-    if (typeof updateHeaderLanguageButton === 'function') {
-        console.log('🔧 Calling updateHeaderLanguageButton...');
-        updateHeaderLanguageButton();
-    } else {
-        console.log('⚠️ updateHeaderLanguageButton function not found (optional)');
-    }
-    
-    console.log('✅ Language switched to:', lang);
-}
+// NOTE: switchLanguage() is defined in extracted_js.js - do not duplicate here
 
 function saveAutoPrintTime() {
     const select = document.getElementById('autoPrintTimeSelect');
