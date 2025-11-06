@@ -35,13 +35,14 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          permission_mode: auto_approve_read_write
           prompt: |
             Translate ${{ github.event.inputs.source_file || 'nama.org' }} to ${{ github.event.inputs.target_language || 'Spanish' }}.
 
             Steps:
             1. Read the source file
             2. Translate all text naturally (use Latin American Spanish)
-            3. Use Write tool to create: nama-es.org (for .org files) or README-es.md (for .md files)
+            3. Use Write tool to OVERWRITE the same file with the translated content
 
             Don't translate: code blocks, URLs, org-mode syntax (*, TODO, DONE), technical terms
             Do NOT use git commands - the workflow handles commits
