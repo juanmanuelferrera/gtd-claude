@@ -5,9 +5,9 @@ on:
   workflow_dispatch:
     inputs:
       source_file:
-        description: 'File to translate (e.g., README.md)'
+        description: 'File to translate (e.g., nama.org, README.md)'
         required: true
-        default: 'README.md'
+        default: 'nama.org'
       target_language:
         description: 'Target language (e.g., Spanish, French, German)'
         required: true
@@ -39,13 +39,15 @@ jobs:
             I need you to translate text to ${{ github.event.inputs.target_language || 'Spanish' }}.
 
             ## Task:
-            1. Find the file: ${{ github.event.inputs.source_file || 'README.md' }}
+            1. Find the file: ${{ github.event.inputs.source_file || 'nama.org' }}
             2. Read its contents
             3. Translate ALL text to ${{ github.event.inputs.target_language || 'Spanish' }}
-            4. Keep the same markdown formatting
-            5. Keep code blocks unchanged (don't translate code)
-            6. Keep HTML tags unchanged
-            7. Create a new file: `${{ github.event.inputs.source_file || 'README.md' }}-es.md` (or appropriate language suffix)
+            4. Keep the same Org-mode formatting (headlines, lists, properties)
+            5. Keep code blocks unchanged (don't translate code in #+BEGIN_SRC blocks)
+            6. Keep Org-mode syntax unchanged (*, **, TODO, DONE, etc.)
+            7. If the file is .org, create output file with -es.org suffix
+            8. If the file is .md, create output file with -es.md suffix
+            9. Create the translated file in the same directory
 
             ## Translation Guidelines:
             - Maintain professional tone
