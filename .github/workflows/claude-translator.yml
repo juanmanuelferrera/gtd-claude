@@ -41,7 +41,7 @@ jobs:
 
             Steps:
             1. Read the entire source file content
-            2. Translate ALL text naturally to Latin American Spanish
+            2. Translate ALL text naturally to Spanish from Spain (Castilian, use vosotros form, natural European Spanish)
             3. Use Edit tool to replace the ENTIRE file content with the translation (use old_string = entire file content, new_string = translated content)
 
             Don't translate: code blocks, URLs, org-mode syntax (*, TODO, DONE), technical terms (Krsna, Vaisnava, etc.)
