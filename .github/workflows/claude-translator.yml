@@ -1,0 +1,58 @@
+name: Claude Translator
+
+on:
+  # Option 1: Trigger manually with a button
+  workflow_dispatch:
+    inputs:
+      source_file:
+        description: 'File to translate (e.g., README.md)'
+        required: true
+        default: 'README.md'
+      target_language:
+        description: 'Target language (e.g., Spanish, French, German)'
+        required: true
+        default: 'Spanish'
+
+  # Option 2: Trigger by commenting on an issue or PR
+  issue_comment:
+    types: [created]
+
+jobs:
+  translate:
+    # Only run if comment contains "@claude translate"
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.comment.body, '@claude translate')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Claude Translation
+        uses: anthropics/claude-code-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            I need you to translate text to ${{ github.event.inputs.target_language || 'Spanish' }}.
+
+            ## Task:
+            1. Find the file: ${{ github.event.inputs.source_file || 'README.md' }}
+            2. Read its contents
+            3. Translate ALL text to ${{ github.event.inputs.target_language || 'Spanish' }}
+            4. Keep the same markdown formatting
+            5. Keep code blocks unchanged (don't translate code)
+            6. Keep HTML tags unchanged
+            7. Create a new file: `${{ github.event.inputs.source_file || 'README.md' }}-es.md` (or appropriate language suffix)
+
+            ## Translation Guidelines:
+            - Maintain professional tone
+            - Use natural language (not literal/robotic translation)
+            - Keep technical terms in English if commonly used
+            - Preserve links, URLs, and file paths
+            - Keep emoji and special characters
+
+            ## Output:
+            Create the translated file and commit it with message: "Add ${{ github.event.inputs.target_language || 'Spanish' }} translation"
