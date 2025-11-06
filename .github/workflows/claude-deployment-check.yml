@@ -1,0 +1,63 @@
+name: Claude Deployment Check
+
+on:
+  push:
+    branches: [main, master]
+
+jobs:
+  pre-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Claude Pre-Deployment Validation
+        uses: anthropics/claude-code-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Pre-deployment validation for HyperFiler Pro:
+
+            ## Deployment Checklist:
+
+            **1. Build Verification:**
+            - All 23 modules present and valid
+            - No console errors in hyperfiler-pro-modular.html
+            - Service worker (sw.js) configured correctly
+
+            **2. File Structure:**
+            - _redirects file for Cloudflare Pages
+            - manifest.json valid
+            - All required HTML files present
+
+            **3. Configuration:**
+            - .env.example matches required variables
+            - No secrets in committed files
+            - API endpoints configured
+
+            **4. Performance:**
+            - Check bundle size (warn if > 1MB)
+            - Verify offline sync works
+            - Test mobile responsiveness
+
+            **5. Documentation:**
+            - README.md reflects current version
+            - CHANGELOG.md updated
+            - ARCHITECTURE.md matches code
+
+            **6. Browser Compatibility:**
+            - ES6 module support required
+            - Service Worker API available
+            - LocalStorage operations
+
+            ## Deployment Target:
+            Cloudflare Pages: https://hyperfiler.pages.dev
+
+            Create deployment summary with:
+            - ✅ Ready items
+            - ⚠️  Warnings to address
+            - 🛑 Blockers preventing deployment

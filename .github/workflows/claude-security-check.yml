@@ -1,0 +1,59 @@
+name: Claude Security Check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Claude Security Analysis
+        uses: anthropics/claude-code-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Perform security analysis on HyperFiler Pro:
+
+            ## Critical Security Checks:
+
+            **1. XSS Prevention:**
+            - Check all innerHTML/outerHTML usage
+            - Verify sanitization.js is used for user input
+            - Check task rendering in ui-components.js
+
+            **2. Data Storage Security:**
+            - Sensitive data handling in storage.js
+            - Check if credentials are properly secured
+            - Verify .env is in .gitignore
+
+            **3. API Security:**
+            - Check authentication in auth.js
+            - Verify token handling in sync operations
+            - Check for exposed API keys
+
+            **4. Injection Attacks:**
+            - SQL injection (if using backend)
+            - Command injection risks
+            - Template injection in task templates
+
+            **5. Dependencies:**
+            - Check package.json for vulnerable packages
+            - Scan for known CVEs
+
+            ## Priority Levels:
+            - 🔴 Critical: Immediate fix required
+            - 🟡 Medium: Fix before merge
+            - 🟢 Low: Consider for improvement
+
+            Report all findings with severity levels and remediation steps.

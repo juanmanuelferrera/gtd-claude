@@ -1,0 +1,56 @@
+name: Claude Module Validator
+
+on:
+  pull_request:
+    paths:
+      - 'src/modules/**/*.js'
+      - 'js/**/*.js'
+
+jobs:
+  validate-modules:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Claude Module Structure Check
+        uses: anthropics/claude-code-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Validate ES6 module changes in HyperFiler Pro:
+
+            ## Module Organization (23 modules total)
+
+            **Core Modules (4):**
+            - globals.js - Global state and constants
+            - sanitization.js - Input sanitization
+            - storage.js - LocalStorage/Cloud operations
+            - utils.js - Utility functions
+
+            **Feature Modules (17):**
+            - Check that new features are in correct module
+            - Verify no cross-module coupling violations
+            - Ensure backward compatibility
+
+            **UI Modules (3):**
+            - dark-mode.js, keyboard-shortcuts.js, ui-components.js
+            - No business logic in UI modules
+
+            ## Validation Checklist:
+            1. Are imports/exports properly declared?
+            2. No circular dependencies introduced?
+            3. Functions in correct module category?
+            4. No duplicate function names across modules?
+            5. Consistent with ARCHITECTURE.md?
+
+            ## Backward Compatibility:
+            - No breaking changes to existing exports
+            - Function signatures unchanged
+            - Global references still work
+
+            Post detailed findings as PR comment.

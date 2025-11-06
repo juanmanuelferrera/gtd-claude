@@ -1,0 +1,52 @@
+name: Claude Test Runner
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start test server
+        run: |
+          python3 -m http.server 8000 &
+          sleep 3
+
+      - name: Claude Test Analysis
+        uses: anthropics/claude-code-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Analyze HyperFiler Pro test suite:
+
+            1. Check if hyperfiler-pro-modular.html loads correctly
+            2. Verify all 23 ES6 modules import successfully
+            3. Check for JavaScript errors in console
+            4. Verify test files execute without errors
+            5. Check for broken module dependencies
+
+            If issues found:
+            - Identify which module(s) are affected
+            - Suggest fixes based on the modular architecture
+            - Check ARCHITECTURE.md for proper structure
+
+            Report findings as a comment on this PR.

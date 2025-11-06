@@ -1,0 +1,51 @@
+name: Claude Code PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Review this HyperFiler Pro pull request focusing on:
+
+            ## Code Quality
+            - ES6 module structure and imports
+            - Function organization across 23 modules
+            - Naming conventions and consistency
+
+            ## Architecture Compliance
+            - Check against ARCHITECTURE.md principles
+            - Ensure modular separation (core/features/ui)
+            - No breaking changes to existing modules
+
+            ## Testing
+            - Are new functions covered by tests?
+            - Do changes require test updates?
+            - Check for potential test failures
+
+            ## Security & Performance
+            - Data sanitization in storage operations
+            - XSS prevention in UI components
+            - Performance impact on large task lists
+
+            ## Documentation
+            - JSDoc comments for new functions
+            - Update relevant .md files if needed
+
+            Provide constructive feedback as inline PR comments.
