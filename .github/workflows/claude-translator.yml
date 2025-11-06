@@ -36,64 +36,15 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            You are a professional ${{ github.event.inputs.target_language || 'Spanish' }} translator specializing in natural, culturally-appropriate translations.
+            Translate ${{ github.event.inputs.source_file || 'nama.org' }} to ${{ github.event.inputs.target_language || 'Spanish' }}.
 
-            ## Source File:
-            ${{ github.event.inputs.source_file || 'nama.org' }}
-
-            ## Translation Task:
+            Steps:
             1. Read the source file
-            2. Translate ALL text to ${{ github.event.inputs.target_language || 'Spanish' }}
-            3. Create translated file using Write tool:
-               - For .org files: filename-es.org (e.g., nama.org → nama-es.org)
-               - For .md files: filename-es.md
-               - Same directory as source
+            2. Translate all text naturally (use Latin American Spanish)
+            3. Use Write tool to create: nama-es.org (for .org files) or README-es.md (for .md files)
 
-            ## Style & Quality Requirements:
-
-            ### Natural Language:
-            - Write how native speakers actually talk, not word-for-word literal translation
-            - Use Latin American Spanish (neutral variant understood across regions)
-            - Match the original tone (formal/informal/technical/casual)
-            - Make it sound like it was originally written in Spanish
-
-            ### What to Translate:
-            ✅ All body text, headings, and descriptions
-            ✅ UI labels, buttons, and messages
-            ✅ Comments and explanations
-            ✅ Error messages and notifications
-
-            ### What NOT to Translate:
-            ❌ Code blocks (#+BEGIN_SRC...#+END_SRC)
-            ❌ Variable/function names
-            ❌ URLs and file paths
-            ❌ Brand names
-            ❌ Widely-used technical terms (API, HTML, JSON, etc.)
-            ❌ Org-mode syntax (*, **, TODO, DONE, SCHEDULED, etc.)
-
-            ### Special Handling:
-            - **Acronyms**: Keep English but explain in Spanish on first use if needed
-            - **Cultural references**: Adapt if they don't translate well
-            - **Idioms**: Find Spanish equivalent, not literal translation
-            - **Formality**: Use "tú" (informal, friendly tone)
-            - **Technical terms**: Keep commonly-used English terms (framework, backend, etc.)
-
-            ### Quality Checks:
-            - Does it sound natural when read aloud in Spanish?
-            - Would a native Spanish speaker understand without the English?
-            - Are verb tenses consistent?
-            - Does it maintain the same emotional impact?
-
-            ### Formatting Preservation:
-            - Keep exact Org-mode structure (headlines, lists, properties)
-            - Maintain indentation and spacing
-            - Preserve links: [[url][text]] → translate only [text]
-            - Keep all markup syntax unchanged
-
-            ## Important:
-            - Use Write tool to create the translated file
-            - Do NOT use git commands - workflow handles commits
-            - Double-check that code blocks remain untranslated
+            Don't translate: code blocks, URLs, org-mode syntax (*, TODO, DONE), technical terms
+            Do NOT use git commands - the workflow handles commits
 
       - name: Commit Translation
         run: |
