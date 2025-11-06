@@ -40,11 +40,11 @@ jobs:
             Translate ${{ github.event.inputs.source_file || 'nama.org' }} to ${{ github.event.inputs.target_language || 'Spanish' }}.
 
             Steps:
-            1. Read the source file
-            2. Translate all text naturally (use Latin American Spanish)
-            3. Use Write tool to OVERWRITE the same file with the translated content
+            1. Read the entire source file content
+            2. Translate ALL text naturally to Latin American Spanish
+            3. Use Edit tool to replace the ENTIRE file content with the translation (use old_string = entire file content, new_string = translated content)
 
-            Don't translate: code blocks, URLs, org-mode syntax (*, TODO, DONE), technical terms
+            Don't translate: code blocks, URLs, org-mode syntax (*, TODO, DONE), technical terms (Krsna, Vaisnava, etc.)
             Do NOT use git commands - the workflow handles commits
 
       - name: Commit Translation
