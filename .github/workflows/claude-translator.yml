@@ -35,20 +35,19 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          mode: agent
           prompt: |
             I need you to translate text to ${{ github.event.inputs.target_language || 'Spanish' }}.
 
             ## Task:
-            1. Find the file: ${{ github.event.inputs.source_file || 'nama.org' }}
-            2. Read its contents
-            3. Translate ALL text to ${{ github.event.inputs.target_language || 'Spanish' }}
-            4. Keep the same Org-mode formatting (headlines, lists, properties)
-            5. Keep code blocks unchanged (don't translate code in #+BEGIN_SRC blocks)
-            6. Keep Org-mode syntax unchanged (*, **, TODO, DONE, etc.)
-            7. If the file is .org, create output file with -es.org suffix
-            8. If the file is .md, create output file with -es.md suffix
-            9. Create the translated file in the same directory
+            1. Read the file: ${{ github.event.inputs.source_file || 'nama.org' }}
+            2. Translate ALL text to ${{ github.event.inputs.target_language || 'Spanish' }}
+            3. Keep the same Org-mode formatting (headlines, lists, properties)
+            4. Keep code blocks unchanged (don't translate code in #+BEGIN_SRC blocks)
+            5. Keep Org-mode syntax unchanged (*, **, TODO, DONE, etc.)
+            6. Use the Write tool to create the translated file:
+               - For .org files: create filename-es.org (e.g., nama.org → nama-es.org)
+               - For .md files: create filename-es.md
+               - Put it in the same directory as the source file
 
             ## Translation Guidelines:
             - Maintain professional tone
@@ -57,5 +56,14 @@ jobs:
             - Preserve links, URLs, and file paths
             - Keep emoji and special characters
 
-            ## Output:
-            Create the translated file and commit it with message: "Add ${{ github.event.inputs.target_language || 'Spanish' }} translation"
+            ## Important:
+            - Use the Write tool to create the translated file
+            - Do NOT use git commands - the workflow will commit automatically
+
+      - name: Commit Translation
+        run: |
+          git config --local user.email "claude[bot]@users.noreply.github.com"
+          git config --local user.name "claude[bot]"
+          git add .
+          git commit -m "Add ${{ github.event.inputs.target_language || 'Spanish' }} translation of ${{ github.event.inputs.source_file || 'nama.org' }}" || echo "No changes to commit"
+          git push
