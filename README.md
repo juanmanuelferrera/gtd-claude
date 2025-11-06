@@ -91,3 +91,5 @@ Live: https://hyperfiler.pages.dev/hyperfiler-pro-modular.html
 <!-- Testing Claude Code workflows -->
 
 <!-- Testing with debug output enabled -->
+
+<- Testing OAuth authentication -->
