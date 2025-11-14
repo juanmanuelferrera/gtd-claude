@@ -1147,6 +1147,30 @@
         function isRegisteredEvent(taskId) {
             return eventTaskIds.has(taskId);
         }
+
+        function toggleEventStatus(taskId, event) {
+            if (event) event.stopPropagation();
+
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            // Toggle the event status
+            if (task.isEvent) {
+                task.isEvent = false;
+                unmarkAsEvent(taskId);
+                console.log('📱 Task unmarked as event:', taskId);
+                showInlineNotification('⚪ Converted to Action', 'success');
+            } else {
+                task.isEvent = true;
+                markAsEvent(taskId);
+                console.log('📱 Task marked as event:', taskId);
+                showInlineNotification('🔴 Converted to Event', 'success');
+            }
+
+            // Save and re-render
+            task.updatedAt = new Date().toISOString();
+            saveTask(task);
+        }
         // Post-download healing: Restore isEvent properties from registry
         function healEventProperties() {
             let healedCount = 0;
@@ -5310,10 +5334,16 @@
                         hint.style.opacity = Math.min(1, Math.abs(limitedDeltaX) / 60);
                         
                     } else if (deltaX < -30) {
-                        // Swiping left - show "Delete" indication
-                        currentSwipeElement.style.background = 'linear-gradient(90deg, rgba(244, 67, 54, 0.2), rgba(244, 67, 54, 0.8))';
-                        currentSwipeElement.style.boxShadow = '-2px 0 8px rgba(244, 67, 54, 0.4)';
-                        
+                        // Swiping left - show "Toggle Event" indication
+                        // Check current task status to show correct feedback
+                        const taskId = currentSwipeElement.dataset.taskId;
+                        const task = window.tasks?.find(t => t.id === taskId);
+                        const isCurrentlyEvent = task?.isEvent;
+
+                        // Purple gradient for event toggle
+                        currentSwipeElement.style.background = 'linear-gradient(90deg, rgba(156, 39, 176, 0.2), rgba(156, 39, 176, 0.8))';
+                        currentSwipeElement.style.boxShadow = '-2px 0 8px rgba(156, 39, 176, 0.4)';
+
                         // Add or update visual hint
                         let hint = currentSwipeElement.querySelector('.swipe-hint');
                         if (!hint) {
@@ -5337,10 +5367,9 @@
                             currentSwipeElement.style.position = 'relative';
                             currentSwipeElement.appendChild(hint);
                         }
-                        hint.innerHTML = `
-                            <span style="font-size: 16px;">🗑️</span>
-                            <span>Delete</span>
-                        `;
+                        hint.innerHTML = isCurrentlyEvent
+                            ? `<span style="font-size: 16px;">⚪</span><span>Action</span>`
+                            : `<span style="font-size: 16px;">🔴</span><span>Event</span>`;
                         hint.style.opacity = Math.min(1, Math.abs(limitedDeltaX) / 60);
                         
                     } else {
@@ -5379,24 +5408,10 @@
                             delayTask(taskId, 1, event);
                         }
                     } else {
-                        // Swipe left - open unified date/time modal (same as desktop)
-                        console.log('📱 Swipe left detected - opening unified calendar for task:', taskId);
-                        const task = window.tasks?.find(t => t.id === taskId) || {};
-                        try {
-                            // Set the current task ID for the modal
-                            window.currentDateTimeTaskId = taskId;
-                            
-                            // Open the unified modal using the same function as desktop
-                            if (typeof populateDateTimeModal === 'function') {
-                                populateDateTimeModal(task.dueDate || task.date || '', task.dueTime || task.time || '');
-                                const modal = document.getElementById('dateTimeModal');
-                                if (modal) {
-                                    modal.style.display = 'block';
-                                    console.log('📅 Opened unified date/time modal for task:', taskId);
-                                }
-                            }
-                        } catch (error) {
-                            console.error('❌ Error opening unified calendar modal:', error);
+                        // Swipe left - toggle event status (convert action ↔ event)
+                        console.log('📱 Swipe left detected - toggling event status for task:', taskId);
+                        if (typeof toggleEventStatus === 'function') {
+                            toggleEventStatus(taskId, event);
                         }
                     }
                 }, 100);
