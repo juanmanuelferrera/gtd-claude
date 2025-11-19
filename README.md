@@ -87,3 +87,9 @@ Live: https://hyperfiler.pages.dev/hyperfiler-pro-modular.html
 ---
 
 **Status:** ✅ Production Ready | **Architecture:** ES6 Modules | **Test Coverage:** Complete
+
+<!-- Testing Claude Code workflows -->
+
+<!-- Testing with debug output enabled -->
+
+<- Testing OAuth authentication -->
