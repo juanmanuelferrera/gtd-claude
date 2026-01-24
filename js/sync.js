@@ -233,15 +233,21 @@ async function _uploadAllTasksInternal() {
     }
     
     try {
+        // Log tombstone status before upload
+        const tasksToUpload = tasks.map(task => cleanTaskForStorage(task));
+        const deletedCount = tasksToUpload.filter(t => t.isDeleted || t.status === 'deleted').length;
+        const activeCount = tasksToUpload.filter(t => !t.isDeleted && t.status !== 'deleted').length;
+        console.log(`📤 Uploading ${tasksToUpload.length} tasks (${activeCount} active, ${deletedCount} tombstones)`);
+
         const response = await fetch(`${window.API_BASE}/tasks/sync`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify({
                 userId: window.currentUser.user.id,
-                tasks: tasks.map(task => cleanTaskForStorage(task))
+                tasks: tasksToUpload
             })
         });
-        
+
         if (response.ok) {
             console.log('✅ Tasks synced to server successfully');
             // Update last sync timestamp
