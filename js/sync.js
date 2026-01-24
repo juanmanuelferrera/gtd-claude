@@ -299,8 +299,8 @@ async function _downloadAllTasksInternal() {
         }
     }
     
-    // Get auth token with fallback
-    const authToken = window.currentUser?.token || localStorage.getItem('authToken');
+    // Get auth token with fallback (check all possible locations)
+    const authToken = window.currentUser?.token || localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
     if (!authToken) {
         console.log('⚠️ No auth token available for download');
         return;
