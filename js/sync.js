@@ -847,6 +847,11 @@ async function performStaleBrowserRecovery() {
             await _downloadAllTemplatesInternal();
             
             console.log('✅ Stale browser recovery completed successfully');
+
+            // Clear stale browser flags to allow uploads after recovery
+            window.staleBrowserDetected = false;
+            window.skipInitialUpload = false;
+            console.log('🔓 Stale browser protection cleared - uploads now allowed');
         } catch (error) {
             console.error('❌ Stale browser recovery failed:', error);
             throw error;
