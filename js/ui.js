@@ -3094,9 +3094,11 @@ function completeTask(taskId, event) {
         console.log('📋 Task before deletion:', taskBefore);
         
         tasks[taskIndex].status = 'deleted';
+        tasks[taskIndex].isDeleted = true;
         tasks[taskIndex].deletedAt = new Date().toISOString();
-        
-        console.log('📋 Task after deletion:', tasks[taskIndex]);
+        tasks[taskIndex].updatedAt = new Date().toISOString();
+
+        console.log('📋 Task after deletion (tombstone):', tasks[taskIndex]);
         console.log('💾 Saving tasks...');
         
         // Save changes

@@ -676,24 +676,16 @@ async function deleteTaskFromModal() {
         // Store task for undo before deletion
         const taskToDelete = {...task};
         
-        // Count tasks before deletion for verification
-        const beforeCount = tasks.length;
-        const beforeRepeatCount = tasks.filter(t => t.title === task.title).length;
-        
-        // Remove ONLY the specific task ID from local array
-        tasks = tasks.filter(t => t.id !== currentEditTaskId);
-        
-        // Count tasks after deletion for verification
-        const afterCount = tasks.length;
-        const afterRepeatCount = tasks.filter(t => t.title === task.title).length;
-        
-        console.log(`Tasks before deletion: ${beforeCount}, after: ${afterCount}`);
-        console.log(`Repeat instances before: ${beforeRepeatCount}, after: ${afterRepeatCount}`);
-        
-        // Verify only one task was deleted
-        const deletedCount = beforeCount - afterCount;
-        if (deletedCount !== 1) {
-            throw new Error(`Expected to delete 1 task, but deleted ${deletedCount} tasks`);
+        // Mark task as deleted (tombstone pattern for sync)
+        const taskIndex = tasks.findIndex(t => t.id === currentEditTaskId);
+        if (taskIndex >= 0) {
+            tasks[taskIndex].isDeleted = true;
+            tasks[taskIndex].status = 'deleted';
+            tasks[taskIndex].deletedAt = new Date().toISOString();
+            tasks[taskIndex].updatedAt = new Date().toISOString();
+            console.log('🗑️ Task marked as deleted (tombstone):', currentEditTaskId);
+        } else {
+            throw new Error('Task not found in array');
         }
         
         // Save to localStorage immediately
@@ -1514,17 +1506,20 @@ async function deleteTask(taskId, event) {
         const taskToDelete = tasks.find(t => t.id === taskId);
         console.log('🗑️ Task to delete:', taskToDelete);
         
-        // Remove task from local array
+        // Mark task as deleted (tombstone pattern for sync)
         const taskIndex = tasks.findIndex(t => t.id === taskId);
         if (taskIndex >= 0) {
-            // Move to trash before permanent deletion if function exists
+            // Move to trash before marking as deleted if function exists
             if (typeof moveToTrash === 'function') {
-                moveToTrash(taskToDelete);
+                moveToTrash({...tasks[taskIndex]});
             }
-            
-            // Remove task permanently from local array
-            tasks.splice(taskIndex, 1);
-            console.log('🗑️ Task permanently removed from local array:', taskId);
+
+            // Mark as deleted instead of removing (tombstone for sync)
+            tasks[taskIndex].isDeleted = true;
+            tasks[taskIndex].status = 'deleted';
+            tasks[taskIndex].deletedAt = new Date().toISOString();
+            tasks[taskIndex].updatedAt = new Date().toISOString();
+            console.log('🗑️ Task marked as deleted (tombstone):', taskId);
         } else {
             console.error('🗑️ ERROR: Task not found in array:', taskId);
             return;
