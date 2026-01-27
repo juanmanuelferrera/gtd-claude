@@ -1973,6 +1973,15 @@ function generateSimpleTasksReview(mode) {
     const sortedDates = Object.keys(dateGroups).sort();
     sortedDates.forEach(date => {
         const tasksForDate = dateGroups[date];
+        // For daily review, sort by time (earliest first, no-time tasks at end)
+        if (isDaily) {
+            tasksForDate.sort((a, b) => {
+                if (!a.dueTime && !b.dueTime) return 0;
+                if (!a.dueTime) return 1;
+                if (!b.dueTime) return -1;
+                return a.dueTime.localeCompare(b.dueTime);
+            });
+        }
         const isToday = date === todayStr;
         const isPast = date < todayStr;
 
@@ -2196,6 +2205,14 @@ function generateSimplePlainTextReport(allTasks, todayStr, mode) {
 
     Object.keys(dateGroups).sort().forEach(date => {
         const tasksForDate = dateGroups[date];
+        if (isDaily) {
+            tasksForDate.sort((a, b) => {
+                if (!a.dueTime && !b.dueTime) return 0;
+                if (!a.dueTime) return 1;
+                if (!b.dueTime) return -1;
+                return a.dueTime.localeCompare(b.dueTime);
+            });
+        }
         text += `${date} (${tasksForDate.length})\n`;
         text += `${'-'.repeat(20)}\n`;
         tasksForDate.forEach(task => {
@@ -2335,6 +2352,14 @@ function generateSimpleOrgModeReport(allTasks, todayStr, mode) {
 
     Object.keys(dateGroups).sort().forEach(date => {
         const tasksForDate = dateGroups[date];
+        if (isDaily) {
+            tasksForDate.sort((a, b) => {
+                if (!a.dueTime && !b.dueTime) return 0;
+                if (!a.dueTime) return 1;
+                if (!b.dueTime) return -1;
+                return a.dueTime.localeCompare(b.dueTime);
+            });
+        }
         text += `** ${date} (${tasksForDate.length})\n`;
         tasksForDate.forEach(task => {
             text += `- [ ] ${task.title || 'Untitled'}`;
