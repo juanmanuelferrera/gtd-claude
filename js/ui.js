@@ -1797,7 +1797,7 @@ function openReviewFormatModal(mode) {
     if (modal) {
         const title = document.getElementById('reviewModalTitle');
         if (title) {
-            title.textContent = mode === 'daily' ? '☀️ GTD Daily Review' : '📊 GTD Weekly Review';
+            title.textContent = mode === 'projects' ? '📁 GTD Projects Review' : mode === 'daily' ? '☀️ GTD Daily Review' : '📊 GTD Weekly Review';
         }
         modal.style.display = 'block';
 
@@ -1829,6 +1829,7 @@ function closeReviewFormatModal() {
 function generateSimpleTasksReview(mode) {
     mode = mode || 'weekly';
     const isDaily = mode === 'daily';
+    const isProjects = mode === 'projects';
 
     const allTasks = tasks.filter(task => task.status !== 'deleted');
 
@@ -1852,17 +1853,18 @@ function generateSimpleTasksReview(mode) {
     weekEnd.setDate(weekStart.getDate() + 6);
     const weekEndStr = getLocalDateString(weekEnd);
 
-    const reviewTitle = isDaily ? '☀️ GTD Daily Review' : '📊 GTD Weekly Review';
-    const reviewSubtitle = isDaily ? todayStr : `${weekStartStr} to ${weekEndStr}`;
+    const reviewTitle = isProjects ? '📁 GTD Projects Review' : isDaily ? '☀️ GTD Daily Review' : '📊 GTD Weekly Review';
+    const reviewSubtitle = isProjects ? `All projects as of ${todayStr}` : isDaily ? todayStr : `${weekStartStr} to ${weekEndStr}`;
 
     // Generate simple report HTML
     let reportHTML = `
         <div style="max-width: 900px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-            <h1 style="text-align: center; color: ${isDaily ? '#ff6b35' : '#2563eb'}; margin-bottom: 5px;">${reviewTitle}</h1>
+            <h1 style="text-align: center; color: ${isProjects ? '#6f42c1' : isDaily ? '#ff6b35' : '#2563eb'}; margin-bottom: 5px;">${reviewTitle}</h1>
             <p style="text-align: center; color: #666; margin-bottom: 30px;">${reviewSubtitle}</p>
     `;
 
-    // 1. EVENTS SECTION - filtered by mode
+    // 1. EVENTS SECTION - filtered by mode (skip for projects mode)
+    if (!isProjects) {
     const events = allTasks.filter(task => {
         if (!task.isEvent) return false;
         if (isDaily) return task.dueDate === todayStr;
@@ -1987,8 +1989,7 @@ function generateSimpleTasksReview(mode) {
         tasksForDate.forEach(task => {
             reportHTML += `
                 <li style="margin: 6px 0; padding: 8px; background: white; border-radius: 3px;">
-                    📋 ${task.title || 'Untitled'}
-                    ${task.dueTime ? `<span style="color: #666; font-size: 12px; margin-left: 6px;">${task.dueTime}</span>` : ''}
+                    ${task.dueTime ? `<span style="color: #007AFF; font-size: 12px; font-weight: 600; margin-right: 6px;">${task.dueTime}</span>` : ''}📋 ${task.title || 'Untitled'}
                     ${task.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${task.notes}</div>` : ''}
                 </li>
             `;
@@ -1998,15 +1999,17 @@ function generateSimpleTasksReview(mode) {
     });
 
     reportHTML += `</div>`;
-    
-    // 2. TASKS WITH TEMPLATES GROUPED BY PROJECTS
+    } // end if (!isProjects)
+
+    // 2. TASKS WITH TEMPLATES GROUPED BY PROJECTS (only in projects mode)
+    if (isProjects) {
     const templatedProjects = {};
     allTasks.forEach(task => {
-        if (task.isEvent) return; // Skip events
-        
+        if (task.isEvent) return;
+
         const text = `${task.title || ''} ${task.notes || ''}`;
         const templates = TemplateProcessor.extractFromText(text);
-        
+
         if (templates.length > 0) {
             templates.forEach(template => {
                 if (!templatedProjects[template]) {
@@ -2016,7 +2019,7 @@ function generateSimpleTasksReview(mode) {
             });
         }
     });
-    
+
     if (Object.keys(templatedProjects).length > 0) {
         reportHTML += `
             <div style="margin-bottom: 40px;">
@@ -2058,7 +2061,8 @@ function generateSimpleTasksReview(mode) {
         
         reportHTML += `</div>`;
     }
-    
+    } // end if (isProjects)
+
     // Footer
     reportHTML += `
         <div style="text-align: center; margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
@@ -2072,7 +2076,7 @@ function generateSimpleTasksReview(mode) {
     // Check if format preferences were set by the modal
     const formats = window.selectedReviewFormats;
     
-    const filePrefix = isDaily ? 'gtd-daily' : 'gtd-weekly';
+    const filePrefix = isProjects ? 'gtd-projects' : isDaily ? 'gtd-daily' : 'gtd-weekly';
 
     if (formats) {
         if (formats.txt) {
@@ -2106,6 +2110,7 @@ function generateSimpleTasksReview(mode) {
 function generateSimplePlainTextReport(allTasks, todayStr, mode) {
     mode = mode || 'weekly';
     const isDaily = mode === 'daily';
+    const isProjects = mode === 'projects';
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -2118,11 +2123,12 @@ function generateSimplePlainTextReport(allTasks, todayStr, mode) {
     weekEnd.setDate(weekStart.getDate() + 6);
     const weekEndStr = getLocalDateString(weekEnd);
 
-    let text = isDaily ? `GTD DAILY REVIEW\n` : `GTD WEEKLY REVIEW\n`;
+    let text = isProjects ? `GTD PROJECTS REVIEW\n` : isDaily ? `GTD DAILY REVIEW\n` : `GTD WEEKLY REVIEW\n`;
     text += `Generated on ${todayStr} at ${new Date().toLocaleTimeString()}\n`;
-    if (!isDaily) text += `Week: ${weekStartStr} to ${weekEndStr}\n`;
+    if (!isDaily && !isProjects) text += `Week: ${weekStartStr} to ${weekEndStr}\n`;
     text += `${'='.repeat(50)}\n\n`;
 
+    if (!isProjects) {
     // EVENTS - filtered by mode
     const events = allTasks.filter(task => {
         if (!task.isEvent) return false;
@@ -2193,16 +2199,17 @@ function generateSimplePlainTextReport(allTasks, todayStr, mode) {
         text += `${date} (${tasksForDate.length})\n`;
         text += `${'-'.repeat(20)}\n`;
         tasksForDate.forEach(task => {
-            text += `• ${task.title || 'Untitled'}`;
-            if (task.dueTime) text += ` [${task.dueTime}]`;
+            if (task.dueTime) text += `• [${task.dueTime}] ${task.title || 'Untitled'}`;
+            else text += `• ${task.title || 'Untitled'}`;
             text += `\n`;
             if (task.notes) text += `  ${task.notes}\n`;
         });
         text += `\n`;
     });
+    } // end if (!isProjects)
 
-    // Projects section (weekly only)
-    if (!isDaily) {
+    // Projects section (projects mode only)
+    if (isProjects) {
         const templatedProjects = {};
         allTasks.forEach(task => {
             if (task.isEvent) return;
@@ -2245,6 +2252,7 @@ function generateSimplePlainTextReport(allTasks, todayStr, mode) {
 function generateSimpleOrgModeReport(allTasks, todayStr, mode) {
     mode = mode || 'weekly';
     const isDaily = mode === 'daily';
+    const isProjects = mode === 'projects';
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -2257,12 +2265,13 @@ function generateSimpleOrgModeReport(allTasks, todayStr, mode) {
     weekEnd.setDate(weekStart.getDate() + 6);
     const weekEndStr = getLocalDateString(weekEnd);
 
-    let text = `#+TITLE: GTD ${isDaily ? 'Daily' : 'Weekly'} Review\n`;
+    let text = `#+TITLE: GTD ${isProjects ? 'Projects' : isDaily ? 'Daily' : 'Weekly'} Review\n`;
     text += `#+DATE: ${todayStr}\n`;
     text += `#+TIME: ${new Date().toLocaleTimeString()}\n`;
-    if (!isDaily) text += `#+WEEK: ${weekStartStr} to ${weekEndStr}\n`;
+    if (!isDaily && !isProjects) text += `#+WEEK: ${weekStartStr} to ${weekEndStr}\n`;
     text += `\n`;
 
+    if (!isProjects) {
     // EVENTS - filtered
     const events = allTasks.filter(task => {
         if (!task.isEvent) return false;
@@ -2336,9 +2345,10 @@ function generateSimpleOrgModeReport(allTasks, todayStr, mode) {
         });
         text += `\n`;
     });
+    } // end if (!isProjects)
 
-    // Projects (weekly only)
-    if (!isDaily) {
+    // Projects (projects mode only)
+    if (isProjects) {
         const templatedProjects = {};
         allTasks.forEach(task => {
             if (task.isEvent) return;
