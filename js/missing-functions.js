@@ -304,15 +304,15 @@ function closeDateDropdown() {
 }
 
 // Select a specific date in inline calendar dropdown
-function selectInlineCalendarDate(taskId, day) {
+async function selectInlineCalendarDate(taskId, day) {
     console.log('📅 selectCalendarDate called with taskId:', taskId, 'day:', day);
     console.log('📅 currentCalendarYear:', window.currentCalendarYear);
     console.log('📅 currentCalendarMonth:', window.currentCalendarMonth);
-    
+
     try {
         const dateString = `${window.currentCalendarYear}-${(window.currentCalendarMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
         console.log('📅 Selected date:', dateString);
-        
+
         // Find the task first
         const task = window.tasks?.find(t => t.id === taskId);
         if (!task) {
@@ -320,15 +320,15 @@ function selectInlineCalendarDate(taskId, day) {
             return;
         }
         console.log('✅ Found task:', task.title);
-        
-        // Update task date
-        console.log('📅 Calling updateTaskDate...');
-        updateTaskDate(taskId, dateString, { stopPropagation: () => {} });
-        
-        // Close dropdown
+
+        // Close dropdown first for better UX
         console.log('📅 Closing dropdown...');
         closeDateDropdown();
-        
+
+        // Update task date and wait for it to complete
+        console.log('📅 Calling updateTaskDate...');
+        await updateTaskDate(taskId, dateString, { stopPropagation: () => {} });
+
         console.log('✅ Date updated successfully!');
     } catch (error) {
         console.error('❌ Error in selectCalendarDate:', error);
@@ -1000,14 +1000,18 @@ function closeTimeDropdown() {
     }
 }
 
-function setTimeAndClose(taskId, time) {
-    updateTaskTime(taskId, time, { stopPropagation: () => {} });
+async function setTimeAndClose(taskId, time) {
+    // Close dropdown first for better UX
     closeTimeDropdown();
+    // Update task time and wait for it to complete
+    await updateTaskTime(taskId, time, { stopPropagation: () => {} });
 }
 
-function clearTimeAndClose(taskId) {
-    updateTaskTime(taskId, '', { stopPropagation: () => {} });
+async function clearTimeAndClose(taskId) {
+    // Close dropdown first for better UX
     closeTimeDropdown();
+    // Update task time and wait for it to complete
+    await updateTaskTime(taskId, '', { stopPropagation: () => {} });
 }
 
 // Quick time selection
