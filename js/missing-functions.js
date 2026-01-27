@@ -880,58 +880,63 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
         overflow-y: auto;
     `;
 
-    // Helper to render a single hour button
-    function renderHourBtn(hour, bgColor, textColor, hoverColor) {
+    // Helper to render a time row: full hour button + small :30 button
+    function renderTimeRow(hour, bgColor, textColor, hoverColor) {
         const fullTime = `${String(hour).padStart(2, '0')}:00`;
         const halfTime = `${String(hour).padStart(2, '0')}:30`;
         const isFullSelected = fullTime === currentTime;
         const isHalfSelected = halfTime === currentTime;
-        const isSelected = isFullSelected || isHalfSelected;
-        const displayTime = isHalfSelected ? halfTime : fullTime;
 
-        const style = isSelected
+        const fullStyle = isFullSelected
             ? 'background: #007AFF; color: white;'
             : `background: ${bgColor}; color: ${textColor};`;
+        const halfStyle = isHalfSelected
+            ? 'background: #007AFF; color: white;'
+            : `background: ${bgColor}; color: ${textColor}; opacity: 0.75;`;
 
-        return `<div onclick="selectTimeHour('${taskId}', ${hour})"
-                     style="padding: 6px 2px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 12px; font-weight: 600; transition: all 0.2s; ${style}"
-                     onmouseover="this.style.background='${isSelected ? '#0056CC' : hoverColor}'"
-                     onmouseout="this.style.background='${isSelected ? '#007AFF' : bgColor}'">
-                    ${displayTime}
-                </div>`;
+        return `<div style="display: flex; gap: 3px;">
+            <div onclick="setTimeAndClose('${taskId}', '${fullTime}')"
+                 style="flex: 1; padding: 6px 2px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 12px; font-weight: 600; transition: all 0.2s; ${fullStyle}"
+                 onmouseover="this.style.background='${isFullSelected ? '#0056CC' : hoverColor}'"
+                 onmouseout="this.style.background='${isFullSelected ? '#007AFF' : bgColor}'">
+                ${fullTime}
+            </div>
+            <div onclick="setTimeAndClose('${taskId}', '${halfTime}')"
+                 style="width: 36px; padding: 6px 2px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 10px; font-weight: 500; transition: all 0.2s; ${halfStyle}"
+                 onmouseover="this.style.background='${isHalfSelected ? '#0056CC' : hoverColor}'"
+                 onmouseout="this.style.background='${isHalfSelected ? '#007AFF' : bgColor}'">
+                :30
+            </div>
+        </div>`;
     }
 
     let html = `
         <!-- Header -->
-        <div style="display: flex; gap: 6px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eee; justify-content: center;">
+        <div style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
             <button onclick="clearTimeAndClose('${taskId}')"
-                    style="background: #f0f0f0; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer; font-size: 12px; font-weight: 600;">
-                ✕ Untimed
-            </button>
-            <button id="halfHourBtn" onclick="toggleHalfHour('${taskId}')"
-                    style="background: ${currentTime && currentTime.endsWith(':30') ? '#007AFF' : '#f0f0f0'}; color: ${currentTime && currentTime.endsWith(':30') ? 'white' : '#333'}; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer; font-size: 12px; font-weight: 600;">
-                :30
+                    style="background: #f0f0f0; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                ✕ Clear Time (Untimed)
             </button>
         </div>
 
         <!-- Morning (6-11) -->
         <div style="margin-bottom: 8px;">
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">
-                ${[6,7,8,9,10,11].map(h => renderHourBtn(h, '#e3f2fd', '#1976d2', '#bbdefb')).join('')}
+                ${[6,7,8,9,10,11].map(h => renderTimeRow(h, '#e3f2fd', '#1976d2', '#bbdefb')).join('')}
             </div>
         </div>
 
         <!-- Afternoon (12-17) -->
         <div style="margin-bottom: 8px;">
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">
-                ${[12,13,14,15,16,17].map(h => renderHourBtn(h, '#fff3e0', '#f57c00', '#ffe0b2')).join('')}
+                ${[12,13,14,15,16,17].map(h => renderTimeRow(h, '#fff3e0', '#f57c00', '#ffe0b2')).join('')}
             </div>
         </div>
 
         <!-- Evening (18-23) -->
         <div style="margin-bottom: 8px;">
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">
-                ${[18,19,20,21,22,23].map(h => renderHourBtn(h, '#f3e5f5', '#7b1fa2', '#e1bee7')).join('')}
+                ${[18,19,20,21,22,23].map(h => renderTimeRow(h, '#f3e5f5', '#7b1fa2', '#e1bee7')).join('')}
             </div>
         </div>
     `;
@@ -969,40 +974,17 @@ function closeTimeDropdown() {
 }
 
 async function setTimeAndClose(taskId, time) {
+    // Close dropdown first for better UX
     closeTimeDropdown();
+    // Update task time and wait for it to complete
     await updateTaskTime(taskId, time, { stopPropagation: () => {} });
 }
 
 async function clearTimeAndClose(taskId) {
+    // Close dropdown first for better UX
     closeTimeDropdown();
+    // Update task time and wait for it to complete
     await updateTaskTime(taskId, '', { stopPropagation: () => {} });
-}
-
-// Select an hour - applies :30 if the half-hour toggle is active
-function selectTimeHour(taskId, hour) {
-    const halfBtn = document.getElementById('halfHourBtn');
-    const useHalf = halfBtn && halfBtn.dataset.active === 'true';
-    const time = `${String(hour).padStart(2, '0')}:${useHalf ? '30' : '00'}`;
-    setTimeAndClose(taskId, time);
-}
-
-// Toggle :30 modifier - if task already has a time, switch between :00 and :30
-function toggleHalfHour(taskId) {
-    const halfBtn = document.getElementById('halfHourBtn');
-    if (!halfBtn) return;
-
-    const isActive = halfBtn.dataset.active === 'true';
-    halfBtn.dataset.active = isActive ? 'false' : 'true';
-    halfBtn.style.background = isActive ? '#f0f0f0' : '#007AFF';
-    halfBtn.style.color = isActive ? '#333' : 'white';
-
-    // If task already has a time set, toggle its :30 immediately
-    const task = window.tasks?.find(t => t.id === taskId);
-    if (task && task.dueTime) {
-        const hour = task.dueTime.split(':')[0];
-        const newTime = `${hour}:${isActive ? '00' : '30'}`;
-        setTimeAndClose(taskId, newTime);
-    }
 }
 
 // Quick time selection
