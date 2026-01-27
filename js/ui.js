@@ -1998,7 +1998,7 @@ function generateSimpleTasksReview(mode) {
         tasksForDate.forEach(task => {
             reportHTML += `
                 <li style="margin: 6px 0; padding: 8px; background: white; border-radius: 3px;">
-                    ${task.dueTime ? `<span style="color: #007AFF; font-size: 12px; font-weight: 600; margin-right: 6px;">${task.dueTime}</span> ` : ''}${task.title || 'Untitled'}
+                    ${task.dueTime ? `<span style="color: #007AFF; font-size: 12px; font-weight: 600; margin-right: 6px;">${task.dueTime}</span> ` : ''}${isDaily ? (extractTagsAndCleanText(task.title || 'Untitled').cleanText) : (task.title || 'Untitled')}
                     ${task.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${task.notes}</div>` : ''}
                 </li>
             `;
@@ -2216,8 +2216,9 @@ function generateSimplePlainTextReport(allTasks, todayStr, mode) {
         text += `${date} (${tasksForDate.length})\n`;
         text += `${'-'.repeat(20)}\n`;
         tasksForDate.forEach(task => {
-            if (task.dueTime) text += `• [${task.dueTime}] ${task.title || 'Untitled'}`;
-            else text += `• ${task.title || 'Untitled'}`;
+            const title = isDaily ? extractTagsAndCleanText(task.title || 'Untitled').cleanText : (task.title || 'Untitled');
+            if (task.dueTime) text += `• [${task.dueTime}] ${title}`;
+            else text += `• ${title}`;
             text += `\n`;
             if (task.notes) text += `  ${task.notes}\n`;
         });
@@ -2362,7 +2363,8 @@ function generateSimpleOrgModeReport(allTasks, todayStr, mode) {
         }
         text += `** ${date} (${tasksForDate.length})\n`;
         tasksForDate.forEach(task => {
-            text += `- [ ] ${task.title || 'Untitled'}`;
+            const title = isDaily ? extractTagsAndCleanText(task.title || 'Untitled').cleanText : (task.title || 'Untitled');
+            text += `- [ ] ${title}`;
             if (task.dueTime) text += ` <${task.dueDate} ${task.dueTime}>`;
             else if (task.dueDate) text += ` <${task.dueDate}>`;
             text += `\n`;
