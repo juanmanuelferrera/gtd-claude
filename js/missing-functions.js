@@ -872,11 +872,10 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
     // Create time card (wider to fit 4 columns with half hours)
     const timeCard = document.createElement('div');
     timeCard.style.cssText = `
-        background: white; border-radius: 12px; width: 300px;
+        background: white; border-radius: 12px; width: min(300px, calc(100vw - 20px));
         padding: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         position: fixed; z-index: 10001;
-        left: ${Math.max(10, Math.min(buttonRect.left - 50, window.innerWidth - 320))}px;
-        top: ${Math.max(10, Math.min(buttonRect.bottom + 10, window.innerHeight - 400))}px;
+        left: 50%; top: 50%; transform: translate(-50%, -50%);
         border: 1px solid #e0e0e0;
         max-height: 80vh;
         overflow-y: auto;
