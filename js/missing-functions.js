@@ -856,68 +856,74 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
     if (window.currentTimeDropdown) {
         document.body.removeChild(window.currentTimeDropdown);
     }
-    
+
     console.log('🕐 Opening time grid card for task:', taskId);
-    
+
     // Get button position
     const buttonRect = buttonElement.getBoundingClientRect();
-    
+
     // Create overlay
     const overlay = document.createElement('div');
     overlay.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0,0,0,0.3); z-index: 10000;
     `;
-    
-    // Create time card
+
+    // Create time card (wider to fit 4 columns with half hours)
     const timeCard = document.createElement('div');
     timeCard.style.cssText = `
-        background: white; border-radius: 12px; width: 240px; 
+        background: white; border-radius: 12px; width: 300px;
         padding: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         position: fixed; z-index: 10001;
-        left: ${Math.max(10, Math.min(buttonRect.left - 30, window.innerWidth - 260))}px;
-        top: ${Math.max(10, Math.min(buttonRect.bottom + 10, window.innerHeight - 320))}px;
+        left: ${Math.max(10, Math.min(buttonRect.left - 50, window.innerWidth - 320))}px;
+        top: ${Math.max(10, Math.min(buttonRect.bottom + 10, window.innerHeight - 400))}px;
         border: 1px solid #e0e0e0;
+        max-height: 80vh;
+        overflow-y: auto;
     `;
-    
-    // Generate morning times (6:00 - 11:00)
+
+    // Generate morning times (6:00 - 11:30) with half hours
     const morningTimes = [];
     for (let hour = 6; hour <= 11; hour++) {
         morningTimes.push(`${String(hour).padStart(2, '0')}:00`);
+        morningTimes.push(`${String(hour).padStart(2, '0')}:30`);
     }
-    
-    // Generate afternoon times (12:00 - 17:00)
+
+    // Generate afternoon times (12:00 - 17:30) with half hours
     const afternoonTimes = [];
     for (let hour = 12; hour <= 17; hour++) {
         afternoonTimes.push(`${String(hour).padStart(2, '0')}:00`);
+        afternoonTimes.push(`${String(hour).padStart(2, '0')}:30`);
     }
-    
-    // Generate evening times (18:00 - 22:00)
+
+    // Generate evening times (18:00 - 23:30) with half hours
     const eveningTimes = [];
-    for (let hour = 18; hour <= 22; hour++) {
+    for (let hour = 18; hour <= 23; hour++) {
         eveningTimes.push(`${String(hour).padStart(2, '0')}:00`);
+        eveningTimes.push(`${String(hour).padStart(2, '0')}:30`);
     }
-    
+
     let html = `
         <!-- Header -->
         <div style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-            <button onclick="clearTimeAndClose('${taskId}')" 
+            <button onclick="clearTimeAndClose('${taskId}')"
                     style="background: #f0f0f0; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-size: 12px; font-weight: 600;">
                 ✕ Clear Time (Untimed)
             </button>
         </div>
-        
-        <!-- Morning Times -->
+
+        <!-- Morning Times (6:00 - 11:30) -->
         <div style="margin-bottom: 10px;">
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+            <div style="font-size: 10px; color: #1976d2; font-weight: 600; margin-bottom: 4px;">☀️ Morning</div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
                 ${morningTimes.map(time => {
                     const isSelected = time === currentTime;
-                    const baseStyle = 'padding: 6px 4px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 11px; font-weight: 500; transition: all 0.2s;';
-                    const colorStyle = isSelected 
+                    const baseStyle = 'padding: 5px 2px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 10px; font-weight: 500; transition: all 0.2s;';
+                    const colorStyle = isSelected
                         ? 'background: #007AFF; color: white;'
                         : 'background: #e3f2fd; color: #1976d2;';
-                    
-                    return `<div onclick="setTimeAndClose('${taskId}', '${time}')" 
+
+                    return `<div onclick="setTimeAndClose('${taskId}', '${time}')"
                                  style="${baseStyle} ${colorStyle}"
                                  onmouseover="this.style.background='${isSelected ? '#0056CC' : '#bbdefb'}'"
                                  onmouseout="this.style.background='${isSelected ? '#007AFF' : '#e3f2fd'}'">
@@ -926,18 +932,19 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
                 }).join('')}
             </div>
         </div>
-        
-        <!-- Afternoon Times -->
+
+        <!-- Afternoon Times (12:00 - 17:30) -->
         <div style="margin-bottom: 10px;">
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+            <div style="font-size: 10px; color: #f57c00; font-weight: 600; margin-bottom: 4px;">🌤️ Afternoon</div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
                 ${afternoonTimes.map(time => {
                     const isSelected = time === currentTime;
-                    const baseStyle = 'padding: 6px 4px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 11px; font-weight: 500; transition: all 0.2s;';
-                    const colorStyle = isSelected 
+                    const baseStyle = 'padding: 5px 2px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 10px; font-weight: 500; transition: all 0.2s;';
+                    const colorStyle = isSelected
                         ? 'background: #007AFF; color: white;'
                         : 'background: #fff3e0; color: #f57c00;';
-                    
-                    return `<div onclick="setTimeAndClose('${taskId}', '${time}')" 
+
+                    return `<div onclick="setTimeAndClose('${taskId}', '${time}')"
                                  style="${baseStyle} ${colorStyle}"
                                  onmouseover="this.style.background='${isSelected ? '#0056CC' : '#ffe0b2'}'"
                                  onmouseout="this.style.background='${isSelected ? '#007AFF' : '#fff3e0'}'">
@@ -946,18 +953,19 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
                 }).join('')}
             </div>
         </div>
-        
-        <!-- Evening Times -->
+
+        <!-- Evening Times (18:00 - 23:30) -->
         <div style="margin-bottom: 10px;">
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+            <div style="font-size: 10px; color: #7b1fa2; font-weight: 600; margin-bottom: 4px;">🌙 Evening</div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
                 ${eveningTimes.map(time => {
                     const isSelected = time === currentTime;
-                    const baseStyle = 'padding: 6px 4px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 11px; font-weight: 500; transition: all 0.2s;';
-                    const colorStyle = isSelected 
+                    const baseStyle = 'padding: 5px 2px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 10px; font-weight: 500; transition: all 0.2s;';
+                    const colorStyle = isSelected
                         ? 'background: #007AFF; color: white;'
                         : 'background: #f3e5f5; color: #7b1fa2;';
-                    
-                    return `<div onclick="setTimeAndClose('${taskId}', '${time}')" 
+
+                    return `<div onclick="setTimeAndClose('${taskId}', '${time}')"
                                  style="${baseStyle} ${colorStyle}"
                                  onmouseover="this.style.background='${isSelected ? '#0056CC' : '#e1bee7'}'"
                                  onmouseout="this.style.background='${isSelected ? '#007AFF' : '#f3e5f5'}'">
@@ -967,7 +975,7 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
             </div>
         </div>
     `;
-    
+
     timeCard.innerHTML = html;
     
     // Store references
