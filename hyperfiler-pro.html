@@ -1462,19 +1462,25 @@
             </div>
             
             <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">📊 GTD Weekly Review</h4>
-                <p style="color: #718096; font-size: 14px; margin-bottom: 15px;">Generate comprehensive task reviews following Getting Things Done methodology</p>
-                
+                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">📊 GTD Reviews</h4>
+                <p style="color: #718096; font-size: 14px; margin-bottom: 15px;">Generate task reviews following Getting Things Done methodology</p>
+
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button onclick="openReviewFormatModal()" 
+                    <button onclick="openReviewFormatModal('daily')"
+                            style="background: linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%); color: white; border: none; font-size: 14px; cursor: pointer; padding: 12px 20px; border-radius: 8px; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+                        ☀️ Daily Review
+                    </button>
+                    <button onclick="openReviewFormatModal('weekly')"
                             style="background: linear-gradient(135deg, #2E5BFF 0%, #1E4FE6 100%); color: white; border: none; font-size: 14px; cursor: pointer; padding: 12px 20px; border-radius: 8px; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'"
                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
-                        📊 Generate Weekly Review
+                        📊 Weekly Review
                     </button>
                 </div>
                 <div style="margin-top: 10px; font-size: 12px; color: #a0aec0;">
-                    Choose export formats in the popup • Perfect for weekly planning sessions
+                    Choose export formats in the popup
                 </div>
             </div>
             
@@ -2293,8 +2299,8 @@
     <script src="js/toast.js?v=20250101-toast-system"></script>
     <script src="js/keyboard-shortcuts.js?v=20250101-shortcuts-help"></script>
     <script src="js/auth.js?v=1736363000"></script>
-    <script src="js/tasks.js?v=20250127-instant-refresh"></script>
-    <script src="js/ui.js?v=20260124-tombstone"></script>
+    <script src="js/tasks.js?v=20250127-reviews"></script>
+    <script src="js/ui.js?v=20250127-daily-weekly-review"></script>
     <script src="js/sync.js?v=20260124-tombstone-v3"></script>
     <script src="js/offline-sync.js?v=20250915-step3"></script>
     <script src="js/network-status.js?v=20250918-no-world-emoji"></script>
@@ -3148,7 +3154,7 @@
         <div class="modal-content" style="background: white; margin: 10% auto; padding: 0; border-radius: 15px; width: 90%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalSlideIn 0.3s ease-out;">
             <div class="modal-header" style="background: linear-gradient(135deg, #2E5BFF 0%, #1E4FE6 100%); color: white; padding: 25px 30px; text-align: center; border-radius: 15px 15px 0 0; position: relative;">
                 <span class="close" onclick="closeReviewFormatModal()" style="position: absolute; right: 20px; top: 20px; color: white; font-size: 28px; font-weight: bold; cursor: pointer; opacity: 0.8; transition: opacity 0.3s;">&times;</span>
-                <h2 style="margin: 0; font-size: 1.8em; font-weight: 700;">📊 GTD Weekly Review</h2>
+                <h2 id="reviewModalTitle" style="margin: 0; font-size: 1.8em; font-weight: 700;">📊 GTD Review</h2>
                 <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 14px;">Choose your preferred export formats</p>
             </div>
             <div class="modal-body" style="padding: 30px;">

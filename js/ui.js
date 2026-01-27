@@ -1791,11 +1791,16 @@ function generateTasksReview() {
 /**
  * Open the format selection modal for GTD Review
  */
-function openReviewFormatModal() {
+function openReviewFormatModal(mode) {
+    window.reviewMode = mode || 'weekly';
     const modal = document.getElementById('reviewFormatModal');
     if (modal) {
+        const title = document.getElementById('reviewModalTitle');
+        if (title) {
+            title.textContent = mode === 'daily' ? '☀️ GTD Daily Review' : '📊 GTD Weekly Review';
+        }
         modal.style.display = 'block';
-        
+
         // Add click outside to close
         setTimeout(() => {
             document.addEventListener('click', function closeOnClickOutside(event) {
@@ -1821,26 +1826,50 @@ function closeReviewFormatModal() {
 /**
  * Generate simple GTD review with just date groups and project groups
  */
-function generateSimpleTasksReview() {
+function generateSimpleTasksReview(mode) {
+    mode = mode || 'weekly';
+    const isDaily = mode === 'daily';
+
     const allTasks = tasks.filter(task => task.status !== 'deleted');
-    
+
     if (allTasks.length === 0) {
         alert('No tasks to review!');
         return;
     }
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayStr = getLocalDateString(today);
-    
-    // Generate simple report HTML 
+
+    // Calculate current week boundaries (Monday to Sunday)
+    const weekStart = new Date(today);
+    const dayOfWeek = today.getDay();
+    const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    weekStart.setDate(today.getDate() + diffToMonday);
+    const weekStartStr = getLocalDateString(weekStart);
+
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    const weekEndStr = getLocalDateString(weekEnd);
+
+    const reviewTitle = isDaily ? '☀️ GTD Daily Review' : '📊 GTD Weekly Review';
+    const reviewSubtitle = isDaily ? todayStr : `${weekStartStr} to ${weekEndStr}`;
+
+    // Generate simple report HTML
     let reportHTML = `
         <div style="max-width: 900px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-            <h1 style="text-align: center; color: #2563eb; margin-bottom: 30px;">📊 GTD Review</h1>
+            <h1 style="text-align: center; color: ${isDaily ? '#ff6b35' : '#2563eb'}; margin-bottom: 5px;">${reviewTitle}</h1>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;">${reviewSubtitle}</p>
     `;
-    
-    // 1. EVENTS SECTION FIRST
-    const events = allTasks.filter(task => task.isEvent);
+
+    // 1. EVENTS SECTION - filtered by mode
+    const events = allTasks.filter(task => {
+        if (!task.isEvent) return false;
+        if (isDaily) return task.dueDate === todayStr;
+        // Weekly: only events within current week
+        return task.dueDate && task.dueDate >= weekStartStr && task.dueDate <= weekEndStr;
+    });
+
     if (events.length > 0) {
         reportHTML += `
             <div style="margin-bottom: 40px;">
@@ -1848,107 +1877,86 @@ function generateSimpleTasksReview() {
                     🎉 Events (${events.length})
                 </h2>
         `;
-        
+
         // Group events by date
         const eventsByDate = {};
-        const noDateEvents = [];
-        
         events.forEach(event => {
-            if (!event.dueDate) {
-                noDateEvents.push(event);
-            } else {
-                if (!eventsByDate[event.dueDate]) {
-                    eventsByDate[event.dueDate] = [];
-                }
-                eventsByDate[event.dueDate].push(event);
+            if (!eventsByDate[event.dueDate]) {
+                eventsByDate[event.dueDate] = [];
             }
+            eventsByDate[event.dueDate].push(event);
         });
-        
-        // Show events without dates
-        if (noDateEvents.length > 0) {
-            reportHTML += `
-                <div style="margin-bottom: 25px; padding: 15px; background: #fef2f2; border-left: 4px solid #dc3545; border-radius: 4px;">
-                    <h3 style="margin: 0 0 15px 0; color: #dc3545;">🚨 No Date (${noDateEvents.length})</h3>
-                    <ul style="margin: 0; padding-left: 20px; list-style: none;">
-            `;
-            
-            noDateEvents.forEach(event => {
-                reportHTML += `
-                    <li style="margin: 6px 0; padding: 8px; background: white; border-radius: 3px;">
-                        🎉 ${event.title || 'Untitled Event'}
-                        ${event.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${event.notes}</div>` : ''}
-                    </li>
-                `;
-            });
-            
-            reportHTML += `</ul></div>`;
-        }
-        
-        // Show events by date (sorted chronologically)
+
         const sortedEventDates = Object.keys(eventsByDate).sort();
         sortedEventDates.forEach(date => {
             const eventsForDate = eventsByDate[date];
             const isToday = date === todayStr;
             const isPast = date < todayStr;
-            
-            const dateStyle = isPast ? 'color: #dc3545; background: #fef2f2;' : 
-                             isToday ? 'color: #ff6b35; background: #fff7ed;' : 
+
+            const dateStyle = isPast ? 'color: #dc3545; background: #fef2f2;' :
+                             isToday ? 'color: #ff6b35; background: #fff7ed;' :
                              'color: #059669; background: #f0fdf4;';
-            
+
             reportHTML += `
                 <div style="margin-bottom: 20px; padding: 15px; border-left: 4px solid ${isPast ? '#dc3545' : isToday ? '#ff6b35' : '#059669'}; border-radius: 4px; ${dateStyle}">
                     <h3 style="margin: 0 0 15px 0;">${isPast ? '🚨' : isToday ? '⚡' : '🎉'} ${date} (${eventsForDate.length})</h3>
                     <ul style="margin: 0; padding-left: 20px; list-style: none;">
             `;
-            
+
             eventsForDate.forEach(event => {
                 reportHTML += `
                     <li style="margin: 6px 0; padding: 8px; background: white; border-radius: 3px;">
                         🎉 ${event.title || 'Untitled Event'}
+                        ${event.dueTime ? `<span style="color: #666; font-size: 12px; margin-left: 6px;">${event.dueTime}</span>` : ''}
                         ${event.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${event.notes}</div>` : ''}
                     </li>
                 `;
             });
-            
+
             reportHTML += `</ul></div>`;
         });
-        
+
         reportHTML += `</div>`;
     }
-    
+
+    // 2. TASKS SECTION - filtered by mode
     reportHTML += `
-            <!-- 2. TASKS GROUPED BY DATES -->
             <div style="margin-bottom: 40px;">
                 <h2 style="color: #2563eb; border-bottom: 3px solid #2563eb; padding-bottom: 8px; margin-bottom: 20px;">
-                    📅 Tasks by Date
+                    📅 ${isDaily ? 'Today\'s Tasks' : 'Tasks by Date'}
                 </h2>
     `;
-    
-    // Group all tasks by dates
+
+    // Group tasks by dates, filtered by mode
     const dateGroups = {};
     const noDateTasks = [];
-    
+
     allTasks.forEach(task => {
-        if (task.isEvent) return; // Skip events
-        
-        if (!task.dueDate) {
-            noDateTasks.push(task);
-        } else {
-            if (!dateGroups[task.dueDate]) {
-                dateGroups[task.dueDate] = [];
+        if (task.isEvent) return;
+
+        if (isDaily) {
+            // Daily: only today's tasks
+            if (task.dueDate === todayStr) {
+                if (!dateGroups[task.dueDate]) dateGroups[task.dueDate] = [];
+                dateGroups[task.dueDate].push(task);
             }
-            dateGroups[task.dueDate].push(task);
+        } else {
+            // Weekly: all tasks
+            if (!task.dueDate) {
+                noDateTasks.push(task);
+            } else {
+                if (!dateGroups[task.dueDate]) dateGroups[task.dueDate] = [];
+                dateGroups[task.dueDate].push(task);
+            }
         }
     });
-    
-    // Show tasks without dates first
-    if (noDateTasks.length > 0) {
+
+    if (!isDaily && noDateTasks.length > 0) {
         reportHTML += `
             <div style="margin-bottom: 25px; padding: 15px; background: #fef2f2; border-left: 4px solid #dc3545; border-radius: 4px;">
                 <h3 style="margin: 0 0 15px 0; color: #dc3545;">🚨 No Date (${noDateTasks.length})</h3>
                 <ul style="margin: 0; padding-left: 20px; list-style: none;">
         `;
-        
         noDateTasks.forEach(task => {
             reportHTML += `
                 <li style="margin: 6px 0; padding: 8px; background: white; border-radius: 3px;">
@@ -1957,39 +1965,38 @@ function generateSimpleTasksReview() {
                 </li>
             `;
         });
-        
         reportHTML += `</ul></div>`;
     }
-    
-    // Show tasks by date (sorted chronologically)
+
     const sortedDates = Object.keys(dateGroups).sort();
     sortedDates.forEach(date => {
         const tasksForDate = dateGroups[date];
         const isToday = date === todayStr;
         const isPast = date < todayStr;
-        
-        const dateStyle = isPast ? 'color: #dc3545; background: #fef2f2;' : 
-                         isToday ? 'color: #ff6b35; background: #fff7ed;' : 
+
+        const dateStyle = isPast ? 'color: #dc3545; background: #fef2f2;' :
+                         isToday ? 'color: #ff6b35; background: #fff7ed;' :
                          'color: #059669; background: #f0fdf4;';
-        
+
         reportHTML += `
             <div style="margin-bottom: 20px; padding: 15px; border-left: 4px solid ${isPast ? '#dc3545' : isToday ? '#ff6b35' : '#059669'}; border-radius: 4px; ${dateStyle}">
                 <h3 style="margin: 0 0 15px 0;">${isPast ? '🚨' : isToday ? '⚡' : '📅'} ${date} (${tasksForDate.length})</h3>
                 <ul style="margin: 0; padding-left: 20px; list-style: none;">
         `;
-        
+
         tasksForDate.forEach(task => {
             reportHTML += `
                 <li style="margin: 6px 0; padding: 8px; background: white; border-radius: 3px;">
                     📋 ${task.title || 'Untitled'}
+                    ${task.dueTime ? `<span style="color: #666; font-size: 12px; margin-left: 6px;">${task.dueTime}</span>` : ''}
                     ${task.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${task.notes}</div>` : ''}
                 </li>
             `;
         });
-        
+
         reportHTML += `</ul></div>`;
     });
-    
+
     reportHTML += `</div>`;
     
     // 2. TASKS WITH TEMPLATES GROUPED BY PROJECTS
@@ -2065,31 +2072,30 @@ function generateSimpleTasksReview() {
     // Check if format preferences were set by the modal
     const formats = window.selectedReviewFormats;
     
+    const filePrefix = isDaily ? 'gtd-daily' : 'gtd-weekly';
+
     if (formats) {
-        // Generate only the selected formats
         if (formats.txt) {
-            const plainText = generateSimplePlainTextReport(allTasks, todayStr);
-            downloadTextFile(plainText, `gtd-review-${todayStr}.txt`);
+            const plainText = generateSimplePlainTextReport(allTasks, todayStr, mode);
+            downloadTextFile(plainText, `${filePrefix}-${todayStr}.txt`);
         }
-        
+
         if (formats.org) {
-            const orgMode = generateSimpleOrgModeReport(allTasks, todayStr);
-            downloadTextFile(orgMode, `gtd-review-${todayStr}.org`);
+            const orgMode = generateSimpleOrgModeReport(allTasks, todayStr, mode);
+            downloadTextFile(orgMode, `${filePrefix}-${todayStr}.org`);
         }
-        
+
         if (formats.html) {
             openHTMLReport(reportHTML, todayStr);
         }
-        
+
         if (formats.pdf) {
             openPrintableReport(reportHTML, todayStr);
         }
-        
-        // Clear the format preferences
+
         window.selectedReviewFormats = null;
-        
+
     } else {
-        // Just show HTML by default
         openHTMLReport(reportHTML, todayStr);
     }
 }
@@ -2097,74 +2103,82 @@ function generateSimpleTasksReview() {
 /**
  * Generate simple plain text report
  */
-function generateSimplePlainTextReport(allTasks, todayStr) {
-    let text = `GTD REVIEW\n`;
+function generateSimplePlainTextReport(allTasks, todayStr, mode) {
+    mode = mode || 'weekly';
+    const isDaily = mode === 'daily';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const weekStart = new Date(today);
+    const dayOfWeek = today.getDay();
+    const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    weekStart.setDate(today.getDate() + diffToMonday);
+    const weekStartStr = getLocalDateString(weekStart);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    const weekEndStr = getLocalDateString(weekEnd);
+
+    let text = isDaily ? `GTD DAILY REVIEW\n` : `GTD WEEKLY REVIEW\n`;
     text += `Generated on ${todayStr} at ${new Date().toLocaleTimeString()}\n`;
+    if (!isDaily) text += `Week: ${weekStartStr} to ${weekEndStr}\n`;
     text += `${'='.repeat(50)}\n\n`;
-    
-    // 1. EVENTS SECTION FIRST
-    const events = allTasks.filter(task => task.isEvent);
+
+    // EVENTS - filtered by mode
+    const events = allTasks.filter(task => {
+        if (!task.isEvent) return false;
+        if (isDaily) return task.dueDate === todayStr;
+        return task.dueDate && task.dueDate >= weekStartStr && task.dueDate <= weekEndStr;
+    });
+
     if (events.length > 0) {
         text += `EVENTS (${events.length})\n`;
         text += `${'='.repeat(30)}\n\n`;
-        
+
         const eventsByDate = {};
-        const noDateEvents = [];
-        
         events.forEach(event => {
-            if (!event.dueDate) {
-                noDateEvents.push(event);
-            } else {
-                if (!eventsByDate[event.dueDate]) {
-                    eventsByDate[event.dueDate] = [];
-                }
-                eventsByDate[event.dueDate].push(event);
-            }
+            if (!eventsByDate[event.dueDate]) eventsByDate[event.dueDate] = [];
+            eventsByDate[event.dueDate].push(event);
         });
-        
-        if (noDateEvents.length > 0) {
-            text += `NO DATE (${noDateEvents.length})\n`;
-            text += `${'-'.repeat(20)}\n`;
-            noDateEvents.forEach(event => {
-                text += `• ${event.title || 'Untitled Event'}\n`;
-                if (event.notes) text += `  ${event.notes}\n`;
-            });
-            text += `\n`;
-        }
-        
-        const sortedEventDates = Object.keys(eventsByDate).sort();
-        sortedEventDates.forEach(date => {
+
+        Object.keys(eventsByDate).sort().forEach(date => {
             const eventsForDate = eventsByDate[date];
             text += `${date} (${eventsForDate.length})\n`;
             text += `${'-'.repeat(20)}\n`;
             eventsForDate.forEach(event => {
-                text += `• ${event.title || 'Untitled Event'}\n`;
+                text += `• ${event.title || 'Untitled Event'}`;
+                if (event.dueTime) text += ` [${event.dueTime}]`;
+                text += `\n`;
                 if (event.notes) text += `  ${event.notes}\n`;
             });
             text += `\n`;
         });
     }
-    
-    // Group tasks by dates (excluding events)
+
+    // TASKS - filtered by mode
     const dateGroups = {};
     const noDateTasks = [];
-    
+
     allTasks.forEach(task => {
         if (task.isEvent) return;
-        if (!task.dueDate) {
-            noDateTasks.push(task);
-        } else {
-            if (!dateGroups[task.dueDate]) {
-                dateGroups[task.dueDate] = [];
+        if (isDaily) {
+            if (task.dueDate === todayStr) {
+                if (!dateGroups[task.dueDate]) dateGroups[task.dueDate] = [];
+                dateGroups[task.dueDate].push(task);
             }
-            dateGroups[task.dueDate].push(task);
+        } else {
+            if (!task.dueDate) {
+                noDateTasks.push(task);
+            } else {
+                if (!dateGroups[task.dueDate]) dateGroups[task.dueDate] = [];
+                dateGroups[task.dueDate].push(task);
+            }
         }
     });
-    
-    text += `TASKS BY DATE\n`;
+
+    text += isDaily ? `TODAY'S TASKS\n` : `TASKS BY DATE\n`;
     text += `${'='.repeat(30)}\n\n`;
-    
-    if (noDateTasks.length > 0) {
+
+    if (!isDaily && noDateTasks.length > 0) {
         text += `NO DATE (${noDateTasks.length})\n`;
         text += `${'-'.repeat(20)}\n`;
         noDateTasks.forEach(task => {
@@ -2173,124 +2187,135 @@ function generateSimplePlainTextReport(allTasks, todayStr) {
         });
         text += `\n`;
     }
-    
-    const sortedDates = Object.keys(dateGroups).sort();
-    sortedDates.forEach(date => {
+
+    Object.keys(dateGroups).sort().forEach(date => {
         const tasksForDate = dateGroups[date];
         text += `${date} (${tasksForDate.length})\n`;
         text += `${'-'.repeat(20)}\n`;
         tasksForDate.forEach(task => {
-            text += `• ${task.title || 'Untitled'}\n`;
+            text += `• ${task.title || 'Untitled'}`;
+            if (task.dueTime) text += ` [${task.dueTime}]`;
+            text += `\n`;
             if (task.notes) text += `  ${task.notes}\n`;
         });
         text += `\n`;
     });
-    
-    // Group tasks by projects
-    const templatedProjects = {};
-    allTasks.forEach(task => {
-        if (task.isEvent) return;
-        const text_content = `${task.title || ''} ${task.notes || ''}`;
-        const templates = TemplateProcessor.extractFromText(text_content);
-        if (templates.length > 0) {
-            templates.forEach(template => {
-                if (!templatedProjects[template]) {
-                    templatedProjects[template] = [];
-                }
-                templatedProjects[template].push(task);
-            });
-        }
-    });
-    
-    if (Object.keys(templatedProjects).length > 0) {
-        text += `\nPROJECTS (Tasks with @templates)\n`;
-        text += `${'='.repeat(30)}\n\n`;
-        
-        Object.entries(templatedProjects)
-            .sort((a, b) => b[1].length - a[1].length)
-            .forEach(([template, projectTasks]) => {
-                text += `${template} (${projectTasks.length} tasks)\n`;
-                text += `${'-'.repeat(20)}\n`;
-                projectTasks.forEach(task => {
-                    text += `• ${task.title || 'Untitled'}`;
-                    if (task.dueDate) text += ` [${task.dueDate}]`;
-                    text += `\n`;
-                    if (task.notes) text += `  ${task.notes}\n`;
+
+    // Projects section (weekly only)
+    if (!isDaily) {
+        const templatedProjects = {};
+        allTasks.forEach(task => {
+            if (task.isEvent) return;
+            const text_content = `${task.title || ''} ${task.notes || ''}`;
+            const templates = TemplateProcessor.extractFromText(text_content);
+            if (templates.length > 0) {
+                templates.forEach(template => {
+                    if (!templatedProjects[template]) templatedProjects[template] = [];
+                    templatedProjects[template].push(task);
                 });
-                text += `\n`;
-            });
+            }
+        });
+
+        if (Object.keys(templatedProjects).length > 0) {
+            text += `\nPROJECTS (Tasks with @templates)\n`;
+            text += `${'='.repeat(30)}\n\n`;
+
+            Object.entries(templatedProjects)
+                .sort((a, b) => b[1].length - a[1].length)
+                .forEach(([template, projectTasks]) => {
+                    text += `${template} (${projectTasks.length} tasks)\n`;
+                    text += `${'-'.repeat(20)}\n`;
+                    projectTasks.forEach(task => {
+                        text += `• ${task.title || 'Untitled'}`;
+                        if (task.dueDate) text += ` [${task.dueDate}]`;
+                        text += `\n`;
+                        if (task.notes) text += `  ${task.notes}\n`;
+                    });
+                    text += `\n`;
+                });
+        }
     }
-    
+
     return text;
 }
 
 /**
  * Generate simple org-mode report
  */
-function generateSimpleOrgModeReport(allTasks, todayStr) {
-    let text = `#+TITLE: GTD Review\n`;
+function generateSimpleOrgModeReport(allTasks, todayStr, mode) {
+    mode = mode || 'weekly';
+    const isDaily = mode === 'daily';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const weekStart = new Date(today);
+    const dayOfWeek = today.getDay();
+    const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    weekStart.setDate(today.getDate() + diffToMonday);
+    const weekStartStr = getLocalDateString(weekStart);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    const weekEndStr = getLocalDateString(weekEnd);
+
+    let text = `#+TITLE: GTD ${isDaily ? 'Daily' : 'Weekly'} Review\n`;
     text += `#+DATE: ${todayStr}\n`;
-    text += `#+TIME: ${new Date().toLocaleTimeString()}\n\n`;
-    
-    // 1. EVENTS SECTION FIRST
-    const events = allTasks.filter(task => task.isEvent);
+    text += `#+TIME: ${new Date().toLocaleTimeString()}\n`;
+    if (!isDaily) text += `#+WEEK: ${weekStartStr} to ${weekEndStr}\n`;
+    text += `\n`;
+
+    // EVENTS - filtered
+    const events = allTasks.filter(task => {
+        if (!task.isEvent) return false;
+        if (isDaily) return task.dueDate === todayStr;
+        return task.dueDate && task.dueDate >= weekStartStr && task.dueDate <= weekEndStr;
+    });
+
     if (events.length > 0) {
         text += `* Events (${events.length})\n\n`;
-        
+
         const eventsByDate = {};
-        const noDateEvents = [];
-        
         events.forEach(event => {
-            if (!event.dueDate) {
-                noDateEvents.push(event);
-            } else {
-                if (!eventsByDate[event.dueDate]) {
-                    eventsByDate[event.dueDate] = [];
-                }
-                eventsByDate[event.dueDate].push(event);
-            }
+            if (!eventsByDate[event.dueDate]) eventsByDate[event.dueDate] = [];
+            eventsByDate[event.dueDate].push(event);
         });
-        
-        if (noDateEvents.length > 0) {
-            text += `** No Date (${noDateEvents.length})\n`;
-            noDateEvents.forEach(event => {
-                text += `- ${event.title || 'Untitled Event'}\n`;
-                if (event.notes) text += `  ${event.notes}\n`;
-            });
-            text += `\n`;
-        }
-        
-        const sortedEventDates = Object.keys(eventsByDate).sort();
-        sortedEventDates.forEach(date => {
+
+        Object.keys(eventsByDate).sort().forEach(date => {
             const eventsForDate = eventsByDate[date];
             text += `** ${date} (${eventsForDate.length})\n`;
             eventsForDate.forEach(event => {
-                text += `- ${event.title || 'Untitled Event'}\n`;
+                text += `- ${event.title || 'Untitled Event'}`;
+                if (event.dueTime) text += ` <${event.dueDate} ${event.dueTime}>`;
+                text += `\n`;
                 if (event.notes) text += `  ${event.notes}\n`;
             });
             text += `\n`;
         });
     }
-    
-    // Group tasks by dates (excluding events)
+
+    // TASKS - filtered
     const dateGroups = {};
     const noDateTasks = [];
-    
+
     allTasks.forEach(task => {
         if (task.isEvent) return;
-        if (!task.dueDate) {
-            noDateTasks.push(task);
-        } else {
-            if (!dateGroups[task.dueDate]) {
-                dateGroups[task.dueDate] = [];
+        if (isDaily) {
+            if (task.dueDate === todayStr) {
+                if (!dateGroups[task.dueDate]) dateGroups[task.dueDate] = [];
+                dateGroups[task.dueDate].push(task);
             }
-            dateGroups[task.dueDate].push(task);
+        } else {
+            if (!task.dueDate) {
+                noDateTasks.push(task);
+            } else {
+                if (!dateGroups[task.dueDate]) dateGroups[task.dueDate] = [];
+                dateGroups[task.dueDate].push(task);
+            }
         }
     });
-    
-    text += `* Tasks by Date\n\n`;
-    
-    if (noDateTasks.length > 0) {
+
+    text += isDaily ? `* Today's Tasks\n\n` : `* Tasks by Date\n\n`;
+
+    if (!isDaily && noDateTasks.length > 0) {
         text += `** No Date (${noDateTasks.length})\n`;
         noDateTasks.forEach(task => {
             text += `- [ ] ${task.title || 'Untitled'}\n`;
@@ -2298,51 +2323,53 @@ function generateSimpleOrgModeReport(allTasks, todayStr) {
         });
         text += `\n`;
     }
-    
-    const sortedDates = Object.keys(dateGroups).sort();
-    sortedDates.forEach(date => {
+
+    Object.keys(dateGroups).sort().forEach(date => {
         const tasksForDate = dateGroups[date];
         text += `** ${date} (${tasksForDate.length})\n`;
         tasksForDate.forEach(task => {
-            text += `- [ ] ${task.title || 'Untitled'}\n`;
+            text += `- [ ] ${task.title || 'Untitled'}`;
+            if (task.dueTime) text += ` <${task.dueDate} ${task.dueTime}>`;
+            else if (task.dueDate) text += ` <${task.dueDate}>`;
+            text += `\n`;
             if (task.notes) text += `  ${task.notes}\n`;
         });
         text += `\n`;
     });
-    
-    // Group tasks by projects
-    const templatedProjects = {};
-    allTasks.forEach(task => {
-        if (task.isEvent) return;
-        const text_content = `${task.title || ''} ${task.notes || ''}`;
-        const templates = TemplateProcessor.extractFromText(text_content);
-        if (templates.length > 0) {
-            templates.forEach(template => {
-                if (!templatedProjects[template]) {
-                    templatedProjects[template] = [];
-                }
-                templatedProjects[template].push(task);
-            });
-        }
-    });
-    
-    if (Object.keys(templatedProjects).length > 0) {
-        text += `* Projects (Tasks with @templates)\n\n`;
-        
-        Object.entries(templatedProjects)
-            .sort((a, b) => b[1].length - a[1].length)
-            .forEach(([template, projectTasks]) => {
-                text += `** ${template} (${projectTasks.length} tasks)\n`;
-                projectTasks.forEach(task => {
-                    text += `- [ ] ${task.title || 'Untitled'}`;
-                    if (task.dueDate) text += ` <${task.dueDate}>`;
-                    text += `\n`;
-                    if (task.notes) text += `  ${task.notes}\n`;
+
+    // Projects (weekly only)
+    if (!isDaily) {
+        const templatedProjects = {};
+        allTasks.forEach(task => {
+            if (task.isEvent) return;
+            const text_content = `${task.title || ''} ${task.notes || ''}`;
+            const templates = TemplateProcessor.extractFromText(text_content);
+            if (templates.length > 0) {
+                templates.forEach(template => {
+                    if (!templatedProjects[template]) templatedProjects[template] = [];
+                    templatedProjects[template].push(task);
                 });
-                text += `\n`;
-            });
+            }
+        });
+
+        if (Object.keys(templatedProjects).length > 0) {
+            text += `* Projects (Tasks with @templates)\n\n`;
+
+            Object.entries(templatedProjects)
+                .sort((a, b) => b[1].length - a[1].length)
+                .forEach(([template, projectTasks]) => {
+                    text += `** ${template} (${projectTasks.length} tasks)\n`;
+                    projectTasks.forEach(task => {
+                        text += `- [ ] ${task.title || 'Untitled'}`;
+                        if (task.dueDate) text += ` <${task.dueDate}>`;
+                        text += `\n`;
+                        if (task.notes) text += `  ${task.notes}\n`;
+                    });
+                    text += `\n`;
+                });
+        }
     }
-    
+
     return text;
 }
 
@@ -2458,9 +2485,9 @@ function generateReviewWithSelectedFormats() {
         pdf: pdfChecked,
         org: orgChecked
     };
-    
-    // Call the new simple generateTasksReview function
-    generateSimpleTasksReview()
+
+    // Call the review function with the selected mode
+    generateSimpleTasksReview(window.reviewMode || 'weekly')
 }
 
 
