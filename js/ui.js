@@ -1998,7 +1998,7 @@ function generateSimpleTasksReview(mode) {
         tasksForDate.forEach(task => {
             reportHTML += `
                 <li style="margin: 6px 0; padding: 8px; background: white; border-radius: 3px;">
-                    ${task.dueTime ? `<span style="color: #007AFF; font-size: 12px; font-weight: 600; margin-right: 6px;">${task.dueTime}</span>` : ''}📋 ${task.title || 'Untitled'}
+                    ${task.dueTime ? `<span style="color: #007AFF; font-size: 12px; font-weight: 600; margin-right: 6px;">${task.dueTime}</span> ` : ''}${task.title || 'Untitled'}
                     ${task.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${task.notes}</div>` : ''}
                 </li>
             `;
