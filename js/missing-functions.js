@@ -180,12 +180,11 @@ function openIOSDateTimePicker(taskId, currentDate, currentTime, buttonElement) 
     // Create calendar card
     const calendar = document.createElement('div');
     calendar.style.cssText = `
-        background: white; border-radius: 12px; width: 280px; 
+        background: white; border-radius: 12px; width: min(300px, calc(100vw - 20px));
         padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         position: fixed; z-index: 10001;
-        left: ${Math.max(10, Math.min(buttonRect.left, window.innerWidth - 300))}px;
-        top: ${Math.max(10, Math.min(buttonRect.bottom + 10, window.innerHeight - 350))}px;
-        border: 1px solid #e0e0e0; max-height: 320px; overflow-y: auto;
+        left: 50%; top: 50%; transform: translate(-50%, -50%);
+        border: 1px solid #e0e0e0;
     `;
     
     // Get current date info
