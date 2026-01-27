@@ -298,6 +298,34 @@ function quickAddTaskWithTemplate(templateName) {
 }
 
 /**
+ * Refresh a specific task card element in the DOM without full re-render
+ */
+function refreshTaskCardElement(taskId) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    // Find all task card elements with this ID (could be in multiple views)
+    const taskCards = document.querySelectorAll(`[data-task-id="${taskId}"]`);
+
+    taskCards.forEach(cardElement => {
+        // Re-render the card using the existing renderTaskCard function
+        if (typeof renderTaskCard === 'function') {
+            const newCardHtml = renderTaskCard(task);
+            // Create a temporary container to parse the HTML
+            const temp = document.createElement('div');
+            temp.innerHTML = newCardHtml;
+            const newCard = temp.firstElementChild;
+
+            if (newCard && cardElement.parentNode) {
+                // Replace the old card with the new one
+                cardElement.parentNode.replaceChild(newCard, cardElement);
+                console.log('✅ Task card refreshed in DOM for:', task.title);
+            }
+        }
+    });
+}
+
+/**
  * Update task date
  */
 async function updateTaskDate(taskId, newDate, event) {
@@ -305,38 +333,41 @@ async function updateTaskDate(taskId, newDate, event) {
     if (event && event.stopPropagation) {
         event.stopPropagation();
     }
-    
+
     try {
         const task = tasks.find(t => t.id === taskId);
         if (!task) {
             console.error('Task not found:', taskId);
             return;
         }
-        
+
         console.log(`🔄 Updating task "${task.title}" date from "${task.dueDate}" to "${newDate}"`);
-        
+
         // Save state for undo
         if (typeof saveStateForUndo === 'function') {
             saveStateForUndo('update date', task);
         }
-        
+
         // Update task date
         task.dueDate = newDate || null;
         task.lastModified = new Date().toISOString();
-        
+
+        // Immediately refresh the task card in DOM for instant feedback
+        refreshTaskCardElement(taskId);
+
         // Save to localStorage
         saveTasksToLocalStorage();
-        
-        // Save to cloud
+
+        // Save to cloud (async, don't wait)
         if (typeof uploadAllTasks === 'function') {
-            await uploadAllTasks();
+            uploadAllTasks();
         }
-        
-        // Re-render current view to reposition the task
+
+        // Re-render current view to reposition the task if it moved to different group
         if (typeof renderCurrentView === 'function') {
             renderCurrentView();
         }
-        
+
         console.log('✅ Task date updated and repositioned successfully');
     } catch (error) {
         console.error('❌ Error updating task date:', error);
@@ -395,45 +426,42 @@ function openTimePicker(taskId, event) {
  */
 async function updateTaskTime(taskId, newTime, event) {
     console.log('🔄 updateTaskTime called with:', taskId, newTime);
-    event.stopPropagation();
-    
+    if (event && event.stopPropagation) {
+        event.stopPropagation();
+    }
+
     try {
         const task = tasks.find(t => t.id === taskId);
         if (!task) {
             console.error('Task not found:', taskId);
             return;
         }
-        
+
         const timeDescription = newTime === '' ? 'untimed (no specific time)' : newTime;
         console.log(`🔄 Updating task "${task.title}" time from "${task.dueTime}" to "${timeDescription}"`);
-        
+
         // Save state for undo
         if (typeof saveStateForUndo === 'function') {
             saveStateForUndo('update time', task);
         }
-        
+
         // Update task time (empty string for untimed tasks)
         task.dueTime = newTime || null;
-        
+
+        // Immediately refresh the task card in DOM for instant feedback
+        refreshTaskCardElement(taskId);
+
         // Save to localStorage and server
         saveTasks();
         if (typeof uploadAllTasks === 'function') {
-            await uploadAllTasks();
+            uploadAllTasks();
         }
-        
-        // Re-render current view to reposition the task if needed
+
+        // Re-render current view to reposition the task if it moved to different time group
         if (typeof renderCurrentView === 'function') {
             renderCurrentView();
         }
-        
-        // Force additional render for mobile compatibility
-        setTimeout(() => {
-            if (typeof renderCurrentView === 'function') {
-                console.log('🔄 Force re-render for mobile compatibility');
-                renderCurrentView();
-            }
-        }, 100);
-        
+
         console.log('✅ Task time updated successfully');
     } catch (error) {
         console.error('❌ Error updating task time:', error);
