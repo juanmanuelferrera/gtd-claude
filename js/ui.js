@@ -1165,7 +1165,7 @@ function renderTaskCard(task, isAllTasksView = false) {
                 <span style="cursor: pointer; font-size: 16px; padding: 4px; position: relative;"
                       title="Change time"
                       onclick="event.stopPropagation(); openTimeDropdown('${task.id}', '${task.dueTime || ''}', this)">
-                    🕐${task.dueTime ? `<span style="font-size: 11px; margin-left: 2px;">${formatTime(task.dueTime)}</span>` : ''}
+                    🕐
                 </span>
                 <button onclick="delayTask('${task.id}', 1, event)" 
                         style="background: #ffc107; color: #333; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; white-space: nowrap;" 
