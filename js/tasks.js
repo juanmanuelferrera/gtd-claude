@@ -352,23 +352,20 @@ async function updateTaskDate(taskId, newDate, event) {
         task.dueDate = newDate || null;
         task.lastModified = new Date().toISOString();
 
-        // Immediately refresh the task card in DOM for instant feedback
-        refreshTaskCardElement(taskId);
-
         // Save to localStorage
         saveTasksToLocalStorage();
 
-        // Save to cloud (async, don't wait)
-        if (typeof uploadAllTasks === 'function') {
-            uploadAllTasks();
-        }
-
-        // Re-render current view to reposition the task if it moved to different group
+        // Re-render current view immediately for instant feedback
         if (typeof renderCurrentView === 'function') {
             renderCurrentView();
         }
 
-        console.log('✅ Task date updated and repositioned successfully');
+        // Sync to cloud in background
+        if (typeof uploadAllTasks === 'function') {
+            uploadAllTasks();
+        }
+
+        console.log('✅ Task date updated successfully');
     } catch (error) {
         console.error('❌ Error updating task date:', error);
         showNotification('Failed to update task date', 'error');
@@ -448,18 +445,17 @@ async function updateTaskTime(taskId, newTime, event) {
         // Update task time (empty string for untimed tasks)
         task.dueTime = newTime || null;
 
-        // Immediately refresh the task card in DOM for instant feedback
-        refreshTaskCardElement(taskId);
-
-        // Save to localStorage and server
+        // Save to localStorage
         saveTasks();
-        if (typeof uploadAllTasks === 'function') {
-            uploadAllTasks();
-        }
 
-        // Re-render current view to reposition the task if it moved to different time group
+        // Re-render current view immediately for instant feedback
         if (typeof renderCurrentView === 'function') {
             renderCurrentView();
+        }
+
+        // Sync to cloud in background
+        if (typeof uploadAllTasks === 'function') {
+            uploadAllTasks();
         }
 
         console.log('✅ Task time updated successfully');
