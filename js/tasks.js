@@ -780,6 +780,7 @@ async function saveTaskEdit() {
     isSaving = true;
     
     try {
+        const isNewTask = !currentEditTaskId;
         console.log('💾 Getting form data...');
         // Get form data and sanitize inputs
         let title = sanitizeInput(document.getElementById('editTaskTitle').value.trim());
