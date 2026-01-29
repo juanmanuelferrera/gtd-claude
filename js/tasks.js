@@ -780,7 +780,6 @@ async function saveTaskEdit() {
     isSaving = true;
     
     try {
-        const isNewTask = !currentEditTaskId;
         console.log('💾 Getting form data...');
         // Get form data and sanitize inputs
         let title = sanitizeInput(document.getElementById('editTaskTitle').value.trim());
@@ -1050,10 +1049,6 @@ async function saveTaskEdit() {
 
         console.log('✅ Task saved successfully');
 
-        // Show success toast
-        if (window.toast) {
-            toast.success(isNewTask ? 'Task created successfully' : 'Task updated successfully');
-        }
 
     } catch (error) {
         console.error('❌ Error saving task:', error);
