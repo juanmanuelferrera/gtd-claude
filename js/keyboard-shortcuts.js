@@ -34,6 +34,12 @@ const SHORTCUT_ACTIONS = {
     },
     'Ctrl+E': () => {
         if (typeof exportAsText === 'function') exportAsText();
+    },
+    'Q': () => {
+        if (typeof quickBackupJSON === 'function') quickBackupJSON();
+    },
+    'I': () => {
+        if (typeof importTasks === 'function') importTasks();
     }
 };
 
@@ -69,11 +75,12 @@ const KEYBOARD_SHORTCUTS = {
         title: '⌨️ Other',
         shortcuts: [
             { keys: ['N'], description: 'New task' },
+            { keys: ['Q'], description: 'Quick backup' },
+            { keys: ['I'], description: 'Import' },
             { keys: ['P'], description: 'Templates' },
             { keys: ['←', '→'], description: 'Date nav' },
             { keys: ['Ctrl+K'], description: 'Keyboard mode' },
             { keys: ['Ctrl+Z'], description: 'Undo' },
-            { keys: ['Ctrl+B'], description: 'Backup' },
             { keys: ['Ctrl+E'], description: 'Export' },
             { keys: ['?'], description: 'This help' },
             { keys: ['Esc'], description: 'Close / Clear' }

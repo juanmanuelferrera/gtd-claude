@@ -3871,6 +3871,20 @@ document.addEventListener('keydown', function(event) {
     // Only handle non-modifier keys below
     if (event.ctrlKey || event.altKey || event.metaKey) return;
 
+    // Q: quick backup
+    if (event.key === 'q' || event.key === 'Q') {
+        event.preventDefault();
+        if (typeof quickBackupJSON === 'function') quickBackupJSON();
+        return;
+    }
+
+    // I: import
+    if (event.key === 'i' || event.key === 'I') {
+        event.preventDefault();
+        if (typeof importTasks === 'function') importTasks();
+        return;
+    }
+
     var allTasks = document.querySelectorAll('.task-card[data-task-id], .task-item[data-task-id]');
     if (allTasks.length === 0) return;
 
