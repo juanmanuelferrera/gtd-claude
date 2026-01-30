@@ -7942,7 +7942,127 @@
                 console.log('🗓️ DEBUG: Set button text to default:', button.textContent);
             }
         }
-        // [REMOVED] Duplicate function - using js/ui.js version instead
+        // Navigation and view management
+        function showView(viewName, preserveDate = false) {
+            currentView = viewName;
+            window.currentView = viewName; // Fix: Also update global window.currentView for drag handlers
+            
+            // Reset task selection when changing views
+            if (typeof resetTaskSelection === 'function') {
+                resetTaskSelection();
+            }
+            
+            // If switching to Today view, reset to current date (unless preserveDate is true)
+            if (viewName === 'today' && !preserveDate) {
+                currentTodayDate = new Date();
+            }
+            
+            // If switching to Week view, reset to current week
+            if (viewName === 'week') {
+                currentWeekDate = new Date();
+            }
+            
+            // If switching to Calendar (Month) view, reset to current month
+            // Commented out to preserve month navigation state
+            // if (viewName === 'calendar') {
+            //     currentCalendarDate = new Date();
+            // }
+            
+            // If switching to Search view, auto-focus the search field
+            if (viewName === 'search') {
+                setTimeout(() => {
+                    const searchField = document.getElementById('searchInput');
+                    if (searchField) {
+                        searchField.focus();
+                    }
+                }, 100); // Small delay to ensure view is rendered
+            }
+            
+            // VERSION 3: Update mobile navigation
+            updateMobileNavigation();
+            
+            // Update navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`nav-${viewName}`).classList.add('active');
+            
+            
+            // Update container background to match active tab
+            const container = document.querySelector('.container');
+            if (container) {
+                container.classList.remove('today-active', 'week-active', 'calendar-active', 'all-active', 'lists-active', 'repeat-active', 'undo-active');
+                container.classList.add(`${viewName}-active`);
+            }
+            
+            
+            // Show/hide sections
+            const todayView = document.getElementById('today-view');
+            const calendarView = document.getElementById('calendar-view');
+            const weekView = document.getElementById('week-view');
+            const tasksView = document.getElementById('tasks-view');
+            const statsView = document.getElementById('stats-view');
+            const listsView = document.getElementById('lists-view');
+            const repeatView = document.getElementById('repeat-view');
+            const undoView = document.getElementById('undo-view');
+            const settingsView = document.getElementById('settings-view');
+            const searchSection = document.getElementById('search-section');
+            
+            todayView.classList.toggle('hidden', viewName !== 'today');
+            calendarView.classList.toggle('hidden', viewName !== 'calendar');
+            weekView.classList.toggle('hidden', viewName !== 'week');
+            tasksView.classList.toggle('hidden', viewName !== 'all');
+            statsView.classList.toggle('hidden', viewName !== 'stats');
+            listsView.classList.toggle('hidden', viewName !== 'lists');
+            repeatView.classList.toggle('hidden', viewName !== 'repeat');
+            undoView.classList.toggle('hidden', viewName !== 'undo');
+            settingsView.classList.toggle('hidden', viewName !== 'settings');
+            searchSection.style.display = viewName === 'search' ? 'block' : 'none';
+            
+            // Update view
+            if (viewName === 'today') {
+                renderTodayView();
+                // Restore persistent highlighting after render
+                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+            } else if (viewName === 'week') {
+                renderWeekView();
+                highlightCurrentDay();
+                // Restore persistent highlighting after render
+                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+            } else if (viewName === 'calendar') {
+                renderCalendar();
+                highlightCurrentDay();
+                // Restore persistent highlighting after render
+                PERSISTENT_TASK_SELECTION.restoreAfterRender();
+            } else if (viewName === 'stats') {
+                renderStats();
+            } else if (viewName === 'lists') {
+                renderListsView();
+            } else if (viewName === 'repeat') {
+                renderRepeatView();
+            } else if (viewName === 'undo') {
+                renderUndoView();
+            } else if (viewName === 'settings') {
+                renderSettingsView();
+            } else if (viewName === 'search') {
+                document.getElementById('searchInput').focus();
+                performSearch(); // Show all tasks initially
+            } else if (viewName === 'all') {
+                console.log('showView: switching to all tasks view');
+                renderTasks(viewName);
+            } else {
+                renderTasks(viewName);
+            }
+            
+            // Re-translate UI after view changes to handle dynamic content
+            setTimeout(() => {
+                translateUI();
+                // CRITICAL: Restore emojis after translations
+                setTimeout(() => {
+                    restoreMobileNavEmojis();
+                }, 50);
+            }, 50);
+        }
         // Show loading state
         function showLoadingState() {
             // Find the currently visible view or default to today-view
@@ -11598,7 +11718,254 @@
                 </div>
             `;
         }
-        // [REMOVED] Duplicate function - using js/ui.js version instead
+        // Calendar rendering
+        function renderCalendar() {
+            console.log('🎨 renderCalendar() CALLED - Starting render');
+            const grid = document.getElementById('calendarGrid');
+            const monthTitle = document.getElementById('currentMonth');
+            
+            if (!grid || !monthTitle) {
+                console.error('❌ renderCalendar FAILED - grid or monthTitle not found');
+                return;
+            }
+            
+            // Update the month display
+            updateCurrentMonthDisplay();
+            
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            // Format month name with translations
+            const monthNames = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            const translatedMonth = translateText(monthNames[month]);
+            monthTitle.textContent = `${translatedMonth} ${year}`;
+            
+            grid.innerHTML = '';
+            
+            // Day headers (Monday first)
+            const dayHeaders = [
+                translateText('Monday').substring(0, 3), 
+                translateText('Tuesday').substring(0, 3), 
+                translateText('Wednesday').substring(0, 3), 
+                translateText('Thursday').substring(0, 3), 
+                translateText('Friday').substring(0, 3), 
+                translateText('Saturday').substring(0, 3), 
+                translateText('Sunday').substring(0, 3)
+            ];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-header';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+            
+            // Get first day of month
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            // Adjust for Monday-first week (0=Sunday, 1=Monday, etc.)
+            const dayOfWeek = firstDay.getDay();
+            const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            startDate.setDate(startDate.getDate() - daysToSubtract);
+            
+            const today = new Date();
+            const todayStr = getLocalDateString(today);
+            
+            // Generate calendar days
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                const dateStr = getLocalDateString(date);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.dataset.date = dateStr;
+                
+                if (date.getMonth() !== month) {
+                    dayElement.classList.add('other-month');
+                }
+                
+                if (dateStr === todayStr) {
+                    dayElement.classList.add('today');
+                }
+                
+                const dayTasks = getTasksForDate(dateStr);
+                if (dayTasks.length > 0) {
+                    dayElement.classList.add('has-tasks');
+                    
+                    // Highlight days with events (highest priority)
+                    const hasEvents = dayTasks.some(t => t.isEvent && t.status === 'pending');
+                    if (hasEvents) {
+                        dayElement.classList.add('has-events');
+                    } else {
+                        // Highlight days with overdue tasks (if no events)
+                        const hasOverdue = dayTasks.some(t => t.dueDate < todayStr && t.status === 'pending');
+                        if (hasOverdue) {
+                            dayElement.classList.add('critical-tasks');
+                        }
+                    }
+                }
+                
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'calendar-day-number';
+                dayNumber.textContent = date.getDate();
+                dayNumber.style.cursor = 'pointer';
+                dayNumber.style.textDecoration = 'underline';
+                dayNumber.onclick = (event) => {
+                    event.stopPropagation();
+                    // Navigate to Today view for this date
+                    selectedDate = dateStr;
+                    currentTodayDate = new Date(date);
+                    showView('today', true); // preserveDate = true
+                    renderTodayView(); // Refresh to show the selected date
+                };
+                dayElement.appendChild(dayNumber);
+                
+                // Make day clickable on blank space to open task creation modal
+                dayElement.style.cursor = 'pointer';
+                dayElement.onclick = (event) => {
+                    // Only trigger if clicking on empty space (not on day number or task)
+                    if (event.target === dayElement || (event.target.classList && !event.target.classList.contains('calendar-day-number') && !event.target.classList.contains('calendar-task-item'))) {
+                        openAddTaskModal(dateStr);
+                    }
+                };
+                
+                // Sort day tasks: events first, then by time, then by creation date
+                const sortedDayTasks = [...dayTasks].sort((a, b) => {
+                    // First, prioritize by completion status (pending first)
+                    if (a.status !== b.status) {
+                        return a.status === 'completed' ? 1 : -1;
+                    }
+                    
+                    // Then prioritize events first
+                    if (a.isEvent !== b.isEvent) {
+                        return a.isEvent ? -1 : 1;
+                    }
+                    
+                    // Then sort by time if both have times
+                    if (a.dueTime && b.dueTime) {
+                        return a.dueTime.localeCompare(b.dueTime);
+                    }
+                    if (a.dueTime && !b.dueTime) return -1;
+                    if (!a.dueTime && b.dueTime) return 1;
+                    
+                    // Finally by creation date
+                    return new Date(a.createdAt) - new Date(b.createdAt);
+                });
+                
+                // Add task items (events will appear first)
+                sortedDayTasks.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = task.isEvent ? 'calendar-task-item event' : 'calendar-task-item';
+                    const titlePrefix = task.isEvent ? '🔴 ' : '';
+                    
+                    // Show more text with line breaks for better readability
+                    const maxChars = 25; // Increased from 13 to 25 characters
+                    let displayText = titlePrefix + task.title;
+                    
+                    if (task.title.length > maxChars) {
+                        displayText = titlePrefix + task.title.substring(0, maxChars) + '...';
+                    }
+                    
+                    taskElement.textContent = displayText;
+                    taskElement.dataset.taskId = task.id;
+                    taskElement.dataset.fullText = task.title; // Store full text for hover
+                    taskElement.title = task.title; // Native tooltip
+                    taskElement.draggable = true;
+                    
+                    taskElement.addEventListener('dragstart', handleDragStart);
+                    taskElement.addEventListener('dragend', handleDragEnd);
+                    taskElement.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        editTask(task.id);
+                    });
+                    
+                    dayElement.appendChild(taskElement);
+                });
+                
+                
+                // Drop events
+                dayElement.addEventListener('dragover', handleDragOver);
+                dayElement.addEventListener('drop', handleDrop);
+                dayElement.addEventListener('dragenter', handleDragEnter);
+                dayElement.addEventListener('dragleave', handleDragLeave);
+                
+                grid.appendChild(dayElement);
+            }
+            
+            // Generate template filters based on month's tasks
+            const monthTasks = tasks.filter(task => {
+                if (!task.dueDate) return false;
+                const taskDate = new Date(task.dueDate + 'T00:00:00');
+                return taskDate.getFullYear() === year && taskDate.getMonth() === month;
+            });
+            renderMonthTemplateFilters(monthTasks);
+            
+            // Ensure the current day has the day cursor, or find first day with tasks
+            const currentDateISO = getLocalDateString(currentCalendarDate);
+            let currentDayElement = grid.querySelector(`.calendar-day[data-date="${currentDateISO}"]`);
+            
+            // If current day exists and has tasks, use it
+            if (currentDayElement && currentDayElement.querySelectorAll('.calendar-task-item').length > 0) {
+                if (!currentDayElement.classList.contains('day-cursor')) {
+                    // Remove any existing cursors
+                    grid.querySelectorAll('.day-cursor').forEach(el => {
+                        el.classList.remove('day-cursor');
+                    });
+                    // Add cursor to current day
+                    currentDayElement.classList.add('day-cursor');
+                }
+            } else {
+                // Current day has no tasks, find first day with tasks
+                const allDays = grid.querySelectorAll('.calendar-day');
+                for (let day of allDays) {
+                    const dayTasks = day.querySelectorAll('.calendar-task-item');
+                    if (dayTasks.length > 0) {
+                        // Remove any existing cursors
+                        grid.querySelectorAll('.day-cursor').forEach(el => {
+                            el.classList.remove('day-cursor');
+                        });
+                        // Add cursor to first day with tasks
+                        day.classList.add('day-cursor');
+                        // Update currentCalendarDate to match
+                        const dayDate = day.getAttribute('data-date');
+                        if (dayDate) {
+                            currentCalendarDate = new Date(dayDate + 'T00:00:00');
+                        }
+                        
+                        // Auto-select first task in this day with debugging
+                        setTimeout(() => {
+                            if (currentView === 'calendar') {
+                                const dayTasks = Array.from(day.querySelectorAll('.calendar-task-item'));
+                                console.log('📅 Calendar initial load - Found tasks:', dayTasks.length);
+                                if (dayTasks.length > 0) {
+                                    selectedTaskIndex = 0;
+                                    selectedTaskElement = dayTasks[0];
+                                    console.log('🎯 Initial calendar task selected:', selectedTaskElement);
+                                    console.log('🎯 Task ID:', selectedTaskElement.getAttribute('data-task-id'));
+                                    highlightSelectedTask();
+                                    
+                                    // Force highlight with direct class application as backup
+                                    setTimeout(() => {
+                                        if (selectedTaskElement && !selectedTaskElement.classList.contains('task-selected')) {
+                                            console.log('⚠️ Backup highlighting applied for calendar');
+                                            selectedTaskElement.classList.add('task-selected');
+                                        }
+                                    }, 50);
+                                }
+                            }
+                        }, 150);
+                        break;
+                    }
+                }
+            }
+            
+            // Update dynamic month statistics
+            updateMonthStats(year, month);
+        }
         // Update dynamic month statistics
         function updateMonthStats(year, month) {
             const monthTasks = tasks.filter(task => {
@@ -11675,7 +12042,199 @@
                 monthStats.style.background = `linear-gradient(135deg, ${gradient})`;
             }
         }
-        // [REMOVED] Duplicate function - using js/ui.js version instead
+        // Week view rendering
+        function renderWeekView() {
+            const grid = document.getElementById('weekGrid');
+            const weekTitle = document.getElementById('currentWeek');
+            
+            if (!grid || !weekTitle) return;
+            
+            // Update the week display
+            updateCurrentWeekDisplay();
+            
+            // Get Monday of the current week
+            const monday = getMonday(currentWeekDate);
+            const sunday = new Date(monday);
+            sunday.setDate(sunday.getDate() + 6);
+            
+            // Set week title
+            const mondayStr = monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const sundayStr = sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const year = monday.getFullYear();
+            weekTitle.textContent = `${mondayStr} - ${sundayStr}, ${year}`;
+            
+            // Clear grid
+            grid.innerHTML = '';
+            
+            const today = new Date();
+            const todayStr = getLocalDateString(today);
+            
+            // Generate 7 days starting from Monday
+            const dayNames = [
+                translateText('Monday'), 
+                translateText('Tuesday'), 
+                translateText('Wednesday'), 
+                translateText('Thursday'), 
+                translateText('Friday'), 
+                translateText('Saturday'), 
+                translateText('Sunday')
+            ];
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(monday);
+                date.setDate(monday.getDate() + i);
+                const dateStr = getLocalDateString(date);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'week-day';
+                dayElement.dataset.date = dateStr;
+                
+                // Add classes
+                if (dateStr === todayStr) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Check for tasks on this date
+                const dayTasks = getTasksForDate(dateStr);
+                if (dayTasks.length > 0) {
+                    dayElement.classList.add('has-tasks');
+                }
+                
+                // Day header
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'week-day-header';
+                
+                const dayName = document.createElement('div');
+                dayName.className = 'week-day-name';
+                dayName.textContent = dayNames[i];
+                dayName.style.cursor = 'pointer';
+                dayName.style.textDecoration = 'underline';
+                dayName.onclick = (event) => {
+                    event.stopPropagation();
+                    // Navigate to Today view for this date
+                    selectedDate = dateStr;
+                    currentTodayDate = new Date(date);
+                    showView('today', true); // preserveDate = true
+                    renderTodayView(); // Refresh to show the selected date
+                };
+                
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'week-day-number';
+                dayNumber.textContent = date.getDate();
+                
+                dayHeader.appendChild(dayName);
+                dayHeader.appendChild(dayNumber);
+                dayElement.appendChild(dayHeader);
+                
+                // Sort day tasks: events first, then by time
+                const sortedDayTasks = [...dayTasks].sort((a, b) => {
+                    // First, prioritize by completion status (pending first)
+                    if (a.status !== b.status) {
+                        return a.status === 'completed' ? 1 : -1;
+                    }
+                    
+                    // Then prioritize events first
+                    if (a.isEvent !== b.isEvent) {
+                        return a.isEvent ? -1 : 1;
+                    }
+                    
+                    // Then sort by time if both have times
+                    if (a.dueTime && b.dueTime) {
+                        return a.dueTime.localeCompare(b.dueTime);
+                    }
+                    if (a.dueTime && !b.dueTime) return -1;
+                    if (!a.dueTime && b.dueTime) return 1;
+                    
+                    // Finally by creation date
+                    return new Date(a.createdAt) - new Date(b.createdAt);
+                });
+                
+                // Add task items
+                sortedDayTasks.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = task.isEvent ? 'week-task-item event' : 'week-task-item';
+                    
+                    const titlePrefix = task.isEvent ? '🔴 ' : '';
+                    
+                    // Character limit for single-line display with ellipsis
+                    const maxChars = 30; // Reduced for single-line display
+                    let displayTitle = task.title;
+                    if (task.title.length > maxChars) {
+                        displayTitle = task.title.substring(0, maxChars) + '...';
+                    }
+                    
+                    taskElement.innerHTML = `${titlePrefix}${displayTitle}`;
+                    
+                    taskElement.dataset.taskId = task.id;
+                    taskElement.dataset.fullText = task.title;
+                    taskElement.title = task.title; // Native tooltip for full text
+                    taskElement.draggable = true;
+                    
+                    // Click and drag events
+                    taskElement.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        editTask(task.id);
+                    });
+                    taskElement.addEventListener('dragstart', handleDragStart);
+                    taskElement.addEventListener('dragend', handleDragEnd);
+                    
+                    dayElement.appendChild(taskElement);
+                });
+                
+                // Drop events
+                dayElement.addEventListener('dragover', handleDragOver);
+                dayElement.addEventListener('drop', handleDrop);
+                dayElement.addEventListener('dragenter', handleDragEnter);
+                dayElement.addEventListener('dragleave', handleDragLeave);
+                
+                // Click to add new task
+                dayElement.addEventListener('click', (e) => {
+                    // Only trigger if clicking on empty space (not on a task)
+                    if (e.target === dayElement || e.target === dayHeader || e.target === dayName || e.target === dayNumber) {
+                        openAddTaskModal(dateStr);
+                    }
+                });
+                
+                grid.appendChild(dayElement);
+            }
+            
+            // Generate template filters based on week's tasks
+            const weekTasks = tasks.filter(task => {
+                if (!task.dueDate) return false;
+                const taskDate = new Date(task.dueDate + 'T00:00:00');
+                return taskDate >= monday && taskDate <= sunday;
+            });
+            renderWeekTemplateFilters(weekTasks);
+            
+            // Ensure the current day has the day cursor, or find first day with tasks
+            const currentDateISO = getLocalDateString(currentWeekDate);
+            let currentDayElement = grid.querySelector(`.week-day[data-date="${currentDateISO}"]`);
+            
+            // If current day exists and has tasks, use it
+            if (currentDayElement && currentDayElement.querySelectorAll('.week-task-item').length > 0) {
+                if (!currentDayElement.classList.contains('day-cursor')) {
+                    // Remove any existing cursors
+                    grid.querySelectorAll('.day-cursor').forEach(el => {
+                        el.classList.remove('day-cursor');
+                    });
+                    // Add cursor to current day
+                    currentDayElement.classList.add('day-cursor');
+                }
+            } else {
+                // Current day has no tasks, still show cursor on current day
+                if (currentDayElement) {
+                    // Remove any existing cursors
+                    grid.querySelectorAll('.day-cursor').forEach(el => {
+                        el.classList.remove('day-cursor');
+                    });
+                    // Add cursor to current day even if no tasks
+                    currentDayElement.classList.add('day-cursor');
+                }
+            }
+            
+            // Update dynamic week statistics
+            updateWeekStats();
+        }
         // Update dynamic week statistics
         function updateWeekStats() {
             const monday = getMonday(currentWeekDate);
@@ -19110,7 +19669,78 @@
                 }
             });
         }
-        // [REMOVED] Duplicate function - using js/ui.js version instead
+        // Generate dynamic template filter buttons for Today view
+        function renderTodayTemplateFilters(todayTasks) {
+            const container = document.getElementById('todayTemplateFilters');
+            const mobileContainer = document.getElementById('todayTemplateFiltersMobile');
+            if (!container && !mobileContainer) return;
+            
+            // Extract all templates used in today's tasks
+            const templatesInUse = new Set();
+            
+            todayTasks.forEach(task => {
+                // Check task title and notes for template patterns (@word)
+                const text = `${task.title || ''} ${task.notes || ''}`;
+                const templateMatches = text.match(/@\w+/g);
+                if (templateMatches) {
+                    templateMatches.forEach(template => templatesInUse.add(template));
+                }
+            });
+            
+            // Convert to sorted array
+            const sortedTemplates = Array.from(templatesInUse).sort();
+            
+            let html = '';
+            if (sortedTemplates.length > 0) {
+                html += `<span style="font-size: 12px; color: #666; margin-right: 10px;">${translateText('Quick filters')}:</span>`;
+                
+                sortedTemplates.forEach(template => {
+                    const displayName = template; // e.g., "@casa"
+                    const cleanTemplate = template.substring(1); // e.g., "casa"
+                    const title = `Filter ${cleanTemplate} tasks`;
+                    const escapedTemplate = template.replace(/'/g, "\\'"); // Escape single quotes
+                    
+                    html += `<button class="filter-btn" onclick="filterTodayByTemplate('${escapedTemplate}')" title="${title}">${displayName}</button>`;
+                });
+                
+                html += `<button class="filter-btn filter-no-filter" onclick="showTodayNoFilterTasks()" title="Exit filter mode and return to normal view">➡️ ${translateText('Exit Filters')}</button>`;
+            }
+            
+            
+            if (container) {
+                container.innerHTML = html;
+            }
+            
+            // Populate mobile version with dropdown-style filters
+            if (mobileContainer && sortedTemplates.length > 0) {
+                let mobileHtml = '<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
+                mobileHtml += '<select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: transparent; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">';
+                mobileHtml += '<option value="">All tasks</option>';
+                
+                sortedTemplates.forEach(template => {
+                    const displayName = template; // e.g., "@casa"
+                    const escapedTemplate = template.replace(/'/g, "\\'"); // Escape single quotes
+                    mobileHtml += `<option value="${escapedTemplate}">${displayName}</option>`;
+                });
+                
+                mobileHtml += '</select>';
+                mobileHtml += `<button class="filter-btn filter-no-filter" onclick="showTodayNoFilterTasks()" title="Exit filter mode and return to normal view" style="font-size: 12px; padding: 6px 8px; white-space: nowrap;">➡️ ${translateText('Exit Filters')}</button>`;
+                mobileHtml += '</div>';
+                
+                mobileContainer.innerHTML = mobileHtml;
+            } else if (mobileContainer) {
+                mobileContainer.innerHTML = '';
+            }
+            
+            // Restore active filter button state after re-rendering
+            if (activeTemplateFilter) {
+                updateTemplateButtonStates(activeTemplateFilter);
+                // Re-apply the visual filter after re-rendering
+                setTimeout(() => {
+                    applyTodayTemplateFilter(activeTemplateFilter);
+                }, 10);
+            }
+        }
         // All Tasks Template Filter Functions
         let activeAllTasksTemplateFilter = null;
         // Generate dynamic template filter buttons for All Tasks view
@@ -19343,7 +19973,208 @@
                 filterAllTasksByTemplate(selectedValue);
             }
         }
-        // [REMOVED] Duplicate function - using js/ui.js version instead
+        // Render Today View with time blocks
+        function renderTodayView() {
+            console.log('📱 MOBILE DEBUG: renderTodayView called, tasks.length:', tasks.length);
+            console.log('Current view:', currentView);
+            const container = document.getElementById('todaySchedule');
+            console.log('📱 MOBILE DEBUG: Container found:', !!container);
+            const today = new Date(currentTodayDate);
+            const todayStr = getLocalDateString(today);
+            
+            // Update mobile header date
+            updateMobileDateHeader();
+            const isToday = todayStr === getLocalDateString(new Date());
+            
+            console.log('🔍 Debug currentTodayDate:', currentTodayDate);
+            console.log('🔍 Debug today (copy):', today);
+            console.log('🔍 Debug todayStr:', todayStr);
+            console.log('🔍 Is actual today?:', isToday);
+            console.log('Total tasks:', tasks.length);
+            console.log('Today date string:', todayStr);
+            
+            // Update the date display
+            updateCurrentTodayDisplay();
+            
+            // Get today's tasks AND overdue tasks (only show overdue on current day)
+            const todayTasks = tasks.filter(task => {
+                // Show tasks for this specific date
+                if (task.dueDate === todayStr) return true;
+                
+                // Only show overdue tasks if we're viewing TODAY (not past/future dates)
+                if (isToday && task.dueDate && task.dueDate < todayStr && task.status === 'pending') {
+                    return true;
+                }
+                
+                return false;
+            });
+            const exactlyToday = todayTasks.filter(task => task.dueDate === todayStr).length;
+            const overdueShown = todayTasks.filter(task => task.dueDate && task.dueDate < todayStr && task.status === 'pending').length;
+            console.log('Today tasks found:', todayTasks.length, `(${exactlyToday} for today + ${overdueShown} overdue shown)`);
+            
+            console.log('🔍 First 5 tasks with dates:', tasks.slice(0, 5).map(t => ({
+                title: t.title?.substring(0, 30),
+                dueDate: t.dueDate,
+                matches: t.dueDate === todayStr
+            })));
+            
+            console.log('🔍 Today tasks details:', todayTasks.slice(0, 3).map(t => ({
+                title: t.title?.substring(0, 30),
+                dueDate: t.dueDate,
+                dueTime: t.dueTime
+            })));;
+            
+            // Generate dynamic template filter buttons based on today's tasks
+            renderTodayTemplateFilters(todayTasks);
+            
+            if (todayTasks.length === 0 && tasks.length > 0) {
+                console.log('📅 Debug: Expected date format:', todayStr);
+                console.log('📅 Debug: Sample task dates:', tasks.slice(0, 5).map(t => ({title: t.title, dueDate: t.dueDate})));
+                const todayRelatedTasks = tasks.filter(t => t.dueDate && (t.dueDate.includes('2025-07-08') || t.dueDate.includes('07-08')));
+                console.log('📅 Debug: Tasks with dates for today:', todayRelatedTasks.map(t => ({title: t.title, dueDate: t.dueDate})));
+            }
+            
+            if (todayTasks.length === 0) {
+                container.innerHTML = `
+                    <div class="no-tasks-today">
+                        <span class="emoji">📅</span>
+                        <h3>📱 DEBUG: No tasks for ${todayStr} (Total tasks: ${tasks.length})</h3>
+                        <p>Click the "+ Today" button to add a new task for today</p>
+                        <button class="btn btn-primary" onclick="openAddTaskModal('${todayStr}')" style="background: #ff6b35; border-color: #ff6b35;">+ Add Task for Today</button>
+                    </div>
+                `;
+                console.log('📱 DEBUG: Rendered no-tasks message');
+                return;
+            }
+            
+            
+            // Function to round up time to next 30-minute interval
+            function roundUpToNext30Min(timeStr) {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                let newMinutes = Math.ceil(minutes / 30) * 30;
+                let newHours = hours;
+                
+                if (newMinutes >= 60) {
+                    newMinutes = 0;
+                    newHours = (newHours + 1) % 24;
+                }
+                
+                return `${newHours.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')}`;
+            }
+            
+            // Separate events from regular tasks
+            const events = todayTasks.filter(task => task.isEvent);
+            const regularTasks = todayTasks.filter(task => !task.isEvent);
+            
+            // Group regular tasks by their actual times (only create slots for existing tasks)
+            const timeSlots = {};
+            const noTimeSlot = [];
+            
+            regularTasks.forEach(task => {
+                const hasValidTime = task.dueTime && task.dueTime !== '' && task.dueTime !== null && task.dueTime !== undefined;
+                
+                if (hasValidTime) {
+                    const timeKey = task.dueTime;
+                    if (!timeSlots[timeKey]) {
+                        timeSlots[timeKey] = [];
+                    }
+                    timeSlots[timeKey].push(task);
+                } else {
+                    task.dueTime = normalizeDueTime(task.dueTime);
+                    noTimeSlot.push(task);
+                }
+            });
+            
+            // Sort untimed tasks
+            noTimeSlot.sort((a, b) => {
+                const dateA = new Date(a.createdAt || a.created_at || 0);
+                const dateB = new Date(b.createdAt || b.created_at || 0);
+                return dateB - dateA;
+            });
+            
+            // Sort time slots by time
+            const sortedTimeSlots = Object.keys(timeSlots).sort();
+            const currentTime = today.toTimeString().slice(0, 5);
+            
+            let html = '';
+            
+            // Render Events section at the top (if any events exist)
+            if (events.length > 0) {
+                html += `
+                    <div class="time-block events-section" style="background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%); margin-bottom: 15px;">
+                        <div class="time-block-header" style="background: transparent; color: white; font-weight: 600;">
+                            <span>🔴 Events (${events.length})</span>
+                        </div>
+                        <div class="time-block-content" style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; margin: 8px;">
+                            ${events.map(task => renderTimeSlotTask(task)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Render time slots (only for times that have tasks)
+            sortedTimeSlots.forEach(time => {
+                const isCurrentTime = time <= currentTime && 
+                    (sortedTimeSlots[sortedTimeSlots.indexOf(time) + 1] || '23:59') > currentTime;
+                
+                html += `
+                    <div class="time-block" 
+                         ondragover="handleTodayDragOver(event)" 
+                         ondrop="handleTodayDrop(event)" 
+                         ondragleave="handleTodayDragLeave(event)"
+                         data-time-slot="${time}">
+                        <div class="time-block-header ${isCurrentTime ? 'current-time' : ''}">
+                            <span>🕐 ${formatTime(time)}</span>
+                            ${isCurrentTime ? `<span style="margin-left: auto; font-size: 12px; padding-right: 8px;">← ${translateText('Current Time')}</span>` : ''}
+                        </div>
+                        <div class="time-block-content" 
+                             ondragover="handleTodayDragOver(event)" 
+                             ondrop="handleTodayDrop(event)" 
+                             ondragleave="handleTodayDragLeave(event)"
+                             data-time-slot="${time}">
+                            ${timeSlots[time].map(task => renderTimeSlotTask(task)).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Render tasks without specific time
+            if (noTimeSlot.length > 0) {
+                html += `
+                    <div class="time-block" 
+                         ondragover="handleTodayDragOver(event)" 
+                         ondrop="handleTodayDrop(event)" 
+                         ondragleave="handleTodayDragLeave(event)"
+                         data-time-slot="no-time">
+                        <div class="time-block-header">
+                            <span>📋 No Specific Time</span>
+                        </div>
+                        <div class="time-block-content" 
+                             ondragover="handleTodayDragOver(event)" 
+                             ondrop="handleTodayDrop(event)" 
+                             ondragleave="handleTodayDragLeave(event)"
+                             data-time-slot="no-time">
+                            ${noTimeSlot.map(task => renderTimeSlotTask(task)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (container) {
+                container.innerHTML = html;
+            } else {
+                console.warn('Cannot render today view: todaySchedule container not found - retrying in 100ms');
+                // Retry after a short delay in case container is temporarily unavailable
+                setTimeout(() => {
+                    const retryContainer = document.getElementById('todaySchedule');
+                    if (retryContainer) {
+                        retryContainer.innerHTML = html;
+                    } else {
+                        console.error('todaySchedule container still not found after retry');
+                    }
+                }, 100);
+            }
+        }
         
         // Helper function to check if task has images
         function taskHasImages(task) {
