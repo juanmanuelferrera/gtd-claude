@@ -2039,29 +2039,103 @@ function clearAllTasks() {
 }
 
 function performUndo() {
-    if (typeof undoStack !== 'undefined' && undoStack.length > 0) {
-        const lastState = undoStack.pop();
-        if (lastState && lastState.tasks) {
-            tasks = lastState.tasks;
-            if (typeof saveTasksToLocalStorage === 'function') {
-                saveTasksToLocalStorage();
-            }
-            if (typeof renderCurrentView === 'function') {
-                renderCurrentView();
-            }
-            alert('Action undone');
-        }
-    } else {
-        alert('Nothing to undo');
+    // Revert the most recent action from the registry
+    var registry = window.actionRegistry || JSON.parse(localStorage.getItem('actionRegistry') || '[]');
+    if (registry.length === 0) {
+        console.log('Nothing to undo');
+        return;
     }
+    revertAction(registry[registry.length - 1].id);
 }
 
-function refreshUndoView() {
-    // Refresh undo view logic
-    console.log('Refreshing undo view...');
-    if (typeof renderCurrentView === 'function') {
-        renderCurrentView();
+/**
+ * Revert a specific action from the action registry
+ */
+function revertAction(actionId) {
+    var registry = window.actionRegistry || JSON.parse(localStorage.getItem('actionRegistry') || '[]');
+    var idx = registry.findIndex(function(a) { return a.id === actionId; });
+    if (idx === -1) {
+        console.error('Action not found:', actionId);
+        return;
     }
+    var action = registry[idx];
+    console.log('Reverting action:', action.type, action.taskTitle);
+
+    switch (action.type) {
+        case 'create':
+        case 'duplicate': {
+            // Delete the created task (tombstone)
+            var task = tasks.find(function(t) { return t.id === action.taskId; });
+            if (task) {
+                task.isDeleted = true;
+                task.status = 'deleted';
+                task.deletedAt = new Date().toISOString();
+                task.updatedAt = new Date().toISOString();
+            }
+            break;
+        }
+        case 'edit':
+        case 'delay': {
+            // Restore before fields
+            var task = tasks.find(function(t) { return t.id === action.taskId; });
+            if (task && action.before) {
+                Object.keys(action.before).forEach(function(key) {
+                    task[key] = action.before[key];
+                });
+                task.updatedAt = new Date().toISOString();
+            }
+            break;
+        }
+        case 'delete': {
+            // Restore the task
+            var task = tasks.find(function(t) { return t.id === action.taskId; });
+            if (task) {
+                task.isDeleted = false;
+                task.status = 'pending';
+                task.deletedAt = null;
+                task.updatedAt = new Date().toISOString();
+            } else if (action.before) {
+                // Task was fully removed, re-add from snapshot
+                var restored = JSON.parse(JSON.stringify(action.before));
+                restored.isDeleted = false;
+                restored.status = 'pending';
+                restored.deletedAt = null;
+                restored.updatedAt = new Date().toISOString();
+                tasks.push(restored);
+            }
+            break;
+        }
+        case 'complete': {
+            // Restore previous status
+            var task = tasks.find(function(t) { return t.id === action.taskId; });
+            if (task && action.before) {
+                task.status = action.before.status || 'pending';
+                task.isDeleted = action.before.isDeleted || false;
+                task.deletedAt = action.before.deletedAt || null;
+                task.updatedAt = new Date().toISOString();
+            }
+            break;
+        }
+    }
+
+    // Remove action from registry
+    registry.splice(idx, 1);
+    window.actionRegistry = registry;
+    localStorage.setItem('actionRegistry', JSON.stringify(registry));
+
+    // Save and re-render
+    if (typeof saveTasksToLocalStorage === 'function') saveTasksToLocalStorage();
+    if (typeof sortTasks === 'function') sortTasks();
+    if (typeof renderCurrentView === 'function') renderCurrentView();
+    if (typeof uploadAllTasks === 'function') uploadAllTasks();
+
+    console.log('Reverted:', action.type, action.taskTitle);
+}
+
+window.revertAction = revertAction;
+
+function refreshUndoView() {
+    renderRecentActionsView();
 }
 
 function checkAllBackups() {
@@ -5492,219 +5566,89 @@ function openTrash() {
 }
 
 /**
- * Recent Actions View Functions
- * Unified system combining deleted tasks (Trash) and undo stack actions
+ * Action Registry View
+ * Shows all recorded actions with per-action revert buttons
  */
 
-function getRecentActions() {
-    const actions = [];
-    
-    // Get deleted tasks (from old Trash system)
-    const deletedTasks = tasks.filter(task => task.status === 'deleted');
-    deletedTasks.forEach(task => {
-        actions.push({
-            type: 'delete',
-            icon: '🗑️',
-            title: 'Deleted Task',
-            task: task,
-            timestamp: task.deletedAt || task.updatedAt || Date.now(),
-            description: `${task.title || 'Untitled Task'}`,
-            canRestore: true,
-            canPermanentDelete: true
-        });
-    });
-    
-    // Get undo stack actions (from old Undo system)
-    if (typeof undoStack !== 'undefined' && undoStack.length > 0) {
-        undoStack.forEach((state, index) => {
-            let icon = '↩️';
-            let title = 'Action';
-            let description = state.action || 'Unknown action';
-            
-            switch (state.action) {
-                case 'toggle_complete':
-                    icon = '✅';
-                    title = 'Completed Task';
-                    description = state.task ? state.task.title || 'Untitled Task' : 'Task completion';
-                    break;
-                case 'update date':
-                    icon = '📅';
-                    title = 'Changed Date';
-                    description = state.task ? state.task.title || 'Untitled Task' : 'Date update';
-                    break;
-                case 'update time':
-                    icon = '⏰';
-                    title = 'Changed Time';
-                    description = state.task ? state.task.title || 'Untitled Task' : 'Time update';
-                    break;
-                case 'delay task':
-                    icon = '⏭️';
-                    title = 'Delayed Task';
-                    description = state.task ? state.task.title || 'Untitled Task' : 'Task delay';
-                    break;
-                default:
-                    icon = '↩️';
-                    title = 'Modified';
-                    break;
-            }
-            
-            actions.push({
-                type: 'undo',
-                icon: icon,
-                title: title,
-                description: description,
-                timestamp: state.timestamp || Date.now(),
-                stackIndex: index,
-                canUndo: true
-            });
-        });
-    }
-    
-    // Sort by timestamp (most recent first)
-    actions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    
-    return actions;
-}
+const ACTION_ICONS = {
+    create: '➕', edit: '✏️', delete: '🗑️', complete: '✅',
+    delay: '⏭️', duplicate: '📋'
+};
+const ACTION_LABELS = {
+    create: 'Created', edit: 'Edited', delete: 'Deleted', complete: 'Completed',
+    delay: 'Delayed', duplicate: 'Duplicated'
+};
+const ACTION_COLORS = {
+    create: '#28a745', edit: '#007bff', delete: '#dc3545', complete: '#6f42c1',
+    delay: '#f59e0b', duplicate: '#17a2b8'
+};
 
-function renderRecentActionsView() {
-    console.log('⏮️ Rendering recent actions view...');
-    
-    // Get the main tasks view container and replace ALL content
-    const tasksView = document.getElementById('tasks-view');
-    if (!tasksView) {
-        console.error('Tasks view container not found');
-        return;
+function renderRecentActionsView(searchTerm) {
+    console.log('📋 Rendering action registry view...');
+    var tasksView = document.getElementById('tasks-view');
+    if (!tasksView) return;
+
+    var registry = window.actionRegistry || JSON.parse(localStorage.getItem('actionRegistry') || '[]');
+    // Show newest first
+    var actions = registry.slice().reverse();
+
+    // Filter by search
+    if (searchTerm) {
+        var term = searchTerm.toLowerCase();
+        actions = actions.filter(function(a) {
+            return (a.taskTitle || '').toLowerCase().includes(term) ||
+                   (a.type || '').toLowerCase().includes(term) ||
+                   (ACTION_LABELS[a.type] || '').toLowerCase().includes(term);
+        });
     }
-    
-    if (!Array.isArray(tasks)) {
-        console.error('Tasks array not properly initialized');
-        return;
+
+    var countText = actions.length + ' action' + (actions.length !== 1 ? 's' : '');
+    if (searchTerm) countText += ' matching "' + searchTerm + '"';
+
+    var html = '<div class="section-header"><h3>📋 Registry</h3><div class="view-controls">' +
+        '<input type="text" id="recentActionsSearchInput" placeholder="Search actions..." value="' + (searchTerm || '') + '" style="padding:6px 12px;border:2px solid #e1e5e9;border-radius:4px;font-size:11px;width:200px;margin-right:8px;" oninput="searchRecentActions()">' +
+        '</div></div>';
+
+    html += '<div style="padding:16px 20px;background:linear-gradient(135deg,#6f42c1,#563d7c);color:white;border-radius:12px;margin-bottom:16px;">' +
+        '<h2 style="margin:0;font-size:20px;font-weight:700;">📋 Action Registry</h2>' +
+        '<p style="margin:4px 0 0;opacity:0.9;font-size:14px;">' + countText + '</p></div>';
+
+    if (actions.length === 0) {
+        html += '<div style="text-align:center;padding:40px;color:#666;">' +
+            '<div style="font-size:48px;margin-bottom:16px;">📋</div>' +
+            '<h3>No Actions Recorded</h3>' +
+            '<p style="color:#999;">Actions will appear here as you create, edit, delete, or delay tasks.</p></div>';
+    } else {
+        html += '<div style="display:grid;gap:8px;">';
+        actions.forEach(function(action) {
+            var icon = ACTION_ICONS[action.type] || '📝';
+            var label = ACTION_LABELS[action.type] || action.type;
+            var color = ACTION_COLORS[action.type] || '#6c757d';
+            var d = new Date(action.timestamp);
+            var timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+
+            html += '<div style="background:#fff;border:1px solid #e9ecef;border-left:4px solid ' + color + ';border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">' +
+                '<div style="flex:1;min-width:0;">' +
+                '<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">' +
+                '<span style="font-size:16px;">' + icon + '</span>' +
+                '<span style="font-weight:600;font-size:13px;color:' + color + ';">' + label + '</span>' +
+                '<span style="font-size:13px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (action.taskTitle || '') + '</span>' +
+                '</div>' +
+                '<div style="font-size:11px;color:#999;">' + timeStr + '</div>' +
+                '</div>' +
+                '<button onclick="revertAction(\'' + action.id + '\')" style="background:' + color + ';color:white;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;margin-left:8px;">Revert</button>' +
+                '</div>';
+        });
+        html += '</div>';
     }
-    
-    // Get all recent actions
-    const recentActions = getRecentActions();
-    
-    console.log(`⏮️ Found ${recentActions.length} recent actions`);
-    
-    if (recentActions.length === 0) {
-        tasksView.innerHTML = `
-            <div class="section-header">
-                <h3>⏮️ Recent Actions</h3>
-                <div class="view-controls">
-                    <input type="text" id="recentActionsSearchInput" placeholder="🔍 Search actions..." style="padding: 6px 12px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 11px; width: 200px; margin-right: 8px;" oninput="searchRecentActions()">
-                    <button class="btn btn-secondary btn-small" onclick="refreshRecentActionsView()" style="background: #6c757d; border-color: #6c757d;">🔄 Refresh</button>
-                </div>
-            </div>
-            <div class="no-tasks-today" style="text-align: center; padding: 40px; color: #666;">
-                <div style="font-size: 48px; margin-bottom: 16px;">⏮️</div>
-                <h3>No Recent Actions</h3>
-                <p style="color: #999; margin-bottom: 20px;">No recent actions to undo or restore. When you delete tasks or make changes, they'll appear here.</p>
-                <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
-                    <button onclick="showView('today')" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                        🔥 Go to Today
-                    </button>
-                    <button onclick="showView('all')" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                        🔍 All Tasks
-                    </button>
-                </div>
-            </div>
-        `;
-        return;
-    }
-    
-    // Count different action types
-    const deletedCount = recentActions.filter(a => a.type === 'delete').length;
-    const undoCount = recentActions.filter(a => a.type === 'undo').length;
-    
-    let html = `
-        <div class="section-header">
-            <h3>⏮️ Recent Actions</h3>
-            <div class="view-controls">
-                <input type="text" id="recentActionsSearchInput" placeholder="🔍 Search actions..." style="padding: 6px 12px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 11px; width: 200px; margin-right: 8px;" oninput="searchRecentActions()">
-                <button class="btn btn-secondary btn-small" onclick="refreshRecentActionsView()" style="background: #6c757d; border-color: #6c757d;">🔄 Refresh</button>
-            </div>
-        </div>
-        <div class="recent-actions-header" style="padding: 20px; background: linear-gradient(135deg, #6f42c1, #563d7c); color: white; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(111, 66, 193, 0.2);">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                <div>
-                    <h2 style="margin: 0; font-size: 24px; font-weight: 700; display: flex; align-items: center;">
-                        <span style="margin-right: 12px; font-size: 28px;">⏮️</span>
-                        Recent Actions
-                    </h2>
-                    <p style="margin: 4px 0 0 0; opacity: 0.9; font-size: 16px;">${recentActions.length} recent action${recentActions.length !== 1 ? 's' : ''}</p>
-                </div>
-                <div style="display: flex; gap: 12px;">
-                    ${deletedCount > 0 ? `<button onclick="restoreAllDeletedTasks()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                        Restore All Deleted (${deletedCount})
-                    </button>` : ''}
-                    ${deletedCount > 0 ? `<button onclick="deleteAllDeletedTasks()" style="background: rgba(220,53,69,0.8); color: white; border: 1px solid rgba(220,53,69,0.9); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(220,53,69,0.9)'" onmouseout="this.style.background='rgba(220,53,69,0.8)'">
-                        Delete All (${deletedCount})
-                    </button>` : ''}
-                    ${undoCount > 0 ? `<button onclick="undoAllActions()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                        Undo All (${undoCount})
-                    </button>` : ''}
-                </div>
-            </div>
-        </div>
-        <div class="recent-actions-list" style="display: grid; gap: 16px;">
-    `;
-    
-    recentActions.forEach(action => {
-        const actionDate = new Date(action.timestamp).toLocaleDateString();
-        const actionTime = new Date(action.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        // Color coding by action type
-        const borderColor = action.type === 'delete' ? '#dc3545' : '#6f42c1';
-        const bgColor = action.type === 'delete' ? 'rgba(220, 53, 69, 0.05)' : 'rgba(111, 66, 193, 0.05)';
-        
-        html += `
-            <div class="action-card" style="background: ${bgColor}; border: 1px solid #e9ecef; border-left: 4px solid ${borderColor}; border-radius: 8px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s; position: relative; margin-bottom: 8px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 16px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                    <div style="flex: 1; padding-right: 12px;">
-                        <div style="display: flex; align-items: center; margin-bottom: 6px;">
-                            <span style="font-size: 18px; margin-right: 8px;">${action.icon}</span>
-                            <h3 style="margin: 0; color: #333; font-size: 15px; font-weight: 600;">
-                                ${action.title}
-                            </h3>
-                        </div>
-                        <p style="margin: 0 0 6px 0; color: #666; font-size: 13px; line-height: 1.4;">
-                            ${action.description}
-                        </p>
-                        ${action.task && action.task.notes ? `<p style="margin: 0 0 6px 0; color: #888; font-size: 12px; font-style: italic; opacity: 0.8;">${action.task.notes.substring(0, 100)}${action.task.notes.length > 100 ? '...' : ''}</p>` : ''}
-                        <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: #888;">
-                            <span style="display: flex; align-items: center;">
-                                <span style="margin-right: 4px;">⏰</span>
-                                ${actionDate} at ${actionTime}
-                            </span>
-                            ${action.task && action.task.dueDate ? `<span style="display: flex; align-items: center;">
-                                <span style="margin-right: 4px;">📅</span>
-                                Due: ${action.task.dueDate}${action.task.dueTime ? ` at ${action.task.dueTime}` : ''}
-                            </span>` : ''}
-                        </div>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 8px; justify-content: flex-end; border-top: 1px solid #f0f0f0; padding-top: 10px;">
-                    ${action.type === 'delete' && action.canRestore ? `
-                        <button onclick="restoreDeletedTask('${action.task.id}')" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 4px;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
-                            <span>↩️</span> Restore
-                        </button>
-                        ${action.canPermanentDelete ? `<button onclick="permanentlyDeleteTask('${action.task.id}')" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 4px;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
-                            <span>🗑️</span> Delete Forever
-                        </button>` : ''}
-                    ` : ''}
-                    ${action.type === 'undo' && action.canUndo ? `
-                        <button onclick="undoSpecificAction(${action.stackIndex})" style="background: #6f42c1; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 4px;" onmouseover="this.style.background='#563d7c'" onmouseout="this.style.background='#6f42c1'">
-                            <span>↩️</span> Undo This Action
-                        </button>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-    });
-    
-    html += '</div>';
-    
+
     tasksView.innerHTML = html;
+
+    // Re-focus search
+    if (searchTerm) {
+        var si = document.getElementById('recentActionsSearchInput');
+        if (si) { si.focus(); si.setSelectionRange(si.value.length, si.value.length); }
+    }
 }
 
 /**
@@ -5715,242 +5659,13 @@ function restoreAllTasksUI() {
     // This function kept for compatibility
 }
 
-/**
- * Recent Actions Support Functions
- */
-function restoreDeletedTask(taskId) {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) {
-        console.error('Task not found:', taskId);
-        return;
-    }
-    
-    if (task.status !== 'deleted') {
-        console.error('Task is not deleted:', taskId);
-        return;
-    }
-    
-    // Restore the task
-    task.status = 'pending';
-    task.deletedAt = null;
-    task.updatedAt = new Date().toISOString();
-    
-    console.log('✅ Task restored from Recent Actions:', task.title);
-    
-    // Save and sync
-    if (typeof saveTasks === 'function') {
-        saveTasks();
-    }
-    if (typeof uploadAllTasks === 'function') {
-        uploadAllTasks();
-    }
-    
-    // Refresh Recent Actions view
-    renderRecentActionsView();
-    
-    // Show success message
-    if (typeof showInlineNotification === 'function') {
-        showInlineNotification(`Task restored: ${task.title}`, 'success');
-    }
-}
-
-function restoreAllDeletedTasks() {
-    const deletedTasks = tasks.filter(task => task.status === 'deleted');
-    
-    if (deletedTasks.length === 0) {
-        if (typeof showInlineNotification === 'function') {
-            showInlineNotification('No deleted tasks to restore', 'info');
-        }
-        return;
-    }
-    
-    // Confirm restoring all
-    if (!confirm(`Restore all ${deletedTasks.length} deleted tasks?`)) {
-        return;
-    }
-    
-    deletedTasks.forEach(task => {
-        task.status = 'pending';
-        task.deletedAt = null;
-        task.updatedAt = new Date().toISOString();
-    });
-    
-    console.log(`✅ Restored ${deletedTasks.length} tasks from Recent Actions`);
-    
-    // Save and sync
-    if (typeof saveTasks === 'function') {
-        saveTasks();
-    }
-    if (typeof uploadAllTasks === 'function') {
-        uploadAllTasks();
-    }
-    
-    // Refresh Recent Actions view
-    renderRecentActionsView();
-    
-    // Show success message
-    if (typeof showInlineNotification === 'function') {
-        showInlineNotification(`${deletedTasks.length} tasks restored`, 'success');
-    }
-}
-
-function deleteAllDeletedTasks() {
-    const deletedTasks = tasks.filter(task => task.status === 'deleted');
-    
-    if (deletedTasks.length === 0) {
-        if (typeof showInlineNotification === 'function') {
-            showInlineNotification('No deleted tasks to permanently delete', 'info');
-        }
-        return;
-    }
-    
-    // Confirm permanent deletion
-    if (!confirm(`Permanently delete all ${deletedTasks.length} deleted tasks? This action cannot be undone.`)) {
-        return;
-    }
-    
-    // Remove all deleted tasks from the tasks array
-    const originalTaskCount = tasks.length;
-    tasks = tasks.filter(task => task.status !== 'deleted');
-    const removedCount = originalTaskCount - tasks.length;
-    
-    console.log(`🗑️ Permanently deleted ${removedCount} tasks from Recent Actions`);
-    
-    // Save and sync
-    if (typeof saveTasks === 'function') {
-        saveTasks();
-    }
-    if (typeof uploadAllTasks === 'function') {
-        uploadAllTasks();
-    }
-    
-    // Refresh Recent Actions view
-    renderRecentActionsView();
-    
-    // Show success message
-    if (typeof showInlineNotification === 'function') {
-        showInlineNotification(`${removedCount} tasks permanently deleted`, 'success');
-    }
-}
-
-function undoSpecificAction(stackIndex) {
-    if (typeof undoStack === 'undefined' || !undoStack[stackIndex]) {
-        console.error('Undo action not found at index:', stackIndex);
-        return;
-    }
-    
-    // Get the specific state to restore
-    const state = undoStack[stackIndex];
-    
-    if (state && state.tasks) {
-        // Restore the tasks state from this specific point
-        tasks = JSON.parse(JSON.stringify(state.tasks));
-        
-        // Remove this action and all newer ones from the undo stack
-        undoStack.splice(stackIndex);
-        
-        console.log('✅ Undid action:', state.action);
-        
-        // Save and sync
-        if (typeof saveTasksToLocalStorage === 'function') {
-            saveTasksToLocalStorage();
-        }
-        if (typeof uploadAllTasks === 'function') {
-            uploadAllTasks();
-        }
-        
-        // Refresh Recent Actions view
-        renderRecentActionsView();
-        
-        // Show success message
-        if (typeof showInlineNotification === 'function') {
-            showInlineNotification(`Undid: ${state.action}`, 'success');
-        }
-    }
-}
-
-function undoAllActions() {
-    if (typeof undoStack === 'undefined' || undoStack.length === 0) {
-        if (typeof showInlineNotification === 'function') {
-            showInlineNotification('No actions to undo', 'info');
-        }
-        return;
-    }
-    
-    // Confirm undoing all actions
-    if (!confirm(`Undo all ${undoStack.length} recent actions? This will revert all recent changes.`)) {
-        return;
-    }
-    
-    // Get the oldest state (first item in undo stack)
-    const oldestState = undoStack[0];
-    
-    if (oldestState && oldestState.tasks) {
-        tasks = JSON.parse(JSON.stringify(oldestState.tasks));
-        
-        // Clear the entire undo stack
-        undoStack.length = 0;
-        
-        console.log('✅ Undid all recent actions');
-        
-        // Save and sync
-        if (typeof saveTasksToLocalStorage === 'function') {
-            saveTasksToLocalStorage();
-        }
-        if (typeof uploadAllTasks === 'function') {
-            uploadAllTasks();
-        }
-        
-        // Refresh Recent Actions view
-        renderRecentActionsView();
-        
-        // Show success message
-        if (typeof showInlineNotification === 'function') {
-            showInlineNotification('All actions undone', 'success');
-        }
-    }
-}
-
-/**
- * Permanently delete a task (used by Recent Actions)
- */
-function permanentlyDeleteTask(taskId) {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) {
-        console.error('Task not found:', taskId);
-        return;
-    }
-    
-    const taskTitle = task.title || 'Untitled Task';
-    
-    // Confirm permanent deletion
-    if (!confirm(`Are you sure you want to permanently delete "${taskTitle}"? This cannot be undone.`)) {
-        return;
-    }
-    
-    // Remove task completely
-    const taskIndex = tasks.findIndex(t => t.id === taskId);
-    if (taskIndex !== -1) {
-        tasks.splice(taskIndex, 1);
-        console.log(`🗑️ Permanently deleted task: ${taskTitle}`);
-    }
-    
-    // Save and sync
-    if (typeof saveTasks === 'function') {
-        saveTasks();
-    }
-    if (typeof uploadAllTasks === 'function') {
-        uploadAllTasks();
-    }
-    
-    // Refresh Recent Actions view
-    renderRecentActionsView();
-    
-    // Show success message
-    if (typeof showInlineNotification === 'function') {
-        showInlineNotification(`Task permanently deleted: ${taskTitle}`, 'success');
-    }
-}
+// Legacy stubs for backward compatibility
+function restoreDeletedTask(taskId) { console.log('Use revertAction instead'); }
+function restoreAllDeletedTasks() { console.log('Use Registry view instead'); }
+function deleteAllDeletedTasks() { console.log('Use Registry view instead'); }
+function undoSpecificAction() { console.log('Use revertAction instead'); }
+function undoAllActions() { console.log('Use Registry view instead'); }
+function permanentlyDeleteTask() { console.log('Use Registry view instead'); }
 
 // Keyboard support for collapse/expand functionality
 function setupCollapseExpandKeyboardSupport() {
@@ -5989,8 +5704,8 @@ function setupCollapseExpandKeyboardSupport() {
                     break;
                 case 'z':
                     e.preventDefault();
-                    console.log('🎹 Keyboard: Undo last action');
-                    if (typeof performUndo === 'function') {
+                    console.log('🎹 Keyboard: Revert last action');
+                    if (typeof revertAction === 'function') {
                         performUndo();
                     }
                     break;
@@ -6047,158 +5762,13 @@ window.performUndo = performUndo;
 window.quickBackupJSON = quickBackupJSON;
 window.refreshUndoView = refreshUndoView;
 
-// Search functionality for Recent Actions - searches through ALL saved actions
 function searchRecentActions() {
-    const searchInput = document.getElementById('recentActionsSearchInput');
-    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-    
-    // Get ALL recent actions (not just displayed ones)
-    const allActions = getRecentActions();
-    
-    let filteredActions = allActions;
-    if (searchTerm) {
-        // Filter actions based on search term
-        filteredActions = allActions.filter(action => {
-            const searchableText = [
-                action.title || '',
-                action.description || '',
-                action.type || '',
-                new Date(action.timestamp).toLocaleDateString(),
-                new Date(action.timestamp).toLocaleTimeString()
-            ].join(' ').toLowerCase();
-            
-            return searchableText.includes(searchTerm);
-        });
-    }
-    
-    // Re-render the actions list with filtered results
-    renderFilteredActions(filteredActions, searchTerm);
+    var input = document.getElementById('recentActionsSearchInput');
+    var term = input ? input.value.trim() : '';
+    renderRecentActionsView(term || undefined);
 }
 
-// Render filtered actions (separate from full view render)
-function renderFilteredActions(actions, searchTerm = '') {
-    const tasksView = document.getElementById('tasks-view');
-    if (!tasksView) return;
-    
-    // Count different action types
-    const deletedCount = actions.filter(a => a.type === 'delete').length;
-    const undoCount = actions.filter(a => a.type === 'undo').length;
-    
-    let resultText = '';
-    if (searchTerm) {
-        resultText = ` - ${actions.length} result${actions.length !== 1 ? 's' : ''} for "${searchTerm}"`;
-    }
-    
-    let html = `
-        <div class="section-header">
-            <h3>⏮️ Recent Actions</h3>
-            <div class="view-controls">
-                <input type="text" id="recentActionsSearchInput" placeholder="🔍 Search actions..." value="${searchTerm}" style="padding: 6px 12px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 11px; width: 200px; margin-right: 8px;" oninput="searchRecentActions()">
-                <button class="btn btn-secondary btn-small" onclick="refreshRecentActionsView()" style="background: #6c757d; border-color: #6c757d;">🔄 Refresh</button>
-            </div>
-        </div>
-        <div class="recent-actions-header" style="padding: 20px; background: linear-gradient(135deg, #6f42c1, #563d7c); color: white; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(111, 66, 193, 0.2);">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                <div>
-                    <h2 style="margin: 0; font-size: 24px; font-weight: 700; display: flex; align-items: center;">
-                        <span style="margin-right: 12px; font-size: 28px;">⏮️</span>
-                        Recent Actions${resultText}
-                    </h2>
-                    <p style="margin: 4px 0 0 0; opacity: 0.9; font-size: 16px;">${actions.length} action${actions.length !== 1 ? 's' : ''}</p>
-                </div>
-                <div style="display: flex; gap: 12px;">
-                    ${deletedCount > 0 ? `<button onclick="restoreAllDeletedTasks()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                        Restore All Deleted (${deletedCount})
-                    </button>` : ''}
-                    ${deletedCount > 0 ? `<button onclick="deleteAllDeletedTasks()" style="background: rgba(220,53,69,0.8); color: white; border: 1px solid rgba(220,53,69,0.9); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(220,53,69,0.9)'" onmouseout="this.style.background='rgba(220,53,69,0.8)'">
-                        Delete All (${deletedCount})
-                    </button>` : ''}
-                    ${undoCount > 0 ? `<button onclick="undoAllActions()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                        Undo All (${undoCount})
-                    </button>` : ''}
-                </div>
-            </div>
-        </div>
-        <div class="recent-actions-list" style="display: grid; gap: 16px;">
-    `;
-    
-    if (actions.length === 0) {
-        html += `
-            <div class="no-results" style="text-align: center; padding: 40px; color: #666;">
-                <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
-                <h3>No results found</h3>
-                <p style="color: #999; margin-bottom: 20px;">${searchTerm ? `No actions match "${searchTerm}"` : 'No recent actions available'}</p>
-                ${searchTerm ? `<button onclick="document.getElementById('recentActionsSearchInput').value=''; searchRecentActions();" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">Clear Search</button>` : ''}
-            </div>
-        `;
-    } else {
-        actions.forEach(action => {
-            const actionDate = new Date(action.timestamp).toLocaleDateString();
-            const actionTime = new Date(action.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            
-            // Action-specific styling and content
-            let borderColor = '#e1e5e9';
-            let bgColor = '#ffffff';
-            let actionButtons = '';
-            
-            if (action.type === 'delete') {
-                borderColor = '#dc3545';
-                bgColor = '#fff5f5';
-                actionButtons = `
-                    <button onclick="restoreDeletedTask('${action.task.id}')" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 8px;">
-                        ↩️ Restore
-                    </button>
-                    <button onclick="permanentlyDeleteTask('${action.task.id}')" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                        🗑️ Delete Forever
-                    </button>
-                `;
-            } else if (action.type === 'undo') {
-                borderColor = '#6f42c1';
-                bgColor = '#f8f6ff';
-                actionButtons = `
-                    <button onclick="undoSpecificAction(${action.stackIndex})" style="background: #6f42c1; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                        ↩️ Undo to This Point
-                    </button>
-                `;
-            }
-            
-            html += `
-                <div style="background: ${bgColor}; border: 2px solid ${borderColor}; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                        <div style="flex: 1;">
-                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                                <span style="font-size: 20px; margin-right: 12px;">${action.icon}</span>
-                                <div>
-                                    <h4 style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${action.title}</h4>
-                                    <p style="margin: 2px 0 0 0; color: #666; font-size: 14px;">${action.description}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="text-align: right; color: #999; font-size: 12px; min-width: 120px;">
-                            <div>${actionDate}</div>
-                            <div style="font-weight: 600; color: #666;">${actionTime}</div>
-                        </div>
-                    </div>
-                    ${actionButtons ? `<div style="display: flex; gap: 8px; justify-content: flex-end;">${actionButtons}</div>` : ''}
-                </div>
-            `;
-        });
-    }
-    
-    html += `
-        </div>
-    `;
-    
-    tasksView.innerHTML = html;
-    
-    // Re-focus search input if it was focused
-    const searchInput = document.getElementById('recentActionsSearchInput');
-    if (searchInput && searchTerm) {
-        searchInput.focus();
-        // Set cursor to end
-        searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
-    }
-}
+// renderFilteredActions removed - replaced by renderRecentActionsView(searchTerm)
 
 function refreshRecentActionsView() {
     renderRecentActionsView();
@@ -6206,8 +5776,6 @@ function refreshRecentActionsView() {
 
 window.searchRecentActions = searchRecentActions;
 window.refreshRecentActionsView = refreshRecentActionsView;
-window.renderFilteredActions = renderFilteredActions;
-window.deleteAllDeletedTasks = deleteAllDeletedTasks;
 
 // Search functionality for Undo History
 function searchUndoHistory() {

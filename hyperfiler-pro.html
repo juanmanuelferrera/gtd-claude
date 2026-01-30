@@ -224,7 +224,7 @@
         </button>
         <button class="mobile-more-item" onclick="provideFeedback(this); switchToMobileView('recent-actions'); hideMobileMoreMenu();">
             <div class="mobile-more-icon">⏮️</div>
-            <div>Undo</div>
+            <div>Registry</div>
         </button>
         <div style="border-top: 1px solid #e0e0e0; margin: 8px 0; padding-top: 8px;">
             <div style="text-align: center; font-size: 12px; color: #666; margin-bottom: 8px;">Language / Idioma</div>
@@ -307,7 +307,7 @@
                 🔄 Repeat <span style="opacity: 0.7; font-size: 11px; color: #666;">R</span>
             </button>
             <button class="nav-btn" onclick="showView('recent-actions')" id="nav-recent-actions" tabindex="7">
-                ⏮️ Undo <span style="opacity: 0.7; font-size: 11px; color: #666;">U</span>
+                📋 Registry <span style="opacity: 0.7; font-size: 11px; color: #666;">U</span>
             </button>
             <button class="nav-btn" onclick="showView('settings')" id="nav-settings" tabindex="9">
                 ⚙️ Settings <span style="opacity: 0.7; font-size: 11px; color: #666;">X</span>
@@ -634,7 +634,7 @@
                             🖨️ Print
                         </button>
                         <button class="btn btn-secondary btn-small" onclick="showView('recent-actions')" id="recentActionsBtn" style="background: #6f42c1; color: white; border-color: #6f42c1; font-weight: 600; font-size: 11px; padding: 8px 6px;">
-                            ⏮️ Undo
+                            📋 Registry
                         </button>
                         <span id="selectedCount" class="selected-count" style="display: none; font-size: 11px;">0 selected</span>
                     </div>
@@ -755,7 +755,7 @@
                         <button class="btn btn-secondary" onclick="exportTasks()" style="padding: 10px 20px; background: #28a745; border-color: #28a745; color: white;">📤 Export Data</button>
                         <button class="btn btn-secondary" onclick="importTasks()" style="padding: 10px 20px; background: #007bff; border-color: #007bff; color: white;">📥 Import Data</button>
                         <button class="btn btn-secondary" onclick="console.log('🔍 BUTTON CLICKED!'); clearAllTasks()" style="padding: 10px 20px; background: #dc3545; border-color: #dc3545; color: white;">Clear All</button>
-                        <button class="btn btn-secondary" onclick="performUndo()" style="padding: 10px 20px; background: #ffc107; border-color: #ffc107; color: #212529;">↶ Undo Last</button>
+                        <button class="btn btn-secondary" onclick="performUndo()" style="padding: 10px 20px; background: #ffc107; border-color: #ffc107; color: #212529;">↶ Revert Last</button>
                     </div>
                 </div>
                 
@@ -974,7 +974,7 @@
     <!-- Undo View -->
     <div id="undo-view" class="tasks-section hidden">
         <div class="section-header">
-            <h3>↶ Undo Management</h3>
+            <h3>📋 Action Registry</h3>
             <div class="view-controls">
                 <input type="text" id="undoSearchInput" placeholder="🔍 Search actions..." style="padding: 6px 12px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 11px; width: 200px; margin-right: 8px;" oninput="searchUndoHistory()">
                 <button class="btn btn-secondary btn-small" onclick="refreshUndoView()" style="background: #6c757d; border-color: #6c757d;">🔄 Refresh</button>
@@ -2310,9 +2310,9 @@
     <script src="js/globals.js?v=20250106-ULTRA-DEBUG"></script>
     <script src="js/utils.js?v=1757614969"></script>
     <script src="js/toast.js?v=20260130-disabled"></script>
-    <script src="js/keyboard-shortcuts.js?v=20260130-kbd-v6"></script>
+    <script src="js/keyboard-shortcuts.js?v=20260130-registry"></script>
     <script src="js/auth.js?v=1736363000"></script>
-    <script src="js/tasks.js?v=20250127-reviews"></script>
+    <script src="js/tasks.js?v=20260130-registry"></script>
     <script src="js/ui.js?v=20260130-swap-td-v4"></script>
     <script src="js/sync.js?v=20260124-tombstone-v3"></script>
     <script src="js/offline-sync.js?v=20250915-step3"></script>
@@ -2321,7 +2321,7 @@
     <script src="js/natural-language.js?v=1736363000"></script>
     <script src="js/patches.js?v=1736363000"></script>
     <script src="extracted_js.js?v=20260130-no-toast"></script>
-    <script src="js/missing-functions.js?v=20260130-kbd-v13"></script>
+    <script src="js/missing-functions.js?v=20260130-registry"></script>
     
     <!-- Tawk.to Live Chat Integration with automatic language detection -->
 

@@ -6,8 +6,9 @@
 // Global task-related variables
 let tasks = [];
 let currentEditTaskId = null;
-let undoStack = [];
-let maxUndoSteps = 5;
+// Action Registry - stores last 150 actions with per-action revert
+let actionRegistry = JSON.parse(localStorage.getItem('actionRegistry') || '[]');
+const MAX_ACTION_REGISTRY = 150;
 let draggedTask = null;
 let isSaving = false;
 
@@ -286,7 +287,10 @@ function quickAddTaskWithTemplate(templateName) {
     // Add task to array
     tasks.push(newTask);
     window.tasks = tasks; // Sync to window
-    
+
+    // Record action
+    recordAction('create', newTask.id, newTask.title, null, {...newTask});
+
     // Save to localStorage and server
     saveTasksToLocalStorage();
     saveTasks().then(() => {
@@ -343,14 +347,13 @@ async function updateTaskDate(taskId, newDate, event) {
 
         console.log(`🔄 Updating task "${task.title}" date from "${task.dueDate}" to "${newDate}"`);
 
-        // Save state for undo
-        if (typeof saveStateForUndo === 'function') {
-            saveStateForUndo('update date', task);
-        }
+        const beforeDate = { dueDate: task.dueDate };
 
         // Update task date
         task.dueDate = newDate || null;
         task.lastModified = new Date().toISOString();
+
+        recordAction('edit', task.id, task.title, beforeDate, { dueDate: task.dueDate });
 
         // Save to localStorage
         saveTasksToLocalStorage();
@@ -437,13 +440,12 @@ async function updateTaskTime(taskId, newTime, event) {
         const timeDescription = newTime === '' ? 'untimed (no specific time)' : newTime;
         console.log(`🔄 Updating task "${task.title}" time from "${task.dueTime}" to "${timeDescription}"`);
 
-        // Save state for undo
-        if (typeof saveStateForUndo === 'function') {
-            saveStateForUndo('update time', task);
-        }
+        const beforeTime = { dueTime: task.dueTime };
 
         // Update task time (empty string for untimed tasks)
         task.dueTime = newTime || null;
+
+        recordAction('edit', task.id, task.title, beforeTime, { dueTime: task.dueTime });
 
         // Save to localStorage
         saveTasks();
@@ -492,17 +494,20 @@ function duplicateTask(taskId, event) {
     // Add task directly to array and save
     tasks.push(newTask);
     window.tasks = tasks; // Sync to window
+
+    recordAction('duplicate', newTask.id, newTask.title, null, {...newTask});
+
     saveTasksToLocalStorage();
     sortTasks();
     renderCurrentView();
-    
+
     // Sync to cloud in background
     if (typeof uploadAllTasks === 'function') {
         uploadAllTasks().catch(error => {
             console.error('Background sync failed for duplicated task:', error);
         });
     }
-    
+
     console.log('✅ Task duplicated successfully:', newTask.title);
 }
 
@@ -697,9 +702,9 @@ async function deleteTaskFromModal() {
         console.log(`Deleting single task instance with ID: ${currentEditTaskId}`);
         console.log(`Task title: ${task.title}`);
         
-        // Store task for undo before deletion
+        // Store task snapshot before deletion
         const taskToDelete = {...task};
-        
+
         // Mark task as deleted (tombstone pattern for sync)
         const taskIndex = tasks.findIndex(t => t.id === currentEditTaskId);
         if (taskIndex >= 0) {
@@ -711,6 +716,8 @@ async function deleteTaskFromModal() {
         } else {
             throw new Error('Task not found in array');
         }
+
+        recordAction('delete', taskToDelete.id, taskToDelete.title, {...taskToDelete}, null);
         
         // Save to localStorage immediately
         localStorage.setItem('gtdTasks', JSON.stringify(tasks));
@@ -894,7 +901,9 @@ async function saveTaskEdit() {
                 console.log(`✅ Created ${tasksToCreate.length} repeat instances`);
                 
             } else {
-                // Regular task update
+                // Regular task update - capture before state
+                const beforeEdit = { title: task.title, notes: task.notes, dueDate: task.dueDate, dueTime: task.dueTime, isEvent: task.isEvent, repeat: task.repeat };
+
                 task.title = title;
                 task.notes = notes;
                 task.images = images;
@@ -903,14 +912,16 @@ async function saveTaskEdit() {
                 task.isEvent = isEvent;
                 task.repeat = repeatType;
                 task.updatedAt = new Date().toISOString();
-                
+
+                recordAction('edit', task.id, task.title, beforeEdit, { title, notes, dueDate, dueTime, isEvent, repeat: repeatType });
+
                 // Update Event registry
                 if (isEvent) {
                     markAsEvent(task.id);
                 } else {
                     unmarkAsEvent(task.id);
                 }
-                
+
                 console.log('✅ Updated existing task:', task.title);
             }
             
@@ -1003,11 +1014,13 @@ async function saveTaskEdit() {
                 
                 tasks.push(newTask);
                 window.tasks = tasks; // Sync to window
-                
+
+                recordAction('create', newTask.id, newTask.title, null, {...newTask});
+
                 if (isEvent) {
                     markAsEvent(taskId);
                 }
-                
+
                 console.log('✅ Created new single task:', newTask.title);
             }
         }
@@ -1430,23 +1443,33 @@ async function addNewTemplate() {
 window.addNewTemplate = addNewTemplate;
 
 /**
- * Save state for undo functionality
+ * Record an action in the action registry for per-action revert
+ * @param {string} type - 'create'|'edit'|'delete'|'complete'|'delay'|'duplicate'
+ * @param {string} taskId - ID of the affected task
+ * @param {string} taskTitle - Title for display
+ * @param {Object|null} before - Changed fields before (null for create)
+ * @param {Object|null} after - Changed fields after (null for delete)
  */
-function saveStateForUndo(action, task = null) {
-    const state = {
-        action: action,
-        tasks: JSON.parse(JSON.stringify(tasks)), // Deep copy
-        timestamp: Date.now(),
-        task: task ? JSON.parse(JSON.stringify(task)) : null
+function recordAction(type, taskId, taskTitle, before, after) {
+    const entry = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 4),
+        type: type,
+        taskId: taskId,
+        taskTitle: taskTitle || '(untitled)',
+        before: before,
+        after: after,
+        timestamp: Date.now()
     };
-    
-    undoStack.push(state);
-    
-    // Limit undo stack size
-    if (undoStack.length > maxUndoSteps) {
-        undoStack.shift();
+    actionRegistry.push(entry);
+    if (actionRegistry.length > MAX_ACTION_REGISTRY) {
+        actionRegistry = actionRegistry.slice(-MAX_ACTION_REGISTRY);
     }
+    localStorage.setItem('actionRegistry', JSON.stringify(actionRegistry));
+    console.log(`📋 Action recorded: ${type} "${taskTitle}"`);
 }
+
+window.actionRegistry = actionRegistry;
+window.recordAction = recordAction;
 
 /**
  * Task completion toggle
@@ -1457,27 +1480,26 @@ function toggleTaskComplete(taskId, event) {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
     
-    // Save state for undo
-    saveStateForUndo('toggle_complete', task);
-    
+    const beforeStatus = { status: task.status, isDeleted: task.isDeleted, deletedAt: task.deletedAt };
+
     // If task is pending, move to trash instead of marking complete
     if (task.status === 'pending') {
-        // Move to trash
         task.status = 'deleted';
         task.deletedAt = new Date().toISOString();
         task.updatedAt = new Date().toISOString();
-        
+
         // Animate completion before removal
         const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
         if (taskElement) {
             animateTaskCompletion(taskElement);
         }
     } else if (task.status === 'deleted') {
-        // Restore from trash
         task.status = 'pending';
         task.deletedAt = null;
         task.updatedAt = new Date().toISOString();
     }
+
+    recordAction('complete', task.id, task.title, beforeStatus, { status: task.status, isDeleted: task.isDeleted, deletedAt: task.deletedAt });
     
     // Save and sync
     saveTasksToLocalStorage();
@@ -1522,10 +1544,11 @@ async function deleteTask(taskId, event) {
     console.log('🗑️ PERMANENT DELETE: Deleting task', taskId);
     
     try {
-        // Find the task before deletion for debugging
+        // Find the task before deletion
         const taskToDelete = tasks.find(t => t.id === taskId);
         console.log('🗑️ Task to delete:', taskToDelete);
-        
+        const beforeSnapshot = taskToDelete ? {...taskToDelete} : null;
+
         // Mark task as deleted (tombstone pattern for sync)
         const taskIndex = tasks.findIndex(t => t.id === taskId);
         if (taskIndex >= 0) {
@@ -1540,6 +1563,10 @@ async function deleteTask(taskId, event) {
             tasks[taskIndex].deletedAt = new Date().toISOString();
             tasks[taskIndex].updatedAt = new Date().toISOString();
             console.log('🗑️ Task marked as deleted (tombstone):', taskId);
+
+            if (beforeSnapshot) {
+                recordAction('delete', beforeSnapshot.id, beforeSnapshot.title, beforeSnapshot, null);
+            }
         } else {
             console.error('🗑️ ERROR: Task not found in array:', taskId);
             return;
@@ -1613,9 +1640,8 @@ async function delayTask(taskId, days, event) {
             return;
         }
         
-        // Save state for undo before change
-        saveStateForUndo('delay task', task);
-        
+        const beforeDelay = { dueDate: task.dueDate };
+
         // Calculate new date
         const currentDate = task.dueDate ? new Date(task.dueDate) : new Date();
         const newDate = new Date(currentDate);
@@ -1632,10 +1658,12 @@ async function delayTask(taskId, days, event) {
         // Update task
         task.dueDate = getLocalDateString(newDate);
         task.updatedAt = new Date().toISOString();
-        
+
+        recordAction('delay', task.id, task.title, beforeDelay, { dueDate: task.dueDate });
+
         // Save to localStorage
         saveTasksToLocalStorage();
-        
+
         // Update UI
         if (typeof sortTasks === 'function') {
             sortTasks();
@@ -1643,7 +1671,6 @@ async function delayTask(taskId, days, event) {
         if (typeof renderCurrentView === 'function') {
             renderCurrentView();
         }
-
 
         // Background sync
         window.justModifiedTasks = true;
@@ -1656,11 +1683,11 @@ async function delayTask(taskId, days, event) {
                 }
             }
         }, 100);
-        
+
         setTimeout(() => {
             window.justModifiedTasks = false;
         }, 5000);
-        
+
     } catch (error) {
         console.error('Error delaying task:', error);
         if (window.toast) {

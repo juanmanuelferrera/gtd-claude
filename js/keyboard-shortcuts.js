@@ -34,7 +34,7 @@ const KEYBOARD_SHORTCUTS = {
             { keys: ['S'], description: 'Search / All' },
             { keys: ['L'], description: 'Lists' },
             { keys: ['R'], description: 'Repeat' },
-            { keys: ['U'], description: 'Undo' },
+            { keys: ['U'], description: 'Registry' },
             { keys: ['X'], description: 'Settings' }
         ]
     },
