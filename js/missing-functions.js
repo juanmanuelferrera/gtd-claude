@@ -2882,7 +2882,6 @@ function resetTaskTitle() {
 // Settings and language functions
 function switchLanguage(lang) {
     console.log('🔧 switchLanguage called with:', lang);
-    alert('🌐 Language switching to: ' + lang); // Debug alert
     currentLanguage = lang;
     localStorage.setItem('preferredLanguage', lang);
     
@@ -2908,6 +2907,80 @@ function switchLanguage(lang) {
     }
     
     console.log('✅ Language switched to:', lang);
+}
+
+const translations = {
+    es: {
+        "Today": "Hoy",
+        "Add": "Crear",
+        "Week": "Semana",
+        "Lists": "Listas",
+        "More": "Mas",
+        "Month": "Mes",
+        "+ Add Task": "+ Nueva Tarea",
+        "+ Add": "+ Nueva",
+        "Quick filters": "Filtros rapidos:",
+        "TODAY": "🔥 HOY",
+        "MONTH": "🗓️ MES",
+        "WEEK": "📅 SEMANA",
+        "Recent Changes (Last 10)": "📋 Cambios Recientes (Ultimos 10)",
+        "Press Ctrl+Z to undo or click any item to undo up to that point": "Pulsa Ctrl+Z para deshacer o haz clic en cualquier elemento",
+        "No Actions to Undo": "Sin Acciones para Deshacer",
+        "Make some changes to see undo history here": "Haz cambios para ver el historial aqui",
+        "Create Manual Backup": "Crear Respaldo Manual",
+        "Import Tasks": "Importar Tareas",
+        "Paste your tasks below (one per line):": "Pega tus tareas abajo (una por linea):",
+        "Cancel": "Cancelar",
+        "Import": "Importar",
+        "General": "General",
+        "Data": "Datos",
+        "Trash": "Papelera",
+        "Backup": "Respaldo",
+        "Shortcuts": "Atajos",
+        "Mobile UI Version": "Version Movil",
+        "Keyboard-Only Mode": "Modo Solo Teclado",
+        "Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation": "Ocultar botones con atajos de teclado, forzando navegacion solo con teclado",
+        "Enable": "Activar",
+        "Text Files": "Archivos de Texto",
+        "Import Data": "Importar Datos",
+        "Export Data": "Exportar Datos",
+        "Quick Backup": "Respaldo Rapido",
+        "Quick Backup JSON": "Respaldo Rapido JSON",
+        "Import JSON Backup": "Importar Respaldo JSON",
+        "Enable Automatic Backups": "Habilitar Respaldos Automaticos",
+        "Automatically create backups based on your schedule": "Crear respaldos automaticamente segun tu horario",
+        "Choose Backup Types:": "Elegir Tipos de Respaldo:",
+        "Daily Backups": "📅 Respaldos Diarios",
+        "Weekly Backups": "📊 Respaldos Semanales",
+        "Monthly Backups": "📆 Respaldos Mensuales",
+        "Select which automatic backups you want to enable": "Selecciona que respaldos automaticos quieres habilitar",
+        "View Backup Stats": "📈 Ver Estadisticas de Respaldo",
+        "Delete all tasks permanently - this cannot be undone": "Eliminar todas las tareas permanentemente - esto no se puede deshacer",
+        "Delete All Tasks": "Eliminar Todas las Tareas",
+        "Quick Import": "Importacion Rapida",
+        "Choose the type of file you want to import:": "Elige el tipo de archivo que quieres importar:",
+        "Import Backup": "Importar Respaldo",
+        "Import TXT File": "Importar Archivo TXT",
+        "Supported formats: .json, .txt": "Formatos soportados: .json, .txt"
+    }
+};
+
+function translateUI() {
+    const lang = currentLanguage || 'en';
+    const dict = translations[lang];
+
+    document.querySelectorAll('[data-translate]').forEach(el => {
+        const key = el.getAttribute('data-translate');
+        if (lang === 'en') {
+            // Restore English (the key IS the English text)
+            // Preserve emojis that were in the original HTML by checking if key has emoji
+            el.textContent = key;
+        } else if (dict && dict[key]) {
+            el.textContent = dict[key];
+        }
+    });
+
+    console.log('🌐 UI translated to:', lang);
 }
 
 function saveAutoPrintTime() {
@@ -5395,6 +5468,7 @@ window.expandAllGroups = expandAllGroups;
 window.collapseAllGroups = collapseAllGroups;
 window.exportTasks = exportTasks;
 window.exportAllTasks = exportAllTasks;
+window.translateUI = translateUI;
 window.importTasks = importTasks;
 window.clearAllTasks = clearAllTasks;
 window.performUndo = performUndo;
