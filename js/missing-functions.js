@@ -4070,7 +4070,7 @@ function parseTaskId(raw) {
     return raw;
 }
 
-// Keyboard shortcuts (missing-functions.js)
+// Keyboard shortcuts (missing-functions.js) — capture phase to beat extracted_js NavigationManager
 document.addEventListener('keydown', function(event) {
     // Skip if typing in input fields
     var ae = document.activeElement;
@@ -4119,6 +4119,7 @@ document.addEventListener('keydown', function(event) {
     // Arrow Up/Down: navigate tasks
     if (event.key === 'ArrowDown') {
         event.preventDefault();
+        event.stopImmediatePropagation();
         var next = currentIdx < allTasks.length - 1 ? currentIdx + 1 : 0;
         if (current) current.classList.remove('task-selected');
         allTasks[next].classList.add('task-selected');
@@ -4127,6 +4128,7 @@ document.addEventListener('keydown', function(event) {
     }
     if (event.key === 'ArrowUp') {
         event.preventDefault();
+        event.stopImmediatePropagation();
         var prev = currentIdx > 0 ? currentIdx - 1 : allTasks.length - 1;
         if (current) current.classList.remove('task-selected');
         allTasks[prev].classList.add('task-selected');
@@ -4265,7 +4267,7 @@ document.addEventListener('keydown', function(event) {
         current.classList.remove('task-selected');
         return;
     }
-});
+}, true);  // capture phase
 
 function saveDateFormat() {
     const select = document.getElementById('dateFormatSelect');
