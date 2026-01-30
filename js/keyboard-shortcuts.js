@@ -59,7 +59,7 @@ const KEYBOARD_SHORTCUTS = {
             { keys: ['I'], description: 'Import' },
             { keys: ['P'], description: 'Templates' },
             { keys: ['←', '→'], description: 'Date nav' },
-            { keys: ['Ctrl+Z'], description: 'Undo' },
+            { keys: ['Ctrl+Z'], description: 'Revert last' },
             { keys: ['?'], description: 'This help' },
             { keys: ['Esc'], description: 'Close / Clear' }
         ]
@@ -146,10 +146,12 @@ function createKeyboardShortcutsModal() {
 function showKeyboardShortcutsModal() {
     if (isShortcutsModalOpen) return;
 
-    if (!shortcutsOverlay) {
-        shortcutsOverlay = createKeyboardShortcutsModal();
-        document.body.appendChild(shortcutsOverlay);
+    // Always recreate to pick up latest shortcuts
+    if (shortcutsOverlay && shortcutsOverlay.parentNode) {
+        shortcutsOverlay.parentNode.removeChild(shortcutsOverlay);
     }
+    shortcutsOverlay = createKeyboardShortcutsModal();
+    document.body.appendChild(shortcutsOverlay);
 
     shortcutsOverlay.classList.add('active');
     isShortcutsModalOpen = true;
