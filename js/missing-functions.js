@@ -3954,6 +3954,11 @@ document.addEventListener('keydown', function(event) {
         return;
     }
 
+    // Skip if a date or time dropdown overlay is open (let clicks/keys go to the dropdown)
+    if (window.currentDateDropdown || window.currentTimeDropdown) {
+        return;
+    }
+
     // Ctrl+K: toggle keyboard-only mode
     if (event.ctrlKey && (event.key === 'k' || event.key === 'K') && !event.altKey && !event.metaKey) {
         event.preventDefault();
