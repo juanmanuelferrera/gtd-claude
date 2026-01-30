@@ -19980,9 +19980,14 @@
                     reader.onload = (e) => {
                         try {
                             const backupData = JSON.parse(e.target.result);
-                            
+
                             // Validate backup structure
-                            if (backupData.tasks || backupData.version) {
+                            const isValidBackup = (backupData.tasks || backupData.version) &&
+                                (!backupData.tasks || Array.isArray(backupData.tasks)) &&
+                                (!backupData.listSections || Array.isArray(backupData.listSections)) &&
+                                (!backupData.customTemplates || Array.isArray(backupData.customTemplates)) &&
+                                (!backupData.trash || Array.isArray(backupData.trash));
+                            if (isValidBackup) {
                                 const confirmRestore = confirm(
                                     translateText('⚠️ This will replace all current data with backup data. Are you sure?') + 
                                     '\n\n' + translateText('Backup file:') + ' ' + file.name
