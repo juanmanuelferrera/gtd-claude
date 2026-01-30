@@ -2889,14 +2889,7 @@ function toggleSidebarLanguage() {
     if (typeof currentLanguage !== 'undefined') currentLanguage = lang;
     localStorage.setItem('preferredLanguage', lang);
 
-    // Try extracted_js.js switchLanguage first
-    if (window.switchLanguage) {
-        window.switchLanguage(lang);
-    } else if (window.translateUI) {
-        window.translateUI();
-    } else {
-        console.log('🌐 Translating UI directly');
-        var dict = {
+    var dict = {
             "Today": "Hoy", "Add": "Crear", "Week": "Semana", "Lists": "Listas",
             "More": "Mas", "Month": "Mes", "General": "General", "Data": "Datos",
             "Trash": "Papelera", "Backup": "Respaldo", "Shortcuts": "Atajos",
@@ -2968,7 +2961,6 @@ function toggleSidebarLanguage() {
                 else if (p === '🔍 Mes') input.placeholder = '🔍 Month';
             }
         });
-    }
 
     var btn = document.getElementById('sidebarLangToggle');
     if (btn) {
