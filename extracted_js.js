@@ -13798,13 +13798,16 @@
                 // MOVE TO TRASH FIRST: Save copy for recovery before permanent deletion
                 const taskIndex = tasks.findIndex(t => t.id === taskId);
                 if (taskIndex >= 0) {
-                    // Move to trash before permanent deletion
+                    // Move to trash before marking deleted
                     moveToTrash(taskToDelete);
                     console.log('🗑️ Task moved to trash:', taskId);
-                    
-                    // Remove task permanently from local array
-                    tasks.splice(taskIndex, 1);
-                    console.log('🗑️ Task permanently removed from local array:', taskId);
+
+                    // Soft-delete: mark as deleted (tombstone for cross-browser sync)
+                    tasks[taskIndex].isDeleted = true;
+                    tasks[taskIndex].status = 'deleted';
+                    tasks[taskIndex].deletedAt = new Date().toISOString();
+                    tasks[taskIndex].updatedAt = new Date().toISOString();
+                    console.log('🗑️ Task marked as deleted (tombstone):', taskId);
                     
                     // 📊 DELTA SYNC: Track deletion for efficient sync
                     trackTaskDeleted(taskId);

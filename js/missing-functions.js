@@ -1876,10 +1876,13 @@ function deleteSelectedTasks() {
         if (typeof deleteTask === 'function') {
             deleteTask(taskId);
         } else {
-            // Remove from tasks array directly
+            // Soft-delete from tasks array (tombstone for sync)
             const taskIndex = tasks.findIndex(t => t.id == taskId);
             if (taskIndex >= 0) {
-                tasks.splice(taskIndex, 1);
+                tasks[taskIndex].isDeleted = true;
+                tasks[taskIndex].status = 'deleted';
+                tasks[taskIndex].deletedAt = new Date().toISOString();
+                tasks[taskIndex].updatedAt = new Date().toISOString();
             }
         }
     });
