@@ -189,6 +189,11 @@ async function checkAuthentication() {
                 if (mobileResponse && mobileResponse.ok) {
                     const userInfo = await mobileResponse.json();
                     window.currentUser = userInfo;
+                    try {
+                        localStorage.setItem('currentUser', JSON.stringify(userInfo));
+                    } catch (e) {
+                        console.warn('⚠️ Failed to persist currentUser to localStorage:', e);
+                    }
                     return true;
                 } else {
                     console.error('❌ Mobile Safari auth failed after retries:', mobileLastError);
@@ -310,6 +315,11 @@ async function checkAuthentication() {
         
         // Store user info for app use
         window.currentUser = userInfo;
+        try {
+            localStorage.setItem('currentUser', JSON.stringify(userInfo));
+        } catch (e) {
+            console.warn('⚠️ Failed to persist currentUser to localStorage:', e);
+        }
         
         // CRITICAL: Check for stale browser data before allowing sync
         const lastSyncTime = localStorage.getItem('lastSyncTime');
