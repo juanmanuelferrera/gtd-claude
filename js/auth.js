@@ -62,7 +62,10 @@ function clearAuthData() {
     sessionStorage.removeItem('authToken');
     sessionStorage.removeItem('userEmail');
     sessionStorage.removeItem('userId');
-    
+
+    // Clear persisted user data
+    localStorage.removeItem('currentUser');
+
     // Clear any legacy sync data
     localStorage.removeItem('tasks_with_tombstones');
     
