@@ -3751,32 +3751,12 @@ async function handleDrop(e) {
 
 // Settings helper functions
 function applyKeyboardOnlyMode(keyboardOnlyMode) {
-    // Hide task action buttons (delete, delay, edit icons on each task card)
-    var selectors = [
-        '.task-actions',
-        '.task-action-btn',
-        '.delete-btn',
-        '.delay-btn',
-        '.edit-btn',
-        '.task-card .action-buttons',
-        '.task-item .action-buttons',
-        'button[onclick*="deleteTask"]',
-        'button[onclick*="delayTask"]',
-        'button[onclick*="editTask"]'
-    ];
-    var allButtons = document.querySelectorAll(selectors.join(', '));
-    allButtons.forEach(function(el) {
-        el.style.display = keyboardOnlyMode ? 'none' : '';
-    });
-
-    // Toggle body class for CSS-based hiding
+    // CSS handles hiding via body.keyboard-only-mode (survives re-renders)
     if (keyboardOnlyMode) {
         document.body.classList.add('keyboard-only-mode');
     } else {
         document.body.classList.remove('keyboard-only-mode');
     }
-
-    // Show notification
     if (typeof showInlineNotification === 'function') {
         showInlineNotification(keyboardOnlyMode ? '⌨️ Keyboard-only mode ON' : '🖱️ Keyboard-only mode OFF', 'success');
     }

@@ -6,6 +6,23 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>⚡ HyperFiler Pro 🚀 - v4.14.0 Stable</title>
+    <style>
+    /* Keyboard-only mode: hide mouse-oriented UI elements */
+    body.keyboard-only-mode .task-actions,
+    body.keyboard-only-mode .action-buttons,
+    body.keyboard-only-mode .task-action-btn,
+    body.keyboard-only-mode button[onclick*="deleteTask"],
+    body.keyboard-only-mode button[onclick*="delayTask"],
+    body.keyboard-only-mode .section-action-btn,
+    body.keyboard-only-mode .list-action-btn,
+    body.keyboard-only-mode .mobile-task-actions {
+        display: none !important;
+    }
+    body.keyboard-only-mode .task-card,
+    body.keyboard-only-mode .task-item {
+        cursor: pointer;
+    }
+    </style>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -2296,7 +2313,7 @@
     <script src="js/natural-language.js?v=1736363000"></script>
     <script src="js/patches.js?v=1736363000"></script>
     <script src="extracted_js.js?v=20260130-keyboard"></script>
-    <script src="js/missing-functions.js?v=20260130-kbd-v2"></script>
+    <script src="js/missing-functions.js?v=20260130-kbd-v3"></script>
     
     <!-- Tawk.to Live Chat Integration with automatic language detection -->
 
