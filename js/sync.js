@@ -647,52 +647,30 @@ async function performComprehensiveSync() {
 }
 
 /**
- * Upload all templates to the server (internal implementation)  
+ * Upload all templates to the server (internal implementation)
  */
 async function _uploadAllTemplatesInternal() {
-    console.log('📤 [ULTRA-DEBUG] _uploadAllTemplatesInternal called');
-    console.log('📤 [ULTRA-DEBUG] window.currentUser:', window.currentUser?.user?.id);
-    
-    if (!window.currentUser?.user?.id) {
-        console.log('📤 [ULTRA-DEBUG] No user ID, returning');
-        return;
-    }
-    
+    if (!window.currentUser?.user?.id) return;
+
     try {
         const templatesArray = window.customTemplates || [];
-        console.log('📤 [ULTRA-DEBUG] customTemplates variable:', customTemplates);
-        console.log('📤 [ULTRA-DEBUG] window.customTemplates:', window.customTemplates);
-        console.log('📤 [ULTRA-DEBUG] Templates to upload:', templatesArray);
-        console.log('📤 [ULTRA-DEBUG] Templates count:', templatesArray.length);
-        
-        const uploadData = {
-            userId: window.currentUser.user.id,
-            templates: templatesArray
-        };
-        console.log('📤 [ULTRA-DEBUG] Upload payload:', JSON.stringify(uploadData, null, 2));
-        console.log('📤 [ULTRA-DEBUG] API_BASE:', window.API_BASE);
-        console.log('📤 [ULTRA-DEBUG] Upload URL:', `${window.API_BASE}/templates/sync`);
-        
+        console.log(`📤 Uploading ${templatesArray.length} templates`);
+
         const response = await fetch(`${window.API_BASE}/templates/sync`, {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify(uploadData)
+            body: JSON.stringify({
+                userId: window.currentUser.user.id,
+                templates: templatesArray
+            })
         });
-        
-        console.log('📤 [ULTRA-DEBUG] Server response status:', response.status);
-        console.log('📤 [ULTRA-DEBUG] Server response ok:', response.ok);
-        
+
         if (response.ok) {
-            const responseData = await response.text();
-            console.log('📤 [ULTRA-DEBUG] Server response data:', responseData);
             console.log('✅ Templates synced to server successfully');
         } else {
-            const errorData = await response.text();
-            console.error('📤 [ULTRA-DEBUG] Server error response:', errorData);
             console.error('❌ TEMPLATES SYNC: Upload failed:', response.status);
         }
     } catch (error) {
-        console.error('📤 [ULTRA-DEBUG] Upload exception:', error);
         console.error('❌ TEMPLATES SYNC: Upload error:', error);
     }
 }
@@ -708,73 +686,54 @@ async function uploadAllTemplates() {
  * Download all templates from server (internal implementation)
  */
 async function _downloadAllTemplatesInternal() {
-    console.log('📥 [ULTRA-DEBUG] _downloadAllTemplatesInternal called');
-    console.log('📥 [ULTRA-DEBUG] window.currentUser:', window.currentUser?.user?.id);
-    console.log('📥 [ULTRA-DEBUG] localStorage gtdTemplates:', localStorage.getItem('gtdTemplates'));
-    console.log('📥 [ULTRA-DEBUG] window.customTemplates:', window.customTemplates);
-    
-    if (!window.currentUser?.user?.id) {
-        console.log('📥 [ULTRA-DEBUG] No user ID, returning');
-        return;
-    }
-    
+    if (!window.currentUser?.user?.id) return;
+
     // Check persistent protection flag from localStorage
     const protectionData = localStorage.getItem('templateProtection');
     if (protectionData) {
         try {
             const protection = JSON.parse(protectionData);
-            const timeSinceProtection = Date.now() - protection.timestamp;
-            console.log('📥 [ULTRA-DEBUG] Found localStorage protection:', protection);
-            console.log('📥 [ULTRA-DEBUG] Time since protection set:', timeSinceProtection, 'ms');
-            
-            // Respect protection for 30 seconds
-            if (timeSinceProtection < 30000) {
-                console.log('📥 [ULTRA-DEBUG] BLOCKED by localStorage protection - recent template modification');
+            if (Date.now() - protection.timestamp < 30000) {
+                console.log('🔒 Templates download blocked - recent template modification');
                 return;
             } else {
-                console.log('📥 [ULTRA-DEBUG] Protection expired, removing flag');
                 localStorage.removeItem('templateProtection');
             }
         } catch (e) {
-            console.log('📥 [ULTRA-DEBUG] Invalid protection data, removing');
             localStorage.removeItem('templateProtection');
         }
     }
-    
+
     // MANDATORY REFRESH: Override protection for stale browser
     if (window.forceMandatoryRefresh || window.staleBrowserMode) {
-        console.log('🚨 MANDATORY REFRESH: Forcing templates download despite protection flags');
+        console.log('🚨 MANDATORY REFRESH: Forcing templates download');
     } else {
-        // BACKUP RESTORE PROTECTION - highest priority
         if (window.justRestoredBackup || window.skipNextDownload || window.backupRestoreInProgress) {
             console.log('🔒 BLOCKED: Templates download skipped - backup restore in progress');
             return;
         }
-        
-        // Don't download if we just modified templates (memory flag)
         if (window.justModifiedTemplates) {
-            console.log('📥 [ULTRA-DEBUG] BLOCKED by memory flag - just modified templates');
+            console.log('📥 Skipping templates download - just modified templates');
             return;
         }
     }
-    
+
     try {
         const response = await fetch(`${window.API_BASE}/templates/${window.currentUser.user.id}`, {
             headers: getAuthHeaders()
         });
-        
+
         if (response.ok) {
             const data = await response.json();
             const serverTemplates = data.templates || [];
-            console.log('📥 [ULTRA-DEBUG] Server response received');
-            console.log('📥 [ULTRA-DEBUG] Server templates:', serverTemplates);
-            console.log('📥 [ULTRA-DEBUG] Server templates count:', serverTemplates.length);
-            
+            console.log('📥 Downloaded', serverTemplates.length, 'templates from server');
+
             // MANDATORY REFRESH: Direct replacement with server data
             if (window.forceMandatoryRefresh || window.staleBrowserMode) {
                 console.log('🚨 MANDATORY REFRESH: Directly replacing templates with server data');
                 if (typeof customTemplates !== 'undefined') {
                     customTemplates = serverTemplates;
+                    window.customTemplates = serverTemplates;
                     localStorage.setItem('gtdTemplates', JSON.stringify(serverTemplates));
                     if (typeof renderTemplateButtons === 'function') {
                         renderTemplateButtons();
@@ -783,45 +742,32 @@ async function _downloadAllTemplatesInternal() {
             } else {
                 // Smart sync: Preserve local deletions, only add new templates from server
                 const localTemplates = typeof customTemplates !== 'undefined' ? customTemplates : [];
-                console.log('📥 [ULTRA-DEBUG] Local templates before sync:', localTemplates);
-                console.log('📥 [ULTRA-DEBUG] Local templates count:', localTemplates.length);
-                
+
                 if (JSON.stringify(serverTemplates) !== JSON.stringify(localTemplates)) {
-                    console.log('📥 [ULTRA-DEBUG] Templates differ - analyzing changes...');
-                    
-                    // Smart merge logic: Only add new templates from server, don't restore deleted ones
-                    const newTemplatesFromServer = serverTemplates.filter(serverTemplate => 
+                    const newTemplatesFromServer = serverTemplates.filter(serverTemplate =>
                         !localTemplates.includes(serverTemplate)
                     );
-                    
-                    console.log('📥 [ULTRA-DEBUG] New templates from server:', newTemplatesFromServer);
-                    
+
                     if (newTemplatesFromServer.length > 0) {
-                        console.log('📥 [ULTRA-DEBUG] Adding new templates from server:', newTemplatesFromServer);
+                        console.log('📥 Adding', newTemplatesFromServer.length, 'new templates from server');
                         const mergedTemplates = [...localTemplates, ...newTemplatesFromServer];
-                        
+
                         if (typeof customTemplates !== 'undefined') {
                             customTemplates = mergedTemplates;
                             window.customTemplates = mergedTemplates;
                             localStorage.setItem('gtdTemplates', JSON.stringify(mergedTemplates));
-                            console.log('📥 [ULTRA-DEBUG] Updated with merged templates:', mergedTemplates);
-                            
                             if (typeof renderTemplateButtons === 'function') {
                                 renderTemplateButtons();
                             }
                         }
-                    } else {
-                        console.log('📥 [ULTRA-DEBUG] No new templates from server, keeping local templates');
                     }
-                } else {
-                    console.log('📥 [ULTRA-DEBUG] Templates are identical, no sync needed');
                 }
             }
         } else {
             console.log('📥 TEMPLATES SYNC: Download failed:', response.status);
         }
     } catch (error) {
-        console.log('📥 TEMPLATES SYNC: Download error:', error);
+        console.error('📥 TEMPLATES SYNC: Download error:', error);
     }
 }
 
