@@ -32,7 +32,6 @@ const KEYBOARD_SHORTCUTS = {
     templates: {
         title: '🏷️ Template Filters',
         shortcuts: [
-            { keys: ['P'], description: 'Toggle template selector' },
             { keys: ['←', '→'], description: 'Navigate between templates (when active)' },
             { keys: ['Enter'], description: 'Apply selected template filter' },
             { keys: ['Esc'], description: 'Exit template navigation' }
@@ -53,13 +52,13 @@ const KEYBOARD_SHORTCUTS = {
         ]
     },
     ctrlShortcuts: {
-        title: '⌨️ Ctrl Shortcuts',
+        title: '⌨️ Other Shortcuts',
         shortcuts: [
-            { keys: ['Ctrl+N'], description: 'New task' },
+            { keys: ['N'], description: 'New task' },
+            { keys: ['P'], description: 'Toggle template selector' },
             { keys: ['Ctrl+K'], description: 'Toggle keyboard-only mode' },
             { keys: ['Ctrl+Z'], description: 'Undo' },
             { keys: ['Ctrl+J'], description: 'Time dropdown for selected task' },
-            { keys: ['Ctrl+F'], description: 'Filter navigation' },
             { keys: ['Ctrl+S'], description: 'Focus search' },
             { keys: ['Ctrl+B'], description: 'Emergency backup' },
             { keys: ['Ctrl+E'], description: 'Export as text' }
