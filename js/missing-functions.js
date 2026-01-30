@@ -3851,14 +3851,30 @@ function toggleAutoPrint() {
     }
 }
 
-function toggleKeyboardOnlyMode() {
-    const checkbox = document.getElementById('keyboardOnlyMode');
-    if (checkbox) {
-        const enabled = checkbox.checked;
-        localStorage.setItem('keyboardOnlyMode', enabled);
-        applyKeyboardOnlyMode(enabled);
+function toggleKeyboardOnlyMode(forceState) {
+    var enabled;
+    if (typeof forceState === 'boolean') {
+        enabled = forceState;
+    } else {
+        // Toggle current state
+        var current = localStorage.getItem('keyboardOnlyMode');
+        enabled = !(current === 'true');
     }
+    localStorage.setItem('keyboardOnlyMode', String(enabled));
+    // Sync all checkboxes with this id
+    document.querySelectorAll('#keyboardOnlyMode, input[id="keyboardOnlyMode"]').forEach(function(cb) {
+        cb.checked = enabled;
+    });
+    applyKeyboardOnlyMode(enabled);
 }
+
+// Ctrl+K keyboard shortcut for keyboard-only mode
+document.addEventListener('keydown', function(event) {
+    if (event.ctrlKey && (event.key === 'k' || event.key === 'K') && !event.altKey && !event.metaKey) {
+        event.preventDefault();
+        toggleKeyboardOnlyMode();
+    }
+});
 
 function saveDateFormat() {
     const select = document.getElementById('dateFormatSelect');
