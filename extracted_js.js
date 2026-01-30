@@ -24793,23 +24793,8 @@
                     // Start 500ms timer for amplifier (responsive)
                     TaskAmplifier.startShowTimer(selectedTaskElement);
 
-                    // Scroll task to center of viewport instantly for keyboard nav
-                    const rect = selectedTaskElement.getBoundingClientRect();
-                    const viewportHeight = window.innerHeight;
-                    const taskCenter = rect.top + rect.height / 2;
-                    const viewportCenter = viewportHeight / 2;
-                    const scrollOffset = taskCenter - viewportCenter;
-
-                    // Find the scrollable container (could be window or a parent element)
-                    const scrollParent = selectedTaskElement.closest('[style*="overflow"]') ||
-                                         selectedTaskElement.closest('.tasks-section') ||
-                                         document.documentElement;
-
-                    if (scrollParent === document.documentElement || scrollParent === document.body) {
-                        window.scrollBy({ top: scrollOffset, behavior: 'instant' });
-                    } else {
-                        scrollParent.scrollBy({ top: scrollOffset, behavior: 'instant' });
-                    }
+                    // Scroll task to center of viewport
+                    selectedTaskElement.scrollIntoView({ behavior: 'instant', block: 'center' });
                 }
             }
         }
