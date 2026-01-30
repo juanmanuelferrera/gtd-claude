@@ -16363,7 +16363,7 @@
                     version: '2.0', // Updated version for SQLite
                     exportDate: new Date().toISOString(),
                     tasks: tasks,
-                    templates: customTemplates, // Include templates in export
+                    customTemplates: customTemplates, // Include templates in export
                     listSections: typeof listSections !== 'undefined' ? listSections : [], // Include Lists sections in export
                     trash: typeof trash !== 'undefined' ? trash : [], // Include trash in export
                     backupReason: 'manual-export'
@@ -16518,7 +16518,7 @@
                 const exportData = {
                     tasks: tasks || [],
                     listSections: typeof listSections !== 'undefined' ? listSections : [], // Include list sections in backup
-                    templates: customTemplates || [], // Include templates in backup
+                    customTemplates: customTemplates || [], // Include templates in backup
                     trash: typeof trash !== 'undefined' ? trash : [], // Include trash in backup
                     exportDate: now.toISOString(),
                     totalTasks: tasks ? tasks.length : 0,
@@ -19885,7 +19885,7 @@
             const backupData = {
                 tasks: tasks || [],
                 listSections: typeof listSections !== 'undefined' ? listSections : [],
-                templates: customTemplates || [],
+                customTemplates: customTemplates || [],
                 trash: typeof trash !== 'undefined' ? trash : [],
                 exportDate: new Date().toISOString(),
                 totalTasks: tasks ? tasks.length : 0,
