@@ -1048,14 +1048,13 @@ async function saveTaskEdit() {
                     console.log('✅ Task changes synced to cloud');
                 } catch (error) {
                     console.error('❌ Error syncing task changes:', error);
+                } finally {
+                    window.justModifiedTasks = false;
                 }
             }, 100);
+        } else {
+            setTimeout(() => { window.justModifiedTasks = false; }, 5000);
         }
-        
-        // Clear flag
-        setTimeout(() => {
-            window.justModifiedTasks = false;
-        }, 10000);
 
         console.log('✅ Task saved successfully');
 
@@ -1521,13 +1520,13 @@ function toggleTaskComplete(taskId, event) {
                 await uploadAllTasks();
             } catch (error) {
                 console.error('Background sync failed:', error);
+            } finally {
+                window.justModifiedTasks = false;
             }
         }, 100);
+    } else {
+        setTimeout(() => { window.justModifiedTasks = false; }, 5000);
     }
-    
-    setTimeout(() => {
-        window.justModifiedTasks = false;
-    }, 5000);
 }
 
 /**
@@ -1611,13 +1610,13 @@ async function deleteTask(taskId, event) {
                     await uploadAllTasks();
                 } catch (error) {
                     console.error('Background sync failed for deletion:', error);
+                } finally {
+                    window.justModifiedTasks = false;
                 }
+            } else {
+                window.justModifiedTasks = false;
             }
         }, 100);
-        
-        setTimeout(() => {
-            window.justModifiedTasks = false;
-        }, 5000);
         
     } catch (error) {
         console.error('🗑️ Error deleting task:', error);
@@ -1682,13 +1681,13 @@ async function delayTask(taskId, days, event) {
                     await uploadAllTasks();
                 } catch (error) {
                     console.error('Background sync failed for delay:', error);
+                } finally {
+                    window.justModifiedTasks = false;
                 }
+            } else {
+                window.justModifiedTasks = false;
             }
         }, 100);
-
-        setTimeout(() => {
-            window.justModifiedTasks = false;
-        }, 5000);
 
     } catch (error) {
         console.error('Error delaying task:', error);
