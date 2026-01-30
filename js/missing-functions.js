@@ -3848,6 +3848,12 @@ function toggleKeyboardOnlyMode(forceState) {
     applyKeyboardOnlyMode(enabled);
 }
 
+// Parse task ID as number if possible (IDs are mixed string/number in codebase)
+function parseTaskId(raw) {
+    var n = parseInt(raw);
+    return isNaN(n) ? raw : n;
+}
+
 // Keyboard shortcuts (missing-functions.js)
 document.addEventListener('keydown', function(event) {
     // Skip if typing in input fields
@@ -3896,8 +3902,10 @@ document.addEventListener('keydown', function(event) {
     // Enter: edit selected task
     if (event.key === 'Enter' && current) {
         event.preventDefault();
-        var taskId = current.getAttribute('data-task-id');
-        if (taskId && typeof editTask === 'function') editTask(taskId);
+        var eid = parseTaskId(current.getAttribute('data-task-id'));
+        if (eid && typeof editTask === 'function') {
+            editTask(eid);
+        }
         return;
     }
 
@@ -3911,19 +3919,19 @@ document.addEventListener('keydown', function(event) {
     // Delete: delete selected task
     if (event.key === 'Delete' && current) {
         event.preventDefault();
-        var taskId = current.getAttribute('data-task-id');
-        if (taskId && typeof deleteTask === 'function') deleteTask(taskId);
+        var did = parseTaskId(current.getAttribute('data-task-id'));
+        if (did && typeof deleteTask === 'function') deleteTask(did);
         return;
     }
 
     // C: complete/uncomplete selected task
     if ((event.key === 'c' || event.key === 'C') && current) {
         event.preventDefault();
-        var taskId = current.getAttribute('data-task-id');
-        if (taskId && typeof toggleTaskStatus === 'function') {
-            toggleTaskStatus(taskId);
-        } else if (taskId && typeof completeTask === 'function') {
-            completeTask(taskId);
+        var cid = parseTaskId(current.getAttribute('data-task-id'));
+        if (cid && typeof toggleTaskStatus === 'function') {
+            toggleTaskStatus(cid);
+        } else if (cid && typeof completeTask === 'function') {
+            completeTask(cid);
         }
         return;
     }
