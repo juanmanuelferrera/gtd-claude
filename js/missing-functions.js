@@ -3787,6 +3787,29 @@ function applyTabDisplayMode(mode) {
     console.log('Tab display mode applied:', mode);
 }
 
+function toggleMobileUIVersion() {
+    var select = document.getElementById('mobileUIVersion');
+    if (select) {
+        var version = select.value;
+        localStorage.setItem('mobileUIVersion', version);
+        applyMobileUIVersion(version);
+        console.log('📱 Mobile UI version changed to:', version);
+        if (typeof showInlineNotification === 'function') {
+            showInlineNotification('📱 Mobile interface updated', 'success');
+        }
+    } else {
+        // Toggle between m1 and m2 if no select element
+        var current = localStorage.getItem('mobileUIVersion') || 'm1';
+        var next = current === 'm1' ? 'm2' : 'm1';
+        localStorage.setItem('mobileUIVersion', next);
+        applyMobileUIVersion(next);
+        console.log('📱 Mobile UI toggled to:', next);
+        if (typeof showInlineNotification === 'function') {
+            showInlineNotification('📱 Mobile UI: ' + next, 'success');
+        }
+    }
+}
+
 function applyMobileUIVersion(version) {
     document.body.classList.remove('mobile-v1', 'mobile-v2');
     if (version === 'm1') {
