@@ -588,6 +588,13 @@ async function logout() {
         console.error('Logout error:', error);
     }
     
+    // Clean up sync timers and event listeners before clearing auth
+    if (typeof cleanupSyncEventListeners === 'function') {
+        cleanupSyncEventListeners();
+    }
+    clearTimeout(window._staleBrowserFailsafeTimer);
+    clearTimeout(window._backupRestoreFailsafeTimer);
+
     // SECURITY: Clear all authentication data
     clearAuthData();
     window.location.href = '/login';
