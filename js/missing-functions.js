@@ -3113,20 +3113,22 @@ function toggleSidebarLanguage() {
     var allReverse = [tabMapReverse, statMapReverse, labelMapReverse, kbMapReverse, reviewMapReverse, mobileMapReverse];
 
     // Translate all generic text elements
-    document.querySelectorAll('span, small, p, label, div, td').forEach(function(el) {
-        if (el.children.length > 0 && el.tagName !== 'LABEL') return; // skip containers, but allow labels
-        var t = el.textContent.trim();
-        if (!t || t.length > 200) return;
-        for (var i = 0; i < allMaps.length; i++) {
-            if (lang === 'es' && allMaps[i][t]) {
-                el.textContent = allMaps[i][t];
-                return;
-            } else if (lang === 'en' && allReverse[i][t]) {
-                el.textContent = allReverse[i][t];
-                return;
+    try {
+        document.querySelectorAll('span, small, p, label').forEach(function(el) {
+            if (el.children.length > 0 && el.tagName !== 'LABEL') return;
+            var t = el.textContent.trim();
+            if (!t || t.length > 200) return;
+            for (var i = 0; i < allMaps.length; i++) {
+                if (lang === 'es' && allMaps[i][t]) {
+                    el.textContent = allMaps[i][t];
+                    return;
+                } else if (lang === 'en' && allReverse[i][t]) {
+                    el.textContent = allReverse[i][t];
+                    return;
+                }
             }
-        }
-    });
+        });
+    } catch(e) { console.error('Translation error:', e); }
 
     // Translate day headers in calendar
     document.querySelectorAll('.day-header, .calendar-day-header').forEach(function(el) {
