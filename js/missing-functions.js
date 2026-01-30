@@ -2879,6 +2879,22 @@ function resetTaskTitle() {
     }
 }
 
+function toggleSidebarLanguage() {
+    console.log('🌐 toggleSidebarLanguage called');
+    var lang = (localStorage.getItem('preferredLanguage') || 'en') === 'en' ? 'es' : 'en';
+    console.log('🌐 Switching to:', lang);
+    if (window.switchLanguage) {
+        window.switchLanguage(lang);
+    } else {
+        console.error('❌ window.switchLanguage not found');
+    }
+    var btn = document.getElementById('sidebarLangToggle');
+    if (btn) {
+        btn.textContent = lang === 'en' ? '🇪🇸 ES' : '🇬🇧 EN';
+    }
+}
+window.toggleSidebarLanguage = toggleSidebarLanguage;
+
 function saveAutoPrintTime() {
     const select = document.getElementById('autoPrintTimeSelect');
     if (select) {
