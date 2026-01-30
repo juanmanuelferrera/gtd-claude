@@ -955,7 +955,7 @@ function initializeKeyboardNavigation() {
         console.log('⌨️ Processing shortcut key:', e.key.toLowerCase());
         
         // Handle arrow keys for date navigation (when not in template nav)
-        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !window.currentDateDropdown && !window.currentTimeDropdown) {
             e.preventDefault();
             
             if (e.key === 'ArrowLeft') {

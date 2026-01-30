@@ -25746,12 +25746,13 @@
             }
             
             // Arrow key navigation for all views (only when not typing in inputs and not in filter navigation mode)
-            if ((event.key === 'ArrowLeft' || event.key === 'ArrowRight') && 
-                event.target.tagName !== 'INPUT' && 
-                event.target.tagName !== 'TEXTAREA' && 
+            if ((event.key === 'ArrowLeft' || event.key === 'ArrowRight') &&
+                event.target.tagName !== 'INPUT' &&
+                event.target.tagName !== 'TEXTAREA' &&
                 event.target.tagName !== 'SELECT' &&
                 !event.target.contentEditable &&
-                !filterNavigationActive) {
+                !filterNavigationActive &&
+                !window.currentDateDropdown && !window.currentTimeDropdown) {
                 
                 event.preventDefault();
                 
@@ -25775,7 +25776,7 @@
             }
             
             // Option + arrows for week/month navigation (kept for compatibility)
-            if (event.altKey && event.key === 'ArrowLeft') {
+            if (event.altKey && event.key === 'ArrowLeft' && !window.currentDateDropdown && !window.currentTimeDropdown) {
                 event.preventDefault();
                 if (currentView === 'week') {
                     previousWeek();
@@ -25783,7 +25784,7 @@
                     previousMonth();
                 }
             }
-            if (event.altKey && event.key === 'ArrowRight') {
+            if (event.altKey && event.key === 'ArrowRight' && !window.currentDateDropdown && !window.currentTimeDropdown) {
                 event.preventDefault();
                 if (currentView === 'week') {
                     nextWeek();
