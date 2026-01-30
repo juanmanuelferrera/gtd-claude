@@ -3228,7 +3228,18 @@ function toggleSidebarLanguage() {
         'Display Options': 'Opciones de Visualizacion',
         'Monday': 'Lunes', 'Tuesday': 'Martes', 'Wednesday': 'Miercoles',
         'Thursday': 'Jueves', 'Friday': 'Viernes', 'Saturday': 'Sabado', 'Sunday': 'Domingo',
-        'English': 'English', 'Español': 'Español'
+        'English': 'English', 'Español': 'Español',
+        'Import/Export': 'Importar/Exportar',
+        'Export Tasks': 'Exportar Tareas',
+        'Import Tasks': 'Importar Tareas',
+        'Export Today HTML': 'Exportar Hoy HTML',
+        'Export Week HTML': 'Exportar Semana HTML',
+        'Export Month HTML': 'Exportar Mes HTML',
+        'Keyboard & Advanced': 'Teclado y Avanzado',
+        'Keyboard-Only Mode': 'Modo Solo Teclado',
+        'Hide mouse buttons, show only keyboard shortcuts': 'Ocultar botones del raton, mostrar solo atajos de teclado',
+        'Switch Mobile UI': 'Cambiar a UI Movil',
+        'Save Backup Settings': 'Guardar Ajustes de Respaldo'
     };
     var allTextReverse = {};
     Object.keys(allText).forEach(function(k) { allTextReverse[allText[k]] = k; });
