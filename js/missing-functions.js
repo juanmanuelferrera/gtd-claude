@@ -2962,6 +2962,26 @@ function toggleSidebarLanguage() {
             }
         });
 
+    // Translate nav buttons (emoji + text + shortcut key)
+    var navMap = {
+        'nav-today':          { icon: '📋', en: 'Today',    es: 'Hoy',      key: 'D' },
+        'nav-week':           { icon: '📊', en: 'Week',     es: 'Semana',   key: 'W' },
+        'nav-calendar':       { icon: '📆', en: 'Month',    es: 'Mes',      key: 'M' },
+        'nav-all':            { icon: '🔍', en: 'Search',   es: 'Buscar',   key: 'S' },
+        'nav-lists':          { icon: '📂', en: 'Lists',    es: 'Listas',   key: 'L' },
+        'nav-repeat':         { icon: '🔄', en: 'Repeat',   es: 'Repetir',  key: 'R' },
+        'nav-recent-actions': { icon: '⏮️', en: 'Undo',     es: 'Deshacer', key: 'U' },
+        'nav-settings':       { icon: '⚙️', en: 'Settings', es: 'Ajustes',  key: 'X' }
+    };
+    Object.keys(navMap).forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            var n = navMap[id];
+            var text = lang === 'es' ? n.es : n.en;
+            el.innerHTML = n.icon + ' ' + text + ' <span style="opacity: 0.7; font-size: 11px; color: #666;">' + n.key + '</span>';
+        }
+    });
+
     var btn = document.getElementById('sidebarLangToggle');
     if (btn) {
         btn.textContent = lang === 'en' ? '🇪🇸 ES' : '🇬🇧 EN';
