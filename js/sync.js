@@ -853,6 +853,13 @@ async function performStaleBrowserRecovery() {
             console.log('🔓 Stale browser protection cleared - uploads now allowed');
         } catch (error) {
             console.error('❌ Stale browser recovery failed:', error);
+            // Clear flags on failure so uploads aren't blocked forever
+            window.staleBrowserDetected = false;
+            window.skipInitialUpload = false;
+            window.justModifiedTasks = false;
+            window.justModifiedLists = false;
+            window.justModifiedTemplates = false;
+            console.warn('🔓 Stale browser protection cleared after recovery failure');
             throw error;
         }
     });
