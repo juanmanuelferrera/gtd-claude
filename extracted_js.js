@@ -24793,8 +24793,11 @@
                     // Start 500ms timer for amplifier (responsive)
                     TaskAmplifier.startShowTimer(selectedTaskElement);
 
-                    // Scroll task to center of viewport
-                    selectedTaskElement.scrollIntoView({ behavior: 'instant', block: 'center' });
+                    // Scroll task to center of viewport (manual calc for consistent centering)
+                    const elRect = selectedTaskElement.getBoundingClientRect();
+                    const absoluteTop = elRect.top + window.pageYOffset;
+                    const centerY = absoluteTop - (window.innerHeight / 2) + (elRect.height / 2);
+                    window.scrollTo({ top: centerY, behavior: 'instant' });
                 }
             }
         }
