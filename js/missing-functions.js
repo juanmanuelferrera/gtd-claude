@@ -1870,7 +1870,7 @@ function exportTasks() {
 }
 
 function exportAllTasks() {
-    exportTasks(); // Alias for exportTasks
+    quickBackupJSON(); // Unified - uses full backup
 }
 
 function importTasks() {
