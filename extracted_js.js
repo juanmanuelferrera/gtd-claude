@@ -20298,48 +20298,7 @@
                     showInlineNotification('⚠️ ' + translateText('Backup restored locally but sync failed'), 'warning');
                 }
                 
-                // Keep the old promise-based approach as fallback
-                const uploadPromises = [];
-                if (typeof uploadAllTasks === 'function') {
-                    uploadPromises.push(uploadAllTasks());
-                }
-                if (typeof uploadAllLists === 'function') {
-                    uploadPromises.push(uploadAllLists());
-                }
-                if (typeof uploadAllTemplates === 'function') {
-                    uploadPromises.push(uploadAllTemplates());
-                }
-                
-                // Wait for fallback uploads to complete
-                Promise.all(uploadPromises).then(() => {
-                    console.log('✅ Backup Restore: Fallback uploads completed');
-                    
-                    // Keep protection for 30 seconds to ensure cloud has processed the upload
-                    setTimeout(() => {
-                        window.justModifiedTasks = false;
-                        window.justModifiedLists = false;
-                        window.justModifiedTemplates = false;
-                        window.justRestoredBackup = false;
-                        window.skipNextDownload = false;
-                        window.backupRestoreInProgress = false;
-                        window.backupForceOverwrite = false; // Clear force overwrite flag
-                        console.log('🔓 Backup Restore: All protection flags removed, normal sync resumed');
-                    }, 30000); // 30 seconds protection
-                }).catch(error => {
-                    console.error('⚠️ Backup Restore: Upload failed, keeping protection flags', error);
-                    // Keep protection for longer if upload failed
-                    setTimeout(() => {
-                        window.justModifiedTasks = false;
-                        window.justModifiedLists = false;
-                        window.justModifiedTemplates = false;
-                        window.justRestoredBackup = false;
-                        window.skipNextDownload = false;
-                        window.backupRestoreInProgress = false;
-                        window.backupForceOverwrite = false; // Clear force overwrite flag
-                    }, 60000); // 1 minute protection on error
-                });
-                
-                // Final success message will be shown after upload completes
+                // Protection flags cleared by 90s failsafe timer (set earlier in this function)
                 
             } catch (error) {
                 console.error('Error restoring backup:', error);
