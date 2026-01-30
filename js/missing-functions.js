@@ -3206,7 +3206,29 @@ function toggleSidebarLanguage() {
         'Upload JSON backup file': 'Subir archivo de respaldo JSON',
         // Undo
         '🔄 Refresh': '🔄 Actualizar',
-        '🔍 Search Tasks': '🔍 Buscar Tareas'
+        '🔍 Search Tasks': '🔍 Buscar Tareas',
+        'Recent Actions': 'Acciones Recientes',
+        'recent actions': 'acciones recientes',
+        'Deleted Task': 'Tarea Eliminada',
+        'Restore All Deleted': 'Restaurar Eliminadas',
+        'Delete All': 'Eliminar Todo',
+        'Dark': 'Oscuro',
+        'Light': 'Claro',
+        'Due:': 'Vence:',
+        'at': 'a las',
+        'Restore': 'Restaurar',
+        'Settings': 'Ajustes',
+        'GTD Reviews': 'Revisiones GTD',
+        'Generate task reviews following Getting Things Done methodology':
+            'Generar revisiones de tareas siguiendo la metodologia Getting Things Done',
+        'Daily Review': 'Revision Diaria',
+        'Weekly Review': 'Revision Semanal',
+        'Projects': 'Proyectos',
+        'Choose export formats in the popup': 'Elige formatos de exportacion en el popup',
+        'Display Options': 'Opciones de Visualizacion',
+        'Monday': 'Lunes', 'Tuesday': 'Martes', 'Wednesday': 'Miercoles',
+        'Thursday': 'Jueves', 'Friday': 'Viernes', 'Saturday': 'Sabado', 'Sunday': 'Domingo',
+        'English': 'English', 'Español': 'Español'
     };
     var allTextReverse = {};
     Object.keys(allText).forEach(function(k) { allTextReverse[allText[k]] = k; });
@@ -3228,12 +3250,54 @@ function toggleSidebarLanguage() {
     }
     translateElements('h3, h4, h5, strong, span, div.stat-label, button, option, label');
 
-    // For div elements with description text (color: #6c757d), translate if matches
+    // For div elements with description text, translate if matches
     document.querySelectorAll('div').forEach(function(el) {
         if (el.children.length > 0) return;
         var t = el.textContent.trim();
         if (lang === 'es' && allText[t]) el.textContent = allText[t];
         else if (lang === 'en' && allTextReverse[t]) el.textContent = allTextReverse[t];
+    });
+
+    // --- Dynamic text with numbers (regex-based) ---
+    document.querySelectorAll('h2, h3, h4, span, div, button').forEach(function(el) {
+        if (el.children.length > 1) return;
+        var t = el.textContent.trim();
+        var m;
+        if (lang === 'es') {
+            // "Recent Actions" heading
+            if (t === 'Recent Actions') el.textContent = 'Acciones Recientes';
+            // "439 recent actions"
+            m = t.match(/^(\d+)\s+recent actions$/);
+            if (m) el.textContent = m[1] + ' acciones recientes';
+            // "Restore All Deleted (439)"
+            m = t.match(/^Restore All Deleted\s*\((\d+)\)$/);
+            if (m) el.textContent = 'Restaurar Eliminadas (' + m[1] + ')';
+            // "Delete All (439)"
+            m = t.match(/^Delete All\s*\((\d+)\)$/);
+            if (m) el.textContent = 'Eliminar Todo (' + m[1] + ')';
+            // "Deleted Task"
+            if (t === 'Deleted Task') el.textContent = 'Tarea Eliminada';
+            // "Dark" / "Light" theme toggle
+            if (t === '🌙 Dark') el.textContent = '🌙 Oscuro';
+            if (t === '☀️ Light') el.textContent = '☀️ Claro';
+            // "Undo Management" heading
+            if (t === '↶ Undo Management') el.textContent = '↶ Gestion de Deshacer';
+            // "Recent Changes" with emoji
+            if (t === '⏮️ Recent Actions' || t === '⏮ Recent Actions') el.textContent = '⏮️ Acciones Recientes';
+        } else {
+            if (t === 'Acciones Recientes') el.textContent = 'Recent Actions';
+            m = t.match(/^(\d+)\s+acciones recientes$/);
+            if (m) el.textContent = m[1] + ' recent actions';
+            m = t.match(/^Restaurar Eliminadas\s*\((\d+)\)$/);
+            if (m) el.textContent = 'Restore All Deleted (' + m[1] + ')';
+            m = t.match(/^Eliminar Todo\s*\((\d+)\)$/);
+            if (m) el.textContent = 'Delete All (' + m[1] + ')';
+            if (t === 'Tarea Eliminada') el.textContent = 'Deleted Task';
+            if (t === '🌙 Oscuro') el.textContent = '🌙 Dark';
+            if (t === '☀️ Claro') el.textContent = '☀️ Light';
+            if (t === '↶ Gestion de Deshacer') el.textContent = '↶ Undo Management';
+            if (t === '⏮️ Acciones Recientes' || t === '⏮ Acciones Recientes') el.textContent = '⏮️ Recent Actions';
+        }
     });
 
     // --- Search placeholders ---
