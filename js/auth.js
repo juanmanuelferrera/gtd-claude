@@ -162,27 +162,39 @@ async function checkAuthentication() {
             }
             
             if (authToken) {
-                // Actually validate the token instead of just checking existence
-                try {
-                    const response = await authenticatedFetch(`${API_BASE}/auth/me`, {
-                        method: 'GET'
-                    });
-                    
-                    if (response.ok) {
-                        const userInfo = await response.json();
-                        window.currentUser = userInfo;
-                        return true;
-                    } else {
-                        clearAuthData();
-                        lastAuthenticationState = false;
-                        showAccessDenied('login');
-                        return false;
+                // Actually validate the token with retry logic (same as non-Safari path)
+                let mobileResponse;
+                let mobileLastError;
+                for (let attempt = 1; attempt <= 3; attempt++) {
+                    try {
+                        mobileResponse = await authenticatedFetch(`${API_BASE}/auth/me`, {
+                            method: 'GET'
+                        });
+                        if (mobileResponse.ok) break;
+                        mobileLastError = `HTTP ${mobileResponse.status}`;
+                        if (mobileResponse.status === 401 || mobileResponse.status === 403) break;
+                        if (attempt < 3) {
+                            console.warn(`⚠️ Mobile auth check failed (attempt ${attempt}), retrying...`);
+                            await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+                        }
+                    } catch (error) {
+                        mobileLastError = error.message;
+                        if (attempt < 3) {
+                            console.warn(`⚠️ Mobile network error (attempt ${attempt}), retrying...`);
+                            await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+                        }
                     }
-                } catch (error) {
-                    console.error('❌ Mobile Safari auth validation failed:', error);
+                }
+
+                if (mobileResponse && mobileResponse.ok) {
+                    const userInfo = await mobileResponse.json();
+                    window.currentUser = userInfo;
+                    return true;
+                } else {
+                    console.error('❌ Mobile Safari auth failed after retries:', mobileLastError);
                     clearAuthData();
                     lastAuthenticationState = false;
-                    showAccessDenied('login');  
+                    showAccessDenied('login');
                     return false;
                 }
             } else {
