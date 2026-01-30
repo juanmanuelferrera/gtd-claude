@@ -32,7 +32,7 @@ const KEYBOARD_SHORTCUTS = {
     templates: {
         title: '🏷️ Template Filters',
         shortcuts: [
-            { keys: ['F'], description: 'Toggle template selector' },
+            { keys: ['P'], description: 'Toggle template selector' },
             { keys: ['←', '→'], description: 'Navigate between templates (when active)' },
             { keys: ['Enter'], description: 'Apply selected template filter' },
             { keys: ['Esc'], description: 'Exit template navigation' }

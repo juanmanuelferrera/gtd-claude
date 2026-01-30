@@ -915,9 +915,9 @@ function initializeKeyboardNavigation() {
                         exitTemplateNavigation();
                     }
                     return;
-                case 'f':
-                case 'F':
-                    console.log('🔄 F pressed during template navigation - toggling off');
+                case 'p':
+                case 'P':
+                    console.log('🔄 P pressed during template navigation - toggling off');
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation(); // Prevent any further handling
@@ -1020,15 +1020,15 @@ function initializeKeyboardNavigation() {
                 console.log('✅ X key - switching to Settings view');
                 showView('settings');
                 break;
-            case 'f':
-                console.log('✅ F key pressed in general handler, templateNavActive:', templateNavActive);
+            case 'p':
+                console.log('✅ P key pressed in general handler, templateNavActive:', templateNavActive);
                 e.preventDefault();
                 e.stopPropagation();
                 if (templateNavActive) {
-                    console.log('🔄 F pressed - template nav is active, exiting');
+                    console.log('🔄 P pressed - template nav is active, exiting');
                     exitTemplateNavigation();
                 } else {
-                    console.log('🏷️ F pressed - template nav is inactive, activating');
+                    console.log('🏷️ P pressed - template nav is inactive, activating');
                     activateTemplateSelector();
                 }
                 break;
