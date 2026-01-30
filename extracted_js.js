@@ -3750,11 +3750,23 @@
                     window.forceMandatoryRefresh = false;
                     window.staleBrowserMode = false;
                     window.needsStaleRefresh = false;
-                    
+                    window.staleBrowserDetected = false;
+                    window.skipInitialUpload = false;
+                    window.justModifiedTasks = false;
+                    window.justModifiedLists = false;
+                    window.justModifiedTemplates = false;
+                    localStorage.setItem('lastSyncTime', Date.now().toString());
+                    console.log('🔓 Stale refresh complete — all protection flags cleared, uploads enabled');
+
                 } catch (refreshError) {
                     console.error('❌ CRITICAL: Failed to refresh stale browser data:', refreshError);
-                    // Don't show alert - let normal sync process handle it
-                    console.log('🔄 Will rely on normal sync process to refresh data');
+                    // Clear flags on error so uploads aren't blocked forever
+                    window.staleBrowserDetected = false;
+                    window.skipInitialUpload = false;
+                    window.justModifiedTasks = false;
+                    window.justModifiedLists = false;
+                    window.justModifiedTemplates = false;
+                    console.log('🔓 Stale refresh failed — protection flags cleared to prevent upload blockage');
                 }
                 
             } catch (error) {
@@ -5604,6 +5616,7 @@
                 const result = await response.json();
                 console.log('✅ Tasks uploaded successfully:', result);
                 window.lastUploadTime = Date.now();
+                localStorage.setItem('lastSyncTime', Date.now().toString());
                 return true;
                 
             } catch (error) {

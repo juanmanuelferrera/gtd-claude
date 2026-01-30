@@ -354,46 +354,9 @@ async function checkAuthentication() {
                 }
             }, 90000);
 
-            // Force immediate download from cloud
-            setTimeout(async () => {
-                try {
-                    // 🔒 CRITICAL: Check if backup restore is in progress
-                    if (window.backupRestoreInProgress || window.justRestoredBackup) {
-                        console.log('🔒 STALE BROWSER: Download cancelled - backup restore in progress');
-                        window.staleBrowserDetected = false;
-                        window.skipInitialUpload = false;
-                        return;
-                    }
-
-                    console.log('📥 STALE BROWSER: Starting forced download...');
-                    window.forceMandatoryRefresh = true; // Override all protection flags
-
-                    // Use the new stale browser recovery function for better sync coordination
-                    if (typeof performStaleBrowserRecovery === 'function') {
-                        await performStaleBrowserRecovery();
-                    } else {
-                        // Fallback to individual downloads if function not available
-                        if (typeof downloadAllTasks === 'function') await downloadAllTasks();
-                        if (typeof downloadAllLists === 'function') await downloadAllLists();
-                        if (typeof downloadAllTemplates === 'function') await downloadAllTemplates();
-                    }
-
-                    window.forceMandatoryRefresh = false;
-                    window.staleBrowserDetected = false;
-                    window.skipInitialUpload = false;
-                    localStorage.setItem('lastSyncTime', currentTime.toString());
-                    console.log('✅ STALE BROWSER: Forced download completed');
-                } catch (error) {
-                    console.error('❌ STALE BROWSER: Forced download failed:', error);
-                    // Clear flags on error so uploads aren't blocked forever
-                    window.staleBrowserDetected = false;
-                    window.skipInitialUpload = false;
-                    window.justModifiedTasks = false;
-                    window.justModifiedLists = false;
-                    window.justModifiedTemplates = false;
-                    console.warn('🔓 STALE BROWSER: Protection flags cleared after download failure');
-                }
-            }, 1000); // Small delay to let UI load
+            // Download is handled by performStaleRefresh() in extracted_js.js init flow
+            // (auth.js only sets flags; extracted_js.js handles the actual download and flag clearing)
+            console.log('🛡️ STALE BROWSER: Flags set — download will be handled by init flow');
         }
         
         // Update authentication state
