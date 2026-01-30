@@ -2883,15 +2883,44 @@ function toggleSidebarLanguage() {
     console.log('🌐 toggleSidebarLanguage called');
     var lang = (localStorage.getItem('preferredLanguage') || 'en') === 'en' ? 'es' : 'en';
     console.log('🌐 Switching to:', lang);
+
+    // Update all possible currentLanguage references
+    window.currentLanguage = lang;
+    if (typeof currentLanguage !== 'undefined') currentLanguage = lang;
+    localStorage.setItem('preferredLanguage', lang);
+
+    // Try extracted_js.js switchLanguage first
     if (window.switchLanguage) {
         window.switchLanguage(lang);
+    } else if (window.translateUI) {
+        window.translateUI();
     } else {
-        console.error('❌ window.switchLanguage not found');
+        console.log('🌐 No translateUI found, translating data-translate elements directly');
+        // Fallback: translate data-translate elements
+        document.querySelectorAll('[data-translate]').forEach(function(el) {
+            var key = el.getAttribute('data-translate');
+            var dict = {
+                "Today": "Hoy", "Add": "Crear", "Week": "Semana", "Lists": "Listas",
+                "More": "Mas", "Month": "Mes", "General": "General", "Data": "Datos",
+                "Trash": "Papelera", "Backup": "Respaldo", "Shortcuts": "Atajos",
+                "Cancel": "Cancelar", "Import": "Importar", "Enable": "Activar",
+                "Quick Backup": "Respaldo Rapido", "Quick Backup JSON": "Respaldo Rapido JSON",
+                "Import JSON Backup": "Importar Respaldo JSON", "Import Data": "Importar Datos",
+                "Export Data": "Exportar Datos", "Delete All Tasks": "Eliminar Todas las Tareas"
+            };
+            if (lang === 'es' && dict[key]) {
+                el.textContent = dict[key];
+            } else if (lang === 'en') {
+                el.textContent = key;
+            }
+        });
     }
+
     var btn = document.getElementById('sidebarLangToggle');
     if (btn) {
         btn.textContent = lang === 'en' ? '🇪🇸 ES' : '🇬🇧 EN';
     }
+    console.log('🌐 Language switched to:', lang);
 }
 window.toggleSidebarLanguage = toggleSidebarLanguage;
 
