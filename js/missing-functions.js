@@ -3166,6 +3166,72 @@ function toggleSidebarLanguage() {
         else if (lang === 'en' && dayMapReverse[t]) el.textContent = dayMapReverse[t];
     });
 
+    // --- Comprehensive text replacement for ALL remaining elements ---
+    var allText = {
+        // Settings Preferences tab
+        'Enable auto-print for today\'s tasks': 'Activar impresion automatica de tareas de hoy',
+        'When enabled, today\'s tasks will be automatically printed': 'Cuando esta activado, las tareas de hoy se imprimiran automaticamente',
+        'Sync Status:': 'Estado de Sincronizacion:',
+        'Sync Period:': 'Periodo de Sincronizacion:',
+        'Last 30 days': 'Ultimos 30 dias',
+        'Last 60 days': 'Ultimos 60 dias',
+        'Last 90 days': 'Ultimos 90 dias',
+        'Last 6 months': 'Ultimos 6 meses',
+        'Last year': 'Ultimo ano',
+        'All data': 'Todos los datos',
+        'Email:': 'Correo:',
+        'Plan:': 'Plan:',
+        'Switch Version': 'Cambiar Version',
+        'Save Settings': 'Guardar Ajustes',
+        'Bulk Import': 'Importar en Lote',
+        'Toggle between different mobile interface versions for optimal experience on your device.':
+            'Alternar entre versiones de interfaz movil para mejor experiencia en tu dispositivo.',
+        'Configure automatic backup preferences and backup frequency settings.':
+            'Configurar preferencias de respaldo automatico y frecuencia.',
+        'Advanced import options for bulk data migration and specialized export formats.':
+            'Opciones avanzadas de importacion masiva y formatos de exportacion.',
+        '🚪 Logout': '🚪 Cerrar Sesion',
+        'Loading...': 'Cargando...',
+        '✅ Connected': '✅ Conectado',
+        // Sync info bullets
+        '• New devices sync only recent data': '• Los dispositivos nuevos sincronizan solo datos recientes',
+        '• Old tasks (90+ days) won\'t upload to cloud': '• Las tareas antiguas (+90 dias) no suben a la nube',
+        '• Existing synced devices work normally': '• Los dispositivos sincronizados funcionan normalmente',
+        // Backups tab
+        'Download all tasks as JSON file': 'Descargar todas las tareas como archivo JSON',
+        'Upload JSON backup file': 'Subir archivo de respaldo JSON',
+        // Undo
+        '🔄 Refresh': '🔄 Actualizar',
+        '🔍 Search Tasks': '🔍 Buscar Tareas'
+    };
+    var allTextReverse = {};
+    Object.keys(allText).forEach(function(k) { allTextReverse[allText[k]] = k; });
+
+    // Scan all text nodes in the document
+    function translateElements(selector) {
+        document.querySelectorAll(selector).forEach(function(el) {
+            // Only process leaf elements or elements with simple text
+            var t = el.textContent.trim();
+            if (!t || t.length > 300) return;
+
+            // Check direct text content match
+            if (lang === 'es' && allText[t]) {
+                el.textContent = allText[t];
+            } else if (lang === 'en' && allTextReverse[t]) {
+                el.textContent = allTextReverse[t];
+            }
+        });
+    }
+    translateElements('h3, h4, h5, strong, span, div.stat-label, button, option, label');
+
+    // For div elements with description text (color: #6c757d), translate if matches
+    document.querySelectorAll('div').forEach(function(el) {
+        if (el.children.length > 0) return;
+        var t = el.textContent.trim();
+        if (lang === 'es' && allText[t]) el.textContent = allText[t];
+        else if (lang === 'en' && allTextReverse[t]) el.textContent = allTextReverse[t];
+    });
+
     // --- Search placeholders ---
     document.querySelectorAll('input[placeholder]').forEach(function(input) {
         var p = input.placeholder;
