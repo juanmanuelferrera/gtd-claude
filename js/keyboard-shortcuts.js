@@ -1,80 +1,99 @@
 /**
  * Keyboard Shortcuts Help Modal for HyperFiler Pro
- * Shows all available keyboard shortcuts when user presses "?"
- * Version: 1.0
+ * Compact layout with clickable shortcut buttons
+ * Version: 2.0
  */
 
-console.log('⌨️ Keyboard Shortcuts Help Modal loading - v1.0');
+console.log('⌨️ Keyboard Shortcuts Help Modal loading - v2.0');
+
+// Action map: key label -> function to execute on click
+const SHORTCUT_ACTIONS = {
+    'T': () => { if (typeof showView === 'function') showView('today'); },
+    'W': () => { if (typeof showView === 'function') showView('week'); },
+    'M': () => { if (typeof showView === 'function') showView('calendar'); },
+    'S': () => { if (typeof showView === 'function') showView('all'); },
+    'L': () => { if (typeof showView === 'function') showView('lists'); },
+    'R': () => { if (typeof showView === 'function') showView('repeat'); },
+    'U': () => { if (typeof showView === 'function') showView('recent-actions'); },
+    'X': () => { if (typeof showView === 'function') showView('settings'); },
+    'N': () => {
+        if (typeof openAddTaskModal === 'function') openAddTaskModal();
+        else if (typeof window.openAddTaskModal === 'function') window.openAddTaskModal();
+    },
+    'P': () => {
+        if (typeof activateTemplateSelector === 'function') activateTemplateSelector();
+    },
+    'Ctrl+K': () => {
+        if (typeof toggleKeyboardOnlyMode === 'function') toggleKeyboardOnlyMode();
+    },
+    'Ctrl+Z': () => {
+        if (typeof undo === 'function') undo();
+    },
+    'Ctrl+B': () => {
+        if (typeof emergencyBackup === 'function') emergencyBackup();
+    },
+    'Ctrl+E': () => {
+        if (typeof exportAsText === 'function') exportAsText();
+    }
+};
 
 // Keyboard shortcuts configuration
 const KEYBOARD_SHORTCUTS = {
     navigation: {
         title: '🧭 Navigation',
         shortcuts: [
-            { keys: ['T'], description: 'Go to Today view' },
-            { keys: ['W'], description: 'Go to Week view' },
-            { keys: ['M'], description: 'Go to Month (Calendar) view' },
-            { keys: ['S'], description: 'Go to Search/All tasks view' },
-            { keys: ['L'], description: 'Go to Lists view' },
-            { keys: ['R'], description: 'Go to Repeat tasks view' },
-            { keys: ['U'], description: 'Go to Undo/Recent actions view' },
-            { keys: ['X'], description: 'Go to Settings view' },
-            { keys: ['/'], description: 'Go to Search view' }
-        ]
-    },
-    dateNavigation: {
-        title: '📅 Date Navigation',
-        shortcuts: [
-            { keys: ['←'], description: 'Previous day/week/month' },
-            { keys: ['→'], description: 'Next day/week/month' }
-        ]
-    },
-    templates: {
-        title: '🏷️ Template Filters',
-        shortcuts: [
-            { keys: ['←', '→'], description: 'Navigate between templates (when active)' },
-            { keys: ['Enter'], description: 'Apply selected template filter' },
-            { keys: ['Esc'], description: 'Exit template navigation' }
+            { keys: ['T'], description: 'Today' },
+            { keys: ['W'], description: 'Week' },
+            { keys: ['M'], description: 'Month' },
+            { keys: ['S'], description: 'Search / All' },
+            { keys: ['L'], description: 'Lists' },
+            { keys: ['R'], description: 'Repeat' },
+            { keys: ['U'], description: 'Undo' },
+            { keys: ['X'], description: 'Settings' }
         ]
     },
     taskActions: {
         title: '✅ Task Actions',
         shortcuts: [
-            { keys: ['↑'], description: 'Select previous task' },
-            { keys: ['↓'], description: 'Select next task' },
-            { keys: ['Enter'], description: 'Edit selected task' },
-            { keys: ['Space'], description: 'Toggle task selection (batch)' },
-            { keys: ['C'], description: 'Complete/uncomplete selected task' },
-            { keys: ['D'], description: 'Delete selected task' },
-            { keys: ['1'], description: 'Delay selected task +1 day' },
-            { keys: ['7'], description: 'Delay selected task +1 week' },
-            { keys: ['3'], description: 'Delay selected task +1 month' }
+            { keys: ['↑', '↓'], description: 'Select task' },
+            { keys: ['Enter'], description: 'Edit task' },
+            { keys: ['Space'], description: 'Batch select' },
+            { keys: ['C'], description: 'Complete' },
+            { keys: ['D'], description: 'Delete' },
+            { keys: ['1'], description: '+1 day' },
+            { keys: ['7'], description: '+1 week' },
+            { keys: ['3'], description: '+1 month' }
         ]
     },
-    ctrlShortcuts: {
-        title: '⌨️ Other Shortcuts',
+    other: {
+        title: '⌨️ Other',
         shortcuts: [
             { keys: ['N'], description: 'New task' },
-            { keys: ['P'], description: 'Toggle template selector' },
-            { keys: ['Ctrl+K'], description: 'Toggle keyboard-only mode' },
+            { keys: ['P'], description: 'Templates' },
+            { keys: ['←', '→'], description: 'Date nav' },
+            { keys: ['Ctrl+K'], description: 'Keyboard mode' },
             { keys: ['Ctrl+Z'], description: 'Undo' },
-            { keys: ['Ctrl+J'], description: 'Time dropdown for selected task' },
-            { keys: ['Ctrl+S'], description: 'Focus search' },
-            { keys: ['Ctrl+B'], description: 'Emergency backup' },
-            { keys: ['Ctrl+E'], description: 'Export as text' }
-        ]
-    },
-    general: {
-        title: '⚙️ General',
-        shortcuts: [
-            { keys: ['?'], description: 'Show this help modal' },
-            { keys: ['Esc'], description: 'Close modals / clear selection' }
+            { keys: ['Ctrl+B'], description: 'Backup' },
+            { keys: ['Ctrl+E'], description: 'Export' },
+            { keys: ['?'], description: 'This help' },
+            { keys: ['Esc'], description: 'Close / Clear' }
         ]
     }
 };
 
 let shortcutsOverlay = null;
 let isShortcutsModalOpen = false;
+
+/**
+ * Execute shortcut action and close modal
+ */
+function executeShortcutAction(keyLabel) {
+    const action = SHORTCUT_ACTIONS[keyLabel];
+    if (action) {
+        closeKeyboardShortcutsModal();
+        setTimeout(() => action(), 50);
+    }
+}
 
 /**
  * Create keyboard shortcuts modal HTML
@@ -93,72 +112,45 @@ function createKeyboardShortcutsModal() {
 
         const shortcutsHTML = section.shortcuts.map(shortcut => {
             const keysHTML = shortcut.keys.map(key => {
-                // Special handling for arrow keys
-                const displayKey = key === '←' ? '←' :
-                                  key === '→' ? '→' :
-                                  key === '↑' ? '↑' :
-                                  key === '↓' ? '↓' :
-                                  key === 'Esc' ? 'Esc' :
-                                  key === 'Enter' ? 'Enter' :
-                                  key;
+                const hasAction = SHORTCUT_ACTIONS[key];
+                const clickAttr = hasAction
+                    ? `onclick="executeShortcutAction('${key}')" style="cursor:pointer;" title="Click to activate"`
+                    : '';
+                const clickClass = hasAction ? ' keyboard-key-clickable' : '';
+                return `<kbd class="keyboard-key${clickClass}" ${clickAttr}>${key}</kbd>`;
+            }).join('');
 
-                return `<kbd class="keyboard-key">${displayKey}</kbd>`;
-            }).join('<span class="keyboard-key-separator">or</span>');
-
-            return `
-                <div class="keyboard-shortcut-item">
+            return `<div class="keyboard-shortcut-item">
+                    <div class="keyboard-shortcut-keys">${keysHTML}</div>
                     <span class="keyboard-shortcut-label">${shortcut.description}</span>
-                    <div class="keyboard-shortcut-keys">
-                        ${keysHTML}
-                    </div>
-                </div>
-            `;
+                </div>`;
         }).join('');
 
         sectionsHTML += `
             <div class="keyboard-shortcuts-section">
                 <h3 class="keyboard-shortcuts-section-title">${section.title}</h3>
-                <div class="keyboard-shortcuts-list">
-                    ${shortcutsHTML}
-                </div>
-            </div>
-        `;
+                <div class="keyboard-shortcuts-list">${shortcutsHTML}</div>
+            </div>`;
     });
 
     overlay.innerHTML = `
         <div class="keyboard-shortcuts-modal">
             <div class="keyboard-shortcuts-header">
-                <h2 id="shortcuts-modal-title">
-                    <span>⌨️</span>
-                    <span>Keyboard Shortcuts</span>
-                </h2>
-                <button class="keyboard-shortcuts-close" onclick="closeKeyboardShortcutsModal()" aria-label="Close keyboard shortcuts help">
-                    ×
-                </button>
+                <h2 id="shortcuts-modal-title">⌨️ Shortcuts</h2>
+                <button class="keyboard-shortcuts-close" onclick="closeKeyboardShortcutsModal()" aria-label="Close">×</button>
             </div>
-
-            <div class="keyboard-shortcuts-content">
-                ${sectionsHTML}
-            </div>
-
+            <div class="keyboard-shortcuts-content">${sectionsHTML}</div>
             <div class="keyboard-shortcuts-footer">
-                <p>Press <strong>?</strong> anytime to show this help • Press <strong>Esc</strong> to close</p>
+                <p><strong>?</strong> show help • <strong>Esc</strong> close • clickable keys execute the action</p>
             </div>
-        </div>
-    `;
+        </div>`;
 
-    // Close on overlay click
     overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-            closeKeyboardShortcutsModal();
-        }
+        if (e.target === overlay) closeKeyboardShortcutsModal();
     });
 
-    // Prevent clicks inside modal from closing
     const modal = overlay.querySelector('.keyboard-shortcuts-modal');
-    modal.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
+    modal.addEventListener('click', (e) => { e.stopPropagation(); });
 
     return overlay;
 }
@@ -177,13 +169,8 @@ function showKeyboardShortcutsModal() {
     shortcutsOverlay.classList.add('active');
     isShortcutsModalOpen = true;
 
-    // Focus trap - move focus to close button
     const closeButton = shortcutsOverlay.querySelector('.keyboard-shortcuts-close');
-    setTimeout(() => {
-        if (closeButton) closeButton.focus();
-    }, 100);
-
-    console.log('⌨️ Keyboard shortcuts modal opened');
+    setTimeout(() => { if (closeButton) closeButton.focus(); }, 100);
 }
 
 /**
@@ -191,64 +178,43 @@ function showKeyboardShortcutsModal() {
  */
 function closeKeyboardShortcutsModal() {
     if (!isShortcutsModalOpen || !shortcutsOverlay) return;
-
     shortcutsOverlay.classList.remove('active');
     isShortcutsModalOpen = false;
-
-    console.log('⌨️ Keyboard shortcuts modal closed');
 }
 
 /**
  * Toggle keyboard shortcuts modal
  */
 function toggleKeyboardShortcutsModal() {
-    if (isShortcutsModalOpen) {
-        closeKeyboardShortcutsModal();
-    } else {
-        showKeyboardShortcutsModal();
-    }
+    if (isShortcutsModalOpen) closeKeyboardShortcutsModal();
+    else showKeyboardShortcutsModal();
 }
 
 /**
  * Initialize keyboard shortcuts help system
  */
 function initializeKeyboardShortcutsHelp() {
-    console.log('🚀 Initializing keyboard shortcuts help system...');
-
-    // Listen for ? key to show help
     document.addEventListener('keydown', (e) => {
-        // Check if user is typing in an input field
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            return;
-        }
-
-        // Handle ? key (Shift + /)
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         if (e.key === '?' && !isShortcutsModalOpen) {
             e.preventDefault();
             showKeyboardShortcutsModal();
         }
-
-        // Handle Escape key to close modal
         if (e.key === 'Escape' && isShortcutsModalOpen) {
             e.preventDefault();
             closeKeyboardShortcutsModal();
         }
     });
-
-    console.log('✅ Keyboard shortcuts help system initialized');
-    console.log('💡 Press ? to see all keyboard shortcuts');
 }
 
 // Make functions globally available
 window.showKeyboardShortcutsModal = showKeyboardShortcutsModal;
 window.closeKeyboardShortcutsModal = closeKeyboardShortcutsModal;
 window.toggleKeyboardShortcutsModal = toggleKeyboardShortcutsModal;
+window.executeShortcutAction = executeShortcutAction;
 
-// Auto-initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeKeyboardShortcutsHelp);
 } else {
     initializeKeyboardShortcutsHelp();
 }
-
-console.log('✅ Keyboard Shortcuts Help Modal ready');

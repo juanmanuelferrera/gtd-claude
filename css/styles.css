@@ -3713,7 +3713,7 @@
         .keyboard-shortcuts-header {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
-            padding: 24px 32px;
+            padding: 14px 20px;
             border-radius: 16px 16px 0 0;
             display: flex;
             align-items: center;
@@ -3722,11 +3722,11 @@
 
         .keyboard-shortcuts-header h2 {
             margin: 0;
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
         }
 
         .keyboard-shortcuts-close {
@@ -3750,11 +3750,11 @@
         }
 
         .keyboard-shortcuts-content {
-            padding: 32px;
+            padding: 16px 20px;
         }
 
         .keyboard-shortcuts-section {
-            margin-bottom: 32px;
+            margin-bottom: 14px;
         }
 
         .keyboard-shortcuts-section:last-child {
@@ -3762,88 +3762,87 @@
         }
 
         .keyboard-shortcuts-section-title {
-            font-size: 16px;
+            font-size: 13px;
             font-weight: 700;
             color: #1f2937;
-            margin: 0 0 16px 0;
+            margin: 0 0 8px 0;
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e5e7eb;
+            gap: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #e5e7eb;
         }
 
         .keyboard-shortcuts-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 12px;
-        }
-
-        @media (max-width: 768px) {
-            .keyboard-shortcuts-list {
-                grid-template-columns: 1fr;
-            }
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
         }
 
         .keyboard-shortcut-item {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 12px;
+            gap: 6px;
+            padding: 4px 8px;
             background: #f9fafb;
-            border-radius: 8px;
-            transition: all 0.2s ease;
+            border-radius: 6px;
+            transition: all 0.15s ease;
         }
 
         .keyboard-shortcut-item:hover {
-            background: #f3f4f6;
-            transform: translateX(4px);
+            background: #e8eaed;
         }
 
         .keyboard-shortcut-label {
-            font-size: 14px;
+            font-size: 12px;
             color: #4b5563;
-            flex: 1;
+            white-space: nowrap;
         }
 
         .keyboard-shortcut-keys {
             display: flex;
-            gap: 6px;
+            gap: 2px;
             align-items: center;
         }
 
         .keyboard-key {
-            /* Subtle glass effect for keyboard keys */
-            background: var(--glass-bg-light);
-            backdrop-filter: var(--glass-blur-sm);
-            -webkit-backdrop-filter: var(--glass-blur-sm);
-            border: 1px solid var(--color-border);
-            border-bottom-width: 3px;
-            border-radius: 6px;
-            padding: 6px 12px;
-            font-size: 14px;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-bottom-width: 2px;
+            border-radius: 4px;
+            padding: 2px 7px;
+            font-size: 12px;
             font-weight: 600;
             font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
-            color: var(--color-text-primary);
-            min-width: 32px;
+            color: #1f2937;
+            min-width: 22px;
             text-align: center;
-            box-shadow: var(--glass-shadow-sm), var(--glass-highlight);
+            line-height: 1.4;
         }
 
-        .keyboard-key-combo {
-            display: flex;
-            align-items: center;
-            gap: 4px;
+        .keyboard-key-clickable {
+            background: #eef2ff;
+            border-color: #818cf8;
+            color: #4338ca;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .keyboard-key-clickable:hover {
+            background: #4338ca;
+            color: #fff;
+            border-color: #4338ca;
+            transform: translateY(-1px);
         }
 
         .keyboard-key-separator {
             color: #9ca3af;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .keyboard-shortcuts-footer {
             background: #f9fafb;
-            padding: 20px 32px;
+            padding: 10px 20px;
             border-radius: 0 0 16px 16px;
             text-align: center;
             border-top: 1px solid #e5e7eb;
@@ -3851,6 +3850,7 @@
 
         .keyboard-shortcuts-footer p {
             margin: 0;
+            font-size: 11px;
             color: #6b7280;
             font-size: 14px;
         }
