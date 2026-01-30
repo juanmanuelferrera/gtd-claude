@@ -187,15 +187,27 @@ function cleanupSyncEventListeners() {
         focusHandler = null;
     }
     
+    if (periodicSyncInterval) {
+        clearInterval(periodicSyncInterval);
+        periodicSyncInterval = null;
+    }
+
     syncEventListenersInitialized = false;
-    console.log('🧹 Sync event listeners cleaned up');
+    console.log('🧹 Sync event listeners and periodic sync cleaned up');
 }
+
+// Store periodic sync interval for cleanup
+let periodicSyncInterval = null;
 
 /**
  * Setup periodic backup sync
  */
 function setupPeriodicSync() {
-    setInterval(() => {
+    // Prevent duplicate intervals from multiple init calls
+    if (periodicSyncInterval) {
+        clearInterval(periodicSyncInterval);
+    }
+    periodicSyncInterval = setInterval(() => {
         if (navigator.onLine && window.currentUser) {
             console.log('📥 Backup periodic sync...');
             pullLatestFromCloud(false).catch(error => {
