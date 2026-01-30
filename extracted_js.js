@@ -4313,10 +4313,10 @@
                 return;
             }
             
-            // IMMEDIATE SYNC: Download tasks, lists, and templates on startup (using smart sync)
-            console.log('📥 Starting immediate smart download on sync init...');
-            smartDownloadTasks().catch(error => {
-                console.warn('📥 Initial smart download failed:', error);
+            // IMMEDIATE SYNC: Full download on startup to ensure cross-browser sync
+            console.log('📥 Starting immediate FULL download on sync init...');
+            downloadAllTasks().catch(error => {
+                console.warn('📥 Initial tasks download failed:', error);
             });
             downloadAllLists().catch(error => {
                 console.warn('📥 Initial lists download failed:', error);
