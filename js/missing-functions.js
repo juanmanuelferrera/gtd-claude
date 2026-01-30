@@ -2924,10 +2924,14 @@ function toggleSidebarLanguage() {
     };
     document.querySelectorAll('[data-translate]').forEach(function(el) {
         var key = el.getAttribute('data-translate');
+        // Extract leading emoji from current content
+        var currentText = el.textContent.trim();
+        var emojiMatch = currentText.match(/^([\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]+\s*)/u);
+        var emoji = emojiMatch ? emojiMatch[1] : '';
         if (lang === 'es' && dict[key]) {
-            el.textContent = dict[key];
+            el.textContent = emoji + dict[key];
         } else if (lang === 'en') {
-            el.textContent = key;
+            el.textContent = emoji + key;
         }
     });
 
