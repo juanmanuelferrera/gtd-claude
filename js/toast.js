@@ -291,9 +291,10 @@ const toast = {
     }
 };
 
-// Make toast globally available
-window.toast = toast;
-window.showToast = showToast; // Legacy compatibility
+// Disabled: toast notifications turned off
+var noOp = function() {};
+window.toast = { success: noOp, error: noOp, warning: noOp, info: noOp, show: noOp, clearAll: noOp };
+window.showToast = noOp;
 
 console.log('✅ Toast Notification System ready');
 console.log('Usage: toast.success("Task completed!"), toast.error("Failed to save"), etc.');

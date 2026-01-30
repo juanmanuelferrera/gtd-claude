@@ -25577,43 +25577,7 @@
                 }
             },
             showDeleteFeedback(taskText) {
-                // Create temporary toast notification
-                const toast = document.createElement('div');
-                toast.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #dc3545;
-                    color: white;
-                    padding: 12px 20px;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    z-index: 10000;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                    transition: all 0.3s ease;
-                    font-size: 14px;
-                    max-width: 300px;
-                `;
-                toast.innerHTML = `🗑️ Deleted: ${taskText.substring(0, 50)}${taskText.length > 50 ? '...' : ''}`;
-                
-                document.body.appendChild(toast);
-                
-                // Animate in
-                setTimeout(() => {
-                    toast.style.transform = 'translateX(0)';
-                    toast.style.opacity = '1';
-                }, 10);
-                
-                // Auto-remove after 2 seconds
-                setTimeout(() => {
-                    toast.style.transform = 'translateX(100%)';
-                    toast.style.opacity = '0';
-                    setTimeout(() => {
-                        if (toast.parentNode) {
-                            toast.parentNode.removeChild(toast);
-                        }
-                    }, 300);
-                }, 2000);
+                // Toast notifications disabled
             },
             clearSelection() {
                 selectedTaskIndex = -1;
