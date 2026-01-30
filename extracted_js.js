@@ -5650,6 +5650,7 @@
                     if (window.forceMandatoryRefresh || window.staleBrowserMode) {
                         console.log('🚨 MANDATORY REFRESH: Directly replacing lists with server data (no safety checks)');
                         listSections = serverListSections;
+                        window.listSections = serverListSections;
                         localStorage.setItem('gtd_list_sections', JSON.stringify(listSections));
                         if (currentView === 'lists') {
                             renderListsView();
@@ -5658,30 +5659,31 @@
                         // PROVEN SAFETY: Prevent data loss when one side has empty data (normal sync only)
                         const localListCount = listSections.length;
                         const serverListCount = serverListSections.length;
-                        
+
                         // Only log if there's a significant difference or potential issue
                         if (Math.abs(localListCount - serverListCount) > 2 || localListCount === 0 || serverListCount === 0) {
                             console.log('📥 LISTS SAFETY CHECK: Local lists:', localListCount, 'Server lists:', serverListCount);
                         }
-                        
+
                         // Safety rule: If server is empty but local has lists, upload local to server instead
                         if (serverListCount === 0 && localListCount > 0) {
                             console.log('🛡️ LISTS SAFETY: Server is empty but local has lists - uploading local to server instead');
                             await uploadAllLists();
                             return;
                         }
-                        
+
                         // Safety rule: If local is empty but server has lists, it's safe to download
                         if (localListCount === 0 && serverListCount > 0) {
                             console.log('📥 LISTS SAFE DOWNLOAD: Local is empty, downloading from server');
                             listSections = serverListSections;
+                            window.listSections = serverListSections;
                             localStorage.setItem('gtd_list_sections', JSON.stringify(listSections));
                             if (currentView === 'lists') {
                                 renderListsView();
                             }
                             return;
                         }
-                        
+
                         // Normal sync: if both have data, compare and update if different
                         if (JSON.stringify(serverListSections) !== JSON.stringify(listSections)) {
                             // Additional safety: Check if server has significantly fewer lists (potential data loss)
@@ -5689,11 +5691,12 @@
                                 console.log('🛡️ LISTS SAFETY: Server has significantly fewer lists than local - skipping download to prevent data loss');
                                 return;
                             }
-                            
+
                             listSections = serverListSections;
+                            window.listSections = serverListSections;
                             localStorage.setItem('gtd_list_sections', JSON.stringify(listSections));
                             if (currentView === 'lists') {
-                                renderListsView(); // Refresh UI if currently viewing lists
+                                renderListsView();
                             }
                         }
                     }
@@ -5761,18 +5764,20 @@
                     // MANDATORY REFRESH: Direct replacement with server data
                     if (window.forceMandatoryRefresh || window.staleBrowserMode) {
                         console.log('🚨 MANDATORY REFRESH: Directly replacing templates with server data');
-                        customTemplates = serverTemplates; // Update the variable
-                        localStorage.setItem('gtdTemplates', JSON.stringify(serverTemplates)); // Update localStorage
-                        renderTemplateButtons(); // Always refresh template buttons when data changes
+                        customTemplates = serverTemplates;
+                        window.customTemplates = serverTemplates;
+                        localStorage.setItem('gtdTemplates', JSON.stringify(serverTemplates));
+                        renderTemplateButtons();
                     } else {
                         // Normal sync: Compare with current customTemplates variable
                         const localTemplates = customTemplates || [];
-                        
+
                         // Simple comparison: if different, replace everything
                         if (JSON.stringify(serverTemplates) !== JSON.stringify(localTemplates)) {
-                            customTemplates = serverTemplates; // Update the variable
-                            localStorage.setItem('gtdTemplates', JSON.stringify(serverTemplates)); // Update localStorage
-                            renderTemplateButtons(); // Always refresh template buttons when data changes
+                            customTemplates = serverTemplates;
+                            window.customTemplates = serverTemplates;
+                            localStorage.setItem('gtdTemplates', JSON.stringify(serverTemplates));
+                            renderTemplateButtons();
                         }
                     }
                 } else {
