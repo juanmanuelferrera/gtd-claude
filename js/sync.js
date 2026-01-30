@@ -308,21 +308,11 @@ async function _downloadAllTasksInternal() {
         }
     }
     
-    // Get auth token with fallback (check all possible locations)
-    const authToken = window.currentUser?.token || localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-    if (!authToken) {
-        console.log('⚠️ No auth token available for download');
-        return;
-    }
-    
     try {
         console.log('📥 Downloading tasks from server...');
-        
+
         const response = await fetch(`${window.API_BASE}/tasks/${window.currentUser.user.id}`, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`,
-                'Content-Type': 'application/json'
-            }
+            headers: getAuthHeaders()
         });
         
         if (!response.ok) {
