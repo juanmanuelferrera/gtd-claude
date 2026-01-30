@@ -25633,8 +25633,7 @@
             }
         };
         // Delete feedback handled by NavigationManager
-        // Keyboard shortcuts temporarily disabled due to syntax error
-        /*
+        // Keyboard shortcuts re-enabled
         document.addEventListener('keydown', async function(event) {
             // Debug Ctrl+L capture
             if (event.ctrlKey && event.key === 'l') {
@@ -26032,11 +26031,10 @@
                     return;
                 }
                 
-                // Navigation temporarily disabled for debugging
-                // NavigationManager.handleKeyEvent(event);
+                // Navigation re-enabled
+                NavigationManager.handleKeyEvent(event);
             }
         });
-        */
     
 
         // Simple sync system initialization
