@@ -30,18 +30,15 @@ window.API_BASE = window.API_BASE || (window.location.hostname.includes('localho
 // SECURITY: Client-side input validation functions
 function sanitizeInput(input) {
     if (typeof input !== 'string') return input;
-    
+
     // Remove dangerous content
-    const cleaned = input
+    return input
         .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
         .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
         .replace(/javascript:/gi, '')
         .replace(/on\w+\s*=/gi, '')
         .replace(/data:text\/html/gi, '')
-        .substring(0, 500) // Limit length
         .trim();
-    
-    return cleaned || null;
 }
 
 // Utility functions - now using centralized utilities with backward compatibility
