@@ -20006,6 +20006,7 @@
                                 (!backupData.tasks || Array.isArray(backupData.tasks)) &&
                                 (!backupData.listSections || Array.isArray(backupData.listSections)) &&
                                 (!backupData.customTemplates || Array.isArray(backupData.customTemplates)) &&
+                                (!backupData.templates || Array.isArray(backupData.templates)) &&
                                 (!backupData.trash || Array.isArray(backupData.trash));
                             if (isValidBackup) {
                                 const confirmRestore = confirm(
@@ -20221,7 +20222,7 @@
                 // Restore all data from backup
                 tasks = backupData.tasks || [];
                 listSections = backupData.listSections || [];
-                customTemplates = backupData.customTemplates || [];
+                customTemplates = backupData.customTemplates || backupData.templates || [];
                 trash = backupData.trash || [];
                 
                 // Save to localStorage
