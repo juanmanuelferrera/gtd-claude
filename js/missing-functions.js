@@ -309,6 +309,20 @@ function closeDateDropdown() {
     }
 }
 
+// Helper: restore task selection at saved index after view re-renders
+function reselectTaskAtSavedIndex() {
+    var idx = window._lastSelectedTaskIdx;
+    if (idx == null || idx < 0) return;
+    setTimeout(function() {
+        var tasks = document.querySelectorAll('.task-card[data-task-id], .task-item[data-task-id]');
+        if (tasks.length === 0) return;
+        var selectIdx = Math.min(idx, tasks.length - 1);
+        tasks[selectIdx].classList.add('task-selected');
+        tasks[selectIdx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }, 300);
+}
+window.reselectTaskAtSavedIndex = reselectTaskAtSavedIndex;
+
 // Select a specific date in inline calendar dropdown
 async function selectInlineCalendarDate(taskId, day) {
     console.log('📅 selectCalendarDate called with taskId:', taskId, 'day:', day);
@@ -346,6 +360,7 @@ async function selectInlineCalendarDate(taskId, day) {
         }
 
         console.log('✅ Date updated successfully!');
+        reselectTaskAtSavedIndex();
     } catch (error) {
         console.error('❌ Error in selectCalendarDate:', error);
     }
@@ -1121,6 +1136,7 @@ async function setTimeAndClose(taskId, time) {
             await updateTaskTime(batchIds[i], time, { stopPropagation: () => {} });
         }
     }
+    reselectTaskAtSavedIndex();
 }
 
 async function clearTimeAndClose(taskId) {
@@ -4195,6 +4211,7 @@ document.addEventListener('keydown', function(event) {
     // F: open calendar dropdown (same as clicking calendar emoji on task line)
     if ((event.key === 'f' || event.key === 'F') && targets.length > 0) {
         event.preventDefault();
+        window._lastSelectedTaskIdx = currentIdx;
         var batchIds = [];
         targets.forEach(function(el) {
             var fid = parseTaskId(el.getAttribute('data-task-id'));
@@ -4218,6 +4235,7 @@ document.addEventListener('keydown', function(event) {
     // G: open time dropdown (same as clicking clock emoji on task line)
     if ((event.key === 'g' || event.key === 'G') && targets.length > 0) {
         event.preventDefault();
+        window._lastSelectedTaskIdx = currentIdx;
         var batchIdsG = [];
         targets.forEach(function(el) {
             var gid = parseTaskId(el.getAttribute('data-task-id'));
