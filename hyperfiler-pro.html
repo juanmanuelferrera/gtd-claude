@@ -337,7 +337,7 @@
                 
                 <!-- Language Switcher -->
                 <div style="display: flex; gap: 8px; justify-content: center;">
-                    <button onclick="var l = (localStorage.getItem('preferredLanguage') || 'en') === 'en' ? 'es' : 'en'; window.currentLanguage = l; currentLanguage = l; localStorage.setItem('preferredLanguage', l); if(window.translateUI) translateUI(); if(window.updateLanguageButtonStyles) updateLanguageButtonStyles(); if(window.updateHeaderLanguageButton) updateHeaderLanguageButton(); this.textContent = l === 'en' ? '🇪🇸 ES' : '🇬🇧 EN';" style="background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;" id="sidebarLangToggle">🇪🇸 ES</button>
+                    <button onclick="var l = (localStorage.getItem('preferredLanguage') || 'en') === 'en' ? 'es' : 'en'; if(window.switchLanguage) window.switchLanguage(l); this.textContent = l === 'en' ? '🇪🇸 ES' : '🇬🇧 EN';" style="background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;" id="sidebarLangToggle">🇪🇸 ES</button>
                 </div>
             </div>
         </div>
