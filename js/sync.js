@@ -563,6 +563,7 @@ async function _downloadAllListsInternal() {
                 if (typeof listSections !== 'undefined') {
                     console.log('✅ MANDATORY REFRESH: Safety checks passed, replacing with server data');
                     listSections = serverListSections;
+                    window.listSections = serverListSections;
                     localStorage.setItem('gtd_list_sections', JSON.stringify(listSections));
                     if (currentView === 'lists' && typeof renderListsView === 'function') {
                         renderListsView();
@@ -599,6 +600,7 @@ async function _downloadAllListsInternal() {
                 if (typeof listSections !== 'undefined') {
                     console.log('✅ LISTS SAFETY: Checks passed, updating local lists with server data');
                     listSections = serverListSections;
+                    window.listSections = serverListSections;
                     localStorage.setItem('gtd_list_sections', JSON.stringify(listSections));
                     if (currentView === 'lists' && typeof renderListsView === 'function') {
                         renderListsView();
