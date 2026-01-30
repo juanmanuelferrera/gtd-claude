@@ -3130,6 +3130,35 @@ function toggleSidebarLanguage() {
         });
     } catch(e) { console.error('Translation error:', e); }
 
+    // --- Settings tabs (buttons with class settings-tab) ---
+    document.querySelectorAll('.settings-tab').forEach(function(btn) {
+        var t = btn.textContent.trim();
+        if (lang === 'es' && tabMap[t]) btn.textContent = tabMap[t];
+        else if (lang === 'en' && tabMapReverse[t]) btn.textContent = tabMapReverse[t];
+    });
+
+    // --- Stat labels (div.stat-label) ---
+    document.querySelectorAll('.stat-label').forEach(function(el) {
+        var t = el.textContent.trim();
+        if (lang === 'es' && statMap[t]) el.textContent = statMap[t];
+        else if (lang === 'en' && statMapReverse[t]) el.textContent = statMapReverse[t];
+    });
+
+    // --- Paragraphs with specific text ---
+    var paraMap = {
+        'This action cannot be undone. All your tasks, settings, and data will be permanently deleted.':
+            'Esta accion no se puede deshacer. Todas tus tareas, ajustes y datos se eliminaran permanentemente.',
+        'Deleted tasks are stored here': 'Las tareas eliminadas se guardan aqui',
+        'Add your first item to get started.': 'Agrega tu primer elemento para empezar.'
+    };
+    var paraMapReverse = {};
+    Object.keys(paraMap).forEach(function(k) { paraMapReverse[paraMap[k]] = k; });
+    document.querySelectorAll('p').forEach(function(el) {
+        var t = el.textContent.trim();
+        if (lang === 'es' && paraMap[t]) el.textContent = paraMap[t];
+        else if (lang === 'en' && paraMapReverse[t]) el.textContent = paraMapReverse[t];
+    });
+
     // Translate day headers in calendar
     document.querySelectorAll('.day-header, .calendar-day-header').forEach(function(el) {
         var t = el.textContent.trim();
@@ -3147,6 +3176,7 @@ function toggleSidebarLanguage() {
             else if (p.includes('Search by title')) input.placeholder = '🔍 Buscar por titulo, notas o fecha...';
             else if (p.includes('Search tasks')) input.placeholder = '🔍 Buscar tareas...';
             else if (p === 'Select date & time...') input.placeholder = 'Seleccionar fecha y hora...';
+            else if (p.includes('Search actions')) input.placeholder = '🔍 Buscar acciones...';
         } else {
             if (p === '🔍 Dia') input.placeholder = '🔍 Day';
             else if (p === '🔍 Semana') input.placeholder = '🔍 Week';
@@ -3154,6 +3184,7 @@ function toggleSidebarLanguage() {
             else if (p.includes('Buscar por titulo')) input.placeholder = '🔍 Search by title, notes, or date...';
             else if (p.includes('Buscar tareas')) input.placeholder = '🔍 Search tasks...';
             else if (p === 'Seleccionar fecha y hora...') input.placeholder = 'Select date & time...';
+            else if (p.includes('Buscar acciones')) input.placeholder = '🔍 Search actions...';
         }
     });
 
