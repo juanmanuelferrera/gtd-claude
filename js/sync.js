@@ -8,6 +8,9 @@
 // Global sync lock to prevent race conditions
 let syncPromise = null;
 
+// Block uploads until first download completes (prevents stale browser overwriting server)
+let initialDownloadComplete = false;
+
 /**
  * Wrapper function to ensure only one sync operation at a time
  * Prevents race conditions by queuing sync operations
@@ -214,6 +217,14 @@ function setupPeriodicSync() {
 async function _uploadAllTasksInternal() {
     console.log('🔄 uploadAllTasks called - using simple sync pattern');
     
+    // CRITICAL: Block uploads until first download completes (prevents stale data overwriting server)
+    if (!initialDownloadComplete) {
+        if (!window.justRestoredBackup) {
+            console.error('🚨 BLOCKED: Tasks upload blocked - initial download not yet complete');
+            return;
+        }
+    }
+
     // CRITICAL STALE BROWSER PROTECTION: Check flags first
     // EXCEPTION: Allow uploads during backup restore (user intentionally restored data)
     if (window.justRestoredBackup) {
@@ -331,9 +342,9 @@ async function _downloadAllTasksInternal() {
         
         console.log('📥 Downloaded', serverTasks.length, 'tasks from server');
         
-        // MANDATORY REFRESH: Direct replacement with server data
-        if (window.forceMandatoryRefresh || window.staleBrowserMode) {
-            console.log('🚨 MANDATORY REFRESH: Directly replacing with server data');
+        // MANDATORY REFRESH or FIRST LOAD: Direct replacement with server data
+        if (window.forceMandatoryRefresh || window.staleBrowserMode || !initialDownloadComplete) {
+            console.log('🚨 SERVER TAKES PRECEDENCE: Directly replacing with server data (first load or mandatory refresh)');
             tasks = serverTasks;
             window.tasks = tasks; // Sync to window
         } else {
@@ -362,7 +373,9 @@ async function _downloadAllTasksInternal() {
             renderCurrentView();
         }
         
-        console.log('✅ Tasks download completed');
+        // Allow uploads now that we have fresh server data
+        initialDownloadComplete = true;
+        console.log('✅ Tasks download completed (uploads now allowed)');
         
     } catch (error) {
         console.error('❌ Error downloading tasks:', error);
