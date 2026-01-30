@@ -328,6 +328,16 @@ async function selectInlineCalendarDate(taskId, day) {
         console.log('📅 Calling updateTaskDate...');
         await updateTaskDate(taskId, dateString, { stopPropagation: () => {} });
 
+        // Batch: also update remaining tasks from F key batch selection
+        if (window.pendingDateTimeBatchIds && window.pendingDateTimeBatchIds.length > 0) {
+            var batchIds = window.pendingDateTimeBatchIds;
+            window.pendingDateTimeBatchIds = null;
+            console.log('📅 Batch updating date for', batchIds.length, 'additional tasks');
+            for (var i = 0; i < batchIds.length; i++) {
+                await updateTaskDate(batchIds[i], dateString, { stopPropagation: () => {} });
+            }
+        }
+
         console.log('✅ Date updated successfully!');
     } catch (error) {
         console.error('❌ Error in selectCalendarDate:', error);
@@ -718,34 +728,6 @@ async function applyDateTime() {
         const selectedDate = window.selectedModalDate || modalSelectedDate;
         const selectedTime = window.selectedModalTime || modalSelectedTime;
 
-        // Batch mode: apply to all pending batch IDs
-        if (window.pendingDateTimeBatchIds && window.pendingDateTimeBatchIds.length > 0) {
-            const batchIds = window.pendingDateTimeBatchIds;
-            console.log('📅 Batch applying date/time to', batchIds.length, 'tasks');
-            const fakeEvent = { stopPropagation: () => {} };
-            batchIds.forEach(function(bid) {
-                if (selectedDate && typeof updateTaskDate === 'function') {
-                    updateTaskDate(bid, selectedDate, fakeEvent);
-                }
-                if (selectedTime && typeof updateTaskTime === 'function') {
-                    updateTaskTime(bid, selectedTime, fakeEvent);
-                }
-                if (selectedDate && !selectedTime && typeof updateTaskTime === 'function') {
-                    updateTaskTime(bid, '', fakeEvent);
-                }
-            });
-            window.pendingDateTimeBatchIds = null;
-            // Refresh view
-            setTimeout(() => {
-                if (window.currentView === 'today' && typeof renderTodayView === 'function') renderTodayView();
-                else if (window.currentView === 'week' && typeof safeRenderWeekView === 'function') safeRenderWeekView();
-                else if (window.currentView === 'calendar' && typeof renderCalendar === 'function') renderCalendar();
-                else if (window.currentView === 'allTasks' && typeof renderAllTasksView === 'function') renderAllTasksView();
-            }, 100);
-            closeDateTimeModal();
-            return;
-        }
-
         if (window.currentDateTimeTaskId) {
             const taskId = window.currentDateTimeTaskId;
             
@@ -877,67 +859,6 @@ window.selectCalendarDay = selectCalendarDay;
 window.applyDateTime = applyDateTime;
 window.initUnifiedDateTimeModal = initUnifiedDateTimeModal;
 
-// Keyboard navigation inside dateTimeModal
-document.addEventListener('keydown', function(e) {
-    var modal = document.getElementById('dateTimeModal');
-    if (!modal || modal.style.display === 'none' || modal.style.display === '') return;
-
-    // Escape closes modal
-    if (e.key === 'Escape') {
-        e.preventDefault();
-        window.pendingDateTimeBatchIds = null;
-        closeDateTimeModal();
-        return;
-    }
-
-    // Enter on Apply button or focused element
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        var focused = document.activeElement;
-        if (focused && (focused.classList.contains('calendar-day') || focused.classList.contains('time-btn'))) {
-            focused.click();
-        } else {
-            applyDateTime();
-        }
-        return;
-    }
-
-    // Arrow key navigation within calendar days or time buttons
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.key) === -1) return;
-    e.preventDefault();
-
-    var calDays = Array.from(modal.querySelectorAll('.calendar-day:not(.empty):not(.disabled)'));
-    var timeBtns = Array.from(modal.querySelectorAll('.time-btn'));
-    var focused = document.activeElement;
-
-    // Determine which grid we're in
-    var inCal = calDays.indexOf(focused) !== -1;
-    var inTime = timeBtns.indexOf(focused) !== -1;
-    var items, idx, cols;
-
-    if (inCal || (!inTime && calDays.length > 0)) {
-        items = calDays;
-        idx = inCal ? items.indexOf(focused) : -1;
-        cols = 7; // week columns
-    } else if (inTime || timeBtns.length > 0) {
-        items = timeBtns;
-        idx = inTime ? items.indexOf(focused) : -1;
-        cols = 4;
-    } else {
-        return;
-    }
-
-    if (idx === -1) { items[0] && items[0].focus(); return; }
-
-    var newIdx = idx;
-    if (e.key === 'ArrowRight') newIdx = Math.min(idx + 1, items.length - 1);
-    else if (e.key === 'ArrowLeft') newIdx = Math.max(idx - 1, 0);
-    else if (e.key === 'ArrowDown') newIdx = Math.min(idx + cols, items.length - 1);
-    else if (e.key === 'ArrowUp') newIdx = Math.max(idx - cols, 0);
-
-    items[newIdx] && items[newIdx].focus();
-});
-
 // Time dropdown picker - Grid Card Layout
 function openTimeDropdown(taskId, currentTime, buttonElement) {
     // Remove any existing picker
@@ -1067,6 +988,15 @@ async function setTimeAndClose(taskId, time) {
     closeTimeDropdown();
     // Update task time and wait for it to complete
     await updateTaskTime(taskId, time, { stopPropagation: () => {} });
+    // Batch: also update remaining tasks from G key batch selection
+    if (window.pendingTimeBatchIds && window.pendingTimeBatchIds.length > 0) {
+        var batchIds = window.pendingTimeBatchIds;
+        window.pendingTimeBatchIds = null;
+        console.log('🕐 Batch updating time for', batchIds.length, 'additional tasks');
+        for (var i = 0; i < batchIds.length; i++) {
+            await updateTaskTime(batchIds[i], time, { stopPropagation: () => {} });
+        }
+    }
 }
 
 async function clearTimeAndClose(taskId) {
@@ -4117,7 +4047,7 @@ document.addEventListener('keydown', function(event) {
         return;
     }
 
-    // F: open date picker for selected task(s)
+    // F: open calendar dropdown (same as clicking calendar emoji on task line)
     if ((event.key === 'f' || event.key === 'F') && targets.length > 0) {
         event.preventDefault();
         var batchIds = [];
@@ -4126,26 +4056,21 @@ document.addEventListener('keydown', function(event) {
             if (fid) batchIds.push(fid);
         });
         if (batchIds.length === 0) return;
-        window.pendingDateTimeBatchIds = batchIds;
-        // Use first task's existing date
-        var firstTask = window.tasks ? window.tasks.find(function(t) { return t.id === batchIds[0] || t.id == batchIds[0]; }) : null;
+        // Store extra batch IDs (excluding the first, which the dropdown handles directly)
+        window.pendingDateTimeBatchIds = batchIds.length > 1 ? batchIds.slice(1) : null;
+        var firstId = batchIds[0];
+        var firstTask = window.tasks ? window.tasks.find(function(t) { return t.id === firstId || t.id == firstId; }) : null;
         var existingDate = firstTask ? (firstTask.dueDate || '') : '';
-        window.currentDateTimeTaskId = batchIds[0];
-        window.selectedModalDate = '';
-        window.selectedModalTime = '';
-        populateDateTimeModal(existingDate, null);
-        var dtModal = document.getElementById('dateTimeModal');
-        if (dtModal) {
-            dtModal.style.display = 'block';
-            var desktopModal = dtModal.querySelector('.modal-content.desktop-only');
-            var mobileModal = dtModal.querySelector('.modal-content.mobile-only');
-            if (mobileModal) mobileModal.style.display = 'none';
-            if (desktopModal) desktopModal.style.display = 'block';
+        var existingTime = firstTask ? (firstTask.dueTime || '') : '';
+        // Find the button element on the first target task card, or use the card itself
+        var btnEl = targets[0].querySelector('[onclick*="openIOSDateTimePicker"]') || targets[0];
+        if (typeof openIOSDateTimePicker === 'function') {
+            openIOSDateTimePicker(firstId, existingDate, existingTime, btnEl);
         }
         return;
     }
 
-    // G: open time picker for selected task(s)
+    // G: open time dropdown (same as clicking clock emoji on task line)
     if ((event.key === 'g' || event.key === 'G') && targets.length > 0) {
         event.preventDefault();
         var batchIdsG = [];
@@ -4154,25 +4079,13 @@ document.addEventListener('keydown', function(event) {
             if (gid) batchIdsG.push(gid);
         });
         if (batchIdsG.length === 0) return;
-        window.pendingDateTimeBatchIds = batchIdsG;
-        var firstTaskG = window.tasks ? window.tasks.find(function(t) { return t.id === batchIdsG[0] || t.id == batchIdsG[0]; }) : null;
-        var existingTime = firstTaskG ? (firstTaskG.dueTime || '') : '';
-        window.currentDateTimeTaskId = batchIdsG[0];
-        window.selectedModalDate = '';
-        window.selectedModalTime = '';
-        populateDateTimeModal(null, existingTime);
-        var dtModalG = document.getElementById('dateTimeModal');
-        if (dtModalG) {
-            dtModalG.style.display = 'block';
-            var desktopModalG = dtModalG.querySelector('.modal-content.desktop-only');
-            var mobileModalG = dtModalG.querySelector('.modal-content.mobile-only');
-            if (mobileModalG) mobileModalG.style.display = 'none';
-            if (desktopModalG) desktopModalG.style.display = 'block';
-            // Scroll to time section
-            setTimeout(function() {
-                var timeSection = dtModalG.querySelector('.time-picker-section, .time-grid, .time-buttons');
-                if (timeSection) timeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 200);
+        window.pendingTimeBatchIds = batchIdsG.length > 1 ? batchIdsG.slice(1) : null;
+        var firstIdG = batchIdsG[0];
+        var firstTaskG = window.tasks ? window.tasks.find(function(t) { return t.id === firstIdG || t.id == firstIdG; }) : null;
+        var existingTimeG = firstTaskG ? (firstTaskG.dueTime || '') : '';
+        var btnElG = targets[0].querySelector('[onclick*="openTimeDropdown"]') || targets[0];
+        if (typeof openTimeDropdown === 'function') {
+            openTimeDropdown(firstIdG, existingTimeG, btnElG);
         }
         return;
     }
