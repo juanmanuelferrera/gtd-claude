@@ -7789,14 +7789,10 @@
             await uploadAllTemplates();
             
             console.log('✅ ULTRA-SYNC: Upload complete');
-            
-            // Clear flags after short delay
-            setTimeout(() => {
-                window.justModifiedTasks = false;
-                window.justModifiedLists = false;
-                window.justModifiedTemplates = false;
-                console.log('🔓 ULTRA-SYNC: Flags cleared, downloads will resume');
-            }, 5000); // 5 seconds for reliable cross-browser sync
+            window.justModifiedTasks = false;
+            window.justModifiedLists = false;
+            window.justModifiedTemplates = false;
+            console.log('🔓 ULTRA-SYNC: Flags cleared, downloads will resume');
         };
         // ULTRA-PULL: Manual ultra-fast download for cross-browser testing  
         window.ultraPull = async function() {
@@ -11014,13 +11010,11 @@
                 // Upload to server
                 await uploadAllLists();
                 
-                // Clear flag after successful upload
-                setTimeout(() => {
-                    window.justModifiedLists = false;
-                    console.log('🔓 Cleared justModifiedLists flag');
-                }, 5000); // 5 seconds for reliable cross-browser sync
-                
+                window.justModifiedLists = false;
+                console.log('🔓 Cleared justModifiedLists flag');
+
             } catch (error) {
+                window.justModifiedLists = false;
                 console.error('Error saving list sections:', error);
             }
         }
@@ -22333,11 +22327,8 @@
             // Upload to server
             await uploadAllTemplates();
             
-            // Clear flag after successful upload
-            setTimeout(() => {
-                window.justModifiedTemplates = false;
-                console.log('🔓 Cleared justModifiedTemplates flag');
-            }, 10000); // 10-second protection
+            window.justModifiedTemplates = false;
+            console.log('🔓 Cleared justModifiedTemplates flag');
         }
         // Render template buttons in modal
         function renderTemplateButtons() {
