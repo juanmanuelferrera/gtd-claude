@@ -46,6 +46,8 @@ const KEYBOARD_SHORTCUTS = {
             { keys: ['Space'], description: 'Batch select' },
             { keys: ['C'], description: 'Copy task' },
             { keys: ['D'], description: 'Delete' },
+            { keys: ['F'], description: 'Set date' },
+            { keys: ['G'], description: 'Set time' },
             { keys: ['1'], description: '+1 day' },
             { keys: ['7'], description: '+1 week' },
             { keys: ['3'], description: '+1 month' }
