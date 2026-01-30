@@ -48,6 +48,7 @@ const KEYBOARD_SHORTCUTS = {
             { keys: ['D'], description: 'Delete' },
             { keys: ['F'], description: 'Set date' },
             { keys: ['G'], description: 'Set time' },
+            { keys: ['0'], description: 'Today' },
             { keys: ['1'], description: '+1 day' },
             { keys: ['7'], description: '+1 week' },
             { keys: ['3'], description: '+1 month' }

@@ -4249,6 +4249,17 @@ document.addEventListener('keydown', function(event) {
         return;
     }
 
+    // 0: set task date to today
+    if (event.key === '0' && targets.length > 0) {
+        event.preventDefault();
+        var todayStr = typeof getLocalDateString === 'function' ? getLocalDateString(new Date()) : new Date().toISOString().slice(0, 10);
+        targets.forEach(function(el) {
+            var tid = parseTaskId(el.getAttribute('data-task-id'));
+            if (tid && typeof updateTaskDate === 'function') updateTaskDate(tid, todayStr, { stopPropagation: function(){} });
+        });
+        return;
+    }
+
     // Escape: clear selection
     if (event.key === 'Escape' && current) {
         current.classList.remove('task-selected');
