@@ -226,6 +226,36 @@ function setupPeriodicSync() {
 /**
  * Upload all tasks to the server (internal implementation)
  */
+/**
+ * Purge tombstones older than 30 days to prevent merge-grows-forever problem.
+ * Each browser accumulates different tombstones; purging old ones keeps arrays convergent.
+ */
+function purgeOldTombstones() {
+    const TOMBSTONE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+    const cutoff = Date.now() - TOMBSTONE_MAX_AGE_MS;
+    const before = tasks.length;
+
+    tasks = tasks.filter(t => {
+        if ((t.isDeleted || t.status === 'deleted') && !t.is_deleted) {
+            // Check updatedAt, deletedAt, or createdAt
+            const ts = new Date(t.deletedAt || t.updatedAt || t.createdAt || 0).getTime();
+            if (ts < cutoff) return false; // purge
+        }
+        // Also handle underscore variant
+        if (t.is_deleted) {
+            const ts = new Date(t.deletedAt || t.updatedAt || t.createdAt || 0).getTime();
+            if (ts < cutoff) return false;
+        }
+        return true;
+    });
+    window.tasks = tasks;
+
+    const purged = before - tasks.length;
+    if (purged > 0) {
+        console.log(`🗑️ Purged ${purged} tombstones older than 30 days (${before} → ${tasks.length})`);
+    }
+}
+
 async function _uploadAllTasksInternal() {
     console.log('🔄 uploadAllTasks called - using simple sync pattern');
     
@@ -248,6 +278,9 @@ async function _uploadAllTasksInternal() {
     }
     
     try {
+        // Purge old tombstones before upload to prevent merge-grows-forever
+        purgeOldTombstones();
+
         // Log tombstone status before upload
         const tasksToUpload = tasks.map(task => cleanTaskForStorage(task));
         const deletedCount = tasksToUpload.filter(t => t.isDeleted || t.status === 'deleted').length;
