@@ -899,15 +899,24 @@ document.addEventListener('keydown', function(e) {
     var focused = document.activeElement;
     var idx = cells.indexOf(focused);
 
-    // Arrow keys navigate, Enter selects
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].indexOf(e.key) === -1) return;
+    // Block ALL keys from propagating when dropdown is open
     e.preventDefault();
     e.stopImmediatePropagation();
 
+    // Enter: click focused cell, or the selected/first cell
     if (e.key === 'Enter') {
-        if (idx >= 0) cells[idx].click();
+        var target = (idx >= 0) ? cells[idx] : null;
+        if (!target) {
+            // Try to find the already-selected cell (blue background)
+            target = container.querySelector('[style*="background: #007AFF"]');
+        }
+        if (!target) target = cells[0];
+        if (target) target.click();
         return;
     }
+
+    // Only arrow keys navigate
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.key) === -1) return;
 
     // Columns: 7 for calendar, 3 for time (grid-template-columns: repeat(3, 1fr) with 2 items per cell = 6 per row)
     var cols = isDate ? 7 : 6; // time grid: 3 columns x 2 (hour + :30) = 6
