@@ -288,6 +288,13 @@ function openIOSDateTimePicker(taskId, currentDate, currentTime, buttonElement) 
             closeDateDropdown();
         }
     });
+
+    // Auto-focus the selected or first day cell for keyboard navigation
+    setTimeout(() => {
+        var selected = calendar.querySelector('[onclick*="selectInlineCalendarDate"][style*="background: #007AFF"]');
+        var target = selected || calendar.querySelector('[onclick*="selectInlineCalendarDate"]');
+        if (target) { target.setAttribute('tabindex', '0'); target.focus(); }
+    }, 50);
 }
 
 // Close calendar dropdown
@@ -859,6 +866,72 @@ window.selectCalendarDay = selectCalendarDay;
 window.applyDateTime = applyDateTime;
 window.initUnifiedDateTimeModal = initUnifiedDateTimeModal;
 
+// Keyboard navigation inside date/time dropdowns (capture phase to beat other handlers)
+document.addEventListener('keydown', function(e) {
+    var isDate = !!window.currentDateDropdown;
+    var isTime = !!window.currentTimeDropdown;
+    if (!isDate && !isTime) return;
+
+    // Escape closes whichever is open
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        if (isDate) closeDateDropdown();
+        if (isTime) closeTimeDropdown();
+        return;
+    }
+
+    // Gather clickable cells
+    var container = isDate
+        ? window.currentDateDropdown
+        : window.currentTimeDropdown;
+    var cells;
+    if (isDate) {
+        // Calendar day cells: divs with onclick containing selectInlineCalendarDate
+        cells = Array.from(container.querySelectorAll('[onclick*="selectInlineCalendarDate"]'));
+    } else {
+        // Time cells: divs with onclick containing setTimeAndClose
+        cells = Array.from(container.querySelectorAll('[onclick*="setTimeAndClose"]'));
+    }
+    if (cells.length === 0) return;
+
+    // Find currently focused cell
+    var focused = document.activeElement;
+    var idx = cells.indexOf(focused);
+
+    // Arrow keys navigate, Enter selects
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].indexOf(e.key) === -1) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+
+    if (e.key === 'Enter') {
+        if (idx >= 0) cells[idx].click();
+        return;
+    }
+
+    // Columns: 7 for calendar, 3 for time (grid-template-columns: repeat(3, 1fr) with 2 items per cell = 6 per row)
+    var cols = isDate ? 7 : 6; // time grid: 3 columns x 2 (hour + :30) = 6
+
+    if (idx < 0) {
+        // Nothing focused yet, focus first cell
+        cells[0].setAttribute('tabindex', '0');
+        cells[0].focus();
+        return;
+    }
+
+    var newIdx = idx;
+    if (e.key === 'ArrowRight') newIdx = Math.min(idx + 1, cells.length - 1);
+    else if (e.key === 'ArrowLeft') newIdx = Math.max(idx - 1, 0);
+    else if (e.key === 'ArrowDown') newIdx = Math.min(idx + cols, cells.length - 1);
+    else if (e.key === 'ArrowUp') newIdx = Math.max(idx - cols, 0);
+
+    if (newIdx !== idx) {
+        cells[idx].removeAttribute('tabindex');
+        cells[newIdx].setAttribute('tabindex', '0');
+        cells[newIdx].focus();
+    }
+}, true);  // capture phase to intercept before other handlers
+
 // Time dropdown picker - Grid Card Layout
 function openTimeDropdown(taskId, currentTime, buttonElement) {
     // Remove any existing picker
@@ -970,6 +1043,13 @@ function openTimeDropdown(taskId, currentTime, buttonElement) {
             closeTimeDropdown();
         }
     });
+
+    // Auto-focus the selected or first time cell for keyboard navigation
+    setTimeout(() => {
+        var selected = timeCard.querySelector('[onclick*="setTimeAndClose"][style*="background: #007AFF"]');
+        var target = selected || timeCard.querySelector('[onclick*="setTimeAndClose"]');
+        if (target) { target.setAttribute('tabindex', '0'); target.focus(); }
+    }, 50);
 }
 
 function closeTimeDropdown() {
