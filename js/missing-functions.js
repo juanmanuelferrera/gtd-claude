@@ -3916,8 +3916,8 @@ document.addEventListener('keydown', function(event) {
         return;
     }
 
-    // Delete: delete selected task
-    if (event.key === 'Delete' && current) {
+    // D or Delete: delete selected task
+    if ((event.key === 'Delete' || event.key === 'd' || event.key === 'D') && current) {
         event.preventDefault();
         var did = parseTaskId(current.getAttribute('data-task-id'));
         if (did && typeof deleteTask === 'function') deleteTask(did);

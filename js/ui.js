@@ -915,9 +915,9 @@ function initializeKeyboardNavigation() {
                         exitTemplateNavigation();
                     }
                     return;
-                case 't':
-                case 'T':
-                    console.log('🔄 T pressed during template navigation - toggling off');
+                case 'f':
+                case 'F':
+                    console.log('🔄 F pressed during template navigation - toggling off');
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation(); // Prevent any further handling
@@ -987,8 +987,8 @@ function initializeKeyboardNavigation() {
         }
         
         switch (e.key.toLowerCase()) {
-            case 'd':
-                console.log('✅ D key - switching to Today view and clearing all template filters');
+            case 't':
+                console.log('✅ T key - switching to Today view and clearing all template filters');
                 clearAllTemplateFilters();
                 showView('today');
                 break;
@@ -1020,15 +1020,15 @@ function initializeKeyboardNavigation() {
                 console.log('✅ X key - switching to Settings view');
                 showView('settings');
                 break;
-            case 't':
-                console.log('✅ T key pressed in general handler, templateNavActive:', templateNavActive);
+            case 'f':
+                console.log('✅ F key pressed in general handler, templateNavActive:', templateNavActive);
                 e.preventDefault();
                 e.stopPropagation();
                 if (templateNavActive) {
-                    console.log('🔄 T pressed - template nav is active, exiting');
+                    console.log('🔄 F pressed - template nav is active, exiting');
                     exitTemplateNavigation();
                 } else {
-                    console.log('🏷️ T pressed - template nav is inactive, activating');
+                    console.log('🏷️ F pressed - template nav is inactive, activating');
                     activateTemplateSelector();
                 }
                 break;

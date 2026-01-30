@@ -11,7 +11,7 @@ const KEYBOARD_SHORTCUTS = {
     navigation: {
         title: '🧭 Navigation',
         shortcuts: [
-            { keys: ['D'], description: 'Go to Today view' },
+            { keys: ['T'], description: 'Go to Today view' },
             { keys: ['W'], description: 'Go to Week view' },
             { keys: ['M'], description: 'Go to Month (Calendar) view' },
             { keys: ['S'], description: 'Go to Search/All tasks view' },
@@ -32,7 +32,7 @@ const KEYBOARD_SHORTCUTS = {
     templates: {
         title: '🏷️ Template Filters',
         shortcuts: [
-            { keys: ['T'], description: 'Toggle template selector' },
+            { keys: ['F'], description: 'Toggle template selector' },
             { keys: ['←', '→'], description: 'Navigate between templates (when active)' },
             { keys: ['Enter'], description: 'Apply selected template filter' },
             { keys: ['Esc'], description: 'Exit template navigation' }
@@ -46,7 +46,7 @@ const KEYBOARD_SHORTCUTS = {
             { keys: ['Enter'], description: 'Edit selected task' },
             { keys: ['Space'], description: 'Toggle task selection (batch)' },
             { keys: ['C'], description: 'Complete/uncomplete selected task' },
-            { keys: ['Delete'], description: 'Delete selected task' },
+            { keys: ['D'], description: 'Delete selected task' },
             { keys: ['1'], description: 'Delay selected task +1 day' },
             { keys: ['7'], description: 'Delay selected task +1 week' },
             { keys: ['3'], description: 'Delay selected task +1 month' }
