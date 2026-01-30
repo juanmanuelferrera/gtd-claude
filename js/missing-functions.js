@@ -4154,6 +4154,18 @@ document.addEventListener('keydown', function(event) {
         return;
     }
 
+    // Helper: re-select task at given index after view re-renders
+    function reselectAfterAction(idx) {
+        setTimeout(function() {
+            var tasks = document.querySelectorAll('.task-card[data-task-id], .task-item[data-task-id]');
+            if (tasks.length === 0) return;
+            var selectIdx = Math.min(idx, tasks.length - 1);
+            if (selectIdx < 0) selectIdx = 0;
+            tasks[selectIdx].classList.add('task-selected');
+            tasks[selectIdx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }, 300);
+    }
+
     // Helper: get batch-selected tasks or fall back to current
     var batchSelected = document.querySelectorAll('.task-card.selected, .task-item.selected');
     var targets = batchSelected.length > 0 ? batchSelected : (current ? [current] : []);
@@ -4165,6 +4177,7 @@ document.addEventListener('keydown', function(event) {
             var did = parseTaskId(el.getAttribute('data-task-id'));
             if (did && typeof deleteTask === 'function') deleteTask(did);
         });
+        reselectAfterAction(currentIdx);
         return;
     }
 
@@ -4175,6 +4188,7 @@ document.addEventListener('keydown', function(event) {
             var cid = parseTaskId(el.getAttribute('data-task-id'));
             if (cid && typeof duplicateTask === 'function') duplicateTask(cid, event);
         });
+        reselectAfterAction(currentIdx);
         return;
     }
 
@@ -4228,6 +4242,7 @@ document.addEventListener('keydown', function(event) {
             var d1id = parseTaskId(el.getAttribute('data-task-id'));
             if (d1id && typeof delayTask === 'function') delayTask(d1id, 1);
         });
+        reselectAfterAction(currentIdx);
         return;
     }
 
@@ -4238,6 +4253,7 @@ document.addEventListener('keydown', function(event) {
             var d7id = parseTaskId(el.getAttribute('data-task-id'));
             if (d7id && typeof delayTask === 'function') delayTask(d7id, 7);
         });
+        reselectAfterAction(currentIdx);
         return;
     }
 
@@ -4248,6 +4264,7 @@ document.addEventListener('keydown', function(event) {
             var d3id = parseTaskId(el.getAttribute('data-task-id'));
             if (d3id && typeof delayTask === 'function') delayTask(d3id, 30);
         });
+        reselectAfterAction(currentIdx);
         return;
     }
 
@@ -4259,6 +4276,7 @@ document.addEventListener('keydown', function(event) {
             var tid = parseTaskId(el.getAttribute('data-task-id'));
             if (tid && typeof updateTaskDate === 'function') updateTaskDate(tid, todayStr, { stopPropagation: function(){} });
         });
+        reselectAfterAction(currentIdx);
         return;
     }
 
