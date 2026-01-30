@@ -1573,10 +1573,6 @@ async function deleteTask(taskId, event) {
             renderCurrentView();
         }
 
-        // Show success toast
-        if (window.toast) {
-            toast.success('Task deleted successfully');
-        }
 
         // Background sync
         window.justModifiedTasks = true;
@@ -1648,11 +1644,6 @@ async function delayTask(taskId, days, event) {
             renderCurrentView();
         }
 
-        // Show success toast
-        if (window.toast) {
-            const daysText = days === 1 ? 'day' : 'days';
-            toast.success(`Task delayed by ${days} ${daysText}`);
-        }
 
         // Background sync
         window.justModifiedTasks = true;
