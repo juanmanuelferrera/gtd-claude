@@ -1166,9 +1166,10 @@
             
             // Copy only the essential properties we want to store
             const allowedProps = [
-                'id', 'title', 'notes', 'dueDate', 'dueTime', 'status', 
-                'repeatType', 'template', 'createdAt', 'updatedAt', 
-                'isDeleted', 'isEvent', 'repeat', 'priority', 'images'
+                'id', 'title', 'notes', 'dueDate', 'dueTime', 'status',
+                'repeatType', 'template', 'createdAt', 'updatedAt',
+                'isDeleted', 'isEvent', 'repeat', 'priority', 'images',
+                'completedAt', 'repeatPaused', 'repeatPausedDate'
             ];
             
             allowedProps.forEach(prop => {
