@@ -645,15 +645,15 @@ async function performComprehensiveSync() {
     return withSyncLock(async () => {
         console.log('🔄 Starting comprehensive sync...');
         try {
-            // Upload local changes first
-            await _uploadAllTasksInternal();
-            await _uploadAllListsInternal();
-            await _uploadAllTemplatesInternal();
-            
-            // Then download latest data
+            // Download latest data FIRST to get other browsers' changes
             await _downloadAllTasksInternal();
             await _downloadAllListsInternal();
             await _downloadAllTemplatesInternal();
+
+            // Then upload merged local changes
+            await _uploadAllTasksInternal();
+            await _uploadAllListsInternal();
+            await _uploadAllTemplatesInternal();
             
             console.log('✅ Comprehensive sync completed successfully');
         } catch (error) {
@@ -926,34 +926,34 @@ async function syncAll() {
     
     try {
         let failures = [];
-        let uploadFailedTypes = new Set();
+        let downloadFailedTypes = new Set();
 
-        // Upload all data first
+        // Download latest data FIRST to get other browsers' changes
         await Promise.all([
-            uploadAllTasks().catch(e => { console.warn('Tasks upload failed:', e); failures.push('tasks upload'); uploadFailedTypes.add('tasks'); }),
-            uploadAllLists().catch(e => { console.warn('Lists upload failed:', e); failures.push('lists upload'); uploadFailedTypes.add('lists'); }),
-            uploadAllTemplates().catch(e => { console.warn('Templates upload failed:', e); failures.push('templates upload'); uploadFailedTypes.add('templates'); })
+            downloadAllTasks().catch(e => { console.warn('Tasks download failed:', e); failures.push('tasks download'); downloadFailedTypes.add('tasks'); }),
+            downloadAllLists().catch(e => { console.warn('Lists download failed:', e); failures.push('lists download'); downloadFailedTypes.add('lists'); }),
+            downloadAllTemplates().catch(e => { console.warn('Templates download failed:', e); failures.push('templates download'); downloadFailedTypes.add('templates'); })
         ]);
 
-        // Download only data types whose upload succeeded — downloading after a failed upload would overwrite local changes
-        const downloads = [];
-        if (!uploadFailedTypes.has('tasks')) {
-            downloads.push(downloadAllTasks().catch(e => { console.warn('Tasks download failed:', e); failures.push('tasks download'); }));
+        // Upload only data types whose download succeeded — uploading after a failed download would overwrite server data with stale local data
+        const uploads = [];
+        if (!downloadFailedTypes.has('tasks')) {
+            uploads.push(uploadAllTasks().catch(e => { console.warn('Tasks upload failed:', e); failures.push('tasks upload'); }));
         } else {
-            console.warn('⚠️ Skipping tasks download — upload failed, protecting local data');
+            console.warn('⚠️ Skipping tasks upload — download failed, protecting server data');
         }
-        if (!uploadFailedTypes.has('lists')) {
-            downloads.push(downloadAllLists().catch(e => { console.warn('Lists download failed:', e); failures.push('lists download'); }));
+        if (!downloadFailedTypes.has('lists')) {
+            uploads.push(uploadAllLists().catch(e => { console.warn('Lists upload failed:', e); failures.push('lists upload'); }));
         } else {
-            console.warn('⚠️ Skipping lists download — upload failed, protecting local data');
+            console.warn('⚠️ Skipping lists upload — download failed, protecting server data');
         }
-        if (!uploadFailedTypes.has('templates')) {
-            downloads.push(downloadAllTemplates().catch(e => { console.warn('Templates download failed:', e); failures.push('templates download'); }));
+        if (!downloadFailedTypes.has('templates')) {
+            uploads.push(uploadAllTemplates().catch(e => { console.warn('Templates upload failed:', e); failures.push('templates upload'); }));
         } else {
-            console.warn('⚠️ Skipping templates download — upload failed, protecting local data');
+            console.warn('⚠️ Skipping templates upload — download failed, protecting server data');
         }
-        if (downloads.length > 0) {
-            await Promise.all(downloads);
+        if (uploads.length > 0) {
+            await Promise.all(uploads);
         }
 
         // Update sync timestamp
