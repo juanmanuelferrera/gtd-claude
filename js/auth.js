@@ -327,11 +327,11 @@ async function checkAuthentication() {
         // CRITICAL: Check for stale browser data before allowing sync
         const lastSyncTime = localStorage.getItem('lastSyncTime');
         const currentTime = Date.now();
-        const threeMinutesAgo = currentTime - (3 * 60 * 1000); // 3 minutes
+        const tenMinutesAgo = currentTime - (10 * 60 * 1000); // 10 minutes
 
-        // Detect stale browser session — any browser not synced in 3+ minutes must download before uploading
-        if (!lastSyncTime || parseInt(lastSyncTime) < threeMinutesAgo) {
-            console.warn('🚨 STALE BROWSER DETECTED: Last sync was more than 3 minutes ago or never');
+        // Detect stale browser session — any browser not synced in 10+ minutes must download before uploading
+        if (!lastSyncTime || parseInt(lastSyncTime) < tenMinutesAgo) {
+            console.warn('🚨 STALE BROWSER DETECTED: Last sync was more than 10 minutes ago or never');
             console.warn('📥 Forcing download from cloud to prevent overwriting fresh data');
             
             // Set flags to prevent upload until download completes

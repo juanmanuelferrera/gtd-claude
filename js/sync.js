@@ -367,8 +367,10 @@ async function _downloadAllTasksInternal() {
             renderCurrentView();
         }
         
+        // Update sync timestamp so stale browser detection knows we're active
+        localStorage.setItem('lastSyncTime', Date.now().toString());
         console.log('✅ Tasks download completed');
-        
+
     } catch (error) {
         console.error('❌ Error downloading tasks:', error);
         throw error;
