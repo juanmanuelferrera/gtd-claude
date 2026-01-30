@@ -3901,6 +3901,7 @@ document.addEventListener('keydown', function(event) {
     // Enter: edit selected task
     if (event.key === 'Enter' && current) {
         event.preventDefault();
+        event.stopImmediatePropagation();
         var eid = parseTaskId(current.getAttribute('data-task-id'));
         if (eid && typeof editTask === 'function') {
             editTask(eid);
