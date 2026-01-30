@@ -3109,9 +3109,14 @@ function importTasksFromTextarea() {
     // Save tasks
     saveTasksToLocalStorage();
     
-    // Sync with server if available
-    if (typeof syncAll === 'function') {
-        syncAll();
+    // Upload directly (avoid syncAll which downloads first and can overwrite local changes)
+    window.justModifiedTasks = true;
+    if (typeof uploadAllTasks === 'function') {
+        uploadAllTasks().then(() => {
+            window.justModifiedTasks = false;
+        }).catch(() => {
+            window.justModifiedTasks = false;
+        });
     }
     
     // Close modal and clear textarea
@@ -3165,10 +3170,17 @@ function completeTask(taskId, event) {
         
         // Save changes
         saveTasksToLocalStorage();
-        
-        // Sync with server if available
-        if (typeof syncAll === 'function') {
-            syncAll();
+
+        // Upload directly (NOT syncAll which downloads first and overwrites the deletion)
+        window.justModifiedTasks = true;
+        if (typeof uploadAllTasks === 'function') {
+            uploadAllTasks().then(() => {
+                console.log('✅ Task deletion synced to server');
+                window.justModifiedTasks = false;
+            }).catch(err => {
+                console.error('❌ Task deletion sync failed:', err);
+                window.justModifiedTasks = false;
+            });
         }
         
         console.log('🔄 Refreshing view...');
@@ -3310,6 +3322,9 @@ function deleteSelectedTasks() {
             if (taskIndex !== -1) {
                 console.log('✅ Setting task to deleted:', tasks[taskIndex].title);
                 tasks[taskIndex].status = 'deleted';
+                tasks[taskIndex].isDeleted = true;
+                tasks[taskIndex].deletedAt = new Date().toISOString();
+                tasks[taskIndex].updatedAt = new Date().toISOString();
                 deletedCount++;
             } else {
                 console.log('❌ Task not found in tasks array');
