@@ -2935,7 +2935,9 @@ function toggleSidebarLanguage() {
         // Translate buttons without data-translate
         var btnMap = {
             '← Prev': '← Ant.', 'Next →': 'Sig. →', '📥 Bulk': '📥 Lote',
-            '🕐 Now': '🕐 Ahora', '🔥 Today': '🔥 Hoy'
+            '🕐 Now': '🕐 Ahora', '🔥 Today': '🔥 Hoy',
+            '💾 Quick Backup': '💾 Respaldo Rapido',
+            '📥 Import JSON': '📥 Importar JSON'
         };
         var btnMapReverse = {};
         Object.keys(btnMap).forEach(function(k) { btnMapReverse[btnMap[k]] = k; });
