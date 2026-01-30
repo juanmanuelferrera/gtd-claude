@@ -7,6 +7,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>⚡ HyperFiler Pro 🚀 - v4.14.0 Stable</title>
     <style>
+    /* Task selected via keyboard navigation */
+    .task-selected,
+    .task-card.task-selected,
+    .task-item.task-selected {
+        outline: 3px solid #2E5BFF !important;
+        outline-offset: -2px;
+        background-color: rgba(46, 91, 255, 0.08) !important;
+    }
     /* Keyboard-only mode: hide mouse-oriented UI elements */
     body.keyboard-only-mode .task-actions,
     body.keyboard-only-mode .action-buttons,
@@ -2313,7 +2321,7 @@
     <script src="js/natural-language.js?v=1736363000"></script>
     <script src="js/patches.js?v=1736363000"></script>
     <script src="extracted_js.js?v=20260130-kbd-v2"></script>
-    <script src="js/missing-functions.js?v=20260130-kbd-v4"></script>
+    <script src="js/missing-functions.js?v=20260130-kbd-v5"></script>
     
     <!-- Tawk.to Live Chat Integration with automatic language detection -->
 

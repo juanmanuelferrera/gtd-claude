@@ -3863,18 +3863,75 @@ document.addEventListener('keydown', function(event) {
         return;
     }
 
-    // C key: complete/uncomplete selected task
-    if (!event.ctrlKey && !event.altKey && !event.metaKey && (event.key === 'c' || event.key === 'C')) {
-        var selected = document.querySelector('.task-selected');
-        if (selected) {
-            event.preventDefault();
-            var taskId = selected.getAttribute('data-task-id');
-            if (taskId && typeof toggleTaskStatus === 'function') {
-                toggleTaskStatus(taskId);
-            } else if (taskId && typeof completeTask === 'function') {
-                completeTask(taskId);
-            }
+    // Only handle non-modifier keys below
+    if (event.ctrlKey || event.altKey || event.metaKey) return;
+
+    var allTasks = document.querySelectorAll('.task-card[data-task-id], .task-item[data-task-id]');
+    if (allTasks.length === 0) return;
+
+    var current = document.querySelector('.task-selected');
+    var currentIdx = -1;
+    if (current) {
+        allTasks.forEach(function(el, i) { if (el === current) currentIdx = i; });
+    }
+
+    // Arrow Up/Down: navigate tasks
+    if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        var next = currentIdx < allTasks.length - 1 ? currentIdx + 1 : 0;
+        if (current) current.classList.remove('task-selected');
+        allTasks[next].classList.add('task-selected');
+        allTasks[next].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        return;
+    }
+    if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        var prev = currentIdx > 0 ? currentIdx - 1 : allTasks.length - 1;
+        if (current) current.classList.remove('task-selected');
+        allTasks[prev].classList.add('task-selected');
+        allTasks[prev].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        return;
+    }
+
+    // Enter: edit selected task
+    if (event.key === 'Enter' && current) {
+        event.preventDefault();
+        var taskId = current.getAttribute('data-task-id');
+        if (taskId && typeof editTask === 'function') editTask(taskId);
+        return;
+    }
+
+    // Space: toggle batch selection
+    if (event.key === ' ' && current) {
+        event.preventDefault();
+        current.classList.toggle('selected');
+        return;
+    }
+
+    // Delete: delete selected task
+    if (event.key === 'Delete' && current) {
+        event.preventDefault();
+        var taskId = current.getAttribute('data-task-id');
+        if (taskId && typeof deleteTask === 'function') deleteTask(taskId);
+        return;
+    }
+
+    // C: complete/uncomplete selected task
+    if ((event.key === 'c' || event.key === 'C') && current) {
+        event.preventDefault();
+        var taskId = current.getAttribute('data-task-id');
+        if (taskId && typeof toggleTaskStatus === 'function') {
+            toggleTaskStatus(taskId);
+        } else if (taskId && typeof completeTask === 'function') {
+            completeTask(taskId);
         }
+        return;
+    }
+
+    // Escape: clear selection
+    if (event.key === 'Escape' && current) {
+        current.classList.remove('task-selected');
+        return;
     }
 });
 
