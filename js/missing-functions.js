@@ -2895,23 +2895,77 @@ function toggleSidebarLanguage() {
     } else if (window.translateUI) {
         window.translateUI();
     } else {
-        console.log('🌐 No translateUI found, translating data-translate elements directly');
-        // Fallback: translate data-translate elements
+        console.log('🌐 Translating UI directly');
+        var dict = {
+            "Today": "Hoy", "Add": "Crear", "Week": "Semana", "Lists": "Listas",
+            "More": "Mas", "Month": "Mes", "General": "General", "Data": "Datos",
+            "Trash": "Papelera", "Backup": "Respaldo", "Shortcuts": "Atajos",
+            "Cancel": "Cancelar", "Import": "Importar", "Enable": "Activar",
+            "Quick Backup": "Respaldo Rapido", "Quick Backup JSON": "Respaldo Rapido JSON",
+            "Import JSON Backup": "Importar Respaldo JSON", "Import Data": "Importar Datos",
+            "Export Data": "Exportar Datos", "Delete All Tasks": "Eliminar Todas las Tareas",
+            "+ Add Task": "+ Nueva Tarea", "+ Add": "+ Nueva",
+            "Quick filters": "Filtros rapidos:", "TODAY": "HOY", "MONTH": "MES", "WEEK": "SEMANA",
+            "Recent Changes (Last 10)": "Cambios Recientes (Ultimos 10)",
+            "Press Ctrl+Z to undo or click any item to undo up to that point": "Pulsa Ctrl+Z para deshacer o haz clic en cualquier elemento",
+            "No Actions to Undo": "Sin Acciones para Deshacer",
+            "Make some changes to see undo history here": "Haz cambios para ver el historial aqui",
+            "Create Manual Backup": "Crear Respaldo Manual", "Import Tasks": "Importar Tareas",
+            "Paste your tasks below (one per line):": "Pega tus tareas abajo (una por linea):",
+            "Mobile UI Version": "Version Movil", "Keyboard-Only Mode": "Modo Solo Teclado",
+            "Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation": "Ocultar botones con atajos de teclado",
+            "Text Files": "Archivos de Texto",
+            "Enable Automatic Backups": "Habilitar Respaldos Automaticos",
+            "Automatically create backups based on your schedule": "Crear respaldos automaticamente segun tu horario",
+            "Choose Backup Types:": "Elegir Tipos de Respaldo:",
+            "Daily Backups": "Respaldos Diarios", "Weekly Backups": "Respaldos Semanales",
+            "Monthly Backups": "Respaldos Mensuales",
+            "Select which automatic backups you want to enable": "Selecciona que respaldos automaticos quieres habilitar",
+            "View Backup Stats": "Ver Estadisticas de Respaldo",
+            "Delete all tasks permanently - this cannot be undone": "Eliminar todas las tareas permanentemente",
+            "Quick Import": "Importacion Rapida",
+            "Choose the type of file you want to import:": "Elige el tipo de archivo a importar:",
+            "Import Backup": "Importar Respaldo", "Import TXT File": "Importar Archivo TXT",
+            "Supported formats: .json, .txt": "Formatos: .json, .txt"
+        };
+
+        // Translate data-translate elements
         document.querySelectorAll('[data-translate]').forEach(function(el) {
             var key = el.getAttribute('data-translate');
-            var dict = {
-                "Today": "Hoy", "Add": "Crear", "Week": "Semana", "Lists": "Listas",
-                "More": "Mas", "Month": "Mes", "General": "General", "Data": "Datos",
-                "Trash": "Papelera", "Backup": "Respaldo", "Shortcuts": "Atajos",
-                "Cancel": "Cancelar", "Import": "Importar", "Enable": "Activar",
-                "Quick Backup": "Respaldo Rapido", "Quick Backup JSON": "Respaldo Rapido JSON",
-                "Import JSON Backup": "Importar Respaldo JSON", "Import Data": "Importar Datos",
-                "Export Data": "Exportar Datos", "Delete All Tasks": "Eliminar Todas las Tareas"
-            };
             if (lang === 'es' && dict[key]) {
                 el.textContent = dict[key];
             } else if (lang === 'en') {
                 el.textContent = key;
+            }
+        });
+
+        // Translate buttons without data-translate
+        var btnMap = {
+            '← Prev': '← Ant.', 'Next →': 'Sig. →', '📥 Bulk': '📥 Lote',
+            '🕐 Now': '🕐 Ahora', '🔥 Today': '🔥 Hoy'
+        };
+        var btnMapReverse = {};
+        Object.keys(btnMap).forEach(function(k) { btnMapReverse[btnMap[k]] = k; });
+        document.querySelectorAll('button:not(.nav-btn)').forEach(function(btn) {
+            var t = btn.textContent.trim();
+            if (lang === 'es' && btnMap[t]) {
+                btn.textContent = btnMap[t];
+            } else if (lang === 'en' && btnMapReverse[t]) {
+                btn.textContent = btnMapReverse[t];
+            }
+        });
+
+        // Translate search placeholders
+        document.querySelectorAll('input[placeholder]').forEach(function(input) {
+            var p = input.placeholder;
+            if (lang === 'es') {
+                if (p === '🔍 Day') input.placeholder = '🔍 Dia';
+                else if (p === '🔍 Week') input.placeholder = '🔍 Semana';
+                else if (p === '🔍 Month') input.placeholder = '🔍 Mes';
+            } else {
+                if (p === '🔍 Dia') input.placeholder = '🔍 Day';
+                else if (p === '🔍 Semana') input.placeholder = '🔍 Week';
+                else if (p === '🔍 Mes') input.placeholder = '🔍 Month';
             }
         });
     }
