@@ -38,11 +38,38 @@ const KEYBOARD_SHORTCUTS = {
             { keys: ['Esc'], description: 'Exit template navigation' }
         ]
     },
+    taskActions: {
+        title: '✅ Task Actions',
+        shortcuts: [
+            { keys: ['↑'], description: 'Select previous task' },
+            { keys: ['↓'], description: 'Select next task' },
+            { keys: ['Enter'], description: 'Edit selected task' },
+            { keys: ['Space'], description: 'Toggle task selection (batch)' },
+            { keys: ['C'], description: 'Complete/uncomplete selected task' },
+            { keys: ['Delete'], description: 'Delete selected task' },
+            { keys: ['1'], description: 'Delay selected task +1 day' },
+            { keys: ['7'], description: 'Delay selected task +1 week' },
+            { keys: ['3'], description: 'Delay selected task +1 month' }
+        ]
+    },
+    ctrlShortcuts: {
+        title: '⌨️ Ctrl Shortcuts',
+        shortcuts: [
+            { keys: ['Ctrl+N'], description: 'New task' },
+            { keys: ['Ctrl+K'], description: 'Toggle keyboard-only mode' },
+            { keys: ['Ctrl+Z'], description: 'Undo' },
+            { keys: ['Ctrl+J'], description: 'Time dropdown for selected task' },
+            { keys: ['Ctrl+F'], description: 'Filter navigation' },
+            { keys: ['Ctrl+S'], description: 'Focus search' },
+            { keys: ['Ctrl+B'], description: 'Emergency backup' },
+            { keys: ['Ctrl+E'], description: 'Export as text' }
+        ]
+    },
     general: {
         title: '⚙️ General',
         shortcuts: [
             { keys: ['?'], description: 'Show this help modal' },
-            { keys: ['Esc'], description: 'Close modals' }
+            { keys: ['Esc'], description: 'Close modals / clear selection' }
         ]
     }
 };

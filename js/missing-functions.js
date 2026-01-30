@@ -3848,11 +3848,33 @@ function toggleKeyboardOnlyMode(forceState) {
     applyKeyboardOnlyMode(enabled);
 }
 
-// Ctrl+K keyboard shortcut for keyboard-only mode
+// Keyboard shortcuts (missing-functions.js)
 document.addEventListener('keydown', function(event) {
+    // Skip if typing in input fields
+    var ae = document.activeElement;
+    if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT' || ae.contentEditable === 'true')) {
+        return;
+    }
+
+    // Ctrl+K: toggle keyboard-only mode
     if (event.ctrlKey && (event.key === 'k' || event.key === 'K') && !event.altKey && !event.metaKey) {
         event.preventDefault();
         toggleKeyboardOnlyMode();
+        return;
+    }
+
+    // C key: complete/uncomplete selected task
+    if (!event.ctrlKey && !event.altKey && !event.metaKey && (event.key === 'c' || event.key === 'C')) {
+        var selected = document.querySelector('.task-selected');
+        if (selected) {
+            event.preventDefault();
+            var taskId = selected.getAttribute('data-task-id');
+            if (taskId && typeof toggleTaskStatus === 'function') {
+                toggleTaskStatus(taskId);
+            } else if (taskId && typeof completeTask === 'function') {
+                completeTask(taskId);
+            }
+        }
     }
 });
 
