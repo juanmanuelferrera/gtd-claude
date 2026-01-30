@@ -3848,10 +3848,9 @@ function toggleKeyboardOnlyMode(forceState) {
     applyKeyboardOnlyMode(enabled);
 }
 
-// Parse task ID as number if possible (IDs are mixed string/number in codebase)
+// Return task ID as-is (IDs are strings in the tasks array)
 function parseTaskId(raw) {
-    var n = parseInt(raw);
-    return isNaN(n) ? raw : n;
+    return raw;
 }
 
 // Keyboard shortcuts (missing-functions.js)
