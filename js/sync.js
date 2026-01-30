@@ -922,25 +922,32 @@ async function syncAll() {
     showSyncStatus('Syncing...', 'info');
     
     try {
+        let failures = [];
+
         // Upload all data first
         await Promise.all([
-            uploadAllTasks().catch(e => console.warn('Tasks upload failed:', e)),
-            uploadAllLists().catch(e => console.warn('Lists upload failed:', e)),
-            uploadAllTemplates().catch(e => console.warn('Templates upload failed:', e))
+            uploadAllTasks().catch(e => { console.warn('Tasks upload failed:', e); failures.push('tasks upload'); }),
+            uploadAllLists().catch(e => { console.warn('Lists upload failed:', e); failures.push('lists upload'); }),
+            uploadAllTemplates().catch(e => { console.warn('Templates upload failed:', e); failures.push('templates upload'); })
         ]);
-        
+
         // Then download to get latest state
         await Promise.all([
-            downloadAllTasks().catch(e => console.warn('Tasks download failed:', e)),
-            downloadAllLists().catch(e => console.warn('Lists download failed:', e)),
-            downloadAllTemplates().catch(e => console.warn('Templates download failed:', e))
+            downloadAllTasks().catch(e => { console.warn('Tasks download failed:', e); failures.push('tasks download'); }),
+            downloadAllLists().catch(e => { console.warn('Lists download failed:', e); failures.push('lists download'); }),
+            downloadAllTemplates().catch(e => { console.warn('Templates download failed:', e); failures.push('templates download'); })
         ]);
-        
+
         // Update sync timestamp
         localStorage.setItem('lastSyncTime', Date.now().toString());
-        
-        showSyncStatus('Sync complete', 'success');
-        console.log('✅ Full sync completed');
+
+        if (failures.length > 0) {
+            console.warn('⚠️ Partial sync - failed:', failures.join(', '));
+            showSyncStatus('Sync partial', 'warning');
+        } else {
+            showSyncStatus('Sync complete', 'success');
+            console.log('✅ Full sync completed');
+        }
         
     } catch (error) {
         console.error('❌ Full sync failed:', error);
