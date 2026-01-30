@@ -3654,7 +3654,7 @@ function renderTodayTemplateFilters(todayTasks) {
         font-weight: bold;
         margin-left: 8px;
         border: 1px solid #ddd;
-    " title="Press T to navigate templates">T</span>`;
+    " title="Press P to navigate templates">P</span>`;
     
     container.innerHTML = html;
 }
