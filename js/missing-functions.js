@@ -3937,7 +3937,6 @@ document.addEventListener('keydown', function(event) {
     // D or Delete: delete task(s)
     if ((event.key === 'Delete' || event.key === 'd' || event.key === 'D') && targets.length > 0) {
         event.preventDefault();
-        if (targets.length > 1 && !confirm('Delete ' + targets.length + ' tasks?')) return;
         targets.forEach(function(el) {
             var did = parseTaskId(el.getAttribute('data-task-id'));
             if (did && typeof deleteTask === 'function') deleteTask(did);
