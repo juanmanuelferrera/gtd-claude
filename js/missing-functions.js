@@ -3261,15 +3261,14 @@ function toggleSidebarLanguage() {
             } else if (lang === 'en' && allTextReverse[t]) {
                 el.textContent = allTextReverse[t];
             } else {
-                // Try stripping leading emoji/symbol prefix to match text part
-                var prefixMatch = t.match(/^(.+?\s+)([A-Z].+)$/);
-                if (prefixMatch) {
-                    var prefix = prefixMatch[1];
-                    var textPart = prefixMatch[2];
-                    if (lang === 'es' && allText[textPart]) {
-                        el.textContent = prefix + allText[textPart];
-                    } else if (lang === 'en' && allTextReverse[textPart]) {
-                        el.textContent = prefix + allTextReverse[textPart];
+                // Try stripping leading emoji prefix
+                var emojiMatch = t.match(/^([\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}\u{2700}-\u{27BF}\u{2300}-\u{23FF}]+\s*)/u);
+                if (emojiMatch) {
+                    var stripped = t.slice(emojiMatch[1].length).trim();
+                    if (lang === 'es' && allText[stripped]) {
+                        el.textContent = emojiMatch[1] + allText[stripped];
+                    } else if (lang === 'en' && allTextReverse[stripped]) {
+                        el.textContent = emojiMatch[1] + allTextReverse[stripped];
                     }
                 }
             }
