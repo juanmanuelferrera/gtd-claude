@@ -4018,19 +4018,7 @@ document.addEventListener('keydown', function(event) {
         return;
     }
 
-    // C: complete/uncomplete task(s)
-    if ((event.key === 'c' || event.key === 'C') && targets.length > 0) {
-        event.preventDefault();
-        targets.forEach(function(el) {
-            var cid = parseTaskId(el.getAttribute('data-task-id'));
-            if (cid && typeof toggleTaskStatus === 'function') {
-                toggleTaskStatus(cid);
-            } else if (cid && typeof completeTask === 'function') {
-                completeTask(cid);
-            }
-        });
-        return;
-    }
+    // C key removed — use D for delete, Registry (U) to revert
 
     // 1: delay +1 day
     if (event.key === '1' && targets.length > 0) {
