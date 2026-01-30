@@ -3950,6 +3950,30 @@ document.addEventListener('keydown', function(event) {
         return;
     }
 
+    // 1: delay +1 day
+    if (event.key === '1' && current) {
+        event.preventDefault();
+        var d1id = parseTaskId(current.getAttribute('data-task-id'));
+        if (d1id && typeof delayTask === 'function') delayTask(d1id, 1);
+        return;
+    }
+
+    // 7: delay +1 week
+    if (event.key === '7' && current) {
+        event.preventDefault();
+        var d7id = parseTaskId(current.getAttribute('data-task-id'));
+        if (d7id && typeof delayTask === 'function') delayTask(d7id, 7);
+        return;
+    }
+
+    // 3: delay +1 month
+    if (event.key === '3' && current) {
+        event.preventDefault();
+        var d3id = parseTaskId(current.getAttribute('data-task-id'));
+        if (d3id && typeof delayTask === 'function') delayTask(d3id, 30);
+        return;
+    }
+
     // Escape: clear selection
     if (event.key === 'Escape' && current) {
         current.classList.remove('task-selected');
@@ -6006,6 +6030,7 @@ window.exportAllTasks = exportAllTasks;
 window.importTasks = importTasks;
 window.clearAllTasks = clearAllTasks;
 window.performUndo = performUndo;
+window.quickBackupJSON = quickBackupJSON;
 window.refreshUndoView = refreshUndoView;
 
 // Search functionality for Recent Actions - searches through ALL saved actions

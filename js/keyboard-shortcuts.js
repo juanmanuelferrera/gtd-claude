@@ -8,39 +8,19 @@ console.log('⌨️ Keyboard Shortcuts Help Modal loading - v2.0');
 
 // Action map: key label -> function to execute on click
 const SHORTCUT_ACTIONS = {
-    'T': () => { if (typeof showView === 'function') showView('today'); },
-    'W': () => { if (typeof showView === 'function') showView('week'); },
-    'M': () => { if (typeof showView === 'function') showView('calendar'); },
-    'S': () => { if (typeof showView === 'function') showView('all'); },
-    'L': () => { if (typeof showView === 'function') showView('lists'); },
-    'R': () => { if (typeof showView === 'function') showView('repeat'); },
-    'U': () => { if (typeof showView === 'function') showView('recent-actions'); },
-    'X': () => { if (typeof showView === 'function') showView('settings'); },
-    'N': () => {
-        if (typeof openAddTaskModal === 'function') openAddTaskModal();
-        else if (typeof window.openAddTaskModal === 'function') window.openAddTaskModal();
-    },
-    'P': () => {
-        if (typeof activateTemplateSelector === 'function') activateTemplateSelector();
-    },
-    'Ctrl+K': () => {
-        if (typeof toggleKeyboardOnlyMode === 'function') toggleKeyboardOnlyMode();
-    },
-    'Ctrl+Z': () => {
-        if (typeof undo === 'function') undo();
-    },
-    'Ctrl+B': () => {
-        if (typeof emergencyBackup === 'function') emergencyBackup();
-    },
-    'Ctrl+E': () => {
-        if (typeof exportAsText === 'function') exportAsText();
-    },
-    'Q': () => {
-        if (typeof quickBackupJSON === 'function') quickBackupJSON();
-    },
-    'I': () => {
-        if (typeof importTasks === 'function') importTasks();
-    }
+    'T': () => { if (window.showView) window.showView('today'); },
+    'W': () => { if (window.showView) window.showView('week'); },
+    'M': () => { if (window.showView) window.showView('calendar'); },
+    'S': () => { if (window.showView) window.showView('all'); },
+    'L': () => { if (window.showView) window.showView('lists'); },
+    'R': () => { if (window.showView) window.showView('repeat'); },
+    'U': () => { if (window.showView) window.showView('recent-actions'); },
+    'X': () => { if (window.showView) window.showView('settings'); },
+    'N': () => { if (window.openAddTaskModal) window.openAddTaskModal(); },
+    'P': () => { if (window.activateTemplateSelector) window.activateTemplateSelector(); },
+    'Q': () => { if (window.quickBackupJSON) window.quickBackupJSON(); },
+    'I': () => { if (window.importTasks) window.importTasks(); },
+    'Ctrl+Z': () => { if (window.performUndo) window.performUndo(); }
 };
 
 // Keyboard shortcuts configuration
@@ -79,9 +59,7 @@ const KEYBOARD_SHORTCUTS = {
             { keys: ['I'], description: 'Import' },
             { keys: ['P'], description: 'Templates' },
             { keys: ['←', '→'], description: 'Date nav' },
-            { keys: ['Ctrl+K'], description: 'Keyboard mode' },
             { keys: ['Ctrl+Z'], description: 'Undo' },
-            { keys: ['Ctrl+E'], description: 'Export' },
             { keys: ['?'], description: 'This help' },
             { keys: ['Esc'], description: 'Close / Clear' }
         ]

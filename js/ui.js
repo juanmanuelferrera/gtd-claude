@@ -5579,6 +5579,7 @@ function clearAllTemplateHighlights() {
 // Make functions globally available
 window.activateTemplateSelector = activateTemplateSelector;
 window.exitTemplateNavigation = exitTemplateNavigation;
+window.showView = showView;
 
 // Add test function to window for debugging
 window.testTemplateSelector = function() {
