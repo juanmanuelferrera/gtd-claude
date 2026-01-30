@@ -452,10 +452,18 @@ async function mergeTasksWithConflictResolution(serverTasks) {
         }
     }
     
-    // Add local-only tasks that don't exist on server
+    // Add local-only tasks that don't exist on server — but ONLY if recently created
+    // (tasks missing from server but old were likely deleted on another browser)
+    const recentThreshold = Date.now() - (60 * 1000); // 60 seconds
     for (const localTask of tasks) {
         if (!serverTaskMap.has(localTask.id)) {
-            mergedTasks.push(localTask);
+            const createdAt = new Date(localTask.createdAt || 0).getTime();
+            if (createdAt > recentThreshold) {
+                console.log('🆕 Preserving recently created local task:', localTask.id, localTask.title);
+                mergedTasks.push(localTask);
+            } else {
+                console.log('🗑️ Dropping local task not on server (likely deleted elsewhere):', localTask.id, localTask.title);
+            }
         }
     }
     
