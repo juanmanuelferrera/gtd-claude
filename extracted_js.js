@@ -25991,15 +25991,8 @@
             }
             
             // Enhanced Arrow Key Navigation System
-            if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-                // Skip if input field is focused
-                const activeElement = document.activeElement;
-                if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'SELECT')) {
-                    return;
-                }
-                
-                NavigationManager.handleKeyEvent(event);
-            }
+            // DISABLED: missing-functions.js now owns arrow key task navigation via capture phase
+            // NavigationManager.handleKeyEvent is no longer called to avoid duplicate handling
         });
     
 
