@@ -237,11 +237,9 @@ function purgeOldTombstones() {
 
     tasks = tasks.filter(t => {
         if ((t.isDeleted || t.status === 'deleted') && !t.is_deleted) {
-            // Check updatedAt, deletedAt, or createdAt
             const ts = new Date(t.deletedAt || t.updatedAt || t.createdAt || 0).getTime();
-            if (ts < cutoff) return false; // purge
+            if (ts < cutoff) return false;
         }
-        // Also handle underscore variant
         if (t.is_deleted) {
             const ts = new Date(t.deletedAt || t.updatedAt || t.createdAt || 0).getTime();
             if (ts < cutoff) return false;
@@ -253,6 +251,33 @@ function purgeOldTombstones() {
     const purged = before - tasks.length;
     if (purged > 0) {
         console.log(`🗑️ Purged ${purged} tombstones older than 30 days (${before} → ${tasks.length})`);
+    }
+}
+
+/**
+ * Deduplicate tasks array — keep only one copy per task ID (newest by updatedAt)
+ */
+function deduplicateTasks() {
+    const before = tasks.length;
+    const bestById = new Map();
+    for (const t of tasks) {
+        if (!t.id) continue;
+        const existing = bestById.get(t.id);
+        if (!existing) {
+            bestById.set(t.id, t);
+        } else {
+            const existTime = new Date(existing.updatedAt || existing.createdAt || 0).getTime();
+            const newTime = new Date(t.updatedAt || t.createdAt || 0).getTime();
+            if (newTime > existTime) {
+                bestById.set(t.id, t);
+            }
+        }
+    }
+    tasks = Array.from(bestById.values());
+    window.tasks = tasks;
+    const removed = before - tasks.length;
+    if (removed > 0) {
+        console.log(`🧹 Deduplicated: removed ${removed} duplicate tasks (${before} → ${tasks.length})`);
     }
 }
 
@@ -278,8 +303,9 @@ async function _uploadAllTasksInternal() {
     }
     
     try {
-        // Purge old tombstones before upload to prevent merge-grows-forever
+        // Purge old tombstones and deduplicate before upload
         purgeOldTombstones();
+        deduplicateTasks();
 
         // Log tombstone status before upload
         const tasksToUpload = tasks.map(task => cleanTaskForStorage(task));
@@ -379,6 +405,9 @@ async function _downloadAllTasksInternal() {
             await mergeTasksWithConflictResolution(serverTasks);
         }
         
+        // Deduplicate after merge/replace to clean any dupes from server
+        deduplicateTasks();
+
         // Clean up event registry and heal properties
         if (typeof cleanEventRegistry === 'function') {
             cleanEventRegistry();
@@ -386,7 +415,7 @@ async function _downloadAllTasksInternal() {
         if (typeof healEventProperties === 'function') {
             healEventProperties();
         }
-        
+
         // Save merged tasks
         if (typeof saveTasksToLocalStorage === 'function') {
             saveTasksToLocalStorage();
@@ -488,10 +517,15 @@ async function mergeTasksWithConflictResolution(serverTasks) {
     }
     
     // Add local-only tasks that don't exist on server
-    // (safe to preserve because deletes now use tombstones — deleted tasks stay in array with status='deleted')
+    // Only add ACTIVE local tasks — tombstones not on server were already purged server-side
     for (const localTask of tasks) {
         if (!serverTaskMap.has(localTask.id)) {
-            mergedTasks.push(localTask);
+            const isTombstone = localTask.isDeleted || localTask.is_deleted || localTask.status === 'deleted';
+            if (isTombstone) {
+                console.log(`🗑️ Merge: dropping local tombstone not on server: ${localTask.id}`);
+            } else {
+                mergedTasks.push(localTask);
+            }
         }
     }
     
