@@ -176,8 +176,8 @@ async function processOfflineQueue() {
         
         try {
             // Use existing sync function if available
-            if (typeof comprehensiveSync === 'function') {
-                await comprehensiveSync();
+            if (typeof performComprehensiveSync === 'function') {
+                await performComprehensiveSync();
                 console.log('✅ Comprehensive sync completed after queue processing');
             }
         } catch (error) {
@@ -265,10 +265,11 @@ async function executeQueuedOperation(operation) {
  */
 async function deleteTaskFromServer(taskId) {
     try {
-        const response = await fetchWithAuth(`${API_BASE}/api/tasks/${taskId}`, {
-            method: 'DELETE'
+        const response = await fetch(`${window.API_BASE}/tasks/${taskId}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
         });
-        
+
         return response.ok;
     } catch (error) {
         console.error('❌ Failed to delete task from server:', error);
@@ -281,10 +282,11 @@ async function deleteTaskFromServer(taskId) {
  */
 async function deleteListFromServer(listId) {
     try {
-        const response = await fetchWithAuth(`${API_BASE}/api/lists/${listId}`, {
-            method: 'DELETE'
+        const response = await fetch(`${window.API_BASE}/lists/${listId}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
         });
-        
+
         return response.ok;
     } catch (error) {
         console.error('❌ Failed to delete list from server:', error);
@@ -297,10 +299,11 @@ async function deleteListFromServer(listId) {
  */
 async function deleteTemplateFromServer(templateId) {
     try {
-        const response = await fetchWithAuth(`${API_BASE}/api/templates/${templateId}`, {
-            method: 'DELETE'
+        const response = await fetch(`${window.API_BASE}/templates/${templateId}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
         });
-        
+
         return response.ok;
     } catch (error) {
         console.error('❌ Failed to delete template from server:', error);
