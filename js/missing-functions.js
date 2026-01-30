@@ -2889,80 +2889,271 @@ function toggleSidebarLanguage() {
     if (typeof currentLanguage !== 'undefined') currentLanguage = lang;
     localStorage.setItem('preferredLanguage', lang);
 
+    // --- data-translate dictionary ---
     var dict = {
-            "Today": "Hoy", "Add": "Crear", "Week": "Semana", "Lists": "Listas",
-            "More": "Mas", "Month": "Mes", "General": "General", "Data": "Datos",
-            "Trash": "Papelera", "Backup": "Respaldo", "Shortcuts": "Atajos",
-            "Cancel": "Cancelar", "Import": "Importar", "Enable": "Activar",
-            "Quick Backup": "Respaldo Rapido", "Quick Backup JSON": "Respaldo Rapido JSON",
-            "Import JSON Backup": "Importar Respaldo JSON", "Import Data": "Importar Datos",
-            "Export Data": "Exportar Datos", "Delete All Tasks": "Eliminar Todas las Tareas",
-            "+ Add Task": "+ Nueva Tarea", "+ Add": "+ Nueva",
-            "Quick filters": "Filtros rapidos:", "TODAY": "HOY", "MONTH": "MES", "WEEK": "SEMANA",
-            "Recent Changes (Last 10)": "Cambios Recientes (Ultimos 10)",
-            "Press Ctrl+Z to undo or click any item to undo up to that point": "Pulsa Ctrl+Z para deshacer o haz clic en cualquier elemento",
-            "No Actions to Undo": "Sin Acciones para Deshacer",
-            "Make some changes to see undo history here": "Haz cambios para ver el historial aqui",
-            "Create Manual Backup": "Crear Respaldo Manual", "Import Tasks": "Importar Tareas",
-            "Paste your tasks below (one per line):": "Pega tus tareas abajo (una por linea):",
-            "Mobile UI Version": "Version Movil", "Keyboard-Only Mode": "Modo Solo Teclado",
-            "Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation": "Ocultar botones con atajos de teclado",
-            "Text Files": "Archivos de Texto",
-            "Enable Automatic Backups": "Habilitar Respaldos Automaticos",
-            "Automatically create backups based on your schedule": "Crear respaldos automaticamente segun tu horario",
-            "Choose Backup Types:": "Elegir Tipos de Respaldo:",
-            "Daily Backups": "Respaldos Diarios", "Weekly Backups": "Respaldos Semanales",
-            "Monthly Backups": "Respaldos Mensuales",
-            "Select which automatic backups you want to enable": "Selecciona que respaldos automaticos quieres habilitar",
-            "View Backup Stats": "Ver Estadisticas de Respaldo",
-            "Delete all tasks permanently - this cannot be undone": "Eliminar todas las tareas permanentemente",
-            "Quick Import": "Importacion Rapida",
-            "Choose the type of file you want to import:": "Elige el tipo de archivo a importar:",
-            "Import Backup": "Importar Respaldo", "Import TXT File": "Importar Archivo TXT",
-            "Supported formats: .json, .txt": "Formatos: .json, .txt"
-        };
+        "Today": "Hoy", "Add": "Crear", "Week": "Semana", "Lists": "Listas",
+        "More": "Mas", "Month": "Mes", "General": "General", "Data": "Datos",
+        "Trash": "Papelera", "Backup": "Respaldo", "Shortcuts": "Atajos",
+        "Cancel": "Cancelar", "Import": "Importar", "Enable": "Activar",
+        "Quick Backup": "Respaldo Rapido", "Quick Backup JSON": "Respaldo Rapido JSON",
+        "Import JSON Backup": "Importar Respaldo JSON", "Import Data": "Importar Datos",
+        "Export Data": "Exportar Datos", "Delete All Tasks": "Eliminar Todas las Tareas",
+        "+ Add Task": "+ Nueva Tarea", "+ Add": "+ Nueva",
+        "Quick filters": "Filtros rapidos:", "TODAY": "HOY", "MONTH": "MES", "WEEK": "SEMANA",
+        "Recent Changes (Last 10)": "Cambios Recientes (Ultimos 10)",
+        "Press Ctrl+Z to undo or click any item to undo up to that point": "Pulsa Ctrl+Z para deshacer o haz clic en cualquier elemento",
+        "No Actions to Undo": "Sin Acciones para Deshacer",
+        "Make some changes to see undo history here": "Haz cambios para ver el historial aqui",
+        "Create Manual Backup": "Crear Respaldo Manual", "Import Tasks": "Importar Tareas",
+        "Paste your tasks below (one per line):": "Pega tus tareas abajo (una por linea):",
+        "Mobile UI Version": "Version Movil", "Keyboard-Only Mode": "Modo Solo Teclado",
+        "Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation": "Ocultar botones con atajos de teclado",
+        "Text Files": "Archivos de Texto",
+        "Enable Automatic Backups": "Habilitar Respaldos Automaticos",
+        "Automatically create backups based on your schedule": "Crear respaldos automaticamente segun tu horario",
+        "Choose Backup Types:": "Elegir Tipos de Respaldo:",
+        "Daily Backups": "Respaldos Diarios", "Weekly Backups": "Respaldos Semanales",
+        "Monthly Backups": "Respaldos Mensuales",
+        "Select which automatic backups you want to enable": "Selecciona que respaldos automaticos quieres habilitar",
+        "View Backup Stats": "Ver Estadisticas de Respaldo",
+        "Delete all tasks permanently - this cannot be undone": "Eliminar todas las tareas permanentemente",
+        "Quick Import": "Importacion Rapida",
+        "Choose the type of file you want to import:": "Elige el tipo de archivo a importar:",
+        "Import Backup": "Importar Respaldo", "Import TXT File": "Importar Archivo TXT",
+        "Supported formats: .json, .txt": "Formatos: .json, .txt"
+    };
+    document.querySelectorAll('[data-translate]').forEach(function(el) {
+        var key = el.getAttribute('data-translate');
+        if (lang === 'es' && dict[key]) {
+            el.textContent = dict[key];
+        } else if (lang === 'en') {
+            el.textContent = key;
+        }
+    });
 
-        // Translate data-translate elements
-        document.querySelectorAll('[data-translate]').forEach(function(el) {
-            var key = el.getAttribute('data-translate');
-            if (lang === 'es' && dict[key]) {
-                el.textContent = dict[key];
-            } else if (lang === 'en') {
-                el.textContent = key;
-            }
-        });
+    // --- Button translations (with emoji prefix) ---
+    var btnMap = {
+        '← Prev': '← Ant.', 'Next →': 'Sig. →', '📥 Bulk': '📥 Lote',
+        '🕐 Now': '🕐 Ahora', '🔥 Today': '🔥 Hoy',
+        '💾 Quick Backup': '💾 Respaldo Rapido',
+        '📥 Import JSON': '📥 Importar JSON',
+        '✖ Clear': '✖ Borrar',
+        '📊 Review': '📊 Revisar',
+        '📂 Expand All': '📂 Expandir Todo',
+        '📁 Collapse All': '📁 Colapsar Todo',
+        '📄 Export Results': '📄 Exportar Resultados',
+        '+ New Section': '+ Nueva Seccion',
+        '📁 Toggle All': '📁 Alternar Todo',
+        '📋 Import TXT': '📋 Importar TXT',
+        '📤 Export Data': '📤 Exportar Datos',
+        '📥 Import Data': '📥 Importar Datos',
+        'Clear All': 'Borrar Todo',
+        '↶ Undo Last': '↶ Deshacer',
+        'Delete All Data': 'Borrar Todos los Datos',
+        '📤 Export JSON': '📤 Exportar JSON',
+        '📥 Import JSON': '📥 Importar JSON',
+        '💾 Create Backup': '💾 Crear Respaldo',
+        '🔄 Refresh': '🔄 Actualizar',
+        '🔄 Refresh Status': '🔄 Actualizar Estado',
+        '🗑️ Empty Trash': '🗑️ Vaciar Papelera',
+        '+ Add Item': '+ Nuevo Elemento',
+        '🗑️ Delete': '🗑️ Eliminar',
+        'Close': 'Cerrar',
+        'Save Task': 'Guardar Tarea',
+        'Delete': 'Eliminar',
+        'Reset': 'Reiniciar',
+        'Add': 'Crear',
+        'Apply': 'Aplicar',
+        'Save': 'Guardar',
+        'Save Changes': 'Guardar Cambios',
+        'Tomorrow': 'Manana',
+        '+1W': '+1S',
+        'Complete': 'Completar',
+        'Next Week': 'Proxima Semana'
+    };
+    var btnMapReverse = {};
+    Object.keys(btnMap).forEach(function(k) { btnMapReverse[btnMap[k]] = k; });
+    document.querySelectorAll('button:not(.nav-btn)').forEach(function(btn) {
+        var t = btn.textContent.trim();
+        if (lang === 'es' && btnMap[t]) {
+            btn.textContent = btnMap[t];
+        } else if (lang === 'en' && btnMapReverse[t]) {
+            btn.textContent = btnMapReverse[t];
+        }
+    });
 
-        // Translate buttons without data-translate
-        var btnMap = {
-            '← Prev': '← Ant.', 'Next →': 'Sig. →', '📥 Bulk': '📥 Lote',
-            '🕐 Now': '🕐 Ahora', '🔥 Today': '🔥 Hoy',
-            '💾 Quick Backup': '💾 Respaldo Rapido',
-            '📥 Import JSON': '📥 Importar JSON'
-        };
-        var btnMapReverse = {};
-        Object.keys(btnMap).forEach(function(k) { btnMapReverse[btnMap[k]] = k; });
-        document.querySelectorAll('button:not(.nav-btn)').forEach(function(btn) {
-            var t = btn.textContent.trim();
-            if (lang === 'es' && btnMap[t]) {
-                btn.textContent = btnMap[t];
-            } else if (lang === 'en' && btnMapReverse[t]) {
-                btn.textContent = btnMapReverse[t];
-            }
-        });
+    // --- Headings (h3, h4, h5) ---
+    var headingMap = {
+        '🔍 Search Tasks': '🔍 Buscar Tareas',
+        '📋 All Tasks': '📋 Todas las Tareas',
+        '🔄 Repeat Management': '🔄 Gestion de Repeticiones',
+        '📝 Lists Management': '📝 Gestion de Listas',
+        '⚙️ Settings & Statistics': '⚙️ Ajustes y Estadisticas',
+        '↶ Undo Management': '↶ Gestion de Deshacer',
+        '✏️ Edit Task': '✏️ Editar Tarea',
+        '📅 Select Date & Time': '📅 Seleccionar Fecha y Hora',
+        '⌨️ Keyboard Shortcuts': '⌨️ Atajos de Teclado',
+        '🗑️ Trash': '🗑️ Papelera',
+        '📋 List Items': '📋 Elementos de Lista',
+        '🚀 Quick Actions': '🚀 Acciones Rapidas',
+        '⚠️ Danger Zone': '⚠️ Zona Peligrosa',
+        '💾 Backup Status': '💾 Estado de Respaldos',
+        '📅 Last Backup Dates': '📅 Ultimas Fechas de Respaldo',
+        '📤 Import / Export JSON Backup': '📤 Importar / Exportar Respaldo JSON',
+        '📁 Recent Backup Files (Latest 3 of each type)': '📁 Archivos Recientes (Ultimos 3 de cada tipo)',
+        '🔧 Backup Management': '🔧 Gestion de Respaldos',
+        '📈 Productivity Insights': '📈 Productividad',
+        '📊 Task Completion Analysis': '📊 Analisis de Tareas',
+        '⚙️ Application Settings': '⚙️ Ajustes de Aplicacion',
+        '🖨️ Auto-Print Settings': '🖨️ Impresion Automatica',
+        '☁️ Sync Settings': '☁️ Ajustes de Sincronizacion',
+        '👤 Account Information': '👤 Informacion de Cuenta',
+        '🔧 Advanced Settings': '🔧 Ajustes Avanzados',
+        '💾 Backup Settings': '💾 Ajustes de Respaldo',
+        '📋 Advanced Import/Export': '📋 Importar/Exportar Avanzado',
+        '📤 Export Formats:': '📤 Formatos de Exportacion:'
+    };
+    var headingMapReverse = {};
+    Object.keys(headingMap).forEach(function(k) { headingMapReverse[headingMap[k]] = k; });
+    document.querySelectorAll('h3, h4, h5').forEach(function(el) {
+        var t = el.textContent.trim();
+        if (lang === 'es' && headingMap[t]) {
+            el.textContent = headingMap[t];
+        } else if (lang === 'en' && headingMapReverse[t]) {
+            el.textContent = headingMapReverse[t];
+        }
+    });
 
-        // Translate search placeholders
-        document.querySelectorAll('input[placeholder]').forEach(function(input) {
-            var p = input.placeholder;
-            if (lang === 'es') {
-                if (p === '🔍 Day') input.placeholder = '🔍 Dia';
-                else if (p === '🔍 Week') input.placeholder = '🔍 Semana';
-                else if (p === '🔍 Month') input.placeholder = '🔍 Mes';
-            } else {
-                if (p === '🔍 Dia') input.placeholder = '🔍 Day';
-                else if (p === '🔍 Semana') input.placeholder = '🔍 Week';
-                else if (p === '🔍 Mes') input.placeholder = '🔍 Month';
+    // --- Settings tabs ---
+    var tabMap = {
+        '📊 Overview': '📊 Resumen',
+        '💾 Backups': '💾 Respaldos',
+        '📈 Analytics': '📈 Analiticas',
+        '⚙️ Settings': '⚙️ Ajustes',
+        '🎛️ General': '🎛️ General',
+        '💾 Data': '💾 Datos',
+        '🗑️ Trash': '🗑️ Papelera',
+        '🛡️ Backup': '🛡️ Respaldo',
+        '⌨️ Shortcuts': '⌨️ Atajos'
+    };
+    var tabMapReverse = {};
+    Object.keys(tabMap).forEach(function(k) { tabMapReverse[tabMap[k]] = k; });
+
+    // --- Statistics labels ---
+    var statMap = {
+        'Total Tasks': 'Total Tareas', 'Completed': 'Completadas', 'Pending': 'Pendientes',
+        'Overdue': 'Atrasadas', 'Due Today': 'Para Hoy', 'Critical Tasks': 'Tareas Criticas',
+        'Daily Backups': 'Respaldos Diarios', 'Weekly Backups': 'Respaldos Semanales',
+        'Monthly Backups': 'Respaldos Mensuales', 'Manual Exports': 'Exportaciones Manuales'
+    };
+    var statMapReverse = {};
+    Object.keys(statMap).forEach(function(k) { statMapReverse[statMap[k]] = k; });
+
+    // --- Labels ---
+    var labelMap = {
+        'Date Format:': 'Formato de Fecha:',
+        'Time Format:': 'Formato de Hora:',
+        'Week Starts On:': 'Semana Empieza:',
+        'Sync Period:': 'Periodo de Sincronizacion:',
+        'Email:': 'Correo:',
+        'Language / Idioma': 'Idioma / Language',
+        'Select date & time...': 'Seleccionar fecha y hora...',
+        'Deleted tasks are stored here': 'Las tareas eliminadas se guardan aqui',
+        'No Items Yet': 'Sin Elementos',
+        'Add your first item to get started.': 'Agrega tu primer elemento.',
+        'No Tasks Yet!': 'Sin Tareas!',
+        'Add Your First Task': 'Crea Tu Primera Tarea',
+        'No Sections Yet!': 'Sin Secciones!',
+        'Create First Section': 'Crear Primera Seccion',
+        'Download all tasks as JSON file': 'Descargar todas las tareas como JSON',
+        'Upload JSON backup file': 'Subir archivo de respaldo JSON',
+        'HyperFiler Pro': 'HyperFiler Pro'
+    };
+    var labelMapReverse = {};
+    Object.keys(labelMap).forEach(function(k) { labelMapReverse[labelMap[k]] = k; });
+
+    // --- Keyboard shortcuts section ---
+    var kbMap = {
+        '📱 Navigation': '📱 Navegacion', '⚡ Actions': '⚡ Acciones',
+        'Today View': 'Vista Hoy', 'Week View': 'Vista Semana', 'Month View': 'Vista Mes',
+        'All Tasks + Search': 'Todas las Tareas + Buscar',
+        'Repeat View': 'Vista Repeticiones', 'Undo View': 'Vista Deshacer',
+        'Lists View': 'Vista Listas', 'Statistics View': 'Vista Estadisticas',
+        'New Task': 'Nueva Tarea', 'Search in Current View': 'Buscar en Vista Actual',
+        'Filter Navigation': 'Navegacion Filtros',
+        'Time Dropdown (Selected Task)': 'Hora (Tarea Seleccionada)',
+        'Open Trash': 'Abrir Papelera', 'Undo (up to 10 steps)': 'Deshacer (hasta 10 pasos)',
+        'Export All Data (text file)': 'Exportar Todos los Datos (texto)'
+    };
+    var kbMapReverse = {};
+    Object.keys(kbMap).forEach(function(k) { kbMapReverse[kbMap[k]] = k; });
+
+    // --- Review format options ---
+    var reviewMap = {
+        '📄 HTML Report': '📄 Informe HTML', '📝 Plain Text': '📝 Texto Plano',
+        '📄 PDF Document': '📄 Documento PDF', '📋 Org-mode': '📋 Org-mode'
+    };
+    var reviewMapReverse = {};
+    Object.keys(reviewMap).forEach(function(k) { reviewMapReverse[reviewMap[k]] = k; });
+
+    // --- Mobile task options ---
+    var mobileMap = {
+        'Complete': 'Completar', 'Tomorrow': 'Manana', 'Next Week': 'Proxima Semana', 'Delete': 'Eliminar'
+    };
+    var mobileMapReverse = {};
+    Object.keys(mobileMap).forEach(function(k) { mobileMapReverse[mobileMap[k]] = k; });
+
+    // --- Day headers ---
+    var dayMap = { 'Su': 'Do', 'Mo': 'Lu', 'Tu': 'Ma', 'We': 'Mi', 'Th': 'Ju', 'Fr': 'Vi', 'Sa': 'Sa' };
+    var dayMapReverse = {};
+    Object.keys(dayMap).forEach(function(k) { dayMapReverse[dayMap[k]] = k; });
+
+    // Merge all maps for span/label/small/p/div text translation
+    var allMaps = [tabMap, statMap, labelMap, kbMap, reviewMap, mobileMap];
+    var allReverse = [tabMapReverse, statMapReverse, labelMapReverse, kbMapReverse, reviewMapReverse, mobileMapReverse];
+
+    // Translate all generic text elements
+    document.querySelectorAll('span, small, p, label, div, td').forEach(function(el) {
+        if (el.children.length > 0 && el.tagName !== 'LABEL') return; // skip containers, but allow labels
+        var t = el.textContent.trim();
+        if (!t || t.length > 200) return;
+        for (var i = 0; i < allMaps.length; i++) {
+            if (lang === 'es' && allMaps[i][t]) {
+                el.textContent = allMaps[i][t];
+                return;
+            } else if (lang === 'en' && allReverse[i][t]) {
+                el.textContent = allReverse[i][t];
+                return;
             }
-        });
+        }
+    });
+
+    // Translate day headers in calendar
+    document.querySelectorAll('.day-header, .calendar-day-header').forEach(function(el) {
+        var t = el.textContent.trim();
+        if (lang === 'es' && dayMap[t]) el.textContent = dayMap[t];
+        else if (lang === 'en' && dayMapReverse[t]) el.textContent = dayMapReverse[t];
+    });
+
+    // --- Search placeholders ---
+    document.querySelectorAll('input[placeholder]').forEach(function(input) {
+        var p = input.placeholder;
+        if (lang === 'es') {
+            if (p === '🔍 Day') input.placeholder = '🔍 Dia';
+            else if (p === '🔍 Week') input.placeholder = '🔍 Semana';
+            else if (p === '🔍 Month') input.placeholder = '🔍 Mes';
+            else if (p.includes('Search by title')) input.placeholder = '🔍 Buscar por titulo, notas o fecha...';
+            else if (p.includes('Search tasks')) input.placeholder = '🔍 Buscar tareas...';
+            else if (p === 'Select date & time...') input.placeholder = 'Seleccionar fecha y hora...';
+        } else {
+            if (p === '🔍 Dia') input.placeholder = '🔍 Day';
+            else if (p === '🔍 Semana') input.placeholder = '🔍 Week';
+            else if (p === '🔍 Mes') input.placeholder = '🔍 Month';
+            else if (p.includes('Buscar por titulo')) input.placeholder = '🔍 Search by title, notes, or date...';
+            else if (p.includes('Buscar tareas')) input.placeholder = '🔍 Search tasks...';
+            else if (p === 'Seleccionar fecha y hora...') input.placeholder = 'Select date & time...';
+        }
+    });
 
     // Translate nav buttons (emoji + text + shortcut key)
     var navMap = {
