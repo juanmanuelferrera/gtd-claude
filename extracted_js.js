@@ -20171,6 +20171,20 @@
                 window.justRestoredBackup = true;
                 window.skipNextDownload = true;
                 window.backupRestoreInProgress = true; // Extra protection flag
+                // FAILSAFE: Auto-clear protection flag after 90 seconds no matter what
+                clearTimeout(window._backupRestoreFailsafeTimer);
+                window._backupRestoreFailsafeTimer = setTimeout(() => {
+                    if (window.backupRestoreInProgress) {
+                        console.warn('⚠️ FAILSAFE: backupRestoreInProgress was still true after 90s — force-clearing all protection flags');
+                        window.backupRestoreInProgress = false;
+                        window.justRestoredBackup = false;
+                        window.skipNextDownload = false;
+                        window.justModifiedTasks = false;
+                        window.justModifiedLists = false;
+                        window.justModifiedTemplates = false;
+                        window.backupForceOverwrite = false;
+                    }
+                }, 90000);
                 window.forceMandatoryRefresh = false; // Disable mandatory refresh during restore
                 window.backupForceOverwrite = isForceOverwriteBackup; // New flag for cloud overwrite
                 
