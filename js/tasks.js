@@ -1464,8 +1464,9 @@ function recordAction(type, taskId, taskTitle, before, after) {
     if (actionRegistry.length > MAX_ACTION_REGISTRY) {
         actionRegistry = actionRegistry.slice(-MAX_ACTION_REGISTRY);
     }
+    window.actionRegistry = actionRegistry;
     localStorage.setItem('actionRegistry', JSON.stringify(actionRegistry));
-    console.log(`📋 Action recorded: ${type} "${taskTitle}"`);
+    console.log(`📋 Action recorded: ${type} "${taskTitle}" (registry now has ${actionRegistry.length} entries)`);
 }
 
 window.actionRegistry = actionRegistry;
