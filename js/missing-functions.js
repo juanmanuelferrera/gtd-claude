@@ -3245,10 +3245,21 @@ function toggleSidebarLanguage() {
                 el.textContent = allText[t];
             } else if (lang === 'en' && allTextReverse[t]) {
                 el.textContent = allTextReverse[t];
+            } else {
+                // Try stripping leading emoji prefix
+                var emojiMatch = t.match(/^([\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}\u{2700}-\u{27BF}\u{2300}-\u{23FF}]+\s*)/u);
+                if (emojiMatch) {
+                    var stripped = t.slice(emojiMatch[1].length).trim();
+                    if (lang === 'es' && allText[stripped]) {
+                        el.textContent = emojiMatch[1] + allText[stripped];
+                    } else if (lang === 'en' && allTextReverse[stripped]) {
+                        el.textContent = emojiMatch[1] + allTextReverse[stripped];
+                    }
+                }
             }
         });
     }
-    translateElements('h3, h4, h5, strong, span, div.stat-label, button, option, label');
+    translateElements('h3, h4, h5, p, strong, span, div.stat-label, button, option, label');
 
     // For div elements with description text, translate if matches
     document.querySelectorAll('div').forEach(function(el) {
