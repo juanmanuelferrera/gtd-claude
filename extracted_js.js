@@ -7928,14 +7928,11 @@
                 
                 // Upload to server
                 await uploadAllTasks();
-                
-                // Clear flag after successful upload
-                setTimeout(() => {
-                    window.justModifiedTasks = false;
-                    console.log('🔓 Cleared justModifiedTasks flag');
-                }, 5000); // 5 seconds for reliable cross-browser sync
-                
+                window.justModifiedTasks = false;
+                console.log('🔓 Cleared justModifiedTasks flag');
+
             } catch (error) {
+                window.justModifiedTasks = false;
                 console.error('Error saving tasks to server:', error);
             }
         }
@@ -9464,8 +9461,7 @@
                 renderRepeatView();
                 renderCurrentView();
                 
-                // Reset sync flag after delay
-                setTimeout(() => { window.justModifiedTasks = false; }, 5000);
+                window.justModifiedTasks = false;
             }
         }
         
@@ -14543,12 +14539,8 @@
                 // Direct upload like Lists
                 window.justModifiedTasks = true;
                 await uploadAllTasks();
-                
-                // Clear flag
-                setTimeout(() => {
-                    window.justModifiedTasks = false;
-                    console.log('🔓 Cleared justModifiedTasks flag');
-                }, 5000);
+                window.justModifiedTasks = false;
+                console.log('🔓 Cleared justModifiedTasks flag');
                 
                 // Move to trash
                 moveToTrash(taskToDelete);
@@ -14727,8 +14719,8 @@
                         saveTasksToLocalStorage();
                         window.justModifiedTasks = true;
                         await uploadAllTasks();
-                        setTimeout(() => { window.justModifiedTasks = false; }, 5000);
-                        
+                        window.justModifiedTasks = false;
+
                         console.log(`✅ Created ${tasksToCreate.length} repeat tasks`);
                         
                     } else {
@@ -14754,11 +14746,9 @@
                         window.justModifiedTasks = true;
                         uploadAllTasks().then(() => {
                             console.log('✅ Task edit synced');
-                            setTimeout(() => {
-                                window.justModifiedTasks = false;
-                                console.log('🔓 Cleared justModifiedTasks flag');
-                            }, 5000);
+                            window.justModifiedTasks = false;
                         }).catch(error => {
+                            window.justModifiedTasks = false;
                             console.error('❌ Task edit sync failed:', error);
                         });
                     }
@@ -14841,11 +14831,9 @@
                         window.justModifiedTasks = true;
                         uploadAllTasks().then(() => {
                             console.log(`✅ ${tasksToCreate.length} repeat tasks synced`);
-                            setTimeout(() => {
-                                window.justModifiedTasks = false;
-                                console.log('🔓 Cleared justModifiedTasks flag');
-                            }, 5000);
+                            window.justModifiedTasks = false;
                         }).catch(error => {
+                            window.justModifiedTasks = false;
                             console.error('❌ Repeat tasks sync failed:', error);
                         });
                         
@@ -14884,11 +14872,9 @@
                         window.justModifiedTasks = true;
                         uploadAllTasks().then(() => {
                             console.log('✅ New task synced');
-                            setTimeout(() => {
-                                window.justModifiedTasks = false;
-                                console.log('🔓 Cleared justModifiedTasks flag');
-                            }, 5000);
+                            window.justModifiedTasks = false;
                         }).catch(error => {
+                            window.justModifiedTasks = false;
                             console.error('❌ New task sync failed:', error);
                         });
                     }
@@ -15022,7 +15008,7 @@
                         if (typeof uploadAllTasks === 'function') {
                             window.justModifiedTasks = true;
                             await uploadAllTasks();
-                            setTimeout(() => { window.justModifiedTasks = false; }, 5000);
+                            window.justModifiedTasks = false;
                             console.log('✅ Mobile Sync: Undo uploaded to cloud');
                         }
                     } catch (uploadError) {
@@ -19288,8 +19274,8 @@
                 console.log('🔄 BULK DELETE: Calling uploadAllTasks for', deletedCount, 'deleted tasks');
                 console.log('🔄 BULK DELETE: Current user auth state:', !!window.currentUser, 'User ID:', window.currentUser?.user?.id);
                 await uploadAllTasks();
-                setTimeout(() => { window.justModifiedTasks = false; }, 5000);
-                
+                window.justModifiedTasks = false;
+
                 // Move to trash if any tasks were deleted
                 if (tasksToDelete.length > 0) {
                     moveToTrash(tasksToDelete);
@@ -19381,7 +19367,7 @@
                         saveTasksToLocalStorage();
                         window.justModifiedTasks = true;
                         const syncSuccess = await uploadAllTasks();
-                        setTimeout(() => { window.justModifiedTasks = false; }, 5000);
+                        window.justModifiedTasks = false;
                         
                         if (syncSuccess) {
                             console.log('✅ SYNC SUCCESS: Background sync completed for', delayedCount, 'delayed task(s)');
@@ -24419,7 +24405,7 @@
                     try {
                         window.justModifiedTasks = true;
                         await uploadAllTasks();
-                        setTimeout(() => { window.justModifiedTasks = false; }, 5000);
+                        window.justModifiedTasks = false;
                         console.log('✅ Import sync completed');
                     } catch (syncError) {
                         console.error('❌ Import sync failed:', syncError);
