@@ -3930,47 +3930,62 @@ document.addEventListener('keydown', function(event) {
         return;
     }
 
-    // D or Delete: delete selected task
-    if ((event.key === 'Delete' || event.key === 'd' || event.key === 'D') && current) {
+    // Helper: get batch-selected tasks or fall back to current
+    var batchSelected = document.querySelectorAll('.task-card.selected, .task-item.selected');
+    var targets = batchSelected.length > 0 ? batchSelected : (current ? [current] : []);
+
+    // D or Delete: delete task(s)
+    if ((event.key === 'Delete' || event.key === 'd' || event.key === 'D') && targets.length > 0) {
         event.preventDefault();
-        var did = parseTaskId(current.getAttribute('data-task-id'));
-        if (did && typeof deleteTask === 'function') deleteTask(did);
+        if (targets.length > 1 && !confirm('Delete ' + targets.length + ' tasks?')) return;
+        targets.forEach(function(el) {
+            var did = parseTaskId(el.getAttribute('data-task-id'));
+            if (did && typeof deleteTask === 'function') deleteTask(did);
+        });
         return;
     }
 
-    // C: complete/uncomplete selected task
-    if ((event.key === 'c' || event.key === 'C') && current) {
+    // C: complete/uncomplete task(s)
+    if ((event.key === 'c' || event.key === 'C') && targets.length > 0) {
         event.preventDefault();
-        var cid = parseTaskId(current.getAttribute('data-task-id'));
-        if (cid && typeof toggleTaskStatus === 'function') {
-            toggleTaskStatus(cid);
-        } else if (cid && typeof completeTask === 'function') {
-            completeTask(cid);
-        }
+        targets.forEach(function(el) {
+            var cid = parseTaskId(el.getAttribute('data-task-id'));
+            if (cid && typeof toggleTaskStatus === 'function') {
+                toggleTaskStatus(cid);
+            } else if (cid && typeof completeTask === 'function') {
+                completeTask(cid);
+            }
+        });
         return;
     }
 
     // 1: delay +1 day
-    if (event.key === '1' && current) {
+    if (event.key === '1' && targets.length > 0) {
         event.preventDefault();
-        var d1id = parseTaskId(current.getAttribute('data-task-id'));
-        if (d1id && typeof delayTask === 'function') delayTask(d1id, 1);
+        targets.forEach(function(el) {
+            var d1id = parseTaskId(el.getAttribute('data-task-id'));
+            if (d1id && typeof delayTask === 'function') delayTask(d1id, 1);
+        });
         return;
     }
 
     // 7: delay +1 week
-    if (event.key === '7' && current) {
+    if (event.key === '7' && targets.length > 0) {
         event.preventDefault();
-        var d7id = parseTaskId(current.getAttribute('data-task-id'));
-        if (d7id && typeof delayTask === 'function') delayTask(d7id, 7);
+        targets.forEach(function(el) {
+            var d7id = parseTaskId(el.getAttribute('data-task-id'));
+            if (d7id && typeof delayTask === 'function') delayTask(d7id, 7);
+        });
         return;
     }
 
     // 3: delay +1 month
-    if (event.key === '3' && current) {
+    if (event.key === '3' && targets.length > 0) {
         event.preventDefault();
-        var d3id = parseTaskId(current.getAttribute('data-task-id'));
-        if (d3id && typeof delayTask === 'function') delayTask(d3id, 30);
+        targets.forEach(function(el) {
+            var d3id = parseTaskId(el.getAttribute('data-task-id'));
+            if (d3id && typeof delayTask === 'function') delayTask(d3id, 30);
+        });
         return;
     }
 
