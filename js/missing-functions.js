@@ -3239,7 +3239,11 @@ function toggleSidebarLanguage() {
         'Keyboard-Only Mode': 'Modo Solo Teclado',
         'Hide mouse buttons, show only keyboard shortcuts': 'Ocultar botones del raton, mostrar solo atajos de teclado',
         'Switch Mobile UI': 'Cambiar a UI Movil',
-        'Save Backup Settings': 'Guardar Ajustes de Respaldo'
+        'Save Backup Settings': 'Guardar Ajustes de Respaldo',
+        'Recent Actions': 'Acciones Recientes',
+        'Deleted Task': 'Tarea Eliminada',
+        'Refresh': 'Actualizar',
+        'recent actions': 'acciones recientes'
     };
     var allTextReverse = {};
     Object.keys(allText).forEach(function(k) { allTextReverse[allText[k]] = k; });
@@ -3270,7 +3274,7 @@ function toggleSidebarLanguage() {
             }
         });
     }
-    translateElements('h3, h4, h5, p, strong, span, div.stat-label, button, option, label');
+    translateElements('h2, h3, h4, h5, p, strong, span, div.stat-label, button, option, label');
 
     // For div elements with description text, translate if matches
     document.querySelectorAll('div').forEach(function(el) {
