@@ -961,12 +961,17 @@ function canSync() {
  */
 async function forceResync() {
     console.log('🔄 Forcing complete resync...');
-    
-    // Clear protection flags
+
+    // Clear ALL protection flags — force resync overrides everything
     window.justModifiedTasks = false;
     window.justModifiedLists = false;
     window.justModifiedTemplates = false;
-    
+    window.staleBrowserDetected = false;
+    window.skipInitialUpload = false;
+    window.backupRestoreInProgress = false;
+    window.justRestoredBackup = false;
+    window.skipNextDownload = false;
+
     // Enable mandatory refresh mode
     window.forceMandatoryRefresh = true;
     
