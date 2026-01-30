@@ -5683,7 +5683,8 @@ function importJSONBackup(input) {
                 showNotification('✅ Backup imported successfully!', 'success');
                 
                 // Close settings modal
-                closeSettings();
+                const settingsModal = document.getElementById('settingsModal');
+                if (settingsModal) settingsModal.style.display = 'none';
             }
         } catch (error) {
             console.error('Import error:', error);
