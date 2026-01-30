@@ -13,24 +13,27 @@ let syncPromise = null;
  * Prevents race conditions by queuing sync operations
  */
 async function withSyncLock(syncFunction, ...args) {
-    // If sync is already running, wait for it to complete
-    if (syncPromise) {
+    // If sync is already running, wait for it then run ours
+    while (syncPromise) {
         console.log('🔒 Sync already in progress, waiting...');
-        await syncPromise;
+        try { await syncPromise; } catch (_) { /* previous sync failed, proceed */ }
     }
-    
-    // Start new sync operation
-    syncPromise = syncFunction(...args);
-    
+
+    // Start new sync operation — assign BEFORE awaiting to claim the lock
+    const thisSync = syncFunction(...args);
+    syncPromise = thisSync;
+
     try {
-        const result = await syncPromise;
+        const result = await thisSync;
         return result;
     } catch (error) {
         console.error('❌ Sync operation failed:', error);
         throw error;
     } finally {
-        // Always clear the lock when done
-        syncPromise = null;
+        // Only clear if we still own the lock (another call hasn't replaced it)
+        if (syncPromise === thisSync) {
+            syncPromise = null;
+        }
     }
 }
 
