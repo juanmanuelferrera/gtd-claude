@@ -316,19 +316,34 @@ async function checkAuthentication() {
             window.justModifiedTasks = true; // Prevent auto-upload
             window.justModifiedLists = true; // Prevent auto-upload
             window.justModifiedTemplates = true; // Prevent auto-upload
-            
+
+            // FAILSAFE: Auto-clear stale browser flags after 90 seconds no matter what
+            clearTimeout(window._staleBrowserFailsafeTimer);
+            window._staleBrowserFailsafeTimer = setTimeout(() => {
+                if (window.staleBrowserDetected || window.skipInitialUpload) {
+                    console.warn('⚠️ FAILSAFE: staleBrowserDetected was still true after 90s — force-clearing');
+                    window.staleBrowserDetected = false;
+                    window.skipInitialUpload = false;
+                    window.justModifiedTasks = false;
+                    window.justModifiedLists = false;
+                    window.justModifiedTemplates = false;
+                }
+            }, 90000);
+
             // Force immediate download from cloud
             setTimeout(async () => {
                 try {
                     // 🔒 CRITICAL: Check if backup restore is in progress
                     if (window.backupRestoreInProgress || window.justRestoredBackup) {
                         console.log('🔒 STALE BROWSER: Download cancelled - backup restore in progress');
+                        window.staleBrowserDetected = false;
+                        window.skipInitialUpload = false;
                         return;
                     }
-                    
+
                     console.log('📥 STALE BROWSER: Starting forced download...');
                     window.forceMandatoryRefresh = true; // Override all protection flags
-                    
+
                     // Use the new stale browser recovery function for better sync coordination
                     if (typeof performStaleBrowserRecovery === 'function') {
                         await performStaleBrowserRecovery();
@@ -338,13 +353,21 @@ async function checkAuthentication() {
                         if (typeof downloadAllLists === 'function') await downloadAllLists();
                         if (typeof downloadAllTemplates === 'function') await downloadAllTemplates();
                     }
-                    
+
                     window.forceMandatoryRefresh = false;
                     window.staleBrowserDetected = false;
+                    window.skipInitialUpload = false;
                     localStorage.setItem('lastSyncTime', currentTime.toString());
                     console.log('✅ STALE BROWSER: Forced download completed');
                 } catch (error) {
                     console.error('❌ STALE BROWSER: Forced download failed:', error);
+                    // Clear flags on error so uploads aren't blocked forever
+                    window.staleBrowserDetected = false;
+                    window.skipInitialUpload = false;
+                    window.justModifiedTasks = false;
+                    window.justModifiedLists = false;
+                    window.justModifiedTemplates = false;
+                    console.warn('🔓 STALE BROWSER: Protection flags cleared after download failure');
                 }
             }, 1000); // Small delay to let UI load
         }

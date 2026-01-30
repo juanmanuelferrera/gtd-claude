@@ -2407,7 +2407,20 @@
                     window.justModifiedTasks = true; // Prevent auto-upload
                     window.justModifiedLists = true; // Prevent auto-upload
                     window.justModifiedTemplates = true; // Prevent auto-upload
-                    
+
+                    // FAILSAFE: Auto-clear stale browser flags after 90 seconds no matter what
+                    clearTimeout(window._staleBrowserFailsafeTimer);
+                    window._staleBrowserFailsafeTimer = setTimeout(() => {
+                        if (window.staleBrowserDetected || window.skipInitialUpload) {
+                            console.warn('⚠️ FAILSAFE: staleBrowserDetected was still true after 90s — force-clearing');
+                            window.staleBrowserDetected = false;
+                            window.skipInitialUpload = false;
+                            window.justModifiedTasks = false;
+                            window.justModifiedLists = false;
+                            window.justModifiedTemplates = false;
+                        }
+                    }, 90000);
+
                     // Force immediate download from cloud
                     setTimeout(async () => {
                         try {
@@ -2419,16 +2432,16 @@
                                 window.skipInitialUpload = false;
                                 return;
                             }
-                            
+
                             console.log('📥 STALE BROWSER: Starting forced cloud download...');
                             await downloadAllTasks();
                             await downloadAllLists();
                             await downloadAllTemplates();
                             console.log('✅ STALE BROWSER: Successfully refreshed all data from cloud');
-                            
+
                             // Update sync time
                             localStorage.setItem('lastSyncTime', currentTime.toString());
-                            
+
                             // Clear protection flags after successful download
                             setTimeout(() => {
                                 window.staleBrowserDetected = false;
@@ -2438,10 +2451,16 @@
                                 window.justModifiedTemplates = false;
                                 console.log('🔓 STALE BROWSER: Protection flags removed, normal sync enabled');
                             }, 5000); // 5 second protection after download
-                            
+
                         } catch (error) {
                             console.error('❌ STALE BROWSER: Failed to download fresh data:', error);
-                            // Keep protection flags on error
+                            // Clear flags on error so uploads aren't blocked forever
+                            window.staleBrowserDetected = false;
+                            window.skipInitialUpload = false;
+                            window.justModifiedTasks = false;
+                            window.justModifiedLists = false;
+                            window.justModifiedTemplates = false;
+                            console.warn('🔓 STALE BROWSER: Protection flags cleared after download failure');
                         }
                     }, 100); // Quick delay to ensure UI is ready
                     
