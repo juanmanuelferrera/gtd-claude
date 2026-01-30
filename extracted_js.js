@@ -377,7 +377,51 @@
                 'Toggle All': 'Alternar Todo',
                 'All Tasks': 'Todas las Tareas',
                 'CALENDAR VIEW': 'VISTA DE CALENDARIO',
-                'Untimed': 'Sin hora'
+                'Untimed': 'Sin hora',
+                'General': 'General',
+                'Data': 'Datos',
+                'Trash': 'Papelera',
+                'Backup': 'Respaldo',
+                'Shortcuts': 'Atajos',
+                'Mobile UI Version': 'Version Movil',
+                'Keyboard-Only Mode': 'Modo Solo Teclado',
+                'Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation': 'Ocultar botones con atajos de teclado, forzando navegacion solo con teclado',
+                'Enable': 'Activar',
+                'Text Files': 'Archivos de Texto',
+                'Import Data': 'Importar Datos',
+                'Export Data': 'Exportar Datos',
+                'Quick Backup': 'Respaldo Rapido',
+                'Quick Backup JSON': 'Respaldo Rapido JSON',
+                'Import JSON Backup': 'Importar Respaldo JSON',
+                'Enable Automatic Backups': 'Habilitar Respaldos Automaticos',
+                'Automatically create backups based on your schedule': 'Crear respaldos automaticamente segun tu horario',
+                'Choose Backup Types:': 'Elegir Tipos de Respaldo:',
+                'Daily Backups': 'Respaldos Diarios',
+                'Weekly Backups': 'Respaldos Semanales',
+                'Monthly Backups': 'Respaldos Mensuales',
+                'Select which automatic backups you want to enable': 'Selecciona que respaldos automaticos quieres habilitar',
+                'View Backup Stats': 'Ver Estadisticas de Respaldo',
+                'Delete all tasks permanently - this cannot be undone': 'Eliminar todas las tareas permanentemente - esto no se puede deshacer',
+                'Delete All Tasks': 'Eliminar Todas las Tareas',
+                'Quick Import': 'Importacion Rapida',
+                'Choose the type of file you want to import:': 'Elige el tipo de archivo que quieres importar:',
+                'Import Backup': 'Importar Respaldo',
+                'Import TXT File': 'Importar Archivo TXT',
+                'Supported formats: .json, .txt': 'Formatos soportados: .json, .txt',
+                'Import Tasks': 'Importar Tareas',
+                'Paste your tasks below (one per line):': 'Pega tus tareas abajo (una por linea):',
+                'Cancel': 'Cancelar',
+                'Import': 'Importar',
+                'Create Manual Backup': 'Crear Respaldo Manual',
+                'Month': 'Mes',
+                'Lists': 'Listas',
+                'More': 'Mas',
+                'Add': 'Crear',
+                'TODAY': 'HOY',
+                'MONTH': 'MES',
+                'WEEK': 'SEMANA',
+                'Bulk': 'Lote',
+                'Now': 'Ahora'
             }
         };
         function translateText(key) {
@@ -657,6 +701,10 @@
                     button.textContent = '✓ ' + translateText('Toggle All');
                 } else if (text.includes('📋 Import TXT')) {
                     button.textContent = '📋 Import TXT';
+                } else if (text === '📥 Bulk' || text === '📥 Lote') {
+                    button.textContent = '📥 ' + translateText('Bulk');
+                } else if (text === '🕐 Now' || text === '🕐 Ahora') {
+                    button.textContent = '🕐 ' + translateText('Now');
                 }
             });
             // Update mobile nav
