@@ -929,12 +929,47 @@ document.addEventListener('keydown', function(e) {
     }
 
     var newIdx = idx;
-    if (e.key === 'ArrowRight') newIdx = Math.min(idx + 1, cells.length - 1);
-    else if (e.key === 'ArrowLeft') newIdx = Math.max(idx - 1, 0);
-    else if (e.key === 'ArrowDown') newIdx = Math.min(idx + cols, cells.length - 1);
-    else if (e.key === 'ArrowUp') newIdx = Math.max(idx - cols, 0);
+    if (e.key === 'ArrowRight') newIdx = idx + 1;
+    else if (e.key === 'ArrowLeft') newIdx = idx - 1;
+    else if (e.key === 'ArrowDown') newIdx = idx + cols;
+    else if (e.key === 'ArrowUp') newIdx = idx - cols;
 
-    if (newIdx !== idx) {
+    // Calendar: navigate to prev/next month when going past edges
+    if (isDate && newIdx >= cells.length) {
+        var taskId = window.currentCalendarTaskId;
+        if (taskId && typeof changeCalendarMonth === 'function') {
+            changeCalendarMonth(taskId, 1);
+            setTimeout(function() {
+                var newContainer = window.currentDateDropdown;
+                if (!newContainer) return;
+                var newCells = Array.from(newContainer.querySelectorAll('[onclick*="selectInlineCalendarDate"]'));
+                var focusIdx = Math.min(newIdx - cells.length, newCells.length - 1);
+                if (newCells[focusIdx]) { newCells[focusIdx].setAttribute('tabindex', '0'); newCells[focusIdx].focus(); }
+            }, 50);
+        }
+        return;
+    }
+    if (isDate && newIdx < 0) {
+        var taskIdPrev = window.currentCalendarTaskId;
+        if (taskIdPrev && typeof changeCalendarMonth === 'function') {
+            changeCalendarMonth(taskIdPrev, -1);
+            setTimeout(function() {
+                var newContainer = window.currentDateDropdown;
+                if (!newContainer) return;
+                var newCells = Array.from(newContainer.querySelectorAll('[onclick*="selectInlineCalendarDate"]'));
+                var focusIdx = Math.max(newCells.length + newIdx, 0);
+                if (newCells[focusIdx]) { newCells[focusIdx].setAttribute('tabindex', '0'); newCells[focusIdx].focus(); }
+            }, 50);
+        }
+        return;
+    }
+
+    // Clamp for time grid (no wrapping)
+    if (!isDate) {
+        newIdx = Math.max(0, Math.min(newIdx, cells.length - 1));
+    }
+
+    if (newIdx !== idx && newIdx >= 0 && newIdx < cells.length) {
         cells[idx].removeAttribute('tabindex');
         cells[newIdx].setAttribute('tabindex', '0');
         cells[newIdx].focus();
