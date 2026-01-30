@@ -369,9 +369,9 @@ async function _downloadAllTasksInternal() {
         
         console.log('📥 Downloaded', serverTasks.length, 'tasks from server');
         
-        // MANDATORY REFRESH: Direct replacement with server data
-        if (window.forceMandatoryRefresh || window.staleBrowserMode) {
-            console.log('🚨 MANDATORY REFRESH: Directly replacing with server data');
+        // MANDATORY REFRESH or FRESH BROWSER: Direct replacement with server data
+        if (window.forceMandatoryRefresh || window.staleBrowserMode || isFreshBrowser) {
+            console.log(`🚨 ${isFreshBrowser ? 'FRESH BROWSER' : 'MANDATORY REFRESH'}: Directly replacing with server data (${serverTasks.length} tasks)`);
             tasks = serverTasks;
             window.tasks = tasks; // Sync to window
         } else {
