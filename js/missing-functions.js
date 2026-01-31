@@ -5707,6 +5707,16 @@ function importJSONBackup(input) {
                 window.justRestoredBackup = true;
                 window.backupRestoreInProgress = true;
 
+                // Warn user if they try to leave before sync completes
+                var _beforeUnloadHandler = function(ev) {
+                    if (window.backupRestoreInProgress) {
+                        ev.preventDefault();
+                        ev.returnValue = 'Import is still syncing to server. Leaving now may lose data.';
+                        return ev.returnValue;
+                    }
+                };
+                window.addEventListener('beforeunload', _beforeUnloadHandler);
+
                 // Import tasks
                 tasks = importedTasks;
                 window.tasks = tasks;
@@ -5728,25 +5738,28 @@ function importJSONBackup(input) {
                 // Refresh the view
                 if (typeof sortTasks === 'function') sortTasks();
                 if (typeof renderCurrentView === 'function') renderCurrentView();
-                showNotification('✅ Backup imported successfully!', 'success');
+                showNotification('⏳ Syncing import to server...', 'info');
 
-                // Upload to server so other browsers see the import
-                setTimeout(async () => {
+                // Close settings modal
+                const settingsModal = document.getElementById('settingsModal');
+                if (settingsModal) settingsModal.style.display = 'none';
+
+                // Upload to server immediately (await to ensure it completes)
+                (async () => {
                     try {
                         if (typeof uploadAllTasks === 'function') await uploadAllTasks();
                         if (typeof uploadAllLists === 'function') await uploadAllLists();
                         if (typeof uploadAllTemplates === 'function') await uploadAllTemplates();
                         console.log('✅ Import synced to server');
+                        showNotification('✅ Backup imported and synced!', 'success');
                     } catch (err) {
                         console.error('❌ Import sync failed:', err);
+                        showNotification('⚠️ Imported locally but sync failed. Do not refresh yet.', 'error');
                     }
                     window.justRestoredBackup = false;
                     window.backupRestoreInProgress = false;
-                }, 1000);
-
-                // Close settings modal
-                const settingsModal = document.getElementById('settingsModal');
-                if (settingsModal) settingsModal.style.display = 'none';
+                    window.removeEventListener('beforeunload', _beforeUnloadHandler);
+                })();
             }
         } catch (error) {
             console.error('Import error:', error);
