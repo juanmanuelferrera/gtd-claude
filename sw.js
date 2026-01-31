@@ -2,7 +2,7 @@
 // Version 1.0 - App Shell Caching Only
 
 const CACHE_NAME = 'hyperfiler-v1.4.1-shell';
-const CACHE_VERSION = '20260130-dedup-merge';
+const CACHE_VERSION = '20260131-v4143-stable';
 
 // App Shell - Critical files for offline functionality
 const APP_SHELL = [
