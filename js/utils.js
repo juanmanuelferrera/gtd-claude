@@ -72,28 +72,6 @@ function formatDate(dateStr) {
     })();
 }
 
-function formatDateForDisplay(dateStr) {
-    return DateUtils.formatDateForDisplay ? DateUtils.formatDateForDisplay(dateStr) : (() => {
-        if (!dateStr) return 'No date';
-        const date = new Date(dateStr);
-        const today = new Date();
-        const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
-        const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-        
-        if (dateStr === getLocalDateString(today)) {
-            return 'Today';
-        } else if (dateStr === getLocalDateString(tomorrow)) {
-            return 'Tomorrow';
-        } else if (dateStr === getLocalDateString(yesterday)) {
-            return 'Yesterday';
-        } else {
-            return date.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric'
-            });
-        }
-    })();
-}
 
 function formatTime(timeStr) {
     return DateUtils.formatTime ? DateUtils.formatTime(timeStr) : (() => {

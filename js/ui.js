@@ -667,19 +667,6 @@ function nextMonth() {
 /**
  * Display update functions
  */
-function updateCurrentTodayDisplay() {
-    console.log('🔍 DEBUG: updateCurrentTodayDisplay FIRST VERSION (line 726) executing');
-    const todayDateElement = document.getElementById('todayDate');
-    if (todayDateElement) {
-        const options = { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        };
-        todayDateElement.textContent = currentTodayDate.toLocaleDateString('en-US', options);
-    }
-}
 
 function updateCurrentWeekDisplay() {
     const weekDateElement = document.getElementById('weekDate');
@@ -4534,18 +4521,9 @@ async function toggleListSection(sectionId) {
     }
 }
 
-async function saveListSections() {
-    try {
-        localStorage.setItem('gtd_list_sections', JSON.stringify(window.listSections));
-        console.log('💾 Saved list sections to localStorage');
-    } catch (error) {
-        console.error('Error saving list sections:', error);
-    }
-}
 
 // Make functions globally available
 window.toggleListSection = toggleListSection;
-window.saveListSections = saveListSections;
 
 // Export the updateTodayHeader function
 window.updateTodayHeader = updateTodayHeader;

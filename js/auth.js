@@ -14,17 +14,6 @@ let redirectTimeout = null;
  * Security Functions - XSS Prevention
  */
 
-/**
- * Escape HTML to prevent XSS attacks
- * @param {string} text - Text to escape
- * @returns {string} - Escaped HTML
- */
-function escapeHtml(text) {
-    if (typeof text !== 'string') return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
 
 /**
  * Safely set innerHTML with HTML escaping

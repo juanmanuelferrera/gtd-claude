@@ -520,30 +520,7 @@ let modalSelectedTime = null;
 let modalCurrentMonth = new Date().getMonth();
 let modalCurrentYear = new Date().getFullYear();
 
-// Navigate calendar months
-function navigateCalendar(direction) {
-    modalCurrentMonth += direction;
-    
-    if (modalCurrentMonth < 0) {
-        modalCurrentMonth = 11;
-        modalCurrentYear--;
-    } else if (modalCurrentMonth > 11) {
-        modalCurrentMonth = 0;
-        modalCurrentYear++;
-    }
-    
-    updateCalendarDisplay();
-}
 
-// Go to today's date
-function goToCalendarToday() {
-    const today = new Date();
-    modalCurrentMonth = today.getMonth();
-    modalCurrentYear = today.getFullYear();
-    modalSelectedDate = getLocalDateString(today);
-    updateCalendarDisplay();
-    updateSelectedDisplay();
-}
 
 // Set quick date
 function setQuickDate(daysFromToday) {
@@ -562,70 +539,7 @@ function setQuickDate(daysFromToday) {
     updateSelectedDisplay();
 }
 
-// Select time
-function selectTime(time) {
-    console.log('🕐 Time selected:', time);
-    
-    // Update unified modal variables
-    modalSelectedTime = time;
-    
-    // Update legacy modal variables for backward compatibility
-    window.selectedModalTime = time;
-    
-    // Update visual state of time buttons
-    document.querySelectorAll('.time-btn').forEach(btn => {
-        if (btn.textContent === time) {
-            btn.style.background = '#007AFF';
-            btn.style.color = 'white';
-        } else {
-            // Reset to original colors based on time period
-            const hour = parseInt(time.split(':')[0]);
-            if (hour < 12) {
-                btn.style.background = '#e3f2fd';
-                btn.style.color = '#1976d2';
-            } else if (hour < 18) {
-                btn.style.background = '#fff3e0';
-                btn.style.color = '#f57c00';
-            } else {
-                btn.style.background = '#f3e5f5';
-                btn.style.color = '#7b1fa2';
-            }
-        }
-    });
-    
-    updateSelectedDisplay();
-    console.log('✅ Time selection updated');
-}
 
-// Clear selected time
-function clearSelectedTime() {
-    console.log('🚫 Clearing selected time');
-    
-    // Update unified modal variables
-    modalSelectedTime = null;
-    
-    // Update legacy modal variables for backward compatibility
-    window.selectedModalTime = '';
-    
-    // Reset all time button styles
-    document.querySelectorAll('.time-btn').forEach(btn => {
-        const btnTime = btn.textContent;
-        const hour = parseInt(btnTime.split(':')[0]);
-        if (hour < 12) {
-            btn.style.background = '#e3f2fd';
-            btn.style.color = '#1976d2';
-        } else if (hour < 18) {
-            btn.style.background = '#fff3e0';
-            btn.style.color = '#f57c00';
-        } else {
-            btn.style.background = '#f3e5f5';
-            btn.style.color = '#7b1fa2';
-        }
-    });
-    
-    updateSelectedDisplay();
-    console.log('✅ Time cleared');
-}
 
 // Update calendar display
 function updateCalendarDisplay() {
