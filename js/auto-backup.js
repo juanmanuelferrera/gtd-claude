@@ -105,10 +105,26 @@ function _countTasks(data) {
         const tasksStr = data['gtd_tasks'];
         if (tasksStr) {
             const tasks = JSON.parse(tasksStr);
-            return Array.isArray(tasks) ? tasks.length : Object.keys(tasks).length;
+            const arr = Array.isArray(tasks) ? tasks : Object.values(tasks);
+            return arr.filter(t => !t.isDeleted && t.status !== 'deleted').length;
         }
     } catch (e) {}
     return 0;
+}
+
+function _countTasksDetailed(data) {
+    try {
+        const tasksStr = data['gtd_tasks'];
+        if (tasksStr) {
+            const tasks = JSON.parse(tasksStr);
+            const arr = Array.isArray(tasks) ? tasks : Object.values(tasks);
+            const total = arr.length;
+            const deleted = arr.filter(t => t.isDeleted || t.status === 'deleted').length;
+            const active = total - deleted;
+            return { active, deleted, total };
+        }
+    } catch (e) {}
+    return { active: 0, deleted: 0, total: 0 };
 }
 
 async function _pruneSnapshots(db) {
@@ -188,12 +204,13 @@ async function getSnapshotById(id) {
 function getSnapshotPreview(snapshot) {
     const data = JSON.parse(snapshot.data);
     const currentData = _collectSnapshotData();
-    const currentCount = _countTasks(currentData);
-    const snapCount = snapshot.taskCount || _countTasks(data);
-    const keys = Object.keys(data);
-    const diff = snapCount - currentCount;
+    const snapDetail = _countTasksDetailed(data);
+    const currentDetail = _countTasksDetailed(currentData);
+    const diff = snapDetail.active - currentDetail.active;
     const diffStr = diff === 0 ? 'same count' : (diff > 0 ? `+${diff} more` : `${diff} fewer`);
-    return { snapCount, currentCount, diffStr, keyCount: keys.length };
+    const hasLists = !!data['gtd_list_sections'];
+    const hasTemplates = !!data['gtd_custom_templates'];
+    return { snapDetail, currentDetail, diffStr, keyCount: Object.keys(data).length, hasLists, hasTemplates };
 }
 
 async function restoreSnapshot(id) {
@@ -419,17 +436,19 @@ async function toggleBackupPreview(id) {
         if (!snap) { contentEl.textContent = 'Snapshot not found'; return; }
 
         const info = getSnapshotPreview(snap);
-        const date = new Date(snap.timestamp);
         const age = _formatAge(Date.now() - snap.timestamp);
+        const includes = [info.hasLists ? 'Lists' : '', info.hasTemplates ? 'Templates' : ''].filter(Boolean).join(', ') || 'None';
 
         contentEl.innerHTML = `
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <div><strong>Tasks in backup:</strong> ${info.snapCount}</div>
-                <div><strong>Current tasks:</strong> ${info.currentCount}</div>
-                <div><strong>Difference:</strong> <span style="color: ${info.snapCount !== info.currentCount ? '#e67e22' : '#28a745'}">${info.diffStr}</span></div>
+                <div><strong>Active tasks:</strong> ${info.snapDetail.active}</div>
+                <div><strong>Current active:</strong> ${info.currentDetail.active}</div>
+                <div><strong>Deleted in backup:</strong> ${info.snapDetail.deleted}</div>
+                <div><strong>Difference:</strong> <span style="color: ${info.snapDetail.active !== info.currentDetail.active ? '#e67e22' : '#28a745'}">${info.diffStr}</span></div>
                 <div><strong>Age:</strong> ${age}</div>
-                <div><strong>Data keys:</strong> ${info.keyCount}</div>
                 <div><strong>Size:</strong> ${((snap.size || 0) / 1024).toFixed(1)} KB</div>
+                <div><strong>Includes:</strong> ${includes}</div>
+                <div><strong>Data keys:</strong> ${info.keyCount}</div>
             </div>
             <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e9ecef; font-size: 12px; color: #6c757d;">
                 A safety backup will be created automatically before restoring.
