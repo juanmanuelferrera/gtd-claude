@@ -530,22 +530,15 @@ async function mergeTasksWithConflictResolution(serverTasks) {
     }
     
     // Add local-only tasks that don't exist on server
-    // Only keep if created recently (not yet synced) — otherwise it was deleted on another browser
-    const recentThreshold = 5 * 60 * 1000; // 5 minutes
-    const now = Date.now();
+    // Keep active local tasks (may not have been uploaded yet)
+    // Drop tombstones not on server (already purged server-side)
     for (const localTask of tasks) {
         if (!serverTaskMap.has(localTask.id)) {
             const isTombstone = localTask.isDeleted || localTask.is_deleted || localTask.status === 'deleted';
             if (isTombstone) {
                 console.log(`🗑️ Merge: dropping local tombstone not on server: ${localTask.id}`);
             } else {
-                const createdAt = new Date(localTask.createdAt || 0).getTime();
-                if ((now - createdAt) < recentThreshold) {
-                    console.log(`🆕 Merge: keeping recently created local task: ${localTask.id}`);
-                    mergedTasks.push(localTask);
-                } else {
-                    console.log(`🗑️ Merge: dropping local task not on server (deleted elsewhere): ${localTask.id}`);
-                }
+                mergedTasks.push(localTask);
             }
         }
     }
