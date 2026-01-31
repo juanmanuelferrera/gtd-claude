@@ -708,6 +708,10 @@ async function performComprehensiveSync() {
     return withSyncLock(async () => {
         console.log('🔄 Starting comprehensive sync...');
         try {
+            // Create pre-sync backup before downloading remote data
+            if (typeof createSnapshot === 'function') {
+                try { await createSnapshot('pre-sync'); } catch(e) { console.warn('Pre-sync backup failed:', e); }
+            }
             // Download latest data FIRST to get other browsers' changes
             await _downloadAllTasksInternal();
             await _downloadAllListsInternal();

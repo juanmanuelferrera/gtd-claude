@@ -1830,6 +1830,36 @@
                 <!-- Backup Tab -->
                 <div id="settings-tab-backup" class="settings-tab-content" style="display: none; padding: 0;">
 
+                <!-- IndexedDB Auto-Backup Section -->
+                <div class="settings-section" style="padding: 20px; border-bottom: 1px solid #e9ecef;">
+                    <h4 style="margin: 0 0 15px 0; color: #1E4FE6; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                        💾 Local Auto-Backups (IndexedDB)
+                    </h4>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #495057;">
+                            <input type="checkbox" id="autoBackupIndexedDBToggle" onchange="setAutoBackupEnabled(this.checked); renderBackupSnapshotList()">
+                            Enable auto-backup (every 5 min)
+                        </label>
+                    </div>
+                    <div id="indexeddb-backup-list" style="margin-top: 10px;">
+                        <p style="color: #6c757d; text-align: center;">Loading backups...</p>
+                    </div>
+                    <script>
+                        // Initialize toggle state and render list when backup tab is shown
+                        (function(){
+                            const orig = window.switchSettingsTab;
+                            window.switchSettingsTab = function(tab) {
+                                if (orig) orig(tab);
+                                if (tab === 'backup') {
+                                    const toggle = document.getElementById('autoBackupIndexedDBToggle');
+                                    if (toggle) toggle.checked = isAutoBackupEnabled();
+                                    renderBackupSnapshotList();
+                                }
+                            };
+                        })();
+                    </script>
+                </div>
+
                 <!-- Backup Settings Section -->
                 <div class="settings-section" style="padding: 20px;">
                     <h4 style="margin: 0 0 15px 0; color: #1E4FE6; font-size: 16px; display: flex; align-items: center; gap: 8px;">
@@ -2264,6 +2294,7 @@
     <script src="js/task-bulk-ops.js?v=20260131-split"></script>
     <script src="js/backup-import.js?v=20260131-split"></script>
     <script src="js/settings-ui.js?v=20260131-split"></script>
+    <script src="js/auto-backup.js?v=20260131-backup"></script>
     <script src="js/missing-functions.js?v=20260131-split"></script>
     
     <!-- Tawk.to Live Chat Integration with automatic language detection -->
