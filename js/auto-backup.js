@@ -37,7 +37,7 @@ function openBackupDB() {
 
 function _collectSnapshotData() {
     const data = {};
-    const keys = ['gtd_tasks', 'gtd_list_sections', 'gtd_custom_templates', 'gtd_settings', 'gtd_preferences'];
+    const keys = ['gtd_tasks', 'gtd_list_sections', 'gtd_custom_templates', 'gtd_settings', 'gtd_preferences', 'actionRegistry'];
     for (const key of keys) {
         const val = localStorage.getItem(key);
         if (val !== null) data[key] = val;
@@ -45,7 +45,7 @@ function _collectSnapshotData() {
     // Also grab any date-keyed task keys
     for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && (k.startsWith('tasks_') || k.startsWith('gtd_'))) {
+        if (k && (k.startsWith('tasks_') || k.startsWith('gtd_') || k === 'actionRegistry')) {
             if (!(k in data)) data[k] = localStorage.getItem(k);
         }
     }
@@ -227,7 +227,7 @@ async function restoreSnapshot(id) {
         const keysToRemove = [];
         for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
-            if (k && (k.startsWith('tasks_') || k.startsWith('gtd_'))) {
+            if (k && (k.startsWith('tasks_') || k.startsWith('gtd_') || k === 'actionRegistry')) {
                 keysToRemove.push(k);
             }
         }
