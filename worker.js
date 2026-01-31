@@ -1814,33 +1814,6 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
         });
       }
       
-      // Layer 2.5: CRITICAL - Bulk staleness detection (check percentage of stale tasks)
-      const staleTasks = clientTimes.filter(time => (currentServerTime - time) > staleAgeMs);
-      const stalePercentage = (staleTasks.length / clientTimes.length) * 100;
-      
-      // If more than 30% of tasks are stale, reject the upload
-      if (stalePercentage > 30) {
-        console.log('🚫 BULK STALENESS: Rejecting upload with too many stale tasks');
-        console.log('🚫 Stale percentage:', stalePercentage.toFixed(1) + '%');
-        console.log('🚫 Stale tasks:', staleTasks.length, 'out of', clientTimes.length);
-        console.log('🚫 Client oldest:', new Date(clientOldestTime).toISOString());
-        console.log('🚫 Client latest:', new Date(clientLatestTime).toISOString());
-        
-        return new Response(JSON.stringify({
-          error: 'bulk_stale_data',
-          message: 'Upload contains too many stale tasks. This may indicate a stale browser trying to overwrite fresh data.',
-          serverLatest: serverLatestUpdate,
-          clientLatest: new Date(clientLatestTime).toISOString(),
-          clientOldest: new Date(clientOldestTime).toISOString(),
-          stalePercentage: stalePercentage,
-          staleTaskCount: staleTasks.length,
-          totalTaskCount: clientTimes.length
-        }), {
-          status: 409, // Conflict
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-      
       // Layer 3: Clock skew protection (detect clients with wrong system time)
       const futureThreshold = 2 * 60 * 60 * 1000; // 2 hours in future
       if (clientLatestTime > currentServerTime + futureThreshold) {
