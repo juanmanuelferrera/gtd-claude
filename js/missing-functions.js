@@ -5666,44 +5666,91 @@ function quickBackupJSON() {
 function importJSONBackup(input) {
     const file = input.files[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const backup = JSON.parse(e.target.result);
-            
-            if (!backup.tasks || !Array.isArray(backup.tasks)) {
-                throw new Error('Invalid backup format');
+
+            // Detect format: {tasks: [...]} or flat object {id: value, ...} or raw array [...]
+            let importedTasks;
+            let importedTemplates;
+            let importedLists;
+
+            if (backup.tasks && Array.isArray(backup.tasks)) {
+                // Standard format: {tasks: [...], templates/customTemplates: {...}, listSections: [...]}
+                importedTasks = backup.tasks;
+                importedTemplates = backup.customTemplates || backup.templates;
+                importedLists = backup.listSections;
+            } else if (Array.isArray(backup)) {
+                // Raw array of tasks
+                importedTasks = backup;
+            } else if (typeof backup === 'object' && !Array.isArray(backup)) {
+                // Flat object — check if values look like tasks
+                const values = Object.values(backup);
+                if (values.length > 0 && typeof values[0] === 'object' && values[0].title) {
+                    importedTasks = values;
+                } else {
+                    console.error('Unrecognized backup format:', Object.keys(backup).slice(0, 5));
+                    alert('Unrecognized backup format. Expected {tasks: [...]} or an array of tasks.');
+                    return;
+                }
             }
-            
-            if (confirm(`Import ${backup.tasks.length} tasks from backup?\nThis will replace your current data!`)) {
+
+            if (!importedTasks || importedTasks.length === 0) {
+                alert('No tasks found in backup file.');
+                return;
+            }
+
+            if (confirm(`Import ${importedTasks.length} tasks from backup?\nThis will replace your current data!`)) {
+                // Set flag to prevent download from overwriting import
+                window.justRestoredBackup = true;
+                window.backupRestoreInProgress = true;
+
                 // Import tasks
-                tasks = backup.tasks || [];
+                tasks = importedTasks;
+                window.tasks = tasks;
                 localStorage.setItem('gtdTasks', JSON.stringify(tasks));
-                
+
                 // Import templates
-                if (backup.customTemplates) {
-                    customTemplates = backup.customTemplates;
+                if (importedTemplates) {
+                    customTemplates = importedTemplates;
                     localStorage.setItem('customTemplates', JSON.stringify(customTemplates));
                 }
-                
+
                 // Import lists
-                if (backup.listSections) {
-                    listSections = backup.listSections;
+                if (importedLists) {
+                    listSections = importedLists;
+                    window.listSections = listSections;
                     localStorage.setItem('listSections', JSON.stringify(listSections));
                 }
-                
+
                 // Refresh the view
-                renderCurrentView();
+                if (typeof sortTasks === 'function') sortTasks();
+                if (typeof renderCurrentView === 'function') renderCurrentView();
                 showNotification('✅ Backup imported successfully!', 'success');
-                
+
+                // Upload to server so other browsers see the import
+                setTimeout(async () => {
+                    try {
+                        if (typeof uploadAllTasks === 'function') await uploadAllTasks();
+                        if (typeof uploadAllLists === 'function') await uploadAllLists();
+                        if (typeof uploadAllTemplates === 'function') await uploadAllTemplates();
+                        console.log('✅ Import synced to server');
+                    } catch (err) {
+                        console.error('❌ Import sync failed:', err);
+                    }
+                    window.justRestoredBackup = false;
+                    window.backupRestoreInProgress = false;
+                }, 1000);
+
                 // Close settings modal
                 const settingsModal = document.getElementById('settingsModal');
                 if (settingsModal) settingsModal.style.display = 'none';
             }
         } catch (error) {
             console.error('Import error:', error);
-            showNotification('❌ Failed to import backup', 'error');
+            showNotification('❌ Failed to import backup: ' + error.message, 'error');
         }
     };
     reader.readAsText(file);
