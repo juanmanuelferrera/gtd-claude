@@ -37,10 +37,6 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    console.log('🚀 HYPERFILER v4.14.2 - Stable Release [Deploy-20260131-revert] [' + new Date().toISOString() + ']');
-    console.log('🖥️ Viewport Width: ' + window.innerWidth + 'px | Height: ' + window.innerHeight + 'px');
-    console.log('📱 Device Type: ' + (window.innerWidth > 768 ? 'DESKTOP' : 'MOBILE') + ' (breakpoint: 769px)');
-    
     // Register Service Worker for offline support
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -131,6 +127,21 @@
     </script>
 
     <link rel="stylesheet" href="css/styles.css?v=20260130-compact-help">
+    <script>
+    // Gate all console output behind debug flag (before any JS files load)
+    window.HYPERFILER_DEBUG = false;
+    (function() {
+        var methods = ['log', 'table', 'warn'];
+        var originals = {};
+        methods.forEach(function(m) {
+            originals[m] = console[m];
+            console[m] = function() {
+                if (window.HYPERFILER_DEBUG) originals[m].apply(console, arguments);
+            };
+        });
+        window._originalConsoleLog = originals.log;
+    })();
+    </script>
     <script src="js/dark-mode.js?v=20250901-lightmode"></script>
 
 </head>
