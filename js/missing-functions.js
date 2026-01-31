@@ -217,9 +217,7 @@ document.addEventListener('keydown', function(event) {
     // Space: toggle batch selection
     if (event.key === ' ' && current) {
         event.preventDefault();
-        event.stopImmediatePropagation();
         current.classList.toggle('selected');
-        current.scrollIntoView({ block: 'center', behavior: 'smooth' });
         return;
     }
     // Helper: re-select task at given index after view re-renders
