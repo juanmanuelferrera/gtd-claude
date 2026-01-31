@@ -1107,7 +1107,7 @@
     <!-- Custom Date/Time Picker Modal -->
     <div id="dateTimeModal" class="modal" onclick="closeDateTimeModal(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
         <!-- Unified Responsive Date/Time Modal -->
-        <div class="modal-content" onclick="event.stopPropagation()" style="width: 90%; max-width: 460px; height: auto; max-height: 85vh; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); padding: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="width: 90%; max-width: 460px; height: auto; max-height: 75vh; position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); padding: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, sans-serif; display: flex; flex-direction: column;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #2E5BFF 0%, #5856D6 100%); color: white; padding: 20px; text-align: center; border-radius: 16px 16px 0 0;">
@@ -1115,7 +1115,7 @@
             </div>
 
             <!-- Main Content -->
-            <div style="padding: 24px; overflow-y: auto; max-height: calc(85vh - 140px);">
+            <div style="padding: 24px; overflow-y: auto; flex: 1; min-height: 0;">
                 
                 <!-- Calendar Section -->
                 <div style="margin-bottom: 24px;">
@@ -1195,7 +1195,7 @@
             </div>
 
             <!-- Footer Actions -->
-            <div style="background: #f8f9fa; padding: 16px 24px; border-radius: 0 0 16px 16px; border-top: 1px solid #e9ecef;">
+            <div style="background: #f8f9fa; padding: 16px 24px; border-radius: 0 0 16px 16px; border-top: 1px solid #e9ecef; flex-shrink: 0;">
                 <div style="display: flex; gap: 12px;">
                     <button onclick="closeDateTimeModal()" style="flex: 1; background: white; color: #6c757d; border: 1px solid #e9ecef; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">Cancel</button>
                     <button onclick="applyDateTime()" style="flex: 1; background: #2E5BFF; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">Apply</button>
