@@ -15,21 +15,6 @@
         outline-offset: -2px;
         background-color: rgba(46, 91, 255, 0.08) !important;
     }
-    /* Keyboard-only mode: hide mouse-oriented UI elements */
-    body.keyboard-only-mode .task-actions,
-    body.keyboard-only-mode .action-buttons,
-    body.keyboard-only-mode .task-action-btn,
-    body.keyboard-only-mode button[onclick*="deleteTask"],
-    body.keyboard-only-mode button[onclick*="delayTask"],
-    body.keyboard-only-mode .section-action-btn,
-    body.keyboard-only-mode .list-action-btn,
-    body.keyboard-only-mode .mobile-task-actions {
-        display: none !important;
-    }
-    body.keyboard-only-mode .task-card,
-    body.keyboard-only-mode .task-item {
-        cursor: pointer;
-    }
     </style>
     
     <!-- PWA Manifest -->
@@ -1308,10 +1293,6 @@
                                 <span style="font-weight: 500; font-size: 13px;" data-translate="Create Manual Backup">Create Manual Backup</span>
                                 <kbd style="background: #ffeaa7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + B</kbd>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff3cd; border-radius: 6px;">
-                                <span style="font-weight: 500; font-size: 13px;">Toggle Keyboard-Only Mode</span>
-                                <kbd style="background: #ffeaa7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + K</kbd>
-                            </div>
                         </div>
                     </div>
                     
@@ -1560,23 +1541,6 @@
             <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
                 <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">⌨️ Keyboard & Advanced</h4>
                 
-                <!-- Keyboard-Only Mode -->
-                <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #dc3545;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                        <div>
-                            <span style="font-size: 14px; font-weight: 500; color: #495057;">Keyboard-Only Mode</span>
-                            <div style="font-size: 12px; color: #6c757d; margin-top: 2px;">Hide mouse buttons, show only keyboard shortcuts</div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+K</kbd>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="keyboardOnlyMode" onchange="toggleKeyboardOnlyMode()">
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                
                 <!-- Advanced Functions -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                     <button onclick="toggleMobileUIVersion()" style="background: #17a2b8; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#138496'" onmouseout="this.style.background='#17a2b8'">
@@ -1721,26 +1685,6 @@
                     </div>
                 </div>
 
-                <!-- Keyboard-Only Mode Section -->
-                <div class="settings-section" style="padding: 15px 20px; border-bottom: 1px solid #e0e0e0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h4 style="margin: 0; color: #1E4FE6; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                                ⌨️ <span data-translate="Keyboard-Only Mode">Keyboard-Only Mode</span>
-                            </h4>
-                            <p style="margin: 5px 0 0 0; font-size: 12px; color: #666; max-width: 300px;">
-                                <span data-translate="Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation">Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation</span>
-                            </p>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" id="keyboardOnlyMode" onchange="toggleKeyboardOnlyMode(this.checked)" style="transform: scale(1.2);">
-                            <label for="keyboardOnlyMode" style="font-size: 14px; color: #495057; font-weight: 600; cursor: pointer;">
-                                <span data-translate="Enable">Enable</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                </div>
 
 
                 <!-- Auto-Print Settings Section -->
@@ -2093,23 +2037,6 @@
                         </div>
                     </div>
                     
-                    <!-- Keyboard-Only Mode -->
-                    <div style="margin-top: 20px; background: #f8f9fa; padding: 16px; border-radius: 8px; border-left: 4px solid #dc3545;">
-                        <h5 style="margin: 0 0 12px 0; color: #dc3545; font-size: 14px; font-weight: 600;">⌨️ Keyboard-Only Mode</h5>
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                            <span style="font-size: 13px; color: #495057;">Hide mouse buttons, show only keyboard shortcuts</span>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+K</kbd>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="keyboardOnlyMode" onchange="toggleKeyboardOnlyMode()">
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <p style="margin: 0; font-size: 12px; color: #6c757d; line-height: 1.4;">
-                            When enabled, only keyboard shortcuts and essential navigation will be visible. Perfect for power users who prefer keyboard-driven workflows.
-                        </p>
-                    </div>
 
                     <!-- Pro Tips -->
                     <div style="margin-top: 20px; background: linear-gradient(135deg, #2E5BFF 0%, #1E4FE6 100%); color: white; padding: 16px; border-radius: 8px;">
@@ -2117,7 +2044,6 @@
                         <ul style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.5;">
                             <li>Use <kbd style="background: rgba(255,255,255,0.2); padding: 1px 4px; border-radius: 2px;">@</kbd> followed by project names for quick templates</li>
                             <li>Combine <kbd style="background: rgba(255,255,255,0.2); padding: 1px 4px; border-radius: 2px;">N</kbd> + natural language for smart task entry</li>
-                            <li>Use <kbd style="background: rgba(255,255,255,0.2); padding: 1px 4px; border-radius: 2px;">Enter</kbd> on navigation buttons for keyboard-only workflow</li>
                         </ul>
                     </div>
                 </div>
@@ -2332,7 +2258,7 @@
     <script src="js/natural-language.js?v=1736363000"></script>
     <script src="js/patches.js?v=1736363000"></script>
 
-    <script src="js/missing-functions.js?v=20260131-scroll-center"></script>
+    <script src="js/missing-functions.js?v=20260131-rm-kbonly"></script>
     
     <!-- Tawk.to Live Chat Integration with automatic language detection -->
 

@@ -3024,8 +3024,7 @@ function toggleSidebarLanguage() {
         "Make some changes to see undo history here": "Haz cambios para ver el historial aqui",
         "Create Manual Backup": "Crear Respaldo Manual", "Import Tasks": "Importar Tareas",
         "Paste your tasks below (one per line):": "Pega tus tareas abajo (una por linea):",
-        "Mobile UI Version": "Version Movil", "Keyboard-Only Mode": "Modo Solo Teclado",
-        "Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation": "Ocultar botones con atajos de teclado",
+        "Mobile UI Version": "Version Movil",
         "Text Files": "Archivos de Texto",
         "Enable Automatic Backups": "Habilitar Respaldos Automaticos",
         "Automatically create backups based on your schedule": "Crear respaldos automaticamente segun tu horario",
@@ -3354,7 +3353,6 @@ function toggleSidebarLanguage() {
         'Export Week HTML': 'Exportar Semana HTML',
         'Export Month HTML': 'Exportar Mes HTML',
         'Keyboard & Advanced': 'Teclado y Avanzado',
-        'Keyboard-Only Mode': 'Modo Solo Teclado',
         'Hide mouse buttons, show only keyboard shortcuts': 'Ocultar botones del raton, mostrar solo atajos de teclado',
         'Switch Mobile UI': 'Cambiar a UI Movil',
         'Save Backup Settings': 'Guardar Ajustes de Respaldo',
@@ -3552,17 +3550,6 @@ function loadSettingsValues() {
         // Initialize auto-print controls visibility
         if (typeof toggleAutoPrint === 'function') {
             toggleAutoPrint();
-        }
-        
-        // Load keyboard-only mode setting
-        const keyboardOnlyMode = localStorage.getItem('keyboardOnlyMode') === 'true';
-        const keyboardOnlyModeElement = document.getElementById('keyboardOnlyMode');
-        if (keyboardOnlyModeElement) {
-            keyboardOnlyModeElement.checked = keyboardOnlyMode;
-        }
-        // Apply keyboard-only mode immediately
-        if (typeof applyKeyboardOnlyMode === 'function') {
-            applyKeyboardOnlyMode(keyboardOnlyMode);
         }
         
         // Load tab display mode setting (default to 'both' for icon + text)
@@ -3868,19 +3855,6 @@ async function handleDrop(e) {
 }
 
 // Settings helper functions
-function applyKeyboardOnlyMode(keyboardOnlyMode) {
-    // CSS handles hiding via body.keyboard-only-mode (survives re-renders)
-    if (keyboardOnlyMode) {
-        document.body.classList.add('keyboard-only-mode');
-    } else {
-        document.body.classList.remove('keyboard-only-mode');
-    }
-    if (typeof showInlineNotification === 'function') {
-        showInlineNotification(keyboardOnlyMode ? '⌨️ Keyboard-only mode ON' : '🖱️ Keyboard-only mode OFF', 'success');
-    }
-    console.log('Keyboard-only mode:', keyboardOnlyMode ? 'enabled' : 'disabled');
-}
-
 function applyTabDisplayMode(mode) {
     const tabs = document.querySelectorAll('.nav-tab');
     tabs.forEach(tab => {
@@ -3949,23 +3923,6 @@ function toggleAutoPrint() {
     }
 }
 
-function toggleKeyboardOnlyMode(forceState) {
-    var enabled;
-    if (typeof forceState === 'boolean') {
-        enabled = forceState;
-    } else {
-        // Toggle current state
-        var current = localStorage.getItem('keyboardOnlyMode');
-        enabled = !(current === 'true');
-    }
-    localStorage.setItem('keyboardOnlyMode', String(enabled));
-    // Sync all checkboxes with this id
-    document.querySelectorAll('#keyboardOnlyMode, input[id="keyboardOnlyMode"]').forEach(function(cb) {
-        cb.checked = enabled;
-    });
-    applyKeyboardOnlyMode(enabled);
-}
-
 // Return task ID as-is (IDs are strings in the tasks array)
 function parseTaskId(raw) {
     return raw;
@@ -3981,13 +3938,6 @@ document.addEventListener('keydown', function(event) {
 
     // Skip if a date or time dropdown overlay is open (let clicks/keys go to the dropdown)
     if (window.currentDateDropdown || window.currentTimeDropdown) {
-        return;
-    }
-
-    // Ctrl+K: toggle keyboard-only mode
-    if (event.ctrlKey && (event.key === 'k' || event.key === 'K') && !event.altKey && !event.metaKey) {
-        event.preventDefault();
-        toggleKeyboardOnlyMode();
         return;
     }
 
