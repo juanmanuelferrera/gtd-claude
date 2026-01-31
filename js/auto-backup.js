@@ -4,8 +4,10 @@
 const BACKUP_DB_NAME = 'HyperFilerBackups';
 const BACKUP_DB_VERSION = 1;
 const BACKUP_STORE = 'snapshots';
-const MAX_SNAPSHOTS = 30;
+const MAX_ROLLING_SNAPSHOTS = 12; // rolling auto/manual/pre-sync (1 hour at 5min)
+const MAX_HOURLY_SNAPSHOTS = 24;
 const MAX_DAILY_SNAPSHOTS = 7;
+const MAX_WEEKLY_SNAPSHOTS = 4;
 const AUTO_BACKUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 let _backupDB = null;
@@ -112,20 +114,30 @@ function _countTasks(data) {
 async function _pruneSnapshots(db) {
     const all = await listSnapshots(); // sorted newest-first
 
-    // Separate daily snapshots from rolling snapshots
-    const daily = all.filter(s => s.reason === 'daily');
-    const rolling = all.filter(s => s.reason !== 'daily');
+    const tiers = {
+        weekly:  { snaps: [], max: MAX_WEEKLY_SNAPSHOTS },
+        daily:   { snaps: [], max: MAX_DAILY_SNAPSHOTS },
+        hourly:  { snaps: [], max: MAX_HOURLY_SNAPSHOTS },
+    };
+    const rolling = [];
+
+    for (const s of all) {
+        if (tiers[s.reason]) tiers[s.reason].snaps.push(s);
+        else rolling.push(s);
+    }
 
     const toDelete = [];
 
-    // Prune rolling snapshots beyond MAX_SNAPSHOTS
-    if (rolling.length > MAX_SNAPSHOTS) {
-        toDelete.push(...rolling.slice(MAX_SNAPSHOTS));
+    // Prune each tier
+    for (const tier of Object.values(tiers)) {
+        if (tier.snaps.length > tier.max) {
+            toDelete.push(...tier.snaps.slice(tier.max));
+        }
     }
 
-    // Prune daily snapshots beyond MAX_DAILY_SNAPSHOTS
-    if (daily.length > MAX_DAILY_SNAPSHOTS) {
-        toDelete.push(...daily.slice(MAX_DAILY_SNAPSHOTS));
+    // Prune rolling (auto, manual, pre-sync, pre-restore)
+    if (rolling.length > MAX_ROLLING_SNAPSHOTS) {
+        toDelete.push(...rolling.slice(MAX_ROLLING_SNAPSHOTS));
     }
 
     if (toDelete.length === 0) return;
@@ -241,24 +253,47 @@ async function deleteAllSnapshots() {
 
 // ── Auto-Backup Timer ──
 
-async function _checkDailyBackup() {
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    const lastDaily = localStorage.getItem('lastDailyBackupDate');
-    if (lastDaily === today) return;
+async function _checkTimedBackups() {
+    const now = new Date();
+    const currentHour = now.toISOString().slice(0, 13); // YYYY-MM-DDTHH
+    const currentDay = now.toISOString().slice(0, 10);  // YYYY-MM-DD
+    const currentWeek = currentDay + '-W' + _getWeekNumber(now);
 
-    await createSnapshot('daily');
-    localStorage.setItem('lastDailyBackupDate', today);
-    console.log(`📅 Daily backup created for ${today}`);
+    // Hourly
+    if (localStorage.getItem('lastHourlyBackup') !== currentHour) {
+        await createSnapshot('hourly');
+        localStorage.setItem('lastHourlyBackup', currentHour);
+        console.log(`⏰ Hourly backup created for ${currentHour}`);
+    }
+
+    // Daily
+    if (localStorage.getItem('lastDailyBackupDate') !== currentDay) {
+        await createSnapshot('daily');
+        localStorage.setItem('lastDailyBackupDate', currentDay);
+        console.log(`📅 Daily backup created for ${currentDay}`);
+    }
+
+    // Weekly
+    if (localStorage.getItem('lastWeeklyBackup') !== currentWeek) {
+        await createSnapshot('weekly');
+        localStorage.setItem('lastWeeklyBackup', currentWeek);
+        console.log(`📆 Weekly backup created for ${currentWeek}`);
+    }
+}
+
+function _getWeekNumber(d) {
+    const oneJan = new Date(d.getFullYear(), 0, 1);
+    return Math.ceil(((d - oneJan) / 86400000 + oneJan.getDay() + 1) / 7);
 }
 
 function startAutoBackup() {
     stopAutoBackup();
-    // Check for daily backup on start
-    _checkDailyBackup().catch(e => console.warn('Daily backup check failed:', e));
+    // Check timed backups on start
+    _checkTimedBackups().catch(e => console.warn('Timed backup check failed:', e));
 
     _autoBackupTimer = setInterval(async () => {
-        // Check daily backup each interval too (covers overnight tabs)
-        await _checkDailyBackup().catch(() => {});
+        // Check hourly/daily/weekly each interval
+        await _checkTimedBackups().catch(() => {});
 
         const data = _collectSnapshotData();
         const hash = _hashData(data);
@@ -312,7 +347,7 @@ async function renderBackupSnapshotList() {
         return;
     }
 
-    const reasonLabels = { auto: '🔄 Auto', daily: '📅 Daily', 'pre-sync': '🔒 Pre-Sync', manual: '✋ Manual', 'pre-restore': '🛡️ Pre-Restore' };
+    const reasonLabels = { auto: '🔄 Auto', hourly: '⏰ Hourly', daily: '📅 Daily', weekly: '📆 Weekly', 'pre-sync': '🔒 Pre-Sync', manual: '✋ Manual', 'pre-restore': '🛡️ Pre-Restore' };
 
     let html = `<div style="margin-bottom: 10px; color: #6c757d; font-size: 13px;">${snapshots.length} backup(s) &middot; ${(stats.totalSize / 1024).toFixed(1)} KB total</div>`;
     html += '<div style="display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto;">';
