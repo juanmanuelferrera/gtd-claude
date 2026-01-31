@@ -1,8 +1,8 @@
 // Service Worker for HyperFiler Pro
 // Version 1.0 - App Shell Caching Only
 
-const CACHE_NAME = 'hyperfiler-v1.4.2-shell';
-const CACHE_VERSION = '20260201-persist-view';
+const CACHE_NAME = 'hyperfiler-v1.5.0-shell';
+const CACHE_VERSION = '20260201-network-first';
 
 // App Shell - Critical files for offline functionality
 const APP_SHELL = [
@@ -92,28 +92,24 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // App shell files - cache first
+  // App shell files - network first, fall back to cache (ensures fresh JS on reload)
   if (APP_SHELL.some(shellFile => url.pathname.endsWith(shellFile.replace('/', '')))) {
     event.respondWith(
-      caches.match(event.request, { ignoreSearch: true })
-        .then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
+      fetch(event.request, { redirect: 'follow' })
+        .then((response) => {
+          if (response.status === 200 && response.type === 'basic') {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseClone);
+              });
           }
-
-          return fetch(event.request, { redirect: 'follow' })
-            .then((response) => {
-              if (response.status === 200 && response.type === 'basic') {
-                const responseClone = response.clone();
-                caches.open(CACHE_NAME)
-                  .then((cache) => {
-                    cache.put(event.request, responseClone);
-                  });
-              }
-              return response;
-            })
-            .catch((error) => {
-              console.error('Service Worker: Network fetch failed:', error);
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request, { ignoreSearch: true })
+            .then((cachedResponse) => {
+              if (cachedResponse) return cachedResponse;
               return new Response('Offline - Please check your connection', {
                 status: 503,
                 statusText: 'Service Unavailable'
