@@ -1814,32 +1814,7 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
         });
       }
       
-      // Layer 2.5: CRITICAL - Bulk staleness detection (check percentage of stale tasks)
-      const staleTasks = clientTimes.filter(time => (currentServerTime - time) > staleAgeMs);
-      const stalePercentage = (staleTasks.length / clientTimes.length) * 100;
-      
-      // If more than 30% of tasks are stale, reject the upload
-      if (stalePercentage > 30) {
-        console.log('🚫 BULK STALENESS: Rejecting upload with too many stale tasks');
-        console.log('🚫 Stale percentage:', stalePercentage.toFixed(1) + '%');
-        console.log('🚫 Stale tasks:', staleTasks.length, 'out of', clientTimes.length);
-        console.log('🚫 Client oldest:', new Date(clientOldestTime).toISOString());
-        console.log('🚫 Client latest:', new Date(clientLatestTime).toISOString());
-        
-        return new Response(JSON.stringify({
-          error: 'bulk_stale_data',
-          message: 'Upload contains too many stale tasks. This may indicate a stale browser trying to overwrite fresh data.',
-          serverLatest: serverLatestUpdate,
-          clientLatest: new Date(clientLatestTime).toISOString(),
-          clientOldest: new Date(clientOldestTime).toISOString(),
-          stalePercentage: stalePercentage,
-          staleTaskCount: staleTasks.length,
-          totalTaskCount: clientTimes.length
-        }), {
-          status: 409, // Conflict
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
+      // Bulk staleness check removed - was causing sync divergence
       
       // Layer 3: Clock skew protection (detect clients with wrong system time)
       const futureThreshold = 2 * 60 * 60 * 1000; // 2 hours in future
@@ -2453,37 +2428,7 @@ async function handleGetTasksSecure(userId, request, env, corsHeaders) {
     
     console.log('📥 SECURE DOWNLOAD: Retrieved', tasks.length, 'tasks for user:', userId);
     
-    // CRITICAL: Validate server data staleness before sending
-    if (tasks.length > 0) {
-      const taskTimes = tasks.map(t => new Date(t.updated_at || t.created_at || 0).getTime());
-      const oldestTime = Math.min(...taskTimes);
-      const currentTime = Date.now();
-      const oldestAge = currentTime - oldestTime;
-      const maxStaleAge = 7 * 24 * 60 * 60 * 1000; // 7 days
-      
-      // Check if server data is stale
-      if (oldestAge > maxStaleAge) {
-        const staleHours = Math.round(oldestAge / (1000 * 60 * 60));
-        console.log('🚫 SECURE DOWNLOAD: Server data contains stale tasks, oldest:', staleHours, 'hours');
-        
-        // Filter out stale tasks instead of rejecting entire download
-        const freshTasks = tasks.filter(task => {
-          const taskTime = new Date(task.updated_at || task.created_at || 0).getTime();
-          const taskAge = currentTime - taskTime;
-          return taskAge <= maxStaleAge;
-        });
-        
-        console.log('✅ SECURE DOWNLOAD: Filtered', tasks.length - freshTasks.length, 'stale tasks, returning', freshTasks.length, 'fresh tasks');
-        
-        return new Response(JSON.stringify({ 
-          tasks: freshTasks,
-          filteredStale: tasks.length - freshTasks.length,
-          totalOriginal: tasks.length
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-    }
+    // Return all tasks without filtering
     
     console.log('✅ SECURE DOWNLOAD: All tasks are fresh, returning', tasks.length, 'tasks');
     
