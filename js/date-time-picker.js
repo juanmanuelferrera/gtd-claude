@@ -572,11 +572,13 @@ async function applyDateTime() {
             
             console.log('✅ Date/time applied successfully');
             
-            // Auto-save the task after applying date/time
-            if (typeof saveTaskEdit === 'function') {
-                console.log('💾 Auto-saving task after date/time change');
+            // Auto-save via edit modal only if the edit modal is actually open
+            const taskModal = document.getElementById('taskModal');
+            const editModalOpen = taskModal && taskModal.style.display === 'block';
+            if (editModalOpen && typeof saveTaskEdit === 'function') {
+                console.log('💾 Auto-saving task after date/time change (edit modal open)');
                 await saveTaskEdit();
-                
+
                 // Close the edit modal as well since we've saved
                 console.log('🚪 Closing edit modal after saving');
                 if (typeof closeTaskModal === 'function') {
