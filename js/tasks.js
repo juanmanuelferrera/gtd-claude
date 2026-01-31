@@ -66,11 +66,19 @@ function saveEventRegistry() {
 function markAsEvent(taskId) {
     eventTaskIds.add(taskId);
     saveEventRegistry();
+    const task = tasks.find(t => t.id === taskId);
+    if (task && typeof recordAction === 'function') {
+        recordAction('edit', taskId, task.title, { ...task, isEvent: false }, { ...task, isEvent: true });
+    }
 }
 
 function unmarkAsEvent(taskId) {
     eventTaskIds.delete(taskId);
     saveEventRegistry();
+    const task = tasks.find(t => t.id === taskId);
+    if (task && typeof recordAction === 'function') {
+        recordAction('edit', taskId, task.title, { ...task, isEvent: true }, { ...task, isEvent: false });
+    }
 }
 
 function isRegisteredEvent(taskId) {

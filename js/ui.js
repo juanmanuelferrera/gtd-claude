@@ -3159,15 +3159,20 @@ function completeTask(taskId, event) {
     if (taskIndex !== -1) {
         const taskBefore = { ...tasks[taskIndex] };
         console.log('📋 Task before deletion:', taskBefore);
-        
+
         tasks[taskIndex].status = 'deleted';
         tasks[taskIndex].isDeleted = true;
         tasks[taskIndex].deletedAt = new Date().toISOString();
         tasks[taskIndex].updatedAt = new Date().toISOString();
 
+        // Record action for undo
+        if (typeof recordAction === 'function') {
+            recordAction('complete', taskId, taskBefore.title, taskBefore, { ...tasks[taskIndex] });
+        }
+
         console.log('📋 Task after deletion (tombstone):', tasks[taskIndex]);
         console.log('💾 Saving tasks...');
-        
+
         // Save changes
         saveTasksToLocalStorage();
 
@@ -3320,11 +3325,15 @@ function deleteSelectedTasks() {
             console.log('📍 Task index found:', taskIndex);
             
             if (taskIndex !== -1) {
+                const taskBefore = { ...tasks[taskIndex] };
                 console.log('✅ Setting task to deleted:', tasks[taskIndex].title);
                 tasks[taskIndex].status = 'deleted';
                 tasks[taskIndex].isDeleted = true;
                 tasks[taskIndex].deletedAt = new Date().toISOString();
                 tasks[taskIndex].updatedAt = new Date().toISOString();
+                if (typeof recordAction === 'function') {
+                    recordAction('delete', taskId, taskBefore.title, taskBefore, { ...tasks[taskIndex] });
+                }
                 deletedCount++;
             } else {
                 console.log('❌ Task not found in tasks array');
@@ -3368,7 +3377,8 @@ function delaySelectedTasks(days) {
             const taskIndex = tasks.findIndex(t => t.id === taskId);
             if (taskIndex !== -1) {
                 const task = tasks[taskIndex];
-                
+                const taskBefore = { ...task };
+
                 // Calculate new due date
                 let newDate;
                 if (task.dueDate) {
@@ -3376,9 +3386,12 @@ function delaySelectedTasks(days) {
                 } else {
                     newDate = new Date(today);
                 }
-                
+
                 newDate.setDate(newDate.getDate() + days);
                 task.dueDate = getLocalDateString(newDate);
+                if (typeof recordAction === 'function') {
+                    recordAction('delay', taskId, task.title, taskBefore, { ...task });
+                }
                 delayedCount++;
             }
         });

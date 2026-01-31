@@ -1879,10 +1879,14 @@ function deleteSelectedTasks() {
             // Soft-delete from tasks array (tombstone for sync)
             const taskIndex = tasks.findIndex(t => t.id == taskId);
             if (taskIndex >= 0) {
+                const taskBefore = { ...tasks[taskIndex] };
                 tasks[taskIndex].isDeleted = true;
                 tasks[taskIndex].status = 'deleted';
                 tasks[taskIndex].deletedAt = new Date().toISOString();
                 tasks[taskIndex].updatedAt = new Date().toISOString();
+                if (typeof recordAction === 'function') {
+                    recordAction('delete', taskId, taskBefore.title, taskBefore, { ...tasks[taskIndex] });
+                }
             }
         }
     });
@@ -6699,6 +6703,7 @@ function moveAllTasksToCurrentTime() {
         );
         
         if (isOverdue) {
+            const taskBefore = { ...task };
             // Move overdue task to current time and today's date
             const updatedTask = {
                 ...task,
@@ -6706,6 +6711,9 @@ function moveAllTasksToCurrentTime() {
                 dueTime: currentTimeStr,
                 updatedAt: new Date().toISOString()
             };
+            if (typeof recordAction === 'function') {
+                recordAction('edit', task.id, task.title, taskBefore, updatedTask);
+            }
             movedCount++;
             console.log('📋 Moved overdue task:', task.title, 'from', task.dueDate, task.dueTime || '(no time)', 'to', todayStr, currentTimeStr);
             return updatedTask;
