@@ -366,9 +366,13 @@ document.addEventListener('keydown', function(event) {
         reselectAfterAction(currentIdx);
         return;
     }
-    // Escape: clear selection
-    if (event.key === 'Escape' && current) {
-        current.classList.remove('task-selected');
+    // Escape: clear cursor and all batch selections
+    if (event.key === 'Escape') {
+        if (current) current.classList.remove('task-selected');
+        document.querySelectorAll('.task-card.selected, .task-item.selected').forEach(function(el) {
+            el.classList.remove('selected');
+        });
+        if (window.PERSISTENT_TASK_SELECTION) window.PERSISTENT_TASK_SELECTION.clearAll();
         return;
     }
 }, true);  // capture phase
