@@ -948,35 +948,19 @@ function showSyncStatus(message, type) {
 }
 
 /**
- * Delete a specific task from the cloud
+ * Delete a specific task from the cloud by uploading all tasks
+ * (includes the soft-deleted tombstone so the server knows it's deleted)
  */
 async function deleteTaskFromCloud(taskId) {
     if (!window.currentUser?.user?.id) {
         console.log('⚠️ No user credentials for cloud delete');
         return false;
     }
-    
-    try {
-        console.log(`🗑️ Deleting task ${taskId} from cloud...`);
-        
-        const response = await fetch(`${window.API_BASE}/tasks/${taskId}`, {
-            method: 'DELETE',
-            mode: 'cors',
-            headers: getAuthHeaders()
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-            throw new Error(`Delete failed: ${response.status} ${errorData.error || response.statusText}`);
-        }
-        
-        console.log(`✅ Task ${taskId} deleted from cloud successfully`);
-        return true;
-        
-    } catch (error) {
-        console.error('❌ Failed to delete task from cloud:', error);
-        throw error;
-    }
+
+    console.log(`🗑️ Syncing deletion of task ${taskId} to cloud...`);
+    await _uploadAllTasksInternal();
+    console.log(`✅ Task ${taskId} deletion synced to cloud`);
+    return true;
 }
 
 /**
