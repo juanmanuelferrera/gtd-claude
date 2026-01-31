@@ -243,8 +243,13 @@ document.addEventListener('keydown', function(event) {
         }
         return;
     }
-    // Helper: re-select task at given index after view re-renders
+    // Helper: re-select task at given index after view re-renders + clear batch selections
     function reselectAfterAction(idx) {
+        // Clear batch selections immediately
+        document.querySelectorAll('.task-card.selected, .task-item.selected').forEach(function(el) {
+            el.classList.remove('selected');
+        });
+        if (window.PERSISTENT_TASK_SELECTION) window.PERSISTENT_TASK_SELECTION.clearAll();
         setTimeout(function() {
             var tasks = document.querySelectorAll('.task-card[data-task-id], .task-item[data-task-id]');
             if (tasks.length === 0) return;
