@@ -6236,8 +6236,8 @@
             }
         }
         
-        // Legacy code block (scoped to avoid global conflicts)
-        void async function downloadAllTasksLegacy() {
+        // Keep the old complex function as fallback (renamed)
+        async function downloadAllTasksLegacy() {
             if (!window.currentUser?.user?.id) {
                 console.log('⚠️ No user ID available for download');
                 return;
@@ -26096,4 +26096,3 @@
                 }
             }, 10000); // Wait 10 seconds to ensure everything is loaded
         });
-        }();
