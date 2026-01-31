@@ -85,8 +85,11 @@ function initializeSimpleSync() {
     
     // IMMEDIATE SYNC: Download tasks, lists, and templates on startup
     console.log('📥 Starting immediate smart download on sync init...');
-    smartDownloadTasks().catch(error => {
-        console.warn('📥 Initial smart download failed:', error);
+    smartDownloadTasks().then(() => {
+        console.log('📤 Upload after download to sync local state to server...');
+        return uploadAllTasks();
+    }).catch(error => {
+        console.warn('📥 Initial download/upload failed:', error);
     });
     downloadAllLists().catch(error => {
         console.warn('📥 Initial lists download failed:', error);
