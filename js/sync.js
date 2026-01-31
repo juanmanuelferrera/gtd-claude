@@ -457,13 +457,6 @@ async function smartDownloadTasks() {
 }
 
 /**
- * Download tasks from cloud (alias for compatibility)
- */
-async function downloadTasksFromCloud() {
-    return downloadAllTasks();
-}
-
-/**
  * Pull latest data from cloud
  */
 async function pullLatestFromCloud(force = false) {
@@ -863,39 +856,6 @@ async function _downloadAllTemplatesInternal() {
  */
 async function downloadAllTemplates() {
     return withSyncLock(_downloadAllTemplatesInternal);
-}
-
-/**
- * Perform stale browser recovery - download all data without uploads
- * Uses sync lock to prevent race conditions
- */
-async function performStaleBrowserRecovery() {
-    return withSyncLock(async () => {
-        console.log('🔄 Starting stale browser recovery...');
-        try {
-            // Only download for stale browser recovery - no uploads
-            await _downloadAllTasksInternal();
-            await _downloadAllListsInternal();
-            await _downloadAllTemplatesInternal();
-            
-            console.log('✅ Stale browser recovery completed successfully');
-
-            // Clear stale browser flags to allow uploads after recovery
-            window.staleBrowserDetected = false;
-            window.skipInitialUpload = false;
-            console.log('🔓 Stale browser protection cleared - uploads now allowed');
-        } catch (error) {
-            console.error('❌ Stale browser recovery failed:', error);
-            // Clear flags on failure so uploads aren't blocked forever
-            window.staleBrowserDetected = false;
-            window.skipInitialUpload = false;
-            window.justModifiedTasks = false;
-            window.justModifiedLists = false;
-            window.justModifiedTemplates = false;
-            console.warn('🔓 Stale browser protection cleared after recovery failure');
-            throw error;
-        }
-    });
 }
 
 /**

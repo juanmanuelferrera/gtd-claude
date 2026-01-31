@@ -81,10 +81,6 @@ function unmarkAsEvent(taskId) {
     }
 }
 
-function isRegisteredEvent(taskId) {
-    return eventTaskIds.has(taskId);
-}
-
 /**
  * Post-download healing: Restore isEvent properties from registry
  */
@@ -188,38 +184,6 @@ function validateTaskInput(input) {
         .trim();
     
     return cleaned || null;
-}
-
-function validateTaskTitle(title) {
-    const cleaned = validateTaskInput(title);
-    return cleaned && cleaned.length > 0 && cleaned.length <= 200 ? cleaned : null;
-}
-
-function validateTaskNotes(notes) {
-    if (!notes) return '';
-    
-    // For notes, we need to do our own validation without the 500 char limit
-    if (typeof notes !== 'string') return '';
-    
-    // Remove dangerous content but don't limit length here
-    const cleaned = notes
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-        .replace(/javascript:/gi, '')
-        .replace(/on\w+\s*=/gi, '')
-        .replace(/data:text\/html/gi, '')
-        .trim();
-    
-    // Check if notes contain images and adjust limit accordingly
-    const hasImages = /\[IMG:\d+:data:image\//.test(cleaned);
-    const maxLength = 50000; // 50,000 characters for notes
-    
-    // Apply the appropriate length limit
-    if (cleaned.length > maxLength) {
-        return cleaned.substring(0, maxLength);
-    }
-    
-    return cleaned;
 }
 
 /**
@@ -1100,153 +1064,6 @@ async function saveTemplates() {
         window.justModifiedTemplates = false;
         console.log('🔓 Cleared justModifiedTemplates flag');
     }, 10000); // 10-second protection
-}
-
-function renderTemplateButtons() {
-    console.log('🔧 renderTemplateButtons called - DEBUGGING');
-    console.log('📋 customTemplates array:', customTemplates);
-    console.log('📋 customTemplates length:', customTemplates.length);
-    
-    const container = document.getElementById('templateButtons');
-    if (!container) {
-        console.log('❌ templateButtons container not found');
-        return;
-    }
-    
-    console.log('✅ templateButtons container found:', container);
-    container.innerHTML = '';
-    
-    console.log('🎨 Rendering templates:', customTemplates);
-    customTemplates.forEach((template, index) => {
-        console.log(`🔄 Processing template ${index + 1}/${customTemplates.length}: "${template}"`);
-        console.log('🎨 Rendering template button:', template, 'includes @:', template.includes('@'));
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'template-btn';
-        button.textContent = template;
-        button.title = `Left-click to add "${template}" to task • Right-click or long-press to delete`;
-        
-        let touchStartTime = 0;
-        let touchTimer = null;
-        let touchHandled = false;
-        
-        // Touch start for mobile long-press
-        button.addEventListener('touchstart', (e) => {
-            touchStartTime = Date.now();
-            touchHandled = false;
-            touchTimer = setTimeout(async () => {
-                // Long press detected - show delete option
-                e.preventDefault();
-                touchHandled = true;
-                button.classList.add('deleting');
-                if (confirm(`Delete template "${template}"?`)) {
-                    await deleteTemplate(template);
-                } else {
-                    button.classList.remove('deleting');
-                }
-            }, 800); // 800ms long press
-        });
-        
-        // Touch end to cancel long-press timer
-        button.addEventListener('touchend', (e) => {
-            clearTimeout(touchTimer);
-            const touchDuration = Date.now() - touchStartTime;
-            if (touchDuration < 800 && !touchHandled) {
-                // Short tap - insert template
-                e.preventDefault(); // Prevent the click event from firing
-                touchHandled = true;
-                console.log('👆 Touch: inserting template:', template);
-                insertTemplateToTask(template);
-            }
-            button.classList.remove('deleting');
-        });
-        
-        // Left click: insert template (for desktop)
-        button.addEventListener('click', (e) => {
-            // Only handle if not already handled by touch
-            if (!touchHandled) {
-                console.log('🖱️ Click: inserting template:', template);
-                insertTemplateToTask(template);
-            }
-            touchHandled = false; // Reset for next interaction
-        });
-        
-        // Right click: delete template (for desktop)
-        button.addEventListener('contextmenu', async (e) => {
-            e.preventDefault();
-            if (confirm(`Delete template "${template}"?`)) {
-                await deleteTemplate(template);
-            }
-        });
-        
-        console.log(`➕ Adding button for template "${template}" to container`);
-        container.appendChild(button);
-        console.log(`✅ Button added. Container now has ${container.children.length} buttons`);
-    });
-    
-    console.log(`🏁 Template buttons rendered. Container has ${container.children.length} buttons before adding "Add" button`);
-    
-    // Add new template button
-    const addButton = document.createElement('button');
-    addButton.type = 'button';
-    addButton.className = 'template-btn add-template';
-    addButton.textContent = '+ Add';
-    addButton.title = 'Add new template';
-    addButton.addEventListener('click', createNewTemplate);
-    
-    console.log('➕ Adding "Add" button to container');
-    container.appendChild(addButton);
-    console.log(`🏁 renderTemplateButtons completed. Final button count: ${container.children.length}`);
-    console.log('🔍 Final container children:', Array.from(container.children).map(btn => btn.textContent));
-}
-
-function insertTemplateToTask(template) {
-    console.log('🏷️ [tasks.js] insertTemplateToTask called with:', template);
-    const titleInput = document.getElementById('editTaskTitle');
-    const notesInput = document.getElementById('editTaskNotes');
-    
-    // Check which element has focus
-    const activeElement = document.activeElement;
-    console.log('🎯 Active element:', activeElement?.id || 'none');
-    
-    // Always insert into notes field for templates
-    if (notesInput) {
-        const currentNotes = notesInput.value.trim();
-        console.log('📝 Current notes value:', currentNotes);
-        
-        // Add template to notes, inline with spaces
-        if (currentNotes) {
-            notesInput.value = currentNotes + ' ' + template;
-            console.log('✅ Appended template to notes');
-        } else {
-            notesInput.value = template;
-            console.log('✅ Set template as notes');
-        }
-        
-        console.log('📍 New notes value:', notesInput.value);
-        
-        // Ensure focus stays on notes input
-        notesInput.focus();
-        notesInput.setSelectionRange(notesInput.value.length, notesInput.value.length);
-        
-        // Trigger change event for any listeners
-        notesInput.dispatchEvent(new Event('change', { bubbles: true }));
-        
-        console.log('🎯 Templates added to notes field inline');
-    } else {
-        console.error('❌ editTaskNotes input not found');
-    }
-}
-
-async function deleteTemplate(template) {
-    customTemplates = customTemplates.filter(t => t !== template);
-    // SYNC FIX: Also update window.customTemplates for renderTemplateButtons  
-    if (typeof window.customTemplates !== 'undefined') {
-        window.customTemplates = window.customTemplates.filter(t => t !== template);
-        console.log('🔄 Synced deletion to window.customTemplates:', window.customTemplates.length);
-    }
-    await saveTemplates();
-    renderTemplateButtons();
 }
 
 async function createNewTemplate() {

@@ -3,6 +3,16 @@
  * Ensures all modules have access to shared state
  */
 
+// Debug mode: set window.HYPERFILER_DEBUG = true in console to enable logging
+window.HYPERFILER_DEBUG = false;
+(function() {
+    const originalLog = console.log;
+    window._originalConsoleLog = originalLog; // preserve for debug mode
+    console.log = function(...args) {
+        if (window.HYPERFILER_DEBUG) originalLog.apply(console, args);
+    };
+})();
+
 // Ensure core globals are initialized
 if (typeof window.tasks === 'undefined') {
     window.tasks = [];
@@ -181,31 +191,6 @@ window.checkGlobalsInitialized = function() {
     
     console.log('✅ All critical global variables initialized');
     return true;
-};
-
-// Function to reset all globals to safe defaults
-window.resetGlobals = function() {
-    window.tasks = [];
-    window.listSections = [];
-    window.customTemplates = [];
-    window.currentView = 'today';
-    window.currentFilteredTasks = [];
-    window.selectedTasks = new Set();
-    window.activeAllTasksTemplateFilter = null;
-    window.currentTodayDate = new Date();
-    window.currentWeekDate = new Date();
-    window.currentCalendarDate = new Date();
-    window.currentEditTaskId = null;
-    window.undoStack = [];
-    window.eventTaskIds = new Set();
-    window.noteImagesData = [];
-    window.justModifiedTasks = false;
-    window.justModifiedLists = false;
-    window.justModifiedTemplates = false;
-    window.modalSaving = false;
-    window.manualTimeSet = false;
-    
-    console.log('🔄 All globals reset to defaults');
 };
 
 // Make key variables directly accessible without window prefix for backward compatibility

@@ -786,84 +786,6 @@ function closeTrialPopup() {
 }
 
 /**
- * Show trial notification
- */
-function showTrialNotification(message, type) {
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 12px 16px;
-        border-radius: 8px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        font-size: 13px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        z-index: 10000;
-        max-width: 300px;
-        opacity: 0;
-        transform: translateX(20px);
-        transition: all 0.3s ease;
-    `;
-    
-    notification.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-            <div style="flex: 1; margin-right: 8px;">${message}</div>
-            <button onclick="this.parentElement.parentElement.remove()" style="
-                background: none;
-                border: none;
-                color: white;
-                cursor: pointer;
-                font-size: 16px;
-                line-height: 1;
-                padding: 0;
-                margin-left: 10px;
-                opacity: 0.7;
-            ">&times;</button>
-        </div>
-        <div style="margin-top: 10px; display: flex; gap: 8px;">
-            <button onclick="upgradeToPro()" style="
-                background: rgba(255,255,255,0.2);
-                border: 1px solid rgba(255,255,255,0.3);
-                color: white;
-                padding: 6px 12px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 12px;
-                font-weight: 500;
-            ">Upgrade Now</button>
-            <button onclick="this.parentElement.parentElement.remove()" style="
-                background: none;
-                border: 1px solid rgba(255,255,255,0.3);
-                color: white;
-                padding: 6px 12px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 12px;
-                opacity: 0.8;
-            ">Maybe Later</button>
-        </div>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Animate in
-    setTimeout(() => {
-        notification.style.opacity = '1';
-        notification.style.transform = 'translateX(0)';
-    }, 100);
-    
-    // Auto-remove after 10 seconds
-    setTimeout(() => {
-        if (notification.parentElement) {
-            notification.remove();
-        }
-    }, 10000);
-}
-
-/**
  * Upgrade to Pro function
  */
 async function upgradeToPro() {
@@ -886,36 +808,6 @@ async function upgradeToPro() {
     } catch (error) {
         console.error('Upgrade error:', error);
         alert('Error processing upgrade. Please try again.');
-    }
-}
-
-/**
- * Initialize premium features
- */
-function initializePremiumFeatures() {
-    // Check if this is a new Pro user with existing local tasks
-    if (typeof checkForTaskMigration === 'function') {
-        checkForTaskMigration();
-    }
-    
-    // Enable cloud sync
-    if (typeof enableCloudSync === 'function') {
-        enableCloudSync();
-    }
-    
-    // Add premium analytics
-    if (typeof addPremiumAnalytics === 'function') {
-        addPremiumAnalytics();
-    }
-    
-    // Enable advanced exports
-    if (typeof enableAdvancedExports === 'function') {
-        enableAdvancedExports();
-    }
-    
-    // Enable collaboration features
-    if (typeof enableCollaboration === 'function') {
-        enableCollaboration();
     }
 }
 

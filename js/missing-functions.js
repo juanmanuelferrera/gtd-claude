@@ -1196,14 +1196,6 @@ window.toggleTimeBlock = toggleTimeBlock;
 
 
 
-function selectAndSetCalendarDay(day) {
-    window.selectedCalendarDay = day;
-    // Immediately set the date+time when day is clicked
-    setIOSDateTime(window.currentTaskId);
-}
-
-
-
 // Missing core functions
 function saveTasks() {
     if (window.tasks) {
@@ -2369,64 +2361,6 @@ function updateDesktopDateTime() {
             }
         }
     }
-}
-
-function closeDateTimeModal(event) {
-    if (event && event.target !== event.currentTarget) return;
-    const modal = document.getElementById('dateTimeModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-function applyDesktopDateTime() {
-    // Get values from pickers
-    const dayPicker = document.getElementById('desktopDayPicker');
-    const monthPicker = document.getElementById('desktopMonthPicker');
-    const hourPicker = document.getElementById('desktopHourPicker');
-    
-    // Also check for direct inputs as fallback
-    const dateInput = document.getElementById('desktopDateInput');
-    const timeInput = document.getElementById('desktopTimeInput');
-    
-    let finalDate = '';
-    let finalTime = '';
-    
-    // Build date from pickers if available
-    if (dayPicker && monthPicker) {
-        const day = dayPicker.value;
-        const month = parseInt(monthPicker.value);
-        const year = new Date().getFullYear(); // Use current year
-        
-        if (day && month !== '') {
-            const date = new Date(year, month, parseInt(day));
-            finalDate = getLocalDateString(date);
-        }
-    }
-    
-    // Use direct date input as fallback
-    if (!finalDate && dateInput) {
-        finalDate = dateInput.value;
-    }
-    
-    // Get time from picker or input
-    if (hourPicker) {
-        finalTime = hourPicker.value || '';
-    } else if (timeInput) {
-        finalTime = timeInput.value || '';
-    }
-    
-    // Update the main form fields
-    const mainDateInput = document.getElementById('editTaskDateOnly');
-    const mainTimeInput = document.getElementById('editTaskTimeOnly');
-    
-    if (mainDateInput && finalDate) mainDateInput.value = finalDate;
-    if (mainTimeInput) mainTimeInput.value = finalTime;
-    
-    // Update display
-    updateDateTimeDisplay();
-    
-    closeDateTimeModal();
 }
 
 function applyMobileDateTime() {
@@ -5124,11 +5058,6 @@ function filterTodayByTemplate(template) {
     }
 }
 
-function clearTodayTemplateFilter() {
-    window.activeTodayTemplateFilter = null;
-    renderTodayView();
-}
-
 // Time slot drag and drop for Today view
 function handleTimeSlotDragOver(e) {
     e.preventDefault();
@@ -5846,14 +5775,6 @@ function restoreAllTasksUI() {
     // No longer needed - All Tasks view renders complete HTML structure
     // This function kept for compatibility
 }
-
-// Legacy stubs for backward compatibility
-function restoreDeletedTask(taskId) { console.log('Use revertAction instead'); }
-function restoreAllDeletedTasks() { console.log('Use Registry view instead'); }
-function deleteAllDeletedTasks() { console.log('Use Registry view instead'); }
-function undoSpecificAction() { console.log('Use revertAction instead'); }
-function undoAllActions() { console.log('Use Registry view instead'); }
-function permanentlyDeleteTask() { console.log('Use Registry view instead'); }
 
 // Keyboard support for collapse/expand functionality
 function setupCollapseExpandKeyboardSupport() {
