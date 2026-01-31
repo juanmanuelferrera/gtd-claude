@@ -1366,7 +1366,7 @@ function performSearch() {
                 if (typeof renderTaskCard === 'function') {
                     return renderTaskCard(task);
                 }
-                return `<div class="task-card">${task.title}</div>`;
+                return `<div class="task-card">${escapeHtml(task.title)}</div>`;
             }).join('');
         }
     }
@@ -1613,7 +1613,7 @@ function searchTodayTasks() {
                 if (typeof renderTaskCard === 'function') {
                     return renderTaskCard(task);
                 }
-                return `<div class="task-card">${task.title}</div>`;
+                return `<div class="task-card">${escapeHtml(task.title)}</div>`;
             }).join('') + 
             '</div>';
     }
@@ -5781,9 +5781,9 @@ function downloadTodayHtml() {
         todayTasks.forEach(task => {
             html += `
                 <div class="task">
-                    <div class="task-title">${task.title}</div>
-                    ${task.dueTime ? `<div class="task-time">Time: ${task.dueTime}</div>` : ''}
-                    ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
+                    <div class="task-title">${escapeHtml(task.title)}</div>
+                    ${task.dueTime ? `<div class="task-time">Time: ${escapeHtml(task.dueTime)}</div>` : ''}
+                    ${task.notes ? `<div class="task-notes">${escapeHtml(task.notes)}</div>` : ''}
                 </div>
             `;
         });
