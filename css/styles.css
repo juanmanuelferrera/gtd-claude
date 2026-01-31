@@ -2879,7 +2879,7 @@
 
             .main-nav {
                 padding: 10px;
-                gap: 5px;
+                gap: var(--space-2);
             }
 
             .nav-btn {
@@ -3085,7 +3085,7 @@
 
             .main-nav {
                 padding: 10px;
-                gap: 5px;
+                gap: var(--space-2);
             }
 
             .nav-btn {
@@ -3127,7 +3127,7 @@
 
             .task-actions {
                 flex-direction: column;
-                gap: 5px;
+                gap: var(--space-2);
             }
 
             .btn {
