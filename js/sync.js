@@ -68,21 +68,8 @@ function initializeSimpleSync() {
         return;
     }
     
-    console.log('🔄 Initializing simple sync system (Lists pattern)...');
-    
-    // Check for stale browser protection flags before sync
-    if (window.staleBrowserDetected || window.skipInitialUpload) {
-        console.log('🔒 STALE BROWSER: Sync initialization postponed until stale browser download completes');
-        // Schedule retry after stale browser handling completes
-        setTimeout(() => {
-            if (!window.staleBrowserDetected && !window.skipInitialUpload) {
-                console.log('🔓 STALE BROWSER: Retrying sync initialization');
-                initializeSimpleSync();
-            }
-        }, 7000); // 7 seconds after stale browser detection
-        return;
-    }
-    
+    console.log('🔄 Initializing simple sync system...');
+
     // IMMEDIATE SYNC: Download tasks, lists, and templates on startup
     console.log('📥 Starting immediate smart download on sync init...');
     smartDownloadTasks().catch(error => {
@@ -283,18 +270,6 @@ function deduplicateTasks() {
 
 async function _uploadAllTasksInternal() {
     console.log('🔄 uploadAllTasks called - using simple sync pattern');
-    
-    // CRITICAL STALE BROWSER PROTECTION: Check flags first
-    // EXCEPTION: Allow uploads during backup restore (user intentionally restored data)
-    if (window.justRestoredBackup) {
-        console.log('✅ BACKUP RESTORE: Tasks upload allowed - user explicitly restored this data');
-    } else {
-        if (window.staleBrowserDetected || window.skipInitialUpload) {
-            console.error('🚨 BLOCKED: Tasks upload blocked - stale browser protection active');
-            console.error('🛡️ Stale browser still downloading fresh data from cloud');
-            return;
-        }
-    }
     
     // MOBILE FIX: Ensure currentUser is loaded
     if (!ensureCurrentUserLoaded() || !window.currentUser?.user?.id) {
@@ -553,17 +528,6 @@ async function mergeTasksWithConflictResolution(serverTasks) {
  */
 async function _uploadAllListsInternal() {
     console.log('🔄 uploadAllLists called - using simple sync pattern');
-    
-    // CRITICAL STALE BROWSER PROTECTION: Check flags first
-    if (window.justRestoredBackup) {
-        console.log('✅ BACKUP RESTORE: Lists upload allowed - user explicitly restored this data');
-    } else {
-        if (window.staleBrowserDetected || window.skipInitialUpload) {
-            console.error('🚨 BLOCKED: Lists upload blocked - stale browser protection active');
-            console.error('🛡️ Stale browser still downloading fresh data from cloud');
-            return;
-        }
-    }
     
     if (!window.currentUser?.user?.id) {
         console.log('⚠️ No user ID available for lists upload');
