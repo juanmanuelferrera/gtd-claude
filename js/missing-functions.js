@@ -345,29 +345,6 @@ document.addEventListener('keydown', function(event) {
     }
 }, true);  // capture phase
 
-// Initialize hash handling on page load and hash changes
-
-// Override any previous definition
-
-/**
- * Action Registry View
- * Shows all recorded actions with per-action revert buttons
- */
-
-    create: '➕', edit: '✏️', delete: '🗑️', complete: '✅',
-    delay: '⏭️', duplicate: '📋'
-};
-    create: 'Created', edit: 'Edited', delete: 'Deleted', complete: 'Completed',
-    delay: 'Delayed', duplicate: 'Duplicated'
-};
-    create: '#28a745', edit: '#007bff', delete: '#dc3545', complete: '#6f42c1',
-    delay: '#f59e0b', duplicate: '#17a2b8'
-};
-
-/**
- * Helper function to restore All Tasks UI (no longer needed as All Tasks renders its own complete HTML)
- */
-
 // Initialize keyboard support on page load
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setupCollapseExpandKeyboardSupport);

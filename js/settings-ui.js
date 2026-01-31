@@ -1156,10 +1156,17 @@ function openTrash() {
 }
 
 const ACTION_ICONS = {
-
+    create: '➕', edit: '✏️', delete: '🗑️', complete: '✅',
+    delay: '⏭️', duplicate: '📋'
+};
 const ACTION_LABELS = {
-
+    create: 'Created', edit: 'Edited', delete: 'Deleted', complete: 'Completed',
+    delay: 'Delayed', duplicate: 'Duplicated'
+};
 const ACTION_COLORS = {
+    create: '#28a745', edit: '#007bff', delete: '#dc3545', complete: '#6f42c1',
+    delay: '#f59e0b', duplicate: '#17a2b8'
+};
 
 function renderRecentActionsView(searchTerm) {
     console.log('📋 Rendering action registry view...');
