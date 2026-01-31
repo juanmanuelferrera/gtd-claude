@@ -168,25 +168,6 @@ function saveTasksToLocalStorage() {
 }
 
 /**
- * SECURITY: Client-side input validation functions
- */
-function validateTaskInput(input) {
-    if (typeof input !== 'string') return null;
-    
-    // Remove dangerous content
-    const cleaned = input
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-        .replace(/javascript:/gi, '')
-        .replace(/on\w+\s*=/gi, '')
-        .replace(/data:text\/html/gi, '')
-        .substring(0, 500) // Limit length
-        .trim();
-    
-    return cleaned || null;
-}
-
-/**
  * Task completion animation
  */
 function animateTaskCompletion(taskElement) {
@@ -1064,24 +1045,6 @@ async function saveTemplates() {
         window.justModifiedTemplates = false;
         console.log('🔓 Cleared justModifiedTemplates flag');
     }, 10000); // 10-second protection
-}
-
-async function createNewTemplate() {
-    const template = prompt('Enter new template:');
-    if (template && template.trim()) {
-        const cleanTemplate = template.trim();
-        if (!customTemplates.includes(cleanTemplate)) {
-            customTemplates.push(cleanTemplate);
-            await saveTemplates();
-            renderTemplateButtons();
-        } else {
-            if (window.toast) {
-                toast.warning('Template already exists');
-            } else {
-                alert('Template already exists!');
-            }
-        }
-    }
 }
 
 async function addNewTemplate() {

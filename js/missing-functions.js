@@ -4921,15 +4921,6 @@ function populateDateTimeModal(currentDate, currentTime) {
 }
 
 
-// Select date in modal calendar
-function selectModalDate(dateStr) {
-    window.selectedModalDate = dateStr;
-    updateDateTimeDisplay();
-    
-    // Re-populate to update selection
-    populateDateTimeModal(dateStr, window.selectedModalTime);
-}
-
 function closeDateTimeModal(event) {
     if (event && event.target !== event.currentTarget) return;
     const modal = document.getElementById('dateTimeModal');
@@ -5551,69 +5542,6 @@ function toggleAllTimeSlots() {
             }
         }
     });
-}
-
-// Export functions
-function downloadTodayHtml() {
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-    });
-    
-    const todayTasks = tasks.filter(task => 
-        task.dueDate === (typeof getLocalDateString === 'function' ? 
-            getLocalDateString(today) : 
-            today.toISOString().split('T')[0])
-    );
-    
-    let html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Today's Schedule - ${formattedDate}</title>
-            <style>
-                body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-                .task { margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-                .task-title { font-weight: bold; }
-                .task-time { color: #666; font-size: 0.9em; }
-                .task-notes { margin-top: 5px; color: #444; }
-            </style>
-        </head>
-        <body>
-            <h1>Today's Schedule</h1>
-            <h2>${formattedDate}</h2>
-    `;
-    
-    if (todayTasks.length === 0) {
-        html += '<p>No tasks scheduled for today.</p>';
-    } else {
-        todayTasks.forEach(task => {
-            html += `
-                <div class="task">
-                    <div class="task-title">${task.title}</div>
-                    ${task.dueTime ? `<div class="task-time">Time: ${task.dueTime}</div>` : ''}
-                    ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
-                </div>
-            `;
-        });
-    }
-    
-    html += `
-        </body>
-        </html>
-    `;
-    
-    // Download the HTML file
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `today-schedule-${today.toISOString().split('T')[0]}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
 }
 
 function exportRepeatHtml() {
@@ -6711,7 +6639,6 @@ function isTaskOverdue(task) {
 window.isTaskOverdue = isTaskOverdue;
 window.showListSelectionForTXTImport = showListSelectionForTXTImport;
 window.handleNewTXTImport = handleNewTXTImport;
-window.downloadTodayHtml = downloadTodayHtml;
 window.exportRepeatHtml = exportRepeatHtml;
 window.printSearchResults = printSearchResults;
 window.openTrash = openTrash;

@@ -2345,14 +2345,6 @@ function updateBulkSelectionUI() {
 }
 
 /**
- * Clear all task selections
- */
-function clearAllSelections() {
-    selectedTaskIds.clear();
-    updateBulkSelectionUI();
-}
-
-/**
  * Mobile Touch/Swipe Handling for Task Cards
  */
 

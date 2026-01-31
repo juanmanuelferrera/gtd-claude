@@ -1005,33 +1005,6 @@ async function syncAll() {
 }
 
 /**
- * Force a complete resync
- */
-async function forceResync() {
-    console.log('🔄 Forcing complete resync...');
-
-    // Clear ALL protection flags — force resync overrides everything
-    window.justModifiedTasks = false;
-    window.justModifiedLists = false;
-    window.justModifiedTemplates = false;
-    window.staleBrowserDetected = false;
-    window.skipInitialUpload = false;
-    window.backupRestoreInProgress = false;
-    window.justRestoredBackup = false;
-    window.skipNextDownload = false;
-
-    // Enable mandatory refresh mode
-    window.forceMandatoryRefresh = true;
-    
-    try {
-        await syncAll();
-    } finally {
-        // Disable mandatory refresh mode
-        window.forceMandatoryRefresh = false;
-    }
-}
-
-/**
  * Ensure currentUser is loaded from localStorage if needed (mobile fix)
  */
 function ensureCurrentUserLoaded() {

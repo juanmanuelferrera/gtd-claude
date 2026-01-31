@@ -463,52 +463,6 @@ function getUserStatusIcon(userInfo) {
 }
 
 /**
- * Display user information in the interface
- */
-function showUserInfo(userInfo) {
-    if (!userInfo || !userInfo.user) return;
-    
-    // Update header user info - SECURITY FIX: Escape user email
-    const headerUserInfo = document.getElementById('headerUserInfo');
-    if (headerUserInfo) {
-        const headerTemplate = `
-            <div style="
-                font-size: 11px;
-                text-align: right;
-                line-height: 1.2;
-                font-weight: normal;
-                color: #666;
-                margin-top: 5px;
-            ">
-                Welcome, \${email} <a href="/upgrade-compare.html" style="color: #28a745; text-decoration: none; margin-left: 8px;" title="Upgrade to Pro">🐷</a> \${statusIcon} | 
-                <a href="#" onclick="logout()" style="color: #dc3545; text-decoration: none;">Logout</a>
-            </div>
-        `;
-        
-        safeSetInnerHTML(headerUserInfo, headerTemplate, {
-            email: userInfo.user.email,
-            statusIcon: getUserStatusIcon(userInfo)
-        });
-        
-        // Update sidebar user info - SECURITY FIX: Escape user email
-        const sidebarUserInfo = document.getElementById('sidebarUserInfo');
-        if (sidebarUserInfo) {
-            const sidebarTemplate = `Welcome, \${email} \${statusIcon} | <a href="#" onclick="logout()" style="color: var(--things-danger);">Logout</a>`;
-            safeSetInnerHTML(sidebarUserInfo, sidebarTemplate, {
-                email: userInfo.user.email,
-                statusIcon: getUserStatusIcon(userInfo)
-            });
-            sidebarUserInfo.style.display = 'block';
-        }
-    }
-    
-    // Show trial reminder for non-paid users
-    if (userInfo.trialStatus && !userInfo.trialStatus.hasPaid) {
-        showTrialReminder(userInfo);
-    }
-}
-
-/**
  * Logout function
  */
 async function logout() {
