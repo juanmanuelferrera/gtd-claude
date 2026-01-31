@@ -174,17 +174,31 @@ async function listSnapshots() {
     }
 }
 
+async function getSnapshotById(id) {
+    const db = await openBackupDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(BACKUP_STORE, 'readonly');
+        const store = tx.objectStore(BACKUP_STORE);
+        const req = store.get(id);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = (e) => reject(e);
+    });
+}
+
+function getSnapshotPreview(snapshot) {
+    const data = JSON.parse(snapshot.data);
+    const currentData = _collectSnapshotData();
+    const currentCount = _countTasks(currentData);
+    const snapCount = snapshot.taskCount || _countTasks(data);
+    const keys = Object.keys(data);
+    const diff = snapCount - currentCount;
+    const diffStr = diff === 0 ? 'same count' : (diff > 0 ? `+${diff} more` : `${diff} fewer`);
+    return { snapCount, currentCount, diffStr, keyCount: keys.length };
+}
+
 async function restoreSnapshot(id) {
     try {
-        const db = await openBackupDB();
-        const snapshot = await new Promise((resolve, reject) => {
-            const tx = db.transaction(BACKUP_STORE, 'readonly');
-            const store = tx.objectStore(BACKUP_STORE);
-            const req = store.get(id);
-            req.onsuccess = () => resolve(req.result);
-            req.onerror = (e) => reject(e);
-        });
-
+        const snapshot = await getSnapshotById(id);
         if (!snapshot) { alert('Snapshot not found'); return false; }
 
         // Create a safety backup before restoring
@@ -206,6 +220,12 @@ async function restoreSnapshot(id) {
         for (const [key, value] of Object.entries(data)) {
             localStorage.setItem(key, value);
         }
+
+        // Flag for post-restore banner
+        localStorage.setItem('_backupJustRestored', JSON.stringify({
+            timestamp: snapshot.timestamp,
+            reason: snapshot.reason
+        }));
 
         console.log('✅ Snapshot restored, reloading...');
         location.reload();
@@ -335,6 +355,101 @@ async function getBackupStats() {
 
 // ── UI Rendering for Settings Tab ──
 
+const REASON_LABELS = { auto: '🔄 Auto', hourly: '⏰ Hourly', daily: '📅 Daily', weekly: '📆 Weekly', 'pre-sync': '🔒 Pre-Sync', manual: '✋ Manual', 'pre-restore': '🛡️ Pre-Restore' };
+
+const TIER_ORDER = [
+    { key: 'weekly', title: '📆 Weekly Backups', reasons: ['weekly'] },
+    { key: 'daily', title: '📅 Daily Backups', reasons: ['daily'] },
+    { key: 'hourly', title: '⏰ Hourly Backups', reasons: ['hourly'] },
+    { key: 'rolling', title: '🔄 Rolling Backups', reasons: ['auto', 'manual', 'pre-sync', 'pre-restore'] },
+];
+
+function _renderSnapshotRow(snap) {
+    const date = new Date(snap.timestamp);
+    const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const sizeStr = ((snap.size || 0) / 1024).toFixed(1) + ' KB';
+    const label = REASON_LABELS[snap.reason] || snap.reason;
+    const rowId = `backup-row-${snap.id}`;
+    const previewId = `backup-preview-${snap.id}`;
+
+    return `
+    <div id="${rowId}" style="background: #f8f9fa; border-radius: 6px; overflow: hidden; border: 1px solid #e9ecef;">
+        <div onclick="toggleBackupPreview(${snap.id})" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; cursor: pointer; gap: 8px;">
+            <div style="flex: 1; min-width: 0;">
+                <div style="font-weight: 600; font-size: 13px; color: #333;">${dateStr}</div>
+                <div style="font-size: 12px; color: #6c757d;">${label} &middot; ${sizeStr} &middot; ${snap.taskCount || '?'} tasks</div>
+            </div>
+            <div style="color: #aaa; font-size: 16px; flex-shrink: 0;" id="backup-chevron-${snap.id}">&#9654;</div>
+        </div>
+        <div id="${previewId}" style="display: none; padding: 0 12px 12px 12px;">
+            <div id="backup-preview-content-${snap.id}" style="background: #fff; border: 1px solid #dee2e6; border-radius: 4px; padding: 10px; margin-bottom: 10px; font-size: 13px; color: #495057;">
+                Loading preview...
+            </div>
+            <div style="display: flex; gap: 6px;">
+                <button onclick="event.stopPropagation(); restoreSnapshot(${snap.id})"
+                    style="background: #007bff; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">Restore This Backup</button>
+                <button onclick="event.stopPropagation(); if(confirm('Delete this backup?')){deleteSnapshot(${snap.id}).then(()=>renderBackupSnapshotList())}"
+                    style="background: #dc3545; color: white; border: none; padding: 8px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
+            </div>
+        </div>
+    </div>`;
+}
+
+async function toggleBackupPreview(id) {
+    const preview = document.getElementById(`backup-preview-${id}`);
+    const chevron = document.getElementById(`backup-chevron-${id}`);
+    if (!preview) return;
+
+    const isOpen = preview.style.display !== 'none';
+    if (isOpen) {
+        preview.style.display = 'none';
+        if (chevron) chevron.innerHTML = '&#9654;';
+        return;
+    }
+
+    preview.style.display = 'block';
+    if (chevron) chevron.innerHTML = '&#9660;';
+
+    // Load preview content
+    const contentEl = document.getElementById(`backup-preview-content-${id}`);
+    if (!contentEl) return;
+
+    try {
+        const snap = await getSnapshotById(id);
+        if (!snap) { contentEl.textContent = 'Snapshot not found'; return; }
+
+        const info = getSnapshotPreview(snap);
+        const date = new Date(snap.timestamp);
+        const age = _formatAge(Date.now() - snap.timestamp);
+
+        contentEl.innerHTML = `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div><strong>Tasks in backup:</strong> ${info.snapCount}</div>
+                <div><strong>Current tasks:</strong> ${info.currentCount}</div>
+                <div><strong>Difference:</strong> <span style="color: ${info.snapCount !== info.currentCount ? '#e67e22' : '#28a745'}">${info.diffStr}</span></div>
+                <div><strong>Age:</strong> ${age}</div>
+                <div><strong>Data keys:</strong> ${info.keyCount}</div>
+                <div><strong>Size:</strong> ${((snap.size || 0) / 1024).toFixed(1)} KB</div>
+            </div>
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e9ecef; font-size: 12px; color: #6c757d;">
+                A safety backup will be created automatically before restoring.
+            </div>`;
+    } catch (e) {
+        contentEl.textContent = 'Failed to load preview: ' + e.message;
+    }
+}
+
+function _formatAge(ms) {
+    const mins = Math.floor(ms / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins} min ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return `${days}d ago`;
+    return `${Math.floor(days / 7)}w ago`;
+}
+
 async function renderBackupSnapshotList() {
     const container = document.getElementById('indexeddb-backup-list');
     if (!container) return;
@@ -347,34 +462,33 @@ async function renderBackupSnapshotList() {
         return;
     }
 
-    const reasonLabels = { auto: '🔄 Auto', hourly: '⏰ Hourly', daily: '📅 Daily', weekly: '📆 Weekly', 'pre-sync': '🔒 Pre-Sync', manual: '✋ Manual', 'pre-restore': '🛡️ Pre-Restore' };
-
-    let html = `<div style="margin-bottom: 10px; color: #6c757d; font-size: 13px;">${snapshots.length} backup(s) &middot; ${(stats.totalSize / 1024).toFixed(1)} KB total</div>`;
-    html += '<div style="display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto;">';
-
+    // Group by tier
+    const grouped = {};
+    for (const tier of TIER_ORDER) grouped[tier.key] = [];
     for (const snap of snapshots) {
-        const date = new Date(snap.timestamp);
-        const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const sizeStr = (snap.size / 1024).toFixed(1) + ' KB';
-        const label = reasonLabels[snap.reason] || snap.reason;
-
-        html += `
-        <div style="display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; padding: 10px 12px; border-radius: 6px; gap: 8px;">
-            <div style="flex: 1; min-width: 0;">
-                <div style="font-weight: 600; font-size: 13px; color: #333;">${dateStr}</div>
-                <div style="font-size: 12px; color: #6c757d;">${label} &middot; ${sizeStr} &middot; ${snap.taskCount || '?'} tasks</div>
-            </div>
-            <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                <button onclick="if(confirm('Restore this backup? Current data will be saved first.')){restoreSnapshot(${snap.id})}"
-                    style="background: #007bff; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">Restore</button>
-                <button onclick="if(confirm('Delete this backup?')){deleteSnapshot(${snap.id}).then(()=>renderBackupSnapshotList())}"
-                    style="background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
-            </div>
-        </div>`;
+        const tier = TIER_ORDER.find(t => t.reasons.includes(snap.reason));
+        if (tier) grouped[tier.key].push(snap);
+        else grouped['rolling'].push(snap); // fallback
     }
 
-    html += '</div>';
-    html += `<div style="margin-top: 12px; display: flex; gap: 8px;">
+    let html = `<div style="margin-bottom: 12px; color: #6c757d; font-size: 13px;">${snapshots.length} backup(s) &middot; ${(stats.totalSize / 1024).toFixed(1)} KB total</div>`;
+
+    for (const tier of TIER_ORDER) {
+        const snaps = grouped[tier.key];
+        if (snaps.length === 0) continue;
+
+        html += `<div style="margin-bottom: 16px;">
+            <div style="font-weight: 700; font-size: 14px; color: #333; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #dee2e6;">${tier.title} <span style="font-weight: 400; color: #999; font-size: 12px;">(${snaps.length})</span></div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">`;
+
+        for (const snap of snaps) {
+            html += _renderSnapshotRow(snap);
+        }
+
+        html += '</div></div>';
+    }
+
+    html += `<div style="margin-top: 8px; display: flex; gap: 8px;">
         <button onclick="createSnapshot('manual').then(()=>renderBackupSnapshotList())"
             style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">💾 Create Backup Now</button>
         <button onclick="if(confirm('Delete ALL local backups?')){deleteAllSnapshots().then(()=>renderBackupSnapshotList())}"
@@ -382,6 +496,46 @@ async function renderBackupSnapshotList() {
     </div>`;
 
     container.innerHTML = html;
+}
+
+// ── Post-Restore Banner ──
+
+function _checkRestoreBanner() {
+    const flag = localStorage.getItem('_backupJustRestored');
+    if (!flag) return;
+    localStorage.removeItem('_backupJustRestored');
+
+    try {
+        const info = JSON.parse(flag);
+        const date = new Date(info.timestamp);
+        const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const banner = document.createElement('div');
+        banner.id = 'restore-banner';
+        banner.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; z-index: 99999; background: #1E4FE6; color: white; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);';
+        banner.innerHTML = `
+            <span>Restored from ${dateStr} backup (${REASON_LABELS[info.reason] || info.reason})</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button onclick="_undoRestore()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">Undo</button>
+                <button onclick="document.getElementById('restore-banner').remove()" style="background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 18px; padding: 4px;">&times;</button>
+            </div>`;
+        document.body.prepend(banner);
+    } catch (e) {
+        console.warn('Failed to show restore banner:', e);
+    }
+}
+
+async function _undoRestore() {
+    // Find the most recent pre-restore snapshot and restore it
+    const snapshots = await listSnapshots();
+    const preRestore = snapshots.find(s => s.reason === 'pre-restore');
+    if (!preRestore) {
+        alert('No pre-restore backup found to undo with.');
+        return;
+    }
+    // Remove the flag so we don't show banner again on this undo-restore
+    localStorage.removeItem('_backupJustRestored');
+    await restoreSnapshot(preRestore.id);
 }
 
 // ── Initialize ──
@@ -392,6 +546,8 @@ function initAutoBackup() {
         // Take initial hash
         _lastDataHash = _hashData(_collectSnapshotData());
     }
+    // Check if we just restored
+    _checkRestoreBanner();
     console.log('💾 Auto-backup system initialized');
 }
 
@@ -399,6 +555,8 @@ function initAutoBackup() {
 window.openBackupDB = openBackupDB;
 window.createSnapshot = createSnapshot;
 window.listSnapshots = listSnapshots;
+window.getSnapshotById = getSnapshotById;
+window.getSnapshotPreview = getSnapshotPreview;
 window.restoreSnapshot = restoreSnapshot;
 window.deleteSnapshot = deleteSnapshot;
 window.deleteAllSnapshots = deleteAllSnapshots;
@@ -407,7 +565,9 @@ window.stopAutoBackup = stopAutoBackup;
 window.isAutoBackupEnabled = isAutoBackupEnabled;
 window.setAutoBackupEnabled = setAutoBackupEnabled;
 window.getBackupStats = getBackupStats;
+window.toggleBackupPreview = toggleBackupPreview;
 window.renderBackupSnapshotList = renderBackupSnapshotList;
+window._undoRestore = _undoRestore;
 window.initAutoBackup = initAutoBackup;
 
 // Auto-init when DOM is ready
