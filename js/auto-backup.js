@@ -450,8 +450,15 @@ function _formatAge(ms) {
     return `${Math.floor(days / 7)}w ago`;
 }
 
-async function renderBackupSnapshotList() {
-    const container = document.getElementById('indexeddb-backup-list');
+async function renderBackupListMain() {
+    const toggle = document.getElementById('autoBackupToggleMain');
+    if (toggle) toggle.checked = isAutoBackupEnabled();
+    await renderBackupSnapshotList('indexeddb-backup-list-main');
+}
+
+async function renderBackupSnapshotList(containerId) {
+    containerId = containerId || 'indexeddb-backup-list';
+    const container = document.getElementById(containerId);
     if (!container) return;
 
     const snapshots = await listSnapshots();
@@ -567,6 +574,7 @@ window.setAutoBackupEnabled = setAutoBackupEnabled;
 window.getBackupStats = getBackupStats;
 window.toggleBackupPreview = toggleBackupPreview;
 window.renderBackupSnapshotList = renderBackupSnapshotList;
+window.renderBackupListMain = renderBackupListMain;
 window._undoRestore = _undoRestore;
 window.initAutoBackup = initAutoBackup;
 

@@ -177,6 +177,9 @@ function showView(viewName, preserveDate = false) {
             if (typeof renderSettingsView === 'function') {
                 renderSettingsView();
             }
+            if (typeof renderBackupListMain === 'function') {
+                renderBackupListMain();
+            }
             break;
         case 'search':
             const searchInput = document.getElementById('searchInput');
