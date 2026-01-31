@@ -324,40 +324,7 @@ async function checkAuthentication() {
             console.warn('⚠️ Failed to persist currentUser to localStorage:', e);
         }
         
-        // CRITICAL: Check for stale browser data before allowing sync
-        const lastSyncTime = localStorage.getItem('lastSyncTime');
-        const currentTime = Date.now();
-        const tenMinutesAgo = currentTime - (10 * 60 * 1000); // 10 minutes
-
-        // Detect stale browser session — any browser not synced in 10+ minutes must download before uploading
-        if (!lastSyncTime || parseInt(lastSyncTime) < tenMinutesAgo) {
-            console.warn('🚨 STALE BROWSER DETECTED: Last sync was more than 10 minutes ago or never');
-            console.warn('📥 Forcing download from cloud to prevent overwriting fresh data');
-            
-            // Set flags to prevent upload until download completes
-            window.staleBrowserDetected = true;
-            window.skipInitialUpload = true;
-            window.justModifiedTasks = true; // Prevent auto-upload
-            window.justModifiedLists = true; // Prevent auto-upload
-            window.justModifiedTemplates = true; // Prevent auto-upload
-
-            // FAILSAFE: Auto-clear stale browser flags after 90 seconds no matter what
-            clearTimeout(window._staleBrowserFailsafeTimer);
-            window._staleBrowserFailsafeTimer = setTimeout(() => {
-                if (window.staleBrowserDetected || window.skipInitialUpload) {
-                    console.warn('⚠️ FAILSAFE: staleBrowserDetected was still true after 90s — force-clearing');
-                    window.staleBrowserDetected = false;
-                    window.skipInitialUpload = false;
-                    window.justModifiedTasks = false;
-                    window.justModifiedLists = false;
-                    window.justModifiedTemplates = false;
-                }
-            }, 90000);
-
-            // Download is handled by performStaleRefresh() in extracted_js.js init flow
-            // (auth.js only sets flags; extracted_js.js handles the actual download and flag clearing)
-            console.log('🛡️ STALE BROWSER: Flags set — download will be handled by init flow');
-        }
+        // Stale browser protection removed — syncAll() already downloads before uploading
         
         // Update authentication state
         lastAuthenticationState = true;
