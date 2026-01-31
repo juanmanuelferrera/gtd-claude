@@ -327,8 +327,9 @@ async function _uploadAllTasksInternal() {
             // Update last sync timestamp
             localStorage.setItem('lastSyncTime', Date.now().toString());
         } else {
-            console.error('❌ TASKS SYNC: Upload failed:', response.status);
-            throw new Error(`Upload failed: ${response.status}`);
+            const errorBody = await response.json().catch(() => ({}));
+            console.error('❌ TASKS SYNC: Upload failed:', response.status, errorBody);
+            throw new Error(`Upload failed: ${response.status} ${errorBody.error || ''} - ${errorBody.message || errorBody.details || ''}`);
         }
     } catch (error) {
         console.error('❌ TASKS SYNC: Upload error:', error);
