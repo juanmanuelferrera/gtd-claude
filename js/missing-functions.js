@@ -3882,9 +3882,13 @@ async function handleDrop(e) {
     const oldDate = window.draggedTask.dueDate ? new Date(window.draggedTask.dueDate) : null;
     
     try {
+        var beforeDrag = { dueDate: window.draggedTask.dueDate };
         // Update task date
         window.draggedTask.dueDate = newDate;
         window.draggedTask.updatedAt = new Date().toISOString();
+        if (typeof recordAction === 'function') {
+            recordAction('delay', taskId, taskTitle, beforeDrag, { dueDate: newDate });
+        }
         
         // Update in memory tasks array
         if (window.tasks) {
@@ -6490,12 +6494,16 @@ async function delayTaskByDays(taskId, days) {
     }
     
     // Calculate new date
+    const beforeDelay = { dueDate: task.dueDate };
     const currentDate = task.dueDate ? new Date(task.dueDate) : new Date();
     const newDate = new Date(currentDate);
     newDate.setDate(newDate.getDate() + days);
-    
+
     // Update the task
     task.dueDate = getLocalDateString(newDate);
+    if (typeof recordAction === 'function') {
+        recordAction('delay', task.id, task.title, beforeDelay, { dueDate: task.dueDate });
+    }
     
     // Save tasks
     await saveTasks();
