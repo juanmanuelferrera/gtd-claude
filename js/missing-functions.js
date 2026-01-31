@@ -193,6 +193,7 @@ document.addEventListener('keydown', function(event) {
         if (current) current.classList.remove('task-selected');
         allTasks[next].classList.add('task-selected');
         allTasks[next].scrollIntoView({ block: 'center', behavior: 'smooth' });
+        if (window.PERSISTENT_TASK_SELECTION) window.PERSISTENT_TASK_SELECTION.trackKeyboardCursor(allTasks[next].getAttribute('data-task-id'));
         return;
     }
     if (event.key === 'ArrowUp') {
@@ -202,6 +203,7 @@ document.addEventListener('keydown', function(event) {
         if (current) current.classList.remove('task-selected');
         allTasks[prev].classList.add('task-selected');
         allTasks[prev].scrollIntoView({ block: 'center', behavior: 'smooth' });
+        if (window.PERSISTENT_TASK_SELECTION) window.PERSISTENT_TASK_SELECTION.trackKeyboardCursor(allTasks[prev].getAttribute('data-task-id'));
         return;
     }
     // Enter: edit selected task
@@ -218,6 +220,10 @@ document.addEventListener('keydown', function(event) {
     if (event.key === ' ' && current) {
         event.preventDefault();
         current.classList.toggle('selected');
+        var tid = current.getAttribute('data-task-id');
+        if (tid && window.PERSISTENT_TASK_SELECTION) {
+            window.PERSISTENT_TASK_SELECTION.trackBatchToggle(tid);
+        }
         return;
     }
     // Helper: re-select task at given index after view re-renders

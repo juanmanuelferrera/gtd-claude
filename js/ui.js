@@ -2198,6 +2198,43 @@ let selectedTaskIds = new Set();
 // Make it globally accessible for other modules
 window.selectedTaskIds = selectedTaskIds;
 
+// Persistent selection state - survives re-renders from sync
+var PERSISTENT_TASK_SELECTION = {
+    batchSelectedIds: new Set(),
+    keyboardCursorId: null,
+
+    trackBatchToggle: function(taskId) {
+        if (this.batchSelectedIds.has(taskId)) {
+            this.batchSelectedIds.delete(taskId);
+        } else {
+            this.batchSelectedIds.add(taskId);
+        }
+    },
+
+    trackKeyboardCursor: function(taskId) {
+        this.keyboardCursorId = taskId;
+    },
+
+    restoreAfterRender: function() {
+        // Restore batch selections
+        this.batchSelectedIds.forEach(function(id) {
+            var el = document.querySelector('[data-task-id="' + id + '"]');
+            if (el) el.classList.add('selected');
+        });
+        // Restore keyboard cursor
+        if (this.keyboardCursorId) {
+            var cur = document.querySelector('[data-task-id="' + this.keyboardCursorId + '"]');
+            if (cur) cur.classList.add('task-selected');
+        }
+    },
+
+    clearAll: function() {
+        this.batchSelectedIds.clear();
+        this.keyboardCursorId = null;
+    }
+};
+window.PERSISTENT_TASK_SELECTION = PERSISTENT_TASK_SELECTION;
+
 /**
  * Complete/Delete a task when checkbox is clicked in Today/Week/Month views
  */
