@@ -1045,13 +1045,6 @@ async function syncAll() {
 }
 
 /**
- * Check if we're online and can sync
- */
-function canSync() {
-    return navigator.onLine && window.currentUser?.user?.id;
-}
-
-/**
  * Force a complete resync
  */
 async function forceResync() {
@@ -1095,19 +1088,6 @@ function ensureCurrentUserLoaded() {
         }
     }
     return !!window.currentUser;
-}
-
-/**
- * Initialize sync system if needed
- */
-function ensureSyncInitialized() {
-    // Ensure currentUser is loaded first
-    ensureCurrentUserLoaded();
-    
-    if (!window.syncInitialized && window.currentUser?.user?.id) {
-        initializeSimpleSync();
-        window.syncInitialized = true;
-    }
 }
 
 // Hide the green DATABASE UPDATED overlay after page loads

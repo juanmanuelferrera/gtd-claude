@@ -1146,62 +1146,6 @@ async function clearTimeAndClose(taskId) {
     await updateTaskTime(taskId, '', { stopPropagation: () => {} });
 }
 
-// Quick time selection
-function setTimeQuick(taskId, timeType) {
-    let time = '';
-    switch(timeType) {
-        case 'morning':
-            time = '09:00';
-            break;
-        case 'noon':
-            time = '12:00';
-            break;
-        case 'afternoon':
-            time = '15:00';
-            break;
-        case 'evening':
-            time = '18:00';
-            break;
-    }
-    
-    if (time) {
-        updateTaskTime(taskId, time, { stopPropagation: () => {} });
-        closeTimeDropdown();
-        showMessage(`Time set to ${time}`, 'success');
-    }
-}
-
-// Template buttons section rendering
-function renderTemplateButtonsSection() {
-    const allTemplates = new Set();
-    tasks.forEach(task => {
-        const text = `${task.title || ''} ${task.notes || ''}`;
-        const templateMatches = text.match(/@\w+/g);
-        if (templateMatches) {
-            templateMatches.forEach(template => allTemplates.add(template));
-        }
-    });
-    
-    if (allTemplates.size === 0) return '';
-    
-    let html = '<div style="margin-bottom: 15px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">';
-    
-    Array.from(allTemplates).sort().forEach(template => {
-        html += `<button onclick="filterByTemplate('${template}')" style="
-            background: #007bff; 
-            color: white; 
-            border: none; 
-            padding: 4px 8px; 
-            border-radius: 4px; 
-            font-size: 11px; 
-            cursor: pointer;
-        ">${template}</button>`;
-    });
-    
-    html += '</div>';
-    return html;
-}
-
 // Time block toggle function with state persistence and rapid-click protection
 function toggleTimeBlock(timeKey) {
     if (!timeKey) return;

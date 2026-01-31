@@ -270,75 +270,6 @@ function loadTasksFromLocalStorage() {
 }
 
 /**
- * Quick add task with template
- */
-function quickAddTaskWithTemplate(templateName) {
-    console.log('Quick adding task with template:', templateName);
-    
-    // Create task for today with the template
-    const today = new Date();
-    const todayStr = getLocalDateString(today);
-    
-    const newTask = {
-        id: Date.now().toString(),
-        title: `@ ${templateName}`,
-        notes: '',
-        dueDate: todayStr,
-        dueTime: null,
-        status: 'pending',
-        template: templateName,
-        repeat: null,
-        isEvent: false,
-        createdAt: new Date().toISOString(),
-        lastModified: new Date().toISOString()
-    };
-    
-    // Add task to array
-    tasks.push(newTask);
-    window.tasks = tasks; // Sync to window
-
-    // Record action
-    recordAction('create', newTask.id, newTask.title, null, {...newTask});
-
-    // Save to localStorage and server
-    saveTasksToLocalStorage();
-    saveTasks().then(() => {
-        console.log('Task created with template:', templateName);
-        renderCurrentView();
-    }).catch(error => {
-        console.error('Error saving task with template:', error);
-    });
-}
-
-/**
- * Refresh a specific task card element in the DOM without full re-render
- */
-function refreshTaskCardElement(taskId) {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-
-    // Find all task card elements with this ID (could be in multiple views)
-    const taskCards = document.querySelectorAll(`[data-task-id="${taskId}"]`);
-
-    taskCards.forEach(cardElement => {
-        // Re-render the card using the existing renderTaskCard function
-        if (typeof renderTaskCard === 'function') {
-            const newCardHtml = renderTaskCard(task);
-            // Create a temporary container to parse the HTML
-            const temp = document.createElement('div');
-            temp.innerHTML = newCardHtml;
-            const newCard = temp.firstElementChild;
-
-            if (newCard && cardElement.parentNode) {
-                // Replace the old card with the new one
-                cardElement.parentNode.replaceChild(newCard, cardElement);
-                console.log('✅ Task card refreshed in DOM for:', task.title);
-            }
-        }
-    });
-}
-
-/**
  * Update task date
  */
 async function updateTaskDate(taskId, newDate, event) {
@@ -381,52 +312,6 @@ async function updateTaskDate(taskId, newDate, event) {
     } catch (error) {
         console.error('❌ Error updating task date:', error);
         showNotification('Failed to update task date', 'error');
-    }
-}
-
-/**
- * Open date picker for task
- */
-function openDatePicker(taskId, event) {
-    event.stopPropagation();
-    
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-    
-    // Store the task ID for the modal
-    window.currentDateTimeTaskId = taskId;
-    
-    // Open the existing dateTimeModal
-    const modal = document.getElementById('dateTimeModal');
-    if (modal) {
-        // Populate current values
-        if (typeof populateDateTimeModal === 'function') {
-            populateDateTimeModal(task.dueDate, task.dueTime);
-        }
-        modal.style.display = 'block';
-    }
-}
-
-/**
- * Open time picker for task
- */
-function openTimePicker(taskId, event) {
-    event.stopPropagation();
-    
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-    
-    // Store the task ID for the modal
-    window.currentDateTimeTaskId = taskId;
-    
-    // Open the existing dateTimeModal
-    const modal = document.getElementById('dateTimeModal');
-    if (modal) {
-        // Populate current values
-        if (typeof populateDateTimeModal === 'function') {
-            populateDateTimeModal(task.dueDate, task.dueTime);
-        }
-        modal.style.display = 'block';
     }
 }
 
