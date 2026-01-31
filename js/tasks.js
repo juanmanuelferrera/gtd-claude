@@ -1576,13 +1576,24 @@ async function deleteTask(taskId, event) {
         // Save updated tasks to localStorage
         saveTasksToLocalStorage();
         console.log('🗑️ Updated localStorage, new task count:', tasks.length);
-
+        
+        // Delete from server if function exists
+        if (typeof deleteTaskFromCloud === 'function') {
+            try {
+                await deleteTaskFromCloud(taskId);
+                console.log('✅ Task successfully deleted from server:', taskId);
+            } catch (serverError) {
+                console.error('❌ Failed to delete from server:', serverError);
+                // Continue with local deletion even if server deletion fails
+            }
+        }
+        
         // Clean up event registry if functions exist
         if (typeof unmarkAsEvent === 'function') {
             unmarkAsEvent(taskId);
         }
-
-        // Update UI immediately (before cloud sync)
+        
+        // Update UI immediately
         if (typeof sortTasks === 'function') {
             sortTasks();
         }
@@ -1590,7 +1601,8 @@ async function deleteTask(taskId, event) {
             renderCurrentView();
         }
 
-        // Background sync (single upload, no duplicate)
+
+        // Background sync
         window.justModifiedTasks = true;
         setTimeout(async () => {
             if (typeof uploadAllTasks === 'function') {

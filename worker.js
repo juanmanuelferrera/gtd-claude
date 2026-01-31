@@ -666,16 +666,11 @@ export default {
         });
       }
       
-      // Tasks sync endpoint - v2.0.7 sync system
-      if (pathname === '/tasks/sync' && request.method === 'POST') {
-        return handleTasksSyncSimple(request, env, corsHeaders);
-      }
-
       // DEBUG: Log any unmatched /tasks/ requests
       if (pathname.startsWith('/tasks/')) {
         console.log('🔍 UNMATCHED TASKS REQUEST:', request.method, pathname);
         console.log('🔍 Request URL:', request.url);
-        return new Response(JSON.stringify({
+        return new Response(JSON.stringify({ 
           error: 'unmatched_endpoint',
           method: request.method,
           pathname: pathname,
@@ -684,6 +679,11 @@ export default {
           status: 404,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
+      }
+
+      // Tasks sync endpoint - v2.0.7 sync system
+      if (pathname === '/tasks/sync' && request.method === 'POST') {
+        return handleTasksSyncSimple(request, env, corsHeaders);
       }
 
       // Lists endpoints - Same ultra-simple pattern as tasks
@@ -1730,28 +1730,223 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
     // v2.0.7 ENHANCED SYNC with staleness detection and device tracking
     console.log('🔄 SYNC v2.0.7: Enhanced sync for user:', actualUserId, 'Client tasks:', tasks.length);
     
-    // Get existing tasks for merge and protection
+    // Get the most recent server task timestamp for staleness detection
+    const serverStmt = env.DB.prepare('SELECT MAX(updated_at) as latest_update FROM user_tasks WHERE user_id = ?');
+    const serverResult = await serverStmt.bind(actualUserId).first();
+    const serverLatestUpdate = serverResult?.latest_update;
+    
+    // CRITICAL FIX: Get existing tasks early for protection checks
     const existingStmt = env.DB.prepare('SELECT * FROM user_tasks WHERE user_id = ?');
     const existingResult = await existingStmt.bind(actualUserId).all();
     const existingTasks = existingResult.results || [];
+    console.log('📊 Existing server tasks (for protection):', existingTasks.length);
     
-    // Only protect against uploading completely empty data when server has tasks
-    if (tasks.length === 0 && existingTasks.length > 5) {
-      console.log('🚫 DATA CLEARING PROTECTION: Rejecting empty upload when server has', existingTasks.length, 'tasks');
-      return new Response(JSON.stringify({
-        error: 'data_clearing_blocked',
-        message: 'Uploading empty state when server has significant data is blocked.',
-        serverTaskCount: existingTasks.length
-      }), {
-        status: 409,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    // CRITICAL FIX: Multi-layer server-side staleness detection
+    if (tasks.length > 0) {
+      const serverTime = new Date(serverLatestUpdate || new Date()).getTime();
+      const currentServerTime = Date.now(); // Use server's actual time, not client time
+      
+      // Layer 1: Client timestamp staleness check
+      const clientTimes = tasks.map(t => new Date(t.updatedAt || t.created_at || 0).getTime());
+      const clientOldestTime = Math.min(...clientTimes);
+      const clientLatestTime = Math.max(...clientTimes);
+      
+      const staleAgeMs = 7 * 24 * 60 * 60 * 1000; // 7 days
+      const criticalStaleAgeMs = 30 * 24 * 60 * 60 * 1000; // 30 days (absolute rejection)
+      
+      // CRITICAL: Reject extremely old uploads (3+ months scenario)
+      if (clientLatestTime < currentServerTime - criticalStaleAgeMs) {
+        console.log('🚫 CRITICAL STALENESS: Rejecting extremely old upload');
+        console.log('🚫 Client latest:', new Date(clientLatestTime).toISOString());
+        console.log('🚫 Server time:', new Date(currentServerTime).toISOString());
+        console.log('🚫 Age difference:', Math.round((currentServerTime - clientLatestTime) / (1000 * 60 * 60 * 24)), 'days');
+        
+        return new Response(JSON.stringify({
+          error: 'extremely_stale_data',
+          message: 'Client data is extremely old (30+ days). This upload is rejected to prevent data corruption.',
+          serverTime: new Date(currentServerTime).toISOString(),
+          clientLatest: new Date(clientLatestTime).toISOString(),
+          ageDifferenceHours: Math.round((currentServerTime - clientLatestTime) / (1000 * 60 * 60)),
+          ageDifferenceDays: Math.round((currentServerTime - clientLatestTime) / (1000 * 60 * 60 * 24))
+        }), {
+          status: 409, // Conflict
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      // Layer 2: Standard staleness check (if server has data)
+      if (serverLatestUpdate && clientLatestTime < serverTime - staleAgeMs) {
+        console.log('🚫 STALENESS: Rejecting stale upload - client data too old compared to server');
+        console.log('🚫 Client latest:', new Date(clientLatestTime).toISOString());
+        console.log('🚫 Server latest:', serverLatestUpdate);
+        console.log('🚫 Age difference:', Math.round((serverTime - clientLatestTime) / (1000 * 60 * 60)), 'hours');
+        
+        return new Response(JSON.stringify({
+          error: 'stale_data',
+          message: 'Client data is too old compared to server data. Please refresh to get latest data.',
+          serverLatest: serverLatestUpdate,
+          clientLatest: new Date(clientLatestTime).toISOString(),
+          ageDifferenceHours: Math.round((serverTime - clientLatestTime) / (1000 * 60 * 60))
+        }), {
+          status: 409, // Conflict
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+
+      
+      // CRITICAL FIX: Layer 2.2 - Data clearing protection (only for significant data loss)
+      // Only block if server has significant data and client uploads empty
+      if (serverLatestUpdate && tasks.length === 0 && existingTasks.length > 5) {
+        console.log('🚫 DATA CLEARING PROTECTION: Rejecting empty upload when server has significant data');
+        console.log('🚫 Server has', existingTasks.length, 'tasks but client is trying to clear them');
+        
+        return new Response(JSON.stringify({
+          error: 'data_clearing_blocked',
+          message: 'Uploading empty state when server has significant data is blocked. This may indicate a stale browser trying to clear fresh data.',
+          serverState: 'has_data',
+          clientState: 'empty',
+          protection: 'data_clearing_protection',
+          serverTaskCount: existingTasks.length
+        }), {
+          status: 409, // Conflict
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      // Layer 2.5: CRITICAL - Bulk staleness detection (check percentage of stale tasks)
+      const staleTasks = clientTimes.filter(time => (currentServerTime - time) > staleAgeMs);
+      const stalePercentage = (staleTasks.length / clientTimes.length) * 100;
+      
+      // If more than 30% of tasks are stale, reject the upload
+      if (stalePercentage > 30) {
+        console.log('🚫 BULK STALENESS: Rejecting upload with too many stale tasks');
+        console.log('🚫 Stale percentage:', stalePercentage.toFixed(1) + '%');
+        console.log('🚫 Stale tasks:', staleTasks.length, 'out of', clientTimes.length);
+        console.log('🚫 Client oldest:', new Date(clientOldestTime).toISOString());
+        console.log('🚫 Client latest:', new Date(clientLatestTime).toISOString());
+        
+        return new Response(JSON.stringify({
+          error: 'bulk_stale_data',
+          message: 'Upload contains too many stale tasks. This may indicate a stale browser trying to overwrite fresh data.',
+          serverLatest: serverLatestUpdate,
+          clientLatest: new Date(clientLatestTime).toISOString(),
+          clientOldest: new Date(clientOldestTime).toISOString(),
+          stalePercentage: stalePercentage,
+          staleTaskCount: staleTasks.length,
+          totalTaskCount: clientTimes.length
+        }), {
+          status: 409, // Conflict
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      // Layer 3: Clock skew protection (detect clients with wrong system time)
+      const futureThreshold = 2 * 60 * 60 * 1000; // 2 hours in future
+      if (clientLatestTime > currentServerTime + futureThreshold) {
+        console.log('🚫 CLOCK SKEW: Rejecting upload with future timestamps');
+        console.log('🚫 Client latest:', new Date(clientLatestTime).toISOString());
+        console.log('🚫 Server time:', new Date(currentServerTime).toISOString());
+        
+        return new Response(JSON.stringify({
+          error: 'clock_skew',
+          message: 'Client time appears to be significantly ahead of server time. Please check your system clock.',
+          serverTime: new Date(currentServerTime).toISOString(),
+          clientLatest: new Date(clientLatestTime).toISOString()
+        }), {
+          status: 409, // Conflict
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      // Layer 4: Deleted task resurrection protection
+      let deletedTaskCount = 0;
+      let oldDeletedTaskCount = 0;
+      
+      tasks.forEach(task => {
+        if (task.isDeleted || task.is_deleted) {
+          deletedTaskCount++;
+          const deleteTime = new Date(task.deletedAt || task.updated_at || 0).getTime();
+          if (deleteTime < currentServerTime - staleAgeMs) {
+            oldDeletedTaskCount++;
+          }
+        }
+      });
+      
+      // Suspicious: Too many old deleted tasks being uploaded
+      if (oldDeletedTaskCount > 5) {
+        console.log('🚫 RESURRECTION PROTECTION: Too many old deleted tasks detected');
+        console.log('🚫 Old deleted tasks:', oldDeletedTaskCount, 'Total deleted:', deletedTaskCount);
+        
+        return new Response(JSON.stringify({
+          error: 'deleted_task_resurrection',
+          message: 'Upload contains too many old deleted tasks. This may indicate a stale browser trying to resurrect deleted data.',
+          oldDeletedTasks: oldDeletedTaskCount,
+          totalDeletedTasks: deletedTaskCount
+        }), {
+          status: 409, // Conflict
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+    }
+    
+    // Get the most recent client task timestamp (for logging only)
+    const clientLatestUpdate = tasks.length > 0 ? 
+      Math.max(...tasks.map(t => new Date(t.updatedAt || t.updated_at || 0).getTime())) : 0;
+    const clientLatestDate = new Date(clientLatestUpdate).toISOString();
+    
+    console.log('📊 Server latest update:', serverLatestUpdate);
+    console.log('📊 Client latest update:', clientLatestDate);
+    console.log('📊 Client task count:', tasks.length);
+    console.log('🔄 MERGE MODE: Allowing all uploads for proper task merging');
+    
+    // v2.0.7 ENHANCED: Request deduplication to prevent infinite loops
+    const requestFingerprint = `${actualUserId}:${tasks.length}:${clientLatestDate}:${syncHeaders.deviceId}`;
+    const recentRequestKey = `recent_sync:${requestFingerprint}`;
+    
+    // Check if we've seen this exact request very recently (within 5 seconds)
+    if (env.syncRequestCache && env.syncRequestCache.has(recentRequestKey)) {
+      const lastRequestTime = env.syncRequestCache.get(recentRequestKey);
+      const timeSinceLastRequest = Date.now() - lastRequestTime;
+      
+      if (timeSinceLastRequest < 5000) {
+        console.log('🚫 DEDUP: Ignoring duplicate sync request within 5 seconds');
+        return new Response(JSON.stringify({
+          success: true,
+          message: 'Duplicate request ignored',
+          synced: 0,
+          deduplicated: true
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+    }
+    
+    // Record this request
+    if (!env.syncRequestCache) {
+      env.syncRequestCache = new Map();
+    }
+    env.syncRequestCache.set(recentRequestKey, Date.now());
+    
+    // Clean up old entries (keep only last 100)
+    if (env.syncRequestCache.size > 100) {
+      const entries = Array.from(env.syncRequestCache.entries());
+      entries.sort((a, b) => b[1] - a[1]); // Sort by timestamp desc
+      env.syncRequestCache.clear();
+      entries.slice(0, 50).forEach(([key, value]) => {
+        env.syncRequestCache.set(key, value);
       });
     }
     
-    console.log('🔄 SYNC: Processing upload for user:', actualUserId, 'Client tasks:', tasks.length);
-
     // MERGE SYNC: Combine client tasks with existing server tasks
-    console.log('🔄 MERGE SYNC: Client tasks:', tasks.length, 'Server tasks:', existingTasks.length);
+    console.log('🔄 MERGE SYNC: Combining tasks for user:', actualUserId, 'Client tasks:', tasks.length);
+    
+    // Use existing tasks from earlier query (INCLUDING deleted ones for proper merge)
+    console.log('📊 Existing server tasks (including deleted):', existingTasks.length);
+    
+    // Count deleted tasks for debugging
+    const deletedTasks = existingTasks.filter(t => t.is_deleted);
+    console.log('💀 Server deleted tasks:', deletedTasks.length);
     
     // Create a map of client tasks by ID
     const clientTaskMap = new Map();
@@ -1969,8 +2164,8 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
     try {
       // Try enhanced v2.0.7 schema with device/session tracking and fingerprinting
       stmt = env.DB.prepare(`
-        INSERT OR IGNORE INTO user_tasks
-        (id, user_id, title, notes, images, due_date, due_time, status, repeat_type, template,
+        INSERT OR REPLACE INTO user_tasks 
+        (id, user_id, title, notes, images, due_date, due_time, status, repeat_type, template, 
          is_event, created_at, updated_at, is_deleted, deleted_at, device_id, session_id, sync_version)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
@@ -1979,8 +2174,8 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
     } catch (error) {
       // Fallback to v2.0.6 schema
       stmt = env.DB.prepare(`
-        INSERT OR IGNORE INTO user_tasks
-        (id, user_id, title, notes, images, due_date, due_time, status, repeat_type, template,
+        INSERT OR REPLACE INTO user_tasks 
+        (id, user_id, title, notes, images, due_date, due_time, status, repeat_type, template, 
          is_event, created_at, updated_at, is_deleted, deleted_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
@@ -2258,8 +2453,40 @@ async function handleGetTasksSecure(userId, request, env, corsHeaders) {
     
     console.log('📥 SECURE DOWNLOAD: Retrieved', tasks.length, 'tasks for user:', userId);
     
-    console.log('✅ SECURE DOWNLOAD: Returning', tasks.length, 'tasks');
-
+    // CRITICAL: Validate server data staleness before sending
+    if (tasks.length > 0) {
+      const taskTimes = tasks.map(t => new Date(t.updated_at || t.created_at || 0).getTime());
+      const oldestTime = Math.min(...taskTimes);
+      const currentTime = Date.now();
+      const oldestAge = currentTime - oldestTime;
+      const maxStaleAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+      
+      // Check if server data is stale
+      if (oldestAge > maxStaleAge) {
+        const staleHours = Math.round(oldestAge / (1000 * 60 * 60));
+        console.log('🚫 SECURE DOWNLOAD: Server data contains stale tasks, oldest:', staleHours, 'hours');
+        
+        // Filter out stale tasks instead of rejecting entire download
+        const freshTasks = tasks.filter(task => {
+          const taskTime = new Date(task.updated_at || task.created_at || 0).getTime();
+          const taskAge = currentTime - taskTime;
+          return taskAge <= maxStaleAge;
+        });
+        
+        console.log('✅ SECURE DOWNLOAD: Filtered', tasks.length - freshTasks.length, 'stale tasks, returning', freshTasks.length, 'fresh tasks');
+        
+        return new Response(JSON.stringify({ 
+          tasks: freshTasks,
+          filteredStale: tasks.length - freshTasks.length,
+          totalOriginal: tasks.length
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+    }
+    
+    console.log('✅ SECURE DOWNLOAD: All tasks are fresh, returning', tasks.length, 'tasks');
+    
     return new Response(JSON.stringify({ tasks }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });

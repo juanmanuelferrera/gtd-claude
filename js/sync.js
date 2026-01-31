@@ -68,8 +68,21 @@ function initializeSimpleSync() {
         return;
     }
     
-    console.log('🔄 Initializing simple sync system...');
-
+    console.log('🔄 Initializing simple sync system (Lists pattern)...');
+    
+    // Check for stale browser protection flags before sync
+    if (window.staleBrowserDetected || window.skipInitialUpload) {
+        console.log('🔒 STALE BROWSER: Sync initialization postponed until stale browser download completes');
+        // Schedule retry after stale browser handling completes
+        setTimeout(() => {
+            if (!window.staleBrowserDetected && !window.skipInitialUpload) {
+                console.log('🔓 STALE BROWSER: Retrying sync initialization');
+                initializeSimpleSync();
+            }
+        }, 7000); // 7 seconds after stale browser detection
+        return;
+    }
+    
     // IMMEDIATE SYNC: Download tasks, lists, and templates on startup
     console.log('📥 Starting immediate smart download on sync init...');
     smartDownloadTasks().catch(error => {
@@ -271,6 +284,18 @@ function deduplicateTasks() {
 async function _uploadAllTasksInternal() {
     console.log('🔄 uploadAllTasks called - using simple sync pattern');
     
+    // CRITICAL STALE BROWSER PROTECTION: Check flags first
+    // EXCEPTION: Allow uploads during backup restore (user intentionally restored data)
+    if (window.justRestoredBackup) {
+        console.log('✅ BACKUP RESTORE: Tasks upload allowed - user explicitly restored this data');
+    } else {
+        if (window.staleBrowserDetected || window.skipInitialUpload) {
+            console.error('🚨 BLOCKED: Tasks upload blocked - stale browser protection active');
+            console.error('🛡️ Stale browser still downloading fresh data from cloud');
+            return;
+        }
+    }
+    
     // MOBILE FIX: Ensure currentUser is loaded
     if (!ensureCurrentUserLoaded() || !window.currentUser?.user?.id) {
         console.log('⚠️ No user ID available for tasks upload');
@@ -283,19 +308,7 @@ async function _uploadAllTasksInternal() {
         deduplicateTasks();
 
         // Log tombstone status before upload
-        const tasksRaw = tasks.map(task => cleanTaskForStorage(task));
-        // Final dedup by ID — keep the most recently updated copy
-        const seenIds = new Map();
-        tasksRaw.forEach(t => {
-            const existing = seenIds.get(t.id);
-            if (!existing || (t.updatedAt || '') > (existing.updatedAt || '')) {
-                seenIds.set(t.id, t);
-            }
-        });
-        const tasksToUpload = Array.from(seenIds.values());
-        if (tasksRaw.length !== tasksToUpload.length) {
-            console.warn(`⚠️ Deduped ${tasksRaw.length - tasksToUpload.length} duplicate task IDs before upload`);
-        }
+        const tasksToUpload = tasks.map(task => cleanTaskForStorage(task));
         const deletedCount = tasksToUpload.filter(t => t.isDeleted || t.status === 'deleted').length;
         const activeCount = tasksToUpload.filter(t => !t.isDeleted && t.status !== 'deleted').length;
         console.log(`📤 Uploading ${tasksToUpload.length} tasks (${activeCount} active, ${deletedCount} tombstones)`);
@@ -314,9 +327,8 @@ async function _uploadAllTasksInternal() {
             // Update last sync timestamp
             localStorage.setItem('lastSyncTime', Date.now().toString());
         } else {
-            const errorBody = await response.json().catch(() => ({}));
-            console.error('❌ TASKS SYNC: Upload failed:', response.status, errorBody);
-            throw new Error(`Upload failed: ${response.status} ${errorBody.error || ''} - ${errorBody.message || errorBody.details || ''}`);
+            console.error('❌ TASKS SYNC: Upload failed:', response.status);
+            throw new Error(`Upload failed: ${response.status}`);
         }
     } catch (error) {
         console.error('❌ TASKS SYNC: Upload error:', error);
@@ -383,11 +395,15 @@ async function _downloadAllTasksInternal() {
         
         console.log('📥 Downloaded', serverTasks.length, 'tasks from server');
         
-        // Replace local data with server data (server is source of truth)
-        // Local-only changes are uploaded separately via uploadAllTasks
-        console.log(`📥 Replacing local tasks with server data (${serverTasks.length} tasks)`);
-        tasks = serverTasks;
-        window.tasks = tasks;
+        // MANDATORY REFRESH or FRESH BROWSER: Direct replacement with server data
+        if (window.forceMandatoryRefresh || window.staleBrowserMode || isFreshBrowser) {
+            console.log(`🚨 ${isFreshBrowser ? 'FRESH BROWSER' : 'MANDATORY REFRESH'}: Directly replacing with server data (${serverTasks.length} tasks)`);
+            tasks = serverTasks;
+            window.tasks = tasks; // Sync to window
+        } else {
+            // Normal sync: merge with conflict detection
+            await mergeTasksWithConflictResolution(serverTasks);
+        }
         
         // Deduplicate after merge/replace to clean any dupes from server
         deduplicateTasks();
@@ -501,8 +517,7 @@ async function mergeTasksWithConflictResolution(serverTasks) {
     }
     
     // Add local-only tasks that don't exist on server
-    // Keep active local tasks (may not have been uploaded yet)
-    // Drop tombstones not on server (already purged server-side)
+    // Only add ACTIVE local tasks — tombstones not on server were already purged server-side
     for (const localTask of tasks) {
         if (!serverTaskMap.has(localTask.id)) {
             const isTombstone = localTask.isDeleted || localTask.is_deleted || localTask.status === 'deleted';
@@ -524,6 +539,17 @@ async function mergeTasksWithConflictResolution(serverTasks) {
  */
 async function _uploadAllListsInternal() {
     console.log('🔄 uploadAllLists called - using simple sync pattern');
+    
+    // CRITICAL STALE BROWSER PROTECTION: Check flags first
+    if (window.justRestoredBackup) {
+        console.log('✅ BACKUP RESTORE: Lists upload allowed - user explicitly restored this data');
+    } else {
+        if (window.staleBrowserDetected || window.skipInitialUpload) {
+            console.error('🚨 BLOCKED: Lists upload blocked - stale browser protection active');
+            console.error('🛡️ Stale browser still downloading fresh data from cloud');
+            return;
+        }
+    }
     
     if (!window.currentUser?.user?.id) {
         console.log('⚠️ No user ID available for lists upload');
@@ -922,12 +948,35 @@ function showSyncStatus(message, type) {
 }
 
 /**
- * Delete a specific task from the cloud.
- * No-op: the caller's background uploadAllTasks() handles syncing the tombstone.
+ * Delete a specific task from the cloud
  */
 async function deleteTaskFromCloud(taskId) {
-    console.log(`🗑️ Task ${taskId} deletion will sync via background uploadAllTasks`);
-    return true;
+    if (!window.currentUser?.user?.id) {
+        console.log('⚠️ No user credentials for cloud delete');
+        return false;
+    }
+    
+    try {
+        console.log(`🗑️ Deleting task ${taskId} from cloud...`);
+        
+        const response = await fetch(`${window.API_BASE}/tasks/${taskId}`, {
+            method: 'DELETE',
+            mode: 'cors',
+            headers: getAuthHeaders()
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            throw new Error(`Delete failed: ${response.status} ${errorData.error || response.statusText}`);
+        }
+        
+        console.log(`✅ Task ${taskId} deleted from cloud successfully`);
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Failed to delete task from cloud:', error);
+        throw error;
+    }
 }
 
 /**

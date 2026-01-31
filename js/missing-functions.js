@@ -1366,7 +1366,7 @@ function performSearch() {
                 if (typeof renderTaskCard === 'function') {
                     return renderTaskCard(task);
                 }
-                return `<div class="task-card">${escapeHtml(task.title)}</div>`;
+                return `<div class="task-card">${task.title}</div>`;
             }).join('');
         }
     }
@@ -1613,7 +1613,7 @@ function searchTodayTasks() {
                 if (typeof renderTaskCard === 'function') {
                     return renderTaskCard(task);
                 }
-                return `<div class="task-card">${escapeHtml(task.title)}</div>`;
+                return `<div class="task-card">${task.title}</div>`;
             }).join('') + 
             '</div>';
     }
@@ -2280,19 +2280,10 @@ function revertAction(actionId) {
         }
     }
 
-    // Record the revert as a new action before removing the old one
-    if (typeof recordAction === 'function') {
-        recordAction('revert', action.taskId, action.taskTitle, action.after, action.before);
-    }
-
-    // Remove the original action from registry
-    registry = window.actionRegistry || JSON.parse(localStorage.getItem('actionRegistry') || '[]');
-    var newIdx = registry.findIndex(function(a) { return a.id === actionId; });
-    if (newIdx !== -1) {
-        registry.splice(newIdx, 1);
-        window.actionRegistry = registry;
-        localStorage.setItem('actionRegistry', JSON.stringify(registry));
-    }
+    // Remove action from registry
+    registry.splice(idx, 1);
+    window.actionRegistry = registry;
+    localStorage.setItem('actionRegistry', JSON.stringify(registry));
 
     // Save and re-render
     if (typeof saveTasksToLocalStorage === 'function') saveTasksToLocalStorage();
@@ -3891,13 +3882,9 @@ async function handleDrop(e) {
     const oldDate = window.draggedTask.dueDate ? new Date(window.draggedTask.dueDate) : null;
     
     try {
-        var beforeDrag = { dueDate: window.draggedTask.dueDate };
         // Update task date
         window.draggedTask.dueDate = newDate;
         window.draggedTask.updatedAt = new Date().toISOString();
-        if (typeof recordAction === 'function') {
-            recordAction('delay', taskId, taskTitle, beforeDrag, { dueDate: newDate });
-        }
         
         // Update in memory tasks array
         if (window.tasks) {
@@ -4205,10 +4192,8 @@ document.addEventListener('keydown', function(event) {
     // D or Delete: delete task(s)
     if ((event.key === 'Delete' || event.key === 'd' || event.key === 'D') && targets.length > 0) {
         event.preventDefault();
-        console.log('🎹 D key: deleting', targets.length, 'task(s)');
         targets.forEach(function(el) {
             var did = parseTaskId(el.getAttribute('data-task-id'));
-            console.log('🎹 D key: task ID =', did, 'deleteTask exists:', typeof deleteTask === 'function');
             if (did && typeof deleteTask === 'function') deleteTask(did);
         });
         reselectAfterAction(currentIdx);
@@ -5666,104 +5651,44 @@ function quickBackupJSON() {
 function importJSONBackup(input) {
     const file = input.files[0];
     if (!file) return;
-
+    
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const backup = JSON.parse(e.target.result);
-
-            // Detect format: {tasks: [...]} or flat object {id: value, ...} or raw array [...]
-            let importedTasks;
-            let importedTemplates;
-            let importedLists;
-
-            if (backup.tasks && Array.isArray(backup.tasks)) {
-                // Standard format: {tasks: [...], templates/customTemplates: {...}, listSections: [...]}
-                importedTasks = backup.tasks;
-                importedTemplates = backup.customTemplates || backup.templates;
-                importedLists = backup.listSections;
-            } else if (Array.isArray(backup)) {
-                // Raw array of tasks
-                importedTasks = backup;
-            } else if (typeof backup === 'object' && !Array.isArray(backup)) {
-                // Flat object — check if values look like tasks
-                const values = Object.values(backup);
-                if (values.length > 0 && typeof values[0] === 'object' && values[0].title) {
-                    importedTasks = values;
-                } else {
-                    console.error('Unrecognized backup format:', Object.keys(backup).slice(0, 5));
-                    alert('Unrecognized backup format. Expected {tasks: [...]} or an array of tasks.');
-                    return;
-                }
+            
+            if (!backup.tasks || !Array.isArray(backup.tasks)) {
+                throw new Error('Invalid backup format');
             }
-
-            if (!importedTasks || importedTasks.length === 0) {
-                alert('No tasks found in backup file.');
-                return;
-            }
-
-            if (confirm(`Import ${importedTasks.length} tasks from backup?\nThis will replace your current data!`)) {
-                // Set flag to prevent download from overwriting import
-                window.justRestoredBackup = true;
-                window.backupRestoreInProgress = true;
-
-                // Warn user if they try to leave before sync completes
-                var _beforeUnloadHandler = function(ev) {
-                    if (window.backupRestoreInProgress) {
-                        ev.preventDefault();
-                        ev.returnValue = 'Import is still syncing to server. Leaving now may lose data.';
-                        return ev.returnValue;
-                    }
-                };
-                window.addEventListener('beforeunload', _beforeUnloadHandler);
-
+            
+            if (confirm(`Import ${backup.tasks.length} tasks from backup?\nThis will replace your current data!`)) {
                 // Import tasks
-                tasks = importedTasks;
-                window.tasks = tasks;
+                tasks = backup.tasks || [];
                 localStorage.setItem('gtdTasks', JSON.stringify(tasks));
-
+                
                 // Import templates
-                if (importedTemplates) {
-                    customTemplates = importedTemplates;
+                if (backup.customTemplates) {
+                    customTemplates = backup.customTemplates;
                     localStorage.setItem('customTemplates', JSON.stringify(customTemplates));
                 }
-
+                
                 // Import lists
-                if (importedLists) {
-                    listSections = importedLists;
-                    window.listSections = listSections;
+                if (backup.listSections) {
+                    listSections = backup.listSections;
                     localStorage.setItem('listSections', JSON.stringify(listSections));
                 }
-
+                
                 // Refresh the view
-                if (typeof sortTasks === 'function') sortTasks();
-                if (typeof renderCurrentView === 'function') renderCurrentView();
-                showNotification('⏳ Syncing import to server...', 'info');
-
+                renderCurrentView();
+                showNotification('✅ Backup imported successfully!', 'success');
+                
                 // Close settings modal
                 const settingsModal = document.getElementById('settingsModal');
                 if (settingsModal) settingsModal.style.display = 'none';
-
-                // Upload to server immediately (await to ensure it completes)
-                (async () => {
-                    try {
-                        if (typeof uploadAllTasks === 'function') await uploadAllTasks();
-                        if (typeof uploadAllLists === 'function') await uploadAllLists();
-                        if (typeof uploadAllTemplates === 'function') await uploadAllTemplates();
-                        console.log('✅ Import synced to server');
-                        showNotification('✅ Backup imported and synced!', 'success');
-                    } catch (err) {
-                        console.error('❌ Import sync failed:', err);
-                        showNotification('⚠️ Imported locally but sync failed. Do not refresh yet.', 'error');
-                    }
-                    window.justRestoredBackup = false;
-                    window.backupRestoreInProgress = false;
-                    window.removeEventListener('beforeunload', _beforeUnloadHandler);
-                })();
             }
         } catch (error) {
             console.error('Import error:', error);
-            showNotification('❌ Failed to import backup: ' + error.message, 'error');
+            showNotification('❌ Failed to import backup', 'error');
         }
     };
     reader.readAsText(file);
@@ -5841,9 +5766,9 @@ function downloadTodayHtml() {
         todayTasks.forEach(task => {
             html += `
                 <div class="task">
-                    <div class="task-title">${escapeHtml(task.title)}</div>
-                    ${task.dueTime ? `<div class="task-time">Time: ${escapeHtml(task.dueTime)}</div>` : ''}
-                    ${task.notes ? `<div class="task-notes">${escapeHtml(task.notes)}</div>` : ''}
+                    <div class="task-title">${task.title}</div>
+                    ${task.dueTime ? `<div class="task-time">Time: ${task.dueTime}</div>` : ''}
+                    ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
                 </div>
             `;
         });
@@ -5887,15 +5812,15 @@ function openTrash() {
 
 const ACTION_ICONS = {
     create: '➕', edit: '✏️', delete: '🗑️', complete: '✅',
-    delay: '⏭️', duplicate: '📋', revert: '↩️'
+    delay: '⏭️', duplicate: '📋'
 };
 const ACTION_LABELS = {
     create: 'Created', edit: 'Edited', delete: 'Deleted', complete: 'Completed',
-    delay: 'Delayed', duplicate: 'Duplicated', revert: 'Reverted'
+    delay: 'Delayed', duplicate: 'Duplicated'
 };
 const ACTION_COLORS = {
     create: '#28a745', edit: '#007bff', delete: '#dc3545', complete: '#6f42c1',
-    delay: '#f59e0b', duplicate: '#17a2b8', revert: '#fd7e14'
+    delay: '#f59e0b', duplicate: '#17a2b8'
 };
 
 function renderRecentActionsView(searchTerm) {
@@ -6565,16 +6490,12 @@ async function delayTaskByDays(taskId, days) {
     }
     
     // Calculate new date
-    const beforeDelay = { dueDate: task.dueDate };
     const currentDate = task.dueDate ? new Date(task.dueDate) : new Date();
     const newDate = new Date(currentDate);
     newDate.setDate(newDate.getDate() + days);
-
+    
     // Update the task
     task.dueDate = getLocalDateString(newDate);
-    if (typeof recordAction === 'function') {
-        recordAction('delay', task.id, task.title, beforeDelay, { dueDate: task.dueDate });
-    }
     
     // Save tasks
     await saveTasks();

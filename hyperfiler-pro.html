@@ -37,15 +37,7 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
-    // Gate all console.log/table/debug output behind a debug flag
-    window.HYPERFILER_DEBUG = false;
-    (function() {
-        var _log = console.log, _table = console.table, _debug = console.debug;
-        console.log = function() { if (window.HYPERFILER_DEBUG) _log.apply(console, arguments); };
-        console.table = function() { if (window.HYPERFILER_DEBUG) _table.apply(console, arguments); };
-        console.debug = function() { if (window.HYPERFILER_DEBUG) _debug.apply(console, arguments); };
-    })();
-    console.log('🚀 HYPERFILER v4.15.0 - Cleanup Release [Deploy-20260131-cleanup] [' + new Date().toISOString() + ']');
+    console.log('🚀 HYPERFILER v4.14.2 - Stable Release [Deploy-20260130-sync-fix] [' + new Date().toISOString() + ']');
     console.log('🖥️ Viewport Width: ' + window.innerWidth + 'px | Height: ' + window.innerHeight + 'px');
     console.log('📱 Device Type: ' + (window.innerWidth > 768 ? 'DESKTOP' : 'MOBILE') + ' (breakpoint: 769px)');
     
@@ -140,6 +132,7 @@
 
     <link rel="stylesheet" href="css/styles.css?v=20260130-compact-help">
     <script src="js/dark-mode.js?v=20250901-lightmode"></script>
+    <script src="js/aria-enhancements.js?v=20250101-aria-v1"></script>
 </head>
 <body>
     <!-- Modern Mobile App Header with Gradient & Glass Morphism -->
@@ -443,7 +436,7 @@
             <div id="todayTemplateFiltersMobile" class="mobile-only" style="margin-bottom: 8px; padding: 6px; margin-top: 2px; background: #f9f9f9; border: 1px solid #ddd; min-height: 32px; border-radius: 6px;">
                 <!-- Dynamic template filters will be generated here for mobile -->
                 <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                    <select id="todayMobileFilter-static" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">
+                    <select id="todayMobileFilter" style="padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px; font-size: 14px; background: white; flex: 1;" onchange="handleMobileTemplateFilter(this.value)">
                         <option value="">All tasks</option>
                     </select>
                     <button onclick="clearTodayTemplateFilter()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 12px;">✖ Clear</button>
@@ -827,8 +820,8 @@
                             <small style="color: #6c757d; font-size: 12px; display: block; margin-top: 5px; text-align: center;">Download all tasks as JSON file</small>
                         </div>
                         <div>
-                            <input type="file" id="jsonImportFileSettings-backups" accept=".json" style="display: none;" onchange="importJSONBackup(this)">
-                            <button onclick="document.getElementById('jsonImportFileSettings-backups').click()"
+                            <input type="file" id="jsonImportFileSettings" accept=".json" style="display: none;" onchange="importJSONBackup(this)">
+                            <button onclick="document.getElementById('jsonImportFileSettings').click()" 
                                     style="width: 100%; background: #007bff; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px;"
                                     onmouseover="this.style.background='#1A47CC'"
                                     onmouseout="this.style.background='#007bff'">
@@ -882,7 +875,7 @@
                     <h5 style="margin: 0 0 10px 0; color: #495057;">🖨️ Auto-Print Settings</h5>
                     <div style="font-size: 14px; line-height: 1.5;">
                         <label style="display: flex; align-items: center; margin-bottom: 10px;">
-                            <input type="checkbox" id="autoPrintEnabled-backups" style="margin-right: 8px;">
+                            <input type="checkbox" id="autoPrintEnabled" style="margin-right: 8px;">
                             Enable auto-print for today's tasks
                         </label>
                         <div style="color: #6c757d; font-size: 12px;">
@@ -1464,17 +1457,17 @@
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                     <button onclick="switchLanguage('en')" 
                             style="background: none; border: 2px solid #ddd; font-size: 14px; cursor: pointer; padding: 8px 16px; border-radius: 6px; transition: all 0.2s;"
-                            id="lang-en-btn-desktop">
+                            id="lang-en-btn">
                         🇬🇧 English
                     </button>
-                    <button onclick="switchLanguage('es')"
+                    <button onclick="switchLanguage('es')" 
                             style="background: none; border: 2px solid #ddd; font-size: 14px; cursor: pointer; padding: 8px 16px; border-radius: 6px; transition: all 0.2s;"
-                            id="lang-es-btn-desktop">
+                            id="lang-es-btn">
                         🇪🇸 Español
                     </button>
                 </div>
             </div>
-
+            
             <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
                 <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">📊 GTD Reviews</h4>
                 <p style="color: #718096; font-size: 14px; margin-bottom: 15px;">Generate task reviews following Getting Things Done methodology</p>
@@ -1509,7 +1502,7 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                     <div>
                         <label style="font-size: 14px; color: #4a5568; font-weight: 500; margin-bottom: 5px; display: block;">Date Format:</label>
-                        <select id="dateFormatSelect-desktop" onchange="saveDateFormat()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
+                        <select id="dateFormatSelect" onchange="saveDateFormat()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
                             <option value="YYYY-MM-DD">YYYY-MM-DD</option>
                             <option value="MM/DD/YYYY">MM/DD/YYYY</option>
                             <option value="DD/MM/YYYY">DD/MM/YYYY</option>
@@ -1517,7 +1510,7 @@
                     </div>
                     <div>
                         <label style="font-size: 14px; color: #4a5568; font-weight: 500; margin-bottom: 5px; display: block;">Time Format:</label>
-                        <select id="timeFormatSelect-desktop" onchange="saveTimeFormat()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
+                        <select id="timeFormatSelect" onchange="saveTimeFormat()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
                             <option value="default">Default</option>
                             <option value="12hour">12-hour (AM/PM)</option>
                             <option value="24hour">24-hour</option>
@@ -1566,13 +1559,13 @@
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+K</kbd>
                             <label class="toggle-switch">
-                                <input type="checkbox" id="keyboardOnlyMode-desktop" onchange="toggleKeyboardOnlyMode()">
+                                <input type="checkbox" id="keyboardOnlyMode" onchange="toggleKeyboardOnlyMode()">
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
                     </div>
                 </div>
-
+                
                 <!-- Advanced Functions -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                     <button onclick="toggleMobileUIVersion()" style="background: #17a2b8; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#138496'" onmouseout="this.style.background='#17a2b8'">
@@ -2097,7 +2090,7 @@
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+K</kbd>
                                 <label class="toggle-switch">
-                                    <input type="checkbox" id="keyboardOnlyMode-help" onchange="toggleKeyboardOnlyMode()">
+                                    <input type="checkbox" id="keyboardOnlyMode" onchange="toggleKeyboardOnlyMode()">
                                     <span class="toggle-slider"></span>
                                 </label>
                             </div>
@@ -2314,20 +2307,21 @@
     <script src="js/core/TemplateProcessor.js?v=20250112-3"></script>
     
     <!-- Original modules -->
-    <script src="js/globals.js?v=20260131-debug-gate"></script>
-    <script src="js/utils.js?v=20260131-debug-gate"></script>
-    <script>var _noop=function(){};window.toast={success:_noop,error:_noop,warning:_noop,info:_noop,show:_noop,clearAll:_noop};window.showToast=_noop;</script>
+    <script src="js/globals.js?v=20250106-ULTRA-DEBUG"></script>
+    <script src="js/utils.js?v=20260130-sanitize"></script>
+    <script src="js/toast.js?v=20260130-disabled"></script>
     <script src="js/keyboard-shortcuts.js?v=20260130-zero-today"></script>
-    <script src="js/auth.js?v=20260131-no-stale-block"></script>
-    <script src="js/tasks.js?v=20260131-instant-delete-ui"></script>
-    <script src="js/ui.js?v=20260131-xss-fix"></script>
-    <script src="js/sync.js?v=20260131-server-truth"></script>
+    <script src="js/auth.js?v=20260130-no-dup-download"></script>
+    <script src="js/tasks.js?v=20260130-flag-after-upload"></script>
+    <script src="js/ui.js?v=20260130-delete-sync-fix"></script>
+    <script src="js/sync.js?v=20260130-dedup-merge"></script>
     <script src="js/offline-sync.js?v=20260130-fix-delete"></script>
     <script src="js/network-status.js?v=20250918-no-world-emoji"></script>
     <script src="js/offline-ui.js?v=20250917-icon-only"></script>
     <script src="js/natural-language.js?v=1736363000"></script>
     <script src="js/patches.js?v=1736363000"></script>
-    <script src="js/missing-functions.js?v=20260131-import-fix"></script>
+    <script src="extracted_js.js?v=20260130-full-init-download"></script>
+    <script src="js/missing-functions.js?v=20260130-close-settings"></script>
     
     <!-- Tawk.to Live Chat Integration with automatic language detection -->
 

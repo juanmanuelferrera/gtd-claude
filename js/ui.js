@@ -1148,12 +1148,12 @@ function renderTaskCard(task, isAllTasksView = false) {
             <div style="display: flex; align-items: center; flex: 1;">
                 <div style="margin-right: 8px; color: #ccc; cursor: grab;">⋮⋮</div>
                 ${checkboxHtml}
-                <div class="task-title" style="flex: 1;" title="${escapeHtml(task.title)}${task.notes ? ' - ' + escapeHtml(task.notes) : ''}">
-                    ${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${escapeHtml(task.repeat)}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}
-                    ${makeLinksClickable(escapeHtml(extractTagsAndCleanText(task.title).cleanText))}
+                <div class="task-title" style="flex: 1;" title="${task.title}${task.notes ? ' - ' + task.notes : ''}">
+                    ${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}
+                    ${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}
                     ${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}
                     ${isOverdue && !isEvent ? ' <span style="color: #dc3545; font-weight: bold;">OVERDUE</span>' : ''}
-                    ${task.notes ? ` <span style="color: #666; font-size: 12px; margin-left: 8px;" title="${escapeHtml(task.notes)}">📝</span>` : ''}
+                    ${task.notes ? ` <span style="color: #666; font-size: 12px; margin-left: 8px;" title="${task.notes}">📝</span>` : ''}
                 </div>
             </div>
             <div class="action-buttons" style="display: flex; gap: 4px; align-items: center;">
@@ -3165,14 +3165,9 @@ function completeTask(taskId, event) {
         tasks[taskIndex].deletedAt = new Date().toISOString();
         tasks[taskIndex].updatedAt = new Date().toISOString();
 
-        // Record in action registry for undo
-        if (typeof recordAction === 'function') {
-            recordAction('delete', taskBefore.id, taskBefore.title, taskBefore, null);
-        }
-
         console.log('📋 Task after deletion (tombstone):', tasks[taskIndex]);
         console.log('💾 Saving tasks...');
-
+        
         // Save changes
         saveTasksToLocalStorage();
 
@@ -3325,15 +3320,11 @@ function deleteSelectedTasks() {
             console.log('📍 Task index found:', taskIndex);
             
             if (taskIndex !== -1) {
-                const taskBefore = { ...tasks[taskIndex] };
                 console.log('✅ Setting task to deleted:', tasks[taskIndex].title);
                 tasks[taskIndex].status = 'deleted';
                 tasks[taskIndex].isDeleted = true;
                 tasks[taskIndex].deletedAt = new Date().toISOString();
                 tasks[taskIndex].updatedAt = new Date().toISOString();
-                if (typeof recordAction === 'function') {
-                    recordAction('delete', taskBefore.id, taskBefore.title, taskBefore, null);
-                }
                 deletedCount++;
             } else {
                 console.log('❌ Task not found in tasks array');
@@ -4358,7 +4349,7 @@ function renderWeekView() {
                 displayTitle = task.title.substring(0, maxChars) + '...';
             }
             
-            taskElement.textContent = `${titlePrefix}${displayTitle}`;
+            taskElement.innerHTML = `${titlePrefix}${displayTitle}`;
             
             taskElement.dataset.taskId = task.id;
             taskElement.dataset.fullText = task.title;

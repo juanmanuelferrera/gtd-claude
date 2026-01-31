@@ -2,16 +2,12 @@
 console.log('🚀 HyperFiler Pro v1.3.0 - Starting initialization...');
 
 window.addEventListener('error', function(e) {
-    if (window.HYPERFILER_DEBUG) {
-        console.error('❌ UNCAUGHT ERROR:', e.message, 'at line', e.lineno, 'column', e.colno);
-        console.error('Stack:', e.error?.stack);
-    }
+    console.error('❌ UNCAUGHT ERROR:', e.message, 'at line', e.lineno, 'column', e.colno);
+    console.error('Stack:', e.error?.stack);
 });
 
 window.addEventListener('unhandledrejection', function(e) {
-    if (window.HYPERFILER_DEBUG) {
-        console.error('❌ UNHANDLED PROMISE REJECTION:', e.reason);
-    }
+    console.error('❌ UNHANDLED PROMISE REJECTION:', e.reason);
 });
 
 // Prevent mobile bounce/pull-to-refresh
