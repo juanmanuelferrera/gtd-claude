@@ -1,8 +1,12 @@
 // Service Worker for HyperFiler Pro
 // Version 1.0 - App Shell Caching Only
 
+const SW_DEBUG = false;
+const _swLog = console.log;
+console.log = function() { if (SW_DEBUG) _swLog.apply(console, arguments); };
+
 const CACHE_NAME = 'hyperfiler-v1.4.1-shell';
-const CACHE_VERSION = '20260130-dedup-merge';
+const CACHE_VERSION = '20260131-cleanup';
 
 // App Shell - Critical files for offline functionality
 const APP_SHELL = [
