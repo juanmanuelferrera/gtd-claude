@@ -5,6 +5,7 @@ const BACKUP_DB_NAME = 'HyperFilerBackups';
 const BACKUP_DB_VERSION = 1;
 const BACKUP_STORE = 'snapshots';
 const MAX_SNAPSHOTS = 30;
+const MAX_DAILY_SNAPSHOTS = 7;
 const AUTO_BACKUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 let _backupDB = null;
@@ -109,10 +110,26 @@ function _countTasks(data) {
 }
 
 async function _pruneSnapshots(db) {
-    const all = await listSnapshots();
-    if (all.length <= MAX_SNAPSHOTS) return;
+    const all = await listSnapshots(); // sorted newest-first
 
-    const toDelete = all.slice(MAX_SNAPSHOTS);
+    // Separate daily snapshots from rolling snapshots
+    const daily = all.filter(s => s.reason === 'daily');
+    const rolling = all.filter(s => s.reason !== 'daily');
+
+    const toDelete = [];
+
+    // Prune rolling snapshots beyond MAX_SNAPSHOTS
+    if (rolling.length > MAX_SNAPSHOTS) {
+        toDelete.push(...rolling.slice(MAX_SNAPSHOTS));
+    }
+
+    // Prune daily snapshots beyond MAX_DAILY_SNAPSHOTS
+    if (daily.length > MAX_DAILY_SNAPSHOTS) {
+        toDelete.push(...daily.slice(MAX_DAILY_SNAPSHOTS));
+    }
+
+    if (toDelete.length === 0) return;
+
     const tx = db.transaction(BACKUP_STORE, 'readwrite');
     const store = tx.objectStore(BACKUP_STORE);
     for (const snap of toDelete) {
@@ -224,9 +241,25 @@ async function deleteAllSnapshots() {
 
 // ── Auto-Backup Timer ──
 
+async function _checkDailyBackup() {
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const lastDaily = localStorage.getItem('lastDailyBackupDate');
+    if (lastDaily === today) return;
+
+    await createSnapshot('daily');
+    localStorage.setItem('lastDailyBackupDate', today);
+    console.log(`📅 Daily backup created for ${today}`);
+}
+
 function startAutoBackup() {
     stopAutoBackup();
+    // Check for daily backup on start
+    _checkDailyBackup().catch(e => console.warn('Daily backup check failed:', e));
+
     _autoBackupTimer = setInterval(async () => {
+        // Check daily backup each interval too (covers overnight tabs)
+        await _checkDailyBackup().catch(() => {});
+
         const data = _collectSnapshotData();
         const hash = _hashData(data);
         if (hash === _lastDataHash) {
@@ -279,7 +312,7 @@ async function renderBackupSnapshotList() {
         return;
     }
 
-    const reasonLabels = { auto: '🔄 Auto', 'pre-sync': '🔒 Pre-Sync', manual: '✋ Manual', 'pre-restore': '🛡️ Pre-Restore' };
+    const reasonLabels = { auto: '🔄 Auto', daily: '📅 Daily', 'pre-sync': '🔒 Pre-Sync', manual: '✋ Manual', 'pre-restore': '🛡️ Pre-Restore' };
 
     let html = `<div style="margin-bottom: 10px; color: #6c757d; font-size: 13px;">${snapshots.length} backup(s) &middot; ${(stats.totalSize / 1024).toFixed(1)} KB total</div>`;
     html += '<div style="display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto;">';
