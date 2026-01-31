@@ -56,6 +56,7 @@ function hideSkeletonLoader(containerId, content) {
 function showView(viewName, preserveDate = false) {
     currentView = viewName;
     window.currentView = viewName; // Fix: Also update global window.currentView for drag handlers
+    try { localStorage.setItem('currentView', viewName); } catch(e) {}
     
     // Reset task selection when changing views
     if (typeof resetTaskSelection === 'function') {

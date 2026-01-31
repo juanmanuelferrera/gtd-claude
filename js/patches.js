@@ -32,8 +32,9 @@ window.addEventListener('load', async () => {
     
     // Initialize the UI
     if (typeof showView === 'function') {
-        // Show default view
-        showView('today');
+        // Restore last view or default to today
+        const savedView = localStorage.getItem('currentView') || 'today';
+        showView(savedView);
     }
     
     // Force render the view multiple times to ensure data displays
