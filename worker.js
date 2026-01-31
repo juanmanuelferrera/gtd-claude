@@ -2164,8 +2164,8 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
     try {
       // Try enhanced v2.0.7 schema with device/session tracking and fingerprinting
       stmt = env.DB.prepare(`
-        INSERT OR REPLACE INTO user_tasks 
-        (id, user_id, title, notes, images, due_date, due_time, status, repeat_type, template, 
+        INSERT OR IGNORE INTO user_tasks
+        (id, user_id, title, notes, images, due_date, due_time, status, repeat_type, template,
          is_event, created_at, updated_at, is_deleted, deleted_at, device_id, session_id, sync_version)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
@@ -2174,8 +2174,8 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
     } catch (error) {
       // Fallback to v2.0.6 schema
       stmt = env.DB.prepare(`
-        INSERT OR REPLACE INTO user_tasks 
-        (id, user_id, title, notes, images, due_date, due_time, status, repeat_type, template, 
+        INSERT OR IGNORE INTO user_tasks
+        (id, user_id, title, notes, images, due_date, due_time, status, repeat_type, template,
          is_event, created_at, updated_at, is_deleted, deleted_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);

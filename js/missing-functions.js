@@ -2280,10 +2280,19 @@ function revertAction(actionId) {
         }
     }
 
-    // Remove action from registry
-    registry.splice(idx, 1);
-    window.actionRegistry = registry;
-    localStorage.setItem('actionRegistry', JSON.stringify(registry));
+    // Record the revert as a new action before removing the old one
+    if (typeof recordAction === 'function') {
+        recordAction('revert', action.taskId, action.taskTitle, action.after, action.before);
+    }
+
+    // Remove the original action from registry
+    registry = window.actionRegistry || JSON.parse(localStorage.getItem('actionRegistry') || '[]');
+    var newIdx = registry.findIndex(function(a) { return a.id === actionId; });
+    if (newIdx !== -1) {
+        registry.splice(newIdx, 1);
+        window.actionRegistry = registry;
+        localStorage.setItem('actionRegistry', JSON.stringify(registry));
+    }
 
     // Save and re-render
     if (typeof saveTasksToLocalStorage === 'function') saveTasksToLocalStorage();
@@ -5818,15 +5827,15 @@ function openTrash() {
 
 const ACTION_ICONS = {
     create: '➕', edit: '✏️', delete: '🗑️', complete: '✅',
-    delay: '⏭️', duplicate: '📋'
+    delay: '⏭️', duplicate: '📋', revert: '↩️'
 };
 const ACTION_LABELS = {
     create: 'Created', edit: 'Edited', delete: 'Deleted', complete: 'Completed',
-    delay: 'Delayed', duplicate: 'Duplicated'
+    delay: 'Delayed', duplicate: 'Duplicated', revert: 'Reverted'
 };
 const ACTION_COLORS = {
     create: '#28a745', edit: '#007bff', delete: '#dc3545', complete: '#6f42c1',
-    delay: '#f59e0b', duplicate: '#17a2b8'
+    delay: '#f59e0b', duplicate: '#17a2b8', revert: '#fd7e14'
 };
 
 function renderRecentActionsView(searchTerm) {
