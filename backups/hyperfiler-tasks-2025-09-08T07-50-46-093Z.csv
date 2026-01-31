@@ -1,4 +1,0 @@
-ID,Title,Notes,Due Date,Due Time,Status,Is Event,Priority,Tags,Created At,Updated At,Completed At
-sample_task_1,"Sample Task 1","This is a sample task with notes",2024-01-15,14:30,pending,No,1,"work, @project",2024-01-10T10:00:00.000Z,2024-01-10T10:00:00.000Z,
-sample_task_2,"Sample Completed Task","",2024-01-14,,completed,No,0,"personal",2024-01-09T09:00:00.000Z,2024-01-14T16:30:00.000Z,2024-01-14T16:30:00.000Z
-sample_event_1,"Team Meeting","Weekly team sync meeting",2024-01-16,09:00,pending,Yes,2,"work, meeting",2024-01-01T08:00:00.000Z,2024-01-01T08:00:00.000Z,
