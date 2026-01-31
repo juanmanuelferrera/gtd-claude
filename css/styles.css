@@ -5522,9 +5522,7 @@
                 width: 24px;
                 text-align: center;
             }
-            
-        }
-        
+
         /* Fix Lists view background formatting */
         .list-section-content {
             background: white !important;
@@ -5836,13 +5834,7 @@
             
             
         }
-        
-            
-            .desktop-task-actions {
-                display: block !important;
-            }
-        }
-        
+
         /* Mobile floating add button positioning */
         @media (max-width: 768px) {
             .floating-add-btn, #fabAddTask {
