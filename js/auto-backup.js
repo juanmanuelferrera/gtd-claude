@@ -458,6 +458,15 @@ async function toggleBackupPreview(id) {
     }
 }
 
+function toggleBackupTier(sectionId) {
+    const section = document.getElementById(sectionId);
+    const chevron = document.getElementById(sectionId + '-chevron');
+    if (!section) return;
+    const isHidden = section.style.display === 'none';
+    section.style.display = isHidden ? 'flex' : 'none';
+    if (chevron) chevron.innerHTML = isHidden ? '&#9660;' : '&#9654;';
+}
+
 function _formatAge(ms) {
     const mins = Math.floor(ms / 60000);
     if (mins < 1) return 'just now';
@@ -503,9 +512,15 @@ async function renderBackupSnapshotList(containerId) {
         const snaps = grouped[tier.key];
         if (snaps.length === 0) continue;
 
+        const sectionId = `backup-tier-${tier.key}`;
+        const isCollapsed = tier.key === 'rolling' || tier.key === 'hourly'; // collapse verbose tiers by default
+
         html += `<div style="margin-bottom: 16px;">
-            <div style="font-weight: 700; font-size: 14px; color: #333; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #dee2e6;">${tier.title} <span style="font-weight: 400; color: #999; font-size: 12px;">(${snaps.length})</span></div>
-            <div style="display: flex; flex-direction: column; gap: 6px;">`;
+            <div onclick="toggleBackupTier('${sectionId}')" style="font-weight: 700; font-size: 14px; color: #333; padding-bottom: 4px; border-bottom: 1px solid #dee2e6; cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none;">
+                <span>${tier.title} <span style="font-weight: 400; color: #999; font-size: 12px;">(${snaps.length})</span></span>
+                <span style="color: #aaa; font-size: 14px;" id="${sectionId}-chevron">${isCollapsed ? '&#9654;' : '&#9660;'}</span>
+            </div>
+            <div id="${sectionId}" style="display: ${isCollapsed ? 'none' : 'flex'}; flex-direction: column; gap: 6px; margin-top: 8px;">`;
 
         for (const snap of snaps) {
             html += _renderSnapshotRow(snap);
@@ -592,6 +607,7 @@ window.isAutoBackupEnabled = isAutoBackupEnabled;
 window.setAutoBackupEnabled = setAutoBackupEnabled;
 window.getBackupStats = getBackupStats;
 window.toggleBackupPreview = toggleBackupPreview;
+window.toggleBackupTier = toggleBackupTier;
 window.renderBackupSnapshotList = renderBackupSnapshotList;
 window.renderBackupListMain = renderBackupListMain;
 window._undoRestore = _undoRestore;
