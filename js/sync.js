@@ -961,18 +961,11 @@ function showSyncStatus(message, type) {
 }
 
 /**
- * Delete a specific task from the cloud by uploading all tasks
- * (includes the soft-deleted tombstone so the server knows it's deleted)
+ * Delete a specific task from the cloud.
+ * No-op: the caller's background uploadAllTasks() handles syncing the tombstone.
  */
 async function deleteTaskFromCloud(taskId) {
-    if (!window.currentUser?.user?.id) {
-        console.log('⚠️ No user credentials for cloud delete');
-        return false;
-    }
-
-    console.log(`🗑️ Syncing deletion of task ${taskId} to cloud...`);
-    await _uploadAllTasksInternal();
-    console.log(`✅ Task ${taskId} deletion synced to cloud`);
+    console.log(`🗑️ Task ${taskId} deletion will sync via background uploadAllTasks`);
     return true;
 }
 

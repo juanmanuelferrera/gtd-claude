@@ -4196,8 +4196,10 @@ document.addEventListener('keydown', function(event) {
     // D or Delete: delete task(s)
     if ((event.key === 'Delete' || event.key === 'd' || event.key === 'D') && targets.length > 0) {
         event.preventDefault();
+        console.log('🎹 D key: deleting', targets.length, 'task(s)');
         targets.forEach(function(el) {
             var did = parseTaskId(el.getAttribute('data-task-id'));
+            console.log('🎹 D key: task ID =', did, 'deleteTask exists:', typeof deleteTask === 'function');
             if (did && typeof deleteTask === 'function') deleteTask(did);
         });
         reselectAfterAction(currentIdx);
