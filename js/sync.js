@@ -383,15 +383,11 @@ async function _downloadAllTasksInternal() {
         
         console.log('📥 Downloaded', serverTasks.length, 'tasks from server');
         
-        // MANDATORY REFRESH or FRESH BROWSER: Direct replacement with server data
-        if (window.forceMandatoryRefresh || window.staleBrowserMode || isFreshBrowser) {
-            console.log(`🚨 ${isFreshBrowser ? 'FRESH BROWSER' : 'MANDATORY REFRESH'}: Directly replacing with server data (${serverTasks.length} tasks)`);
-            tasks = serverTasks;
-            window.tasks = tasks; // Sync to window
-        } else {
-            // Normal sync: merge with conflict detection
-            await mergeTasksWithConflictResolution(serverTasks);
-        }
+        // Replace local data with server data (server is source of truth)
+        // Local-only changes are uploaded separately via uploadAllTasks
+        console.log(`📥 Replacing local tasks with server data (${serverTasks.length} tasks)`);
+        tasks = serverTasks;
+        window.tasks = tasks;
         
         // Deduplicate after merge/replace to clean any dupes from server
         deduplicateTasks();
