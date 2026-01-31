@@ -4024,7 +4024,7 @@ document.addEventListener('keydown', function(event) {
         var next = currentIdx < allTasks.length - 1 ? currentIdx + 1 : 0;
         if (current) current.classList.remove('task-selected');
         allTasks[next].classList.add('task-selected');
-        allTasks[next].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        allTasks[next].scrollIntoView({ block: 'center', behavior: 'smooth' });
         return;
     }
     if (event.key === 'ArrowUp') {
@@ -4033,7 +4033,7 @@ document.addEventListener('keydown', function(event) {
         var prev = currentIdx > 0 ? currentIdx - 1 : allTasks.length - 1;
         if (current) current.classList.remove('task-selected');
         allTasks[prev].classList.add('task-selected');
-        allTasks[prev].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        allTasks[prev].scrollIntoView({ block: 'center', behavior: 'smooth' });
         return;
     }
 
