@@ -154,6 +154,12 @@ document.addEventListener('keydown', function(e) {
 // draggedTask declared in tasks.js
 
 // Keyboard shortcuts (missing-functions.js) — capture phase to beat extracted_js NavigationManager
+// Track Space key state for Space+Arrow batch selection
+var _spaceHeld = false;
+document.addEventListener('keyup', function(event) {
+    if (event.key === ' ') _spaceHeld = false;
+}, true);
+
 document.addEventListener('keydown', function(event) {
     // Skip if typing in input fields
     var ae = document.activeElement;
@@ -185,7 +191,7 @@ document.addEventListener('keydown', function(event) {
     if (current) {
         allTasks.forEach(function(el, i) { if (el === current) currentIdx = i; });
     }
-    // Arrow Up/Down: navigate tasks
+    // Arrow Up/Down: navigate tasks (+ batch select if Space held)
     if (event.key === 'ArrowDown') {
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -194,6 +200,11 @@ document.addEventListener('keydown', function(event) {
         allTasks[next].classList.add('task-selected');
         allTasks[next].scrollIntoView({ block: 'center', behavior: 'smooth' });
         if (window.PERSISTENT_TASK_SELECTION) window.PERSISTENT_TASK_SELECTION.trackKeyboardCursor(allTasks[next].getAttribute('data-task-id'));
+        if (_spaceHeld) {
+            allTasks[next].classList.toggle('selected');
+            var sid = allTasks[next].getAttribute('data-task-id');
+            if (sid && window.PERSISTENT_TASK_SELECTION) window.PERSISTENT_TASK_SELECTION.trackBatchToggle(sid);
+        }
         return;
     }
     if (event.key === 'ArrowUp') {
@@ -204,6 +215,11 @@ document.addEventListener('keydown', function(event) {
         allTasks[prev].classList.add('task-selected');
         allTasks[prev].scrollIntoView({ block: 'center', behavior: 'smooth' });
         if (window.PERSISTENT_TASK_SELECTION) window.PERSISTENT_TASK_SELECTION.trackKeyboardCursor(allTasks[prev].getAttribute('data-task-id'));
+        if (_spaceHeld) {
+            allTasks[prev].classList.toggle('selected');
+            var sid2 = allTasks[prev].getAttribute('data-task-id');
+            if (sid2 && window.PERSISTENT_TASK_SELECTION) window.PERSISTENT_TASK_SELECTION.trackBatchToggle(sid2);
+        }
         return;
     }
     // Enter: edit selected task
@@ -216,9 +232,10 @@ document.addEventListener('keydown', function(event) {
         }
         return;
     }
-    // Space: toggle batch selection
+    // Space: toggle batch selection + track held state for Space+Arrow
     if (event.key === ' ' && current) {
         event.preventDefault();
+        _spaceHeld = true;
         current.classList.toggle('selected');
         var tid = current.getAttribute('data-task-id');
         if (tid && window.PERSISTENT_TASK_SELECTION) {
