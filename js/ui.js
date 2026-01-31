@@ -4290,8 +4290,8 @@ function initializeUI() {
     // Set up mobile navigation if present
     updateMobileNavigation();
     
-    // Initialize with today view
-    showView('today');
+    // Restore last view or default to today
+    showView(localStorage.getItem('currentView') || 'today');
     
     console.log('✅ UI module initialized');
 }
