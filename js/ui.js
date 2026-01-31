@@ -3165,9 +3165,14 @@ function completeTask(taskId, event) {
         tasks[taskIndex].deletedAt = new Date().toISOString();
         tasks[taskIndex].updatedAt = new Date().toISOString();
 
+        // Record in action registry for undo
+        if (typeof recordAction === 'function') {
+            recordAction('delete', taskBefore.id, taskBefore.title, taskBefore, null);
+        }
+
         console.log('📋 Task after deletion (tombstone):', tasks[taskIndex]);
         console.log('💾 Saving tasks...');
-        
+
         // Save changes
         saveTasksToLocalStorage();
 
@@ -3320,11 +3325,15 @@ function deleteSelectedTasks() {
             console.log('📍 Task index found:', taskIndex);
             
             if (taskIndex !== -1) {
+                const taskBefore = { ...tasks[taskIndex] };
                 console.log('✅ Setting task to deleted:', tasks[taskIndex].title);
                 tasks[taskIndex].status = 'deleted';
                 tasks[taskIndex].isDeleted = true;
                 tasks[taskIndex].deletedAt = new Date().toISOString();
                 tasks[taskIndex].updatedAt = new Date().toISOString();
+                if (typeof recordAction === 'function') {
+                    recordAction('delete', taskBefore.id, taskBefore.title, taskBefore, null);
+                }
                 deletedCount++;
             } else {
                 console.log('❌ Task not found in tasks array');
