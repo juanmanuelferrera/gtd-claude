@@ -4,7 +4,7 @@
 const BACKUP_DB_NAME = 'HyperFilerBackups';
 const BACKUP_DB_VERSION = 1;
 const BACKUP_STORE = 'snapshots';
-const MAX_SNAPSHOTS = 10;
+const MAX_SNAPSHOTS = 30;
 const AUTO_BACKUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 let _backupDB = null;
