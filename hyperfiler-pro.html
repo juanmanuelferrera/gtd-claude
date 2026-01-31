@@ -37,6 +37,14 @@
     <meta name="theme-color" content="#ff6b35">
     
     <script>
+    // Gate all console.log/table/debug output behind a debug flag
+    window.HYPERFILER_DEBUG = false;
+    (function() {
+        var _log = console.log, _table = console.table, _debug = console.debug;
+        console.log = function() { if (window.HYPERFILER_DEBUG) _log.apply(console, arguments); };
+        console.table = function() { if (window.HYPERFILER_DEBUG) _table.apply(console, arguments); };
+        console.debug = function() { if (window.HYPERFILER_DEBUG) _debug.apply(console, arguments); };
+    })();
     console.log('🚀 HYPERFILER v4.15.0 - Cleanup Release [Deploy-20260131-cleanup] [' + new Date().toISOString() + ']');
     console.log('🖥️ Viewport Width: ' + window.innerWidth + 'px | Height: ' + window.innerHeight + 'px');
     console.log('📱 Device Type: ' + (window.innerWidth > 768 ? 'DESKTOP' : 'MOBILE') + ' (breakpoint: 769px)');

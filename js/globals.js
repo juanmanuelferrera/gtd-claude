@@ -3,15 +3,6 @@
  * Ensures all modules have access to shared state
  */
 
-// Debug flag — set to true in console to re-enable logging: window.HYPERFILER_DEBUG = true
-window.HYPERFILER_DEBUG = false;
-(function() {
-    var _origLog = console.log;
-    console.log = function() {
-        if (window.HYPERFILER_DEBUG) _origLog.apply(console, arguments);
-    };
-})();
-
 // Ensure core globals are initialized
 if (typeof window.tasks === 'undefined') {
     window.tasks = [];
