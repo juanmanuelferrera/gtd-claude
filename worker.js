@@ -666,11 +666,16 @@ export default {
         });
       }
       
+      // Tasks sync endpoint - v2.0.7 sync system
+      if (pathname === '/tasks/sync' && request.method === 'POST') {
+        return handleTasksSyncSimple(request, env, corsHeaders);
+      }
+
       // DEBUG: Log any unmatched /tasks/ requests
       if (pathname.startsWith('/tasks/')) {
         console.log('🔍 UNMATCHED TASKS REQUEST:', request.method, pathname);
         console.log('🔍 Request URL:', request.url);
-        return new Response(JSON.stringify({ 
+        return new Response(JSON.stringify({
           error: 'unmatched_endpoint',
           method: request.method,
           pathname: pathname,
@@ -679,11 +684,6 @@ export default {
           status: 404,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
-      }
-
-      // Tasks sync endpoint - v2.0.7 sync system
-      if (pathname === '/tasks/sync' && request.method === 'POST') {
-        return handleTasksSyncSimple(request, env, corsHeaders);
       }
 
       // Lists endpoints - Same ultra-simple pattern as tasks
