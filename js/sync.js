@@ -308,7 +308,19 @@ async function _uploadAllTasksInternal() {
         deduplicateTasks();
 
         // Log tombstone status before upload
-        const tasksToUpload = tasks.map(task => cleanTaskForStorage(task));
+        const tasksRaw = tasks.map(task => cleanTaskForStorage(task));
+        // Final dedup by ID — keep the most recently updated copy
+        const seenIds = new Map();
+        tasksRaw.forEach(t => {
+            const existing = seenIds.get(t.id);
+            if (!existing || (t.updatedAt || '') > (existing.updatedAt || '')) {
+                seenIds.set(t.id, t);
+            }
+        });
+        const tasksToUpload = Array.from(seenIds.values());
+        if (tasksRaw.length !== tasksToUpload.length) {
+            console.warn(`⚠️ Deduped ${tasksRaw.length - tasksToUpload.length} duplicate task IDs before upload`);
+        }
         const deletedCount = tasksToUpload.filter(t => t.isDeleted || t.status === 'deleted').length;
         const activeCount = tasksToUpload.filter(t => !t.isDeleted && t.status !== 'deleted').length;
         console.log(`📤 Uploading ${tasksToUpload.length} tasks (${activeCount} active, ${deletedCount} tombstones)`);
