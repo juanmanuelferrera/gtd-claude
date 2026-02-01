@@ -817,8 +817,8 @@ async function carryOverYesterdayTasks(env) {
     if (notes.includes('@compra')) continue;
     if (t.dueDate !== yesterdayStr) continue;
 
-    t.dueDate = today;
-    t.dueTime = '';
+    t.dueDate = t.due_date = today;
+    t.dueTime = t.due_time = '';
     t.updatedAt = new Date().toISOString();
     moved++;
   }
