@@ -231,6 +231,39 @@ export default {
 
     try {
       // Health check endpoint
+      // Manual trigger for scheduled organizer (protected by secret)
+      if (pathname === '/trigger-organize' && request.method === 'POST') {
+        const body = await request.json().catch(() => ({}));
+        if (body.secret !== env.ORGANIZER_USER_ID) {
+          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        await organizeTomorrowTasks(env);
+        return new Response(JSON.stringify({ success: true, message: 'Organize triggered' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Admin: restore tasks (protected by secret)
+      if (pathname === '/admin-restore-tasks' && request.method === 'POST') {
+        const body = await request.json().catch(() => ({}));
+        if (body.secret !== env.ORGANIZER_USER_ID) {
+          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        const userId = env.ORGANIZER_USER_ID;
+        await env.DB.prepare('DELETE FROM user_tasks WHERE user_id = ?').bind(userId).run();
+        await env.DB.prepare(
+          `INSERT INTO user_tasks (user_id, task_data, title, created_at, updated_at)
+           VALUES (?, ?, 'JSON_TASKS_DATA', datetime('now'), datetime('now'))`
+        ).bind(userId, JSON.stringify(body.tasks)).run();
+        return new Response(JSON.stringify({ success: true, count: body.tasks.length }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
       if (pathname === '/health') {
         return new Response(JSON.stringify({ 
           status: 'OK', 
@@ -682,7 +715,349 @@ export default {
       });
     }
   },
+
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(purgeOldDeletedTasks(env).then(() => organizeTomorrowTasks(env)));
+  },
 };
+
+// ========== PURGE OLD DELETED TASKS ==========
+
+const DELETED_MAX_AGE_DAYS = 30;
+const DELETED_MAX_COUNT = 200;
+
+async function purgeOldDeletedTasks(env) {
+  const userId = env.ORGANIZER_USER_ID;
+  if (!userId) return;
+
+  console.log('🗑️ Purge: checking deleted tasks...');
+
+  const { results } = await env.DB.prepare(
+    'SELECT task_data FROM user_tasks WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+  ).bind(userId).all();
+
+  if (!results || !results.length || !results[0].task_data) return;
+
+  const tasks = JSON.parse(results[0].task_data);
+  const cutoff = new Date();
+  cutoff.setUTCDate(cutoff.getUTCDate() - DELETED_MAX_AGE_DAYS);
+  const cutoffISO = cutoff.toISOString();
+
+  // Separate deleted from active
+  const active = [];
+  const deleted = [];
+  for (const t of tasks) {
+    if (t._meta || (!t.isDeleted && t.status !== 'deleted')) {
+      active.push(t);
+    } else {
+      deleted.push(t);
+    }
+  }
+
+  // Remove deleted older than 30 days
+  let kept = deleted.filter(t => (t.updatedAt || '') >= cutoffISO);
+
+  // If still over max count, keep only the most recent
+  if (kept.length > DELETED_MAX_COUNT) {
+    kept.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+    kept = kept.slice(0, DELETED_MAX_COUNT);
+  }
+
+  const purged = deleted.length - kept.length;
+  if (purged === 0) {
+    console.log(`🗑️ Purge: nothing to remove (${deleted.length} deleted, all recent)`);
+    return;
+  }
+
+  const newTasks = [...active, ...kept];
+  const taskJson = JSON.stringify(newTasks);
+  const now = new Date().toISOString();
+
+  await env.DB.prepare('DELETE FROM user_tasks WHERE user_id = ?').bind(userId).run();
+  await env.DB.prepare(
+    `INSERT INTO user_tasks (user_id, task_data, title, created_at, updated_at)
+     VALUES (?, ?, 'tasks', ?, ?)`
+  ).bind(userId, taskJson, now, now).run();
+
+  console.log(`🗑️ Purge done: removed ${purged} old deleted tasks (kept ${kept.length})`);
+}
+
+// ========== AUTO-ORGANIZE DAILY TASKS ==========
+
+function getTodayDateStr() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+function getTomorrowDateStr() {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
+function scoreImportance(task) {
+  const t = (task.title || '').toLowerCase();
+  const n = (task.notes || '').toLowerCase();
+  const text = t + ' ' + n;
+
+  // Legal / administrative deadlines
+  if (/legal|abogado|notari|impuesto|hacienda|multa|deadline|vencimiento|cita médica|doctor/.test(text)) return 1;
+  // Real-world urgent (communication, health, errands)
+  if (/llamar|email|urgente|cita|farmacia|banco|correo|comprar|recoger|entregar|salud/.test(text)) return 2;
+  // Active projects with momentum (books, marketing, web)
+  if (/libro|book|capítulo|chapter|marketing|campaign|web|deploy|launch|publicar/.test(text)) return 3;
+  // Digital / tech tasks
+  if (/code|programar|fix|bug|update|server|backup|config|setup|instalar/.test(text)) return 4;
+  // Personal care
+  if (/ejercicio|gym|meditar|yoga|ducha|ropa|lavar/.test(text)) return 5;
+  // Household chores
+  if (/limpiar|barrer|fregar|basura|planchar|ordenar/.test(text)) return 6;
+  // Reference / recipes / low priority
+  return 7;
+}
+
+function estimateDuration(task) {
+  const t = (task.title || '').toLowerCase();
+  // Check for explicit duration in notes
+  const durMatch = (task.notes || '').match(/(\d+)\s*min/);
+  if (durMatch) return parseInt(durMatch[1]);
+  // Heuristics
+  if (/desayuno|breakfast/.test(t)) return 30;
+  if (/cocinar|cook/.test(t)) return 45;
+  if (/limpiar|clean/.test(t)) return 30;
+  if (/llamar|call|email/.test(t)) return 15;
+  if (/ejercicio|gym|workout/.test(t)) return 60;
+  if (/comprar|errand|shopping/.test(t)) return 45;
+  if (/escribir|write|capítulo|chapter/.test(t)) return 90;
+  if (/deploy|fix|bug|code|programar/.test(t)) return 60;
+  return 30; // default
+}
+
+function timeToMinutes(timeStr) {
+  if (!timeStr) return null;
+  const [h, m] = timeStr.split(':').map(Number);
+  return h * 60 + (m || 0);
+}
+
+function minutesToTime(mins) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+async function organizeTomorrowTasks(env) {
+  const userId = env.ORGANIZER_USER_ID;
+  if (!userId) {
+    console.error('❌ ORGANIZER_USER_ID secret not set');
+    return;
+  }
+
+  console.log('🗓️ Auto-organize: starting for user', userId);
+
+  // 1. Read all tasks from D1
+  const { results } = await env.DB.prepare(
+    'SELECT task_data FROM user_tasks WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+  ).bind(userId).all();
+
+  if (!results.length || !results[0].task_data) {
+    console.log('No tasks found');
+    return;
+  }
+
+  let allTasks = JSON.parse(results[0].task_data);
+  const tomorrow = getTodayDateStr();
+  const dayAfter = getTomorrowDateStr();
+
+  // 2. Separate tomorrow's organizable tasks from everything else
+  const tomorrowTasks = [];
+  const otherTasks = [];
+
+  for (const task of allTasks) {
+    // Skip metadata entries (e.g. actionRegistry)
+    if (task._meta) {
+      otherTasks.push(task);
+      continue;
+    }
+    if (task.is_deleted || task.isDeleted || task.status === 'deleted') {
+      otherTasks.push(task);
+      continue;
+    }
+    const dueDate = task.due_date || task.dueDate;
+    if (dueDate === tomorrow) {
+      tomorrowTasks.push(task);
+    } else {
+      otherTasks.push(task);
+    }
+  }
+
+  // Ensure "Spiritual Program" task exists at 06:00 for today
+  let hasSpiritual = tomorrowTasks.some(t =>
+    /programa espiritual|spiritual program/i.test(t.title || '')
+  );
+  if (!hasSpiritual) {
+    const spiritualTask = {
+      id: `spiritual_${tomorrow}`,
+      title: 'Programa Espiritual',
+      notes: '',
+      dueDate: tomorrow,
+      due_date: tomorrow,
+      dueTime: '06:00',
+      due_time: '06:00',
+      status: 'pending',
+      isEvent: false,
+      is_event: false,
+      isDeleted: false,
+      is_deleted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      images: []
+    };
+    tomorrowTasks.push(spiritualTask);
+  } else {
+    // Fix time to 06:00 if it exists but has wrong time
+    for (const t of tomorrowTasks) {
+      if (/programa espiritual|spiritual program/i.test(t.title || '')) {
+        t.due_time = t.dueTime = '06:00';
+      }
+    }
+  }
+
+  // Also ensure spiritual program exists for the next day
+  let dayAfterHasSpiritual = otherTasks.some(t => {
+    const dd = t.due_date || t.dueDate;
+    return dd === dayAfter && /programa espiritual|spiritual program/i.test(t.title || '') && !t.isDeleted && t.status !== 'deleted';
+  });
+  if (!dayAfterHasSpiritual) {
+    otherTasks.push({
+      id: `spiritual_${dayAfter}`,
+      title: 'Programa Espiritual',
+      notes: '',
+      dueDate: dayAfter,
+      due_date: dayAfter,
+      dueTime: '06:00',
+      due_time: '06:00',
+      status: 'pending',
+      isEvent: false,
+      is_event: false,
+      isDeleted: false,
+      is_deleted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      images: []
+    });
+  }
+
+  if (tomorrowTasks.length === 0) {
+    console.log('No tasks for today to organize');
+    return;
+  }
+
+  // 3. Separate fixed-time tasks and events from flexible tasks
+  const fixed = [];    // tasks with mandatory time slots
+  const flexible = []; // tasks to be scheduled
+
+  for (const task of tomorrowTasks) {
+    const title = (task.title || '').toLowerCase();
+    const isEvent = task.is_event || task.isEvent;
+
+    if (/programa espiritual|spiritual program/i.test(title)) {
+      task.due_time = task.dueTime = '06:00';
+      fixed.push(task);
+    } else if (isEvent) {
+      // Events never get moved
+      fixed.push(task);
+    } else if (/desayuno/.test(title)) {
+      task.due_time = task.dueTime = '09:00';
+      fixed.push(task);
+    } else if (/\btot\b/i.test(task.title || '')) {
+      task.due_time = task.dueTime = '10:00';
+      fixed.push(task);
+    } else if (/cocinar/.test(title)) {
+      task.due_time = task.dueTime = '14:00';
+      fixed.push(task);
+    } else if (/@compra/i.test(task.template || '') || /@compra/i.test(task.notes || '')) {
+      // Shopping items: don't organize, leave as-is
+      fixed.push(task);
+    } else {
+      flexible.push(task);
+    }
+  }
+
+  // 4. Score and sort flexible tasks: importance first, then shortest duration
+  for (const task of flexible) {
+    task._importance = scoreImportance(task);
+    task._duration = estimateDuration(task);
+  }
+  flexible.sort((a, b) => {
+    if (a._importance !== b._importance) return a._importance - b._importance;
+    return a._duration - b._duration;
+  });
+
+  // 5. Define available time slots (in minutes from midnight)
+  // 03:00-06:00, 07:00-09:00, 09:15-10:00, 13:00-14:00, 14:45-19:00
+  // Skip: 06:00-07:00 spiritual, 09:00 desayuno, 10:00-13:00 TOT, 14:00 cocinar
+  const slots = [
+    { start: 420, end: 540 },   // 07:00-09:00
+    { start: 570, end: 600 },   // 09:30-10:00
+    { start: 780, end: 840 },   // 13:00-14:00
+    { start: 885, end: 1140 },  // 14:45-19:00
+  ];
+
+  let slotIdx = 0;
+  let cursor = slots[0].start;
+  const scheduled = [];
+  const overflow = [];
+
+  for (const task of flexible) {
+    const duration = task._duration;
+    let placed = false;
+
+    while (slotIdx < slots.length) {
+      const slot = slots[slotIdx];
+      if (cursor + duration <= slot.end) {
+        task.due_time = task.dueTime = minutesToTime(cursor);
+        cursor += duration;
+        placed = true;
+        break;
+      }
+      // Move to next slot
+      slotIdx++;
+      if (slotIdx < slots.length) {
+        cursor = slots[slotIdx].start;
+      }
+    }
+
+    // Clean up internal fields
+    delete task._importance;
+    delete task._duration;
+
+    if (placed) {
+      scheduled.push(task);
+    } else {
+      // Overflow → move to day after tomorrow
+      task.due_date = task.dueDate = dayAfter;
+      task.due_time = task.dueTime = null;
+      delete task._importance;
+      delete task._duration;
+      overflow.push(task);
+    }
+  }
+
+  // 6. Reassemble all tasks
+  const organizedTomorrow = [...fixed, ...scheduled];
+  const finalTasks = [...otherTasks, ...organizedTomorrow, ...overflow];
+
+  // 7. Write back to D1 (same DELETE + INSERT pattern)
+  await env.DB.prepare('DELETE FROM user_tasks WHERE user_id = ?')
+    .bind(userId).run();
+
+  await env.DB.prepare(
+    `INSERT INTO user_tasks (user_id, task_data, title, created_at, updated_at)
+     VALUES (?, ?, 'JSON_TASKS_DATA', datetime('now'), datetime('now'))`
+  ).bind(userId, JSON.stringify(finalTasks)).run();
+
+  console.log(`✅ Auto-organize done: ${scheduled.length} scheduled, ${fixed.length} fixed, ${overflow.length} overflowed`);
+}
 
 // Authentication helper
 function getAuthToken(request) {
