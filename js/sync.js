@@ -316,12 +316,16 @@ async function _uploadAllTasksInternal() {
         const activeCount = tasksToUpload.filter(t => !t.isDeleted && t.status !== 'deleted').length;
         console.log(`📤 Uploading ${tasksToUpload.length} tasks (${activeCount} active, ${deletedCount} tombstones)`);
 
+        // Include actionRegistry as a special metadata entry
+        const registry = window.actionRegistry || JSON.parse(localStorage.getItem('actionRegistry') || '[]');
+        const tasksWithMeta = [...tasksToUpload, { _meta: 'actionRegistry', data: registry }];
+
         const response = await fetch(`${window.API_BASE}/tasks/sync`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify({
                 userId: window.currentUser.user.id,
-                tasks: tasksToUpload
+                tasks: tasksWithMeta
             })
         });
 
@@ -394,8 +398,18 @@ async function _downloadAllTasksInternal() {
         }
         
         const data = await response.json();
-        const serverTasks = data.tasks || [];
-        
+        let serverTasks = data.tasks || [];
+
+        // Extract actionRegistry metadata if present
+        const metaIdx = serverTasks.findIndex(t => t._meta === 'actionRegistry');
+        if (metaIdx !== -1) {
+            const registryData = serverTasks[metaIdx].data || [];
+            window.actionRegistry = registryData;
+            localStorage.setItem('actionRegistry', JSON.stringify(registryData));
+            console.log(`📋 Restored ${registryData.length} actions from server`);
+            serverTasks = serverTasks.filter(t => !t._meta);
+        }
+
         console.log('📥 Downloaded', serverTasks.length, 'tasks from server');
         
         // MANDATORY REFRESH or FRESH BROWSER: Direct replacement with server data

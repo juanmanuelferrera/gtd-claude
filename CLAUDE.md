@@ -1,3 +1,15 @@
+## HyperFiler Task Rules
+- Events (isEvent: true) NEVER get moved to a different date when redistributing/rebalancing tasks, unless the user explicitly orders it
+- When deleting tasks via MCP, always set both `isDeleted: true` AND `status: 'deleted'` for frontend compatibility
+- When the user asks to reorder tasks by priority, apply own judgment using these criteria (in order): 1) Legal/administrative deadlines, 2) Real-world urgent actions (communication, health, errands), 3) Active projects with momentum (books, marketing, web), 4) Digital/tech tasks, 5) Personal care, 6) Household chores, 7) Reference/recipes/low priority
+- ALL tasks with "TOT" (uppercase) in the title go to the 10:00-13:00 block. Even if there are multiple TOT tasks on the same day, they all share the same 10:00 slot. When organizing a day, place other tasks before 10:00 or after 13:00 around the TOT block.
+- "cocinar" tasks always go at 14:00
+- "desayuno" tasks always go at 09:00-09:30
+- Tasks can start from 06:00. Maximum task time is 19:00. Never schedule tasks beyond 19:00.
+- 06:00-07:00 is always reserved for "programa espiritual" (spiritual program). Never schedule other tasks in this slot.
+- Always schedule most important tasks first, then sort by shortest duration within the same priority level.
+- If any tasks don't fit in the day (overflow past 19:00), automatically move them to the next day.
+
 ## Git Tips
 - Always commit and push changes after making modifications
 - When changes are made, always run: git add -A && git commit -m "descriptive message" && git push

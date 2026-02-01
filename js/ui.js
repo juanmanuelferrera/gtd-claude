@@ -1005,11 +1005,17 @@ function renderTaskCard(task, isAllTasksView = false) {
                style="margin-right: 10px;"
                title="Select this task for bulk actions">` : 
         // Today/Week/Month views: checkbox for task completion/deletion
-        `<input type="checkbox" class="task-completion-checkbox" 
-               onclick="completeTask('${task.id}', event)" 
+        (() => {
+            const isCompra = (task.notes || '').includes('@compra') || (task.template || '').includes('@compra');
+            const handler = isCompra ? 'toggleCompraTask' : 'completeTask';
+            const checked = isCompra && task.status === 'completed' ? 'checked' : '';
+            return `<input type="checkbox" class="task-completion-checkbox"
+               onclick="${handler}('${task.id}', event)"
                data-task-id="${task.id}"
+               ${checked}
                style="margin-right: 10px;"
-               title="Mark as complete">`;
+               title="${isCompra ? 'Toggle item' : 'Mark as complete'}">`;
+        })();
     
     return `
         <div class="${cardClass}" 
@@ -1025,7 +1031,7 @@ function renderTaskCard(task, isAllTasksView = false) {
             <div style="display: flex; align-items: center; flex: 1;">
                 <div style="margin-right: 8px; color: #ccc; cursor: grab;">⋮⋮</div>
                 ${checkboxHtml}
-                <div class="task-title" style="flex: 1;" title="${task.title}${task.notes ? ' - ' + task.notes : ''}">
+                <div class="task-title" style="flex: 1;${task.status === 'completed' ? ' text-decoration: line-through; opacity: 0.5;' : ''}" title="${task.title}${task.notes ? ' - ' + task.notes : ''}">
                     ${(task.repeat && task.repeat !== 'none') ? `<span class="repeat-badge" title="Recurring task: ${task.repeat}" style="background: #ffc107; color: #333; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-right: 6px;">🔄</span>` : ''}
                     ${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}
                     ${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}
@@ -2242,9 +2248,28 @@ window.PERSISTENT_TASK_SELECTION = PERSISTENT_TASK_SELECTION;
 /**
  * Complete/Delete a task when checkbox is clicked in Today/Week/Month views
  */
+function toggleCompraTask(taskId, event) {
+    event.stopPropagation();
+    const taskIndex = tasks.findIndex(t => t.id == taskId);
+    if (taskIndex === -1) return;
+    const taskBefore = { ...tasks[taskIndex] };
+    const wasCompleted = tasks[taskIndex].status === 'completed';
+    tasks[taskIndex].status = wasCompleted ? 'pending' : 'completed';
+    tasks[taskIndex].updatedAt = new Date().toISOString();
+    if (typeof recordAction === 'function') {
+        recordAction('complete', taskId, taskBefore.title, taskBefore, { ...tasks[taskIndex] });
+    }
+    saveTasksToLocalStorage();
+    renderCurrentView();
+    window.justModifiedTasks = true;
+    if (typeof uploadAllTasks === 'function') {
+        uploadAllTasks().then(() => { window.justModifiedTasks = false; })
+            .catch(() => { window.justModifiedTasks = false; });
+    }
+}
+
 function completeTask(taskId, event) {
     event.stopPropagation(); // Prevent task edit dialog
-    
     console.log('✅ Completing/deleting task:', taskId);
     console.log('🔍 Total tasks in array:', tasks.length);
     
@@ -2283,16 +2308,16 @@ function completeTask(taskId, event) {
                 window.justModifiedTasks = false;
             });
         }
-        
+
         console.log('🔄 Refreshing view...');
         // Refresh the current view
         renderCurrentView();
-        
+
         // Show feedback
         if (typeof showNotification === 'function') {
             showNotification('Task completed', 'success');
         }
-        
+
         console.log('✅ Task completion process finished');
     } else {
         console.error('❌ Task not found with ID:', taskId);
@@ -2695,13 +2720,17 @@ function renderTodayView() {
     const actualTodayStr = getLocalDateString(new Date());
     
     // One-time migration: Convert all "completed" tasks to "deleted" (cleanup legacy status)
+    // Exception: @compra tasks use "completed" status for strikethrough toggle
     let completedTasksMigrated = false;
     tasks.forEach(task => {
         if (task.status === 'completed') {
-            console.log(`🔄 Converting legacy completed task to deleted: "${task.title}"`);
-            task.status = 'deleted';
-            task.deletedAt = task.updatedAt || new Date().toISOString();
-            completedTasksMigrated = true;
+            const isCompra = (task.notes || '').includes('@compra') || (task.template || '').includes('@compra');
+            if (!isCompra) {
+                console.log(`🔄 Converting legacy completed task to deleted: "${task.title}"`);
+                task.status = 'deleted';
+                task.deletedAt = task.updatedAt || new Date().toISOString();
+                completedTasksMigrated = true;
+            }
         }
     });
     
