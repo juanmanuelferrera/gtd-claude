@@ -1036,6 +1036,8 @@ async function organizeTomorrowTasks(env) {
       // Shopping items: don't organize, leave as-is
       fixed.push(task);
     } else {
+      // Strip stale time from non-protected tasks so organizer schedules fresh
+      task.due_time = task.dueTime = '';
       flexible.push(task);
     }
   }
