@@ -717,7 +717,11 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(purgeOldDeletedTasks(env).then(() => organizeTomorrowTasks(env)));
+    ctx.waitUntil(
+      purgeOldDeletedTasks(env)
+        .then(() => carryOverYesterdayTasks(env))
+        .then(() => organizeTomorrowTasks(env))
+    );
   },
 };
 
@@ -780,6 +784,59 @@ async function purgeOldDeletedTasks(env) {
   ).bind(userId, taskJson, now, now).run();
 
   console.log(`🗑️ Purge done: removed ${purged} old deleted tasks (kept ${kept.length})`);
+}
+
+// ========== CARRY OVER YESTERDAY'S PENDING TASKS ==========
+
+async function carryOverYesterdayTasks(env) {
+  const userId = env.ORGANIZER_USER_ID;
+  if (!userId) return;
+
+  const today = getTodayDateStr();
+  const yesterday = new Date();
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+  console.log(`📦 Carry-over: moving pending tasks from ${yesterdayStr} to ${today}`);
+
+  const { results } = await env.DB.prepare(
+    'SELECT task_data FROM user_tasks WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+  ).bind(userId).all();
+
+  if (!results || !results.length || !results[0].task_data) return;
+
+  const tasks = JSON.parse(results[0].task_data);
+  let moved = 0;
+
+  for (const t of tasks) {
+    if (t._meta) continue;
+    if (t.isDeleted || t.status === 'deleted') continue;
+    if (t.status === 'completed') continue;
+    if (t.isEvent) continue;
+    const notes = ((t.notes || '') + ' ' + (t.template || '')).toLowerCase();
+    if (notes.includes('@compra')) continue;
+    if (t.dueDate !== yesterdayStr) continue;
+
+    t.dueDate = today;
+    t.dueTime = '';
+    t.updatedAt = new Date().toISOString();
+    moved++;
+  }
+
+  if (moved === 0) {
+    console.log('📦 Carry-over: no pending tasks from yesterday');
+    return;
+  }
+
+  const taskJson = JSON.stringify(tasks);
+  const now = new Date().toISOString();
+  await env.DB.prepare('DELETE FROM user_tasks WHERE user_id = ?').bind(userId).run();
+  await env.DB.prepare(
+    `INSERT INTO user_tasks (user_id, task_data, title, created_at, updated_at)
+     VALUES (?, ?, 'tasks', ?, ?)`
+  ).bind(userId, taskJson, now, now).run();
+
+  console.log(`📦 Carry-over done: moved ${moved} tasks from ${yesterdayStr} to ${today}`);
 }
 
 // ========== AUTO-ORGANIZE DAILY TASKS ==========
