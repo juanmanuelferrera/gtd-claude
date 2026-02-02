@@ -813,9 +813,17 @@ async function carryOverYesterdayTasks(env) {
     if (t.isDeleted || t.status === 'deleted') continue;
     if (t.status === 'completed') continue;
     if (t.isEvent) continue;
-    const notes = ((t.notes || '') + ' ' + (t.template || '')).toLowerCase();
-    if (notes.includes('@compra')) continue;
     if (t.dueDate !== yesterdayStr) continue;
+
+    const notes = ((t.notes || '') + ' ' + (t.template || '')).toLowerCase();
+    if (notes.includes('@compra')) {
+      // @compra tasks move to next Monday
+      t.dueDate = t.due_date = getNextMondayDateStr();
+      t.dueTime = t.due_time = '';
+      t.updatedAt = new Date().toISOString();
+      moved++;
+      continue;
+    }
 
     t.dueDate = t.due_date = today;
     t.dueTime = t.due_time = '';
@@ -849,6 +857,14 @@ function getTodayDateStr() {
 function getTomorrowDateStr() {
   const d = new Date();
   d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
+function getNextMondayDateStr() {
+  const d = new Date();
+  const day = d.getUTCDay(); // 0=Sun, 1=Mon, ...
+  const daysUntilMonday = day === 0 ? 1 : (8 - day);
+  d.setUTCDate(d.getUTCDate() + daysUntilMonday);
   return d.toISOString().slice(0, 10);
 }
 
