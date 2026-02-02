@@ -815,10 +815,11 @@ async function carryOverYesterdayTasks(env) {
 
     const notes = ((t.notes || '') + ' ' + (t.template || '')).toLowerCase();
 
-    // @compra tasks: move to next Monday in current state (even if completed)
+    // @compra tasks: move to next Monday and reset to pending
     if (notes.includes('@compra')) {
       t.dueDate = t.due_date = getNextMondayDateStr();
       t.dueTime = t.due_time = '';
+      t.status = 'pending';
       t.updatedAt = new Date().toISOString();
       moved++;
       continue;
