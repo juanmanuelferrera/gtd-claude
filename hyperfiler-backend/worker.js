@@ -831,6 +831,7 @@ async function carryOverYesterdayTasks(env) {
 
     t.dueDate = t.due_date = today;
     t.dueTime = t.due_time = '';
+    t._carriedOver = true;
     t.updatedAt = new Date().toISOString();
     moved++;
   }
@@ -1068,6 +1069,10 @@ async function organizeTomorrowTasks(env) {
     task._duration = estimateDuration(task);
   }
   flexible.sort((a, b) => {
+    // Carried-over tasks (unfinished from yesterday) get priority
+    const aCarried = a._carriedOver ? 0 : 1;
+    const bCarried = b._carriedOver ? 0 : 1;
+    if (aCarried !== bCarried) return aCarried - bCarried;
     if (a._importance !== b._importance) return a._importance - b._importance;
     return a._duration - b._duration;
   });
@@ -1109,6 +1114,7 @@ async function organizeTomorrowTasks(env) {
     // Clean up internal fields
     delete task._importance;
     delete task._duration;
+    delete task._carriedOver;
 
     if (placed) {
       scheduled.push(task);
@@ -1118,6 +1124,7 @@ async function organizeTomorrowTasks(env) {
       task.due_time = task.dueTime = null;
       delete task._importance;
       delete task._duration;
+      delete task._carriedOver;
       overflow.push(task);
     }
   }
