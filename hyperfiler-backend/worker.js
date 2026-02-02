@@ -811,19 +811,22 @@ async function carryOverYesterdayTasks(env) {
   for (const t of tasks) {
     if (t._meta) continue;
     if (t.isDeleted || t.status === 'deleted') continue;
-    if (t.status === 'completed') continue;
-    if (t.isEvent) continue;
     if (t.dueDate !== yesterdayStr) continue;
 
     const notes = ((t.notes || '') + ' ' + (t.template || '')).toLowerCase();
+
+    // @compra tasks: move to next Monday in current state (even if completed)
     if (notes.includes('@compra')) {
-      // @compra tasks move to next Monday
       t.dueDate = t.due_date = getNextMondayDateStr();
       t.dueTime = t.due_time = '';
       t.updatedAt = new Date().toISOString();
       moved++;
       continue;
     }
+
+    // Non-compra: skip completed and events
+    if (t.status === 'completed') continue;
+    if (t.isEvent) continue;
 
     t.dueDate = t.due_date = today;
     t.dueTime = t.due_time = '';
