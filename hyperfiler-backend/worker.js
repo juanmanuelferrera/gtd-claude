@@ -815,8 +815,8 @@ async function carryOverYesterdayTasks(env) {
 
     const notes = ((t.notes || '') + ' ' + (t.template || '')).toLowerCase();
 
-    // @compra tasks: move to next Monday and reset to pending
-    if (notes.includes('@compra')) {
+    // @bhoga tasks: move to next Monday and reset to pending
+    if (notes.includes('@bhoga')) {
       t.dueDate = t.due_date = getNextMondayDateStr();
       t.dueTime = t.due_time = '';
       t.status = 'pending';
@@ -1053,8 +1053,8 @@ async function organizeTomorrowTasks(env) {
     } else if (/cocinar/.test(title)) {
       task.due_time = task.dueTime = '14:00';
       fixed.push(task);
-    } else if (/@compra/i.test(task.template || '') || /@compra/i.test(task.notes || '')) {
-      // Shopping items: don't organize, leave as-is
+    } else if (/@bhoga/i.test(task.template || '') || /@bhoga/i.test(task.notes || '')) {
+      // Bhoga (grocery) items: don't organize, leave as-is
       fixed.push(task);
     } else {
       // Strip stale time from non-protected tasks so organizer schedules fresh
