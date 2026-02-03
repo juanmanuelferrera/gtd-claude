@@ -108,7 +108,7 @@ function showView(viewName, preserveDate = false) {
         'today-view': viewName === 'today',
         'calendar-view': viewName === 'calendar',
         'week-view': viewName === 'week',
-        'tasks-view': viewName === 'all' || viewName === 'recent-actions',
+        'tasks-view': viewName === 'all' || viewName === 'recent-actions' || viewName === 'events',
         'stats-view': viewName === 'stats',
         'lists-view': viewName === 'lists',
         'repeat-view': viewName === 'repeat',
