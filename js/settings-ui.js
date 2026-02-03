@@ -2393,7 +2393,7 @@ function renderEventsView() {
             <div style="background: ${isPast ? '#fff5f5' : '#f8f9fa'}; border-radius: 6px; padding: 6px 10px; margin-bottom: 3px; border-left: 3px solid ${borderColor};">
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
                     <div style="flex: 1; min-width: 0;">
-                        <div style="font-weight: 500; color: #333; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <div style="font-weight: 500; color: #333; font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                             ${event.dueTime ? '<span style="color: #6f42c1; font-weight: 600;">' + event.dueTime + '</span> ' : ''}${escapeHtml(event.title || 'Sin título')}
                         </div>
                     </div>
