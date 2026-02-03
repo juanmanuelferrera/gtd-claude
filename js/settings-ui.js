@@ -2388,12 +2388,12 @@ function renderEventsView() {
                             ${event.dueTime ? '<span style="color: #6f42c1; font-weight: 600;">' + event.dueTime + '</span> ' : ''}${escapeHtml(event.title || 'Sin título')}
                         </div>
                     </div>
-                    <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                    <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
                         <button onclick="event.stopPropagation(); openIOSDateTimePicker('${event.id}', '${event.dueDate || ''}', '${event.dueTime || ''}', this)"
-                                style="background: none; border: none; padding: 4px; cursor: pointer; font-size: 18px; opacity: 0.8;"
+                                style="background: #f0f4f8; border: 1px solid #e2e8f0; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 16px;"
                                 title="Cambiar fecha">📅</button>
                         <button onclick="deleteEventFromView('${event.id}')"
-                                style="background: none; border: none; padding: 4px; cursor: pointer; font-size: 18px; opacity: 0.8;"
+                                style="background: #fff5f5; border: 1px solid #fed7d7; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 16px;"
                                 title="Eliminar">🗑️</button>
                     </div>
                 </div>
