@@ -657,8 +657,9 @@ async function saveTaskEdit() {
         const dateValue = document.getElementById('editTaskDateOnly').value;
         const timeValue = document.getElementById('editTaskTimeOnly').value;
         
-        // If no date provided, use today's date for new tasks
-        const dueDate = dateValue || (currentEditTaskId ? null : getLocalDateString(new Date()));
+        // If no date provided, send to backlog (2099-01-01) for new tasks
+        const BACKLOG_DATE = '2099-01-01';
+        const dueDate = dateValue || (currentEditTaskId ? null : BACKLOG_DATE);
         const dueTime = timeValue || null;
         
         if (currentEditTaskId) {
