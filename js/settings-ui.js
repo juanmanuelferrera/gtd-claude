@@ -1876,6 +1876,73 @@ async function updateTimezoneFromMain() {
 window.loadTimezoneOptionsMain = loadTimezoneOptionsMain;
 window.updateTimezoneFromMain = updateTimezoneFromMain;
 
+// Toggle auto-organize checkbox - shows/hides city selector
+function toggleAutoOrganize(enabled) {
+    const container = document.getElementById('timezoneSelectContainerMain');
+    const statusSpan = document.getElementById('timezoneStatusMain');
+
+    if (container) {
+        container.style.display = enabled ? 'block' : 'none';
+    }
+
+    if (!enabled) {
+        // Disable automation by clearing timezone
+        const select = document.getElementById('timezoneSelectMain');
+        if (select) select.value = '';
+
+        // Save to server
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            fetch(`${window.API_BASE_URL || 'https://hyperfiler-api.joanmanelferrera-400.workers.dev'}/auth/timezone`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ timezone: null })
+            }).catch(e => console.error('Error disabling timezone:', e));
+        }
+
+        if (statusSpan) statusSpan.innerHTML = '';
+    }
+}
+
+// Load auto-organize checkbox state
+async function loadAutoOrganizeState() {
+    const checkbox = document.getElementById('autoOrganizeEnabledMain');
+    const container = document.getElementById('timezoneSelectContainerMain');
+    const select = document.getElementById('timezoneSelectMain');
+    const statusSpan = document.getElementById('timezoneStatusMain');
+
+    if (!checkbox) return;
+
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+
+        const response = await fetch(`${window.API_BASE_URL || 'https://hyperfiler-api.joanmanelferrera-400.workers.dev'}/auth/timezone`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) return;
+
+        const data = await response.json();
+
+        if (data.timezone) {
+            checkbox.checked = true;
+            if (container) container.style.display = 'block';
+            if (select) select.value = data.timezone;
+            if (statusSpan) statusSpan.innerHTML = '✅ Active';
+        } else {
+            checkbox.checked = false;
+            if (container) container.style.display = 'none';
+            if (statusSpan) statusSpan.innerHTML = '';
+        }
+    } catch (e) { console.error('Error loading auto-organize state:', e); }
+}
+
+window.toggleAutoOrganize = toggleAutoOrganize;
+window.loadAutoOrganizeState = loadAutoOrganizeState;
+
 // Load timezone when settings view is shown
 const originalLoadSettingsValues = window.loadSettingsValues || loadSettingsValues;
 window.loadSettingsValues = function() {
@@ -1884,6 +1951,7 @@ window.loadSettingsValues = function() {
     loadTimezoneOptionsOverview();
     loadTimezoneOptionsGeneral();
     loadTimezoneOptionsMain();
+    loadAutoOrganizeState();
 };
 
 // ========== PAST EVENTS MANAGEMENT ==========

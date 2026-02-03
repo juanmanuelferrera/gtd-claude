@@ -809,37 +809,63 @@ function getLocalHour(utcHour, timezone) {
     'Europe/Berlin': 1,        // CET
     'Europe/Rome': 1,          // CET
     'Europe/Amsterdam': 1,     // CET
+    'Europe/Brussels': 1,      // CET
+    'Europe/Vienna': 1,        // CET
+    'Europe/Stockholm': 1,     // CET
+    'Europe/Warsaw': 1,        // CET
+    'Europe/Zurich': 1,        // CET
+    'Europe/Athens': 2,        // EET
+    'Europe/Helsinki': 2,      // EET
+    'Europe/Istanbul': 3,      // TRT
     'Europe/Moscow': 3,        // MSK
     // Asia
+    'Asia/Jerusalem': 2,       // IST
+    'Asia/Riyadh': 3,          // AST
     'Asia/Dubai': 4,           // GST
+    'Asia/Karachi': 5,         // PKT
     'Asia/Kolkata': 5.5,       // IST
+    'Asia/Dhaka': 6,           // BST
     'Asia/Bangkok': 7,         // ICT
+    'Asia/Jakarta': 7,         // WIB
+    'Asia/Ho_Chi_Minh': 7,     // ICT
     'Asia/Singapore': 8,       // SGT
+    'Asia/Kuala_Lumpur': 8,    // MYT
     'Asia/Hong_Kong': 8,       // HKT
     'Asia/Shanghai': 8,        // CST
+    'Asia/Taipei': 8,          // CST
+    'Asia/Manila': 8,          // PHT
     'Asia/Tokyo': 9,           // JST
     'Asia/Seoul': 9,           // KST
-    'Asia/Jerusalem': 2,       // IST
     // Americas
     'America/New_York': -5,    // EST
     'America/Toronto': -5,     // EST
     'America/Chicago': -6,     // CST
     'America/Denver': -7,      // MST
+    'America/Phoenix': -7,     // MST (no DST)
     'America/Los_Angeles': -8, // PST
+    'America/Vancouver': -8,   // PST
+    'America/Anchorage': -9,   // AKST
     'America/Mexico_City': -6, // CST
     'America/Bogota': -5,      // COT
     'America/Lima': -5,        // PET
+    'America/Caracas': -4,     // VET
+    'America/Santiago': -3,    // CLT
     'America/Sao_Paulo': -3,   // BRT
     'America/Buenos_Aires': -3, // ART
+    'Pacific/Honolulu': -10,   // HST
     // Africa
     'Africa/Cairo': 2,         // EET
     'Africa/Lagos': 1,         // WAT
     'Africa/Johannesburg': 2,  // SAST
+    'Africa/Nairobi': 3,       // EAT
+    'Africa/Casablanca': 1,    // WEST
     // Oceania
     'Australia/Sydney': 11,    // AEDT
     'Australia/Melbourne': 11, // AEDT
+    'Australia/Brisbane': 10,  // AEST
     'Australia/Perth': 8,      // AWST
     'Pacific/Auckland': 13,    // NZDT
+    'Pacific/Fiji': 12,        // FJT
     'UTC': 0,
   };
 
@@ -996,14 +1022,30 @@ async function organizeTomorrowTasksForUser(env, userId) {
 // Helper to get local dates based on timezone
 function getLocalDates(timezone) {
   const offsets = {
-    'Europe/Madrid': 1,
-    'Europe/London': 0,
-    'Asia/Kolkata': 5.5,
-    'America/New_York': -5,
-    'America/Chicago': -6,
-    'America/Denver': -7,
-    'America/Los_Angeles': -8,
-    'UTC': 0,
+    // Europe
+    'Europe/London': 0, 'Europe/Madrid': 1, 'Europe/Paris': 1, 'Europe/Berlin': 1,
+    'Europe/Rome': 1, 'Europe/Amsterdam': 1, 'Europe/Brussels': 1, 'Europe/Vienna': 1,
+    'Europe/Stockholm': 1, 'Europe/Warsaw': 1, 'Europe/Zurich': 1, 'Europe/Athens': 2,
+    'Europe/Helsinki': 2, 'Europe/Istanbul': 3, 'Europe/Moscow': 3,
+    // Asia
+    'Asia/Jerusalem': 2, 'Asia/Riyadh': 3, 'Asia/Dubai': 4, 'Asia/Karachi': 5,
+    'Asia/Kolkata': 5.5, 'Asia/Dhaka': 6, 'Asia/Bangkok': 7, 'Asia/Jakarta': 7,
+    'Asia/Ho_Chi_Minh': 7, 'Asia/Singapore': 8, 'Asia/Kuala_Lumpur': 8,
+    'Asia/Hong_Kong': 8, 'Asia/Shanghai': 8, 'Asia/Taipei': 8, 'Asia/Manila': 8,
+    'Asia/Tokyo': 9, 'Asia/Seoul': 9,
+    // Americas
+    'America/New_York': -5, 'America/Toronto': -5, 'America/Chicago': -6,
+    'America/Denver': -7, 'America/Phoenix': -7, 'America/Los_Angeles': -8,
+    'America/Vancouver': -8, 'America/Anchorage': -9, 'America/Mexico_City': -6,
+    'America/Bogota': -5, 'America/Lima': -5, 'America/Caracas': -4,
+    'America/Santiago': -3, 'America/Sao_Paulo': -3, 'America/Buenos_Aires': -3,
+    'Pacific/Honolulu': -10,
+    // Africa
+    'Africa/Cairo': 2, 'Africa/Lagos': 1, 'Africa/Johannesburg': 2,
+    'Africa/Nairobi': 3, 'Africa/Casablanca': 1,
+    // Oceania
+    'Australia/Sydney': 11, 'Australia/Melbourne': 11, 'Australia/Brisbane': 10,
+    'Australia/Perth': 8, 'Pacific/Auckland': 13, 'Pacific/Fiji': 12, 'UTC': 0,
   };
 
   const offset = offsets[timezone] || 0;

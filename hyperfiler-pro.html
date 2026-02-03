@@ -784,44 +784,73 @@
                                 <option value="Europe/Berlin">Berlin (Germany)</option>
                                 <option value="Europe/Rome">Rome (Italy)</option>
                                 <option value="Europe/Amsterdam">Amsterdam (Netherlands)</option>
+                                <option value="Europe/Brussels">Brussels (Belgium)</option>
+                                <option value="Europe/Vienna">Vienna (Austria)</option>
+                                <option value="Europe/Stockholm">Stockholm (Sweden)</option>
+                                <option value="Europe/Warsaw">Warsaw (Poland)</option>
+                                <option value="Europe/Zurich">Zurich (Switzerland)</option>
+                                <option value="Europe/Athens">Athens (Greece)</option>
+                                <option value="Europe/Helsinki">Helsinki (Finland)</option>
+                                <option value="Europe/Istanbul">Istanbul (Turkey)</option>
                                 <option value="Europe/Moscow">Moscow (Russia)</option>
                             </optgroup>
                             <optgroup label="🌏 Asia">
+                                <option value="Asia/Jerusalem">Tel Aviv (Israel)</option>
+                                <option value="Asia/Riyadh">Riyadh (Saudi Arabia)</option>
                                 <option value="Asia/Dubai">Dubai (UAE)</option>
+                                <option value="Asia/Karachi">Karachi (Pakistan)</option>
                                 <option value="Asia/Kolkata">Mumbai / Delhi (India)</option>
+                                <option value="Asia/Dhaka">Dhaka (Bangladesh)</option>
                                 <option value="Asia/Bangkok">Bangkok (Thailand)</option>
+                                <option value="Asia/Jakarta">Jakarta (Indonesia)</option>
+                                <option value="Asia/Ho_Chi_Minh">Ho Chi Minh (Vietnam)</option>
                                 <option value="Asia/Singapore">Singapore</option>
+                                <option value="Asia/Kuala_Lumpur">Kuala Lumpur (Malaysia)</option>
                                 <option value="Asia/Hong_Kong">Hong Kong</option>
                                 <option value="Asia/Shanghai">Shanghai (China)</option>
+                                <option value="Asia/Taipei">Taipei (Taiwan)</option>
+                                <option value="Asia/Manila">Manila (Philippines)</option>
                                 <option value="Asia/Tokyo">Tokyo (Japan)</option>
                                 <option value="Asia/Seoul">Seoul (Korea)</option>
                             </optgroup>
                             <optgroup label="🌎 Americas">
                                 <option value="America/New_York">New York (USA East)</option>
+                                <option value="America/Toronto">Toronto (Canada)</option>
                                 <option value="America/Chicago">Chicago (USA Central)</option>
                                 <option value="America/Denver">Denver (USA Mountain)</option>
+                                <option value="America/Phoenix">Phoenix (Arizona)</option>
                                 <option value="America/Los_Angeles">Los Angeles (USA West)</option>
-                                <option value="America/Toronto">Toronto (Canada)</option>
+                                <option value="America/Vancouver">Vancouver (Canada)</option>
+                                <option value="America/Anchorage">Anchorage (Alaska)</option>
+                                <option value="Pacific/Honolulu">Honolulu (Hawaii)</option>
                                 <option value="America/Mexico_City">Mexico City (Mexico)</option>
                                 <option value="America/Bogota">Bogotá (Colombia)</option>
                                 <option value="America/Lima">Lima (Peru)</option>
+                                <option value="America/Caracas">Caracas (Venezuela)</option>
+                                <option value="America/Santiago">Santiago (Chile)</option>
                                 <option value="America/Sao_Paulo">São Paulo (Brazil)</option>
                                 <option value="America/Buenos_Aires">Buenos Aires (Argentina)</option>
                             </optgroup>
-                            <optgroup label="🌏 Africa & Middle East">
-                                <option value="Africa/Cairo">Cairo (Egypt)</option>
+                            <optgroup label="🌍 Africa">
+                                <option value="Africa/Casablanca">Casablanca (Morocco)</option>
                                 <option value="Africa/Lagos">Lagos (Nigeria)</option>
+                                <option value="Africa/Cairo">Cairo (Egypt)</option>
                                 <option value="Africa/Johannesburg">Johannesburg (South Africa)</option>
-                                <option value="Asia/Jerusalem">Tel Aviv (Israel)</option>
+                                <option value="Africa/Nairobi">Nairobi (Kenya)</option>
                             </optgroup>
                             <optgroup label="🌏 Oceania">
+                                <option value="Australia/Perth">Perth (Australia)</option>
+                                <option value="Australia/Brisbane">Brisbane (Australia)</option>
                                 <option value="Australia/Sydney">Sydney (Australia)</option>
                                 <option value="Australia/Melbourne">Melbourne (Australia)</option>
-                                <option value="Australia/Perth">Perth (Australia)</option>
+                                <option value="Pacific/Fiji">Fiji</option>
                                 <option value="Pacific/Auckland">Auckland (New Zealand)</option>
                             </optgroup>
                         </select>
                         <div id="timezoneStatusOverview" style="margin-top: 8px; color: #6c757d; font-size: 12px;"></div>
+                        <div style="font-size: 11px; color: #718096; margin-top: 4px;">
+                            ⚡ "Disabled" = no automatic processing. Select a city to activate.
+                        </div>
                     </div>
                 </div>
 
@@ -995,20 +1024,81 @@
                             <label style="display: block; font-weight: 500; margin-bottom: 4px;">Select your city to enable:</label>
                             <select id="timezoneSelect" onchange="updateTimezone()" style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; font-size: 14px; width: 100%; max-width: 300px;">
                                 <option value="">-- Disabled --</option>
-                                <option value="Europe/Madrid">Madrid (Spain)</option>
-                                <option value="Europe/London">London (UK)</option>
-                                <option value="Europe/Paris">Paris (France)</option>
-                                <option value="Europe/Berlin">Berlin (Germany)</option>
-                                <option value="Asia/Kolkata">Mumbai / Delhi (India)</option>
-                                <option value="Asia/Tokyo">Tokyo (Japan)</option>
-                                <option value="America/New_York">New York (USA East)</option>
-                                <option value="America/Los_Angeles">Los Angeles (USA West)</option>
-                                <option value="America/Mexico_City">Mexico City (Mexico)</option>
-                                <option value="America/Sao_Paulo">São Paulo (Brazil)</option>
-                                <option value="Australia/Sydney">Sydney (Australia)</option>
+                                <optgroup label="🌍 Europe">
+                                    <option value="Europe/London">London (UK)</option>
+                                    <option value="Europe/Madrid">Madrid (Spain)</option>
+                                    <option value="Europe/Paris">Paris (France)</option>
+                                    <option value="Europe/Berlin">Berlin (Germany)</option>
+                                    <option value="Europe/Rome">Rome (Italy)</option>
+                                    <option value="Europe/Amsterdam">Amsterdam (Netherlands)</option>
+                                    <option value="Europe/Brussels">Brussels (Belgium)</option>
+                                    <option value="Europe/Vienna">Vienna (Austria)</option>
+                                    <option value="Europe/Stockholm">Stockholm (Sweden)</option>
+                                    <option value="Europe/Warsaw">Warsaw (Poland)</option>
+                                    <option value="Europe/Zurich">Zurich (Switzerland)</option>
+                                    <option value="Europe/Athens">Athens (Greece)</option>
+                                    <option value="Europe/Helsinki">Helsinki (Finland)</option>
+                                    <option value="Europe/Istanbul">Istanbul (Turkey)</option>
+                                    <option value="Europe/Moscow">Moscow (Russia)</option>
+                                </optgroup>
+                                <optgroup label="🌏 Asia">
+                                    <option value="Asia/Jerusalem">Tel Aviv (Israel)</option>
+                                    <option value="Asia/Riyadh">Riyadh (Saudi Arabia)</option>
+                                    <option value="Asia/Dubai">Dubai (UAE)</option>
+                                    <option value="Asia/Karachi">Karachi (Pakistan)</option>
+                                    <option value="Asia/Kolkata">Mumbai / Delhi (India)</option>
+                                    <option value="Asia/Dhaka">Dhaka (Bangladesh)</option>
+                                    <option value="Asia/Bangkok">Bangkok (Thailand)</option>
+                                    <option value="Asia/Jakarta">Jakarta (Indonesia)</option>
+                                    <option value="Asia/Ho_Chi_Minh">Ho Chi Minh (Vietnam)</option>
+                                    <option value="Asia/Singapore">Singapore</option>
+                                    <option value="Asia/Kuala_Lumpur">Kuala Lumpur (Malaysia)</option>
+                                    <option value="Asia/Hong_Kong">Hong Kong</option>
+                                    <option value="Asia/Shanghai">Shanghai (China)</option>
+                                    <option value="Asia/Taipei">Taipei (Taiwan)</option>
+                                    <option value="Asia/Manila">Manila (Philippines)</option>
+                                    <option value="Asia/Tokyo">Tokyo (Japan)</option>
+                                    <option value="Asia/Seoul">Seoul (Korea)</option>
+                                </optgroup>
+                                <optgroup label="🌎 Americas">
+                                    <option value="America/New_York">New York (USA East)</option>
+                                    <option value="America/Toronto">Toronto (Canada)</option>
+                                    <option value="America/Chicago">Chicago (USA Central)</option>
+                                    <option value="America/Denver">Denver (USA Mountain)</option>
+                                    <option value="America/Phoenix">Phoenix (Arizona)</option>
+                                    <option value="America/Los_Angeles">Los Angeles (USA West)</option>
+                                    <option value="America/Vancouver">Vancouver (Canada)</option>
+                                    <option value="America/Anchorage">Anchorage (Alaska)</option>
+                                    <option value="Pacific/Honolulu">Honolulu (Hawaii)</option>
+                                    <option value="America/Mexico_City">Mexico City (Mexico)</option>
+                                    <option value="America/Bogota">Bogotá (Colombia)</option>
+                                    <option value="America/Lima">Lima (Peru)</option>
+                                    <option value="America/Caracas">Caracas (Venezuela)</option>
+                                    <option value="America/Santiago">Santiago (Chile)</option>
+                                    <option value="America/Sao_Paulo">São Paulo (Brazil)</option>
+                                    <option value="America/Buenos_Aires">Buenos Aires (Argentina)</option>
+                                </optgroup>
+                                <optgroup label="🌍 Africa">
+                                    <option value="Africa/Casablanca">Casablanca (Morocco)</option>
+                                    <option value="Africa/Lagos">Lagos (Nigeria)</option>
+                                    <option value="Africa/Cairo">Cairo (Egypt)</option>
+                                    <option value="Africa/Johannesburg">Johannesburg (South Africa)</option>
+                                    <option value="Africa/Nairobi">Nairobi (Kenya)</option>
+                                </optgroup>
+                                <optgroup label="🌏 Oceania">
+                                    <option value="Australia/Perth">Perth (Australia)</option>
+                                    <option value="Australia/Brisbane">Brisbane (Australia)</option>
+                                    <option value="Australia/Sydney">Sydney (Australia)</option>
+                                    <option value="Australia/Melbourne">Melbourne (Australia)</option>
+                                    <option value="Pacific/Fiji">Fiji</option>
+                                    <option value="Pacific/Auckland">Auckland (New Zealand)</option>
+                                </optgroup>
                             </select>
                         </div>
                         <div id="timezoneStatus" style="color: #6c757d; font-size: 12px;"></div>
+                        <div style="font-size: 11px; color: #718096; margin-top: 4px;">
+                            ⚡ "Disabled" = no automatic processing. Select a city to activate.
+                        </div>
                     </div>
                 </div>
 
@@ -1593,23 +1683,90 @@
                         📅 <strong>Events</strong> are fixed and never moved automatically
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                    <label style="font-size: 14px; color: #4a5568; font-weight: 600;">Your city:</label>
-                    <select id="timezoneSelectMain" onchange="updateTimezoneFromMain()" style="padding: 10px 14px; border: 2px solid #bee3f8; border-radius: 6px; font-size: 14px; min-width: 220px; background: white;">
-                        <option value="">-- Disabled --</option>
-                        <option value="Europe/Madrid">Madrid (Spain)</option>
-                        <option value="Europe/London">London (UK)</option>
-                        <option value="Europe/Paris">Paris (France)</option>
-                        <option value="Europe/Berlin">Berlin (Germany)</option>
-                        <option value="Asia/Kolkata">Mumbai / Delhi (India)</option>
-                        <option value="Asia/Tokyo">Tokyo (Japan)</option>
-                        <option value="America/New_York">New York (USA East)</option>
-                        <option value="America/Los_Angeles">Los Angeles (USA West)</option>
-                        <option value="America/Mexico_City">Mexico City (Mexico)</option>
-                        <option value="America/Sao_Paulo">São Paulo (Brazil)</option>
-                        <option value="Australia/Sydney">Sydney (Australia)</option>
-                    </select>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #4a5568; cursor: pointer;">
+                        <input type="checkbox" id="autoOrganizeEnabledMain" onchange="toggleAutoOrganize(this.checked)" style="width: 18px; height: 18px; cursor: pointer;">
+                        Enable automatic task organization
+                    </label>
                     <span id="timezoneStatusMain" style="font-size: 13px; color: #48bb78; font-weight: 500;"></span>
+                </div>
+                <div style="font-size: 12px; color: #718096; margin-bottom: 12px; padding-left: 26px;">
+                    ⚡ Check the box AND select your city to activate. Nothing happens until both are set.
+                </div>
+                <div id="timezoneSelectContainerMain" style="display: none; margin-top: 12px;">
+                    <label style="font-size: 14px; color: #4a5568; font-weight: 500; display: block; margin-bottom: 6px;">Select the city nearest you:</label>
+                    <select id="timezoneSelectMain" onchange="updateTimezoneFromMain()" style="padding: 10px 14px; border: 2px solid #bee3f8; border-radius: 6px; font-size: 14px; min-width: 280px; background: white;">
+                        <option value="">-- Select city --</option>
+                        <optgroup label="🌍 Europe">
+                            <option value="Europe/London">London (UK)</option>
+                            <option value="Europe/Madrid">Madrid (Spain)</option>
+                            <option value="Europe/Paris">Paris (France)</option>
+                            <option value="Europe/Berlin">Berlin (Germany)</option>
+                            <option value="Europe/Rome">Rome (Italy)</option>
+                            <option value="Europe/Amsterdam">Amsterdam (Netherlands)</option>
+                            <option value="Europe/Brussels">Brussels (Belgium)</option>
+                            <option value="Europe/Vienna">Vienna (Austria)</option>
+                            <option value="Europe/Stockholm">Stockholm (Sweden)</option>
+                            <option value="Europe/Warsaw">Warsaw (Poland)</option>
+                            <option value="Europe/Zurich">Zurich (Switzerland)</option>
+                            <option value="Europe/Athens">Athens (Greece)</option>
+                            <option value="Europe/Helsinki">Helsinki (Finland)</option>
+                            <option value="Europe/Istanbul">Istanbul (Turkey)</option>
+                            <option value="Europe/Moscow">Moscow (Russia)</option>
+                        </optgroup>
+                        <optgroup label="🌏 Asia">
+                            <option value="Asia/Jerusalem">Tel Aviv (Israel)</option>
+                            <option value="Asia/Riyadh">Riyadh (Saudi Arabia)</option>
+                            <option value="Asia/Dubai">Dubai (UAE)</option>
+                            <option value="Asia/Karachi">Karachi (Pakistan)</option>
+                            <option value="Asia/Kolkata">Mumbai / Delhi (India)</option>
+                            <option value="Asia/Dhaka">Dhaka (Bangladesh)</option>
+                            <option value="Asia/Bangkok">Bangkok (Thailand)</option>
+                            <option value="Asia/Jakarta">Jakarta (Indonesia)</option>
+                            <option value="Asia/Ho_Chi_Minh">Ho Chi Minh (Vietnam)</option>
+                            <option value="Asia/Singapore">Singapore</option>
+                            <option value="Asia/Kuala_Lumpur">Kuala Lumpur (Malaysia)</option>
+                            <option value="Asia/Hong_Kong">Hong Kong</option>
+                            <option value="Asia/Shanghai">Shanghai (China)</option>
+                            <option value="Asia/Taipei">Taipei (Taiwan)</option>
+                            <option value="Asia/Manila">Manila (Philippines)</option>
+                            <option value="Asia/Tokyo">Tokyo (Japan)</option>
+                            <option value="Asia/Seoul">Seoul (Korea)</option>
+                        </optgroup>
+                        <optgroup label="🌎 Americas">
+                            <option value="America/New_York">New York (USA East)</option>
+                            <option value="America/Toronto">Toronto (Canada)</option>
+                            <option value="America/Chicago">Chicago (USA Central)</option>
+                            <option value="America/Denver">Denver (USA Mountain)</option>
+                            <option value="America/Phoenix">Phoenix (Arizona)</option>
+                            <option value="America/Los_Angeles">Los Angeles (USA West)</option>
+                            <option value="America/Vancouver">Vancouver (Canada)</option>
+                            <option value="America/Anchorage">Anchorage (Alaska)</option>
+                            <option value="Pacific/Honolulu">Honolulu (Hawaii)</option>
+                            <option value="America/Mexico_City">Mexico City (Mexico)</option>
+                            <option value="America/Bogota">Bogotá (Colombia)</option>
+                            <option value="America/Lima">Lima (Peru)</option>
+                            <option value="America/Caracas">Caracas (Venezuela)</option>
+                            <option value="America/Santiago">Santiago (Chile)</option>
+                            <option value="America/Sao_Paulo">São Paulo (Brazil)</option>
+                            <option value="America/Buenos_Aires">Buenos Aires (Argentina)</option>
+                        </optgroup>
+                        <optgroup label="🌍 Africa">
+                            <option value="Africa/Casablanca">Casablanca (Morocco)</option>
+                            <option value="Africa/Lagos">Lagos (Nigeria)</option>
+                            <option value="Africa/Cairo">Cairo (Egypt)</option>
+                            <option value="Africa/Johannesburg">Johannesburg (South Africa)</option>
+                            <option value="Africa/Nairobi">Nairobi (Kenya)</option>
+                        </optgroup>
+                        <optgroup label="🌏 Oceania">
+                            <option value="Australia/Perth">Perth (Australia)</option>
+                            <option value="Australia/Brisbane">Brisbane (Australia)</option>
+                            <option value="Australia/Sydney">Sydney (Australia)</option>
+                            <option value="Australia/Melbourne">Melbourne (Australia)</option>
+                            <option value="Pacific/Fiji">Fiji</option>
+                            <option value="Pacific/Auckland">Auckland (New Zealand)</option>
+                        </optgroup>
+                    </select>
                 </div>
             </div>
 
@@ -1741,7 +1898,7 @@
                         <div style="margin-top: 4px;">1️⃣ Unfinished → today · 2️⃣ Time slots assigned · 3️⃣ Overflow → next days</div>
                         <div style="margin-top: 6px; font-size: 11px; color: #666;">📅 Events are fixed and never moved</div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
                         <label style="font-size: 14px; color: #495057; font-weight: 600;">Your city:</label>
                         <select id="timezoneSelectGeneral" onchange="updateTimezoneFromGeneral()" style="padding: 8px 12px; border: 2px solid #bee3f8; border-radius: 6px; font-size: 14px; min-width: 200px; background: white;">
                             <option value="">-- Disabled --</option>
@@ -1752,44 +1909,73 @@
                                 <option value="Europe/Berlin">Berlin (Germany)</option>
                                 <option value="Europe/Rome">Rome (Italy)</option>
                                 <option value="Europe/Amsterdam">Amsterdam (Netherlands)</option>
+                                <option value="Europe/Brussels">Brussels (Belgium)</option>
+                                <option value="Europe/Vienna">Vienna (Austria)</option>
+                                <option value="Europe/Stockholm">Stockholm (Sweden)</option>
+                                <option value="Europe/Warsaw">Warsaw (Poland)</option>
+                                <option value="Europe/Zurich">Zurich (Switzerland)</option>
+                                <option value="Europe/Athens">Athens (Greece)</option>
+                                <option value="Europe/Helsinki">Helsinki (Finland)</option>
+                                <option value="Europe/Istanbul">Istanbul (Turkey)</option>
                                 <option value="Europe/Moscow">Moscow (Russia)</option>
                             </optgroup>
                             <optgroup label="🌏 Asia">
+                                <option value="Asia/Jerusalem">Tel Aviv (Israel)</option>
+                                <option value="Asia/Riyadh">Riyadh (Saudi Arabia)</option>
                                 <option value="Asia/Dubai">Dubai (UAE)</option>
+                                <option value="Asia/Karachi">Karachi (Pakistan)</option>
                                 <option value="Asia/Kolkata">Mumbai / Delhi (India)</option>
+                                <option value="Asia/Dhaka">Dhaka (Bangladesh)</option>
                                 <option value="Asia/Bangkok">Bangkok (Thailand)</option>
+                                <option value="Asia/Jakarta">Jakarta (Indonesia)</option>
+                                <option value="Asia/Ho_Chi_Minh">Ho Chi Minh (Vietnam)</option>
                                 <option value="Asia/Singapore">Singapore</option>
+                                <option value="Asia/Kuala_Lumpur">Kuala Lumpur (Malaysia)</option>
                                 <option value="Asia/Hong_Kong">Hong Kong</option>
                                 <option value="Asia/Shanghai">Shanghai (China)</option>
+                                <option value="Asia/Taipei">Taipei (Taiwan)</option>
+                                <option value="Asia/Manila">Manila (Philippines)</option>
                                 <option value="Asia/Tokyo">Tokyo (Japan)</option>
                                 <option value="Asia/Seoul">Seoul (Korea)</option>
                             </optgroup>
                             <optgroup label="🌎 Americas">
                                 <option value="America/New_York">New York (USA East)</option>
+                                <option value="America/Toronto">Toronto (Canada)</option>
                                 <option value="America/Chicago">Chicago (USA Central)</option>
                                 <option value="America/Denver">Denver (USA Mountain)</option>
+                                <option value="America/Phoenix">Phoenix (Arizona)</option>
                                 <option value="America/Los_Angeles">Los Angeles (USA West)</option>
-                                <option value="America/Toronto">Toronto (Canada)</option>
+                                <option value="America/Vancouver">Vancouver (Canada)</option>
+                                <option value="America/Anchorage">Anchorage (Alaska)</option>
+                                <option value="Pacific/Honolulu">Honolulu (Hawaii)</option>
                                 <option value="America/Mexico_City">Mexico City (Mexico)</option>
                                 <option value="America/Bogota">Bogotá (Colombia)</option>
                                 <option value="America/Lima">Lima (Peru)</option>
+                                <option value="America/Caracas">Caracas (Venezuela)</option>
+                                <option value="America/Santiago">Santiago (Chile)</option>
                                 <option value="America/Sao_Paulo">São Paulo (Brazil)</option>
                                 <option value="America/Buenos_Aires">Buenos Aires (Argentina)</option>
                             </optgroup>
-                            <optgroup label="🌏 Africa & Middle East">
-                                <option value="Africa/Cairo">Cairo (Egypt)</option>
+                            <optgroup label="🌍 Africa">
+                                <option value="Africa/Casablanca">Casablanca (Morocco)</option>
                                 <option value="Africa/Lagos">Lagos (Nigeria)</option>
+                                <option value="Africa/Cairo">Cairo (Egypt)</option>
                                 <option value="Africa/Johannesburg">Johannesburg (South Africa)</option>
-                                <option value="Asia/Jerusalem">Tel Aviv (Israel)</option>
+                                <option value="Africa/Nairobi">Nairobi (Kenya)</option>
                             </optgroup>
                             <optgroup label="🌏 Oceania">
+                                <option value="Australia/Perth">Perth (Australia)</option>
+                                <option value="Australia/Brisbane">Brisbane (Australia)</option>
                                 <option value="Australia/Sydney">Sydney (Australia)</option>
                                 <option value="Australia/Melbourne">Melbourne (Australia)</option>
-                                <option value="Australia/Perth">Perth (Australia)</option>
+                                <option value="Pacific/Fiji">Fiji</option>
                                 <option value="Pacific/Auckland">Auckland (New Zealand)</option>
                             </optgroup>
                         </select>
                         <span id="timezoneStatusGeneral" style="font-size: 12px; color: #6c757d;"></span>
+                    </div>
+                    <div style="font-size: 11px; color: #718096; margin-top: 4px;">
+                        ⚡ Select a city to activate. "Disabled" = no automatic processing.
                     </div>
                 </div>
 
