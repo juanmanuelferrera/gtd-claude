@@ -2419,7 +2419,7 @@ function renderEventsView() {
         }
 
         return `
-            <div style="background: ${bgColor}; border: ${borderStyle}; border-radius: 6px; padding: 8px 10px; min-height: 40px;">
+            <div style="background: ${bgColor}; border: ${borderStyle}; border-radius: 6px; padding: 10px 12px; min-height: 55px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${events.length > 0 ? '6px' : '0'};">
                     <div style="display: flex; align-items: baseline; gap: 6px;">
                         <span style="font-weight: 700; font-size: 14px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${dayNames[dayIndex]}</span>
