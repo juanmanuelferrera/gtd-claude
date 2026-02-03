@@ -11,6 +11,17 @@ let currentTodayDate = new Date();
 let mobileMoreMenuOpen = false;
 
 /**
+ * Check if a task is an Event (either via isEvent flag or @event in notes)
+ * This ensures MCP-created events display correctly in the UI
+ */
+function isTaskEvent(task) {
+    if (!task) return false;
+    if (isTaskEvent(task)) return true;
+    const notes = (task.notes || '').toLowerCase();
+    return notes.includes('@event');
+}
+
+/**
  * Generate skeleton loader HTML
  */
 function generateSkeletonLoader(count = 3) {
@@ -961,8 +972,8 @@ function groupTasksByDate(tasksArray) {
     Object.keys(grouped).forEach(dateKey => {
         grouped[dateKey].tasks.sort((a, b) => {
             // Prioritize events first within the same day
-            if (a.isEvent !== b.isEvent) {
-                return a.isEvent ? -1 : 1;
+            if (isTaskEvent(a) !== isTaskEvent(b)) {
+                return isTaskEvent(a) ? -1 : 1;
             }
             
             // Then sort by time if both have times
@@ -997,7 +1008,7 @@ function groupTasksByDate(tasksArray) {
  */
 function renderTaskCard(task, isAllTasksView = false) {
     const isOverdue = window.isTaskOverdue ? window.isTaskOverdue(task) : (task.dueDate && task.dueDate < getLocalDateString() && task.status === 'pending');
-    const isEvent = task.isEvent;
+    const isEvent = isTaskEvent(task);
     let cardClass = `task-card ${task.status}`;
     
     if (isEvent) {
@@ -1258,7 +1269,7 @@ function generateSimpleTasksReview(mode) {
     // 1. EVENTS SECTION - filtered by mode (skip for projects mode)
     if (!isProjects) {
     const events = allTasks.filter(task => {
-        if (!task.isEvent) return false;
+        if (!isTaskEvent(task)) return false;
         if (isDaily) return task.dueDate === todayStr;
         // Weekly: only events within current week
         return task.dueDate && task.dueDate >= weekStartStr && task.dueDate <= weekEndStr;
@@ -1326,7 +1337,7 @@ function generateSimpleTasksReview(mode) {
     const noDateTasks = [];
 
     allTasks.forEach(task => {
-        if (task.isEvent) return;
+        if (isTaskEvent(task)) return;
 
         if (isDaily) {
             // Daily: only today's tasks
@@ -1406,7 +1417,7 @@ function generateSimpleTasksReview(mode) {
     if (isProjects) {
     const templatedProjects = {};
     allTasks.forEach(task => {
-        if (task.isEvent) return;
+        if (isTaskEvent(task)) return;
 
         const text = `${task.title || ''} ${task.notes || ''}`;
         const templates = TemplateProcessor.extractFromText(text);
@@ -1532,7 +1543,7 @@ function generateSimplePlainTextReport(allTasks, todayStr, mode) {
     if (!isProjects) {
     // EVENTS - filtered by mode
     const events = allTasks.filter(task => {
-        if (!task.isEvent) return false;
+        if (!isTaskEvent(task)) return false;
         if (isDaily) return task.dueDate === todayStr;
         return task.dueDate && task.dueDate >= weekStartStr && task.dueDate <= weekEndStr;
     });
@@ -1566,7 +1577,7 @@ function generateSimplePlainTextReport(allTasks, todayStr, mode) {
     const noDateTasks = [];
 
     allTasks.forEach(task => {
-        if (task.isEvent) return;
+        if (isTaskEvent(task)) return;
         if (isDaily) {
             if (task.dueDate === todayStr) {
                 if (!dateGroups[task.dueDate]) dateGroups[task.dueDate] = [];
@@ -1622,7 +1633,7 @@ function generateSimplePlainTextReport(allTasks, todayStr, mode) {
     if (isProjects) {
         const templatedProjects = {};
         allTasks.forEach(task => {
-            if (task.isEvent) return;
+            if (isTaskEvent(task)) return;
             const text_content = `${task.title || ''} ${task.notes || ''}`;
             const templates = TemplateProcessor.extractFromText(text_content);
             if (templates.length > 0) {
@@ -1684,7 +1695,7 @@ function generateSimpleOrgModeReport(allTasks, todayStr, mode) {
     if (!isProjects) {
     // EVENTS - filtered
     const events = allTasks.filter(task => {
-        if (!task.isEvent) return false;
+        if (!isTaskEvent(task)) return false;
         if (isDaily) return task.dueDate === todayStr;
         return task.dueDate && task.dueDate >= weekStartStr && task.dueDate <= weekEndStr;
     });
@@ -1716,7 +1727,7 @@ function generateSimpleOrgModeReport(allTasks, todayStr, mode) {
     const noDateTasks = [];
 
     allTasks.forEach(task => {
-        if (task.isEvent) return;
+        if (isTaskEvent(task)) return;
         if (isDaily) {
             if (task.dueDate === todayStr) {
                 if (!dateGroups[task.dueDate]) dateGroups[task.dueDate] = [];
@@ -1770,7 +1781,7 @@ function generateSimpleOrgModeReport(allTasks, todayStr, mode) {
     if (isProjects) {
         const templatedProjects = {};
         allTasks.forEach(task => {
-            if (task.isEvent) return;
+            if (isTaskEvent(task)) return;
             const text_content = `${task.title || ''} ${task.notes || ''}`;
             const templates = TemplateProcessor.extractFromText(text_content);
             if (templates.length > 0) {
@@ -1853,7 +1864,7 @@ function generateReviewWithSelectedFormats() {
     };
     
     allTasks.forEach(task => {
-        if (task.isEvent) {
+        if (isTaskEvent(task)) {
             timeGroups.events.push(task);
             return;
         }
@@ -1882,7 +1893,7 @@ function generateReviewWithSelectedFormats() {
     // Group tasks by projects (same logic as original function)
     const projectGroups = {};
     allTasks.forEach(task => {
-        if (task.isEvent) return;
+        if (isTaskEvent(task)) return;
         
         const text = `${task.title || ''} ${task.notes || ''}`;
         const templates = TemplateProcessor.extractFromText(text);
@@ -2587,7 +2598,7 @@ function renderTodayTemplateFilters(todayTasks) {
     const todayStr = getLocalDateString(new Date(currentTodayDate));
     const allTodayTasks = tasks.filter(task => {
         if (task.status === 'deleted') return false;
-        if (task.isEvent) {
+        if (isTaskEvent(task)) {
             const taskDate = new Date(task.dueDate);
             const endDate = task.endDate ? new Date(task.endDate) : taskDate;
             const today = new Date(currentTodayDate);
@@ -2760,7 +2771,7 @@ function renderTodayView() {
             title: task.title ? task.title.substring(0, 30) + '...' : 'No title',
             dueDate: task.dueDate,
             status: task.status,
-            isEvent: task.isEvent,
+            isEvent: isTaskEvent(task),
             isDeleted: task.status === 'deleted'
         }));
         console.log('📋 All tasks in system:');
@@ -2777,7 +2788,7 @@ function renderTodayView() {
                 return; // Skip deleted tasks
             }
             
-            if (task.isEvent) {
+            if (isTaskEvent(task)) {
                 skippedTasks.push({reason: 'is_event', title: task.title, dueDate: task.dueDate});
                 return; // Skip events - they stay on their dates
             }
@@ -2788,7 +2799,7 @@ function renderTodayView() {
                     title: task.title,
                     dueDate: task.dueDate,
                     status: task.status,
-                    isEvent: task.isEvent
+                    isEvent: isTaskEvent(task)
                 });
                 console.log(`🔄 Auto-migrating overdue task: "${task.title}" from ${task.dueDate} to ${todayStr}`);
                 task.dueDate = todayStr;
@@ -2834,7 +2845,7 @@ function renderTodayView() {
         if (task.status === 'deleted') return false;
         
         // Events should ONLY appear on their exact due date - no exceptions
-        if (task.isEvent) {
+        if (isTaskEvent(task)) {
             return task.dueDate === todayStr;
         }
         
@@ -2863,7 +2874,7 @@ function renderTodayView() {
             const allTodayTasks = tasks.filter(task => {
                 if (task.status === 'deleted') return false;
                 
-                if (task.isEvent) {
+                if (isTaskEvent(task)) {
                     // Events can span multiple days, check if today is within range
                     const taskDate = new Date(task.dueDate);
                     const endDate = task.endDate ? new Date(task.endDate) : taskDate;
@@ -2902,8 +2913,8 @@ function renderTodayView() {
     }
     
     // Separate events from regular tasks
-    const eventTasks = todayTasks.filter(task => task.isEvent);
-    const regularTasks = todayTasks.filter(task => !task.isEvent);
+    const eventTasks = todayTasks.filter(task => isTaskEvent(task));
+    const regularTasks = todayTasks.filter(task => !isTaskEvent(task));
     
     // Group regular tasks by time
     const timedTasks = regularTasks.filter(task => task.dueTime);
@@ -3149,7 +3160,7 @@ function renderWeekView() {
             if (task.dueDate !== dateStr) return false;
             
             // Events always show at their original date
-            if (task.isEvent) return true;
+            if (isTaskEvent(task)) return true;
             
             // For regular tasks: hide both completed AND pending tasks from past dates
             // (pending tasks will appear in Today view as overdue)
@@ -3283,8 +3294,8 @@ function renderWeekView() {
         // Sort day tasks: events first, then by time
         const sortedDayTasks = [...dayTasks].sort((a, b) => {
             // Prioritize events first
-            if (a.isEvent !== b.isEvent) {
-                return a.isEvent ? -1 : 1;
+            if (isTaskEvent(a) !== isTaskEvent(b)) {
+                return isTaskEvent(a) ? -1 : 1;
             }
             
             // Then sort by time if both have times
@@ -3306,9 +3317,9 @@ function renderWeekView() {
         });
         sortedDayTasks.forEach(task => {
             const taskElement = document.createElement('div');
-            taskElement.className = task.isEvent ? 'week-task-item event' : 'week-task-item';
+            taskElement.className = isTaskEvent(task) ? 'week-task-item event' : 'week-task-item';
             
-            const titlePrefix = task.isEvent ? '🔴 ' : '';
+            const titlePrefix = isTaskEvent(task) ? '🔴 ' : '';
             
             // Character limit for single-line display with ellipsis
             const maxChars = 30; // Reduced for single-line display
@@ -3905,7 +3916,7 @@ function renderCalendar() {
         if (taskDate.getFullYear() !== year || taskDate.getMonth() !== month) return false;
         
         // Events always show at their original date
-        if (task.isEvent) return true;
+        if (isTaskEvent(task)) return true;
         
         // For regular tasks: hide both completed AND pending tasks from past dates
         // (pending tasks will appear in Today view as overdue)
@@ -4014,7 +4025,7 @@ function renderCalendar() {
                             if (task.dueDate !== dateStr) return false;
                             
                             // Events always show at their original date
-                            if (task.isEvent) return true;
+                            if (isTaskEvent(task)) return true;
                             
                             // For regular tasks: hide both completed AND pending tasks from past dates
                             // (pending tasks will appear in Today view as overdue)
@@ -4042,7 +4053,7 @@ function renderCalendar() {
             dayElement.classList.add('has-tasks');
             
             // Highlight days with events (highest priority)
-            const hasEvents = dayTasks.some(t => t.isEvent && t.status === 'pending');
+            const hasEvents = dayTasks.some(t => isTaskEvent(t) && t.status === 'pending');
             if (hasEvents) {
                 dayElement.classList.add('has-events');
             } else {
@@ -4087,8 +4098,8 @@ function renderCalendar() {
         // Sort day tasks: events first, then by time, then by creation date
         const sortedDayTasks = [...dayTasks].sort((a, b) => {
             // Prioritize events first
-            if (a.isEvent !== b.isEvent) {
-                return a.isEvent ? -1 : 1;
+            if (isTaskEvent(a) !== isTaskEvent(b)) {
+                return isTaskEvent(a) ? -1 : 1;
             }
             
             // Then sort by time if both have times
@@ -4105,8 +4116,8 @@ function renderCalendar() {
         // Add task items (events will appear first)
         sortedDayTasks.forEach(task => {
             const taskElement = document.createElement('div');
-            taskElement.className = task.isEvent ? 'calendar-task-item event' : 'calendar-task-item';
-            const titlePrefix = task.isEvent ? '🔴 ' : '';
+            taskElement.className = isTaskEvent(task) ? 'calendar-task-item event' : 'calendar-task-item';
+            const titlePrefix = isTaskEvent(task) ? '🔴 ' : '';
             
             // Show more text with line breaks for better readability
             const maxChars = 25; // Increased from 13 to 25 characters
@@ -4273,7 +4284,7 @@ function renderStats() {
     const overdue = tasks.filter(t => 
         t.dueDate && t.dueDate < today && t.status === 'pending'
     ).length;
-    const events = tasks.filter(t => t.isEvent && t.status === 'pending').length;
+    const events = tasks.filter(t => isTaskEvent(t) && t.status === 'pending').length;
     
     // Update stats display elements if they exist
     const totalTasksEl = document.getElementById('totalTasks');

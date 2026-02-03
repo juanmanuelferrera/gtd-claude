@@ -395,7 +395,9 @@ function editTask(taskId, event) {
     window.manualTimeSet = false;
     
     document.getElementById('editTaskTitle').value = task.title;
-    document.getElementById('editTaskIsEvent').checked = task.isEvent || false;
+    // Check both isEvent flag and @event in notes (for MCP compatibility)
+    const hasEventTag = task.notes && task.notes.toLowerCase().includes('@event');
+    document.getElementById('editTaskIsEvent').checked = task.isEvent || hasEventTag || false;
     
     // Handle both old format (images in notes) and new format (separate images property)
     if (task.images && task.images.length > 0) {
@@ -1281,7 +1283,11 @@ async function delayTask(taskId, days, event) {
         const today = getLocalDateString(new Date());
         if (task.dueDate > today) {
             task.isEvent = true;
-            console.log(`📅 Task "${task.title}" moved to future date - marked as Event`);
+            // Add @event to notes for MCP compatibility
+            if (!task.notes || !task.notes.includes('@event')) {
+                task.notes = task.notes ? task.notes + ' @event' : '@event';
+            }
+            console.log(`📅 Task "${task.title}" moved to future date - marked as Event + @event`);
         }
 
         recordAction('delay', task.id, task.title, beforeDelay, { dueDate: task.dueDate, isEvent: task.isEvent });
