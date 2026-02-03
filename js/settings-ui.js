@@ -2387,11 +2387,12 @@ function renderEventsView() {
     };
 
     const renderWeekGroup = (weekStart, events, isPast, color) => {
+        console.log('📅 renderWeekGroup called:', weekStart, events.length, 'events');
         const weekLabel = formatWeekLabel(weekStart);
         return `
-            <div style="margin-bottom: 16px;">
-                <div style="font-size: 13px; font-weight: 600; color: ${color}; margin-bottom: 8px; padding: 4px 8px; background: ${isPast ? '#fff5f5' : '#f0f7ff'}; border-radius: 4px;">
-                    ${weekLabel} (${events.length})
+            <div style="margin-bottom: 16px; border: 2px dashed ${color}; padding: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: ${color}; margin-bottom: 10px; padding: 6px 10px; background: ${isPast ? '#fff5f5' : '#e8f4fd'}; border-radius: 6px; border-left: 4px solid ${color};">
+                    📆 ${weekLabel} (${events.length})
                 </div>
                 ${events.sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || '')).map(e => renderEventCard(e, isPast)).join('')}
             </div>
