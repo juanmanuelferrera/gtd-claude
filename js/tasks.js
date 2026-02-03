@@ -18,14 +18,26 @@ let eventTaskIds = new Set(); // Tracks which tasks are Events
 // Template Management
 let customTemplates = [];
 
+// Local sanitizeInput fallback if utils.js hasn't loaded yet
+function _localSanitizeInput(input) {
+    if (typeof input !== 'string') return input;
+    return input
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+        .replace(/javascript:/gi, '')
+        .replace(/on\w+\s*=/gi, '')
+        .replace(/data:text\/html/gi, '')
+        .trim();
+}
+
 /**
  * Validate task data structure and sanitize inputs
  */
 function validateTaskData(task) {
     if (!task || typeof task !== 'object') return null;
 
-    // Use sanitizeInput if available, otherwise just return the value
-    const sanitize = (typeof sanitizeInput === 'function') ? sanitizeInput : (v => v);
+    // Use sanitizeInput if available, otherwise use local fallback
+    const sanitize = (typeof sanitizeInput === 'function') ? sanitizeInput : _localSanitizeInput;
 
     return {
         id: task.id,
