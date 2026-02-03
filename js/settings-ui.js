@@ -2310,18 +2310,25 @@ function groupEventsByWeek(events) {
     return groups;
 }
 
-// Format week label
+// Format week label - simple month + day range
 function formatWeekLabel(weekStart) {
     const start = new Date(weekStart + 'T00:00:00');
     const end = new Date(start);
     end.setDate(end.getDate() + 6);
 
-    const options = { day: 'numeric', month: 'short' };
-    const startStr = start.toLocaleDateString('es-ES', options);
-    const endStr = end.toLocaleDateString('es-ES', options);
+    const startDay = start.getDate();
+    const endDay = end.getDate();
+    const startMonth = start.toLocaleDateString('es-ES', { month: 'long' });
+    const endMonth = end.toLocaleDateString('es-ES', { month: 'long' });
 
-    const { week } = getWeekInfo(weekStart);
-    return `Semana ${week}: ${startStr} - ${endStr}`;
+    // Capitalize first letter
+    const capMonth = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+    if (startMonth === endMonth) {
+        return `${capMonth(startMonth)} ${startDay}-${endDay}`;
+    } else {
+        return `${capMonth(startMonth)} ${startDay} - ${capMonth(endMonth)} ${endDay}`;
+    }
 }
 
 function renderEventsView() {
