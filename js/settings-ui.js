@@ -1645,11 +1645,110 @@ async function updateTimezone() {
 window.loadTimezoneOptions = loadTimezoneOptions;
 window.updateTimezone = updateTimezone;
 
+// Load timezone for Overview tab (duplicate for visibility)
+async function loadTimezoneOptionsOverview() {
+    const select = document.getElementById('timezoneSelectOverview');
+    const statusDiv = document.getElementById('timezoneStatusOverview');
+
+    if (!select) return;
+
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+
+        const response = await fetch(`${window.API_BASE_URL || 'https://hyperfiler-api.joanmanelferrera-400.workers.dev'}/auth/timezone`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+
+        select.innerHTML = '<option value="">-- Disabled --</option>';
+        const sortedOptions = (data.options || []).sort((a, b) => a.city.localeCompare(b.city));
+        sortedOptions.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.timezone;
+            option.textContent = opt.city;
+            if (opt.timezone === data.timezone) option.selected = true;
+            select.appendChild(option);
+        });
+
+        if (statusDiv) {
+            statusDiv.innerHTML = data.isEnabled
+                ? `<span style="color: #28a745;">✅ Enabled - Tasks organized at 1am ${data.city}</span>`
+                : `<span style="color: #6c757d;">⏸️ Disabled</span>`;
+        }
+    } catch (error) {
+        console.error('⏰ Error loading timezone:', error);
+    }
+}
+
+async function updateTimezoneFromOverview() {
+    const select = document.getElementById('timezoneSelectOverview');
+    const statusDiv = document.getElementById('timezoneStatusOverview');
+    if (!select) return;
+
+    const timezone = select.value || null;
+    const cityName = select.options[select.selectedIndex]?.textContent || '';
+
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            alert('Please log in to change settings');
+            return;
+        }
+
+        const response = await fetch(`${window.API_BASE_URL || 'https://hyperfiler-api.joanmanelferrera-400.workers.dev'}/auth/timezone`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ timezone })
+        });
+
+        if (!response.ok) {
+            alert('Failed to update');
+            return;
+        }
+
+        const data = await response.json();
+
+        if (statusDiv) {
+            statusDiv.innerHTML = timezone
+                ? `<span style="color: #28a745;">✅ Enabled - Tasks organized at 1am ${cityName}</span>`
+                : `<span style="color: #6c757d;">⏸️ Disabled</span>`;
+        }
+
+        // Sync with preferences tab select if it exists
+        const prefSelect = document.getElementById('timezoneSelect');
+        if (prefSelect) prefSelect.value = timezone || '';
+
+        if (typeof showInlineNotification === 'function') {
+            showInlineNotification(data.message, 'success');
+        }
+    } catch (error) {
+        console.error('⏰ Error:', error);
+        alert('Failed to update');
+    }
+}
+
+window.loadTimezoneOptionsOverview = loadTimezoneOptionsOverview;
+window.updateTimezoneFromOverview = updateTimezoneFromOverview;
+
 // Load timezone when settings view is shown
 const originalLoadSettingsValues = window.loadSettingsValues || loadSettingsValues;
 window.loadSettingsValues = function() {
     originalLoadSettingsValues();
     loadTimezoneOptions();
+    loadTimezoneOptionsOverview();
 };
 
 // ========== PAST EVENTS MANAGEMENT ==========

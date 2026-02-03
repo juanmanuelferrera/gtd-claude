@@ -758,6 +758,29 @@
                     </div>
                 </div>
                 
+                <!-- Automatic Task Organization -->
+                <div style="margin-top: 30px; background: #f0f7ff; padding: 20px; border-radius: 8px; border: 1px solid #bee3f8;">
+                    <h4 style="color: #1E4FE6; margin-bottom: 15px;">🌙 Automatic Task Organization</h4>
+                    <div style="margin-bottom: 12px; color: #495057; font-size: 13px; background: white; padding: 12px; border-radius: 6px; border-left: 3px solid #1E4FE6;">
+                        <strong>Every night at 1am:</strong>
+                        <div style="margin-top: 6px; display: grid; gap: 4px;">
+                            <span>1️⃣ Unfinished tasks → move to today</span>
+                            <span>2️⃣ Tasks get time slots assigned</span>
+                            <span>3️⃣ If too many → overflow to next days</span>
+                        </div>
+                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #666;">
+                            📅 <strong>Events</strong> are fixed and never moved automatically
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <label style="display: block; font-weight: 500; margin-bottom: 6px; color: #4a5568;">Select your city to enable:</label>
+                        <select id="timezoneSelectOverview" onchange="updateTimezoneFromOverview()" style="padding: 10px 14px; border: 2px solid #bee3f8; border-radius: 6px; font-size: 14px; width: 100%; max-width: 300px; background: white;">
+                            <option value="">-- Disabled --</option>
+                        </select>
+                        <div id="timezoneStatusOverview" style="margin-top: 8px; color: #6c757d; font-size: 12px;"></div>
+                    </div>
+                </div>
+
                 <!-- Danger Zone -->
                 <div style="margin-top: 40px; padding: 20px; background: #fff5f5; border: 2px solid #feb2b2; border-radius: 8px;">
                     <h4 style="color: #e53e3e; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
