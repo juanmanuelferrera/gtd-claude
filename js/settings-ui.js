@@ -2527,6 +2527,15 @@ function deleteEventFromView(eventId) {
 
     if (!confirm(`¿Eliminar "${task.title}"?`)) return;
 
+    // Record action for undo (Ctrl+Z)
+    if (typeof recordAction === 'function') {
+        recordAction('delete', task.id, task.title, {
+            status: task.status,
+            isDeleted: task.isDeleted,
+            deletedAt: task.deletedAt
+        }, null);
+    }
+
     task.status = 'deleted';
     task.isDeleted = true;
     task.deletedAt = new Date().toISOString();
