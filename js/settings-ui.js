@@ -2302,7 +2302,7 @@ function getWeekInfo(dateStr) {
 // Get week start date based on user preference - timezone safe
 function getWeekStart(dateStr) {
     const [year, month, day] = dateStr.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
+    const date = new Date(year, month - 1, day, 12, 0, 0); // Use noon to avoid timezone issues
     const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
     const weekStartDay = getWeekStartDay(); // 0 = Sunday, 1 = Monday
 
@@ -2342,9 +2342,10 @@ function groupEventsByWeek(events) {
 
 // Format week label - simple month + day range
 function formatWeekLabel(weekStart) {
-    const start = new Date(weekStart + 'T00:00:00');
-    const end = new Date(start);
-    end.setDate(end.getDate() + 6);
+    // Parse date components directly to avoid timezone issues
+    const [year, month, day] = weekStart.split('-').map(Number);
+    const start = new Date(year, month - 1, day, 12, 0, 0); // Use noon
+    const end = new Date(year, month - 1, day + 6, 12, 0, 0);
 
     const startDay = start.getDate();
     const endDay = end.getDate();
@@ -2450,7 +2451,7 @@ function renderEventsView() {
         const events = eventsByDate[dateStr] || [];
         const isPast = dateStr < today;
         const isToday = dateStr === today;
-        const dayNum = new Date(dateStr + 'T00:00:00').getDate();
+        const dayNum = parseInt(dateStr.split('-')[2]); // Extract day directly from string
 
         let bgColor = '#fff';
         let borderStyle = '1px solid #e2e8f0';
