@@ -2331,8 +2331,10 @@ function formatWeekLabel(weekStart) {
     }
 }
 
+// Track current week offset for Events view navigation
+window.eventsWeekOffset = window.eventsWeekOffset || 0;
+
 function renderEventsView() {
-    console.log('📅 renderEventsView v20260203-weeks');
     const container = document.getElementById('tasks-view');
     if (!container) return;
 
@@ -2343,134 +2345,160 @@ function renderEventsView() {
     // Get all events (not deleted)
     const allEvents = (window.tasks || []).filter(t => t.isEvent && t.status !== 'deleted');
 
-    // Categorize events
-    const pastEvents = allEvents.filter(e => e.dueDate < today).sort((a, b) => (b.dueDate || '').localeCompare(a.dueDate || ''));
-    const todayEvents = allEvents.filter(e => e.dueDate === today).sort((a, b) => (a.dueTime || '').localeCompare(b.dueTime || ''));
-    const futureEvents = allEvents.filter(e => e.dueDate > today).sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''));
+    // Calculate current week's Monday based on offset
+    const currentWeekMonday = getWeekStart(today);
+    const mondayDate = new Date(currentWeekMonday + 'T00:00:00');
+    mondayDate.setDate(mondayDate.getDate() + (window.eventsWeekOffset * 7));
+    const weekStart = mondayDate.toISOString().slice(0, 10);
 
-    // Group by week
-    const pastByWeek = groupEventsByWeek(pastEvents);
-    const futureByWeek = groupEventsByWeek(futureEvents);
-    console.log('📅 Week groups - Past:', Object.keys(pastByWeek), 'Future:', Object.keys(futureByWeek));
+    // Generate all 7 days of the week
+    const weekDays = [];
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(mondayDate);
+        d.setDate(d.getDate() + i);
+        weekDays.push(d.toISOString().slice(0, 10));
+    }
 
-    const renderEventCard = (event, isPast) => {
-        const bgColor = isPast ? '#fff5f5' : '#f8f9fa';
-        const borderColor = isPast ? '#dc3545' : (event.dueDate === today ? '#28a745' : '#007bff');
-        const dayName = new Date(event.dueDate + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
+    // Group events by date for quick lookup
+    const eventsByDate = {};
+    allEvents.forEach(e => {
+        if (!e.dueDate) return;
+        if (!eventsByDate[e.dueDate]) eventsByDate[e.dueDate] = [];
+        eventsByDate[e.dueDate].push(e);
+    });
+
+    // Format week header
+    const weekLabel = formatWeekLabel(weekStart);
+    const isCurrentWeek = window.eventsWeekOffset === 0;
+
+    // Day names in Spanish
+    const dayNames = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+    // Render event card
+    const renderEventCard = (event) => {
+        const isPast = event.dueDate < today;
+        const isToday = event.dueDate === today;
+        const borderColor = isPast ? '#dc3545' : (isToday ? '#28a745' : '#6f42c1');
 
         return `
-            <div style="background: ${bgColor}; border-radius: 8px; padding: 10px 12px; margin-bottom: 6px; border-left: 4px solid ${borderColor};">
-                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+            <div style="background: ${isPast ? '#fff5f5' : '#f8f9fa'}; border-radius: 6px; padding: 8px 10px; margin-bottom: 4px; border-left: 3px solid ${borderColor};">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
                     <div style="flex: 1; min-width: 0;">
-                        <div style="font-weight: 600; color: #333; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            ${escapeHtml(event.title || 'Sin título')}
-                        </div>
-                        <div style="font-size: 11px; color: #666; margin-top: 2px;">
-                            ${dayName}${event.dueTime ? ' · ' + event.dueTime : ''}
+                        <div style="font-weight: 500; color: #333; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${event.dueTime ? '<span style="color: #6f42c1; font-weight: 600;">' + event.dueTime + '</span> ' : ''}${escapeHtml(event.title || 'Sin título')}
                         </div>
                     </div>
-                    <div style="display: flex; gap: 4px; flex-shrink: 0;">
-                        ${isPast ? `
-                            <button onclick="movePastEventToToday('${event.id}')"
-                                    style="background: #28a745; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;"
-                                    title="Mover a hoy">
-                                Hoy
-                            </button>
-                        ` : ''}
+                    <div style="display: flex; gap: 2px; flex-shrink: 0;">
                         <button onclick="event.stopPropagation(); openIOSDateTimePicker('${event.id}', '${event.dueDate || ''}', '${event.dueTime || ''}', this)"
-                                style="background: none; border: 1px solid #dee2e6; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 14px;"
-                                title="Cambiar fecha">
-                            📅
-                        </button>
+                                style="background: none; border: none; padding: 4px; cursor: pointer; font-size: 12px; opacity: 0.7;"
+                                title="Cambiar fecha">📅</button>
                         <button onclick="deleteEventFromView('${event.id}')"
-                                style="background: none; border: 1px solid #dee2e6; color: #dc3545; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 14px;"
-                                title="Eliminar">
-                            🗑️
-                        </button>
+                                style="background: none; border: none; padding: 4px; cursor: pointer; font-size: 12px; opacity: 0.7; color: #dc3545;"
+                                title="Eliminar">🗑️</button>
                     </div>
                 </div>
             </div>
         `;
     };
 
-    const renderWeekGroup = (weekStart, events, isPast, color) => {
-        console.log('📅 renderWeekGroup called:', weekStart, events.length, 'events');
-        const weekLabel = formatWeekLabel(weekStart);
-        return `
-            <div style="margin-bottom: 16px; border: 2px dashed ${color}; padding: 8px;">
-                <div style="font-size: 14px; font-weight: 700; color: ${color}; margin-bottom: 10px; padding: 6px 10px; background: ${isPast ? '#fff5f5' : '#e8f4fd'}; border-radius: 6px; border-left: 4px solid ${color};">
-                    📆 ${weekLabel} (${events.length})
-                </div>
-                ${events.sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || '')).map(e => renderEventCard(e, isPast)).join('')}
-            </div>
-        `;
-    };
+    // Render day slot
+    const renderDaySlot = (dateStr, dayIndex) => {
+        const events = eventsByDate[dateStr] || [];
+        const isPast = dateStr < today;
+        const isToday = dateStr === today;
+        const dayNum = new Date(dateStr + 'T00:00:00').getDate();
+        const monthName = new Date(dateStr + 'T00:00:00').toLocaleDateString('es-ES', { month: 'short' });
 
-    const renderSection = (title, eventsByWeek, isPast, color) => {
-        const weeks = Object.keys(eventsByWeek).sort((a, b) => isPast ? b.localeCompare(a) : a.localeCompare(b));
-        if (weeks.length === 0) return '';
-
-        const totalCount = weeks.reduce((sum, w) => sum + eventsByWeek[w].length, 0);
+        let bgColor = '#fff';
+        let borderStyle = '1px solid #e2e8f0';
+        if (isToday) {
+            bgColor = '#e8f5e9';
+            borderStyle = '2px solid #28a745';
+        } else if (isPast) {
+            bgColor = '#fafafa';
+        }
 
         return `
-            <div style="margin-bottom: 24px;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid ${color};">
-                    <span style="font-size: 16px; font-weight: 700; color: ${color};">${title}</span>
-                    <span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600;">${totalCount}</span>
-                    ${isPast ? `
-                        <button onclick="deleteAllPastEvents()" style="margin-left: auto; background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">
-                            Eliminar todos
-                        </button>
-                    ` : ''}
+            <div style="background: ${bgColor}; border: ${borderStyle}; border-radius: 8px; padding: 12px; min-height: 80px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div>
+                        <span style="font-weight: 700; font-size: 18px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${dayNum}</span>
+                        <span style="font-size: 11px; color: #666; margin-left: 4px;">${monthName}</span>
+                    </div>
+                    <span style="font-size: 12px; color: ${isToday ? '#28a745' : '#999'}; font-weight: ${isToday ? '600' : '400'};">
+                        ${dayNames[dayIndex]}${isToday ? ' (Hoy)' : ''}
+                    </span>
                 </div>
-                ${weeks.map(w => renderWeekGroup(w, eventsByWeek[w], isPast, color)).join('')}
-            </div>
-        `;
-    };
-
-    // Today section (no week grouping needed)
-    const renderTodaySection = () => {
-        if (todayEvents.length === 0) return '';
-        return `
-            <div style="margin-bottom: 24px;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #28a745;">
-                    <span style="font-size: 16px; font-weight: 700; color: #28a745;">📍 Hoy</span>
-                    <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600;">${todayEvents.length}</span>
-                </div>
-                ${todayEvents.map(e => renderEventCard(e, false)).join('')}
+                ${events.length > 0
+                    ? events.sort((a, b) => (a.dueTime || '').localeCompare(b.dueTime || '')).map(e => renderEventCard(e)).join('')
+                    : `<div style="color: #ccc; font-size: 12px; text-align: center; padding: 10px;">—</div>`
+                }
             </div>
         `;
     };
 
     container.innerHTML = `
         <div style="padding: 16px 20px; background: linear-gradient(135deg, #6f42c1, #563d7c); color: white; border-radius: 12px; margin-bottom: 16px;">
-            <h2 style="margin: 0; font-size: 20px; font-weight: 700;">📅 Events</h2>
-            <p style="margin: 4px 0 0; opacity: 0.9; font-size: 14px;">${allEvents.length} evento${allEvents.length !== 1 ? 's' : ''} total</p>
-        </div>
-
-        ${pastEvents.length > 0 ? `
-            <div style="background: #fff5f5; border: 1px solid #f5c6cb; border-radius: 8px; padding: 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 24px;">⚠️</span>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <strong style="color: #721c24;">${pastEvents.length} evento${pastEvents.length > 1 ? 's' : ''} pasado${pastEvents.length > 1 ? 's' : ''}</strong>
-                    <div style="font-size: 12px; color: #856404;">Revisa y actualiza o elimina</div>
+                    <h2 style="margin: 0; font-size: 20px; font-weight: 700;">📅 Events</h2>
+                    <p style="margin: 4px 0 0; opacity: 0.9; font-size: 14px;">${allEvents.length} evento${allEvents.length !== 1 ? 's' : ''} total</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button onclick="navigateEventsWeek(-1)" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 18px;" title="Semana anterior (←)">‹</button>
+                    <button onclick="window.eventsWeekOffset = 0; renderEventsView();" style="background: ${isCurrentWeek ? 'white' : 'rgba(255,255,255,0.2)'}; border: none; color: ${isCurrentWeek ? '#6f42c1' : 'white'}; padding: 6px 12px; border-radius: 16px; cursor: pointer; font-size: 12px; font-weight: 600;">Hoy</button>
+                    <button onclick="navigateEventsWeek(1)" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 18px;" title="Semana siguiente (→)">›</button>
                 </div>
             </div>
-        ` : ''}
+        </div>
 
-        ${renderSection('⚠️ Pasados', pastByWeek, true, '#dc3545')}
-        ${renderTodaySection()}
-        ${renderSection('🔮 Futuros', futureByWeek, false, '#007bff')}
+        <div style="background: #f8f9fa; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; text-align: center;">
+            <span style="font-size: 16px; font-weight: 600; color: #333;">${weekLabel}</span>
+            ${!isCurrentWeek ? `<span style="font-size: 12px; color: #666; margin-left: 8px;">(${window.eventsWeekOffset > 0 ? '+' : ''}${window.eventsWeekOffset} sem)</span>` : ''}
+        </div>
 
-        ${allEvents.length === 0 ? `
-            <div style="text-align: center; padding: 40px; color: #666;">
-                <div style="font-size: 48px; margin-bottom: 16px;">📅</div>
-                <h3>No hay eventos</h3>
-                <p style="color: #999;">Los eventos se crean marcando "Es un evento" al crear una tarea</p>
-            </div>
-        ` : ''}
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${weekDays.map((day, i) => renderDaySlot(day, i)).join('')}
+        </div>
+
+        <div style="margin-top: 16px; padding: 12px; background: #f0f4f8; border-radius: 8px; text-align: center; color: #666; font-size: 12px;">
+            ⌨️ Usa ← → para navegar entre semanas
+        </div>
     `;
+
+    // Setup keyboard navigation
+    setupEventsKeyboardNav();
 }
+
+// Navigate weeks
+function navigateEventsWeek(direction) {
+    window.eventsWeekOffset += direction;
+    renderEventsView();
+}
+
+// Keyboard navigation for Events view
+function setupEventsKeyboardNav() {
+    if (window.eventsKeyboardHandler) {
+        document.removeEventListener('keydown', window.eventsKeyboardHandler);
+    }
+
+    window.eventsKeyboardHandler = function(e) {
+        if (window.currentView !== 'events') return;
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            navigateEventsWeek(-1);
+        } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            navigateEventsWeek(1);
+        }
+    };
+
+    document.addEventListener('keydown', window.eventsKeyboardHandler);
+}
+
+window.navigateEventsWeek = navigateEventsWeek;
 
 // Open date picker for event
 function openEventDatePicker(eventId) {

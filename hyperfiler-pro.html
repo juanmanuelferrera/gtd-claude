@@ -293,18 +293,18 @@
             <button class="nav-btn" onclick="showView('calendar')" id="nav-calendar" tabindex="3" data-translate="Month">
                 📆 Month <span style="opacity: 0.7; font-size: 11px; color: #666;">M</span>
             </button>
-            <button class="nav-btn" onclick="showView('all'); setTimeout(() => { const searchInput = document.getElementById('allTasksSearchInput'); if (searchInput) searchInput.focus(); }, 100);" id="nav-all" tabindex="4">
+            <button class="nav-btn" onclick="showView('events')" id="nav-events" tabindex="4" style="position: relative;">
+                🗓️ Events <span style="opacity: 0.7; font-size: 11px; color: #666;">E</span>
+                <span id="pastEventsBadge" style="display: none; position: absolute; top: 2px; right: 8px; background: #dc3545; color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; min-width: 16px; text-align: center; animation: pulse 2s infinite;"></span>
+            </button>
+            <button class="nav-btn" onclick="showView('all'); setTimeout(() => { const searchInput = document.getElementById('allTasksSearchInput'); if (searchInput) searchInput.focus(); }, 100);" id="nav-all" tabindex="5">
                 🔍 Search <span style="opacity: 0.7; font-size: 11px; color: #666;">S</span>
             </button>
-            <button class="nav-btn" onclick="showView('lists')" id="nav-lists" tabindex="5">
+            <button class="nav-btn" onclick="showView('lists')" id="nav-lists" tabindex="6">
                 📂 Lists <span style="opacity: 0.7; font-size: 11px; color: #666;">L</span>
             </button>
-            <button class="nav-btn" onclick="showView('repeat')" id="nav-repeat" tabindex="6">
+            <button class="nav-btn" onclick="showView('repeat')" id="nav-repeat" tabindex="7">
                 🔄 Repeat <span style="opacity: 0.7; font-size: 11px; color: #666;">R</span>
-            </button>
-            <button class="nav-btn" onclick="showView('events')" id="nav-events" tabindex="7" style="position: relative;">
-                📅 Events <span style="opacity: 0.7; font-size: 11px; color: #666;">E</span>
-                <span id="pastEventsBadge" style="display: none; position: absolute; top: 2px; right: 8px; background: #dc3545; color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; min-width: 16px; text-align: center; animation: pulse 2s infinite;"></span>
             </button>
             <button class="nav-btn" onclick="showView('recent-actions')" id="nav-recent-actions" tabindex="8">
                 📋 Registry <span style="opacity: 0.7; font-size: 11px; color: #666;">U</span>
