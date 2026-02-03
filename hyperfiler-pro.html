@@ -1546,7 +1546,41 @@
                     Choose export formats in the popup
                 </div>
             </div>
-            
+
+            <!-- Automatic Task Organization -->
+            <div class="settings-section" style="padding: 20px; border: 2px solid #bee3f8; border-radius: 8px; margin-bottom: 20px; background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);">
+                <h4 style="margin: 0 0 15px 0; color: #1E4FE6; font-size: 16px;">🌙 Automatic Task Organization</h4>
+                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid #1E4FE6; margin-bottom: 15px;">
+                    <strong style="color: #2d3748;">Every night at 1am:</strong>
+                    <div style="margin-top: 8px; display: grid; gap: 4px; color: #4a5568; font-size: 14px;">
+                        <span>1️⃣ Unfinished tasks → move to today</span>
+                        <span>2️⃣ Tasks get time slots assigned</span>
+                        <span>3️⃣ If too many → overflow to next days</span>
+                    </div>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 13px; color: #718096;">
+                        📅 <strong>Events</strong> are fixed and never moved automatically
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <label style="font-size: 14px; color: #4a5568; font-weight: 600;">Your city:</label>
+                    <select id="timezoneSelectMain" onchange="updateTimezoneFromMain()" style="padding: 10px 14px; border: 2px solid #bee3f8; border-radius: 6px; font-size: 14px; min-width: 220px; background: white;">
+                        <option value="">-- Disabled --</option>
+                        <option value="Europe/Madrid">Madrid (Spain)</option>
+                        <option value="Europe/London">London (UK)</option>
+                        <option value="Europe/Paris">Paris (France)</option>
+                        <option value="Europe/Berlin">Berlin (Germany)</option>
+                        <option value="Asia/Kolkata">Mumbai / Delhi (India)</option>
+                        <option value="Asia/Tokyo">Tokyo (Japan)</option>
+                        <option value="America/New_York">New York (USA East)</option>
+                        <option value="America/Los_Angeles">Los Angeles (USA West)</option>
+                        <option value="America/Mexico_City">Mexico City (Mexico)</option>
+                        <option value="America/Sao_Paulo">São Paulo (Brazil)</option>
+                        <option value="Australia/Sydney">Sydney (Australia)</option>
+                    </select>
+                    <span id="timezoneStatusMain" style="font-size: 13px; color: #48bb78; font-weight: 500;"></span>
+                </div>
+            </div>
+
             <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
                 <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">Display Options</h4>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
