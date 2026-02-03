@@ -1053,7 +1053,7 @@ async function organizeTomorrowTasks(env) {
     } else if (/\btot\b/i.test(task.title || '')) {
       task.due_time = task.dueTime = '10:00';
       fixed.push(task);
-    } else if (/cocinar/.test(title)) {
+    } else if (/cocinar|comer/.test(title)) {
       task.due_time = task.dueTime = '14:00';
       fixed.push(task);
     } else if (/@bhoga/i.test(task.template || '') || /@bhoga/i.test(task.notes || '')) {
@@ -1148,7 +1148,7 @@ async function organizeTomorrowTasks(env) {
         isEvent ||
         /desayuno/.test(title) ||
         /\btot\b/i.test(task.title || '') ||
-        /cocinar/.test(title) ||
+        /cocinar|comer/.test(title) ||
         /@bhoga/i.test(notes) ||
         task.status === 'completed') {
       remainingDayAfter.push(task);
