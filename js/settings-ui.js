@@ -2421,13 +2421,12 @@ function renderEventsView() {
         return `
             <div style="background: ${bgColor}; border: ${borderStyle}; border-radius: 6px; padding: 8px 10px; min-height: 40px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${events.length > 0 ? '6px' : '0'};">
-                    <div>
-                        <span style="font-weight: 700; font-size: 18px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${dayNum}</span>
-                        <span style="font-size: 11px; color: #666; margin-left: 4px;">${monthName}</span>
+                    <div style="display: flex; align-items: baseline; gap: 6px;">
+                        <span style="font-weight: 700; font-size: 14px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${dayNames[dayIndex]}</span>
+                        <span style="font-weight: 700; font-size: 16px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${dayNum}</span>
+                        <span style="font-size: 11px; color: #666;">${monthName}</span>
+                        ${isToday ? '<span style="font-size: 10px; background: #28a745; color: white; padding: 1px 6px; border-radius: 8px; margin-left: 4px;">Hoy</span>' : ''}
                     </div>
-                    <span style="font-size: 12px; color: ${isToday ? '#28a745' : '#999'}; font-weight: ${isToday ? '600' : '400'};">
-                        ${dayNames[dayIndex]}${isToday ? ' (Hoy)' : ''}
-                    </span>
                 </div>
                 ${events.length > 0
                     ? events.sort((a, b) => (a.dueTime || '').localeCompare(b.dueTime || '')).map(e => renderEventCard(e)).join('')
