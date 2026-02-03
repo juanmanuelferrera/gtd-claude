@@ -2393,7 +2393,7 @@ function renderEventsView() {
             <div style="background: ${isPast ? '#fff5f5' : '#f8f9fa'}; border-radius: 6px; padding: 6px 10px; margin-bottom: 3px; border-left: 3px solid ${borderColor};">
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
                     <div style="flex: 1; min-width: 0;">
-                        <div style="font-weight: 500; color: #333; font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <div style="font-weight: 500; color: #333; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                             ${event.dueTime ? '<span style="color: #6f42c1; font-weight: 600;">' + event.dueTime + '</span> ' : ''}${escapeHtml(event.title || 'Sin título')}
                         </div>
                     </div>
@@ -2430,9 +2430,9 @@ function renderEventsView() {
             <div style="background: ${bgColor}; border: ${borderStyle}; border-radius: 6px; padding: 8px 12px; min-height: 48px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${events.length > 0 ? '4px' : '0'};">
                     <div style="display: flex; align-items: baseline; gap: 8px;">
-                        <span style="font-weight: 700; font-size: 18px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${getDayName(dateStr)}</span>
-                        <span style="font-weight: 700; font-size: 22px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${dayNum}</span>
-                        ${isToday ? '<span style="font-size: 12px; background: #28a745; color: white; padding: 2px 8px; border-radius: 8px; margin-left: 4px;">Hoy</span>' : ''}
+                        <span style="font-weight: 700; font-size: 17px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${getDayName(dateStr)}</span>
+                        <span style="font-weight: 700; font-size: 21px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${dayNum}</span>
+                        ${isToday ? '<span style="font-size: 11px; background: #28a745; color: white; padding: 2px 8px; border-radius: 8px; margin-left: 4px;">Hoy</span>' : ''}
                     </div>
                 </div>
                 ${events.length > 0
@@ -2447,21 +2447,21 @@ function renderEventsView() {
         <div style="padding: 12px 16px; background: linear-gradient(135deg, #6f42c1, #563d7c); color: white; border-radius: 10px; margin-bottom: 10px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <h2 style="margin: 0; font-size: 22px; font-weight: 700;">📅 Events</h2>
-                    <p style="margin: 2px 0 0; opacity: 0.9; font-size: 15px;">${allEvents.length} evento${allEvents.length !== 1 ? 's' : ''}</p>
+                    <h2 style="margin: 0; font-size: 21px; font-weight: 700;">📅 Events</h2>
+                    <p style="margin: 2px 0 0; opacity: 0.9; font-size: 14px;">${allEvents.length} evento${allEvents.length !== 1 ? 's' : ''}</p>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <button onclick="createEventFromEventsView()" style="background: white; border: none; color: #6f42c1; padding: 8px 12px; border-radius: 16px; cursor: pointer; font-size: 14px; font-weight: 600;" title="Crear evento">+ Evento</button>
+                    <button onclick="createEventFromEventsView()" style="background: white; border: none; color: #6f42c1; padding: 8px 12px; border-radius: 16px; cursor: pointer; font-size: 13px; font-weight: 600;" title="Crear evento">+ Evento</button>
                     <button onclick="navigateEventsWeek(-1)" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;" title="← Semana anterior">‹</button>
-                    <button onclick="window.eventsWeekOffset = 0; renderEventsView();" style="background: ${isCurrentWeek ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.15)'}; border: none; color: white; padding: 6px 10px; border-radius: 12px; cursor: pointer; font-size: 12px; font-weight: 500;">Hoy</button>
+                    <button onclick="window.eventsWeekOffset = 0; renderEventsView();" style="background: ${isCurrentWeek ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.15)'}; border: none; color: white; padding: 6px 10px; border-radius: 12px; cursor: pointer; font-size: 11px; font-weight: 500;">Hoy</button>
                     <button onclick="navigateEventsWeek(1)" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;" title="Semana siguiente →">›</button>
                 </div>
             </div>
         </div>
 
         <div style="background: #f8f9fa; padding: 10px 16px; border-radius: 8px; margin-bottom: 10px; text-align: center;">
-            <span style="font-size: 20px; font-weight: 600; color: #333;">${weekLabel}</span>
-            ${!isCurrentWeek ? `<span style="font-size: 14px; color: #666; margin-left: 8px;">(${window.eventsWeekOffset > 0 ? '+' : ''}${window.eventsWeekOffset} sem)</span>` : ''}
+            <span style="font-size: 19px; font-weight: 600; color: #333;">${weekLabel}</span>
+            ${!isCurrentWeek ? `<span style="font-size: 13px; color: #666; margin-left: 8px;">(${window.eventsWeekOffset > 0 ? '+' : ''}${window.eventsWeekOffset} sem)</span>` : ''}
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 6px;">
