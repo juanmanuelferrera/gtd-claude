@@ -23,17 +23,20 @@ let customTemplates = [];
  */
 function validateTaskData(task) {
     if (!task || typeof task !== 'object') return null;
-    
+
+    // Use sanitizeInput if available, otherwise just return the value
+    const sanitize = (typeof sanitizeInput === 'function') ? sanitizeInput : (v => v);
+
     return {
         id: task.id,
-        title: sanitizeInput(task.title || ''),
-        notes: sanitizeInput(task.notes || ''),
+        title: sanitize(task.title || ''),
+        notes: sanitize(task.notes || ''),
         images: task.images || [],
         dueDate: task.dueDate,
         dueTime: task.dueTime,
         status: task.status,
         repeat: task.repeat,
-        template: sanitizeInput(task.template || ''),
+        template: sanitize(task.template || ''),
         isEvent: Boolean(task.isEvent || (task.notes || '').toLowerCase().includes('@event')),
         createdAt: task.createdAt,
         updatedAt: task.updatedAt
