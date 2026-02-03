@@ -2325,6 +2325,7 @@ function formatWeekLabel(weekStart) {
 }
 
 function renderEventsView() {
+    console.log('📅 renderEventsView v20260203-weeks');
     const container = document.getElementById('tasks-view');
     if (!container) return;
 
@@ -2343,6 +2344,7 @@ function renderEventsView() {
     // Group by week
     const pastByWeek = groupEventsByWeek(pastEvents);
     const futureByWeek = groupEventsByWeek(futureEvents);
+    console.log('📅 Week groups - Past:', Object.keys(pastByWeek), 'Future:', Object.keys(futureByWeek));
 
     const renderEventCard = (event, isPast) => {
         const bgColor = isPast ? '#fff5f5' : '#f8f9fa';
