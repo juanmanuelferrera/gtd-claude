@@ -67,8 +67,14 @@ function markAsEvent(taskId) {
     eventTaskIds.add(taskId);
     saveEventRegistry();
     const task = tasks.find(t => t.id === taskId);
-    if (task && typeof recordAction === 'function') {
-        recordAction('edit', taskId, task.title, { ...task, isEvent: false }, { ...task, isEvent: true });
+    if (task) {
+        // Add @event to notes if not already present (for MCP compatibility)
+        if (!task.notes || !task.notes.includes('@event')) {
+            task.notes = task.notes ? task.notes + ' @event' : '@event';
+        }
+        if (typeof recordAction === 'function') {
+            recordAction('edit', taskId, task.title, { ...task, isEvent: false }, { ...task, isEvent: true });
+        }
     }
 }
 
@@ -76,8 +82,14 @@ function unmarkAsEvent(taskId) {
     eventTaskIds.delete(taskId);
     saveEventRegistry();
     const task = tasks.find(t => t.id === taskId);
-    if (task && typeof recordAction === 'function') {
-        recordAction('edit', taskId, task.title, { ...task, isEvent: true }, { ...task, isEvent: false });
+    if (task) {
+        // Remove @event from notes
+        if (task.notes) {
+            task.notes = task.notes.replace(/@event\s*/gi, '').trim();
+        }
+        if (typeof recordAction === 'function') {
+            recordAction('edit', taskId, task.title, { ...task, isEvent: true }, { ...task, isEvent: false });
+        }
     }
 }
 
@@ -242,7 +254,11 @@ async function updateTaskDate(taskId, newDate, event) {
         const today = typeof getLocalDateString === 'function' ? getLocalDateString(new Date()) : new Date().toISOString().slice(0, 10);
         if (newDate && newDate > today) {
             task.isEvent = true;
-            console.log(`📅 Task "${task.title}" set to future date - marked as Event`);
+            // Add @event to notes for MCP compatibility
+            if (!task.notes || !task.notes.includes('@event')) {
+                task.notes = task.notes ? task.notes + ' @event' : '@event';
+            }
+            console.log(`📅 Task "${task.title}" set to future date - marked as Event + @event`);
         }
 
         recordAction('edit', task.id, task.title, beforeDate, { dueDate: task.dueDate, isEvent: task.isEvent });

@@ -320,7 +320,11 @@ async function handleDrop(e) {
         const today = typeof getLocalDateString === 'function' ? getLocalDateString(new Date()) : new Date().toISOString().slice(0, 10);
         if (newDate > today) {
             window.draggedTask.isEvent = true;
-            console.log(`📅 Task "${window.draggedTask.title}" dropped on future date - marked as Event`);
+            // Add @event to notes for MCP compatibility
+            if (!window.draggedTask.notes || !window.draggedTask.notes.includes('@event')) {
+                window.draggedTask.notes = window.draggedTask.notes ? window.draggedTask.notes + ' @event' : '@event';
+            }
+            console.log(`📅 Task "${window.draggedTask.title}" dropped on future date - marked as Event + @event`);
         }
 
         // Update in memory tasks array

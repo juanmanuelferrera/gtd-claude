@@ -1128,7 +1128,8 @@ async function organizeTasksForUserAndDates(env, userId, tomorrow, dayAfter, tas
 
   for (const task of tomorrowTasks) {
     const title = (task.title || '').toLowerCase();
-    const isEvent = task.is_event || task.isEvent;
+    const notes = (task.notes || '').toLowerCase();
+    const isEvent = task.is_event || task.isEvent || notes.includes('@event');
 
     if (/programa espiritual|spiritual program/i.test(title)) {
       task.due_time = task.dueTime = '06:00';
@@ -1144,7 +1145,7 @@ async function organizeTasksForUserAndDates(env, userId, tomorrow, dayAfter, tas
     } else if (/cocinar|comer/.test(title)) {
       task.due_time = task.dueTime = '14:00';
       fixed.push(task);
-    } else if (/@bhoga/i.test(task.template || '') || /@bhoga/i.test(task.notes || '')) {
+    } else if (/@bhoga/i.test(task.template || '') || /@bhoga/i.test(notes)) {
       fixed.push(task);
     } else {
       task.due_time = task.dueTime = '';
@@ -1556,7 +1557,8 @@ async function organizeTomorrowTasks(env) {
 
   for (const task of tomorrowTasks) {
     const title = (task.title || '').toLowerCase();
-    const isEvent = task.is_event || task.isEvent;
+    const notes = (task.notes || '').toLowerCase();
+    const isEvent = task.is_event || task.isEvent || notes.includes('@event');
 
     if (/programa espiritual|spiritual program/i.test(title)) {
       task.due_time = task.dueTime = '06:00';
@@ -1573,7 +1575,7 @@ async function organizeTomorrowTasks(env) {
     } else if (/cocinar|comer/.test(title)) {
       task.due_time = task.dueTime = '14:00';
       fixed.push(task);
-    } else if (/@bhoga/i.test(task.template || '') || /@bhoga/i.test(task.notes || '')) {
+    } else if (/@bhoga/i.test(task.template || '') || /@bhoga/i.test(notes)) {
       // Bhoga (grocery) items: don't organize, leave as-is
       fixed.push(task);
     } else {
@@ -1639,8 +1641,8 @@ async function organizeTomorrowTasks(env) {
   const futureFlexible = [];
   for (const task of futureTasks) {
     const title = (task.title || '').toLowerCase();
-    const isEvent = task.is_event || task.isEvent;
     const notes = ((task.notes || '') + ' ' + (task.template || '')).toLowerCase();
+    const isEvent = task.is_event || task.isEvent || notes.includes('@event');
 
     // Skip deleted/completed
     if (task.isDeleted || task.status === 'deleted' || task.status === 'completed') {
@@ -1701,8 +1703,8 @@ async function organizeTomorrowTasks(env) {
   const backlogFlexible = [];
   for (const task of backlogTasks) {
     const title = (task.title || '').toLowerCase();
-    const isEvent = task.is_event || task.isEvent;
     const notes = ((task.notes || '') + ' ' + (task.template || '')).toLowerCase();
+    const isEvent = task.is_event || task.isEvent || notes.includes('@event');
 
     // Skip deleted/completed
     if (task.isDeleted || task.status === 'deleted' || task.status === 'completed') {
