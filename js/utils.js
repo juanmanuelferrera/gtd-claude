@@ -40,6 +40,7 @@ function sanitizeInput(input) {
         .replace(/data:text\/html/gi, '')
         .trim();
 }
+window.sanitizeInput = sanitizeInput;
 
 // Utility functions - now using centralized utilities with backward compatibility
 
