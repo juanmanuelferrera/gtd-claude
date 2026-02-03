@@ -2390,10 +2390,10 @@ function renderEventsView() {
                     </div>
                     <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
                         <button onclick="event.stopPropagation(); openIOSDateTimePicker('${event.id}', '${event.dueDate || ''}', '${event.dueTime || ''}', this)"
-                                style="background: #f0f4f8; border: 1px solid #e2e8f0; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 18px;"
+                                style="background: #f0f4f8; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 22px;"
                                 title="Cambiar fecha">📅</button>
                         <button onclick="deleteEventFromView('${event.id}')"
-                                style="background: #fff5f5; border: 1px solid #fed7d7; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 18px;"
+                                style="background: #fff5f5; border: 1px solid #fed7d7; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 22px;"
                                 title="Eliminar">🗑️</button>
                     </div>
                 </div>
@@ -2441,10 +2441,11 @@ function renderEventsView() {
                     <h2 style="margin: 0; font-size: 22px; font-weight: 700;">📅 Events</h2>
                     <p style="margin: 2px 0 0; opacity: 0.9; font-size: 15px;">${allEvents.length} evento${allEvents.length !== 1 ? 's' : ''}</p>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <button onclick="navigateEventsWeek(-1)" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 22px;" title="Semana anterior (←)">‹</button>
-                    <button onclick="window.eventsWeekOffset = 0; renderEventsView();" style="background: ${isCurrentWeek ? 'white' : 'rgba(255,255,255,0.2)'}; border: none; color: ${isCurrentWeek ? '#6f42c1' : 'white'}; padding: 8px 14px; border-radius: 16px; cursor: pointer; font-size: 14px; font-weight: 600;">Hoy</button>
-                    <button onclick="navigateEventsWeek(1)" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 22px;" title="Semana siguiente (→)">›</button>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button onclick="createEventFromEventsView()" style="background: white; border: none; color: #6f42c1; padding: 8px 12px; border-radius: 16px; cursor: pointer; font-size: 14px; font-weight: 600;" title="Crear evento">+ Evento</button>
+                    <button onclick="navigateEventsWeek(-1)" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;" title="← Semana anterior">‹</button>
+                    <button onclick="window.eventsWeekOffset = 0; renderEventsView();" style="background: ${isCurrentWeek ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.15)'}; border: none; color: white; padding: 6px 10px; border-radius: 12px; cursor: pointer; font-size: 12px; font-weight: 500;">Hoy</button>
+                    <button onclick="navigateEventsWeek(1)" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;" title="Semana siguiente →">›</button>
                 </div>
             </div>
         </div>
@@ -2492,6 +2493,26 @@ function setupEventsKeyboardNav() {
 }
 
 window.navigateEventsWeek = navigateEventsWeek;
+
+// Create event from Events view (opens modal with isEvent pre-checked)
+function createEventFromEventsView() {
+    // Open the add task modal
+    if (typeof openAddTaskModal === 'function') {
+        openAddTaskModal();
+    } else if (typeof window.openAddTaskModalMobile === 'function') {
+        window.openAddTaskModalMobile();
+    }
+
+    // Wait for modal to open, then check the event checkbox
+    setTimeout(() => {
+        const eventCheckbox = document.getElementById('newTaskIsEvent') || document.getElementById('isEventCheckbox');
+        if (eventCheckbox) {
+            eventCheckbox.checked = true;
+        }
+    }, 100);
+}
+
+window.createEventFromEventsView = createEventFromEventsView;
 
 // Open date picker for event
 function openEventDatePicker(eventId) {
