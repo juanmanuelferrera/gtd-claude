@@ -169,6 +169,11 @@ function showView(viewName, preserveDate = false) {
                 renderRepeatView();
             }
             break;
+        case 'events':
+            if (typeof renderEventsView === 'function') {
+                renderEventsView();
+            }
+            break;
         case 'undo':
             if (typeof renderUndoView === 'function') {
                 renderUndoView();
@@ -334,6 +339,11 @@ function renderCurrentView() {
         case 'repeat':
             if (typeof renderRepeatView === 'function') {
                 renderRepeatView();
+            }
+            break;
+        case 'events':
+            if (typeof renderEventsView === 'function') {
+                renderEventsView();
             }
             break;
         case 'undo':

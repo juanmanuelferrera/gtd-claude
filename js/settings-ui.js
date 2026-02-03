@@ -1651,3 +1651,453 @@ window.loadSettingsValues = function() {
     originalLoadSettingsValues();
     loadTimezoneOptions();
 };
+
+// ========== PAST EVENTS MANAGEMENT ==========
+
+// Get all past events (events with date before today)
+function getPastEvents() {
+    if (!window.tasks) return [];
+
+    const today = typeof getLocalDateString === 'function'
+        ? getLocalDateString(new Date())
+        : new Date().toISOString().slice(0, 10);
+
+    return window.tasks.filter(task => {
+        if (task.status === 'deleted') return false;
+        if (!task.isEvent) return false;
+        if (!task.dueDate) return false;
+        return task.dueDate < today;
+    }).sort((a, b) => (b.dueDate || '').localeCompare(a.dueDate || ''));
+}
+
+// Check and show past events banner
+function checkPastEvents() {
+    const pastEvents = getPastEvents();
+    const existingBanner = document.getElementById('pastEventsBanner');
+
+    // Remove existing banner if no past events
+    if (pastEvents.length === 0) {
+        if (existingBanner) existingBanner.remove();
+        return;
+    }
+
+    // Create or update banner
+    if (!existingBanner) {
+        const banner = document.createElement('div');
+        banner.id = 'pastEventsBanner';
+        banner.style.cssText = `
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            margin: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+            animation: pulse 2s infinite;
+        `;
+        banner.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 20px;">⚠️</span>
+                <span><strong>${pastEvents.length}</strong> evento${pastEvents.length > 1 ? 's' : ''} pasado${pastEvents.length > 1 ? 's' : ''}</span>
+            </div>
+            <span style="font-size: 14px;">Ver Eventos →</span>
+        `;
+        banner.onclick = () => {
+            if (typeof showView === 'function') {
+                showView('events');
+            }
+        };
+
+        // Add pulse animation
+        if (!document.getElementById('pastEventsPulseStyle')) {
+            const style = document.createElement('style');
+            style.id = 'pastEventsPulseStyle';
+            style.textContent = `
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.85; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Insert at top of tasks view
+        const tasksView = document.getElementById('tasks-view');
+        if (tasksView && tasksView.firstChild) {
+            tasksView.insertBefore(banner, tasksView.firstChild);
+        }
+    } else {
+        // Update count
+        const countSpan = existingBanner.querySelector('span:nth-of-type(2)');
+        if (countSpan) {
+            countSpan.innerHTML = `<strong>${pastEvents.length}</strong> evento${pastEvents.length > 1 ? 's' : ''} pasado${pastEvents.length > 1 ? 's' : ''}`;
+        }
+    }
+}
+
+// Open modal to manage past events
+function openPastEventsModal() {
+    const pastEvents = getPastEvents();
+
+    // Remove existing modal
+    const existing = document.getElementById('pastEventsModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'pastEventsModal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    `;
+
+    let eventsHTML = '';
+    if (pastEvents.length === 0) {
+        eventsHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay eventos pasados</p>';
+    } else {
+        eventsHTML = pastEvents.map(event => `
+            <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 8px; border-left: 4px solid #ff6b35;">
+                <div style="display: flex; justify-content: space-between; align-items: start; gap: 10px;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: 600; color: #333; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${escapeHtml(event.title || 'Sin título')}
+                        </div>
+                        <div style="font-size: 12px; color: #666;">
+                            📅 ${event.dueDate}${event.dueTime ? ' ⏰ ' + event.dueTime : ''}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                        <button onclick="movePastEventToToday('${event.id}')"
+                                style="background: #28a745; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                                title="Mover a hoy">
+                            📆 Hoy
+                        </button>
+                        <button onclick="changePastEventDate('${event.id}')"
+                                style="background: #007bff; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                                title="Cambiar fecha">
+                            📅 Fecha
+                        </button>
+                        <button onclick="deletePastEvent('${event.id}')"
+                                style="background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                                title="Eliminar">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    modal.innerHTML = `
+        <div style="background: white; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <div style="background: linear-gradient(135deg, #ff6b35, #f7931e); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; font-size: 18px;">📅 Eventos Pasados (${pastEvents.length})</h3>
+                <button onclick="closePastEventsModal()" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; line-height: 1;">×</button>
+            </div>
+            <div style="padding: 16px; max-height: 60vh; overflow-y: auto;">
+                ${eventsHTML}
+            </div>
+            <div style="padding: 12px 16px; border-top: 1px solid #e9ecef; display: flex; gap: 10px; justify-content: center;">
+                <button onclick="deleteAllPastEvents()"
+                        style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;"
+                        ${pastEvents.length === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                    🗑️ Eliminar Todos
+                </button>
+                <button onclick="closePastEventsModal()"
+                        style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Close on background click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closePastEventsModal();
+    });
+}
+
+function closePastEventsModal() {
+    const modal = document.getElementById('pastEventsModal');
+    if (modal) modal.remove();
+}
+
+// Move past event to today
+function movePastEventToToday(eventId) {
+    const task = window.tasks.find(t => t.id === eventId);
+    if (!task) return;
+
+    const today = typeof getLocalDateString === 'function'
+        ? getLocalDateString(new Date())
+        : new Date().toISOString().slice(0, 10);
+
+    task.dueDate = today;
+    task.due_date = today;
+    task.updatedAt = new Date().toISOString();
+
+    // Save changes
+    if (typeof saveTasks === 'function') saveTasks();
+    if (typeof uploadAllTasks === 'function') uploadAllTasks();
+
+    // Refresh modal and view
+    openPastEventsModal();
+    checkPastEvents();
+    if (typeof renderTodayView === 'function') renderTodayView();
+
+    console.log(`📅 Event "${task.title}" moved to today`);
+}
+
+// Change past event date
+function changePastEventDate(eventId) {
+    const task = window.tasks.find(t => t.id === eventId);
+    if (!task) return;
+
+    const newDate = prompt('Nueva fecha (YYYY-MM-DD):', task.dueDate);
+    if (!newDate || !/^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
+        if (newDate !== null) alert('Formato inválido. Usa YYYY-MM-DD');
+        return;
+    }
+
+    task.dueDate = newDate;
+    task.due_date = newDate;
+    task.updatedAt = new Date().toISOString();
+
+    // Save changes
+    if (typeof saveTasks === 'function') saveTasks();
+    if (typeof uploadAllTasks === 'function') uploadAllTasks();
+
+    // Refresh modal and view
+    openPastEventsModal();
+    checkPastEvents();
+    if (typeof renderTodayView === 'function') renderTodayView();
+
+    console.log(`📅 Event "${task.title}" date changed to ${newDate}`);
+}
+
+// Delete past event
+function deletePastEvent(eventId) {
+    const task = window.tasks.find(t => t.id === eventId);
+    if (!task) return;
+
+    if (!confirm(`¿Eliminar "${task.title}"?`)) return;
+
+    task.status = 'deleted';
+    task.isDeleted = true;
+    task.deletedAt = new Date().toISOString();
+    task.updatedAt = new Date().toISOString();
+
+    // Save changes
+    if (typeof saveTasks === 'function') saveTasks();
+    if (typeof uploadAllTasks === 'function') uploadAllTasks();
+
+    // Refresh modal and view
+    openPastEventsModal();
+    checkPastEvents();
+
+    console.log(`🗑️ Event "${task.title}" deleted`);
+}
+
+// Delete all past events
+function deleteAllPastEvents() {
+    const pastEvents = getPastEvents();
+    if (pastEvents.length === 0) return;
+
+    if (!confirm(`¿Eliminar ${pastEvents.length} evento${pastEvents.length > 1 ? 's' : ''} pasado${pastEvents.length > 1 ? 's' : ''}?`)) return;
+
+    pastEvents.forEach(event => {
+        event.status = 'deleted';
+        event.isDeleted = true;
+        event.deletedAt = new Date().toISOString();
+        event.updatedAt = new Date().toISOString();
+    });
+
+    // Save changes
+    if (typeof saveTasks === 'function') saveTasks();
+    if (typeof uploadAllTasks === 'function') uploadAllTasks();
+
+    // Refresh
+    closePastEventsModal();
+    checkPastEvents();
+
+    console.log(`🗑️ All ${pastEvents.length} past events deleted`);
+}
+
+// Export functions
+window.getPastEvents = getPastEvents;
+window.checkPastEvents = checkPastEvents;
+window.openPastEventsModal = openPastEventsModal;
+window.closePastEventsModal = closePastEventsModal;
+window.movePastEventToToday = movePastEventToToday;
+window.changePastEventDate = changePastEventDate;
+window.deletePastEvent = deletePastEvent;
+window.deleteAllPastEvents = deleteAllPastEvents;
+
+// Auto-check for past events when app loads
+setTimeout(() => {
+    if (document.getElementById('tasks-view')) {
+        checkPastEvents();
+    }
+}, 2000);
+
+// ========== EVENTS VIEW ==========
+
+function renderEventsView() {
+    const container = document.getElementById('tasks-view');
+    if (!container) return;
+
+    const today = typeof getLocalDateString === 'function'
+        ? getLocalDateString(new Date())
+        : new Date().toISOString().slice(0, 10);
+
+    // Get all events (not deleted)
+    const allEvents = (window.tasks || []).filter(t => t.isEvent && t.status !== 'deleted');
+
+    // Categorize events
+    const pastEvents = allEvents.filter(e => e.dueDate < today).sort((a, b) => (b.dueDate || '').localeCompare(a.dueDate || ''));
+    const todayEvents = allEvents.filter(e => e.dueDate === today).sort((a, b) => (a.dueTime || '').localeCompare(b.dueTime || ''));
+    const futureEvents = allEvents.filter(e => e.dueDate > today).sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''));
+
+    const renderEventCard = (event, isPast) => {
+        const bgColor = isPast ? '#fff5f5' : '#f8f9fa';
+        const borderColor = isPast ? '#dc3545' : (event.dueDate === today ? '#28a745' : '#007bff');
+
+        return `
+            <div style="background: ${bgColor}; border-radius: 8px; padding: 12px; margin-bottom: 8px; border-left: 4px solid ${borderColor};">
+                <div style="display: flex; justify-content: space-between; align-items: start; gap: 10px;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: 600; color: #333; margin-bottom: 4px;">
+                            ${escapeHtml(event.title || 'Sin título')}
+                        </div>
+                        <div style="font-size: 12px; color: #666;">
+                            📅 ${event.dueDate}${event.dueTime ? ' ⏰ ' + event.dueTime : ''}
+                        </div>
+                        ${event.notes ? `<div style="font-size: 11px; color: #888; margin-top: 4px;">${escapeHtml(event.notes.substring(0, 50))}${event.notes.length > 50 ? '...' : ''}</div>` : ''}
+                    </div>
+                    <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                        ${isPast ? `
+                            <button onclick="movePastEventToToday('${event.id}')"
+                                    style="background: #28a745; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                                    title="Mover a hoy">
+                                Hoy
+                            </button>
+                        ` : ''}
+                        <button onclick="openEventDatePicker('${event.id}')"
+                                style="background: #007bff; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                                title="Cambiar fecha">
+                            📅
+                        </button>
+                        <button onclick="deleteEventFromView('${event.id}')"
+                                style="background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                                title="Eliminar">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    const renderSection = (title, events, isPast, color) => {
+        if (events.length === 0) return '';
+        return `
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid ${color};">
+                    <span style="font-size: 16px; font-weight: 700; color: ${color};">${title}</span>
+                    <span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600;">${events.length}</span>
+                    ${isPast && events.length > 0 ? `
+                        <button onclick="deleteAllPastEvents()" style="margin-left: auto; background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">
+                            Eliminar todos
+                        </button>
+                    ` : ''}
+                </div>
+                ${events.map(e => renderEventCard(e, isPast)).join('')}
+            </div>
+        `;
+    };
+
+    container.innerHTML = `
+        <div style="padding: 16px 20px; background: linear-gradient(135deg, #6f42c1, #563d7c); color: white; border-radius: 12px; margin-bottom: 16px;">
+            <h2 style="margin: 0; font-size: 20px; font-weight: 700;">📅 Events</h2>
+            <p style="margin: 4px 0 0; opacity: 0.9; font-size: 14px;">${allEvents.length} evento${allEvents.length !== 1 ? 's' : ''} total</p>
+        </div>
+
+        ${pastEvents.length > 0 ? `
+            <div style="background: #fff5f5; border: 1px solid #f5c6cb; border-radius: 8px; padding: 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 24px;">⚠️</span>
+                <div>
+                    <strong style="color: #721c24;">${pastEvents.length} evento${pastEvents.length > 1 ? 's' : ''} pasado${pastEvents.length > 1 ? 's' : ''}</strong>
+                    <div style="font-size: 12px; color: #856404;">Revisa y actualiza o elimina</div>
+                </div>
+            </div>
+        ` : ''}
+
+        ${renderSection('⚠️ Pasados', pastEvents, true, '#dc3545')}
+        ${renderSection('📍 Hoy', todayEvents, false, '#28a745')}
+        ${renderSection('🔮 Futuros', futureEvents, false, '#007bff')}
+
+        ${allEvents.length === 0 ? `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <div style="font-size: 48px; margin-bottom: 16px;">📅</div>
+                <h3>No hay eventos</h3>
+                <p style="color: #999;">Los eventos se crean marcando "Es un evento" al crear una tarea</p>
+            </div>
+        ` : ''}
+    `;
+}
+
+// Open date picker for event
+function openEventDatePicker(eventId) {
+    const task = window.tasks.find(t => t.id === eventId);
+    if (!task) return;
+
+    const newDate = prompt('Nueva fecha (YYYY-MM-DD):', task.dueDate);
+    if (!newDate || !/^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
+        if (newDate !== null) alert('Formato inválido. Usa YYYY-MM-DD');
+        return;
+    }
+
+    task.dueDate = newDate;
+    task.due_date = newDate;
+    task.updatedAt = new Date().toISOString();
+
+    if (typeof saveTasks === 'function') saveTasks();
+    if (typeof uploadAllTasks === 'function') uploadAllTasks();
+
+    renderEventsView();
+    checkPastEvents();
+}
+
+// Delete event from events view
+function deleteEventFromView(eventId) {
+    const task = window.tasks.find(t => t.id === eventId);
+    if (!task) return;
+
+    if (!confirm(`¿Eliminar "${task.title}"?`)) return;
+
+    task.status = 'deleted';
+    task.isDeleted = true;
+    task.deletedAt = new Date().toISOString();
+    task.updatedAt = new Date().toISOString();
+
+    if (typeof saveTasks === 'function') saveTasks();
+    if (typeof uploadAllTasks === 'function') uploadAllTasks();
+
+    renderEventsView();
+    checkPastEvents();
+}
+
+window.renderEventsView = renderEventsView;
+window.openEventDatePicker = openEventDatePicker;
+window.deleteEventFromView = deleteEventFromView;
