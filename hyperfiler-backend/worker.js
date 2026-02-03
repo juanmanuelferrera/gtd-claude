@@ -802,25 +802,43 @@ async function processTimezoneAwareCron(env) {
 function getLocalHour(utcHour, timezone) {
   // Timezone offsets (simplified - doesn't account for DST perfectly)
   const offsets = {
-    'Europe/Madrid': 1,        // CET
+    // Europe
     'Europe/London': 0,        // GMT
+    'Europe/Madrid': 1,        // CET
     'Europe/Paris': 1,         // CET
     'Europe/Berlin': 1,        // CET
     'Europe/Rome': 1,          // CET
+    'Europe/Amsterdam': 1,     // CET
     'Europe/Moscow': 3,        // MSK
-    'Asia/Kolkata': 5.5,       // IST
-    'Asia/Tokyo': 9,           // JST
-    'Asia/Shanghai': 8,        // CST
-    'Asia/Singapore': 8,       // SGT
+    // Asia
     'Asia/Dubai': 4,           // GST
-    'Australia/Sydney': 11,    // AEDT
-    'Australia/Melbourne': 11, // AEDT
+    'Asia/Kolkata': 5.5,       // IST
+    'Asia/Bangkok': 7,         // ICT
+    'Asia/Singapore': 8,       // SGT
+    'Asia/Hong_Kong': 8,       // HKT
+    'Asia/Shanghai': 8,        // CST
+    'Asia/Tokyo': 9,           // JST
+    'Asia/Seoul': 9,           // KST
+    'Asia/Jerusalem': 2,       // IST
+    // Americas
     'America/New_York': -5,    // EST
+    'America/Toronto': -5,     // EST
     'America/Chicago': -6,     // CST
     'America/Denver': -7,      // MST
     'America/Los_Angeles': -8, // PST
-    'America/Sao_Paulo': -3,   // BRT
     'America/Mexico_City': -6, // CST
+    'America/Bogota': -5,      // COT
+    'America/Lima': -5,        // PET
+    'America/Sao_Paulo': -3,   // BRT
+    'America/Buenos_Aires': -3, // ART
+    // Africa
+    'Africa/Cairo': 2,         // EET
+    'Africa/Lagos': 1,         // WAT
+    'Africa/Johannesburg': 2,  // SAST
+    // Oceania
+    'Australia/Sydney': 11,    // AEDT
+    'Australia/Melbourne': 11, // AEDT
+    'Australia/Perth': 8,      // AWST
     'Pacific/Auckland': 13,    // NZDT
     'UTC': 0,
   };
@@ -2175,25 +2193,43 @@ async function handleAuthMe(request, env, corsHeaders) {
 
 // Supported timezones with friendly city names
 const SUPPORTED_TIMEZONES = {
-  'Europe/Madrid': 'Madrid (Spain)',
+  // Europe
   'Europe/London': 'London (UK)',
+  'Europe/Madrid': 'Madrid (Spain)',
   'Europe/Paris': 'Paris (France)',
   'Europe/Berlin': 'Berlin (Germany)',
   'Europe/Rome': 'Rome (Italy)',
+  'Europe/Amsterdam': 'Amsterdam (Netherlands)',
   'Europe/Moscow': 'Moscow (Russia)',
-  'Asia/Kolkata': 'Mumbai / Delhi (India)',
-  'Asia/Tokyo': 'Tokyo (Japan)',
-  'Asia/Shanghai': 'Beijing / Shanghai (China)',
-  'Asia/Singapore': 'Singapore',
+  // Asia
   'Asia/Dubai': 'Dubai (UAE)',
-  'Australia/Sydney': 'Sydney (Australia)',
-  'Australia/Melbourne': 'Melbourne (Australia)',
+  'Asia/Kolkata': 'Mumbai / Delhi (India)',
+  'Asia/Bangkok': 'Bangkok (Thailand)',
+  'Asia/Singapore': 'Singapore',
+  'Asia/Hong_Kong': 'Hong Kong',
+  'Asia/Shanghai': 'Shanghai (China)',
+  'Asia/Tokyo': 'Tokyo (Japan)',
+  'Asia/Seoul': 'Seoul (Korea)',
+  'Asia/Jerusalem': 'Tel Aviv (Israel)',
+  // Americas
   'America/New_York': 'New York (USA East)',
   'America/Chicago': 'Chicago (USA Central)',
   'America/Denver': 'Denver (USA Mountain)',
   'America/Los_Angeles': 'Los Angeles (USA West)',
-  'America/Sao_Paulo': 'São Paulo (Brazil)',
+  'America/Toronto': 'Toronto (Canada)',
   'America/Mexico_City': 'Mexico City (Mexico)',
+  'America/Bogota': 'Bogotá (Colombia)',
+  'America/Lima': 'Lima (Peru)',
+  'America/Sao_Paulo': 'São Paulo (Brazil)',
+  'America/Buenos_Aires': 'Buenos Aires (Argentina)',
+  // Africa & Middle East
+  'Africa/Cairo': 'Cairo (Egypt)',
+  'Africa/Lagos': 'Lagos (Nigeria)',
+  'Africa/Johannesburg': 'Johannesburg (South Africa)',
+  // Oceania
+  'Australia/Sydney': 'Sydney (Australia)',
+  'Australia/Melbourne': 'Melbourne (Australia)',
+  'Australia/Perth': 'Perth (Australia)',
   'Pacific/Auckland': 'Auckland (New Zealand)',
 };
 

@@ -2210,6 +2210,52 @@ setInterval(() => {
 
 // ========== EVENTS VIEW ==========
 
+// Get week number and year from date
+function getWeekInfo(dateStr) {
+    const date = new Date(dateStr + 'T00:00:00');
+    const startOfYear = new Date(date.getFullYear(), 0, 1);
+    const days = Math.floor((date - startOfYear) / (24 * 60 * 60 * 1000));
+    const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
+    return { week: weekNumber, year: date.getFullYear() };
+}
+
+// Get week start date (Monday)
+function getWeekStart(dateStr) {
+    const date = new Date(dateStr + 'T00:00:00');
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(date.setDate(diff));
+    return monday.toISOString().slice(0, 10);
+}
+
+// Group events by week
+function groupEventsByWeek(events) {
+    const groups = {};
+    events.forEach(event => {
+        if (!event.dueDate) return;
+        const weekStart = getWeekStart(event.dueDate);
+        if (!groups[weekStart]) {
+            groups[weekStart] = [];
+        }
+        groups[weekStart].push(event);
+    });
+    return groups;
+}
+
+// Format week label
+function formatWeekLabel(weekStart) {
+    const start = new Date(weekStart + 'T00:00:00');
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+
+    const options = { day: 'numeric', month: 'short' };
+    const startStr = start.toLocaleDateString('es-ES', options);
+    const endStr = end.toLocaleDateString('es-ES', options);
+
+    const { week } = getWeekInfo(weekStart);
+    return `Semana ${week}: ${startStr} - ${endStr}`;
+}
+
 function renderEventsView() {
     const container = document.getElementById('tasks-view');
     if (!container) return;
@@ -2226,37 +2272,41 @@ function renderEventsView() {
     const todayEvents = allEvents.filter(e => e.dueDate === today).sort((a, b) => (a.dueTime || '').localeCompare(b.dueTime || ''));
     const futureEvents = allEvents.filter(e => e.dueDate > today).sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''));
 
+    // Group by week
+    const pastByWeek = groupEventsByWeek(pastEvents);
+    const futureByWeek = groupEventsByWeek(futureEvents);
+
     const renderEventCard = (event, isPast) => {
         const bgColor = isPast ? '#fff5f5' : '#f8f9fa';
         const borderColor = isPast ? '#dc3545' : (event.dueDate === today ? '#28a745' : '#007bff');
+        const dayName = new Date(event.dueDate + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
 
         return `
-            <div style="background: ${bgColor}; border-radius: 8px; padding: 12px; margin-bottom: 8px; border-left: 4px solid ${borderColor};">
-                <div style="display: flex; justify-content: space-between; align-items: start; gap: 10px;">
+            <div style="background: ${bgColor}; border-radius: 8px; padding: 10px 12px; margin-bottom: 6px; border-left: 4px solid ${borderColor};">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
                     <div style="flex: 1; min-width: 0;">
-                        <div style="font-weight: 600; color: #333; margin-bottom: 4px;">
+                        <div style="font-weight: 600; color: #333; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                             ${escapeHtml(event.title || 'Sin título')}
                         </div>
-                        <div style="font-size: 12px; color: #666;">
-                            📅 ${event.dueDate}${event.dueTime ? ' ⏰ ' + event.dueTime : ''}
+                        <div style="font-size: 11px; color: #666; margin-top: 2px;">
+                            ${dayName}${event.dueTime ? ' · ' + event.dueTime : ''}
                         </div>
-                        ${event.notes ? `<div style="font-size: 11px; color: #888; margin-top: 4px;">${escapeHtml(event.notes.substring(0, 50))}${event.notes.length > 50 ? '...' : ''}</div>` : ''}
                     </div>
-                    <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                    <div style="display: flex; gap: 4px; flex-shrink: 0;">
                         ${isPast ? `
                             <button onclick="movePastEventToToday('${event.id}')"
-                                    style="background: #28a745; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                                    style="background: #28a745; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;"
                                     title="Mover a hoy">
                                 Hoy
                             </button>
                         ` : ''}
-                        <button onclick="openEventDatePicker('${event.id}')"
-                                style="background: #007bff; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                        <button onclick="openEventCalendarPicker(event, '${event.id}')"
+                                style="background: none; border: 1px solid #dee2e6; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 14px;"
                                 title="Cambiar fecha">
                             📅
                         </button>
                         <button onclick="deleteEventFromView('${event.id}')"
-                                style="background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                                style="background: none; border: 1px solid #dee2e6; color: #dc3545; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 14px;"
                                 title="Eliminar">
                             🗑️
                         </button>
@@ -2266,20 +2316,50 @@ function renderEventsView() {
         `;
     };
 
-    const renderSection = (title, events, isPast, color) => {
-        if (events.length === 0) return '';
+    const renderWeekGroup = (weekStart, events, isPast, color) => {
+        const weekLabel = formatWeekLabel(weekStart);
         return `
-            <div style="margin-bottom: 20px;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid ${color};">
+            <div style="margin-bottom: 16px;">
+                <div style="font-size: 13px; font-weight: 600; color: ${color}; margin-bottom: 8px; padding: 4px 8px; background: ${isPast ? '#fff5f5' : '#f0f7ff'}; border-radius: 4px;">
+                    ${weekLabel} (${events.length})
+                </div>
+                ${events.sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || '')).map(e => renderEventCard(e, isPast)).join('')}
+            </div>
+        `;
+    };
+
+    const renderSection = (title, eventsByWeek, isPast, color) => {
+        const weeks = Object.keys(eventsByWeek).sort((a, b) => isPast ? b.localeCompare(a) : a.localeCompare(b));
+        if (weeks.length === 0) return '';
+
+        const totalCount = weeks.reduce((sum, w) => sum + eventsByWeek[w].length, 0);
+
+        return `
+            <div style="margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid ${color};">
                     <span style="font-size: 16px; font-weight: 700; color: ${color};">${title}</span>
-                    <span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600;">${events.length}</span>
-                    ${isPast && events.length > 0 ? `
+                    <span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600;">${totalCount}</span>
+                    ${isPast ? `
                         <button onclick="deleteAllPastEvents()" style="margin-left: auto; background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">
                             Eliminar todos
                         </button>
                     ` : ''}
                 </div>
-                ${events.map(e => renderEventCard(e, isPast)).join('')}
+                ${weeks.map(w => renderWeekGroup(w, eventsByWeek[w], isPast, color)).join('')}
+            </div>
+        `;
+    };
+
+    // Today section (no week grouping needed)
+    const renderTodaySection = () => {
+        if (todayEvents.length === 0) return '';
+        return `
+            <div style="margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #28a745;">
+                    <span style="font-size: 16px; font-weight: 700; color: #28a745;">📍 Hoy</span>
+                    <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600;">${todayEvents.length}</span>
+                </div>
+                ${todayEvents.map(e => renderEventCard(e, false)).join('')}
             </div>
         `;
     };
@@ -2300,9 +2380,9 @@ function renderEventsView() {
             </div>
         ` : ''}
 
-        ${renderSection('⚠️ Pasados', pastEvents, true, '#dc3545')}
-        ${renderSection('📍 Hoy', todayEvents, false, '#28a745')}
-        ${renderSection('🔮 Futuros', futureEvents, false, '#007bff')}
+        ${renderSection('⚠️ Pasados', pastByWeek, true, '#dc3545')}
+        ${renderTodaySection()}
+        ${renderSection('🔮 Futuros', futureByWeek, false, '#007bff')}
 
         ${allEvents.length === 0 ? `
             <div style="text-align: center; padding: 40px; color: #666;">
