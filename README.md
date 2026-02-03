@@ -57,6 +57,71 @@ HyperFiler Pro is a **revolutionary task management system** that combines the p
 - **Smart Search**: Find any task in milliseconds
 - **Statistics Dashboard**: Comprehensive productivity metrics
 
+## 🤖 MCP Integration (Model Context Protocol)
+
+HyperFiler can be controlled directly from **Claude Code** via MCP, enabling natural language task management from the terminal.
+
+### What You Can Do
+
+```bash
+# From Claude Code terminal:
+"move all @book tasks to tomorrow"
+"show today's schedule"
+"create task: call dentist @health due tomorrow 10:00"
+"complete all tasks containing 'email'"
+```
+
+### Architecture
+
+```
+Claude Code
+    ↓ (MCP Protocol - stdio)
+hf_mcp.py (Python MCP server using FastMCP)
+    ↓ (HTTP REST API)
+Cloudflare Workers (hyperfiler-api)
+    ↓
+Cloudflare D1 (SQLite)
+```
+
+### MCP Tools Available
+
+| Tool | Description |
+|------|-------------|
+| `hf_list_tasks` | List tasks with filters (status, date, @project) |
+| `hf_create_task` | Create new task with title, notes, date, time |
+| `hf_update_task` | Update any task field |
+| `hf_complete_task` | Mark task as completed |
+| `hf_delete_task` | Delete a task |
+| `hf_search_tasks` | Search tasks by text |
+| `hf_list_templates` | List all @project tags |
+
+### Smart Auto-Scheduling
+
+- **Cron job at 1am**: Automatically organizes daily tasks following rules defined in a prompt
+- **Protected time blocks**: Certain slots are fixed (spiritual program 6-7am, lunch at 14:00, etc.)
+- **Priority rules**: @health first, legal deadlines before household chores, etc.
+- **On-demand organizing**: Run `/organize` skill anytime from terminal
+- Tasks are built around protected blocks — you then do final adjustments, but with all rules applied it's just a matter of easy decisions
+
+### Setup MCP Server
+
+```bash
+cd mcp-server
+python3 -m venv .venv
+source .venv/bin/activate
+pip install mcp fastmcp
+
+# Configure in .mcp.json:
+{
+  "mcpServers": {
+    "hyperfiler": {
+      "command": "/path/to/mcp-server/.venv/bin/python3",
+      "args": ["/path/to/mcp-server/hf_mcp.py"]
+    }
+  }
+}
+```
+
 ## 🚀 Version 2.0 - What's New
 
 ### 🌟 Major Updates
@@ -102,6 +167,7 @@ Entry    Projects    Views     Review    Focus
 | **Database** | Cloudflare D1 (SQLite) | Distributed data storage |
 | **Hosting** | Cloudflare Pages | Global CDN delivery |
 | **PWA** | Service Workers | Offline functionality |
+| **MCP** | Python + FastMCP | Claude Code integration |
 
 </div>
 
@@ -123,8 +189,8 @@ Entry    Projects    Views     Review    Focus
 
 ### Option 3: Self-Host
 ```bash
-git clone https://github.com/yourusername/hyperfiler-pro
-cd hyperfiler-pro
+git clone https://github.com/juanmanuelferrera/hyperfiler
+cd hyperfiler
 wrangler pages deploy . --project-name=hyperfiler
 ```
 
@@ -149,14 +215,6 @@ wrangler pages deploy . --project-name=hyperfiler
 - **Open Source**: Fully auditable codebase
 - **GDPR Compliant**: Complete data ownership and portability
 
-## 🌟 User Testimonials
-
-> "HyperFiler Pro transformed my chaotic task list into a productivity powerhouse. The GTD implementation is flawless!" - **Sarah K., Product Manager**
-
-> "Finally, a task manager that keeps up with my pace. The offline mode is a game-changer." - **Miguel R., Software Engineer**
-
-> "The weekly review feature alone is worth it. I've never been more organized." - **David L., Entrepreneur**
-
 ## 🤝 Contributing
 
 We welcome contributions that enhance the GTD experience:
@@ -171,7 +229,7 @@ We welcome contributions that enhance the GTD experience:
 ### 🚀 Development Setup
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/hyperfiler-pro
+git clone https://github.com/juanmanuelferrera/hyperfiler
 
 # Install dependencies
 npm install
@@ -179,8 +237,8 @@ npm install
 # Start development server
 wrangler dev
 
-# Run tests
-npm test
+# Deploy
+wrangler pages deploy . --project-name=hyperfiler
 ```
 
 ## 📊 Performance Metrics
@@ -195,20 +253,17 @@ npm test
 
 ## 🗺️ Roadmap
 
-### Q1 2025
-- [ ] AI-powered task suggestions
-- [ ] Voice input support
-- [ ] Team collaboration features
+### Completed
+- [x] MCP integration for Claude Code control
+- [x] Auto-scheduling cron with smart rules
+- [x] Protected time blocks system
+- [x] Priority-based task organization
 
-### Q2 2025
-- [ ] Calendar integration
+### Planned
+- [ ] Calendar integration (Google, Apple)
 - [ ] Email capture
-- [ ] Advanced reporting
-
-### Q3 2025
-- [ ] Native mobile apps
+- [ ] Org-mode export/import
 - [ ] API webhooks
-- [ ] Plugin system
 
 ## 📄 License
 
@@ -227,6 +282,6 @@ MIT License - See [LICENSE](LICENSE) file for details
 
 **Built with ❤️ for productivity enthusiasts worldwide**
 
-[🚀 Start Your GTD Journey](https://hyperfiler.pro/hyperfiler-pro.html) | [⭐ Star on GitHub](https://github.com/yourusername/hyperfiler-pro) | [💬 Join Community](https://discord.gg/hyperfiler)
+[🚀 Start Your GTD Journey](https://hyperfiler.pro/hyperfiler-pro.html) | [⭐ Star on GitHub](https://github.com/juanmanuelferrera/hyperfiler)
 
 </div>
