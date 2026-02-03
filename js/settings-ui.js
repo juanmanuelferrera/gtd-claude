@@ -2424,7 +2424,6 @@ function renderEventsView() {
                     <div style="display: flex; align-items: baseline; gap: 6px;">
                         <span style="font-weight: 700; font-size: 14px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${dayNames[dayIndex]}</span>
                         <span style="font-weight: 700; font-size: 16px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${dayNum}</span>
-                        <span style="font-size: 11px; color: #666;">${monthName}</span>
                         ${isToday ? '<span style="font-size: 10px; background: #28a745; color: white; padding: 1px 6px; border-radius: 8px; margin-left: 4px;">Hoy</span>' : ''}
                     </div>
                 </div>
