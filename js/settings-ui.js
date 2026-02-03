@@ -872,6 +872,8 @@ function saveWeekStart() {
         }
     }
 }
+window.saveWeekStart = saveWeekStart;
+
 function getWeekStartDay() {
     const saved = localStorage.getItem('weekStartDay');
     return saved !== null ? parseInt(saved) : 1; // Default to Monday (1)
