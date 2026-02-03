@@ -43,60 +43,71 @@ function sanitizeInput(input) {
 
 // Utility functions - now using centralized utilities with backward compatibility
 
-// Delegate to DateUtils for consistency
+// Delegate to DateUtils for consistency (with fallback if DateUtils not loaded)
 function getLocalDateString(date = new Date()) {
-    return DateUtils.getLocalDateString ? DateUtils.getLocalDateString(date) : (() => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    })();
+    if (typeof DateUtils !== 'undefined' && DateUtils.getLocalDateString) {
+        return DateUtils.getLocalDateString(date);
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 function getTasksForDate(dateStr) {
     const tasksArray = window.tasks || tasks || [];
-    return TaskUtils.getTasksForDate ? 
-        TaskUtils.getTasksForDate(tasksArray, dateStr) :
-        tasksArray.filter(task => task.dueDate === dateStr && task.status !== 'deleted');
+    if (typeof TaskUtils !== 'undefined' && TaskUtils.getTasksForDate) {
+        return TaskUtils.getTasksForDate(tasksArray, dateStr);
+    }
+    return tasksArray.filter(task => task.dueDate === dateStr && task.status !== 'deleted');
 }
 
 function formatDate(dateStr) {
-    return DateUtils.formatDate ? DateUtils.formatDate(dateStr) : (() => {
-        if (!dateStr) return 'No date';
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric'
-        });
-    })();
+    if (typeof DateUtils !== 'undefined' && DateUtils.formatDate) {
+        return DateUtils.formatDate(dateStr);
+    }
+    if (!dateStr) return 'No date';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric'
+    });
 }
 
 
 function formatTime(timeStr) {
-    return DateUtils.formatTime ? DateUtils.formatTime(timeStr) : (() => {
-        if (!timeStr) return '';
-        return timeStr; // Display in 24-hour format
-    })();
+    if (typeof DateUtils !== 'undefined' && DateUtils.formatTime) {
+        return DateUtils.formatTime(timeStr);
+    }
+    if (!timeStr) return '';
+    return timeStr; // Display in 24-hour format
 }
 
 // Delegate to TaskUtils
 function makeLinksClickable(text) {
-    return TaskUtils.makeLinksClickable ? TaskUtils.makeLinksClickable(text) : (() => {
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
-        return text.replace(urlRegex, '<a href="$1" target="_blank" onclick="event.stopPropagation()">$1</a>');
-    })();
+    if (typeof TaskUtils !== 'undefined' && TaskUtils.makeLinksClickable) {
+        return TaskUtils.makeLinksClickable(text);
+    }
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, '<a href="$1" target="_blank" onclick="event.stopPropagation()">$1</a>');
 }
 
 function extractTagsAndCleanText(text) {
-    return TaskUtils.extractTagsAndCleanText ? TaskUtils.extractTagsAndCleanText(text) : {
+    if (typeof TaskUtils !== 'undefined' && TaskUtils.extractTagsAndCleanText) {
+        return TaskUtils.extractTagsAndCleanText(text);
+    }
+    return {
         cleanText: text,
         tags: []
     };
 }
 
 function hasTaskTags(task) {
-    return TaskUtils.hasTaskTags ? TaskUtils.hasTaskTags(task) : false;
+    if (typeof TaskUtils !== 'undefined' && TaskUtils.hasTaskTags) {
+        return TaskUtils.hasTaskTags(task);
+    }
+    return false;
 }
 
 // Global variables needed for module communication
