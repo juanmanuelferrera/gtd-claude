@@ -2372,8 +2372,8 @@ function renderEventsView() {
         ? getLocalDateString(new Date())
         : new Date().toISOString().slice(0, 10);
 
-    // Get all events (not deleted)
-    const allEvents = (window.tasks || []).filter(t => t.isEvent && t.status !== 'deleted');
+    // Get all events (not deleted) - use isTaskEvent to catch both isEvent flag and @event in notes
+    const allEvents = (window.tasks || []).filter(t => isTaskEvent(t) && t.status !== 'deleted');
 
     // Calculate current week's Monday based on offset
     const currentWeekMonday = getWeekStart(today);

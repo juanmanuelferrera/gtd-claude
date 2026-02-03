@@ -1343,9 +1343,10 @@ async function carryOverYesterdayTasks(env) {
       continue;
     }
 
-    // Non-compra: skip completed and events
+    // Non-compra: skip completed and events (check both isEvent flag and @event in notes)
     if (t.status === 'completed') continue;
-    if (t.isEvent) continue;
+    const tNotes = (t.notes || '').toLowerCase();
+    if (t.isEvent || t.is_event || tNotes.includes('@event')) continue;
 
     t.dueDate = t.due_date = today;
     t.dueTime = t.due_time = '';

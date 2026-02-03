@@ -176,15 +176,15 @@ class TaskUtils {
      */
     static getTaskCardClass(task) {
         const isOverdue = this.isOverdue(task);
-        const isEvent = task.isEvent;
+        const isEvent = this.isTaskEvent(task);
         let cardClass = `task-card ${task.status}`;
-        
+
         if (isEvent) {
             cardClass += ' event';
         } else if (isOverdue) {
             cardClass += ' overdue';
         }
-        
+
         return cardClass;
     }
 
