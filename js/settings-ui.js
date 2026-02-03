@@ -2303,26 +2303,23 @@ function getWeekInfo(dateStr) {
 function getWeekStart(dateStr) {
     const [year, month, day] = dateStr.split('-').map(Number);
     const date = new Date(year, month - 1, day, 12, 0, 0); // Use noon to avoid timezone issues
-    const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
-    const weekStartDay = getWeekStartDay(); // 0 = Sunday, 1 = Monday
+    const currentDayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const weekStartDay = Number(getWeekStartDay()); // 0 = Sunday, 1 = Monday
 
-    console.log('🗓️ getWeekStart called:', { dateStr, dayOfWeek, weekStartDay, setting: localStorage.getItem('weekStartDay') });
+    console.log('🗓️ getWeekStart input:', { dateStr, currentDayOfWeek, weekStartDay, rawSetting: localStorage.getItem('weekStartDay') });
 
-    // Calculate days to subtract to get to week start
-    let diff;
-    if (weekStartDay === 0) {
-        // Week starts on Sunday
-        diff = -dayOfWeek;
-    } else {
-        // Week starts on Monday
-        diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    }
+    // Calculate how many days to go back to reach the week start
+    // Formula: (currentDay - startDay + 7) % 7 gives days since week start
+    let daysSinceWeekStart = (currentDayOfWeek - weekStartDay + 7) % 7;
 
-    date.setDate(date.getDate() + diff);
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    console.log('🗓️ getWeekStart result:', `${y}-${m}-${d}`);
+    // Go back that many days
+    const weekStartDate = new Date(year, month - 1, day - daysSinceWeekStart, 12, 0, 0);
+
+    const y = weekStartDate.getFullYear();
+    const m = String(weekStartDate.getMonth() + 1).padStart(2, '0');
+    const d = String(weekStartDate.getDate()).padStart(2, '0');
+
+    console.log('🗓️ getWeekStart result:', `${y}-${m}-${d}`, 'daysSinceWeekStart:', daysSinceWeekStart);
     return `${y}-${m}-${d}`;
 }
 
