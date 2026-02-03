@@ -1942,10 +1942,12 @@ async function loadAutoOrganizeState() {
             if (container) container.style.display = 'block';
             if (select) select.value = data.timezone;
             if (statusSpan) statusSpan.innerHTML = '✅ Active';
+            window.autoOrganizeEnabled = true;
         } else {
             checkbox.checked = false;
             if (container) container.style.display = 'none';
             if (statusSpan) statusSpan.innerHTML = '';
+            window.autoOrganizeEnabled = false;
         }
     } catch (e) { console.error('Error loading auto-organize state:', e); }
 }

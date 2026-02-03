@@ -657,9 +657,13 @@ async function saveTaskEdit() {
         const dateValue = document.getElementById('editTaskDateOnly').value;
         const timeValue = document.getElementById('editTaskTimeOnly').value;
         
-        // If no date provided, send to backlog (2099-01-01) for new tasks
+        // If no date provided:
+        // - If auto-organize is ON: send to backlog (2099-01-01) so cron can pull it
+        // - If auto-organize is OFF: send to today (otherwise task would be invisible/lost)
         const BACKLOG_DATE = '2099-01-01';
-        const dueDate = dateValue || (currentEditTaskId ? null : BACKLOG_DATE);
+        const todayDate = new Date().toISOString().slice(0, 10);
+        const defaultDate = window.autoOrganizeEnabled ? BACKLOG_DATE : todayDate;
+        const dueDate = dateValue || (currentEditTaskId ? null : defaultDate);
         const dueTime = timeValue || null;
         
         if (currentEditTaskId) {

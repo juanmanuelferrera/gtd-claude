@@ -91,6 +91,11 @@ function initializeSimpleSync() {
     }).catch(error => {
         console.warn('📥 Initial download/upload failed:', error);
     });
+
+    // Load auto-organize state early (needed for task creation logic)
+    if (typeof loadAutoOrganizeState === 'function') {
+        loadAutoOrganizeState().catch(e => console.warn('Failed to load auto-organize state:', e));
+    }
     downloadAllLists().catch(error => {
         console.warn('📥 Initial lists download failed:', error);
     });
