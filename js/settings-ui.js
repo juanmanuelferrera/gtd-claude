@@ -1838,10 +1838,28 @@ function getPastEvents() {
     }).sort((a, b) => (b.dueDate || '').localeCompare(a.dueDate || ''));
 }
 
+// Update the badge on Events nav button
+function updateEventsBadge() {
+    const pastEvents = getPastEvents();
+    const badge = document.getElementById('pastEventsBadge');
+
+    if (!badge) return;
+
+    if (pastEvents.length > 0) {
+        badge.textContent = pastEvents.length;
+        badge.style.display = 'block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
 // Check and show past events banner
 function checkPastEvents() {
     const pastEvents = getPastEvents();
     const existingBanner = document.getElementById('pastEventsBanner');
+
+    // Update badge on nav button
+    updateEventsBadge();
 
     // Remove existing banner if no past events
     if (pastEvents.length === 0) {
@@ -2105,6 +2123,7 @@ function deleteAllPastEvents() {
 // Export functions
 window.getPastEvents = getPastEvents;
 window.checkPastEvents = checkPastEvents;
+window.updateEventsBadge = updateEventsBadge;
 window.openPastEventsModal = openPastEventsModal;
 window.closePastEventsModal = closePastEventsModal;
 window.movePastEventToToday = movePastEventToToday;
@@ -2114,10 +2133,14 @@ window.deleteAllPastEvents = deleteAllPastEvents;
 
 // Auto-check for past events when app loads
 setTimeout(() => {
-    if (document.getElementById('tasks-view')) {
-        checkPastEvents();
-    }
+    checkPastEvents();
+    updateEventsBadge();
 }, 2000);
+
+// Also update badge periodically in case tasks change
+setInterval(() => {
+    updateEventsBadge();
+}, 30000); // Every 30 seconds
 
 // ========== EVENTS VIEW ==========
 
