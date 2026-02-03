@@ -1978,7 +1978,7 @@ function getPastEvents() {
 
     return window.tasks.filter(task => {
         if (task.status === 'deleted') return false;
-        if (!task.isEvent) return false;
+        if (!isTaskEvent(task)) return false;
         if (!task.dueDate) return false;
         return task.dueDate < today;
     }).sort((a, b) => (b.dueDate || '').localeCompare(a.dueDate || ''));

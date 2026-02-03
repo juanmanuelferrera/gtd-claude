@@ -137,7 +137,11 @@ class DateUtils {
      * Check if a date is overdue (past and task is pending)
      */
     static isOverdue(task) {
-        return this.isPast(task.dueDate) && task.status === 'pending' && !task.isEvent;
+        // Use TaskUtils.isTaskEvent if available, otherwise check both isEvent and @event
+        const isEvent = (typeof TaskUtils !== 'undefined' && TaskUtils.isTaskEvent)
+            ? TaskUtils.isTaskEvent(task)
+            : (task.isEvent || (task.notes || '').toLowerCase().includes('@event'));
+        return this.isPast(task.dueDate) && task.status === 'pending' && !isEvent;
     }
 
     /**

@@ -762,7 +762,7 @@ function moveAllTasksToCurrentTime() {
     });
 
     const overdueTasks = tasksArray.filter(task => {
-        if (!task.dueDate || task.status === 'deleted' || task.status === 'completed' || task.isEvent) {
+        if (!task.dueDate || task.status === 'deleted' || task.status === 'completed' || isTaskEvent(task)) {
             return false;
         }
         
@@ -1005,7 +1005,7 @@ window.toggleAllSections = toggleAllSections;
 // Standardized overdue check - use this everywhere to ensure consistency
 function isTaskOverdue(task) {
     // Consistent logic: pending status, has due date, date is in past, not an event
-    if (!task.dueDate || task.status !== 'pending' || task.isEvent) {
+    if (!task.dueDate || task.status !== 'pending' || isTaskEvent(task)) {
         return false;
     }
     const today = getLocalDateString(new Date());

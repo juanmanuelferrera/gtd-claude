@@ -490,18 +490,21 @@ function searchMonthTasks() {
         if (dayCell) {
             // Sort tasks for this day
             const sortedTasks = [...dayTasks].sort((a, b) => {
-                if (a.isEvent !== b.isEvent) return b.isEvent ? 1 : -1;
+                const aIsEvent = isTaskEvent(a);
+                const bIsEvent = isTaskEvent(b);
+                if (aIsEvent !== bIsEvent) return bIsEvent ? 1 : -1;
                 const timeA = a.dueTime || '99:99';
                 const timeB = b.dueTime || '99:99';
                 return timeA.localeCompare(timeB);
             });
-            
+
             // Add task items
             sortedTasks.forEach(task => {
                 const taskElement = document.createElement('div');
-                taskElement.className = task.isEvent ? 'calendar-task-item event' : 'calendar-task-item';
-                
-                const titlePrefix = task.isEvent ? '🔴 ' : '';
+                const taskIsEvent = isTaskEvent(task);
+                taskElement.className = taskIsEvent ? 'calendar-task-item event' : 'calendar-task-item';
+
+                const titlePrefix = taskIsEvent ? '🔴 ' : '';
                 const maxChars = 25;
                 let displayText = titlePrefix + task.title;
                 
@@ -597,18 +600,21 @@ function searchWeekTasks() {
         if (dayElement && tasksByDate[dateStr]) {
             // Sort tasks for this day
             const sortedTasks = [...tasksByDate[dateStr]].sort((a, b) => {
-                if (a.isEvent !== b.isEvent) return b.isEvent ? 1 : -1;
+                const aIsEvent = isTaskEvent(a);
+                const bIsEvent = isTaskEvent(b);
+                if (aIsEvent !== bIsEvent) return bIsEvent ? 1 : -1;
                 const timeA = a.dueTime || '99:99';
                 const timeB = b.dueTime || '99:99';
                 return timeA.localeCompare(timeB);
             });
-            
+
             // Add task items
             sortedTasks.forEach(task => {
                 const taskElement = document.createElement('div');
-                taskElement.className = task.isEvent ? 'week-task-item event' : 'week-task-item';
-                
-                const titlePrefix = task.isEvent ? '🔴 ' : '';
+                const taskIsEvent = isTaskEvent(task);
+                taskElement.className = taskIsEvent ? 'week-task-item event' : 'week-task-item';
+
+                const titlePrefix = taskIsEvent ? '🔴 ' : '';
                 const maxChars = 30;
                 let displayText = titlePrefix + task.title;
                 

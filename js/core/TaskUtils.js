@@ -5,6 +5,17 @@
 
 class TaskUtils {
     /**
+     * Check if a task is an Event (either via isEvent flag or @event in notes)
+     * This ensures MCP-created events are recognized correctly
+     */
+    static isTaskEvent(task) {
+        if (!task) return false;
+        if (task.isEvent) return true;
+        const notes = (task.notes || '').toLowerCase();
+        return notes.includes('@event');
+    }
+
+    /**
      * Get tasks for a specific date
      */
     static getTasksForDate(tasks, dateStr) {
@@ -32,8 +43,10 @@ class TaskUtils {
             }
             
             // Then prioritize events first
-            if (a.isEvent !== b.isEvent) {
-                return a.isEvent ? -1 : 1;
+            const aIsEvent = this.isTaskEvent(a);
+            const bIsEvent = this.isTaskEvent(b);
+            if (aIsEvent !== bIsEvent) {
+                return aIsEvent ? -1 : 1;
             }
             
             // Then sort by time if both have times
@@ -86,8 +99,8 @@ class TaskUtils {
      * Group tasks by time for Today view
      */
     static groupTasksByTime(tasks) {
-        const eventTasks = tasks.filter(task => task.isEvent);
-        const regularTasks = tasks.filter(task => !task.isEvent);
+        const eventTasks = tasks.filter(task => this.isTaskEvent(task));
+        const regularTasks = tasks.filter(task => !this.isTaskEvent(task));
         
         const timedTasks = regularTasks.filter(task => task.dueTime);
         const untimedTasks = regularTasks.filter(task => !task.dueTime);
@@ -142,7 +155,7 @@ class TaskUtils {
      * Check if task is overdue
      */
     static isOverdue(task) {
-        if (!task.dueDate || task.status !== 'pending' || task.isEvent) return false;
+        if (!task.dueDate || task.status !== 'pending' || this.isTaskEvent(task)) return false;
         const today = DateUtils.getLocalDateString ? DateUtils.getLocalDateString(new Date()) : '';
         return task.dueDate < today;
     }
