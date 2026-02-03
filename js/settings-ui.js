@@ -1743,12 +1743,81 @@ async function updateTimezoneFromOverview() {
 window.loadTimezoneOptionsOverview = loadTimezoneOptionsOverview;
 window.updateTimezoneFromOverview = updateTimezoneFromOverview;
 
+// Load timezone for General tab in second settings view
+async function loadTimezoneOptionsGeneral() {
+    const select = document.getElementById('timezoneSelectGeneral');
+    const statusSpan = document.getElementById('timezoneStatusGeneral');
+    if (!select) return;
+
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+
+        const response = await fetch(`${window.API_BASE_URL || 'https://hyperfiler-api.joanmanelferrera-400.workers.dev'}/auth/timezone`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) return;
+
+        const data = await response.json();
+        select.innerHTML = '<option value="">-- Disabled --</option>';
+        (data.options || []).sort((a, b) => a.city.localeCompare(b.city)).forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.timezone;
+            option.textContent = opt.city;
+            if (opt.timezone === data.timezone) option.selected = true;
+            select.appendChild(option);
+        });
+
+        if (statusSpan) {
+            statusSpan.innerHTML = data.isEnabled ? `✅ Active` : '';
+        }
+    } catch (e) { console.error('⏰ Error:', e); }
+}
+
+async function updateTimezoneFromGeneral() {
+    const select = document.getElementById('timezoneSelectGeneral');
+    const statusSpan = document.getElementById('timezoneStatusGeneral');
+    if (!select) return;
+
+    const timezone = select.value || null;
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) { alert('Please log in'); return; }
+
+        const response = await fetch(`${window.API_BASE_URL || 'https://hyperfiler-api.joanmanelferrera-400.workers.dev'}/auth/timezone`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ timezone })
+        });
+        if (!response.ok) { alert('Failed'); return; }
+
+        if (statusSpan) statusSpan.innerHTML = timezone ? '✅ Active' : '';
+
+        // Sync other selects
+        ['timezoneSelect', 'timezoneSelectOverview'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = timezone || '';
+        });
+
+        if (typeof showInlineNotification === 'function') {
+            showInlineNotification(timezone ? 'Automation enabled' : 'Automation disabled', 'success');
+        }
+    } catch (e) { console.error('⏰ Error:', e); alert('Failed'); }
+}
+
+window.loadTimezoneOptionsGeneral = loadTimezoneOptionsGeneral;
+window.updateTimezoneFromGeneral = updateTimezoneFromGeneral;
+
 // Load timezone when settings view is shown
 const originalLoadSettingsValues = window.loadSettingsValues || loadSettingsValues;
 window.loadSettingsValues = function() {
     originalLoadSettingsValues();
     loadTimezoneOptions();
     loadTimezoneOptionsOverview();
+    loadTimezoneOptionsGeneral();
 };
 
 // ========== PAST EVENTS MANAGEMENT ==========

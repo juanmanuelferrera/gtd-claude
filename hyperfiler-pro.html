@@ -1642,6 +1642,25 @@
                     </div>
                 </div>
 
+                <!-- Automatic Task Organization Section -->
+                <div class="settings-section" style="padding: 15px 20px; border-bottom: 1px solid #e0e0e0; background: #f0f7ff;">
+                    <h4 style="margin: 0 0 12px 0; color: #1E4FE6; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                        🌙 Automatic Task Organization
+                    </h4>
+                    <div style="font-size: 13px; color: #495057; background: white; padding: 10px; border-radius: 6px; border-left: 3px solid #1E4FE6; margin-bottom: 12px;">
+                        <strong>Every night at 1am:</strong>
+                        <div style="margin-top: 4px;">1️⃣ Unfinished → today · 2️⃣ Time slots assigned · 3️⃣ Overflow → next days</div>
+                        <div style="margin-top: 6px; font-size: 11px; color: #666;">📅 Events are fixed and never moved</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <label style="font-size: 14px; color: #495057; font-weight: 600;">Your city:</label>
+                        <select id="timezoneSelectGeneral" onchange="updateTimezoneFromGeneral()" style="padding: 8px 12px; border: 2px solid #bee3f8; border-radius: 6px; font-size: 14px; min-width: 200px; background: white;">
+                            <option value="">-- Disabled --</option>
+                        </select>
+                        <span id="timezoneStatusGeneral" style="font-size: 12px; color: #6c757d;"></span>
+                    </div>
+                </div>
+
                 <!-- Display Options Section -->
                 <div class="settings-section" style="padding: 15px 20px; border-bottom: 1px solid #e0e0e0;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
