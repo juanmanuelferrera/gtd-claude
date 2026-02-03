@@ -2287,13 +2287,17 @@ function getWeekInfo(dateStr) {
     return { week: weekNumber, year: date.getFullYear() };
 }
 
-// Get week start date (Monday)
+// Get week start date (Monday) - timezone safe
 function getWeekStart(dateStr) {
-    const date = new Date(dateStr + 'T00:00:00');
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(date.setDate(diff));
-    return monday.toISOString().slice(0, 10);
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    const dayOfWeek = date.getDay();
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Monday = 1, Sunday = 0 -> -6
+    date.setDate(date.getDate() + diff);
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
 }
 
 // Group events by week
@@ -2372,7 +2376,12 @@ function renderEventsView() {
     const isCurrentWeek = window.eventsWeekOffset === 0;
 
     // Day names in Spanish
-    const dayNames = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    // Get day name from actual date to ensure accuracy
+    const getDayName = (dateStr) => {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const date = new Date(y, m - 1, d);
+        return date.toLocaleDateString('en-US', { weekday: 'long' });
+    };
 
     // Render event card
     const renderEventCard = (event) => {
@@ -2421,7 +2430,7 @@ function renderEventsView() {
             <div style="background: ${bgColor}; border: ${borderStyle}; border-radius: 6px; padding: 8px 12px; min-height: 48px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${events.length > 0 ? '4px' : '0'};">
                     <div style="display: flex; align-items: baseline; gap: 8px;">
-                        <span style="font-weight: 700; font-size: 18px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${dayNames[dayIndex]}</span>
+                        <span style="font-weight: 700; font-size: 18px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${getDayName(dateStr)}</span>
                         <span style="font-weight: 700; font-size: 22px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${dayNum}</span>
                         ${isToday ? '<span style="font-size: 12px; background: #28a745; color: white; padding: 2px 8px; border-radius: 8px; margin-left: 4px;">Hoy</span>' : ''}
                     </div>
