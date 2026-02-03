@@ -34,7 +34,7 @@ function validateTaskData(task) {
         status: task.status,
         repeat: task.repeat,
         template: sanitizeInput(task.template || ''),
-        isEvent: Boolean(task.isEvent),
+        isEvent: Boolean(task.isEvent || (task.notes || '').toLowerCase().includes('@event')),
         createdAt: task.createdAt,
         updatedAt: task.updatedAt
     };

@@ -47,7 +47,7 @@ function validateAndSanitizeTask(task) {
     status: ['pending', 'completed'].includes(task.status) ? task.status : 'pending',
     repeat_type: sanitizeInput(task.repeatType || task.repeat_type || ''),
     template: sanitizeInput(task.template || ''),
-    is_event: Boolean(task.isEvent || task.is_event),
+    is_event: Boolean(task.isEvent || task.is_event || (task.notes || '').toLowerCase().includes('@event')),
     created_at: task.createdAt || task.created_at || new Date().toISOString(),
     updated_at: new Date().toISOString(),
     is_deleted: Boolean(task.isDeleted || task.is_deleted || false),

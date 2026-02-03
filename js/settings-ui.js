@@ -5,7 +5,7 @@
 // Missing core functions
 function saveTasks() {
     if (window.tasks) {
-        localStorage.setItem('gtd_tasks', JSON.stringify(window.tasks));
+        localStorage.setItem('gtdTasks', JSON.stringify(window.tasks));
         console.log('💾 Tasks saved to localStorage');
     }
 }

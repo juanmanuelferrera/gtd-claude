@@ -1108,13 +1108,13 @@ function importJSONBackup(input) {
                 // Import templates
                 if (backup.customTemplates) {
                     customTemplates = backup.customTemplates;
-                    localStorage.setItem('customTemplates', JSON.stringify(customTemplates));
+                    localStorage.setItem('gtdTemplates', JSON.stringify(customTemplates));
                 }
                 
                 // Import lists
                 if (backup.listSections) {
                     listSections = backup.listSections;
-                    localStorage.setItem('listSections', JSON.stringify(listSections));
+                    localStorage.setItem('gtd_list_sections', JSON.stringify(listSections));
                 }
                 
                 // Refresh the view
