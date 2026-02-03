@@ -1519,3 +1519,135 @@ function executeDeleteAllData() {
 window.initiateDeleteAllData = initiateDeleteAllData;
 window.cancelDeleteAllData = cancelDeleteAllData;
 window.confirmDeleteAllData = confirmDeleteAllData;
+
+// ========== TIMEZONE SETTINGS FOR AUTOMATIC TASK ORGANIZATION ==========
+
+// Load timezone options from API
+async function loadTimezoneOptions() {
+    const select = document.getElementById('timezoneSelect');
+    const statusDiv = document.getElementById('timezoneStatus');
+
+    if (!select) {
+        console.log('⏰ Timezone select not found');
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            console.log('⏰ No auth token, skipping timezone load');
+            return;
+        }
+
+        const response = await fetch(`${window.API_BASE_URL || 'https://hyperfiler-api.joanmanelferrera-400.workers.dev'}/auth/timezone`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            console.error('⏰ Failed to load timezone options');
+            return;
+        }
+
+        const data = await response.json();
+        console.log('⏰ Timezone data:', data);
+
+        // Clear existing options (except the disabled option)
+        select.innerHTML = '<option value="">-- Disabled (no automatic organization) --</option>';
+
+        // Add timezone options (sorted by city name)
+        const sortedOptions = (data.options || []).sort((a, b) => a.city.localeCompare(b.city));
+        sortedOptions.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.timezone;
+            option.textContent = opt.city;
+            if (opt.timezone === data.timezone) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+
+        // Update status
+        if (statusDiv) {
+            if (data.isEnabled) {
+                statusDiv.innerHTML = `<span style="color: #28a745;">✅ Enabled - Tasks organized daily at 1am ${data.city}</span>`;
+            } else {
+                statusDiv.innerHTML = `<span style="color: #6c757d;">⏸️ Disabled - Select your city to enable</span>`;
+            }
+        }
+
+    } catch (error) {
+        console.error('⏰ Error loading timezone:', error);
+    }
+}
+
+// Update user's timezone setting
+async function updateTimezone() {
+    const select = document.getElementById('timezoneSelect');
+    const statusDiv = document.getElementById('timezoneStatus');
+
+    if (!select) return;
+
+    const timezone = select.value || null;
+    const selectedOption = select.options[select.selectedIndex];
+    const cityName = selectedOption ? selectedOption.textContent : '';
+
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            alert('Please log in to change timezone settings');
+            return;
+        }
+
+        const response = await fetch(`${window.API_BASE_URL || 'https://hyperfiler-api.joanmanelferrera-400.workers.dev'}/auth/timezone`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ timezone })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            alert('Failed to update timezone: ' + (error.error || 'Unknown error'));
+            return;
+        }
+
+        const data = await response.json();
+        console.log('⏰ Timezone updated:', data);
+
+        // Update status
+        if (statusDiv) {
+            if (timezone) {
+                statusDiv.innerHTML = `<span style="color: #28a745;">✅ Enabled - Tasks organized daily at 1am ${cityName}</span>`;
+            } else {
+                statusDiv.innerHTML = `<span style="color: #6c757d;">⏸️ Disabled - Automatic organization turned off</span>`;
+            }
+        }
+
+        // Show notification
+        if (typeof showInlineNotification === 'function') {
+            showInlineNotification(data.message, 'success');
+        }
+
+    } catch (error) {
+        console.error('⏰ Error updating timezone:', error);
+        alert('Failed to update timezone. Please try again.');
+    }
+}
+
+window.loadTimezoneOptions = loadTimezoneOptions;
+window.updateTimezone = updateTimezone;
+
+// Load timezone when settings view is shown
+const originalLoadSettingsValues = window.loadSettingsValues || loadSettingsValues;
+window.loadSettingsValues = function() {
+    originalLoadSettingsValues();
+    loadTimezoneOptions();
+};

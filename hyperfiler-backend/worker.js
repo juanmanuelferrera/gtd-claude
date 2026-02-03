@@ -382,6 +382,16 @@ export default {
         return handleAuthMe(request, env, corsHeaders);
       }
 
+      // Set user timezone (enables automatic task organization)
+      if (pathname === '/auth/timezone' && request.method === 'POST') {
+        return handleSetTimezone(request, env, corsHeaders);
+      }
+
+      // Get user timezone
+      if (pathname === '/auth/timezone' && request.method === 'GET') {
+        return handleGetTimezone(request, env, corsHeaders);
+      }
+
       if (pathname === '/auth/logout' && request.method === 'POST') {
         return handleAuthLogout(request, env, corsHeaders);
       }
@@ -754,8 +764,15 @@ async function processTimezoneAwareCron(env) {
   console.log(`👥 Found ${users.length} users to check`);
 
   // Process each user if their local time is around 1am (0-2am window)
+  // ONLY process users who have opted in by setting a timezone
   for (const user of users) {
-    const timezone = user.timezone || 'Europe/Madrid'; // Default to Spain
+    const timezone = user.timezone;
+
+    // Skip users who haven't set a timezone (opt-in only)
+    if (!timezone) {
+      console.log(`⏭️ Skipping ${user.email} (no timezone set - not opted in)`);
+      continue;
+    }
 
     try {
       // Calculate local hour for this user's timezone
@@ -785,13 +802,26 @@ async function processTimezoneAwareCron(env) {
 function getLocalHour(utcHour, timezone) {
   // Timezone offsets (simplified - doesn't account for DST perfectly)
   const offsets = {
-    'Europe/Madrid': 1,      // CET (winter), CEST is +2
-    'Europe/London': 0,      // GMT/UTC
-    'Asia/Kolkata': 5.5,     // IST
-    'America/New_York': -5,  // EST
-    'America/Chicago': -6,   // CST
-    'America/Denver': -7,    // MST
+    'Europe/Madrid': 1,        // CET
+    'Europe/London': 0,        // GMT
+    'Europe/Paris': 1,         // CET
+    'Europe/Berlin': 1,        // CET
+    'Europe/Rome': 1,          // CET
+    'Europe/Moscow': 3,        // MSK
+    'Asia/Kolkata': 5.5,       // IST
+    'Asia/Tokyo': 9,           // JST
+    'Asia/Shanghai': 8,        // CST
+    'Asia/Singapore': 8,       // SGT
+    'Asia/Dubai': 4,           // GST
+    'Australia/Sydney': 11,    // AEDT
+    'Australia/Melbourne': 11, // AEDT
+    'America/New_York': -5,    // EST
+    'America/Chicago': -6,     // CST
+    'America/Denver': -7,      // MST
     'America/Los_Angeles': -8, // PST
+    'America/Sao_Paulo': -3,   // BRT
+    'America/Mexico_City': -6, // CST
+    'Pacific/Auckland': 13,    // NZDT
     'UTC': 0,
   };
 
@@ -2137,6 +2167,122 @@ async function handleAuthMe(request, env, corsHeaders) {
     console.error('❌ Auth me error:', error);
     console.error('❌ Error stack:', error.stack);
     return new Response(JSON.stringify({ error: 'Authentication failed', details: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// Supported timezones with friendly city names
+const SUPPORTED_TIMEZONES = {
+  'Europe/Madrid': 'Madrid (Spain)',
+  'Europe/London': 'London (UK)',
+  'Europe/Paris': 'Paris (France)',
+  'Europe/Berlin': 'Berlin (Germany)',
+  'Europe/Rome': 'Rome (Italy)',
+  'Europe/Moscow': 'Moscow (Russia)',
+  'Asia/Kolkata': 'Mumbai / Delhi (India)',
+  'Asia/Tokyo': 'Tokyo (Japan)',
+  'Asia/Shanghai': 'Beijing / Shanghai (China)',
+  'Asia/Singapore': 'Singapore',
+  'Asia/Dubai': 'Dubai (UAE)',
+  'Australia/Sydney': 'Sydney (Australia)',
+  'Australia/Melbourne': 'Melbourne (Australia)',
+  'America/New_York': 'New York (USA East)',
+  'America/Chicago': 'Chicago (USA Central)',
+  'America/Denver': 'Denver (USA Mountain)',
+  'America/Los_Angeles': 'Los Angeles (USA West)',
+  'America/Sao_Paulo': 'São Paulo (Brazil)',
+  'America/Mexico_City': 'Mexico City (Mexico)',
+  'Pacific/Auckland': 'Auckland (New Zealand)',
+};
+
+// Auth: Set user timezone (enables automatic task organization)
+async function handleSetTimezone(request, env, corsHeaders) {
+  try {
+    const token = getAuthToken(request);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
+
+    if (!payload) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const { timezone } = await request.json();
+
+    // Validate timezone
+    if (timezone && !SUPPORTED_TIMEZONES[timezone]) {
+      return new Response(JSON.stringify({
+        error: 'Invalid timezone',
+        supported: Object.entries(SUPPORTED_TIMEZONES).map(([tz, city]) => ({ timezone: tz, city }))
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Update user timezone (null to disable automatic organization)
+    await env.DB.prepare('UPDATE users SET timezone = ? WHERE id = ?')
+      .bind(timezone || null, payload.userId)
+      .run();
+
+    const message = timezone
+      ? `Timezone set to ${SUPPORTED_TIMEZONES[timezone]}. Tasks will be automatically organized at 1am your local time.`
+      : 'Automatic task organization disabled.';
+
+    return new Response(JSON.stringify({
+      success: true,
+      timezone: timezone || null,
+      city: timezone ? SUPPORTED_TIMEZONES[timezone] : null,
+      message
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    console.error('Set timezone error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to set timezone' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// Auth: Get user timezone and available options
+async function handleGetTimezone(request, env, corsHeaders) {
+  try {
+    const token = getAuthToken(request);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
+
+    if (!payload) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Get user's current timezone
+    const user = await env.DB.prepare('SELECT timezone FROM users WHERE id = ?')
+      .bind(payload.userId)
+      .first();
+
+    const currentTimezone = user?.timezone || null;
+    const isEnabled = !!currentTimezone;
+
+    return new Response(JSON.stringify({
+      timezone: currentTimezone,
+      city: currentTimezone ? SUPPORTED_TIMEZONES[currentTimezone] : null,
+      isEnabled,
+      options: Object.entries(SUPPORTED_TIMEZONES).map(([tz, city]) => ({ timezone: tz, city }))
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    console.error('Get timezone error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to get timezone' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
