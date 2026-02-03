@@ -2419,8 +2419,8 @@ function renderEventsView() {
         }
 
         return `
-            <div style="background: ${bgColor}; border: ${borderStyle}; border-radius: 8px; padding: 12px; min-height: 80px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="background: ${bgColor}; border: ${borderStyle}; border-radius: 6px; padding: 8px 10px; min-height: 40px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${events.length > 0 ? '6px' : '0'};">
                     <div>
                         <span style="font-weight: 700; font-size: 18px; color: ${isToday ? '#28a745' : (isPast ? '#999' : '#333')};">${dayNum}</span>
                         <span style="font-size: 11px; color: #666; margin-left: 4px;">${monthName}</span>
@@ -2431,7 +2431,7 @@ function renderEventsView() {
                 </div>
                 ${events.length > 0
                     ? events.sort((a, b) => (a.dueTime || '').localeCompare(b.dueTime || '')).map(e => renderEventCard(e)).join('')
-                    : `<div style="color: #ccc; font-size: 12px; text-align: center; padding: 10px;">—</div>`
+                    : ``
                 }
             </div>
         `;
