@@ -2375,7 +2375,10 @@ function renderEventsView() {
 
     // Calculate current week's start based on offset and user preference
     const currentWeekStart = getWeekStart(today);
-    const startDate = new Date(currentWeekStart + 'T12:00:00'); // Use noon to avoid timezone issues
+
+    // Parse week start date safely using components
+    const [wsYear, wsMonth, wsDay] = currentWeekStart.split('-').map(Number);
+    const startDate = new Date(wsYear, wsMonth - 1, wsDay, 12, 0, 0);
     startDate.setDate(startDate.getDate() + (window.eventsWeekOffset * 7));
 
     // Helper to get local date string (avoid UTC conversion issues)
@@ -2388,6 +2391,10 @@ function renderEventsView() {
 
     const weekStart = toLocalDateStr(startDate);
 
+    // Debug: Show first day of displayed week
+    const firstDayName = startDate.toLocaleDateString('en-US', { weekday: 'long' });
+    console.log('📅 EVENTS VIEW: First day is', firstDayName, weekStart, '| Setting:', localStorage.getItem('weekStartDay') === '0' ? 'Sunday' : 'Monday');
+
     // Generate all 7 days of the week
     const weekDays = [];
     for (let i = 0; i < 7; i++) {
@@ -2395,6 +2402,11 @@ function renderEventsView() {
         d.setDate(d.getDate() + i);
         weekDays.push(toLocalDateStr(d));
     }
+
+    console.log('📅 Week days:', weekDays.map(d => {
+        const [y,m,day] = d.split('-').map(Number);
+        return new Date(y, m-1, day).toLocaleDateString('en-US', {weekday: 'short'}) + ' ' + day;
+    }).join(', '));
 
     // Group events by date for quick lookup
     const eventsByDate = {};
