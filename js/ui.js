@@ -16,7 +16,7 @@ let mobileMoreMenuOpen = false;
  */
 function isTaskEvent(task) {
     if (!task) return false;
-    if (isTaskEvent(task)) return true;
+    if (task.isEvent) return true;
     const notes = (task.notes || '').toLowerCase();
     return notes.includes('@event');
 }
