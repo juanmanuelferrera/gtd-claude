@@ -910,18 +910,18 @@
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                     <h5 style="margin: 0 0 10px 0; color: #495057;">🌙 Automatic Task Organization</h5>
                     <div style="font-size: 14px; line-height: 1.5;">
-                        <div style="margin-bottom: 10px; color: #6c757d; font-size: 12px;">
-                            When enabled, your tasks are automatically organized at 1am your local time:
-                            <ul style="margin: 5px 0; padding-left: 20px;">
-                                <li>Yesterday's unfinished tasks move to today</li>
-                                <li>Tasks get assigned time slots</li>
-                                <li>Overflow tasks cascade to next days</li>
-                            </ul>
+                        <div style="margin-bottom: 12px; color: #495057; font-size: 13px; background: #e8f4fd; padding: 12px; border-radius: 6px; border-left: 3px solid #1E4FE6;">
+                            <strong>Every night at 1am:</strong>
+                            <div style="margin-top: 6px; display: grid; gap: 4px;">
+                                <span>1️⃣ Unfinished tasks → move to today</span>
+                                <span>2️⃣ Tasks get time slots assigned</span>
+                                <span>3️⃣ If too many → overflow to next days</span>
+                            </div>
                         </div>
                         <div style="margin-bottom: 10px;">
-                            <label style="display: block; font-weight: 500; margin-bottom: 4px;">Your City/Timezone:</label>
+                            <label style="display: block; font-weight: 500; margin-bottom: 4px;">Select your city to enable:</label>
                             <select id="timezoneSelect" onchange="updateTimezone()" style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; font-size: 14px; width: 100%; max-width: 300px;">
-                                <option value="">-- Disabled (no automatic organization) --</option>
+                                <option value="">-- Disabled --</option>
                             </select>
                         </div>
                         <div id="timezoneStatus" style="color: #6c757d; font-size: 12px;"></div>
