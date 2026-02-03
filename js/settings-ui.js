@@ -858,17 +858,23 @@ function saveTimeFormat() {
 }
 function saveWeekStart() {
     const select = document.getElementById('weekStartSelect');
+    console.log('🔧 saveWeekStart called, select element:', select, 'currentView:', window.currentView);
     if (select) {
         localStorage.setItem('weekStartDay', select.value);
-        console.log('Week start day saved:', select.value);
+        console.log('🔧 Week start day saved:', select.value);
 
         // Refresh week, calendar, and events views if they're currently displayed
         if (window.currentView === 'week' && typeof renderWeekView === 'function') {
+            console.log('🔧 Refreshing week view');
             renderWeekView();
         } else if (window.currentView === 'calendar' && typeof renderCalendar === 'function') {
+            console.log('🔧 Refreshing calendar view');
             renderCalendar();
         } else if (window.currentView === 'events' && typeof renderEventsView === 'function') {
+            console.log('🔧 Refreshing events view');
             renderEventsView();
+        } else {
+            console.log('🔧 No view to refresh, currentView is:', window.currentView);
         }
     }
 }
@@ -2298,6 +2304,8 @@ function getWeekStart(dateStr) {
     const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
     const weekStartDay = getWeekStartDay(); // 0 = Sunday, 1 = Monday
 
+    console.log('🗓️ getWeekStart called:', { dateStr, dayOfWeek, weekStartDay, setting: localStorage.getItem('weekStartDay') });
+
     // Calculate days to subtract to get to week start
     let diff;
     if (weekStartDay === 0) {
@@ -2312,6 +2320,7 @@ function getWeekStart(dateStr) {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
+    console.log('🗓️ getWeekStart result:', `${y}-${m}-${d}`);
     return `${y}-${m}-${d}`;
 }
 
