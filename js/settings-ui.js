@@ -1,6 +1,7 @@
 /**
  * Settings and UI Functions for HyperFiler Pro
  */
+console.log('✅ settings-ui.js v20260203-v2 LOADED');
 
 // Missing core functions
 function saveTasks() {
@@ -2363,8 +2364,12 @@ function formatWeekLabel(weekStart) {
 window.eventsWeekOffset = window.eventsWeekOffset || 0;
 
 function renderEventsView() {
+    console.log('🎯 renderEventsView CALLED');
     const container = document.getElementById('tasks-view');
-    if (!container) return;
+    if (!container) {
+        console.log('❌ No container found');
+        return;
+    }
 
     const today = typeof getLocalDateString === 'function'
         ? getLocalDateString(new Date())
