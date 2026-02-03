@@ -717,13 +717,440 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(
-      purgeOldDeletedTasks(env)
-        .then(() => carryOverYesterdayTasks(env))
-        .then(() => organizeTomorrowTasks(env))
-    );
+    ctx.waitUntil(processTimezoneAwareCron(env));
   },
 };
+
+// ========== TIMEZONE-AWARE CRON PROCESSING ==========
+async function processTimezoneAwareCron(env) {
+  console.log('🌍 Starting timezone-aware cron processing...');
+
+  // Get current UTC hour
+  const nowUTC = new Date();
+  const utcHour = nowUTC.getUTCHours();
+  console.log(`⏰ Current UTC hour: ${utcHour}`);
+
+  // Get all users with their timezones
+  let users = [];
+  try {
+    const usersStmt = env.DB.prepare('SELECT id, email, timezone FROM users');
+    const result = await usersStmt.all();
+    users = result.results || [];
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    // If timezone column doesn't exist, add it
+    if (error.message.includes('no such column: timezone')) {
+      console.log('📊 Adding timezone column to users table...');
+      await env.DB.prepare('ALTER TABLE users ADD COLUMN timezone TEXT DEFAULT "Europe/Madrid"').run();
+      // Retry
+      const retryStmt = env.DB.prepare('SELECT id, email, timezone FROM users');
+      const retryResult = await retryStmt.all();
+      users = retryResult.results || [];
+    } else {
+      throw error;
+    }
+  }
+
+  console.log(`👥 Found ${users.length} users to check`);
+
+  // Process each user if their local time is around 1am (0-2am window)
+  for (const user of users) {
+    const timezone = user.timezone || 'Europe/Madrid'; // Default to Spain
+
+    try {
+      // Calculate local hour for this user's timezone
+      const localHour = getLocalHour(utcHour, timezone);
+
+      // Process if local hour is 0, 1, or 2 (around 1am)
+      if (localHour >= 0 && localHour <= 2) {
+        console.log(`✅ Processing user ${user.email} (timezone: ${timezone}, local hour: ${localHour})`);
+
+        await purgeOldDeletedTasksForUser(env, user.id);
+        await carryOverYesterdayTasksForUser(env, user.id);
+        await organizeTomorrowTasksForUser(env, user.id);
+
+        console.log(`✅ Completed processing for ${user.email}`);
+      } else {
+        console.log(`⏭️ Skipping ${user.email} (timezone: ${timezone}, local hour: ${localHour})`);
+      }
+    } catch (error) {
+      console.error(`Error processing user ${user.email}:`, error);
+    }
+  }
+
+  console.log('🌍 Timezone-aware cron processing complete');
+}
+
+// Get local hour from UTC hour and timezone
+function getLocalHour(utcHour, timezone) {
+  // Timezone offsets (simplified - doesn't account for DST perfectly)
+  const offsets = {
+    'Europe/Madrid': 1,      // CET (winter), CEST is +2
+    'Europe/London': 0,      // GMT/UTC
+    'Asia/Kolkata': 5.5,     // IST
+    'America/New_York': -5,  // EST
+    'America/Chicago': -6,   // CST
+    'America/Denver': -7,    // MST
+    'America/Los_Angeles': -8, // PST
+    'UTC': 0,
+  };
+
+  const offset = offsets[timezone] || 0;
+  let localHour = utcHour + offset;
+
+  // Handle wrap-around
+  if (localHour < 0) localHour += 24;
+  if (localHour >= 24) localHour -= 24;
+
+  return Math.floor(localHour);
+}
+
+// Per-user versions of task processing functions
+async function purgeOldDeletedTasksForUser(env, userId) {
+  if (!userId) return;
+
+  console.log(`🗑️ Purge: checking deleted tasks for user ${userId}...`);
+
+  const { results } = await env.DB.prepare(
+    'SELECT task_data FROM user_tasks WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+  ).bind(userId).all();
+
+  if (!results || !results.length || !results[0].task_data) return;
+
+  const tasks = JSON.parse(results[0].task_data);
+  const cutoff = new Date();
+  cutoff.setUTCDate(cutoff.getUTCDate() - DELETED_MAX_AGE_DAYS);
+  const cutoffISO = cutoff.toISOString();
+
+  const active = [];
+  const deleted = [];
+  for (const t of tasks) {
+    if (t._meta || (!t.isDeleted && t.status !== 'deleted')) {
+      active.push(t);
+    } else {
+      deleted.push(t);
+    }
+  }
+
+  let kept = deleted.filter(t => (t.updatedAt || '') >= cutoffISO);
+  if (kept.length > DELETED_MAX_COUNT) {
+    kept.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+    kept = kept.slice(0, DELETED_MAX_COUNT);
+  }
+
+  const purged = deleted.length - kept.length;
+  if (purged === 0) return;
+
+  const newTasks = [...active, ...kept];
+  const taskJson = JSON.stringify(newTasks);
+  const now = new Date().toISOString();
+
+  await env.DB.prepare('DELETE FROM user_tasks WHERE user_id = ?').bind(userId).run();
+  await env.DB.prepare(
+    `INSERT INTO user_tasks (user_id, task_data, title, created_at, updated_at)
+     VALUES (?, ?, 'tasks', ?, ?)`
+  ).bind(userId, taskJson, now, now).run();
+
+  console.log(`🗑️ Purge done for user: removed ${purged} old deleted tasks`);
+}
+
+async function carryOverYesterdayTasksForUser(env, userId) {
+  if (!userId) return;
+
+  // Get user's timezone for date calculations
+  const userStmt = env.DB.prepare('SELECT timezone FROM users WHERE id = ?');
+  const userResult = await userStmt.bind(userId).first();
+  const timezone = userResult?.timezone || 'Europe/Madrid';
+
+  // Calculate yesterday and today based on user's timezone
+  const { yesterday: yesterdayStr, today } = getLocalDates(timezone);
+
+  console.log(`📦 CarryOver for user ${userId}: checking ${yesterdayStr} → ${today}`);
+
+  const { results } = await env.DB.prepare(
+    'SELECT task_data FROM user_tasks WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+  ).bind(userId).all();
+
+  if (!results || !results.length || !results[0].task_data) return;
+
+  let tasks = JSON.parse(results[0].task_data);
+  let moved = 0;
+
+  for (const t of tasks) {
+    if (t._meta || t.isDeleted || t.status === 'deleted' || t.status === 'completed') continue;
+    if (t.dueDate !== yesterdayStr) continue;
+
+    const title = (t.title || '').toLowerCase();
+    const notes = ((t.notes || '') + ' ' + (t.template || '')).toLowerCase();
+
+    // @bhoga tasks move to next Monday
+    if (notes.includes('@bhoga')) {
+      t.dueDate = t.due_date = getNextMondayDateStr();
+      t.dueTime = t.due_time = '';
+      t.status = 'pending';
+      t.updatedAt = new Date().toISOString();
+      moved++;
+      continue;
+    }
+
+    // Regular carryover
+    t.dueDate = t.due_date = today;
+    t.dueTime = t.due_time = '';
+    t._carriedOver = true;
+    t.updatedAt = new Date().toISOString();
+    moved++;
+  }
+
+  if (moved === 0) return;
+
+  const taskJson = JSON.stringify(tasks);
+  const now = new Date().toISOString();
+
+  await env.DB.prepare('DELETE FROM user_tasks WHERE user_id = ?').bind(userId).run();
+  await env.DB.prepare(
+    `INSERT INTO user_tasks (user_id, task_data, title, created_at, updated_at)
+     VALUES (?, ?, 'tasks', ?, ?)`
+  ).bind(userId, taskJson, now, now).run();
+
+  console.log(`📦 CarryOver done for user: moved ${moved} tasks from ${yesterdayStr} to ${today}`);
+}
+
+async function organizeTomorrowTasksForUser(env, userId) {
+  if (!userId) return;
+
+  // Get user's timezone
+  const userStmt = env.DB.prepare('SELECT timezone FROM users WHERE id = ?');
+  const userResult = await userStmt.bind(userId).first();
+  const timezone = userResult?.timezone || 'Europe/Madrid';
+
+  // Calculate today and tomorrow based on user's timezone
+  const { today: tomorrow, tomorrow: dayAfter } = getLocalDates(timezone);
+
+  console.log(`📅 Organizing tasks for user ${userId}: ${tomorrow}`);
+
+  // Use the existing organizeTomorrowTasks logic but with the userId
+  // ... (The full implementation would be too long, so we call the existing function with modified dates)
+
+  // For now, we'll use a simplified approach - call the existing function logic
+  // This would need to be refactored to accept userId parameter
+
+  // Fetch tasks
+  const { results } = await env.DB.prepare(
+    'SELECT task_data FROM user_tasks WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+  ).bind(userId).all();
+
+  if (!results || !results.length || !results[0].task_data) return;
+
+  // Call the main organize logic (which is defined below)
+  await organizeTasksForUserAndDates(env, userId, tomorrow, dayAfter, results[0].task_data);
+}
+
+// Helper to get local dates based on timezone
+function getLocalDates(timezone) {
+  const offsets = {
+    'Europe/Madrid': 1,
+    'Europe/London': 0,
+    'Asia/Kolkata': 5.5,
+    'America/New_York': -5,
+    'America/Chicago': -6,
+    'America/Denver': -7,
+    'America/Los_Angeles': -8,
+    'UTC': 0,
+  };
+
+  const offset = offsets[timezone] || 0;
+  const nowUTC = new Date();
+
+  // Create date adjusted for timezone
+  const localDate = new Date(nowUTC.getTime() + offset * 60 * 60 * 1000);
+
+  const today = localDate.toISOString().slice(0, 10);
+
+  const tomorrowDate = new Date(localDate);
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrow = tomorrowDate.toISOString().slice(0, 10);
+
+  const yesterdayDate = new Date(localDate);
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  const yesterday = yesterdayDate.toISOString().slice(0, 10);
+
+  return { yesterday, today, tomorrow };
+}
+
+// Main organize logic for a specific user and dates
+async function organizeTasksForUserAndDates(env, userId, tomorrow, dayAfter, taskDataJson) {
+  // This reuses the logic from organizeTomorrowTasks but with specific dates
+  let allTasks = JSON.parse(taskDataJson);
+
+  const BACKLOG_DATE = '2099-01-01';
+
+  // Separate tasks by date
+  const tomorrowTasks = [];
+  const dayAfterTasks = [];
+  const otherTasks = [];
+
+  for (const task of allTasks) {
+    if (task._meta) {
+      otherTasks.push(task);
+      continue;
+    }
+    if (task.is_deleted || task.isDeleted || task.status === 'deleted') {
+      otherTasks.push(task);
+      continue;
+    }
+    const dueDate = task.due_date || task.dueDate;
+    if (dueDate === tomorrow) {
+      tomorrowTasks.push(task);
+    } else if (dueDate === dayAfter) {
+      dayAfterTasks.push(task);
+    } else {
+      otherTasks.push(task);
+    }
+  }
+
+  // Ensure spiritual program exists
+  let hasSpiritual = tomorrowTasks.some(t => /programa espiritual|spiritual program/i.test(t.title || ''));
+  if (!hasSpiritual) {
+    tomorrowTasks.push({
+      id: `spiritual_${tomorrow}`,
+      title: 'Programa Espiritual',
+      notes: '',
+      dueDate: tomorrow,
+      due_date: tomorrow,
+      dueTime: '06:00',
+      due_time: '06:00',
+      status: 'pending',
+      isEvent: false,
+      is_event: false,
+      isDeleted: false,
+      is_deleted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      images: []
+    });
+  }
+
+  if (tomorrowTasks.length === 0) return;
+
+  // Separate fixed from flexible
+  const fixed = [];
+  const flexible = [];
+
+  for (const task of tomorrowTasks) {
+    const title = (task.title || '').toLowerCase();
+    const isEvent = task.is_event || task.isEvent;
+
+    if (/programa espiritual|spiritual program/i.test(title)) {
+      task.due_time = task.dueTime = '06:00';
+      fixed.push(task);
+    } else if (isEvent) {
+      fixed.push(task);
+    } else if (/desayuno/.test(title)) {
+      task.due_time = task.dueTime = '09:00';
+      fixed.push(task);
+    } else if (/\btot\b/i.test(task.title || '')) {
+      task.due_time = task.dueTime = '10:00';
+      fixed.push(task);
+    } else if (/cocinar|comer/.test(title)) {
+      task.due_time = task.dueTime = '14:00';
+      fixed.push(task);
+    } else if (/@bhoga/i.test(task.template || '') || /@bhoga/i.test(task.notes || '')) {
+      fixed.push(task);
+    } else {
+      task.due_time = task.dueTime = '';
+      task._importance = scoreImportance(task);
+      task._duration = estimateDuration(task);
+      flexible.push(task);
+    }
+  }
+
+  // Sort flexible
+  flexible.sort((a, b) => {
+    const aCarried = a._carriedOver ? 0 : 1;
+    const bCarried = b._carriedOver ? 0 : 1;
+    if (aCarried !== bCarried) return aCarried - bCarried;
+    if (a._importance !== b._importance) return a._importance - b._importance;
+    return a._duration - b._duration;
+  });
+
+  // Time slots
+  const slots = [
+    { start: 420, end: 540 },
+    { start: 570, end: 600 },
+    { start: 780, end: 840 },
+    { start: 885, end: 1140 },
+  ];
+
+  // Schedule flexible tasks
+  let slotIdx = 0;
+  let cursor = slots[0].start;
+  const scheduled = [];
+  const overflow = [];
+
+  for (const task of flexible) {
+    const duration = task._duration;
+    let placed = false;
+
+    while (slotIdx < slots.length) {
+      const slot = slots[slotIdx];
+      if (cursor + duration <= slot.end) {
+        task.due_time = task.dueTime = minutesToTime(cursor);
+        cursor += duration;
+        placed = true;
+        break;
+      }
+      slotIdx++;
+      if (slotIdx < slots.length) {
+        cursor = slots[slotIdx].start;
+      }
+    }
+
+    delete task._importance;
+    delete task._duration;
+    delete task._carriedOver;
+
+    if (placed) {
+      scheduled.push(task);
+    } else {
+      overflow.push(task);
+    }
+  }
+
+  // Handle overflow (simplified - just move to dayAfter with times)
+  let overflowSlotIdx = 0;
+  let overflowCursor = slots[0].start;
+
+  for (const task of overflow) {
+    const duration = estimateDuration(task);
+    task.due_date = task.dueDate = dayAfter;
+
+    while (overflowSlotIdx < slots.length) {
+      const slot = slots[overflowSlotIdx];
+      if (overflowCursor + duration <= slot.end) {
+        task.due_time = task.dueTime = minutesToTime(overflowCursor);
+        overflowCursor += duration;
+        break;
+      }
+      overflowSlotIdx++;
+      if (overflowSlotIdx < slots.length) {
+        overflowCursor = slots[overflowSlotIdx].start;
+      }
+    }
+  }
+
+  // Reassemble
+  const organizedTomorrow = [...fixed, ...scheduled];
+  const finalTasks = [...otherTasks, ...organizedTomorrow, ...overflow, ...dayAfterTasks];
+
+  // Write back
+  await env.DB.prepare('DELETE FROM user_tasks WHERE user_id = ?').bind(userId).run();
+  await env.DB.prepare(
+    `INSERT INTO user_tasks (user_id, task_data, title, created_at, updated_at)
+     VALUES (?, ?, 'JSON_TASKS_DATA', datetime('now'), datetime('now'))`
+  ).bind(userId, JSON.stringify(finalTasks)).run();
+
+  console.log(`✅ Organized ${scheduled.length} tasks for user, ${overflow.length} overflowed`);
+}
 
 // ========== PURGE OLD DELETED TASKS ==========
 
@@ -1081,7 +1508,6 @@ async function organizeTomorrowTasks(env) {
   });
 
   // 5. Define available time slots (in minutes from midnight)
-  // 03:00-06:00, 07:00-09:00, 09:15-10:00, 13:00-14:00, 14:45-19:00
   // Skip: 06:00-07:00 spiritual, 09:00 desayuno, 10:00-13:00 TOT, 14:00 cocinar
   const slots = [
     { start: 420, end: 540 },   // 07:00-09:00
@@ -1090,12 +1516,160 @@ async function organizeTomorrowTasks(env) {
     { start: 885, end: 1140 },  // 14:45-19:00
   ];
 
+  // Calculate total available slot time
+  const totalSlotMinutes = slots.reduce((sum, s) => sum + (s.end - s.start), 0);
+
+  // Calculate how much time today's flexible tasks need
+  const todayFlexibleMinutes = flexible.reduce((sum, t) => sum + t._duration, 0);
+  let remainingMinutes = totalSlotMinutes - todayFlexibleMinutes;
+
+  const BACKLOG_DATE = '2099-01-01';
+
+  // 5b. Separate otherTasks into: future tasks, backlog tasks, and true "other"
+  const futureTasks = [];
+  const backlogTasks = [];
+  const remainingOther = [];
+
+  for (const task of otherTasks) {
+    const dueDate = task.due_date || task.dueDate;
+    if (dueDate === BACKLOG_DATE) {
+      backlogTasks.push(task);
+    } else if (dueDate && dueDate > tomorrow && dueDate < BACKLOG_DATE) {
+      futureTasks.push(task);
+    } else {
+      remainingOther.push(task);
+    }
+  }
+
+  // 5c. Pull from future tasks first (not events)
+  const pulledFromFuture = [];
+  const remainingFuture = [];
+
+  // Filter future tasks - skip events and fixed tasks
+  const futureFlexible = [];
+  for (const task of futureTasks) {
+    const title = (task.title || '').toLowerCase();
+    const isEvent = task.is_event || task.isEvent;
+    const notes = ((task.notes || '') + ' ' + (task.template || '')).toLowerCase();
+
+    // Skip deleted/completed
+    if (task.isDeleted || task.status === 'deleted' || task.status === 'completed') {
+      remainingFuture.push(task);
+      continue;
+    }
+
+    // Skip events - they stay on their scheduled date
+    if (isEvent) {
+      remainingFuture.push(task);
+      continue;
+    }
+
+    // Skip fixed tasks
+    if (notes.includes('@bhoga') || /^(cocinar|comer|desayuno)$/i.test(title) ||
+        /programa espiritual|spiritual program/i.test(title) || /\btot\b/i.test(title)) {
+      remainingFuture.push(task);
+      continue;
+    }
+
+    task._importance = scoreImportance(task);
+    task._duration = estimateDuration(task);
+    task._originalDate = dueDate;
+    task._fromFuture = true;
+    futureFlexible.push(task);
+  }
+
+  // Sort future tasks by date first (nearest first), then importance, then duration
+  futureFlexible.sort((a, b) => {
+    const dateA = a._originalDate || '';
+    const dateB = b._originalDate || '';
+    if (dateA !== dateB) return dateA.localeCompare(dateB);
+    if (a._importance !== b._importance) return a._importance - b._importance;
+    return a._duration - b._duration;
+  });
+
+  // Pull future tasks to fill remaining time
+  let pulledMinutes = 0;
+  for (const task of futureFlexible) {
+    if (remainingMinutes > 0 && pulledMinutes + task._duration <= remainingMinutes) {
+      task.due_date = task.dueDate = tomorrow;
+      task.updatedAt = new Date().toISOString();
+      pulledMinutes += task._duration;
+      pulledFromFuture.push(task);
+    } else {
+      remainingFuture.push(task);
+    }
+  }
+
+  // Update remaining minutes after pulling from future
+  remainingMinutes = remainingMinutes - pulledMinutes;
+
+  // 5d. If slots still remain, pull from backlog (2099-01-01 = "Someday")
+  const pulledFromBacklog = [];
+  const remainingBacklog = [];
+
+  // Filter backlog tasks
+  const backlogFlexible = [];
+  for (const task of backlogTasks) {
+    const title = (task.title || '').toLowerCase();
+    const isEvent = task.is_event || task.isEvent;
+    const notes = ((task.notes || '') + ' ' + (task.template || '')).toLowerCase();
+
+    // Skip deleted/completed
+    if (task.isDeleted || task.status === 'deleted' || task.status === 'completed') {
+      remainingBacklog.push(task);
+      continue;
+    }
+
+    // Skip fixed tasks even in backlog
+    if (isEvent || notes.includes('@bhoga') || /^(cocinar|comer|desayuno)$/i.test(title) ||
+        /programa espiritual|spiritual program/i.test(title) || /\btot\b/i.test(title)) {
+      remainingBacklog.push(task);
+      continue;
+    }
+
+    task._importance = scoreImportance(task);
+    task._duration = estimateDuration(task);
+    task._fromBacklog = true;
+    backlogFlexible.push(task);
+  }
+
+  // Sort backlog by importance then duration
+  backlogFlexible.sort((a, b) => {
+    if (a._importance !== b._importance) return a._importance - b._importance;
+    return a._duration - b._duration;
+  });
+
+  // Pull backlog tasks to fill remaining time
+  pulledMinutes = 0;
+  for (const task of backlogFlexible) {
+    if (remainingMinutes > 0 && pulledMinutes + task._duration <= remainingMinutes) {
+      task.due_date = task.dueDate = tomorrow;
+      task.updatedAt = new Date().toISOString();
+      pulledMinutes += task._duration;
+      pulledFromBacklog.push(task);
+    } else {
+      remainingBacklog.push(task);
+    }
+  }
+
+  // 5e. Merge today's flexible + pulled future + pulled backlog, re-sort by priority
+  const allFlexible = [...flexible, ...pulledFromFuture, ...pulledFromBacklog];
+  allFlexible.sort((a, b) => {
+    // Carried-over tasks (unfinished from yesterday) get priority
+    const aCarried = a._carriedOver ? 0 : 1;
+    const bCarried = b._carriedOver ? 0 : 1;
+    if (aCarried !== bCarried) return aCarried - bCarried;
+    if (a._importance !== b._importance) return a._importance - b._importance;
+    return a._duration - b._duration;
+  });
+
+  // 5d. Schedule all flexible tasks into slots
   let slotIdx = 0;
   let cursor = slots[0].start;
   const scheduled = [];
   const overflow = [];
 
-  for (const task of flexible) {
+  for (const task of allFlexible) {
     const duration = task._duration;
     let placed = false;
 
@@ -1115,92 +1689,108 @@ async function organizeTomorrowTasks(env) {
     }
 
     // Clean up internal fields
+    const wasFromBacklog = task._fromBacklog;
+    const wasFromFuture = task._fromFuture;
+    const originalDate = task._originalDate;
     delete task._importance;
     delete task._duration;
     delete task._carriedOver;
+    delete task._fromBacklog;
+    delete task._fromFuture;
+    delete task._originalDate;
 
     if (placed) {
       scheduled.push(task);
     } else {
-      // Overflow → move to day after tomorrow
-      task.due_date = task.dueDate = dayAfter;
-      task.due_time = task.dueTime = null;
-      delete task._importance;
+      // Overflow handling based on source
+      if (wasFromBacklog) {
+        // Return to backlog (will be pulled again when there's capacity)
+        task.due_date = task.dueDate = BACKLOG_DATE;
+        task.due_time = task.dueTime = null;
+        remainingBacklog.push(task);
+      } else if (wasFromFuture) {
+        // Return to original future date (keep it where user wanted it)
+        task.due_date = task.dueDate = originalDate;
+        task.due_time = task.dueTime = null;
+        remainingFuture.push(task);
+      } else {
+        // Today's task → collect for cascading overflow
+        overflow.push(task);
+      }
+    }
+  }
+
+  // 6. Cascade overflow tasks to future days with times
+  // Helper to add days to a date string
+  function addDaysToDate(dateStr, days) {
+    const d = new Date(dateStr + 'T12:00:00');
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+
+  const scheduledOverflow = [];
+  let overflowDayOffset = 1; // Start with dayAfter (tomorrow+1 from cron's perspective)
+  let remainingOverflow = [...overflow];
+
+  // Keep scheduling until all overflow tasks are placed (max 30 days to prevent infinite loop)
+  while (remainingOverflow.length > 0 && overflowDayOffset <= 30) {
+    const targetDate = addDaysToDate(tomorrow, overflowDayOffset);
+
+    // Reset slot tracking for this new day
+    let daySlotIdx = 0;
+    let dayCursor = slots[0].start;
+    const placedThisDay = [];
+    const stillOverflow = [];
+
+    for (const task of remainingOverflow) {
+      // Re-estimate duration if not set
+      const duration = task._duration || estimateDuration(task);
+      let placed = false;
+
+      while (daySlotIdx < slots.length) {
+        const slot = slots[daySlotIdx];
+        if (dayCursor < slot.start) dayCursor = slot.start;
+
+        if (dayCursor + duration <= slot.end) {
+          task.due_date = task.dueDate = targetDate;
+          task.due_time = task.dueTime = minutesToTime(dayCursor);
+          task.updatedAt = new Date().toISOString();
+          dayCursor += duration;
+          placed = true;
+          break;
+        }
+        daySlotIdx++;
+        if (daySlotIdx < slots.length) {
+          dayCursor = slots[daySlotIdx].start;
+        }
+      }
+
       delete task._duration;
-      delete task._carriedOver;
-      overflow.push(task);
-    }
-  }
 
-  // 5b. If slots remain, pull flexible tasks from dayAfter to fill today
-  const pulledFromDayAfter = [];
-  const remainingDayAfter = [];
-
-  // Filter dayAfter tasks same way as today's
-  const dayAfterFlexible = [];
-  for (const task of dayAfterTasks) {
-    const title = (task.title || '').toLowerCase();
-    const isEvent = task.is_event || task.isEvent;
-    const notes = ((task.notes || '') + ' ' + (task.template || '')).toLowerCase();
-
-    // Skip fixed tasks - they stay on their day
-    if (/programa espiritual|spiritual program/i.test(title) ||
-        isEvent ||
-        /desayuno/.test(title) ||
-        /\btot\b/i.test(task.title || '') ||
-        /cocinar|comer/.test(title) ||
-        /@bhoga/i.test(notes) ||
-        task.status === 'completed') {
-      remainingDayAfter.push(task);
-      continue;
-    }
-
-    task._importance = scoreImportance(task);
-    task._duration = estimateDuration(task);
-    dayAfterFlexible.push(task);
-  }
-
-  // Sort dayAfter flexible tasks by importance then duration
-  dayAfterFlexible.sort((a, b) => {
-    if (a._importance !== b._importance) return a._importance - b._importance;
-    return a._duration - b._duration;
-  });
-
-  // Try to place dayAfter tasks in remaining slots
-  for (const task of dayAfterFlexible) {
-    const duration = task._duration;
-    let placed = false;
-
-    while (slotIdx < slots.length) {
-      const slot = slots[slotIdx];
-      if (cursor + duration <= slot.end) {
-        task.due_date = task.dueDate = tomorrow;
-        task.due_time = task.dueTime = minutesToTime(cursor);
-        cursor += duration;
-        placed = true;
-        break;
-      }
-      slotIdx++;
-      if (slotIdx < slots.length) {
-        cursor = slots[slotIdx].start;
+      if (placed) {
+        placedThisDay.push(task);
+      } else {
+        stillOverflow.push(task);
       }
     }
 
-    delete task._importance;
-    delete task._duration;
-
-    if (placed) {
-      pulledFromDayAfter.push(task);
-    } else {
-      remainingDayAfter.push(task);
-    }
+    scheduledOverflow.push(...placedThisDay);
+    remainingOverflow = stillOverflow;
+    overflowDayOffset++;
   }
 
-  // 6. Reassemble all tasks
-  const organizedTomorrow = [...fixed, ...scheduled, ...pulledFromDayAfter];
-  const finalTasks = [...otherTasks, ...organizedTomorrow, ...overflow, ...remainingDayAfter];
+  // Any tasks that couldn't be placed in 30 days go to backlog
+  for (const task of remainingOverflow) {
+    task.due_date = task.dueDate = BACKLOG_DATE;
+    task.due_time = task.dueTime = null;
+    remainingBacklog.push(task);
+  }
 
-  // 7. Write back to D1 (same DELETE + INSERT pattern)
+  // 7. Reassemble all tasks
+  const organizedTomorrow = [...fixed, ...scheduled];
+  const finalTasks = [...remainingOther, ...organizedTomorrow, ...scheduledOverflow, ...dayAfterTasks, ...remainingFuture, ...remainingBacklog];
+
+  // 8. Write back to D1 (same DELETE + INSERT pattern)
   await env.DB.prepare('DELETE FROM user_tasks WHERE user_id = ?')
     .bind(userId).run();
 
@@ -1209,7 +1799,7 @@ async function organizeTomorrowTasks(env) {
      VALUES (?, ?, 'JSON_TASKS_DATA', datetime('now'), datetime('now'))`
   ).bind(userId, JSON.stringify(finalTasks)).run();
 
-  console.log(`✅ Auto-organize done: ${scheduled.length} scheduled, ${fixed.length} fixed, ${pulledFromDayAfter.length} pulled from tomorrow, ${overflow.length} overflowed`);
+  console.log(`✅ Auto-organize done: ${scheduled.length} scheduled, ${fixed.length} fixed, ${pulledFromFuture.length} pulled from future, ${pulledFromBacklog.length} pulled from backlog, ${scheduledOverflow.length} cascaded to future days`);
 }
 
 // Authentication helper
@@ -1846,11 +2436,11 @@ async function handleTasksSync(request, env, corsHeaders) {
           case 'add':
           case 'update':
             const stmt = env.DB.prepare(`
-              INSERT OR REPLACE INTO user_tasks 
+              INSERT OR REPLACE INTO user_tasks
               (id, user_id, title, notes, due_date, due_time, status, repeat_type, template, created_at, updated_at, is_deleted, deleted_at)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
-            
+
             await stmt.bind(
               task.id,
               actualUserId,

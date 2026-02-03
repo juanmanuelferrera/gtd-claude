@@ -114,13 +114,14 @@ def hf_create_task(
 ) -> str:
     """Create a new HyperFiler task. title is required. due_date as YYYY-MM-DD, template as @project name."""
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-    today = datetime.now().strftime("%Y-%m-%d")
+    # Tasks created via MCP without a date go to backlog (2099-01-01)
+    BACKLOG_DATE = "2099-01-01"
     new_task = {
         "id": str(int(time.time() * 1000)),
         "title": title,
         "notes": notes,
         "images": [],
-        "dueDate": due_date or today,
+        "dueDate": due_date or BACKLOG_DATE,
         "dueTime": due_time or None,
         "status": "pending",
         "repeatType": None,

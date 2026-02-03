@@ -315,7 +315,14 @@ async function handleDrop(e) {
         // Update task date
         window.draggedTask.dueDate = newDate;
         window.draggedTask.updatedAt = new Date().toISOString();
-        
+
+        // Auto-mark as Event when dropping to a future date (protects from cron pulling it forward)
+        const today = typeof getLocalDateString === 'function' ? getLocalDateString(new Date()) : new Date().toISOString().slice(0, 10);
+        if (newDate > today) {
+            window.draggedTask.isEvent = true;
+            console.log(`📅 Task "${window.draggedTask.title}" dropped on future date - marked as Event`);
+        }
+
         // Update in memory tasks array
         if (window.tasks) {
             const existingIndex = window.tasks.findIndex(t => t.id === window.draggedTask.id);

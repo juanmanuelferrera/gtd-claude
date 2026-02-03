@@ -232,13 +232,20 @@ async function updateTaskDate(taskId, newDate, event) {
 
         console.log(`🔄 Updating task "${task.title}" date from "${task.dueDate}" to "${newDate}"`);
 
-        const beforeDate = { dueDate: task.dueDate };
+        const beforeDate = { dueDate: task.dueDate, isEvent: task.isEvent };
 
         // Update task date
         task.dueDate = newDate || null;
         task.lastModified = new Date().toISOString();
 
-        recordAction('edit', task.id, task.title, beforeDate, { dueDate: task.dueDate });
+        // Auto-mark as Event when setting a future date (protects from cron pulling it forward)
+        const today = typeof getLocalDateString === 'function' ? getLocalDateString(new Date()) : new Date().toISOString().slice(0, 10);
+        if (newDate && newDate > today) {
+            task.isEvent = true;
+            console.log(`📅 Task "${task.title}" set to future date - marked as Event`);
+        }
+
+        recordAction('edit', task.id, task.title, beforeDate, { dueDate: task.dueDate, isEvent: task.isEvent });
 
         // Save to localStorage
         saveTasksToLocalStorage();
@@ -1249,7 +1256,14 @@ async function delayTask(taskId, days, event) {
         task.dueDate = getLocalDateString(newDate);
         task.updatedAt = new Date().toISOString();
 
-        recordAction('delay', task.id, task.title, beforeDelay, { dueDate: task.dueDate });
+        // Auto-mark as Event when moving to a future date (protects from cron pulling it forward)
+        const today = getLocalDateString(new Date());
+        if (task.dueDate > today) {
+            task.isEvent = true;
+            console.log(`📅 Task "${task.title}" moved to future date - marked as Event`);
+        }
+
+        recordAction('delay', task.id, task.title, beforeDelay, { dueDate: task.dueDate, isEvent: task.isEvent });
 
         // Save to localStorage
         saveTasksToLocalStorage();
