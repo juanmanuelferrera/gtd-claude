@@ -946,8 +946,9 @@ async function organizeTomorrowTasks(env) {
   const tomorrow = getTodayDateStr();
   const dayAfter = getTomorrowDateStr();
 
-  // 2. Separate tomorrow's organizable tasks from everything else
+  // 2. Separate today's, tomorrow's (dayAfter), and other tasks
   const tomorrowTasks = [];
+  const dayAfterTasks = [];
   const otherTasks = [];
 
   for (const task of allTasks) {
@@ -963,6 +964,8 @@ async function organizeTomorrowTasks(env) {
     const dueDate = task.due_date || task.dueDate;
     if (dueDate === tomorrow) {
       tomorrowTasks.push(task);
+    } else if (dueDate === dayAfter) {
+      dayAfterTasks.push(task);
     } else {
       otherTasks.push(task);
     }
@@ -1129,9 +1132,73 @@ async function organizeTomorrowTasks(env) {
     }
   }
 
+  // 5b. If slots remain, pull flexible tasks from dayAfter to fill today
+  const pulledFromDayAfter = [];
+  const remainingDayAfter = [];
+
+  // Filter dayAfter tasks same way as today's
+  const dayAfterFlexible = [];
+  for (const task of dayAfterTasks) {
+    const title = (task.title || '').toLowerCase();
+    const isEvent = task.is_event || task.isEvent;
+    const notes = ((task.notes || '') + ' ' + (task.template || '')).toLowerCase();
+
+    // Skip fixed tasks - they stay on their day
+    if (/programa espiritual|spiritual program/i.test(title) ||
+        isEvent ||
+        /desayuno/.test(title) ||
+        /\btot\b/i.test(task.title || '') ||
+        /cocinar/.test(title) ||
+        /@bhoga/i.test(notes) ||
+        task.status === 'completed') {
+      remainingDayAfter.push(task);
+      continue;
+    }
+
+    task._importance = scoreImportance(task);
+    task._duration = estimateDuration(task);
+    dayAfterFlexible.push(task);
+  }
+
+  // Sort dayAfter flexible tasks by importance then duration
+  dayAfterFlexible.sort((a, b) => {
+    if (a._importance !== b._importance) return a._importance - b._importance;
+    return a._duration - b._duration;
+  });
+
+  // Try to place dayAfter tasks in remaining slots
+  for (const task of dayAfterFlexible) {
+    const duration = task._duration;
+    let placed = false;
+
+    while (slotIdx < slots.length) {
+      const slot = slots[slotIdx];
+      if (cursor + duration <= slot.end) {
+        task.due_date = task.dueDate = tomorrow;
+        task.due_time = task.dueTime = minutesToTime(cursor);
+        cursor += duration;
+        placed = true;
+        break;
+      }
+      slotIdx++;
+      if (slotIdx < slots.length) {
+        cursor = slots[slotIdx].start;
+      }
+    }
+
+    delete task._importance;
+    delete task._duration;
+
+    if (placed) {
+      pulledFromDayAfter.push(task);
+    } else {
+      remainingDayAfter.push(task);
+    }
+  }
+
   // 6. Reassemble all tasks
-  const organizedTomorrow = [...fixed, ...scheduled];
-  const finalTasks = [...otherTasks, ...organizedTomorrow, ...overflow];
+  const organizedTomorrow = [...fixed, ...scheduled, ...pulledFromDayAfter];
+  const finalTasks = [...otherTasks, ...organizedTomorrow, ...overflow, ...remainingDayAfter];
 
   // 7. Write back to D1 (same DELETE + INSERT pattern)
   await env.DB.prepare('DELETE FROM user_tasks WHERE user_id = ?')
@@ -1142,7 +1209,7 @@ async function organizeTomorrowTasks(env) {
      VALUES (?, ?, 'JSON_TASKS_DATA', datetime('now'), datetime('now'))`
   ).bind(userId, JSON.stringify(finalTasks)).run();
 
-  console.log(`✅ Auto-organize done: ${scheduled.length} scheduled, ${fixed.length} fixed, ${overflow.length} overflowed`);
+  console.log(`✅ Auto-organize done: ${scheduled.length} scheduled, ${fixed.length} fixed, ${pulledFromDayAfter.length} pulled from tomorrow, ${overflow.length} overflowed`);
 }
 
 // Authentication helper

@@ -10,6 +10,7 @@
 - 06:00-07:00 is always reserved for "programa espiritual" (spiritual program). Never schedule other tasks in this slot.
 - Always schedule most important tasks first, then sort by shortest duration within the same priority level.
 - If any tasks don't fit in the day (overflow past 19:00), automatically move them to the next day.
+- If slots remain after scheduling today's tasks, pull flexible tasks from tomorrow to fill them (same filtering rules: skip events, TOT, @bhoga, cocinar, desayuno, completed). Mark pulled tasks with "(de mañana)" in output.
 
 ## CarryOver (midnight cron)
 - When the cron runs at midnight, tasks carried over from the previous day have **higher priority** than tasks already scheduled for the new day, since they represent unfinished work.
