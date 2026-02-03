@@ -861,12 +861,14 @@ function saveWeekStart() {
     if (select) {
         localStorage.setItem('weekStartDay', select.value);
         console.log('Week start day saved:', select.value);
-        
-        // Refresh week and calendar views if they're currently displayed
+
+        // Refresh week, calendar, and events views if they're currently displayed
         if (window.currentView === 'week' && typeof renderWeekView === 'function') {
             renderWeekView();
         } else if (window.currentView === 'calendar' && typeof renderCalendar === 'function') {
             renderCalendar();
+        } else if (window.currentView === 'events' && typeof renderEventsView === 'function') {
+            renderEventsView();
         }
     }
 }
@@ -2287,12 +2289,23 @@ function getWeekInfo(dateStr) {
     return { week: weekNumber, year: date.getFullYear() };
 }
 
-// Get week start date (Monday) - timezone safe
+// Get week start date based on user preference - timezone safe
 function getWeekStart(dateStr) {
     const [year, month, day] = dateStr.split('-').map(Number);
     const date = new Date(year, month - 1, day);
-    const dayOfWeek = date.getDay();
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Monday = 1, Sunday = 0 -> -6
+    const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const weekStartDay = getWeekStartDay(); // 0 = Sunday, 1 = Monday
+
+    // Calculate days to subtract to get to week start
+    let diff;
+    if (weekStartDay === 0) {
+        // Week starts on Sunday
+        diff = -dayOfWeek;
+    } else {
+        // Week starts on Monday
+        diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    }
+
     date.setDate(date.getDate() + diff);
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
