@@ -2375,18 +2375,27 @@ function renderEventsView() {
     // Get all events (not deleted) - use isTaskEvent to catch both isEvent flag and @event in notes
     const allEvents = (window.tasks || []).filter(t => isTaskEvent(t) && t.status !== 'deleted');
 
-    // Calculate current week's Monday based on offset
-    const currentWeekMonday = getWeekStart(today);
-    const mondayDate = new Date(currentWeekMonday + 'T00:00:00');
-    mondayDate.setDate(mondayDate.getDate() + (window.eventsWeekOffset * 7));
-    const weekStart = mondayDate.toISOString().slice(0, 10);
+    // Calculate current week's start based on offset and user preference
+    const currentWeekStart = getWeekStart(today);
+    const startDate = new Date(currentWeekStart + 'T12:00:00'); // Use noon to avoid timezone issues
+    startDate.setDate(startDate.getDate() + (window.eventsWeekOffset * 7));
+
+    // Helper to get local date string (avoid UTC conversion issues)
+    const toLocalDateStr = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
+    const weekStart = toLocalDateStr(startDate);
 
     // Generate all 7 days of the week
     const weekDays = [];
     for (let i = 0; i < 7; i++) {
-        const d = new Date(mondayDate);
+        const d = new Date(startDate);
         d.setDate(d.getDate() + i);
-        weekDays.push(d.toISOString().slice(0, 10));
+        weekDays.push(toLocalDateStr(d));
     }
 
     // Group events by date for quick lookup
