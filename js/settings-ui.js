@@ -2377,7 +2377,7 @@ function renderEventsView() {
                                 Hoy
                             </button>
                         ` : ''}
-                        <button onclick="openEventCalendarPicker(event, '${event.id}')"
+                        <button onclick="event.stopPropagation(); openIOSDateTimePicker('${event.id}', '${event.dueDate || ''}', '${event.dueTime || ''}', this)"
                                 style="background: none; border: 1px solid #dee2e6; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 14px;"
                                 title="Cambiar fecha">
                             📅
