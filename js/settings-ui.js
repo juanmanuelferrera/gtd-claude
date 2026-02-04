@@ -1993,12 +1993,12 @@ function handleNowOrganizeClick() {
     }
 }
 
-// Organize tasks from UI (similar to /organize but simplified)
+// Full organize from UI (same logic as /organize in terminal)
 async function organizeTasksFromUI() {
     const btn = document.getElementById('nowOrganizeBtn');
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '⏳...';
+        btn.innerHTML = '⏳ Organizing...';
     }
 
     try {
@@ -2009,92 +2009,183 @@ async function organizeTasksFromUI() {
             ? getLocalDateString(now)
             : now.toISOString().slice(0, 10);
 
-        // Get all pending tasks for today that are not events
-        const todayTasks = (window.tasks || []).filter(t =>
-            t.status !== 'deleted' &&
-            t.status !== 'completed' &&
-            t.dueDate === today &&
-            !isTaskEvent(t)
+        // Calculate next Monday for @bhoga
+        const getNextMonday = () => {
+            const d = new Date();
+            const day = d.getDay();
+            const daysUntilMonday = day === 0 ? 1 : (8 - day);
+            d.setDate(d.getDate() + daysUntilMonday);
+            return d.toISOString().slice(0, 10);
+        };
+        const nextMonday = getNextMonday();
+
+        // Get all pending tasks
+        const allTasks = (window.tasks || []).filter(t =>
+            t.status !== 'deleted' && t.status !== 'completed'
         );
 
-        if (todayTasks.length === 0) {
+        if (allTasks.length === 0) {
             if (typeof showToast === 'function') showToast('No tasks to organize');
             return;
         }
 
-        // Define time slots (after current time)
-        const slots = [];
-        const slotRanges = [
-            [7, 0, 9, 0],     // 07:00-09:00
-            [9, 30, 10, 0],   // 09:30-10:00
-            [13, 0, 14, 0],   // 13:00-14:00
-            [14, 45, 19, 0]   // 14:45-19:00
-        ];
+        // Categorize tasks
+        const events = [];      // @event - don't touch
+        const bhogaTasks = [];  // @bhoga - move to Monday
+        const flexibleTasks = []; // Everything else - redistribute
 
-        // Find next available slot
-        let startHour = currentHour;
-        let startMinute = currentMinute;
+        for (const task of allTasks) {
+            const notes = (task.notes || '').toLowerCase();
 
-        // Round up to next 15 min
-        startMinute = Math.ceil(startMinute / 15) * 15;
-        if (startMinute >= 60) {
-            startMinute = 0;
-            startHour++;
-        }
-
-        // Find valid slot
-        for (const [sh, sm, eh, em] of slotRanges) {
-            const slotStart = sh * 60 + sm;
-            const slotEnd = eh * 60 + em;
-            const currentTime = startHour * 60 + startMinute;
-
-            if (currentTime < slotEnd) {
-                const actualStart = Math.max(currentTime, slotStart);
-                slots.push({ start: actualStart, end: slotEnd });
+            if (isTaskEvent(task)) {
+                events.push(task);
+            } else if (/@bhoga/i.test(notes)) {
+                bhogaTasks.push(task);
+            } else {
+                flexibleTasks.push(task);
             }
         }
 
-        if (slots.length === 0) {
-            if (typeof showToast === 'function') showToast('No time slots available today');
-            return;
+        // Move @bhoga tasks to next Monday
+        let bhogaMoved = 0;
+        for (const task of bhogaTasks) {
+            if (task.dueDate !== nextMonday) {
+                task.dueDate = nextMonday;
+                task.due_date = nextMonday;
+                task.dueTime = '';
+                task.due_time = '';
+                task.updatedAt = new Date().toISOString();
+                bhogaMoved++;
+            }
         }
 
-        // Sort tasks by importance (simple heuristic)
-        todayTasks.sort((a, b) => {
-            const scoreA = getTaskPriority(a);
-            const scoreB = getTaskPriority(b);
-            return scoreA - scoreB;
+        // Sort flexible tasks by priority, then duration
+        flexibleTasks.sort((a, b) => {
+            const prioA = getTaskPriority(a);
+            const prioB = getTaskPriority(b);
+            if (prioA !== prioB) return prioA - prioB;
+            return estimateTaskDuration(a) - estimateTaskDuration(b);
         });
 
-        // Assign times
-        let currentSlotIdx = 0;
-        let currentTime = slots[0].start;
+        // Time slots (in minutes from midnight)
+        const TIME_SLOTS = [
+            { start: 7 * 60, end: 9 * 60 },         // 07:00-09:00
+            { start: 9 * 60 + 30, end: 10 * 60 },   // 09:30-10:00
+            { start: 13 * 60, end: 14 * 60 },       // 13:00-14:00
+            { start: 14 * 60 + 45, end: 19 * 60 }   // 14:45-19:00
+        ];
 
-        for (const task of todayTasks) {
-            if (currentSlotIdx >= slots.length) break;
+        // Fixed time rules
+        const getFixedTime = (task) => {
+            const title = (task.title || '').toLowerCase();
+            if (/programa espiritual/.test(title)) return '06:00';
+            if (/desayuno/.test(title)) return '09:00';
+            if (/\btot\b/.test(title)) return '10:00';
+            if (/cocinar|comer/.test(title)) return '14:00';
+            return null;
+        };
 
+        // Schedule tasks across days
+        const scheduled = {};  // { 'YYYY-MM-DD': [tasks] }
+        let currentDate = today;
+        let dayOffset = 0;
+        const MAX_DAYS = 60;
+
+        // Get available minutes for a day starting from a given time
+        const getAvailableSlots = (dateStr, startFromMinute = 0) => {
+            const slots = [];
+            for (const slot of TIME_SLOTS) {
+                if (slot.end > startFromMinute) {
+                    slots.push({
+                        start: Math.max(slot.start, startFromMinute),
+                        end: slot.end
+                    });
+                }
+            }
+            return slots;
+        };
+
+        // Helper to add days to a date string
+        const addDays = (dateStr, days) => {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const date = new Date(y, m - 1, d);
+            date.setDate(date.getDate() + days);
+            return date.toISOString().slice(0, 10);
+        };
+
+        // Format time from minutes
+        const formatTime = (mins) => {
+            const h = Math.floor(mins / 60);
+            const m = mins % 60;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        };
+
+        // Start scheduling from current time for today
+        let currentTimeMinutes = currentHour * 60 + Math.ceil(currentMinute / 15) * 15;
+        let tasksScheduled = 0;
+        let backlogCleared = 0;
+
+        for (const task of flexibleTasks) {
+            let placed = false;
             const duration = estimateTaskDuration(task);
-            const slot = slots[currentSlotIdx];
+            const fixedTime = getFixedTime(task);
+            const wasBacklog = task.dueDate === '2099-01-01';
 
-            // Check if fits in current slot
-            if (currentTime + duration <= slot.end) {
-                const hours = Math.floor(currentTime / 60);
-                const mins = currentTime % 60;
-                task.dueTime = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-                task.due_time = task.dueTime;
-                task.updatedAt = new Date().toISOString();
-                currentTime += duration;
-            } else {
-                // Move to next slot
-                currentSlotIdx++;
-                if (currentSlotIdx < slots.length) {
-                    currentTime = slots[currentSlotIdx].start;
-                    const hours = Math.floor(currentTime / 60);
-                    const mins = currentTime % 60;
-                    task.dueTime = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-                    task.due_time = task.dueTime;
+            // Try to place in current day or future days
+            for (let attempt = 0; attempt < MAX_DAYS && !placed; attempt++) {
+                const targetDate = addDays(today, dayOffset + attempt);
+                const isToday = targetDate === today;
+                const startMin = isToday ? currentTimeMinutes : 0;
+                const slots = getAvailableSlots(targetDate, startMin);
+
+                if (!scheduled[targetDate]) scheduled[targetDate] = [];
+
+                // Check if fixed time task
+                if (fixedTime) {
+                    task.dueDate = targetDate;
+                    task.due_date = targetDate;
+                    task.dueTime = fixedTime;
+                    task.due_time = fixedTime;
                     task.updatedAt = new Date().toISOString();
-                    currentTime += duration;
+                    scheduled[targetDate].push(task);
+                    placed = true;
+                    tasksScheduled++;
+                    if (wasBacklog) backlogCleared++;
+                    break;
+                }
+
+                // Try to fit in slots
+                for (const slot of slots) {
+                    // Calculate used time in this slot for this day
+                    const usedInSlot = scheduled[targetDate]
+                        .filter(t => {
+                            if (!t.dueTime) return false;
+                            const [h, m] = t.dueTime.split(':').map(Number);
+                            const taskMin = h * 60 + m;
+                            return taskMin >= slot.start && taskMin < slot.end;
+                        })
+                        .reduce((sum, t) => sum + estimateTaskDuration(t), 0);
+
+                    const availableInSlot = slot.end - slot.start - usedInSlot;
+
+                    if (duration <= availableInSlot) {
+                        const startTime = slot.start + usedInSlot;
+                        task.dueDate = targetDate;
+                        task.due_date = targetDate;
+                        task.dueTime = formatTime(startTime);
+                        task.due_time = task.dueTime;
+                        task.updatedAt = new Date().toISOString();
+                        scheduled[targetDate].push(task);
+                        placed = true;
+                        tasksScheduled++;
+                        if (wasBacklog) backlogCleared++;
+                        break;
+                    }
+                }
+
+                // If not placed in this day, try next day
+                if (!placed && attempt === 0) {
+                    dayOffset++;
                 }
             }
         }
@@ -2104,7 +2195,10 @@ async function organizeTasksFromUI() {
         if (typeof uploadAllTasks === 'function') uploadAllTasks();
         if (typeof renderTasks === 'function') renderTasks();
 
-        if (typeof showToast === 'function') showToast(`Organized ${todayTasks.length} tasks`);
+        // Show summary
+        const summary = `✅ Organized: ${tasksScheduled} tasks, ${bhogaMoved} @bhoga→Mon, ${backlogCleared} from backlog`;
+        if (typeof showToast === 'function') showToast(summary);
+        console.log(summary);
 
     } catch (error) {
         console.error('Error organizing tasks:', error);
