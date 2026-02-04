@@ -2228,17 +2228,11 @@ async function organizeTasksFromUI() {
             // But don't break - continue to next day
         }
 
-        // Debug: show distribution per day sorted by date
+        // Log distribution for debugging
         const sortedDist = Object.entries(scheduled)
             .sort((a, b) => a[0].localeCompare(b[0]))
             .slice(0, 10);
-        const distribution = sortedDist
-            .map(([date, tasks]) => `${date}: ${tasks.length}`)
-            .join('\n');
-        console.log('Task distribution:\n' + distribution);
-        console.log('Events (not redistributed):', events.length);
-        console.log('Flexible tasks processed:', flexibleTasks.length);
-        alert(`Events: ${events.length}\nFlexible: ${flexibleTasks.length}\n\nDistribution:\n${distribution}`);
+        console.log('Task distribution:', sortedDist.map(([d, t]) => `${d}: ${t.length}`).join(', '));
 
         // Save and sync
         if (typeof saveTasks === 'function') saveTasks();
