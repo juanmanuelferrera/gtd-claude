@@ -2209,7 +2209,6 @@ async function organizeTasksFromUI() {
         const summary = `✅ Organized: ${tasksScheduled} tasks, ${bhogaMoved} @bhoga→Mon, ${backlogCleared} from backlog`;
         console.log(summary);
         if (typeof showToast === 'function') showToast(summary, 5000);
-        alert(summary);
 
     } catch (error) {
         console.error('Error organizing tasks:', error);
