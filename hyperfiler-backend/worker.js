@@ -1113,28 +1113,6 @@ async function organizeTasksForUserAndDates(env, userId, tomorrow, dayAfter, tas
     }
   }
 
-  // Ensure spiritual program exists
-  let hasSpiritual = tomorrowTasks.some(t => /programa espiritual|spiritual program/i.test(t.title || ''));
-  if (!hasSpiritual) {
-    tomorrowTasks.push({
-      id: `spiritual_${tomorrow}`,
-      title: 'Programa Espiritual',
-      notes: '',
-      dueDate: tomorrow,
-      due_date: tomorrow,
-      dueTime: '06:00',
-      due_time: '06:00',
-      status: 'pending',
-      isEvent: false,
-      is_event: false,
-      isDeleted: false,
-      is_deleted: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      images: []
-    });
-  }
-
   if (tomorrowTasks.length === 0) return;
 
   // Helper to check if task matches a user's fixed time rule
@@ -1153,32 +1131,22 @@ async function organizeTasksForUserAndDates(env, userId, tomorrow, dayAfter, tas
   const flexible = [];
 
   for (const task of tomorrowTasks) {
-    const title = (task.title || '').toLowerCase();
     const notes = (task.notes || '').toLowerCase();
     const isEvent = task.is_event || task.isEvent || notes.includes('@event');
 
-    // First check user's custom fixed time rules
+    // Check user's custom fixed time rules
     const userFixedTime = getFixedTimeFromRules(task);
     if (userFixedTime) {
       task.due_time = task.dueTime = userFixedTime;
       fixed.push(task);
-    } else if (/programa espiritual|spiritual program/i.test(title)) {
-      task.due_time = task.dueTime = '06:00';
-      fixed.push(task);
     } else if (isEvent) {
-      fixed.push(task);
-    } else if (/desayuno/.test(title)) {
-      task.due_time = task.dueTime = '09:00';
-      fixed.push(task);
-    } else if (/\btot\b/i.test(task.title || '')) {
-      task.due_time = task.dueTime = '10:00';
-      fixed.push(task);
-    } else if (/cocinar|comer/.test(title)) {
-      task.due_time = task.dueTime = '14:00';
+      // Events keep their time, don't reschedule
       fixed.push(task);
     } else if (/@bhoga/i.test(task.template || '') || /@bhoga/i.test(notes)) {
+      // @bhoga tasks stay fixed (shopping list)
       fixed.push(task);
     } else {
+      // Flexible task - will be scheduled by priority
       task.due_time = task.dueTime = '';
       task._importance = scoreImportance(task);
       task._duration = estimateDuration(task);
@@ -1195,7 +1163,7 @@ async function organizeTasksForUserAndDates(env, userId, tomorrow, dayAfter, tas
     return a._duration - b._duration;
   });
 
-  // Time slots - use user's settings if available, otherwise use defaults
+  // Time slots - use user's settings if available, otherwise use simple default
   let slots;
   if (userTimeBlocks.length > 0) {
     // Convert user time blocks to minutes format
@@ -1205,12 +1173,9 @@ async function organizeTasksForUserAndDates(env, userId, tomorrow, dayAfter, tas
       return { start: sh * 60 + (sm || 0), end: eh * 60 + (em || 0) };
     });
   } else {
-    // Default time slots
+    // Default: simple full day 07:00-19:00 (users configure their own blocks in Settings)
     slots = [
-      { start: 420, end: 540 },
-      { start: 570, end: 600 },
-      { start: 780, end: 840 },
-      { start: 885, end: 1140 },
+      { start: 420, end: 1140 }  // 07:00-19:00
     ];
   }
 
