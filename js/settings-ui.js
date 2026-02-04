@@ -2084,21 +2084,51 @@ async function organizeTasksFromUI() {
             return estimateTaskDuration(a) - estimateTaskDuration(b);
         });
 
-        // Time slots (in minutes from midnight)
-        const TIME_SLOTS = [
-            { start: 7 * 60, end: 9 * 60 },         // 07:00-09:00
-            { start: 9 * 60 + 30, end: 10 * 60 },   // 09:30-10:00
-            { start: 13 * 60, end: 14 * 60 },       // 13:00-14:00
-            { start: 14 * 60 + 45, end: 19 * 60 }   // 14:45-19:00
-        ];
+        // Time slots - check user settings or use simple default
+        const userTimeBlocks = localStorage.getItem('hyperfiler_time_blocks');
+        let TIME_SLOTS;
 
-        // Fixed time rules
+        if (userTimeBlocks) {
+            try {
+                // User has custom blocks: [{start: "07:00", end: "09:00"}, ...]
+                const parsed = JSON.parse(userTimeBlocks);
+                TIME_SLOTS = parsed.map(b => ({
+                    start: parseInt(b.start.split(':')[0]) * 60 + parseInt(b.start.split(':')[1] || 0),
+                    end: parseInt(b.end.split(':')[0]) * 60 + parseInt(b.end.split(':')[1] || 0)
+                }));
+            } catch (e) {
+                // Fallback to simple default
+                TIME_SLOTS = [{ start: 7 * 60, end: 19 * 60 }];  // 07:00-19:00
+            }
+        } else {
+            // No custom blocks - use simple full day
+            TIME_SLOTS = [{ start: 7 * 60, end: 19 * 60 }];  // 07:00-19:00
+        }
+
+        // Fixed time rules - check user settings or use defaults
+        const userFixedTimes = localStorage.getItem('hyperfiler_fixed_times');
+        let fixedTimeRules = [];
+
+        if (userFixedTimes) {
+            try {
+                // User has custom rules: [{pattern: "programa espiritual", time: "06:00"}, ...]
+                fixedTimeRules = JSON.parse(userFixedTimes);
+            } catch (e) {
+                fixedTimeRules = [];
+            }
+        }
+
         const getFixedTime = (task) => {
             const title = (task.title || '').toLowerCase();
-            if (/programa espiritual/.test(title)) return '06:00';
-            if (/desayuno/.test(title)) return '09:00';
-            if (/\btot\b/.test(title)) return '10:00';
-            if (/cocinar|comer/.test(title)) return '14:00';
+
+            // Check user-defined rules first
+            for (const rule of fixedTimeRules) {
+                if (new RegExp(rule.pattern, 'i').test(title)) {
+                    return rule.time;
+                }
+            }
+
+            // No match - return null (task will be scheduled in regular slots)
             return null;
         };
 
@@ -2305,7 +2335,112 @@ window.loadSettingsValues = function() {
     loadTimezoneOptionsGeneral();
     loadTimezoneOptionsMain();
     loadAutoOrganizeState();
+    loadTimeBlocksUI();
 };
+
+// Initialize time blocks and fixed time rules for organize
+function initializeOrganizeSettings() {
+    // Only set defaults if user hasn't configured their own
+    if (!localStorage.getItem('hyperfiler_time_blocks')) {
+        // Default: simple full day block (works for everyone)
+        // Users can customize in settings
+        const defaultBlocks = [
+            { start: '07:00', end: '19:00' }
+        ];
+        localStorage.setItem('hyperfiler_time_blocks', JSON.stringify(defaultBlocks));
+    }
+
+    if (!localStorage.getItem('hyperfiler_fixed_times')) {
+        // Default: no fixed time rules (works for everyone)
+        // Users can add their own patterns
+        localStorage.setItem('hyperfiler_fixed_times', JSON.stringify([]));
+    }
+}
+
+// Load time blocks UI in settings
+function loadTimeBlocksUI() {
+    const container = document.getElementById('timeBlocksContainer');
+    if (!container) return;
+
+    const blocks = JSON.parse(localStorage.getItem('hyperfiler_time_blocks') || '[]');
+    const fixedTimes = JSON.parse(localStorage.getItem('hyperfiler_fixed_times') || '[]');
+
+    container.innerHTML = `
+        <div style="margin-bottom: 15px;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Time Blocks for Scheduling:</label>
+            <div id="timeBlocksList">
+                ${blocks.map((b, i) => `
+                    <div style="display: flex; gap: 10px; margin-bottom: 5px; align-items: center;">
+                        <input type="time" value="${b.start}" onchange="updateTimeBlock(${i}, 'start', this.value)" style="padding: 5px;">
+                        <span>to</span>
+                        <input type="time" value="${b.end}" onchange="updateTimeBlock(${i}, 'end', this.value)" style="padding: 5px;">
+                        <button onclick="removeTimeBlock(${i})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer;">✕</button>
+                    </div>
+                `).join('')}
+            </div>
+            <button onclick="addTimeBlock()" style="background: #28a745; color: white; border: none; padding: 5px 15px; cursor: pointer; margin-top: 5px;">+ Add Block</button>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Fixed Time Rules (task pattern → time):</label>
+            <div id="fixedTimesList">
+                ${fixedTimes.map((r, i) => `
+                    <div style="display: flex; gap: 10px; margin-bottom: 5px; align-items: center;">
+                        <input type="text" value="${r.pattern}" placeholder="pattern (e.g., desayuno)" onchange="updateFixedTime(${i}, 'pattern', this.value)" style="padding: 5px; flex: 1;">
+                        <span>→</span>
+                        <input type="time" value="${r.time}" onchange="updateFixedTime(${i}, 'time', this.value)" style="padding: 5px;">
+                        <button onclick="removeFixedTime(${i})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer;">✕</button>
+                    </div>
+                `).join('')}
+            </div>
+            <button onclick="addFixedTime()" style="background: #28a745; color: white; border: none; padding: 5px 15px; cursor: pointer; margin-top: 5px;">+ Add Rule</button>
+        </div>
+    `;
+}
+
+// Time block management functions
+window.updateTimeBlock = function(index, field, value) {
+    const blocks = JSON.parse(localStorage.getItem('hyperfiler_time_blocks') || '[]');
+    blocks[index][field] = value;
+    localStorage.setItem('hyperfiler_time_blocks', JSON.stringify(blocks));
+};
+
+window.removeTimeBlock = function(index) {
+    const blocks = JSON.parse(localStorage.getItem('hyperfiler_time_blocks') || '[]');
+    blocks.splice(index, 1);
+    localStorage.setItem('hyperfiler_time_blocks', JSON.stringify(blocks));
+    loadTimeBlocksUI();
+};
+
+window.addTimeBlock = function() {
+    const blocks = JSON.parse(localStorage.getItem('hyperfiler_time_blocks') || '[]');
+    blocks.push({ start: '09:00', end: '17:00' });
+    localStorage.setItem('hyperfiler_time_blocks', JSON.stringify(blocks));
+    loadTimeBlocksUI();
+};
+
+window.updateFixedTime = function(index, field, value) {
+    const rules = JSON.parse(localStorage.getItem('hyperfiler_fixed_times') || '[]');
+    rules[index][field] = value;
+    localStorage.setItem('hyperfiler_fixed_times', JSON.stringify(rules));
+};
+
+window.removeFixedTime = function(index) {
+    const rules = JSON.parse(localStorage.getItem('hyperfiler_fixed_times') || '[]');
+    rules.splice(index, 1);
+    localStorage.setItem('hyperfiler_fixed_times', JSON.stringify(rules));
+    loadTimeBlocksUI();
+};
+
+window.addFixedTime = function() {
+    const rules = JSON.parse(localStorage.getItem('hyperfiler_fixed_times') || '[]');
+    rules.push({ pattern: '', time: '09:00' });
+    localStorage.setItem('hyperfiler_fixed_times', JSON.stringify(rules));
+    loadTimeBlocksUI();
+};
+
+// Initialize on load
+initializeOrganizeSettings();
 
 // ========== PAST EVENTS MANAGEMENT ==========
 
