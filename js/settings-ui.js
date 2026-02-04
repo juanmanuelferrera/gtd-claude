@@ -2365,60 +2365,66 @@ function loadTimeBlocksUI() {
     const blocks = JSON.parse(localStorage.getItem('hyperfiler_time_blocks') || '[]');
     const fixedTimes = JSON.parse(localStorage.getItem('hyperfiler_fixed_times') || '[]');
 
+    // Get first block or default
+    const workingHours = blocks[0] || { start: '07:00', end: '19:00' };
+
     container.innerHTML = `
-        <div style="margin-bottom: 15px;">
-            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Time Blocks for Scheduling:</label>
-            <div id="timeBlocksList">
-                ${blocks.map((b, i) => `
-                    <div style="display: flex; gap: 10px; margin-bottom: 5px; align-items: center;">
-                        <input type="time" value="${b.start}" onchange="updateTimeBlock(${i}, 'start', this.value)" style="padding: 5px;">
-                        <span>to</span>
-                        <input type="time" value="${b.end}" onchange="updateTimeBlock(${i}, 'end', this.value)" style="padding: 5px;">
-                        <button onclick="removeTimeBlock(${i})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer;">✕</button>
-                    </div>
-                `).join('')}
+        <div style="margin-bottom: 20px;">
+            <label style="font-weight: 600; display: block; margin-bottom: 8px; color: #4a5568;">
+                ⏰ Working Hours (when tasks can be scheduled):
+            </label>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <input type="time" id="workingHoursStart" value="${workingHours.start}"
+                    onchange="updateWorkingHours()"
+                    style="padding: 8px 12px; border: 2px solid #bee3f8; border-radius: 6px; font-size: 14px;">
+                <span style="color: #718096;">to</span>
+                <input type="time" id="workingHoursEnd" value="${workingHours.end}"
+                    onchange="updateWorkingHours()"
+                    style="padding: 8px 12px; border: 2px solid #bee3f8; border-radius: 6px; font-size: 14px;">
             </div>
-            <button onclick="addTimeBlock()" style="background: #28a745; color: white; border: none; padding: 5px 15px; cursor: pointer; margin-top: 5px;">+ Add Block</button>
+            <div style="font-size: 12px; color: #718096; margin-top: 5px;">
+                Tasks will be scheduled between these hours
+            </div>
         </div>
 
         <div style="margin-bottom: 15px;">
-            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Fixed Time Rules (task pattern → time):</label>
+            <label style="font-weight: 600; display: block; margin-bottom: 8px; color: #4a5568;">
+                📌 Fixed Time Rules (optional):
+            </label>
+            <div style="font-size: 12px; color: #718096; margin-bottom: 10px;">
+                Tasks matching a pattern always go to a specific time
+            </div>
             <div id="fixedTimesList">
                 ${fixedTimes.map((r, i) => `
-                    <div style="display: flex; gap: 10px; margin-bottom: 5px; align-items: center;">
-                        <input type="text" value="${r.pattern}" placeholder="pattern (e.g., desayuno)" onchange="updateFixedTime(${i}, 'pattern', this.value)" style="padding: 5px; flex: 1;">
-                        <span>→</span>
-                        <input type="time" value="${r.time}" onchange="updateFixedTime(${i}, 'time', this.value)" style="padding: 5px;">
-                        <button onclick="removeFixedTime(${i})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer;">✕</button>
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center; background: white; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <input type="text" value="${r.pattern || ''}" placeholder="e.g., desayuno"
+                            onchange="updateFixedTime(${i}, 'pattern', this.value)"
+                            style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 4px; width: 150px; font-size: 14px;">
+                        <span style="color: #718096;">→</span>
+                        <input type="time" value="${r.time || '09:00'}"
+                            onchange="updateFixedTime(${i}, 'time', this.value)"
+                            style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 14px;">
+                        <button onclick="removeFixedTime(${i})"
+                            style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;">✕</button>
                     </div>
                 `).join('')}
             </div>
-            <button onclick="addFixedTime()" style="background: #28a745; color: white; border: none; padding: 5px 15px; cursor: pointer; margin-top: 5px;">+ Add Rule</button>
+            <button onclick="addFixedTime()"
+                style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 5px;">
+                + Add Rule
+            </button>
         </div>
     `;
 }
 
-// Time block management functions
-window.updateTimeBlock = function(index, field, value) {
-    const blocks = JSON.parse(localStorage.getItem('hyperfiler_time_blocks') || '[]');
-    blocks[index][field] = value;
-    localStorage.setItem('hyperfiler_time_blocks', JSON.stringify(blocks));
+// Update working hours (single range)
+window.updateWorkingHours = function() {
+    const start = document.getElementById('workingHoursStart').value;
+    const end = document.getElementById('workingHoursEnd').value;
+    localStorage.setItem('hyperfiler_time_blocks', JSON.stringify([{ start, end }]));
 };
 
-window.removeTimeBlock = function(index) {
-    const blocks = JSON.parse(localStorage.getItem('hyperfiler_time_blocks') || '[]');
-    blocks.splice(index, 1);
-    localStorage.setItem('hyperfiler_time_blocks', JSON.stringify(blocks));
-    loadTimeBlocksUI();
-};
-
-window.addTimeBlock = function() {
-    const blocks = JSON.parse(localStorage.getItem('hyperfiler_time_blocks') || '[]');
-    blocks.push({ start: '09:00', end: '17:00' });
-    localStorage.setItem('hyperfiler_time_blocks', JSON.stringify(blocks));
-    loadTimeBlocksUI();
-};
-
+// Fixed time rules management
 window.updateFixedTime = function(index, field, value) {
     const rules = JSON.parse(localStorage.getItem('hyperfiler_fixed_times') || '[]');
     rules[index][field] = value;
