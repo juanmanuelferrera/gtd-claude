@@ -1,7 +1,7 @@
 /**
  * Settings and UI Functions for HyperFiler Pro
  */
-console.log('✅ settings-ui.js v20260204-no-reservado LOADED');
+console.log('✅ settings-ui.js v20260204-auto-sync LOADED');
 
 // Missing core functions
 function saveTasks() {
@@ -2525,6 +2525,9 @@ function initializeOrganizeSettings() {
     if (!localStorage.getItem('hyperfiler_fixed_times')) {
         localStorage.setItem('hyperfiler_fixed_times', JSON.stringify([]));
     }
+
+    // Always sync to backend on load (ensures cron has latest settings)
+    syncOrganizeSettingsToBackend();
 }
 
 // Load time blocks UI in settings
