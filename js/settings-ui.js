@@ -2204,6 +2204,36 @@ async function organizeTasksFromUI() {
             return dayCapacity[dateStr];
         };
 
+        // Get blocked time ranges from fixed time rules (these are ALWAYS blocked, regardless of tasks)
+        const getBlockedRanges = () => {
+            const blocked = [];
+            for (const rule of fixedTimeRules) {
+                if (rule.startTime && rule.endTime) {
+                    const [sh, sm] = rule.startTime.split(':').map(Number);
+                    const [eh, em] = rule.endTime.split(':').map(Number);
+                    blocked.push({
+                        start: sh * 60 + (sm || 0),
+                        end: eh * 60 + (em || 0),
+                        pattern: rule.pattern
+                    });
+                }
+            }
+            return blocked;
+        };
+        const blockedRanges = getBlockedRanges();
+        console.log('🚫 Blocked time ranges:', JSON.stringify(blockedRanges));
+
+        // Check if a time range overlaps with any blocked range
+        const overlapsBlockedRange = (startMin, endMin) => {
+            for (const blocked of blockedRanges) {
+                // Overlap if: start < blocked.end AND end > blocked.start
+                if (startMin < blocked.end && endMin > blocked.start) {
+                    return blocked;
+                }
+            }
+            return null;
+        };
+
         // Helper to try placing a task on a specific day
         const tryPlaceTask = (task, targetDate) => {
             const isToday = targetDate === today;
@@ -2226,35 +2256,67 @@ async function organizeTasksFromUI() {
                 return true;
             }
 
-            // Try to fit in slots
+            // Try to fit in slots, avoiding blocked ranges
             for (const slot of slots) {
-                const usedInSlot = scheduled[targetDate]
+                // Get all occupied time segments in this slot (from scheduled tasks)
+                const occupiedSegments = scheduled[targetDate]
                     .filter(t => {
                         if (!t.dueTime) return false;
                         const [h, m] = t.dueTime.split(':').map(Number);
                         const taskMin = h * 60 + m;
                         return taskMin >= slot.start && taskMin < slot.end;
                     })
-                    .reduce((sum, t) => {
-                        // If task has fixed end time, use that range instead of estimated duration
+                    .map(t => {
+                        const [h, m] = t.dueTime.split(':').map(Number);
+                        const taskStart = h * 60 + m;
+                        let taskEnd;
                         if (t._fixedEndTime) {
-                            const [sh, sm] = t.dueTime.split(':').map(Number);
                             const [eh, em] = t._fixedEndTime.split(':').map(Number);
-                            return sum + ((eh * 60 + em) - (sh * 60 + sm));
+                            taskEnd = eh * 60 + em;
+                        } else {
+                            taskEnd = taskStart + estimateTaskDuration(t);
                         }
-                        return sum + estimateTaskDuration(t);
-                    }, 0);
+                        return { start: taskStart, end: taskEnd };
+                    });
 
-                const availableInSlot = slot.end - slot.start - usedInSlot;
+                // Add blocked ranges that overlap with this slot
+                for (const blocked of blockedRanges) {
+                    if (blocked.start < slot.end && blocked.end > slot.start) {
+                        occupiedSegments.push({ start: blocked.start, end: blocked.end, isBlocked: true });
+                    }
+                }
 
-                if (duration <= availableInSlot) {
-                    const startTime = slot.start + usedInSlot;
+                // Sort occupied segments by start time
+                occupiedSegments.sort((a, b) => a.start - b.start);
+
+                // Find first gap that fits the task
+                let searchStart = slot.start;
+                for (const seg of occupiedSegments) {
+                    // Gap before this segment?
+                    if (searchStart + duration <= seg.start) {
+                        // Found a gap! Place the task here
+                        task.dueDate = targetDate;
+                        task.due_date = targetDate;
+                        task.dueTime = formatTime(searchStart);
+                        task.due_time = task.dueTime;
+                        task.updatedAt = new Date().toISOString();
+                        scheduled[targetDate].push(task);
+                        console.log(`📍 Placed "${task.title}" at ${task.dueTime} (before blocked/occupied segment)`);
+                        return true;
+                    }
+                    // Move search start past this segment
+                    searchStart = Math.max(searchStart, seg.end);
+                }
+
+                // Check gap after all segments
+                if (searchStart + duration <= slot.end) {
                     task.dueDate = targetDate;
                     task.due_date = targetDate;
-                    task.dueTime = formatTime(startTime);
+                    task.dueTime = formatTime(searchStart);
                     task.due_time = task.dueTime;
                     task.updatedAt = new Date().toISOString();
                     scheduled[targetDate].push(task);
+                    console.log(`📍 Placed "${task.title}" at ${task.dueTime} (after all segments)`);
                     return true;
                 }
             }
