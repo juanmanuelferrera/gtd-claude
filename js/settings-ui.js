@@ -1984,7 +1984,6 @@ function updateNowOrganizeButton() {
 
 // Handle click on Now/Organize button
 async function handleNowOrganizeClick() {
-    alert('handleNowOrganizeClick called! autoOrganizeEnabled=' + window.autoOrganizeEnabled);
     console.log('🔄 handleNowOrganizeClick called, autoOrganizeEnabled:', window.autoOrganizeEnabled);
     if (window.autoOrganizeEnabled) {
         console.log('🔄 Calling organizeTasksFromUI...');
@@ -2094,7 +2093,6 @@ async function organizeTasksFromUI() {
                 // User has custom blocks: [{start: "07:00", end: "09:00"}, ...]
                 const parsed = JSON.parse(userTimeBlocks);
                 console.log('⏰ Time blocks from settings:', JSON.stringify(parsed));
-                alert('TIME BLOCKS loaded: ' + JSON.stringify(parsed));
                 TIME_SLOTS = parsed.map(b => ({
                     start: parseInt(b.start.split(':')[0]) * 60 + parseInt(b.start.split(':')[1] || 0),
                     end: parseInt(b.end.split(':')[0]) * 60 + parseInt(b.end.split(':')[1] || 0)
@@ -2102,13 +2100,11 @@ async function organizeTasksFromUI() {
                 console.log('⏰ TIME_SLOTS (in minutes):', JSON.stringify(TIME_SLOTS));
             } catch (e) {
                 console.log('⚠️ Failed to parse time blocks:', e);
-                alert('FAILED to parse time blocks: ' + e.message);
                 // Fallback to simple default
                 TIME_SLOTS = [{ start: 7 * 60, end: 19 * 60 }];  // 07:00-19:00
             }
         } else {
             console.log('⏰ No custom time blocks, using default 07:00-19:00');
-            alert('NO custom time blocks - using default 07:00-19:00');
             // No custom blocks - use simple full day
             TIME_SLOTS = [{ start: 7 * 60, end: 19 * 60 }];  // 07:00-19:00
         }
@@ -2122,15 +2118,12 @@ async function organizeTasksFromUI() {
                 // User has custom rules: [{pattern: "...", startTime: "06:00", endTime: "07:00"}, ...]
                 fixedTimeRules = JSON.parse(userFixedTimes);
                 console.log('📋 Fixed time rules loaded:', JSON.stringify(fixedTimeRules));
-                alert('FIXED TIME RULES: ' + JSON.stringify(fixedTimeRules));
             } catch (e) {
                 console.log('⚠️ Failed to parse fixed time rules:', e);
-                alert('FAILED to parse fixed time rules: ' + e.message);
                 fixedTimeRules = [];
             }
         } else {
             console.log('📋 No fixed time rules configured');
-            alert('NO fixed time rules configured');
         }
 
         const getFixedTimeRule = (task) => {
@@ -2323,11 +2316,52 @@ async function organizeTasksFromUI() {
             return false;
         };
 
+        // Helper to add real tasks for blocked time ranges when no matching task exists
+        const addBlockedRangeTasks = (targetDate) => {
+            if (!scheduled[targetDate]) scheduled[targetDate] = [];
+
+            for (const blocked of blockedRanges) {
+                // Check if there's already a task matching this pattern on this day (in window.tasks)
+                const hasMatchingTask = (window.tasks || []).some(t => {
+                    if (t.status === 'deleted' || t.status === 'completed') return false;
+                    if (t.dueDate !== targetDate && t.due_date !== targetDate) return false;
+                    const title = (t.title || '').toLowerCase();
+                    return blocked.pattern && new RegExp(blocked.pattern, 'i').test(title);
+                });
+
+                if (!hasMatchingTask && blocked.pattern) {
+                    // Create a REAL task for this blocked range
+                    const taskTitle = blocked.pattern.charAt(0).toUpperCase() + blocked.pattern.slice(1);
+                    const newTask = {
+                        id: `blocked-${targetDate}-${blocked.pattern}-${Date.now()}`,
+                        title: taskTitle,
+                        dueDate: targetDate,
+                        due_date: targetDate,
+                        dueTime: formatTime(blocked.start),
+                        due_time: formatTime(blocked.start),
+                        notes: '@reservado',
+                        status: 'pending',
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    // Add to window.tasks so it gets saved
+                    window.tasks.push(newTask);
+                    scheduled[targetDate].push(newTask);
+                    console.log(`🔒 Created task "${taskTitle}" at ${formatTime(blocked.start)} on ${targetDate}`);
+                }
+            }
+        };
+
         // Fill days one at a time, trying ALL remaining tasks on each day
         let remainingTasks = [...flexibleTasks];
 
         for (let dayNum = 0; dayNum < MAX_DAYS && remainingTasks.length > 0; dayNum++) {
             const targetDate = addDays(today, dayNum);
+
+            // Add tasks for blocked time ranges if no matching task exists
+            addBlockedRangeTasks(targetDate);
+
             const stillRemaining = [];
             let placedOnThisDay = 0;
 
