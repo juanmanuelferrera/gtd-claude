@@ -1984,9 +1984,12 @@ function updateNowOrganizeButton() {
 
 // Handle click on Now/Organize button
 function handleNowOrganizeClick() {
+    console.log('🔄 handleNowOrganizeClick called, autoOrganizeEnabled:', window.autoOrganizeEnabled);
     if (window.autoOrganizeEnabled) {
+        console.log('🔄 Calling organizeTasksFromUI...');
         organizeTasksFromUI();
     } else {
+        console.log('🕐 Calling moveAllTasksToCurrentTime...');
         if (typeof moveAllTasksToCurrentTime === 'function') {
             moveAllTasksToCurrentTime();
         }
@@ -1995,6 +1998,7 @@ function handleNowOrganizeClick() {
 
 // Full organize from UI (same logic as /organize in terminal)
 async function organizeTasksFromUI() {
+    console.log('🔄 organizeTasksFromUI STARTED');
     const btn = document.getElementById('nowOrganizeBtn');
     if (btn) {
         btn.disabled = true;
@@ -2002,6 +2006,7 @@ async function organizeTasksFromUI() {
     }
 
     try {
+        console.log('🔄 Getting tasks, window.tasks count:', (window.tasks || []).length);
         const now = new Date();
         const currentHour = now.getHours();
         const currentMinute = now.getMinutes();
@@ -2024,7 +2029,10 @@ async function organizeTasksFromUI() {
             t.status !== 'deleted' && t.status !== 'completed'
         );
 
+        console.log('🔄 All pending tasks:', allTasks.length);
+
         if (allTasks.length === 0) {
+            console.log('🔄 No tasks to organize');
             if (typeof showToast === 'function') showToast('No tasks to organize');
             return;
         }
@@ -2045,6 +2053,8 @@ async function organizeTasksFromUI() {
                 flexibleTasks.push(task);
             }
         }
+
+        console.log('🔄 Categorized - Events:', events.length, 'Bhoga:', bhogaTasks.length, 'Flexible:', flexibleTasks.length);
 
         // Move @bhoga tasks to next Monday
         let bhogaMoved = 0;
