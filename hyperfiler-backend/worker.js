@@ -1557,155 +1557,54 @@ async function organizeTomorrowTasks(env) {
     }
   }
 
-  // Ensure "Spiritual Program" task exists at 06:00 for today
-  let hasSpiritual = tomorrowTasks.some(t =>
-    /programa espiritual|spiritual program/i.test(t.title || '')
-  );
-  if (!hasSpiritual) {
-    const spiritualTask = {
-      id: `spiritual_${tomorrow}`,
-      title: 'Programa Espiritual',
-      notes: '',
-      dueDate: tomorrow,
-      due_date: tomorrow,
-      dueTime: '06:00',
-      due_time: '06:00',
-      status: 'pending',
-      isEvent: false,
-      is_event: false,
-      isDeleted: false,
-      is_deleted: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      images: []
-    };
-    tomorrowTasks.push(spiritualTask);
-  } else {
-    // Fix time to 06:00 if it exists but has wrong time
-    for (const t of tomorrowTasks) {
-      if (/programa espiritual|spiritual program/i.test(t.title || '')) {
-        t.due_time = t.dueTime = '06:00';
-      }
-    }
-  }
+  // Load user's Fixed Time Rules from database
+  const userSettings = await getUserOrganizeSettings(userId, env);
+  const fixedTimeRules = userSettings.fixedTimeRules || [];
+  console.log(`📋 Cron: loaded ${fixedTimeRules.length} fixed time rules from user settings`);
 
-  // Also ensure spiritual program exists for the next day
-  let dayAfterHasSpiritual = otherTasks.some(t => {
-    const dd = t.due_date || t.dueDate;
-    return dd === dayAfter && /programa espiritual|spiritual program/i.test(t.title || '') && !t.isDeleted && t.status !== 'deleted';
-  });
-  if (!dayAfterHasSpiritual) {
-    otherTasks.push({
-      id: `spiritual_${dayAfter}`,
-      title: 'Programa Espiritual',
-      notes: '',
-      dueDate: dayAfter,
-      due_date: dayAfter,
-      dueTime: '06:00',
-      due_time: '06:00',
-      status: 'pending',
-      isEvent: false,
-      is_event: false,
-      isDeleted: false,
-      is_deleted: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      images: []
+  // Create placeholder tasks for each Fixed Time Rule if no matching task exists
+  for (const rule of fixedTimeRules) {
+    if (!rule.pattern || !rule.startTime) continue;
+
+    const pattern = rule.pattern;
+    const startTime = rule.startTime;
+    const stableId = `fixed_${pattern.toLowerCase().replace(/\s+/g, '_')}_${tomorrow}`;
+
+    // Check if a task matching this pattern already exists for today
+    const hasMatchingTask = tomorrowTasks.some(t => {
+      if (t.isDeleted || t.status === 'deleted') return false;
+      const title = (t.title || '').toLowerCase();
+      return new RegExp(pattern, 'i').test(title);
     });
-  }
 
-  // Ensure "Desayuno" task exists at 09:00 for today
-  let hasDesayuno = tomorrowTasks.some(t =>
-    /desayuno/i.test(t.title || '') && !t.isDeleted && t.status !== 'deleted'
-  );
-  if (!hasDesayuno) {
-    const desayunoTask = {
-      id: `desayuno_${tomorrow}`,
-      title: 'Desayuno',
-      notes: '',
-      dueDate: tomorrow,
-      due_date: tomorrow,
-      dueTime: '09:00',
-      due_time: '09:00',
-      status: 'pending',
-      isEvent: false,
-      is_event: false,
-      isDeleted: false,
-      is_deleted: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      images: []
-    };
-    tomorrowTasks.push(desayunoTask);
-  } else {
-    // Fix time to 09:00 if it exists but has wrong time
-    for (const t of tomorrowTasks) {
-      if (/desayuno/i.test(t.title || '')) {
-        t.due_time = t.dueTime = '09:00';
-      }
-    }
-  }
-
-  // Ensure "Comida" task exists at 14:00 for today
-  let hasComida = tomorrowTasks.some(t =>
-    /comida|comer|almuerzo/i.test(t.title || '') && !t.isDeleted && t.status !== 'deleted'
-  );
-  if (!hasComida) {
-    const comidaTask = {
-      id: `comida_${tomorrow}`,
-      title: 'Comida',
-      notes: '',
-      dueDate: tomorrow,
-      due_date: tomorrow,
-      dueTime: '14:00',
-      due_time: '14:00',
-      status: 'pending',
-      isEvent: false,
-      is_event: false,
-      isDeleted: false,
-      is_deleted: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      images: []
-    };
-    tomorrowTasks.push(comidaTask);
-  } else {
-    // Fix time to 14:00 if it exists but has wrong time
-    for (const t of tomorrowTasks) {
-      if (/comida|comer|almuerzo/i.test(t.title || '')) {
-        t.due_time = t.dueTime = '14:00';
-      }
-    }
-  }
-
-  // Ensure "TOT" (The One Thing) task exists at 10:00 for today
-  let hasTOT = tomorrowTasks.some(t =>
-    /\bTOT\b/i.test(t.title || '') && !t.isDeleted && t.status !== 'deleted'
-  );
-  if (!hasTOT) {
-    const totTask = {
-      id: `tot_${tomorrow}`,
-      title: 'TOT',
-      notes: '@theonething',
-      dueDate: tomorrow,
-      due_date: tomorrow,
-      dueTime: '10:00',
-      due_time: '10:00',
-      status: 'pending',
-      isEvent: false,
-      is_event: false,
-      isDeleted: false,
-      is_deleted: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      images: []
-    };
-    tomorrowTasks.push(totTask);
-  } else {
-    // Fix time to 10:00 if TOT exists but has wrong time
-    for (const t of tomorrowTasks) {
-      if (/\bTOT\b/i.test(t.title || '')) {
-        t.due_time = t.dueTime = '10:00';
+    if (!hasMatchingTask) {
+      // Create placeholder task with title from pattern (capitalized)
+      const taskTitle = pattern.charAt(0).toUpperCase() + pattern.slice(1);
+      const placeholderTask = {
+        id: stableId,
+        title: taskTitle,
+        notes: '',
+        dueDate: tomorrow,
+        due_date: tomorrow,
+        dueTime: startTime,
+        due_time: startTime,
+        status: 'pending',
+        isEvent: false,
+        is_event: false,
+        isDeleted: false,
+        is_deleted: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        images: []
+      };
+      tomorrowTasks.push(placeholderTask);
+      console.log(`🔒 Cron: created placeholder "${taskTitle}" at ${startTime}`);
+    } else {
+      // Fix time if task exists but has wrong time
+      for (const t of tomorrowTasks) {
+        if (new RegExp(pattern, 'i').test(t.title || '')) {
+          t.due_time = t.dueTime = startTime;
+        }
       }
     }
   }
