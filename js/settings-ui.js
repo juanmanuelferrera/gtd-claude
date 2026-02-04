@@ -1,7 +1,7 @@
 /**
  * Settings and UI Functions for HyperFiler Pro
  */
-console.log('✅ settings-ui.js v20260204-debug-tot LOADED');
+console.log('✅ settings-ui.js v20260204-no-placeholders LOADED');
 
 // Missing core functions
 function saveTasks() {
@@ -2349,53 +2349,6 @@ async function organizeTasksFromUI() {
             }
             return false;
         };
-
-        // Helper to add placeholder tasks for blocked time ranges (TODAY ONLY)
-        const addBlockedRangeTasksForToday = () => {
-            if (!scheduled[today]) scheduled[today] = [];
-
-            for (const blocked of blockedRanges) {
-                // Use stable ID so we don't create duplicates
-                const stableId = `blocked-${today}-${blocked.pattern}`;
-
-                // Check if task with this ID already exists
-                const existsById = (window.tasks || []).some(t => t.id === stableId && t.status !== 'deleted');
-
-                // Check if there's ANY pending task matching this pattern (any date, including backlog)
-                // These will be moved to today and placed in the fixed time slot
-                const hasMatchingTask = (window.tasks || []).some(t => {
-                    if (t.status === 'deleted' || t.status === 'completed') return false;
-                    if (t.id === stableId) return true;  // Count existing placeholder
-                    const title = (t.title || '').toLowerCase();
-                    return blocked.pattern && new RegExp(blocked.pattern, 'i').test(title);
-                });
-
-                if (!hasMatchingTask && !existsById && blocked.pattern) {
-                    // Create a task for this blocked range (TODAY only)
-                    const taskTitle = blocked.pattern.charAt(0).toUpperCase() + blocked.pattern.slice(1);
-                    const newTask = {
-                        id: stableId,
-                        title: taskTitle,
-                        dueDate: today,
-                        due_date: today,
-                        dueTime: formatTime(blocked.start),
-                        due_time: formatTime(blocked.start),
-                        notes: '@reservado',
-                        status: 'pending',
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    };
-
-                    // Add to window.tasks so it gets saved
-                    window.tasks.push(newTask);
-                    scheduled[today].push(newTask);
-                    console.log(`🔒 Created task "${taskTitle}" at ${formatTime(blocked.start)} for today`);
-                }
-            }
-        };
-
-        // Add placeholder tasks for blocked time ranges (TODAY only, with stable IDs)
-        addBlockedRangeTasksForToday();
 
         // Fill days one at a time, trying ALL remaining tasks on each day
         let remainingTasks = [...flexibleTasks];
