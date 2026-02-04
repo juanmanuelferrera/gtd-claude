@@ -1415,19 +1415,57 @@ function scoreImportance(task) {
 
 function estimateDuration(task) {
   const t = (task.title || '').toLowerCase();
-  // Check for explicit duration in notes
-  const durMatch = (task.notes || '').match(/(\d+)\s*min/);
+  const n = (task.notes || '').toLowerCase();
+  const text = t + ' ' + n;
+
+  // Check for explicit duration in title or notes (e.g., "30 min", "20 min", "1 hora")
+  const durMatch = text.match(/(\d+)\s*min/);
   if (durMatch) return parseInt(durMatch[1]);
-  // Heuristics
+  const horaMatch = text.match(/(\d+)\s*hora/);
+  if (horaMatch) return parseInt(horaMatch[1]) * 60;
+
+  // AI-like heuristics based on task context
+
+  // Very quick tasks (5-10 min)
+  if (/comprobar|verificar|check|revisar fecha|buscar precio/.test(t)) return 10;
+  if (/llamar|call|contactar|email|enviar|mandar/.test(t)) return 15;
+  if (/anotar|apuntar|recordar|note/.test(t)) return 5;
+
+  // Quick tasks (15-20 min)
+  if (/revisar|review|ver enlace|ver link|leer artículo/.test(t)) return 20;
+  if (/poner|quitar|sacar|meter|guardar/.test(t)) return 15;
+  if (/agua a|regar/.test(t)) return 10;
   if (/desayuno|breakfast/.test(t)) return 30;
-  if (/cocinar|cook/.test(t)) return 45;
-  if (/limpiar|clean/.test(t)) return 30;
-  if (/llamar|call|email/.test(t)) return 15;
-  if (/ejercicio|gym|workout/.test(t)) return 60;
-  if (/comprar|errand|shopping/.test(t)) return 45;
-  if (/escribir|write|capítulo|chapter/.test(t)) return 90;
-  if (/deploy|fix|bug|code|programar/.test(t)) return 60;
-  return 30; // default
+  if (/afeitarm|afeitar|ducha/.test(t)) return 20;
+
+  // Medium tasks (30-45 min)
+  if (/limpiar|clean|barrer|fregar|ordenar/.test(t)) return 30;
+  if (/lavar/.test(t)) return 30;
+  if (/ejercicio|caminar|walk|gym|workout|yoga/.test(t)) return 45;
+  if (/cocinar|cook|preparar comida/.test(t)) return 45;
+  if (/comer|lunch|almuerzo|comida/.test(t)) return 45;
+  if (/comprar(?!.*reloj|.*caro)|errand|recados|mercadona|lidl|tienda/.test(t)) return 45;
+  if (/instalar|install|configurar|setup/.test(t)) return 30;
+  if (/buscar vuelos|buscar hotel|buscar alojamiento/.test(t)) return 30;
+  if (/rellenar|formulario|solicitud|papeles/.test(t)) return 45;
+
+  // Longer tasks (60 min)
+  if (/escribir|write|redactar/.test(t)) return 60;
+  if (/deploy|fix|bug|code|programar|arreglar.*código/.test(t)) return 60;
+  if (/investigar|research|estudiar|analizar/.test(t)) return 60;
+  if (/hacer.*backup|backup/.test(t)) return 30;
+  if (/organizar|planificar/.test(t)) return 45;
+
+  // Long tasks (90+ min)
+  if (/capítulo|chapter|libro|book/.test(t)) return 90;
+  if (/proyecto|project/.test(t)) return 60;
+  if (/viaje|trip|visitar/.test(t)) return 120;
+
+  // Shopping items (@bhoga, grocery lists) - quick to grab
+  if (/@bhoga|@lacteos|@verduras|@frutas|@cereales|@otros/.test(n)) return 5;
+
+  // Default for unknown tasks
+  return 30;
 }
 
 function timeToMinutes(timeStr) {
@@ -1796,18 +1834,14 @@ async function organizeTomorrowTasks(env) {
       scheduled.push(task);
     } else {
       // Overflow handling based on source
-      if (wasFromBacklog) {
-        // Return to backlog (will be pulled again when there's capacity)
-        task.due_date = task.dueDate = BACKLOG_DATE;
-        task.due_time = task.dueTime = null;
-        remainingBacklog.push(task);
-      } else if (wasFromFuture) {
-        // Return to original future date (keep it where user wanted it)
+      if (wasFromFuture) {
+        // Future-dated tasks return to their original date (user chose that date)
         task.due_date = task.dueDate = originalDate;
         task.due_time = task.dueTime = null;
         remainingFuture.push(task);
       } else {
-        // Today's task → collect for cascading overflow
+        // Today's task OR backlog task → cascade to future days
+        // ALL backlog tasks get distributed, never return to backlog
         overflow.push(task);
       }
     }
