@@ -2047,21 +2047,29 @@ async function organizeTasksFromUI() {
         // Categorize tasks
         const events = [];      // @event - don't touch
         const bhogaTasks = [];  // @bhoga - move to Monday
-        const flexibleTasks = []; // Everything else - redistribute
+        const futureTasks = []; // Future-dated (> today, < backlog) - don't touch
+        const flexibleTasks = []; // Today + backlog - organize these
+
+        const BACKLOG_DATE = '2099-01-01';
 
         for (const task of allTasks) {
             const notes = (task.notes || '').toLowerCase();
+            const taskDate = task.dueDate || task.due_date || '';
 
             if (isTaskEvent(task)) {
                 events.push(task);
             } else if (/@bhoga/i.test(notes)) {
                 bhogaTasks.push(task);
+            } else if (taskDate > today && taskDate < BACKLOG_DATE) {
+                // Future-dated task - user put it there intentionally, don't touch
+                futureTasks.push(task);
             } else {
+                // Today's tasks OR backlog (2099-01-01) - organize these
                 flexibleTasks.push(task);
             }
         }
 
-        console.log('🔄 Categorized - Events:', events.length, 'Bhoga:', bhogaTasks.length, 'Flexible:', flexibleTasks.length);
+        console.log('🔄 Categorized - Events:', events.length, 'Bhoga:', bhogaTasks.length, 'Future (untouched):', futureTasks.length, 'Flexible:', flexibleTasks.length);
 
         // Move @bhoga tasks to next Monday
         let bhogaMoved = 0;
