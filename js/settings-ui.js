@@ -2212,6 +2212,14 @@ async function organizeTasksFromUI() {
             }
         }
 
+        // Debug: show distribution per day
+        const distribution = Object.entries(scheduled)
+            .map(([date, tasks]) => `${date}: ${tasks.length}`)
+            .slice(0, 10)  // first 10 days
+            .join('\n');
+        console.log('Task distribution:\n' + distribution);
+        alert('Distribution (first 10 days):\n' + distribution);
+
         // Save and sync
         if (typeof saveTasks === 'function') saveTasks();
         if (typeof uploadAllTasks === 'function') uploadAllTasks();
