@@ -1,7 +1,7 @@
 /**
  * Settings and UI Functions for HyperFiler Pro
  */
-console.log('✅ settings-ui.js v20260204-debug3 LOADED');
+console.log('✅ settings-ui.js v20260204-debug-tot LOADED');
 
 // Missing core functions
 function saveTasks() {
@@ -2053,14 +2053,25 @@ async function organizeTasksFromUI() {
         for (const task of allTasks) {
             const notes = (task.notes || '').toLowerCase();
             const taskDate = task.dueDate || task.due_date || '';
+            const title = (task.title || '').toLowerCase();
+
+            // Debug: Check if this task matches TOT pattern
+            if (/tot/i.test(task.title)) {
+                console.log(`🔍 TOT task found: "${task.title}"`);
+                console.log(`   - isEvent: ${task.isEvent}, notes: "${task.notes}"`);
+                console.log(`   - dueDate: ${taskDate}, today: ${today}`);
+                console.log(`   - isTaskEvent result: ${isTaskEvent(task)}`);
+            }
 
             if (isTaskEvent(task)) {
                 events.push(task);
+                if (/tot/i.test(task.title)) console.log(`   → Categorized as EVENT (skipped)`);
             } else if (/@bhoga/i.test(notes)) {
                 bhogaTasks.push(task);
             } else if (taskDate && taskDate > today) {
                 // Future-dated task - user put it there intentionally, don't touch
                 futureTasks.push(task);
+                if (/tot/i.test(task.title)) console.log(`   → Categorized as FUTURE (skipped)`);
             } else {
                 // Today's tasks (or undated) - organize these
                 // Set date to today if not set
@@ -2069,6 +2080,7 @@ async function organizeTasksFromUI() {
                     task.due_date = today;
                 }
                 flexibleTasks.push(task);
+                if (/tot/i.test(task.title)) console.log(`   → Categorized as FLEXIBLE (will organize)`);
             }
         }
 
@@ -2140,6 +2152,13 @@ async function organizeTasksFromUI() {
         const getFixedTimeRule = (task) => {
             const title = (task.title || '').toLowerCase();
 
+            // Debug: Log when checking TOT tasks
+            if (/tot/i.test(task.title)) {
+                console.log(`🔍 getFixedTimeRule checking: "${task.title}"`);
+                console.log(`   - fixedTimeRules count: ${fixedTimeRules.length}`);
+                console.log(`   - Rules:`, JSON.stringify(fixedTimeRules));
+            }
+
             // Check user-defined rules
             for (const rule of fixedTimeRules) {
                 if (rule.pattern && new RegExp(rule.pattern, 'i').test(title)) {
@@ -2149,10 +2168,15 @@ async function organizeTasksFromUI() {
                         startTime: rule.startTime || rule.time || '09:00',
                         endTime: rule.endTime || null
                     };
+                } else if (/tot/i.test(task.title)) {
+                    console.log(`   - Tested pattern "${rule.pattern}": NO MATCH`);
                 }
             }
 
             // No match - return null (task will be scheduled in regular slots)
+            if (/tot/i.test(task.title)) {
+                console.log(`   → No fixed time rule matched for TOT task`);
+            }
             return null;
         };
 
