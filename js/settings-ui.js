@@ -1,7 +1,7 @@
 /**
  * Settings and UI Functions for HyperFiler Pro
  */
-console.log('✅ settings-ui.js v20260203-v2 LOADED');
+console.log('✅ settings-ui.js v20260204-fixedrange LOADED');
 
 // Missing core functions
 function saveTasks() {
@@ -2111,20 +2111,24 @@ async function organizeTasksFromUI() {
 
         if (userFixedTimes) {
             try {
-                // User has custom rules: [{pattern: "programa espiritual", time: "06:00"}, ...]
+                // User has custom rules: [{pattern: "...", startTime: "06:00", endTime: "07:00"}, ...]
                 fixedTimeRules = JSON.parse(userFixedTimes);
             } catch (e) {
                 fixedTimeRules = [];
             }
         }
 
-        const getFixedTime = (task) => {
+        const getFixedTimeRule = (task) => {
             const title = (task.title || '').toLowerCase();
 
-            // Check user-defined rules first
+            // Check user-defined rules
             for (const rule of fixedTimeRules) {
-                if (new RegExp(rule.pattern, 'i').test(title)) {
-                    return rule.time;
+                if (rule.pattern && new RegExp(rule.pattern, 'i').test(title)) {
+                    // Support both old format (time) and new format (startTime/endTime)
+                    return {
+                        startTime: rule.startTime || rule.time || '09:00',
+                        endTime: rule.endTime || null
+                    };
                 }
             }
 
@@ -2190,16 +2194,17 @@ async function organizeTasksFromUI() {
             const startMin = isToday ? currentTimeMinutes : 0;
             const slots = getAvailableSlots(targetDate, startMin);
             const duration = estimateTaskDuration(task);
-            const fixedTime = getFixedTime(task);
+            const fixedRule = getFixedTimeRule(task);
 
             if (!scheduled[targetDate]) scheduled[targetDate] = [];
 
-            // Fixed time tasks always fit
-            if (fixedTime) {
+            // Fixed time tasks always fit - use startTime from the rule
+            if (fixedRule) {
                 task.dueDate = targetDate;
                 task.due_date = targetDate;
-                task.dueTime = fixedTime;
-                task.due_time = fixedTime;
+                task.dueTime = fixedRule.startTime;
+                task.due_time = fixedRule.startTime;
+                task._fixedEndTime = fixedRule.endTime;  // Store for slot calculation
                 task.updatedAt = new Date().toISOString();
                 scheduled[targetDate].push(task);
                 return true;
@@ -2214,7 +2219,15 @@ async function organizeTasksFromUI() {
                         const taskMin = h * 60 + m;
                         return taskMin >= slot.start && taskMin < slot.end;
                     })
-                    .reduce((sum, t) => sum + estimateTaskDuration(t), 0);
+                    .reduce((sum, t) => {
+                        // If task has fixed end time, use that range instead of estimated duration
+                        if (t._fixedEndTime) {
+                            const [sh, sm] = t.dueTime.split(':').map(Number);
+                            const [eh, em] = t._fixedEndTime.split(':').map(Number);
+                            return sum + ((eh * 60 + em) - (sh * 60 + sm));
+                        }
+                        return sum + estimateTaskDuration(t);
+                    }, 0);
 
                 const availableInSlot = slot.end - slot.start - usedInSlot;
 
@@ -2396,14 +2409,18 @@ function loadTimeBlocksUI() {
             </div>
             <div id="fixedTimesList">
                 ${fixedTimes.map((r, i) => `
-                    <div style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center; background: white; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center; background: white; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0; flex-wrap: wrap;">
                         <input type="text" value="${r.pattern || ''}" placeholder="e.g., desayuno"
                             onchange="updateFixedTime(${i}, 'pattern', this.value)"
-                            style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 4px; width: 150px; font-size: 14px;">
+                            style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 4px; width: 120px; font-size: 14px;">
                         <span style="color: #718096;">→</span>
-                        <input type="time" value="${r.time || '09:00'}"
-                            onchange="updateFixedTime(${i}, 'time', this.value)"
-                            style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 14px;">
+                        <input type="time" value="${r.startTime || r.time || '09:00'}"
+                            onchange="updateFixedTime(${i}, 'startTime', this.value)"
+                            style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 14px;" title="Start time">
+                        <span style="color: #718096;">to</span>
+                        <input type="time" value="${r.endTime || '10:00'}"
+                            onchange="updateFixedTime(${i}, 'endTime', this.value)"
+                            style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 14px;" title="End time">
                         <button onclick="removeFixedTime(${i})"
                             style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;">✕</button>
                     </div>
@@ -2417,11 +2434,33 @@ function loadTimeBlocksUI() {
     `;
 }
 
+// Sync organize settings to backend (for cron to use)
+async function syncOrganizeSettingsToBackend() {
+    try {
+        const timeBlocks = JSON.parse(localStorage.getItem('hyperfiler_time_blocks') || '[]');
+        const fixedTimeRules = JSON.parse(localStorage.getItem('hyperfiler_fixed_times') || '[]');
+
+        const response = await fetch('/api/auth/settings', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ timeBlocks, fixedTimeRules })
+        });
+
+        if (response.ok) {
+            console.log('✅ Organize settings synced to backend');
+        }
+    } catch (e) {
+        console.log('⚠️ Could not sync settings to backend:', e.message);
+    }
+}
+
 // Update working hours (single range)
 window.updateWorkingHours = function() {
     const start = document.getElementById('workingHoursStart').value;
     const end = document.getElementById('workingHoursEnd').value;
     localStorage.setItem('hyperfiler_time_blocks', JSON.stringify([{ start, end }]));
+    syncOrganizeSettingsToBackend();
 };
 
 // Fixed time rules management
@@ -2429,6 +2468,7 @@ window.updateFixedTime = function(index, field, value) {
     const rules = JSON.parse(localStorage.getItem('hyperfiler_fixed_times') || '[]');
     rules[index][field] = value;
     localStorage.setItem('hyperfiler_fixed_times', JSON.stringify(rules));
+    syncOrganizeSettingsToBackend();
 };
 
 window.removeFixedTime = function(index) {
@@ -2436,13 +2476,15 @@ window.removeFixedTime = function(index) {
     rules.splice(index, 1);
     localStorage.setItem('hyperfiler_fixed_times', JSON.stringify(rules));
     loadTimeBlocksUI();
+    syncOrganizeSettingsToBackend();
 };
 
 window.addFixedTime = function() {
     const rules = JSON.parse(localStorage.getItem('hyperfiler_fixed_times') || '[]');
-    rules.push({ pattern: '', time: '09:00' });
+    rules.push({ pattern: '', startTime: '09:00', endTime: '10:00' });
     localStorage.setItem('hyperfiler_fixed_times', JSON.stringify(rules));
     loadTimeBlocksUI();
+    syncOrganizeSettingsToBackend();
 };
 
 // Initialize on load

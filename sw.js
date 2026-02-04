@@ -1,8 +1,8 @@
 // Service Worker for HyperFiler Pro
 // Version 1.0 - App Shell Caching Only
 
-const CACHE_NAME = 'hyperfiler-v1.9.3-organize-btn3';
-const CACHE_VERSION = '20260204-organize-btn3';
+const CACHE_NAME = 'hyperfiler-v1.9.4-fixedrange';
+const CACHE_VERSION = '20260204-fixedrange';
 
 // App Shell - Critical files for offline functionality
 const APP_SHELL = [

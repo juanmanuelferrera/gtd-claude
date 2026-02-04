@@ -392,6 +392,16 @@ export default {
         return handleGetTimezone(request, env, corsHeaders);
       }
 
+      // Save user organize settings (time blocks, fixed time rules)
+      if (pathname === '/auth/settings' && request.method === 'POST') {
+        return handleSaveSettings(request, env, corsHeaders);
+      }
+
+      // Get user organize settings
+      if (pathname === '/auth/settings' && request.method === 'GET') {
+        return handleGetSettings(request, env, corsHeaders);
+      }
+
       if (pathname === '/auth/logout' && request.method === 'POST') {
         return handleAuthLogout(request, env, corsHeaders);
       }
@@ -1072,6 +1082,11 @@ async function organizeTasksForUserAndDates(env, userId, tomorrow, dayAfter, tas
   // This reuses the logic from organizeTomorrowTasks but with specific dates
   let allTasks = JSON.parse(taskDataJson);
 
+  // Get user's organize settings (time blocks and fixed time rules)
+  const userSettings = await getUserOrganizeSettings(userId, env);
+  const userTimeBlocks = userSettings.timeBlocks || [];
+  const userFixedTimeRules = userSettings.fixedTimeRules || [];
+
   const BACKLOG_DATE = '2099-01-01';
 
   // Separate tasks by date
@@ -1122,6 +1137,17 @@ async function organizeTasksForUserAndDates(env, userId, tomorrow, dayAfter, tas
 
   if (tomorrowTasks.length === 0) return;
 
+  // Helper to check if task matches a user's fixed time rule
+  const getFixedTimeFromRules = (task) => {
+    const title = (task.title || '').toLowerCase();
+    for (const rule of userFixedTimeRules) {
+      if (rule.pattern && new RegExp(rule.pattern, 'i').test(title)) {
+        return rule.startTime || rule.time || null;
+      }
+    }
+    return null;
+  };
+
   // Separate fixed from flexible
   const fixed = [];
   const flexible = [];
@@ -1131,7 +1157,12 @@ async function organizeTasksForUserAndDates(env, userId, tomorrow, dayAfter, tas
     const notes = (task.notes || '').toLowerCase();
     const isEvent = task.is_event || task.isEvent || notes.includes('@event');
 
-    if (/programa espiritual|spiritual program/i.test(title)) {
+    // First check user's custom fixed time rules
+    const userFixedTime = getFixedTimeFromRules(task);
+    if (userFixedTime) {
+      task.due_time = task.dueTime = userFixedTime;
+      fixed.push(task);
+    } else if (/programa espiritual|spiritual program/i.test(title)) {
       task.due_time = task.dueTime = '06:00';
       fixed.push(task);
     } else if (isEvent) {
@@ -1164,13 +1195,24 @@ async function organizeTasksForUserAndDates(env, userId, tomorrow, dayAfter, tas
     return a._duration - b._duration;
   });
 
-  // Time slots
-  const slots = [
-    { start: 420, end: 540 },
-    { start: 570, end: 600 },
-    { start: 780, end: 840 },
-    { start: 885, end: 1140 },
-  ];
+  // Time slots - use user's settings if available, otherwise use defaults
+  let slots;
+  if (userTimeBlocks.length > 0) {
+    // Convert user time blocks to minutes format
+    slots = userTimeBlocks.map(b => {
+      const [sh, sm] = (b.start || '07:00').split(':').map(Number);
+      const [eh, em] = (b.end || '19:00').split(':').map(Number);
+      return { start: sh * 60 + (sm || 0), end: eh * 60 + (em || 0) };
+    });
+  } else {
+    // Default time slots
+    slots = [
+      { start: 420, end: 540 },
+      { start: 570, end: 600 },
+      { start: 780, end: 840 },
+      { start: 885, end: 1140 },
+    ];
+  }
 
   // Schedule flexible tasks
   let slotIdx = 0;
@@ -2389,6 +2431,123 @@ async function handleGetTimezone(request, env, corsHeaders) {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
+}
+
+// Save user organize settings (time blocks, fixed time rules)
+async function handleSaveSettings(request, env, corsHeaders) {
+  try {
+    const token = getAuthToken(request);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
+
+    if (!payload) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const body = await request.json();
+    const { timeBlocks, fixedTimeRules } = body;
+
+    // Store as JSON in organize_settings column
+    const settings = JSON.stringify({
+      timeBlocks: timeBlocks || [],
+      fixedTimeRules: fixedTimeRules || []
+    });
+
+    try {
+      await env.DB.prepare('UPDATE users SET organize_settings = ? WHERE id = ?')
+        .bind(settings, payload.userId)
+        .run();
+    } catch (dbError) {
+      // If column doesn't exist, add it first
+      if (dbError.message && dbError.message.includes('no such column')) {
+        console.log('📊 Adding organize_settings column to users table...');
+        await env.DB.prepare('ALTER TABLE users ADD COLUMN organize_settings TEXT').run();
+        // Retry the update
+        await env.DB.prepare('UPDATE users SET organize_settings = ? WHERE id = ?')
+          .bind(settings, payload.userId)
+          .run();
+      } else {
+        throw dbError;
+      }
+    }
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    console.error('Save settings error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to save settings' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// Get user organize settings
+async function handleGetSettings(request, env, corsHeaders) {
+  try {
+    const token = getAuthToken(request);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
+
+    if (!payload) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const user = await env.DB.prepare('SELECT organize_settings FROM users WHERE id = ?')
+      .bind(payload.userId)
+      .first();
+
+    let settings = { timeBlocks: [], fixedTimeRules: [] };
+    if (user?.organize_settings) {
+      try {
+        settings = JSON.parse(user.organize_settings);
+      } catch (e) {
+        // Use defaults if parse fails
+      }
+    }
+
+    return new Response(JSON.stringify(settings), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    console.error('Get settings error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to get settings' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// Helper for cron to get user organize settings
+async function getUserOrganizeSettings(userId, env) {
+  try {
+    const user = await env.DB.prepare('SELECT organize_settings FROM users WHERE id = ?')
+      .bind(userId)
+      .first();
+
+    if (user?.organize_settings) {
+      const settings = JSON.parse(user.organize_settings);
+      return {
+        timeBlocks: settings.timeBlocks || [],
+        fixedTimeRules: settings.fixedTimeRules || []
+      };
+    }
+  } catch (e) {
+    // If column doesn't exist, just return empty settings (user hasn't configured anything)
+    if (e.message && e.message.includes('no such column')) {
+      console.log('📊 organize_settings column not found, using defaults');
+      return { timeBlocks: [], fixedTimeRules: [] };
+    }
+    console.error('Failed to get user settings:', e);
+  }
+  return { timeBlocks: [], fixedTimeRules: [] };
 }
 
 // Auth: Logout (clear httpOnly cookie)
