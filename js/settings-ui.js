@@ -2154,69 +2154,78 @@ async function organizeTasksFromUI() {
             return dayCapacity[dateStr];
         };
 
-        for (const task of flexibleTasks) {
-            let placed = false;
+        // Helper to try placing a task on a specific day
+        const tryPlaceTask = (task, targetDate) => {
+            const isToday = targetDate === today;
+            const startMin = isToday ? currentTimeMinutes : 0;
+            const slots = getAvailableSlots(targetDate, startMin);
             const duration = estimateTaskDuration(task);
             const fixedTime = getFixedTime(task);
-            const wasBacklog = task.dueDate === '2099-01-01';
 
-            // Try to place in days starting from dayOffset
-            for (let dayNum = dayOffset; dayNum < dayOffset + MAX_DAYS && !placed; dayNum++) {
-                const targetDate = addDays(today, dayNum);
-                const isToday = targetDate === today;
-                const startMin = isToday ? currentTimeMinutes : 0;
-                const slots = getAvailableSlots(targetDate, startMin);
+            if (!scheduled[targetDate]) scheduled[targetDate] = [];
 
-                if (!scheduled[targetDate]) scheduled[targetDate] = [];
+            // Fixed time tasks always fit
+            if (fixedTime) {
+                task.dueDate = targetDate;
+                task.due_date = targetDate;
+                task.dueTime = fixedTime;
+                task.due_time = fixedTime;
+                task.updatedAt = new Date().toISOString();
+                scheduled[targetDate].push(task);
+                return true;
+            }
 
-                // Check if fixed time task
-                if (fixedTime) {
+            // Try to fit in slots
+            for (const slot of slots) {
+                const usedInSlot = scheduled[targetDate]
+                    .filter(t => {
+                        if (!t.dueTime) return false;
+                        const [h, m] = t.dueTime.split(':').map(Number);
+                        const taskMin = h * 60 + m;
+                        return taskMin >= slot.start && taskMin < slot.end;
+                    })
+                    .reduce((sum, t) => sum + estimateTaskDuration(t), 0);
+
+                const availableInSlot = slot.end - slot.start - usedInSlot;
+
+                if (duration <= availableInSlot) {
+                    const startTime = slot.start + usedInSlot;
                     task.dueDate = targetDate;
                     task.due_date = targetDate;
-                    task.dueTime = fixedTime;
-                    task.due_time = fixedTime;
+                    task.dueTime = formatTime(startTime);
+                    task.due_time = task.dueTime;
                     task.updatedAt = new Date().toISOString();
                     scheduled[targetDate].push(task);
-                    placed = true;
-                    tasksScheduled++;
-                    if (wasBacklog) backlogCleared++;
-                    break;
-                }
-
-                // Try to fit in slots
-                for (const slot of slots) {
-                    // Calculate used time in this slot for this day
-                    const usedInSlot = scheduled[targetDate]
-                        .filter(t => {
-                            if (!t.dueTime) return false;
-                            const [h, m] = t.dueTime.split(':').map(Number);
-                            const taskMin = h * 60 + m;
-                            return taskMin >= slot.start && taskMin < slot.end;
-                        })
-                        .reduce((sum, t) => sum + estimateTaskDuration(t), 0);
-
-                    const availableInSlot = slot.end - slot.start - usedInSlot;
-
-                    if (duration <= availableInSlot) {
-                        const startTime = slot.start + usedInSlot;
-                        task.dueDate = targetDate;
-                        task.due_date = targetDate;
-                        task.dueTime = formatTime(startTime);
-                        task.due_time = task.dueTime;
-                        task.updatedAt = new Date().toISOString();
-                        scheduled[targetDate].push(task);
-                        placed = true;
-                        tasksScheduled++;
-                        if (wasBacklog) backlogCleared++;
-                        break;
-                    }
-                }
-
-                // If day is full, advance dayOffset so we don't retry full days
-                if (!placed && dayNum === dayOffset) {
-                    dayOffset++;
+                    return true;
                 }
             }
+            return false;
+        };
+
+        // Fill days one at a time, trying ALL remaining tasks on each day
+        let remainingTasks = [...flexibleTasks];
+
+        for (let dayNum = 0; dayNum < MAX_DAYS && remainingTasks.length > 0; dayNum++) {
+            const targetDate = addDays(today, dayNum);
+            const stillRemaining = [];
+            let placedOnThisDay = 0;
+
+            // Try to place each remaining task on this day
+            for (const task of remainingTasks) {
+                const wasBacklog = task.dueDate === '2099-01-01';
+                if (tryPlaceTask(task, targetDate)) {
+                    tasksScheduled++;
+                    if (wasBacklog) backlogCleared++;
+                    placedOnThisDay++;
+                } else {
+                    stillRemaining.push(task);
+                }
+            }
+
+            remainingTasks = stillRemaining;
+
+            // If nothing was placed on this day, move on (day might be in the past or no capacity)
+            // But don't break - continue to next day
         }
 
         // Debug: show distribution per day sorted by date
