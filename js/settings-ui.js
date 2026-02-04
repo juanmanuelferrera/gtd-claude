@@ -2392,7 +2392,15 @@ async function organizeTasksFromUI() {
         // Save and sync
         if (typeof saveTasks === 'function') saveTasks();
         if (typeof uploadAllTasks === 'function') uploadAllTasks();
-        if (typeof renderTasks === 'function') renderTasks();
+
+        // Render the current view (whichever is active)
+        if (typeof renderCurrentView === 'function') {
+            renderCurrentView();
+        } else if (typeof renderTodayView === 'function') {
+            renderTodayView();
+        } else if (typeof renderTasks === 'function') {
+            renderTasks();
+        }
 
         // Show summary
         const summary = `✅ Organized: ${tasksScheduled} tasks, ${bhogaMoved} @bhoga→Mon, ${backlogCleared} from backlog`;
