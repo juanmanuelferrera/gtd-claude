@@ -1678,6 +1678,38 @@ async function organizeTomorrowTasks(env) {
     }
   }
 
+  // Ensure "TOT" (The One Thing) task exists at 10:00 for today
+  let hasTOT = tomorrowTasks.some(t =>
+    /\bTOT\b/i.test(t.title || '') && !t.isDeleted && t.status !== 'deleted'
+  );
+  if (!hasTOT) {
+    const totTask = {
+      id: `tot_${tomorrow}`,
+      title: 'TOT',
+      notes: '@reservado @theonething',
+      dueDate: tomorrow,
+      due_date: tomorrow,
+      dueTime: '10:00',
+      due_time: '10:00',
+      status: 'pending',
+      isEvent: false,
+      is_event: false,
+      isDeleted: false,
+      is_deleted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      images: []
+    };
+    tomorrowTasks.push(totTask);
+  } else {
+    // Fix time to 10:00 if TOT exists but has wrong time
+    for (const t of tomorrowTasks) {
+      if (/\bTOT\b/i.test(t.title || '')) {
+        t.due_time = t.dueTime = '10:00';
+      }
+    }
+  }
+
   if (tomorrowTasks.length === 0) {
     console.log('No tasks for today to organize');
     return;
