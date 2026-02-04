@@ -2219,13 +2219,17 @@ async function organizeTasksFromUI() {
             }
         }
 
-        // Debug: show distribution per day
-        const distribution = Object.entries(scheduled)
+        // Debug: show distribution per day sorted by date
+        const sortedDist = Object.entries(scheduled)
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .slice(0, 10);
+        const distribution = sortedDist
             .map(([date, tasks]) => `${date}: ${tasks.length}`)
-            .slice(0, 10)  // first 10 days
             .join('\n');
         console.log('Task distribution:\n' + distribution);
-        alert('Distribution (first 10 days):\n' + distribution);
+        console.log('Events (not redistributed):', events.length);
+        console.log('Flexible tasks processed:', flexibleTasks.length);
+        alert(`Events: ${events.length}\nFlexible: ${flexibleTasks.length}\n\nDistribution:\n${distribution}`);
 
         // Save and sync
         if (typeof saveTasks === 'function') saveTasks();
