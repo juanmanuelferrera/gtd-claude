@@ -1913,7 +1913,13 @@ function toggleAutoOrganize(enabled) {
         }
 
         if (statusSpan) statusSpan.innerHTML = '';
+        window.autoOrganizeEnabled = false;
+    } else {
+        window.autoOrganizeEnabled = true;
     }
+
+    // Update the Now/Organize button
+    updateNowOrganizeButton();
 }
 
 // Load auto-organize checkbox state
@@ -1950,11 +1956,207 @@ async function loadAutoOrganizeState() {
             if (statusSpan) statusSpan.innerHTML = '';
             window.autoOrganizeEnabled = false;
         }
+        // Update the Now/Organize button
+        updateNowOrganizeButton();
     } catch (e) { console.error('Error loading auto-organize state:', e); }
 }
 
 window.toggleAutoOrganize = toggleAutoOrganize;
 window.loadAutoOrganizeState = loadAutoOrganizeState;
+
+// ========== NOW/ORGANIZE BUTTON ==========
+
+// Update the Now/Organize button based on auto-organize setting
+function updateNowOrganizeButton() {
+    const btn = document.getElementById('nowOrganizeBtn');
+    if (!btn) return;
+
+    if (window.autoOrganizeEnabled) {
+        btn.innerHTML = '🔄 Organize';
+        btn.title = 'Reorganize all tasks optimally';
+        btn.style.background = '#6f42c1';
+    } else {
+        btn.innerHTML = '🕐 Now';
+        btn.title = 'Move all today\'s tasks to current time block';
+        btn.style.background = '#28a745';
+    }
+}
+
+// Handle click on Now/Organize button
+function handleNowOrganizeClick() {
+    if (window.autoOrganizeEnabled) {
+        organizeTasksFromUI();
+    } else {
+        if (typeof moveAllTasksToCurrentTime === 'function') {
+            moveAllTasksToCurrentTime();
+        }
+    }
+}
+
+// Organize tasks from UI (similar to /organize but simplified)
+async function organizeTasksFromUI() {
+    const btn = document.getElementById('nowOrganizeBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳...';
+    }
+
+    try {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const today = typeof getLocalDateString === 'function'
+            ? getLocalDateString(now)
+            : now.toISOString().slice(0, 10);
+
+        // Get all pending tasks for today that are not events
+        const todayTasks = (window.tasks || []).filter(t =>
+            t.status !== 'deleted' &&
+            t.status !== 'completed' &&
+            t.dueDate === today &&
+            !isTaskEvent(t)
+        );
+
+        if (todayTasks.length === 0) {
+            if (typeof showToast === 'function') showToast('No tasks to organize');
+            return;
+        }
+
+        // Define time slots (after current time)
+        const slots = [];
+        const slotRanges = [
+            [7, 0, 9, 0],     // 07:00-09:00
+            [9, 30, 10, 0],   // 09:30-10:00
+            [13, 0, 14, 0],   // 13:00-14:00
+            [14, 45, 19, 0]   // 14:45-19:00
+        ];
+
+        // Find next available slot
+        let startHour = currentHour;
+        let startMinute = currentMinute;
+
+        // Round up to next 15 min
+        startMinute = Math.ceil(startMinute / 15) * 15;
+        if (startMinute >= 60) {
+            startMinute = 0;
+            startHour++;
+        }
+
+        // Find valid slot
+        for (const [sh, sm, eh, em] of slotRanges) {
+            const slotStart = sh * 60 + sm;
+            const slotEnd = eh * 60 + em;
+            const currentTime = startHour * 60 + startMinute;
+
+            if (currentTime < slotEnd) {
+                const actualStart = Math.max(currentTime, slotStart);
+                slots.push({ start: actualStart, end: slotEnd });
+            }
+        }
+
+        if (slots.length === 0) {
+            if (typeof showToast === 'function') showToast('No time slots available today');
+            return;
+        }
+
+        // Sort tasks by importance (simple heuristic)
+        todayTasks.sort((a, b) => {
+            const scoreA = getTaskPriority(a);
+            const scoreB = getTaskPriority(b);
+            return scoreA - scoreB;
+        });
+
+        // Assign times
+        let currentSlotIdx = 0;
+        let currentTime = slots[0].start;
+
+        for (const task of todayTasks) {
+            if (currentSlotIdx >= slots.length) break;
+
+            const duration = estimateTaskDuration(task);
+            const slot = slots[currentSlotIdx];
+
+            // Check if fits in current slot
+            if (currentTime + duration <= slot.end) {
+                const hours = Math.floor(currentTime / 60);
+                const mins = currentTime % 60;
+                task.dueTime = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+                task.due_time = task.dueTime;
+                task.updatedAt = new Date().toISOString();
+                currentTime += duration;
+            } else {
+                // Move to next slot
+                currentSlotIdx++;
+                if (currentSlotIdx < slots.length) {
+                    currentTime = slots[currentSlotIdx].start;
+                    const hours = Math.floor(currentTime / 60);
+                    const mins = currentTime % 60;
+                    task.dueTime = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+                    task.due_time = task.dueTime;
+                    task.updatedAt = new Date().toISOString();
+                    currentTime += duration;
+                }
+            }
+        }
+
+        // Save and sync
+        if (typeof saveTasks === 'function') saveTasks();
+        if (typeof uploadAllTasks === 'function') uploadAllTasks();
+        if (typeof renderTasks === 'function') renderTasks();
+
+        if (typeof showToast === 'function') showToast(`Organized ${todayTasks.length} tasks`);
+
+    } catch (error) {
+        console.error('Error organizing tasks:', error);
+        if (typeof showToast === 'function') showToast('Error organizing');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            updateNowOrganizeButton();
+        }
+    }
+}
+
+// Simple priority scoring (1 = highest priority)
+function getTaskPriority(task) {
+    const title = (task.title || '').toLowerCase();
+    const notes = (task.notes || '').toLowerCase();
+
+    if (/juicio|hacienda|notario|deadline|cita médica|urgente/.test(title)) return 1;
+    if (/llamar|contactar|farmacia|comprar|recoger|entregar/.test(title)) return 2;
+    if (/libro|marketing|publicar|capítulo|proyecto/.test(title)) return 3;
+    if (/code|fix|deploy|backup|programar|hyperfiler/.test(title)) return 4;
+    if (/ejercicio|ducha|yoga|caminar/.test(title)) return 5;
+    if (/limpiar|barrer|ordenar|fregar/.test(title)) return 6;
+    return 7;
+}
+
+// Estimate task duration in minutes
+function estimateTaskDuration(task) {
+    const title = (task.title || '').toLowerCase();
+    const notes = (task.notes || '').toLowerCase();
+
+    // Check for explicit duration
+    const durMatch = (title + ' ' + notes).match(/(\d+)\s*min/);
+    if (durMatch) return parseInt(durMatch[1]);
+
+    const horaMatch = (title + ' ' + notes).match(/(\d+)\s*hora/);
+    if (horaMatch) return parseInt(horaMatch[1]) * 60;
+
+    // Heuristics
+    if (/comprobar|verificar|check|buscar precio/.test(title)) return 10;
+    if (/llamar|email|enviar|contactar/.test(title)) return 15;
+    if (/revisar|poner|quitar|sacar/.test(title)) return 20;
+    if (/limpiar|lavar|ejercicio|comprar/.test(title)) return 30;
+    if (/escribir|programar|investigar|arreglar/.test(title)) return 60;
+    if (/capítulo|libro|proyecto/.test(title)) return 90;
+
+    return 30; // default
+}
+
+window.updateNowOrganizeButton = updateNowOrganizeButton;
+window.handleNowOrganizeClick = handleNowOrganizeClick;
+window.organizeTasksFromUI = organizeTasksFromUI;
 
 // Load timezone when settings view is shown
 const originalLoadSettingsValues = window.loadSettingsValues || loadSettingsValues;
@@ -2660,3 +2862,11 @@ window.renderEventsView = renderEventsView;
 window.openEventDatePicker = openEventDatePicker;
 window.convertEventToTask = convertEventToTask;
 window.deleteEventFromView = deleteEventFromView;
+
+// Initialize Now/Organize button on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Load auto-organize state after a short delay to ensure tasks are loaded
+    setTimeout(() => {
+        loadAutoOrganizeState();
+    }, 500);
+});

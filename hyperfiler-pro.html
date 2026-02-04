@@ -417,7 +417,7 @@
                         <button class="btn btn-small" onclick="previousDay()" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;">← Prev</button>
                         <button class="btn btn-primary btn-small" onclick="goToToday()" style="background: #dc3545; border-color: #dc3545; padding: 8px 14px; font-size: 12px; flex-shrink: 0; border-radius: 6px; font-weight: 600;">🔥 Today</button>
                         <button class="btn btn-small" onclick="nextDay()" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;">Next →</button>
-                        <button class="move-current-time-btn" onclick="moveAllTasksToCurrentTime()" title="Move all today's tasks to current time block" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">🕐 Now</button>
+                        <button id="nowOrganizeBtn" class="move-current-time-btn" onclick="handleNowOrganizeClick()" title="Move all today's tasks to current time block" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">🕐 Now</button>
                     </div>
                 </div>
                 
@@ -2642,7 +2642,7 @@
     <script src="js/search-filter.js?v=20260203-consistent"></script>
     <script src="js/task-bulk-ops.js?v=20260203-consistent"></script>
     <script src="js/backup-import.js?v=20260203-bugfix"></script>
-    <script src="js/settings-ui.js?v=20260204-convert"></script>
+    <script src="js/settings-ui.js?v=20260204-organize-btn"></script>
     <script src="js/auto-backup.js?v=20260131-backup"></script>
     <script src="js/missing-functions.js?v=20260131-split"></script>
     
