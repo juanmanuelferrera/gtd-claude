@@ -2448,6 +2448,9 @@ function renderEventsView() {
                         </div>
                     </div>
                     <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
+                        <button onclick="event.stopPropagation(); convertEventToTask('${event.id}')"
+                                style="background: #e8f5e9; border: 1px solid #c8e6c9; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 22px;"
+                                title="Convertir a tarea">📋</button>
                         <button onclick="event.stopPropagation(); openIOSDateTimePicker('${event.id}', '${event.dueDate || ''}', '${event.dueTime || ''}', this)"
                                 style="background: #f0f4f8; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 22px;"
                                 title="Cambiar fecha">📅</button>
@@ -2595,6 +2598,36 @@ function openEventDatePicker(eventId) {
     checkPastEvents();
 }
 
+// Convert event to regular task
+function convertEventToTask(eventId) {
+    const task = window.tasks.find(t => t.id === eventId);
+    if (!task) return;
+
+    if (!confirm(`¿Convertir "${task.title}" en tarea normal?`)) return;
+
+    // Remove isEvent flag
+    task.isEvent = false;
+    delete task.isEvent;
+
+    // Remove @event from notes if present
+    if (task.notes) {
+        task.notes = task.notes.replace(/@event\s*/gi, '').trim();
+    }
+
+    task.updatedAt = new Date().toISOString();
+
+    if (typeof saveTasks === 'function') saveTasks();
+    if (typeof uploadAllTasks === 'function') uploadAllTasks();
+
+    renderEventsView();
+    checkPastEvents();
+
+    // Show feedback
+    if (typeof showToast === 'function') {
+        showToast('Convertido a tarea');
+    }
+}
+
 // Delete event from events view
 function deleteEventFromView(eventId) {
     const task = window.tasks.find(t => t.id === eventId);
@@ -2625,4 +2658,5 @@ function deleteEventFromView(eventId) {
 
 window.renderEventsView = renderEventsView;
 window.openEventDatePicker = openEventDatePicker;
+window.convertEventToTask = convertEventToTask;
 window.deleteEventFromView = deleteEventFromView;
