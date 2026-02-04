@@ -1,7 +1,7 @@
 /**
  * Settings and UI Functions for HyperFiler Pro
  */
-console.log('✅ settings-ui.js v20260204-fixedrange LOADED');
+console.log('✅ settings-ui.js v20260204-fixedrange2 LOADED');
 
 // Missing core functions
 function saveTasks() {
@@ -2092,15 +2092,19 @@ async function organizeTasksFromUI() {
             try {
                 // User has custom blocks: [{start: "07:00", end: "09:00"}, ...]
                 const parsed = JSON.parse(userTimeBlocks);
+                console.log('⏰ Time blocks from settings:', JSON.stringify(parsed));
                 TIME_SLOTS = parsed.map(b => ({
                     start: parseInt(b.start.split(':')[0]) * 60 + parseInt(b.start.split(':')[1] || 0),
                     end: parseInt(b.end.split(':')[0]) * 60 + parseInt(b.end.split(':')[1] || 0)
                 }));
+                console.log('⏰ TIME_SLOTS (in minutes):', JSON.stringify(TIME_SLOTS));
             } catch (e) {
+                console.log('⚠️ Failed to parse time blocks:', e);
                 // Fallback to simple default
                 TIME_SLOTS = [{ start: 7 * 60, end: 19 * 60 }];  // 07:00-19:00
             }
         } else {
+            console.log('⏰ No custom time blocks, using default 07:00-19:00');
             // No custom blocks - use simple full day
             TIME_SLOTS = [{ start: 7 * 60, end: 19 * 60 }];  // 07:00-19:00
         }
@@ -2113,9 +2117,13 @@ async function organizeTasksFromUI() {
             try {
                 // User has custom rules: [{pattern: "...", startTime: "06:00", endTime: "07:00"}, ...]
                 fixedTimeRules = JSON.parse(userFixedTimes);
+                console.log('📋 Fixed time rules loaded:', JSON.stringify(fixedTimeRules));
             } catch (e) {
+                console.log('⚠️ Failed to parse fixed time rules:', e);
                 fixedTimeRules = [];
             }
+        } else {
+            console.log('📋 No fixed time rules configured');
         }
 
         const getFixedTimeRule = (task) => {
@@ -2124,6 +2132,7 @@ async function organizeTasksFromUI() {
             // Check user-defined rules
             for (const rule of fixedTimeRules) {
                 if (rule.pattern && new RegExp(rule.pattern, 'i').test(title)) {
+                    console.log(`✅ Task "${task.title}" matches rule "${rule.pattern}" → ${rule.startTime || rule.time}`);
                     // Support both old format (time) and new format (startTime/endTime)
                     return {
                         startTime: rule.startTime || rule.time || '09:00',
