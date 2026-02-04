@@ -794,6 +794,7 @@ async function processTimezoneAwareCron(env) {
 
         await purgeOldDeletedTasksForUser(env, user.id);
         await carryOverYesterdayTasksForUser(env, user.id);
+        await organizeTodayTasksForUser(env, user.id);  // Organize today AFTER carryover
         await organizeTomorrowTasksForUser(env, user.id);
 
         console.log(`✅ Completed processing for ${user.email}`);
@@ -999,6 +1000,30 @@ async function carryOverYesterdayTasksForUser(env, userId) {
   console.log(`📦 CarryOver done for user: moved ${moved} tasks from ${yesterdayStr} to ${today}`);
 }
 
+async function organizeTodayTasksForUser(env, userId) {
+  if (!userId) return;
+
+  // Get user's timezone
+  const userStmt = env.DB.prepare('SELECT timezone FROM users WHERE id = ?');
+  const userResult = await userStmt.bind(userId).first();
+  const timezone = userResult?.timezone || 'Europe/Madrid';
+
+  // Get today and tomorrow based on user's timezone
+  const { today, tomorrow } = getLocalDates(timezone);
+
+  console.log(`📅 Organizing TODAY's tasks for user ${userId}: ${today}`);
+
+  // Fetch tasks
+  const { results } = await env.DB.prepare(
+    'SELECT task_data FROM user_tasks WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+  ).bind(userId).all();
+
+  if (!results || !results.length || !results[0].task_data) return;
+
+  // Organize today's tasks (today → tomorrow for overflow)
+  await organizeTasksForUserAndDates(env, userId, today, tomorrow, results[0].task_data);
+}
+
 async function organizeTomorrowTasksForUser(env, userId) {
   if (!userId) return;
 
@@ -1010,7 +1035,7 @@ async function organizeTomorrowTasksForUser(env, userId) {
   // Calculate today and tomorrow based on user's timezone
   const { today: tomorrow, tomorrow: dayAfter } = getLocalDates(timezone);
 
-  console.log(`📅 Organizing tasks for user ${userId}: ${tomorrow}`);
+  console.log(`📅 Organizing TOMORROW's tasks for user ${userId}: ${tomorrow}`);
 
   // Use the existing organizeTomorrowTasks logic but with the userId
   // ... (The full implementation would be too long, so we call the existing function with modified dates)
