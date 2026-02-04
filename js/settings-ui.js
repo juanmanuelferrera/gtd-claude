@@ -1,7 +1,7 @@
 /**
  * Settings and UI Functions for HyperFiler Pro
  */
-console.log('✅ settings-ui.js v20260204-fix-sync-url LOADED');
+console.log('✅ settings-ui.js v20260204-fix-overflow LOADED');
 
 // Missing core functions
 function saveTasks() {
@@ -2419,6 +2419,22 @@ async function organizeTasksFromUI() {
 
             // If nothing was placed on this day, move on (day might be in the past or no capacity)
             // But don't break - continue to next day
+        }
+
+        // Handle tasks that couldn't fit in any day - assign to last day with a default time
+        if (remainingTasks.length > 0) {
+            console.log(`⚠️ ${remainingTasks.length} tasks couldn't fit, assigning to future days with default time`);
+            const lastDay = addDays(today, MAX_DAYS - 1);
+            for (const task of remainingTasks) {
+                task.dueDate = lastDay;
+                task.due_date = lastDay;
+                task.dueTime = '07:00';  // Default morning time
+                task.due_time = '07:00';
+                task.updatedAt = new Date().toISOString();
+                if (!scheduled[lastDay]) scheduled[lastDay] = [];
+                scheduled[lastDay].push(task);
+                console.log(`📍 Overflow: "${task.title}" → ${lastDay} at 07:00`);
+            }
         }
 
         // Log distribution for debugging
