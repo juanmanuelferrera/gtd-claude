@@ -2316,27 +2316,34 @@ async function organizeTasksFromUI() {
             return false;
         };
 
-        // Helper to add real tasks for blocked time ranges when no matching task exists
-        const addBlockedRangeTasks = (targetDate) => {
-            if (!scheduled[targetDate]) scheduled[targetDate] = [];
+        // Helper to add placeholder tasks for blocked time ranges (TODAY ONLY)
+        const addBlockedRangeTasksForToday = () => {
+            if (!scheduled[today]) scheduled[today] = [];
 
             for (const blocked of blockedRanges) {
-                // Check if there's already a task matching this pattern on this day (in window.tasks)
+                // Use stable ID so we don't create duplicates
+                const stableId = `blocked-${today}-${blocked.pattern}`;
+
+                // Check if task with this ID already exists
+                const existsById = (window.tasks || []).some(t => t.id === stableId && t.status !== 'deleted');
+
+                // Check if there's already a task matching this pattern today
                 const hasMatchingTask = (window.tasks || []).some(t => {
                     if (t.status === 'deleted' || t.status === 'completed') return false;
-                    if (t.dueDate !== targetDate && t.due_date !== targetDate) return false;
+                    if (t.dueDate !== today && t.due_date !== today) return false;
+                    if (t.id === stableId) return true;  // Count existing placeholder
                     const title = (t.title || '').toLowerCase();
                     return blocked.pattern && new RegExp(blocked.pattern, 'i').test(title);
                 });
 
-                if (!hasMatchingTask && blocked.pattern) {
-                    // Create a REAL task for this blocked range
+                if (!hasMatchingTask && !existsById && blocked.pattern) {
+                    // Create a task for this blocked range (TODAY only)
                     const taskTitle = blocked.pattern.charAt(0).toUpperCase() + blocked.pattern.slice(1);
                     const newTask = {
-                        id: `blocked-${targetDate}-${blocked.pattern}-${Date.now()}`,
+                        id: stableId,
                         title: taskTitle,
-                        dueDate: targetDate,
-                        due_date: targetDate,
+                        dueDate: today,
+                        due_date: today,
                         dueTime: formatTime(blocked.start),
                         due_time: formatTime(blocked.start),
                         notes: '@reservado',
@@ -2347,21 +2354,20 @@ async function organizeTasksFromUI() {
 
                     // Add to window.tasks so it gets saved
                     window.tasks.push(newTask);
-                    scheduled[targetDate].push(newTask);
-                    console.log(`🔒 Created task "${taskTitle}" at ${formatTime(blocked.start)} on ${targetDate}`);
+                    scheduled[today].push(newTask);
+                    console.log(`🔒 Created task "${taskTitle}" at ${formatTime(blocked.start)} for today`);
                 }
             }
         };
+
+        // Add placeholder tasks for blocked time ranges (TODAY only, with stable IDs)
+        addBlockedRangeTasksForToday();
 
         // Fill days one at a time, trying ALL remaining tasks on each day
         let remainingTasks = [...flexibleTasks];
 
         for (let dayNum = 0; dayNum < MAX_DAYS && remainingTasks.length > 0; dayNum++) {
             const targetDate = addDays(today, dayNum);
-
-            // Add tasks for blocked time ranges if no matching task exists
-            addBlockedRangeTasks(targetDate);
-
             const stillRemaining = [];
             let placedOnThisDay = 0;
 
