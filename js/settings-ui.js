@@ -2010,9 +2010,16 @@ async function organizeTasksFromUI() {
         const now = new Date();
         const currentHour = now.getHours();
         const currentMinute = now.getMinutes();
-        const today = typeof getLocalDateString === 'function'
-            ? getLocalDateString(now)
-            : now.toISOString().slice(0, 10);
+        // Helper for local date string (YYYY-MM-DD)
+        const toLocalDateString = (date) => {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        };
+
+        const today = toLocalDateString(now);
+        console.log('🔄 Today (local):', today);
 
         // Calculate next Monday for @bhoga
         const getNextMonday = () => {
@@ -2020,7 +2027,7 @@ async function organizeTasksFromUI() {
             const day = d.getDay();
             const daysUntilMonday = day === 0 ? 1 : (8 - day);
             d.setDate(d.getDate() + daysUntilMonday);
-            return d.toISOString().slice(0, 10);
+            return toLocalDateString(d);
         };
         const nextMonday = getNextMonday();
 
@@ -2120,7 +2127,7 @@ async function organizeTasksFromUI() {
             const [y, m, d] = dateStr.split('-').map(Number);
             const date = new Date(y, m - 1, d);
             date.setDate(date.getDate() + days);
-            return date.toISOString().slice(0, 10);
+            return toLocalDateString(date);
         };
 
         // Format time from minutes
