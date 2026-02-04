@@ -1,7 +1,7 @@
 /**
  * Settings and UI Functions for HyperFiler Pro
  */
-console.log('✅ settings-ui.js v20260204-placeholders-restored LOADED');
+console.log('✅ settings-ui.js v20260204-no-reservado LOADED');
 
 // Missing core functions
 function saveTasks() {
@@ -2380,7 +2380,7 @@ async function organizeTasksFromUI() {
                         due_date: today,
                         dueTime: formatTime(blocked.start),
                         due_time: formatTime(blocked.start),
-                        notes: '@reservado',
+                        notes: '',
                         status: 'pending',
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString()

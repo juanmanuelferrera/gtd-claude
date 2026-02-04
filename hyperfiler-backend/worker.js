@@ -1622,7 +1622,7 @@ async function organizeTomorrowTasks(env) {
     const desayunoTask = {
       id: `desayuno_${tomorrow}`,
       title: 'Desayuno',
-      notes: '@reservado',
+      notes: '',
       dueDate: tomorrow,
       due_date: tomorrow,
       dueTime: '09:00',
@@ -1654,7 +1654,7 @@ async function organizeTomorrowTasks(env) {
     const comidaTask = {
       id: `comida_${tomorrow}`,
       title: 'Comida',
-      notes: '@reservado',
+      notes: '',
       dueDate: tomorrow,
       due_date: tomorrow,
       dueTime: '14:00',
@@ -1686,7 +1686,7 @@ async function organizeTomorrowTasks(env) {
     const totTask = {
       id: `tot_${tomorrow}`,
       title: 'TOT',
-      notes: '@reservado @theonething',
+      notes: '@theonething',
       dueDate: tomorrow,
       due_date: tomorrow,
       dueTime: '10:00',
