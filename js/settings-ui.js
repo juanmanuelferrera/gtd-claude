@@ -2327,10 +2327,10 @@ async function organizeTasksFromUI() {
                 // Check if task with this ID already exists
                 const existsById = (window.tasks || []).some(t => t.id === stableId && t.status !== 'deleted');
 
-                // Check if there's already a task matching this pattern today
+                // Check if there's ANY pending task matching this pattern (any date, including backlog)
+                // These will be moved to today and placed in the fixed time slot
                 const hasMatchingTask = (window.tasks || []).some(t => {
                     if (t.status === 'deleted' || t.status === 'completed') return false;
-                    if (t.dueDate !== today && t.due_date !== today) return false;
                     if (t.id === stableId) return true;  // Count existing placeholder
                     const title = (t.title || '').toLowerCase();
                     return blocked.pattern && new RegExp(blocked.pattern, 'i').test(title);
