@@ -1,7 +1,7 @@
 /**
  * Settings and UI Functions for HyperFiler Pro
  */
-console.log('✅ settings-ui.js v20260204-auto-sync LOADED');
+console.log('✅ settings-ui.js v20260204-fix-sync-url LOADED');
 
 // Missing core functions
 function saveTasks() {
@@ -2600,7 +2600,8 @@ async function syncOrganizeSettingsToBackend() {
         const timeBlocks = JSON.parse(localStorage.getItem('hyperfiler_time_blocks') || '[]');
         const fixedTimeRules = JSON.parse(localStorage.getItem('hyperfiler_fixed_times') || '[]');
 
-        const response = await fetch('/api/auth/settings', {
+        const apiUrl = window.API_BASE_URL || 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
+        const response = await fetch(`${apiUrl}/auth/settings`, {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -2609,6 +2610,8 @@ async function syncOrganizeSettingsToBackend() {
 
         if (response.ok) {
             console.log('✅ Organize settings synced to backend');
+        } else {
+            console.log('⚠️ Settings sync failed:', response.status);
         }
     } catch (e) {
         console.log('⚠️ Could not sync settings to backend:', e.message);
