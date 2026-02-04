@@ -1666,8 +1666,9 @@ async function organizeTomorrowTasks(env) {
   const BACKLOG_DATE = '2099-01-01';
 
   // 5b. Separate otherTasks into: future tasks, backlog tasks, and true "other"
-  const futureTasks = [];
+  // IMPORTANT: Future tasks are NEVER pulled - they stay on their scheduled date
   const backlogTasks = [];
+  const remainingFuture = [];
   const remainingOther = [];
 
   for (const task of otherTasks) {
@@ -1675,75 +1676,21 @@ async function organizeTomorrowTasks(env) {
     if (dueDate === BACKLOG_DATE) {
       backlogTasks.push(task);
     } else if (dueDate && dueDate > tomorrow && dueDate < BACKLOG_DATE) {
-      futureTasks.push(task);
+      // Future-dated tasks stay on their date - user intentionally scheduled them
+      remainingFuture.push(task);
     } else {
       remainingOther.push(task);
     }
   }
 
-  // 5c. Pull from future tasks first (not events)
-  const pulledFromFuture = [];
-  const remainingFuture = [];
-
-  // Filter future tasks - skip events and fixed tasks
-  const futureFlexible = [];
-  for (const task of futureTasks) {
-    const title = (task.title || '').toLowerCase();
-    const notes = ((task.notes || '') + ' ' + (task.template || '')).toLowerCase();
-    const isEvent = task.is_event || task.isEvent || notes.includes('@event');
-
-    // Skip deleted/completed
-    if (task.isDeleted || task.status === 'deleted' || task.status === 'completed') {
-      remainingFuture.push(task);
-      continue;
-    }
-
-    // Skip events - they stay on their scheduled date
-    if (isEvent) {
-      remainingFuture.push(task);
-      continue;
-    }
-
-    // Skip fixed tasks
-    if (notes.includes('@bhoga') || /^(cocinar|comer|desayuno)$/i.test(title) ||
-        /programa espiritual|spiritual program/i.test(title) || /\btot\b/i.test(title)) {
-      remainingFuture.push(task);
-      continue;
-    }
-
-    task._importance = scoreImportance(task);
-    task._duration = estimateDuration(task);
-    task._originalDate = dueDate;
-    task._fromFuture = true;
-    futureFlexible.push(task);
-  }
-
-  // Sort future tasks by date first (nearest first), then importance, then duration
-  futureFlexible.sort((a, b) => {
-    const dateA = a._originalDate || '';
-    const dateB = b._originalDate || '';
-    if (dateA !== dateB) return dateA.localeCompare(dateB);
-    if (a._importance !== b._importance) return a._importance - b._importance;
-    return a._duration - b._duration;
-  });
-
-  // Pull ALL future flexible tasks for redistribution (not just to fill capacity)
-  // They will be merged with today's tasks and backlog, then distributed optimally
-  for (const task of futureFlexible) {
-    task.due_date = task.dueDate = tomorrow; // Temporarily set to tomorrow, will be redistributed
-    task.updatedAt = new Date().toISOString();
-    pulledFromFuture.push(task);
-  }
-  // Note: remainingMinutes not updated here because we're redistributing everything
-
-  // 5d. If slots still remain, pull from backlog (2099-01-01 = "Someday")
+  // 5c. Pull from backlog ONLY (2099-01-01 = "Someday")
+  // Never pull from future-dated tasks - they stay where user put them
   const pulledFromBacklog = [];
   const remainingBacklog = [];
 
   // Filter backlog tasks
   const backlogFlexible = [];
   for (const task of backlogTasks) {
-    const title = (task.title || '').toLowerCase();
     const notes = ((task.notes || '') + ' ' + (task.template || '')).toLowerCase();
     const isEvent = task.is_event || task.isEvent || notes.includes('@event');
 
@@ -1753,9 +1700,8 @@ async function organizeTomorrowTasks(env) {
       continue;
     }
 
-    // Skip fixed tasks even in backlog
-    if (isEvent || notes.includes('@bhoga') || /^(cocinar|comer|desayuno)$/i.test(title) ||
-        /programa espiritual|spiritual program/i.test(title) || /\btot\b/i.test(title)) {
+    // Skip events and @bhoga in backlog
+    if (isEvent || notes.includes('@bhoga')) {
       remainingBacklog.push(task);
       continue;
     }
@@ -1785,8 +1731,8 @@ async function organizeTomorrowTasks(env) {
     }
   }
 
-  // 5e. Merge today's flexible + pulled future + pulled backlog, re-sort by priority
-  const allFlexible = [...flexible, ...pulledFromFuture, ...pulledFromBacklog];
+  // 5e. Merge today's flexible + pulled backlog, re-sort by priority
+  const allFlexible = [...flexible, ...pulledFromBacklog];
   allFlexible.sort((a, b) => {
     // Carried-over tasks (unfinished from yesterday) get priority
     const aCarried = a._carriedOver ? 0 : 1;
@@ -1920,7 +1866,7 @@ async function organizeTomorrowTasks(env) {
      VALUES (?, ?, 'JSON_TASKS_DATA', datetime('now'), datetime('now'))`
   ).bind(userId, JSON.stringify(finalTasks)).run();
 
-  console.log(`✅ Auto-organize done: ${scheduled.length} scheduled, ${fixed.length} fixed, ${pulledFromFuture.length} pulled from future, ${pulledFromBacklog.length} pulled from backlog, ${scheduledOverflow.length} cascaded to future days`);
+  console.log(`✅ Auto-organize done: ${scheduled.length} scheduled, ${fixed.length} fixed, ${pulledFromBacklog.length} pulled from backlog, ${scheduledOverflow.length} cascaded to future days`);
 }
 
 // Authentication helper

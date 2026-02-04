@@ -265,18 +265,7 @@ async function updateTaskDate(taskId, newDate, event) {
         task.dueDate = newDate || null;
         task.lastModified = new Date().toISOString();
 
-        // Auto-mark as Event when setting a future date (protects from cron pulling it forward)
-        const today = typeof getLocalDateString === 'function' ? getLocalDateString(new Date()) : new Date().toISOString().slice(0, 10);
-        if (newDate && newDate > today) {
-            task.isEvent = true;
-            // Add @event to notes for MCP compatibility
-            if (!task.notes || !task.notes.includes('@event')) {
-                task.notes = task.notes ? task.notes + ' @event' : '@event';
-            }
-            console.log(`📅 Task "${task.title}" set to future date - marked as Event + @event`);
-        }
-
-        recordAction('edit', task.id, task.title, beforeDate, { dueDate: task.dueDate, isEvent: task.isEvent });
+        recordAction('edit', task.id, task.title, beforeDate, { dueDate: task.dueDate });
 
         // Save to localStorage
         saveTasksToLocalStorage();
@@ -1294,18 +1283,7 @@ async function delayTask(taskId, days, event) {
         task.dueDate = getLocalDateString(newDate);
         task.updatedAt = new Date().toISOString();
 
-        // Auto-mark as Event when moving to a future date (protects from cron pulling it forward)
-        const today = getLocalDateString(new Date());
-        if (task.dueDate > today) {
-            task.isEvent = true;
-            // Add @event to notes for MCP compatibility
-            if (!task.notes || !task.notes.includes('@event')) {
-                task.notes = task.notes ? task.notes + ' @event' : '@event';
-            }
-            console.log(`📅 Task "${task.title}" moved to future date - marked as Event + @event`);
-        }
-
-        recordAction('delay', task.id, task.title, beforeDelay, { dueDate: task.dueDate, isEvent: task.isEvent });
+        recordAction('delay', task.id, task.title, beforeDelay, { dueDate: task.dueDate });
 
         // Save to localStorage
         saveTasksToLocalStorage();
