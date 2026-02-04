@@ -794,8 +794,7 @@ async function processTimezoneAwareCron(env) {
 
         await purgeOldDeletedTasksForUser(env, user.id);
         await carryOverYesterdayTasksForUser(env, user.id);
-        await organizeTodayTasksForUser(env, user.id);  // Organize today AFTER carryover
-        await organizeTomorrowTasksForUser(env, user.id);
+        await organizeTodayTasksForUser(env, user.id);  // Organize today AFTER carryover (overflow → future days)
 
         console.log(`✅ Completed processing for ${user.email}`);
       } else {
