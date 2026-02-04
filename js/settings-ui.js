@@ -1,7 +1,7 @@
 /**
  * Settings and UI Functions for HyperFiler Pro
  */
-console.log('✅ settings-ui.js v20260204-fixedrange2 LOADED');
+console.log('✅ settings-ui.js v20260204-debug3 LOADED');
 
 // Missing core functions
 function saveTasks() {
@@ -1984,6 +1984,7 @@ function updateNowOrganizeButton() {
 
 // Handle click on Now/Organize button
 async function handleNowOrganizeClick() {
+    alert('handleNowOrganizeClick called! autoOrganizeEnabled=' + window.autoOrganizeEnabled);
     console.log('🔄 handleNowOrganizeClick called, autoOrganizeEnabled:', window.autoOrganizeEnabled);
     if (window.autoOrganizeEnabled) {
         console.log('🔄 Calling organizeTasksFromUI...');
