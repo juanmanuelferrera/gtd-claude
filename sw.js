@@ -1,8 +1,8 @@
 // Service Worker for HyperFiler Pro
 // Version 1.0 - App Shell Caching Only
 
-const CACHE_NAME = 'hyperfiler-v1.9.12';
-const CACHE_VERSION = '20260204-default-rules';
+const CACHE_NAME = 'hyperfiler-v1.9.13';
+const CACHE_VERSION = '20260204-no-defaults';
 
 // App Shell - Critical files for offline functionality
 const APP_SHELL = [

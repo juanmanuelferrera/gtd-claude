@@ -2489,27 +2489,9 @@ function initializeOrganizeSettings() {
         localStorage.setItem('hyperfiler_time_blocks', JSON.stringify(defaultBlocks));
     }
 
-    // Default fixed time rules based on common daily routines
-    const defaultFixedTimes = [
-        { pattern: 'espiritual', startTime: '06:00', endTime: '07:00' },
-        { pattern: 'desayuno', startTime: '09:00', endTime: '09:30' },
-        { pattern: 'tot|theonething', startTime: '10:00', endTime: '13:00' },
-        { pattern: 'cocinar|comida|comer', startTime: '14:00', endTime: '14:45' }
-    ];
-
-    const existingFixedTimes = localStorage.getItem('hyperfiler_fixed_times');
-    if (!existingFixedTimes) {
-        localStorage.setItem('hyperfiler_fixed_times', JSON.stringify(defaultFixedTimes));
-    } else {
-        // If existing rules are empty, apply defaults
-        try {
-            const parsed = JSON.parse(existingFixedTimes);
-            if (Array.isArray(parsed) && parsed.length === 0) {
-                localStorage.setItem('hyperfiler_fixed_times', JSON.stringify(defaultFixedTimes));
-            }
-        } catch (e) {
-            localStorage.setItem('hyperfiler_fixed_times', JSON.stringify(defaultFixedTimes));
-        }
+    // No defaults - users configure their own fixed time rules in Settings
+    if (!localStorage.getItem('hyperfiler_fixed_times')) {
+        localStorage.setItem('hyperfiler_fixed_times', JSON.stringify([]));
     }
 }
 
