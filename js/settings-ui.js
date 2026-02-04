@@ -1983,12 +1983,11 @@ function updateNowOrganizeButton() {
 }
 
 // Handle click on Now/Organize button
-function handleNowOrganizeClick() {
-    alert('handleNowOrganizeClick called! autoOrganizeEnabled=' + window.autoOrganizeEnabled);
+async function handleNowOrganizeClick() {
     console.log('🔄 handleNowOrganizeClick called, autoOrganizeEnabled:', window.autoOrganizeEnabled);
     if (window.autoOrganizeEnabled) {
         console.log('🔄 Calling organizeTasksFromUI...');
-        organizeTasksFromUI();
+        await organizeTasksFromUI();
     } else {
         console.log('🕐 Calling moveAllTasksToCurrentTime...');
         if (typeof moveAllTasksToCurrentTime === 'function') {
@@ -2208,8 +2207,9 @@ async function organizeTasksFromUI() {
 
         // Show summary
         const summary = `✅ Organized: ${tasksScheduled} tasks, ${bhogaMoved} @bhoga→Mon, ${backlogCleared} from backlog`;
-        if (typeof showToast === 'function') showToast(summary);
         console.log(summary);
+        if (typeof showToast === 'function') showToast(summary, 5000);
+        alert(summary);
 
     } catch (error) {
         console.error('Error organizing tasks:', error);
