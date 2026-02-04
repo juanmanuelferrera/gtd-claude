@@ -1615,7 +1615,9 @@ async function organizeTomorrowTasks(env) {
       task.due_time = task.dueTime = '14:00';
       fixed.push(task);
     } else if (/@bhoga/i.test(task.template || '') || /@bhoga/i.test(notes)) {
-      // Bhoga (grocery) items: don't organize, leave as-is
+      // Bhoga (grocery) items: always move to next Monday
+      task.due_date = task.dueDate = getNextMondayDateStr();
+      task.due_time = task.dueTime = '';
       fixed.push(task);
     } else {
       // Strip stale time from non-protected tasks so organizer schedules fresh
@@ -1718,21 +1720,14 @@ async function organizeTomorrowTasks(env) {
     return a._duration - b._duration;
   });
 
-  // Pull future tasks to fill remaining time
-  let pulledMinutes = 0;
+  // Pull ALL future flexible tasks for redistribution (not just to fill capacity)
+  // They will be merged with today's tasks and backlog, then distributed optimally
   for (const task of futureFlexible) {
-    if (remainingMinutes > 0 && pulledMinutes + task._duration <= remainingMinutes) {
-      task.due_date = task.dueDate = tomorrow;
-      task.updatedAt = new Date().toISOString();
-      pulledMinutes += task._duration;
-      pulledFromFuture.push(task);
-    } else {
-      remainingFuture.push(task);
-    }
+    task.due_date = task.dueDate = tomorrow; // Temporarily set to tomorrow, will be redistributed
+    task.updatedAt = new Date().toISOString();
+    pulledFromFuture.push(task);
   }
-
-  // Update remaining minutes after pulling from future
-  remainingMinutes = remainingMinutes - pulledMinutes;
+  // Note: remainingMinutes not updated here because we're redistributing everything
 
   // 5d. If slots still remain, pull from backlog (2099-01-01 = "Someday")
   const pulledFromBacklog = [];
@@ -1833,17 +1828,9 @@ async function organizeTomorrowTasks(env) {
     if (placed) {
       scheduled.push(task);
     } else {
-      // Overflow handling based on source
-      if (wasFromFuture) {
-        // Future-dated tasks return to their original date (user chose that date)
-        task.due_date = task.dueDate = originalDate;
-        task.due_time = task.dueTime = null;
-        remainingFuture.push(task);
-      } else {
-        // Today's task OR backlog task → cascade to future days
-        // ALL backlog tasks get distributed, never return to backlog
-        overflow.push(task);
-      }
+      // ALL overflow tasks (today, future, backlog) cascade to future days
+      // Nothing returns to backlog or original date - everything gets redistributed
+      overflow.push(task);
     }
   }
 
@@ -1859,8 +1846,8 @@ async function organizeTomorrowTasks(env) {
   let overflowDayOffset = 1; // Start with dayAfter (tomorrow+1 from cron's perspective)
   let remainingOverflow = [...overflow];
 
-  // Keep scheduling until all overflow tasks are placed (max 30 days to prevent infinite loop)
-  while (remainingOverflow.length > 0 && overflowDayOffset <= 30) {
+  // Keep scheduling until all overflow tasks are placed (max 60 days to handle large backlogs)
+  while (remainingOverflow.length > 0 && overflowDayOffset <= 60) {
     const targetDate = addDaysToDate(tomorrow, overflowDayOffset);
 
     // Reset slot tracking for this new day
