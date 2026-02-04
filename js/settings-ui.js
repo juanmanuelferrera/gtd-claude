@@ -1984,6 +1984,7 @@ function updateNowOrganizeButton() {
 
 // Handle click on Now/Organize button
 function handleNowOrganizeClick() {
+    alert('handleNowOrganizeClick called! autoOrganizeEnabled=' + window.autoOrganizeEnabled);
     console.log('🔄 handleNowOrganizeClick called, autoOrganizeEnabled:', window.autoOrganizeEnabled);
     if (window.autoOrganizeEnabled) {
         console.log('🔄 Calling organizeTasksFromUI...');
