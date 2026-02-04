@@ -2135,15 +2135,27 @@ async function organizeTasksFromUI() {
         let tasksScheduled = 0;
         let backlogCleared = 0;
 
+        // Track remaining capacity per day (in minutes)
+        const dayCapacity = {};
+        const getDayCapacity = (dateStr) => {
+            if (dayCapacity[dateStr] === undefined) {
+                const isToday = dateStr === today;
+                const startMin = isToday ? currentTimeMinutes : 0;
+                const slots = getAvailableSlots(dateStr, startMin);
+                dayCapacity[dateStr] = slots.reduce((sum, s) => sum + (s.end - s.start), 0);
+            }
+            return dayCapacity[dateStr];
+        };
+
         for (const task of flexibleTasks) {
             let placed = false;
             const duration = estimateTaskDuration(task);
             const fixedTime = getFixedTime(task);
             const wasBacklog = task.dueDate === '2099-01-01';
 
-            // Try to place in current day or future days
-            for (let attempt = 0; attempt < MAX_DAYS && !placed; attempt++) {
-                const targetDate = addDays(today, dayOffset + attempt);
+            // Try to place in days starting from dayOffset
+            for (let dayNum = dayOffset; dayNum < dayOffset + MAX_DAYS && !placed; dayNum++) {
+                const targetDate = addDays(today, dayNum);
                 const isToday = targetDate === today;
                 const startMin = isToday ? currentTimeMinutes : 0;
                 const slots = getAvailableSlots(targetDate, startMin);
@@ -2193,8 +2205,8 @@ async function organizeTasksFromUI() {
                     }
                 }
 
-                // If not placed in this day, try next day
-                if (!placed && attempt === 0) {
+                // If day is full, advance dayOffset so we don't retry full days
+                if (!placed && dayNum === dayOffset) {
                     dayOffset++;
                 }
             }
