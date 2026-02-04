@@ -1614,6 +1614,70 @@ async function organizeTomorrowTasks(env) {
     });
   }
 
+  // Ensure "Desayuno" task exists at 09:00 for today
+  let hasDesayuno = tomorrowTasks.some(t =>
+    /desayuno/i.test(t.title || '') && !t.isDeleted && t.status !== 'deleted'
+  );
+  if (!hasDesayuno) {
+    const desayunoTask = {
+      id: `desayuno_${tomorrow}`,
+      title: 'Desayuno',
+      notes: '@reservado',
+      dueDate: tomorrow,
+      due_date: tomorrow,
+      dueTime: '09:00',
+      due_time: '09:00',
+      status: 'pending',
+      isEvent: false,
+      is_event: false,
+      isDeleted: false,
+      is_deleted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      images: []
+    };
+    tomorrowTasks.push(desayunoTask);
+  } else {
+    // Fix time to 09:00 if it exists but has wrong time
+    for (const t of tomorrowTasks) {
+      if (/desayuno/i.test(t.title || '')) {
+        t.due_time = t.dueTime = '09:00';
+      }
+    }
+  }
+
+  // Ensure "Comida" task exists at 14:00 for today
+  let hasComida = tomorrowTasks.some(t =>
+    /comida|comer|almuerzo/i.test(t.title || '') && !t.isDeleted && t.status !== 'deleted'
+  );
+  if (!hasComida) {
+    const comidaTask = {
+      id: `comida_${tomorrow}`,
+      title: 'Comida',
+      notes: '@reservado',
+      dueDate: tomorrow,
+      due_date: tomorrow,
+      dueTime: '14:00',
+      due_time: '14:00',
+      status: 'pending',
+      isEvent: false,
+      is_event: false,
+      isDeleted: false,
+      is_deleted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      images: []
+    };
+    tomorrowTasks.push(comidaTask);
+  } else {
+    // Fix time to 14:00 if it exists but has wrong time
+    for (const t of tomorrowTasks) {
+      if (/comida|comer|almuerzo/i.test(t.title || '')) {
+        t.due_time = t.dueTime = '14:00';
+      }
+    }
+  }
+
   if (tomorrowTasks.length === 0) {
     console.log('No tasks for today to organize');
     return;
