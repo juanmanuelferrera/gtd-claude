@@ -1,7 +1,7 @@
 /**
  * Settings and UI Functions for HyperFiler Pro
  */
-console.log('✅ settings-ui.js v20260204-organize-tomorrow LOADED');
+console.log('✅ settings-ui.js v20260204-fix-adddays LOADED');
 
 // Missing core functions
 function saveTasks() {
@@ -2051,7 +2051,9 @@ async function organizeTasksFromUI() {
         const flexibleTasks = []; // Today's tasks (dated or undated) - organize these
 
         // Tomorrow's date for organizing both today and tomorrow
-        const tomorrow = addDays(today, 1);
+        const tomorrowDate = new Date();
+        tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+        const tomorrow = toLocalDateString(tomorrowDate);
 
         for (const task of allTasks) {
             const notes = (task.notes || '').toLowerCase();
