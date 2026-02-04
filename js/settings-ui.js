@@ -2094,6 +2094,7 @@ async function organizeTasksFromUI() {
                 // User has custom blocks: [{start: "07:00", end: "09:00"}, ...]
                 const parsed = JSON.parse(userTimeBlocks);
                 console.log('⏰ Time blocks from settings:', JSON.stringify(parsed));
+                alert('TIME BLOCKS loaded: ' + JSON.stringify(parsed));
                 TIME_SLOTS = parsed.map(b => ({
                     start: parseInt(b.start.split(':')[0]) * 60 + parseInt(b.start.split(':')[1] || 0),
                     end: parseInt(b.end.split(':')[0]) * 60 + parseInt(b.end.split(':')[1] || 0)
@@ -2101,11 +2102,13 @@ async function organizeTasksFromUI() {
                 console.log('⏰ TIME_SLOTS (in minutes):', JSON.stringify(TIME_SLOTS));
             } catch (e) {
                 console.log('⚠️ Failed to parse time blocks:', e);
+                alert('FAILED to parse time blocks: ' + e.message);
                 // Fallback to simple default
                 TIME_SLOTS = [{ start: 7 * 60, end: 19 * 60 }];  // 07:00-19:00
             }
         } else {
             console.log('⏰ No custom time blocks, using default 07:00-19:00');
+            alert('NO custom time blocks - using default 07:00-19:00');
             // No custom blocks - use simple full day
             TIME_SLOTS = [{ start: 7 * 60, end: 19 * 60 }];  // 07:00-19:00
         }
@@ -2119,12 +2122,15 @@ async function organizeTasksFromUI() {
                 // User has custom rules: [{pattern: "...", startTime: "06:00", endTime: "07:00"}, ...]
                 fixedTimeRules = JSON.parse(userFixedTimes);
                 console.log('📋 Fixed time rules loaded:', JSON.stringify(fixedTimeRules));
+                alert('FIXED TIME RULES: ' + JSON.stringify(fixedTimeRules));
             } catch (e) {
                 console.log('⚠️ Failed to parse fixed time rules:', e);
+                alert('FAILED to parse fixed time rules: ' + e.message);
                 fixedTimeRules = [];
             }
         } else {
             console.log('📋 No fixed time rules configured');
+            alert('NO fixed time rules configured');
         }
 
         const getFixedTimeRule = (task) => {
