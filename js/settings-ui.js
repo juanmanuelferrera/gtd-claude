@@ -1,7 +1,7 @@
 /**
  * Settings and UI Functions for HyperFiler Pro
  */
-console.log('✅ settings-ui.js v20260204-fix-overflow LOADED');
+console.log('✅ settings-ui.js v20260204-organize-tomorrow LOADED');
 
 // Missing core functions
 function saveTasks() {
@@ -2050,6 +2050,9 @@ async function organizeTasksFromUI() {
         const futureTasks = []; // Future-dated (> today) - don't touch
         const flexibleTasks = []; // Today's tasks (dated or undated) - organize these
 
+        // Tomorrow's date for organizing both today and tomorrow
+        const tomorrow = addDays(today, 1);
+
         for (const task of allTasks) {
             const notes = (task.notes || '').toLowerCase();
             const taskDate = task.dueDate || task.due_date || '';
@@ -2059,7 +2062,7 @@ async function organizeTasksFromUI() {
             if (/tot/i.test(task.title)) {
                 console.log(`🔍 TOT task found: "${task.title}"`);
                 console.log(`   - isEvent: ${task.isEvent}, notes: "${task.notes}"`);
-                console.log(`   - dueDate: ${taskDate}, today: ${today}`);
+                console.log(`   - dueDate: ${taskDate}, today: ${today}, tomorrow: ${tomorrow}`);
                 console.log(`   - isTaskEvent result: ${isTaskEvent(task)}`);
             }
 
@@ -2068,12 +2071,12 @@ async function organizeTasksFromUI() {
                 if (/tot/i.test(task.title)) console.log(`   → Categorized as EVENT (skipped)`);
             } else if (/@bhoga/i.test(notes)) {
                 bhogaTasks.push(task);
-            } else if (taskDate && taskDate > today) {
-                // Future-dated task - user put it there intentionally, don't touch
+            } else if (taskDate && taskDate > tomorrow) {
+                // Future-dated task (after tomorrow) - user put it there intentionally, don't touch
                 futureTasks.push(task);
                 if (/tot/i.test(task.title)) console.log(`   → Categorized as FUTURE (skipped)`);
             } else {
-                // Today's tasks (or undated) - organize these
+                // Today's or tomorrow's tasks (or undated) - organize these
                 // Set date to today if not set
                 if (!taskDate || taskDate <= today) {
                     task.dueDate = today;
