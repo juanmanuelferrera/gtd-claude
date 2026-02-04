@@ -1111,8 +1111,6 @@ async function organizeTasksForUserAndDates(env, userId, tomorrow, dayAfter, tas
   const userTimeBlocks = userSettings.timeBlocks || [];
   const userFixedTimeRules = userSettings.fixedTimeRules || [];
 
-  const BACKLOG_DATE = '2099-01-01';
-
   // Separate tasks by date
   const tomorrowTasks = [];
   const dayAfterTasks = [];
@@ -1683,23 +1681,14 @@ async function organizeTomorrowTasks(env) {
   // Calculate total available slot time
   const totalSlotMinutes = slots.reduce((sum, s) => sum + (s.end - s.start), 0);
 
-  // Calculate how much time today's flexible tasks need
-  const todayFlexibleMinutes = flexible.reduce((sum, t) => sum + t._duration, 0);
-  let remainingMinutes = totalSlotMinutes - todayFlexibleMinutes;
-
-  const BACKLOG_DATE = '2099-01-01';
-
-  // 5b. Separate otherTasks into: future tasks, backlog tasks, and true "other"
-  // IMPORTANT: Future tasks are NEVER pulled - they stay on their scheduled date
-  const backlogTasks = [];
+  // 5b. Separate otherTasks into: future tasks and true "other"
+  // Future tasks are NEVER touched - they stay on their scheduled date
   const remainingFuture = [];
   const remainingOther = [];
 
   for (const task of otherTasks) {
     const dueDate = task.due_date || task.dueDate;
-    if (dueDate === BACKLOG_DATE) {
-      backlogTasks.push(task);
-    } else if (dueDate && dueDate > tomorrow && dueDate < BACKLOG_DATE) {
+    if (dueDate && dueDate > tomorrow) {
       // Future-dated tasks stay on their date - user intentionally scheduled them
       remainingFuture.push(task);
     } else {
@@ -1707,56 +1696,8 @@ async function organizeTomorrowTasks(env) {
     }
   }
 
-  // 5c. Pull from backlog ONLY (2099-01-01 = "Someday")
-  // Never pull from future-dated tasks - they stay where user put them
-  const pulledFromBacklog = [];
-  const remainingBacklog = [];
-
-  // Filter backlog tasks
-  const backlogFlexible = [];
-  for (const task of backlogTasks) {
-    const notes = ((task.notes || '') + ' ' + (task.template || '')).toLowerCase();
-    const isEvent = task.is_event || task.isEvent || notes.includes('@event');
-
-    // Skip deleted/completed
-    if (task.isDeleted || task.status === 'deleted' || task.status === 'completed') {
-      remainingBacklog.push(task);
-      continue;
-    }
-
-    // Skip events and @bhoga in backlog
-    if (isEvent || notes.includes('@bhoga')) {
-      remainingBacklog.push(task);
-      continue;
-    }
-
-    task._importance = scoreImportance(task);
-    task._duration = estimateDuration(task);
-    task._fromBacklog = true;
-    backlogFlexible.push(task);
-  }
-
-  // Sort backlog by importance then duration
-  backlogFlexible.sort((a, b) => {
-    if (a._importance !== b._importance) return a._importance - b._importance;
-    return a._duration - b._duration;
-  });
-
-  // Pull backlog tasks to fill remaining time
-  pulledMinutes = 0;
-  for (const task of backlogFlexible) {
-    if (remainingMinutes > 0 && pulledMinutes + task._duration <= remainingMinutes) {
-      task.due_date = task.dueDate = tomorrow;
-      task.updatedAt = new Date().toISOString();
-      pulledMinutes += task._duration;
-      pulledFromBacklog.push(task);
-    } else {
-      remainingBacklog.push(task);
-    }
-  }
-
-  // 5e. Merge today's flexible + pulled backlog, re-sort by priority
-  const allFlexible = [...flexible, ...pulledFromBacklog];
+  // 5c. Only process today's flexible tasks (no backlog pulling)
+  const allFlexible = [...flexible];
   allFlexible.sort((a, b) => {
     // Carried-over tasks (unfinished from yesterday) get priority
     const aCarried = a._carriedOver ? 0 : 1;
@@ -1792,21 +1733,14 @@ async function organizeTomorrowTasks(env) {
     }
 
     // Clean up internal fields
-    const wasFromBacklog = task._fromBacklog;
-    const wasFromFuture = task._fromFuture;
-    const originalDate = task._originalDate;
     delete task._importance;
     delete task._duration;
     delete task._carriedOver;
-    delete task._fromBacklog;
-    delete task._fromFuture;
-    delete task._originalDate;
 
     if (placed) {
       scheduled.push(task);
     } else {
-      // ALL overflow tasks (today, future, backlog) cascade to future days
-      // Nothing returns to backlog or original date - everything gets redistributed
+      // Overflow tasks cascade to future days
       overflow.push(task);
     }
   }
@@ -1823,7 +1757,7 @@ async function organizeTomorrowTasks(env) {
   let overflowDayOffset = 1; // Start with dayAfter (tomorrow+1 from cron's perspective)
   let remainingOverflow = [...overflow];
 
-  // Keep scheduling until all overflow tasks are placed (max 60 days to handle large backlogs)
+  // Keep scheduling until all overflow tasks are placed (max 60 days)
   while (remainingOverflow.length > 0 && overflowDayOffset <= 60) {
     const targetDate = addDaysToDate(tomorrow, overflowDayOffset);
 
@@ -1870,16 +1804,17 @@ async function organizeTomorrowTasks(env) {
     overflowDayOffset++;
   }
 
-  // Any tasks that couldn't be placed in 30 days go to backlog
+  // Any tasks that couldn't be placed in 60 days stay on the last overflow day
   for (const task of remainingOverflow) {
-    task.due_date = task.dueDate = BACKLOG_DATE;
+    const lastDay = addDaysToDate(tomorrow, 60);
+    task.due_date = task.dueDate = lastDay;
     task.due_time = task.dueTime = null;
-    remainingBacklog.push(task);
+    scheduledOverflow.push(task);
   }
 
   // 7. Reassemble all tasks
   const organizedTomorrow = [...fixed, ...scheduled];
-  const finalTasks = [...remainingOther, ...organizedTomorrow, ...scheduledOverflow, ...dayAfterTasks, ...remainingFuture, ...remainingBacklog];
+  const finalTasks = [...remainingOther, ...organizedTomorrow, ...scheduledOverflow, ...dayAfterTasks, ...remainingFuture];
 
   // 8. Write back to D1 (same DELETE + INSERT pattern)
   await env.DB.prepare('DELETE FROM user_tasks WHERE user_id = ?')
@@ -1890,7 +1825,7 @@ async function organizeTomorrowTasks(env) {
      VALUES (?, ?, 'JSON_TASKS_DATA', datetime('now'), datetime('now'))`
   ).bind(userId, JSON.stringify(finalTasks)).run();
 
-  console.log(`✅ Auto-organize done: ${scheduled.length} scheduled, ${fixed.length} fixed, ${pulledFromBacklog.length} pulled from backlog, ${scheduledOverflow.length} cascaded to future days`);
+  console.log(`✅ Auto-organize done: ${scheduled.length} scheduled, ${fixed.length} fixed, ${scheduledOverflow.length} cascaded to future days`);
 }
 
 // Authentication helper

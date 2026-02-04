@@ -679,14 +679,11 @@ async function saveTaskEdit() {
         const dateValue = document.getElementById('editTaskDateOnly').value;
         const timeValue = document.getElementById('editTaskTimeOnly').value;
 
-        // If no date provided:
-        // - Events always default to TODAY (they're meant to stay on specific dates)
-        // - Regular tasks: if auto-organize ON → backlog (2099-01-01), if OFF → today
-        const BACKLOG_DATE = '2099-01-01';
+        // If no date provided, default to today
+        // Tasks are created untimed - organize/cron will assign times
         const todayDate = new Date().toISOString().slice(0, 10);
-        const defaultDate = isEvent ? todayDate : (window.autoOrganizeEnabled ? BACKLOG_DATE : todayDate);
-        const dueDate = dateValue || (currentEditTaskId ? null : defaultDate);
-        const dueTime = timeValue || null;
+        const dueDate = dateValue || (currentEditTaskId ? null : todayDate);
+        const dueTime = timeValue || null;  // Untimed by default unless user picks a time
         
         if (currentEditTaskId) {
             // Editing existing task

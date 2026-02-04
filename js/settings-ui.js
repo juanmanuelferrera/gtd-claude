@@ -2047,10 +2047,8 @@ async function organizeTasksFromUI() {
         // Categorize tasks
         const events = [];      // @event - don't touch
         const bhogaTasks = [];  // @bhoga - move to Monday
-        const futureTasks = []; // Future-dated (> today, < backlog) - don't touch
-        const flexibleTasks = []; // Today + backlog - organize these
-
-        const BACKLOG_DATE = '2099-01-01';
+        const futureTasks = []; // Future-dated (> today) - don't touch
+        const flexibleTasks = []; // Today's tasks (dated or undated) - organize these
 
         for (const task of allTasks) {
             const notes = (task.notes || '').toLowerCase();
@@ -2060,16 +2058,21 @@ async function organizeTasksFromUI() {
                 events.push(task);
             } else if (/@bhoga/i.test(notes)) {
                 bhogaTasks.push(task);
-            } else if (taskDate > today && taskDate < BACKLOG_DATE) {
+            } else if (taskDate && taskDate > today) {
                 // Future-dated task - user put it there intentionally, don't touch
                 futureTasks.push(task);
             } else {
-                // Today's tasks OR backlog (2099-01-01) - organize these
+                // Today's tasks (or undated) - organize these
+                // Set date to today if not set
+                if (!taskDate || taskDate <= today) {
+                    task.dueDate = today;
+                    task.due_date = today;
+                }
                 flexibleTasks.push(task);
             }
         }
 
-        console.log('🔄 Categorized - Events:', events.length, 'Bhoga:', bhogaTasks.length, 'Future (untouched):', futureTasks.length, 'Flexible:', flexibleTasks.length);
+        console.log('🔄 Categorized - Events:', events.length, 'Bhoga:', bhogaTasks.length, 'Future (untouched):', futureTasks.length, 'Flexible (today):', flexibleTasks.length);
 
         // Move @bhoga tasks to next Monday
         let bhogaMoved = 0;
@@ -2191,7 +2194,6 @@ async function organizeTasksFromUI() {
         // Start scheduling from current time for today
         let currentTimeMinutes = currentHour * 60 + Math.ceil(currentMinute / 15) * 15;
         let tasksScheduled = 0;
-        let backlogCleared = 0;
 
         // Track remaining capacity per day (in minutes)
         const dayCapacity = {};
@@ -2381,10 +2383,8 @@ async function organizeTasksFromUI() {
 
             // Try to place each remaining task on this day
             for (const task of remainingTasks) {
-                const wasBacklog = task.dueDate === '2099-01-01';
                 if (tryPlaceTask(task, targetDate)) {
                     tasksScheduled++;
-                    if (wasBacklog) backlogCleared++;
                     placedOnThisDay++;
                 } else {
                     stillRemaining.push(task);
@@ -2417,7 +2417,7 @@ async function organizeTasksFromUI() {
         }
 
         // Show summary
-        const summary = `✅ Organized: ${tasksScheduled} tasks, ${bhogaMoved} @bhoga→Mon, ${backlogCleared} from backlog`;
+        const summary = `✅ Organized: ${tasksScheduled} tasks` + (bhogaMoved > 0 ? `, ${bhogaMoved} @bhoga→Mon` : '');
         console.log(summary);
         if (typeof showToast === 'function') showToast(summary, 5000);
 
