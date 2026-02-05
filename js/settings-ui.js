@@ -1,7 +1,7 @@
 /**
  * Settings and UI Functions for HyperFiler Pro
  */
-console.log('✅ settings-ui.js v20260204-fix-adddays LOADED');
+console.log('✅ settings-ui.js v20260205-fix-sync LOADED');
 
 // Missing core functions
 function saveTasks() {
@@ -2618,14 +2618,22 @@ function loadTimeBlocksUI() {
 // Sync organize settings to backend (for cron to use)
 async function syncOrganizeSettingsToBackend() {
     try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            console.log('⚠️ No auth token, skipping settings sync');
+            return;
+        }
+
         const timeBlocks = JSON.parse(localStorage.getItem('hyperfiler_time_blocks') || '[]');
         const fixedTimeRules = JSON.parse(localStorage.getItem('hyperfiler_fixed_times') || '[]');
 
         const apiUrl = window.API_BASE_URL || 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
         const response = await fetch(`${apiUrl}/auth/settings`, {
             method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ timeBlocks, fixedTimeRules })
         });
 
