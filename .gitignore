@@ -37,6 +37,9 @@ build/
 .DS_Store
 Thumbs.db
 
+# ML models (too large for Pages)
+models/
+
 # Claude Code files
 .claude/
 deploy/admin.html.backup
