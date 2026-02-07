@@ -977,6 +977,9 @@ async function carryOverYesterdayTasksForUser(env, userId) {
       continue;
     }
 
+    // Events are FIXED — never carry over (they stay on their original date)
+    if (t.isEvent || t.is_event || notes.includes('@event')) continue;
+
     // Regular carryover
     t.dueDate = t.due_date = today;
     t.dueTime = t.due_time = '';
