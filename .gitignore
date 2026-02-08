@@ -45,6 +45,9 @@ models/
 deploy/admin.html.backup
 deploy/admin.html.insecure_backup
 
+# LanceDB (local RAG database)
+lancedb/
+
 # User data and backup files - NEVER commit these!
 jsons/
 *.json

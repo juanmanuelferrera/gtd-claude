@@ -12,17 +12,8 @@
 - 06:00-07:00 is always reserved for "programa espiritual" (spiritual program). Never schedule other tasks in this slot.
 - Always schedule most important tasks first, then sort by shortest duration within the same priority level.
 - If any tasks don't fit in the day (overflow past 19:00), automatically move them to the next day.
-- If slots remain after scheduling today's tasks:
-  1. First pull from future-dated tasks (nearest date first) — but NOT events (events stay on their scheduled date)
-  2. Then pull from backlog (2099-01-01) if slots still remain
-  - All pulled tasks get merged with today's tasks and sorted by priority before scheduling
-
-## Backlog (Someday tasks)
-- Tasks dated `2099-01-01` are "Someday/Maybe" backlog items
-- The cron pulls backlog tasks when today has remaining slot capacity
-- To query all backlog tasks: `hf_list_tasks` with `date=2099-01-01`
-- Backlog tasks compete fairly with today's tasks based on priority (carryover first, then importance, then duration)
-- If a backlog task overflows (doesn't fit), it returns to 2099-01-01
+- If tasks don't fit today, they overflow to tomorrow and beyond automatically.
+- New tasks are always created for today without a time — the cron organizes them.
 
 ## CarryOver (midnight cron)
 - When the cron runs at midnight, tasks carried over from the previous day have **higher priority** than tasks already scheduled for the new day, since they represent unfinished work.
