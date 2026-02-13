@@ -1,3 +1,6 @@
+## Timezone
+- The user is in **Europe/Madrid** (CET/CEST). The system date may be behind by 1 day. ALWAYS ask yourself: "what date is it in Europe/Madrid right now?" and use THAT date as "today". If the system says Feb 11 but it's already Feb 12 in Madrid, today is Feb 12.
+
 ## HyperFiler Task Rules
 - Events (isEvent: true) NEVER get moved to a different date when redistributing/rebalancing tasks, unless the user explicitly orders it
 - **Auto-Event marking**: When a user moves a task to a future date (via delay buttons, date picker, or drag-drop), the task is automatically marked as an Event to protect it from being pulled forward by the cron. This only applies to future dates, not today.
@@ -14,6 +17,7 @@
 - If any tasks don't fit in the day (overflow past 19:00), automatically move them to the next day.
 - If tasks don't fit today, they overflow to tomorrow and beyond automatically.
 - New tasks are always created for today without a time — the cron organizes them.
+- **Default date is TODAY**: When creating a task via MCP and no date is specified, ALWAYS set `due_date` to today's date. Never leave it without a date.
 
 ## CarryOver (midnight cron)
 - When the cron runs at midnight, tasks carried over from the previous day have **higher priority** than tasks already scheduled for the new day, since they represent unfinished work.

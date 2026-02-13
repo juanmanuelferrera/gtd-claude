@@ -49,7 +49,16 @@ def _api(method, path, data=None, token=None):
 
 def _ensure_auth():
     if _auth["token"]:
-        return _auth["token"], _auth["user_id"]
+        # Verify token still works; re-auth if expired
+        try:
+            _api("GET", f"/tasks/{_auth['user_id']}", token=_auth["token"])
+            return _auth["token"], _auth["user_id"]
+        except urllib.error.HTTPError as e:
+            if e.code == 401:
+                _auth["token"] = None
+                _auth["user_id"] = None
+            else:
+                raise
     email, password = _load_credentials()
     result = _api("POST", "/auth/login", {"email": email, "password": password})
     _auth["token"] = result["token"]
