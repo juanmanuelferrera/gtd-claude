@@ -285,32 +285,32 @@
             </div>
             
             <div class="main-nav">
-            <button class="nav-btn active" onclick="showView('today')" id="nav-today" tabindex="1">
+            <button class="nav-btn active" onclick="window.showView&&showView('today')" id="nav-today" tabindex="1">
                 📋 Today <span style="opacity: 0.7; font-size: 11px; color: #666;">T</span>
             </button>
-            <button class="nav-btn" onclick="showView('week')" id="nav-week" tabindex="2" data-translate="Week">
+            <button class="nav-btn" onclick="window.showView&&showView('week')" id="nav-week" tabindex="2" data-translate="Week">
                 📊 Week <span style="opacity: 0.7; font-size: 11px; color: #666;">W</span>
             </button>
-            <button class="nav-btn" onclick="showView('calendar')" id="nav-calendar" tabindex="3" data-translate="Month">
+            <button class="nav-btn" onclick="window.showView&&showView('calendar')" id="nav-calendar" tabindex="3" data-translate="Month">
                 📆 Month <span style="opacity: 0.7; font-size: 11px; color: #666;">M</span>
             </button>
-            <button class="nav-btn" onclick="showView('events')" id="nav-events" tabindex="4" style="position: relative; overflow: visible;">
+            <button class="nav-btn" onclick="window.showView&&showView('events')" id="nav-events" tabindex="4" style="position: relative; overflow: visible;">
                 🗓️ Events <span style="opacity: 0.7; font-size: 11px; color: #666;">E</span>
                 <span id="pastEventsBadge" style="display: none; margin-left: 6px; background: #dc3545; color: white; font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 10px; min-width: 18px; text-align: center; animation: pulse 2s infinite; box-shadow: 0 2px 4px rgba(220,53,69,0.4); vertical-align: middle;"></span>
             </button>
-            <button class="nav-btn" onclick="showView('all'); setTimeout(() => { const searchInput = document.getElementById('allTasksSearchInput'); if (searchInput) searchInput.focus(); }, 100);" id="nav-all" tabindex="5">
+            <button class="nav-btn" onclick="window.showView&&showView('all'); setTimeout(() => { const searchInput = document.getElementById('allTasksSearchInput'); if (searchInput) searchInput.focus(); }, 100);" id="nav-all" tabindex="5">
                 🔍 Search <span style="opacity: 0.7; font-size: 11px; color: #666;">S</span>
             </button>
-            <button class="nav-btn" onclick="showView('lists')" id="nav-lists" tabindex="6">
+            <button class="nav-btn" onclick="window.showView&&showView('lists')" id="nav-lists" tabindex="6">
                 📂 Lists <span style="opacity: 0.7; font-size: 11px; color: #666;">L</span>
             </button>
-            <button class="nav-btn" onclick="showView('repeat')" id="nav-repeat" tabindex="7">
+            <button class="nav-btn" onclick="window.showView&&showView('repeat')" id="nav-repeat" tabindex="7">
                 🔄 Repeat <span style="opacity: 0.7; font-size: 11px; color: #666;">R</span>
             </button>
-            <button class="nav-btn" onclick="showView('recent-actions')" id="nav-recent-actions" tabindex="8">
+            <button class="nav-btn" onclick="window.showView&&showView('recent-actions')" id="nav-recent-actions" tabindex="8">
                 📋 Registry <span style="opacity: 0.7; font-size: 11px; color: #666;">U</span>
             </button>
-            <button class="nav-btn" onclick="showView('settings')" id="nav-settings" tabindex="9">
+            <button class="nav-btn" onclick="window.showView&&showView('settings')" id="nav-settings" tabindex="9">
                 ⚙️ Settings <span style="opacity: 0.7; font-size: 11px; color: #666;">X</span>
             </button>
             </div>
@@ -634,7 +634,7 @@
                         <button class="btn btn-secondary btn-small" onclick="printSearchResults()" id="printSearchBtn" style="background: #17a2b8; color: white; border-color: #17a2b8; font-size: 11px; padding: 8px 6px;">
                             🖨️ Print
                         </button>
-                        <button class="btn btn-secondary btn-small" onclick="showView('recent-actions')" id="recentActionsBtn" style="background: #6f42c1; color: white; border-color: #6f42c1; font-weight: 600; font-size: 11px; padding: 8px 6px;">
+                        <button class="btn btn-secondary btn-small" onclick="window.showView&&showView('recent-actions')" id="recentActionsBtn" style="background: #6f42c1; color: white; border-color: #6f42c1; font-weight: 600; font-size: 11px; padding: 8px 6px;">
                             📋 Registry
                         </button>
                         <span id="selectedCount" class="selected-count" style="display: none; font-size: 11px;">0 selected</span>
