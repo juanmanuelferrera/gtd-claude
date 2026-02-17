@@ -961,13 +961,13 @@ async function carryOverYesterdayTasksForUser(env, userId) {
   let moved = 0;
 
   for (const t of tasks) {
-    if (t._meta || t.isDeleted || t.status === 'deleted' || t.status === 'completed') continue;
+    if (t._meta || t.isDeleted || t.status === 'deleted') continue;
     if (t.dueDate !== yesterdayStr) continue;
 
     const title = (t.title || '').toLowerCase();
     const notes = ((t.notes || '') + ' ' + (t.template || '')).toLowerCase();
 
-    // @bhoga tasks move to next Monday
+    // @bhoga tasks: ALWAYS move to next Monday, even if completed
     if (notes.includes('@bhoga')) {
       t.dueDate = t.due_date = getNextMondayDateStr();
       t.dueTime = t.due_time = '';
@@ -976,6 +976,9 @@ async function carryOverYesterdayTasksForUser(env, userId) {
       moved++;
       continue;
     }
+
+    // Skip completed for non-bhoga tasks
+    if (t.status === 'completed') continue;
 
     // Events are FIXED — never carry over (they stay on their original date)
     if (t.isEvent || t.is_event || notes.includes('@event')) continue;
