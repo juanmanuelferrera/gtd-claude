@@ -4574,6 +4574,7 @@ function clearAllTemplateHighlights() {
 window.activateTemplateSelector = activateTemplateSelector;
 window.exitTemplateNavigation = exitTemplateNavigation;
 window.showView = showView;
+window.isTaskEvent = isTaskEvent;
 
 // Add test function to window for debugging
 window.testTemplateSelector = function() {
