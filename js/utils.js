@@ -90,7 +90,7 @@ function makeLinksClickable(text) {
     if (typeof TaskUtils !== 'undefined' && TaskUtils.makeLinksClickable) {
         return TaskUtils.makeLinksClickable(text);
     }
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const urlRegex = /((?:https?|kavya):\/\/[^\s]+)/g;
     return text.replace(urlRegex, '<a href="$1" target="_blank" onclick="event.stopPropagation()">$1</a>');
 }
 
