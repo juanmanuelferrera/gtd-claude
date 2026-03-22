@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ HyperFiler Pro 🚀 - Support Development</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 60px 20px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            font-weight: 800;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+        }
+
+        .header h1 span:first-child {
+            margin-right: 12px;
+        }
+
+        .header h1 span:last-child {
+            margin-left: 24px;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .learn-more {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .learn-more:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .comparison-section {
+            padding: 50px 40px 30px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .section-subtitle {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 60px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .plan-card {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid #f0f0f0;
+            position: relative;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.1);
+        }
+
+        .plan-card.featured {
+            border-color: #667eea;
+            transform: translateY(-20px);
+            box-shadow: 0 30px 60px rgba(102, 126, 234, 0.2);
+        }
+
+        .plan-card.featured::before {
+            content: "🌟 MOST POPULAR";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #667eea;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .plan-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .plan-name {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .plan-price {
+            font-size: 3.5em;
+            font-weight: 900;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .plan-period {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        .plan-features li {
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            font-size: 1.1em;
+        }
+
+        .plan-features li::before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 12px;
+            font-size: 1.2em;
+        }
+
+        .plan-features li.unavailable::before {
+            content: "✗";
+            color: #dc3545;
+        }
+
+        .plan-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .plan-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .plan-button.secondary {
+            background: #6c757d;
+        }
+
+        .plan-button.secondary:hover {
+            background: #5a6268;
+            box-shadow: 0 10px 30px rgba(108, 117, 125, 0.3);
+        }
+
+        .promo-section {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .promo-title {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .promo-form {
+            display: flex;
+            gap: 15px;
+            max-width: 500px;
+            margin: 0 auto 20px;
+            flex-wrap: wrap;
+        }
+
+        .promo-input {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .promo-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .promo-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .promo-button:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .promo-codes {
+            color: #666;
+            font-size: 0.9em;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .status-message {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 40px;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px;
+        }
+
+        .download-section {
+            background: #e8f5e8;
+            padding: 40px;
+            text-align: center;
+            border-radius: 15px;
+            margin: 20px;
+            border: 2px solid #28a745;
+            display: none;
+        }
+
+        .download-button {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .download-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+        }
+
+        .download-links {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #28a745;
+        }
+
+        .download-links h4 {
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+
+        .download-links p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .footer p {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .plans-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .plan-card.featured {
+                transform: none;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+            }
+
+            .header h1 span:first-child {
+                margin-right: 8px;
+            }
+
+            .header h1 span:last-child {
+                margin-left: 16px;
+            }
+
+            .section-title {
+                font-size: 2em;
+            }
+
+            .plan-price {
+                font-size: 2.5em;
+            }
+
+            .promo-form {
+                flex-direction: column;
+            }
+
+            .comparison-section {
+                padding: 60px 20px;
+            }
+
+            .promo-section {
+                padding: 30px 20px;
+            }
+
+            .download-section {
+                padding: 30px 20px;
+                margin: 15px;
+            }
+
+            .download-button {
+                padding: 15px 30px;
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><span>⚡</span> HyperFiler Pro <span>🚀</span></h1>
+            <p>Ready to purchase your HyperFiler Pro license? Support continued development!</p>
+            <a href="readme.html" target="_blank" class="learn-more">
+                📚 Learn More About HyperFiler Pro
+            </a>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="success-message" class="status-message success"></div>
+        <div id="error-message" class="status-message error"></div>
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px;">Processing...</p>
+        </div>
+
+        <!-- Main Comparison Section -->
+        <div class="comparison-section">
+
+
+            <div class="plans-grid">
+                <!-- Trial Mode -->
+                <div class="plan-card">
+                    <div class="plan-icon">🔄</div>
+                    <h3 class="plan-name">Trial Mode</h3>
+                    <div class="plan-price">€0</div>
+                    <div class="plan-period">try before you buy</div>
+
+                    <ul class="plan-features">
+                        <li>🔄 Full premium features to try</li>
+                        <li>📅 Unlimited tasks & projects</li>
+                        <li>📊 All views + Statistics</li>
+                        <li>🔁 Advanced recurring tasks</li>
+                        <li>☁️ Cloud sync across devices</li>
+                        <li>⚠️ Periodic purchase reminders</li>
+                        <li>📧 Basic email support</li>
+                        <li>🎯 Try as long as you need</li>
+                        <li>🔄 Experience before purchasing</li>
+                    </ul>
+
+                    <a href="register.html" class="plan-button secondary" style="text-decoration: none; display: inline-block;">
+                        🔄 Start Trial
+                    </a>
+                </div>
+
+                <!-- Licensed Version -->
+                <div class="plan-card featured">
+                    <div class="plan-icon">👑</div>
+                    <h3 class="plan-name">Licensed Version</h3>
+                    <div class="plan-price">€49.98</div>
+                    <div class="plan-period">one-time purchase</div>
+
+                    <ul class="plan-features">
+                        <li>👑 Full ownership of premium software</li>
+                        <li>🔕 No more purchase reminders</li>
+                        <li>📧 Priority email support</li>
+                        <li>🚀 First access to new features</li>
+                        <li>🐛 Priority bug fixes</li>
+                        <li>💎 Professional software license</li>
+                        <li>✅ One-time payment, no subscriptions</li>
+                        <li>🏆 Join our community of licensed users</li>
+                        <li>💰 Support continued development</li>
+                    </ul>
+
+                    <button id="checkout-button" class="plan-button">
+                        👑 Purchase License
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alternative Access Section -->
+        <div class="promo-section">
+            <h3 class="promo-title">🎁 Have a Supporter Code?</h3>
+            <p style="text-align: center; margin-bottom: 20px; color: #667eea; font-weight: 500;">
+                If you have a special supporter code, redeem it here (same benefits as paid)
+            </p>
+            <div class="promo-form">
+                <input type="email" id="promo-email" class="promo-input" placeholder="Your email">
+                <input type="text" id="promo-code" class="promo-input" placeholder="Enter supporter code" style="text-transform: uppercase;">
+                <button id="redeem-btn" class="promo-button">Redeem Code</button>
+            </div>
+            <div class="promo-codes">
+                <strong>✨ Questions about supporter codes?</strong><br>
+                <a href="mailto:support@hyperfiler.pro">support@hyperfiler.pro</a>
+            </div>
+        </div>
+
+        <!-- Billing Portal Section (Hidden by default, shown via email link) -->
+        <div id="manage-subscription" class="promo-section" style="border-top: 1px solid #e9ecef; background: #f0f8ff; display: none;">
+            <h3 class="promo-title" style="color: #667eea;">🔗 Manage Your Subscription</h3>
+            <p style="text-align: center; margin-bottom: 20px; color: #667eea; font-weight: 500;">
+                Need to update payment details, cancel, or view billing history? Get a fresh portal link.
+            </p>
+            <div class="promo-form">
+                <input type="email" id="portal-email" class="promo-input" placeholder="Your subscription email">
+                <button id="portal-btn" class="promo-button" style="background: #667eea;">Get Portal Link</button>
+            </div>
+            <div style="color: #666; font-size: 0.9em; text-align: center; margin-top: 15px;">
+                <strong>Note:</strong> This will generate a fresh Stripe billing portal link for you.
+            </div>
+        </div>
+
+        <!-- Download Section -->
+        <div id="download-section" class="download-section">
+            <h3>🎉 Ready to Login!</h3>
+            <p>Check your email for login credentials and start using HyperFiler Pro.</p>
+
+            <a href="login.html" class="download-button">
+                🔐 Login to Your Account
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>HyperFiler Pro</strong> - Transform your productivity today</p>
+            <a href="mailto:support@hyperfiler.pro">📧 Contact Support</a>
+            <a href="readme.html">📚 User Guide</a>
+            <a href="../index.html">🏠 Home</a>
+        </div>
+    </div>
+
+
+    <script>
+        // Configuration
+        const API_BASE = window.location.hostname.includes('localhost')
+            ? 'http://localhost:8787'
+            : 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
+        const STRIPE_PUBLISHABLE_KEY = 'pk_live_51QcWyCBMBEnwG8p0gIrjYnhgc69OsEVCMKhN9NWPPwbXGz6PBhz2wOBqBRGlnYzKKqPE0Ox66lpOA1WQGWEHdKCp007wJRaykm';
+
+
+        // DOM elements
+        const checkoutButton = document.getElementById('checkout-button');
+        const promoEmailInput = document.getElementById('promo-email');
+        const promoCodeInput = document.getElementById('promo-code');
+        const redeemBtn = document.getElementById('redeem-btn');
+        const portalEmailInput = document.getElementById('portal-email');
+        const portalBtn = document.getElementById('portal-btn');
+        const successMessage = document.getElementById('success-message');
+        const errorMessage = document.getElementById('error-message');
+        const loading = document.getElementById('loading');
+
+        // Debug: Check if elements exist
+        console.log('Elements found:');
+        console.log('checkoutButton:', !!checkoutButton);
+        console.log('promoEmailInput:', !!promoEmailInput);
+        console.log('successMessage:', !!successMessage);
+        console.log('errorMessage:', !!errorMessage);
+        console.log('loading:', !!loading);
+
+        // Initialize Stripe
+        const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+
+        // Utility functions
+        function showError(message) {
+            if (errorMessage) {
+                errorMessage.textContent = `❌ ${message}`;
+                errorMessage.style.display = 'block';
+            }
+            if (successMessage) successMessage.style.display = 'none';
+            if (loading) loading.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            if (successMessage) {
+                successMessage.innerHTML = `✅ ${message}`;
+                successMessage.style.display = 'block';
+                
+                // Auto-scroll to top to show the message
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Auto-hide after 60 seconds
+                setTimeout(() => {
+                    if (successMessage) {
+                        successMessage.style.display = 'none';
+                    }
+                }, 60000);
+            }
+            if (errorMessage) errorMessage.style.display = 'none';
+            if (loading) loading.style.display = 'none';
+        }
+
+        function showLoading() {
+            if (loading) loading.style.display = 'block';
+            if (errorMessage) errorMessage.style.display = 'none';
+            if (successMessage) successMessage.style.display = 'none';
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        // Show and scroll to manage subscription section if accessed via email link
+        if (window.location.hash === '#manage-subscription') {
+            const section = document.getElementById('manage-subscription');
+            if (section) {
+                // Show the hidden section
+                section.style.display = 'block';
+                
+                setTimeout(() => {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Briefly highlight the section
+                    section.style.boxShadow = '0 0 20px rgba(102, 126, 234, 0.3)';
+                    setTimeout(() => {
+                        section.style.boxShadow = '';
+                    }, 2000);
+                }, 500);
+            }
+        }
+
+        // Check URL parameters for success/cancel
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            // Simple success message
+            let stripeMessage = `
+                <div style="text-align: center;">
+                    <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">
+                        🎉 Pro Access Activated! 🎉
+                    </div>
+                    <div style="font-size: 14px; color: #666; margin-top: 10px;">
+                        📧 Check your email for password & login details<br>
+                        ✅ Your existing tasks are preserved<br>
+                        <small style="opacity: 0.8;">⏰ This message will disappear in 60 seconds</small>
+                    </div>
+                </div>`;
+            
+            showSuccess(stripeMessage);
+            // Don't show download section - everything is in the top message
+        } else if (urlParams.get('canceled') === 'true') {
+            showError('Payment was canceled. You can try again anytime.');
+        }
+
+        // Checkout handler - creates payment links via Workers API
+        if (checkoutButton) {
+            console.log('✅ Setting up checkout button listener');
+            checkoutButton.addEventListener('click', async () => {
+            checkoutButton.disabled = true;
+            showLoading();
+
+            try {
+                // Get customer email if available
+                const customerEmail = localStorage.getItem('currentUser') 
+                    ? JSON.parse(localStorage.getItem('currentUser')).user?.email 
+                    : null;
+
+                // Prepare request body
+                const requestBody = { mode: 'payment' };
+                
+                // Only add email if it's valid
+                if (customerEmail && customerEmail.trim() && customerEmail.includes('@')) {
+                    requestBody.email = customerEmail.trim();
+                }
+
+                const response = await fetch(`${API_BASE}/payments/create-checkout-session`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const result = await response.json();
+                console.log('API Response:', JSON.stringify(result, null, 2));
+
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+
+                // Check if we got a Stripe checkout session
+                if (result.id && result.url) {
+                    console.log('✅ STRIPE CHECKOUT SESSION CREATED:', result.id);
+                    console.log('✅ CHECKOUT URL:', result.url);
+                    showSuccess('Redirecting to secure payment page...');
+
+                    // Direct navigation to Stripe checkout page
+                    setTimeout(() => {
+                        window.location.href = result.url;
+                    }, 1000);
+                    return;
+                }
+
+                throw new Error('No valid payment URL received');
+
+            } catch (error) {
+                console.error('Payment error:', error);
+                showError('Payment system error. Please try the promo codes below or contact support.');
+            } finally {
+                checkoutButton.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+        } else {
+            console.error('❌ Checkout button not found!');
+        }
+
+        // Promo code handler
+        async function handlePromoRedeem() {
+            const email = promoEmailInput.value.trim();
+            const code = promoCodeInput.value.trim();
+
+            if (!email || !code) {
+                showError('Please enter both email and promo code');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showError('Please enter a valid email address');
+                return;
+            }
+
+            redeemBtn.disabled = true;
+            redeemBtn.textContent = 'Redeeming...';
+            showLoading();
+
+            try {
+                const response = await fetch(`${API_BASE}/promo/redeem`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, code: code.toUpperCase() })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // Create well-formatted success message with proper login button
+                    let message = `
+                        <style>
+                            @keyframes flashPulse {
+                                0%, 100% { opacity: 1; transform: scale(1); }
+                                50% { opacity: 0.7; transform: scale(1.05); }
+                            }
+                            @keyframes glow {
+                                0%, 100% { box-shadow: 0 0 5px rgba(102, 126, 234, 0.5); }
+                                50% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.8), 0 0 30px rgba(102, 126, 234, 0.6); }
+                            }
+                            .flash-title {
+                                animation: flashPulse 1.5s ease-in-out infinite;
+                            }
+                            .glow-button {
+                                animation: glow 2s ease-in-out infinite;
+                            }
+                        </style>
+                        <div style="text-align: center;">
+                            <div class="flash-title" style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">
+                                🎉 Pro Access Activated Until ${result.trialEnd}! 🎉
+                            </div>`;
+                    
+                    if (result.newPassword) {
+                        message += `
+                            <div style="margin-bottom: 15px;">
+                                <span style="font-weight: bold;">Password:</span> 
+                                <code style="background: #f4f4f4; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 14px;">${result.newPassword}</code>
+                            </div>`;
+                    }
+                    
+                    message += `
+                            <div style="margin-bottom: 15px;">
+                                <a href="login.html" class="glow-button" style="
+                                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                    color: white;
+                                    padding: 12px 24px;
+                                    border-radius: 25px;
+                                    text-decoration: none;
+                                    font-weight: bold;
+                                    display: inline-block;
+                                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                                    transition: transform 0.2s;
+                                " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                                    🔐 Login to Your Account
+                                </a>
+                            </div>
+                            <div style="font-size: 14px; color: #666; margin-top: 10px;">
+                                📧 Check your email for additional details<br>
+                                <small style="opacity: 0.8;">⏰ This message will disappear in 60 seconds</small>
+                            </div>
+                        </div>`;
+                    
+                    showSuccess(message);
+                    promoEmailInput.value = '';
+                    promoCodeInput.value = '';
+
+                    // Don't show download section - everything is in the top message
+                } else {
+                    showError(result.error || 'Invalid promo code');
+                }
+
+            } catch (error) {
+                console.error('Promo error:', error);
+                showError('Error redeeming code. Please try again.');
+            } finally {
+                redeemBtn.disabled = false;
+                redeemBtn.textContent = 'Redeem';
+                loading.style.display = 'none';
+            }
+        }
+
+        // Portal link handler
+        async function handlePortalLink() {
+            const email = portalEmailInput.value.trim();
+
+            if (!email) {
+                showError('Please enter your email address');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showError('Please enter a valid email address');
+                return;
+            }
+
+            portalBtn.disabled = true;
+            portalBtn.textContent = 'Generating...';
+            showLoading();
+
+            try {
+                const response = await fetch(`${API_BASE}/payments/customer-portal`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success && result.portal_url) {
+                    showSuccess(`✅ Fresh portal link generated! Redirecting to your billing portal...`);
+                    
+                    // Redirect to the fresh portal URL
+                    setTimeout(() => {
+                        window.location.href = result.portal_url;
+                    }, 2000);
+                } else {
+                    showError(result.error || 'Unable to generate portal link. Please contact support.');
+                }
+
+            } catch (error) {
+                console.error('Portal link error:', error);
+                showError('Error generating portal link. Please try again or contact support.');
+            } finally {
+                portalBtn.disabled = false;
+                portalBtn.textContent = 'Get Portal Link';
+                loading.style.display = 'none';
+            }
+        }
+
+        // Promo redeem button
+        if (redeemBtn) {
+            redeemBtn.addEventListener('click', handlePromoRedeem);
+        }
+
+        // Portal button
+        if (portalBtn) {
+            portalBtn.addEventListener('click', handlePortalLink);
+        }
+
+        // Allow Enter key to redeem code
+        if (promoCodeInput) {
+            promoCodeInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handlePromoRedeem();
+                }
+            });
+        }
+
+        // Allow Enter key for portal email
+        if (portalEmailInput) {
+            portalEmailInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handlePortalLink();
+                }
+            });
+        }
+
+        // Show coupon form function
+        function showCouponForm() {
+            document.querySelector('.promo-section').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+            document.getElementById('promo-email').focus();
+        }
+    </script>
+</body>
+</html>

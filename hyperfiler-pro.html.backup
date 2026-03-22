@@ -1,0 +1,764 @@
+// 🚀 SYNC SYSTEM v2.0.7 - PRODUCTION READY
+// Unified storage, staleness detection, tombstones, device tracking
+
+// ===== CONFIGURATION =====
+const SYNC_CONFIG = {
+    version: '2.0.7',
+    unifiedStorageKey: 'hyperfiler-tasks', // UNIFIED: Use same key as frontend
+    maxStaleAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+    syncInterval: 5000, // 5 seconds
+    retryAttempts: 3,
+    retryDelay: 2000
+};
+
+// ===== DEVICE/SESSION TRACKING =====
+function getDeviceId() {
+    let deviceId = localStorage.getItem('hyperfiler-device-id');
+    if (!deviceId) {
+        deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('hyperfiler-device-id', deviceId);
+        console.log('🆔 NEW DEVICE: Generated device ID:', deviceId);
+    }
+    return deviceId;
+}
+
+function getSessionId() {
+    let sessionId = sessionStorage.getItem('hyperfiler-session-id');
+    if (!sessionId) {
+        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        sessionStorage.setItem('hyperfiler-session-id', sessionId);
+        // FIXED: Track session start time for staleness detection
+        sessionStorage.setItem('session-start-time', Date.now().toString());
+    }
+    return sessionId;
+}
+
+// ===== TASK FORMAT CONVERSION =====
+function convertHyperFilerToSyncFormat(hyperFilerTasks) {
+    const syncTasks = [];
+    const deviceId = getDeviceId();
+    const sessionId = getSessionId();
+    const now = new Date().toISOString();
+    
+    // Convert section-based format to flat array
+    Object.keys(hyperFilerTasks).forEach(sectionName => {
+        const sectionTasks = hyperFilerTasks[sectionName] || [];
+        sectionTasks.forEach(task => {
+            syncTasks.push({
+                id: task.id,
+                title: task.text || task.title || '',
+                notes: task.notes || '',
+                images: task.images || [],
+                dueDate: task.dueDate || null,
+                dueTime: task.dueTime || null,
+                status: task.completed ? 'completed' : 'pending',
+                repeatType: task.repeatType || '',
+                template: task.template || '',
+                isEvent: Boolean(task.isEvent),
+                section: sectionName,
+                createdAt: task.createdAt || now,
+                updatedAt: task.updatedAt || now,
+                isDeleted: Boolean(task.section === 'trash' || task.isDeleted),
+                deletedAt: task.deletedAt || null,
+                // v2.0.7 NEW FIELDS
+                deviceId: deviceId,
+                sessionId: sessionId,
+                syncVersion: SYNC_CONFIG.version
+            });
+        });
+    });
+    
+    console.log('🔄 CONVERT: HyperFiler format → Sync format:', syncTasks.length, 'tasks');
+    return syncTasks;
+}
+
+function convertSyncToHyperFilerFormat(syncTasks) {
+    const hyperFilerTasks = {};
+    
+    syncTasks.forEach(task => {
+        // Skip permanently deleted tasks (tombstones)
+        if (task.isDeleted && task.deletedAt) {
+            console.log('💀 TOMBSTONE: Skipping deleted task:', task.id);
+            return;
+        }
+        
+        const section = task.section || 'inbox';
+        if (!hyperFilerTasks[section]) {
+            hyperFilerTasks[section] = [];
+        }
+        
+        hyperFilerTasks[section].push({
+            id: task.id,
+            title: task.title, // FIXED: Use 'title' instead of 'text' to match main app
+            completed: task.status === 'completed',
+            createdAt: task.createdAt,
+            updatedAt: task.updatedAt,
+            section: section,
+            notes: task.notes,
+            images: task.images,
+            dueDate: task.dueDate,
+            dueTime: task.dueTime,
+            isDeleted: task.isDeleted,
+            deletedAt: task.deletedAt
+        });
+    });
+    
+    console.log('🔄 CONVERT: Sync format → HyperFiler format:', Object.keys(hyperFilerTasks).length, 'sections');
+    return hyperFilerTasks;
+}
+
+// ===== STALENESS DETECTION =====
+function isUploadStale(clientTasks, serverLatestTimestamp) {
+    if (!serverLatestTimestamp) {
+        console.log('🕐 STALENESS: No server timestamp, allowing upload');
+        return false;
+    }
+    
+    const serverTime = new Date(serverLatestTimestamp).getTime();
+    
+    // FIXED: Check if ANY client task is older than threshold, not just the latest
+    const clientTimes = clientTasks.map(t => new Date(t.updatedAt || 0).getTime());
+    const clientOldestTime = Math.min(...clientTimes);
+    const clientLatestTime = Math.max(...clientTimes);
+    
+    const age = Date.now() - clientOldestTime;
+    const isStale = age > SYNC_CONFIG.maxStaleAge && serverTime > clientLatestTime;
+    
+    // FIXED: Also check browser session age (if this is a very old browser session)
+    const sessionStartTime = sessionStorage.getItem('session-start-time');
+    if (sessionStartTime) {
+        const sessionAge = Date.now() - parseInt(sessionStartTime);
+        const sessionAgeHours = Math.round(sessionAge / (1000 * 60 * 60));
+        
+        if (sessionAgeHours > 24) { // More than 24 hours old session
+            console.log('🚫 STALENESS: Very old browser session detected:', sessionAgeHours, 'hours');
+            return true;
+        }
+    }
+    
+    if (isStale) {
+        const ageHours = Math.round(age / (1000 * 60 * 60));
+        const oldestTaskAge = Math.round((Date.now() - clientOldestTime) / (1000 * 60 * 60));
+        console.log('🚫 STALENESS: Upload rejected - client has data', oldestTaskAge, 'hours old');
+        console.log('🚫 Client oldest:', new Date(clientOldestTime).toISOString());
+        console.log('🚫 Client latest:', new Date(clientLatestTime).toISOString());
+        console.log('🚫 Server latest:', new Date(serverTime).toISOString());
+    } else {
+        console.log('✅ STALENESS: Upload allowed - data is fresh');
+    }
+    
+    return isStale;
+}
+
+// ===== CONFLICT RESOLUTION =====
+function smartMergeConflicts(localData, serverData) {
+    console.log('🔧 MERGE: Starting smart conflict resolution');
+    const merged = {};
+    
+    // Get all section names from both datasets
+    const allSections = new Set([...Object.keys(localData), ...Object.keys(serverData)]);
+    
+    for (const section of allSections) {
+        const localTasks = localData[section] || [];
+        const serverTasks = serverData[section] || [];
+        
+        // Create a map of all tasks by ID
+        const taskMap = new Map();
+        
+        // Add server tasks first
+        serverTasks.forEach(task => {
+            taskMap.set(task.id, { ...task, source: 'server' });
+        });
+        
+        // FIXED: Ensure localTasks is an array before forEach
+        if (!Array.isArray(localTasks)) {
+            console.error('🚫 MERGE: localTasks is not an array:', typeof localTasks);
+            return merged; // Return current merged data without processing invalid localTasks
+        }
+        
+        // Add/merge local tasks with timestamp-based conflict resolution
+        localTasks.forEach(localTask => {
+            const existingTask = taskMap.get(localTask.id);
+            
+            if (!existingTask) {
+                // New local task - keep it
+                taskMap.set(localTask.id, { ...localTask, source: 'local' });
+                console.log('🔧 MERGE: Keeping new local task:', localTask.title);
+            } else {
+                // Conflict resolution: timestamp-based with tombstone priority
+                const localTime = new Date(localTask.updatedAt || localTask.createdAt || 0).getTime();
+                const serverTime = new Date(existingTask.updatedAt || existingTask.createdAt || 0).getTime();
+                
+                // PRIORITY 1: Tombstones always win
+                if (localTask.isDeleted && !existingTask.isDeleted) {
+                    taskMap.set(localTask.id, { ...localTask, source: 'local-tombstone' });
+                    console.log('🪦 MERGE: Local deletion wins:', localTask.title);
+                } else if (existingTask.isDeleted && !localTask.isDeleted) {
+                    taskMap.set(localTask.id, { ...existingTask, source: 'server-tombstone' });
+                    console.log('🪦 MERGE: Server deletion wins:', existingTask.title);
+                } else if (localTask.isDeleted && existingTask.isDeleted) {
+                    // Both are deleted - keep the most recent deletion
+                    const localDeleteTime = new Date(localTask.deletedAt || localTask.updatedAt || 0).getTime();
+                    const serverDeleteTime = new Date(existingTask.deletedAt || existingTask.updatedAt || 0).getTime();
+                    
+                    if (localDeleteTime >= serverDeleteTime) {
+                        taskMap.set(localTask.id, { ...localTask, source: 'local-deletion-newer' });
+                        console.log('🪦 MERGE: Both deleted, local deletion is newer:', localTask.title);
+                    } else {
+                        taskMap.set(localTask.id, { ...existingTask, source: 'server-deletion-newer' });
+                        console.log('🪦 MERGE: Both deleted, server deletion is newer:', existingTask.title);
+                    }
+                }
+                // PRIORITY 2: Most recent timestamp wins
+                else if (localTime > serverTime) {
+                    taskMap.set(localTask.id, { ...localTask, source: 'local-newer' });
+                    console.log('🕐 MERGE: Local is newer:', localTask.title);
+                } else if (serverTime > localTime) {
+                    taskMap.set(localTask.id, { ...existingTask, source: 'server-newer' });
+                    console.log('🕐 MERGE: Server is newer:', existingTask.title);
+                } else {
+                    // Same timestamp - prefer local changes
+                    taskMap.set(localTask.id, { ...localTask, source: 'local-tie' });
+                    console.log('🤝 MERGE: Timestamp tie, keeping local:', localTask.title);
+                }
+            }
+        });
+        
+        // Convert back to array and remove source metadata
+        merged[section] = Array.from(taskMap.values()).map(task => {
+            const { source, ...cleanTask } = task;
+            return cleanTask;
+        });
+        
+        console.log(`🔧 MERGE: Section '${section}': ${merged[section].length} tasks`);
+    }
+    
+    console.log('✅ MERGE: Smart conflict resolution completed');
+    return merged;
+}
+
+// ===== TOMBSTONE IMPLEMENTATION =====
+function createTombstone(task) {
+    return {
+        ...task,
+        isDeleted: true,
+        deletedAt: new Date().toISOString(),
+        title: `[DELETED] ${task.title}`,
+        deviceId: getDeviceId(),
+        sessionId: getSessionId(),
+        updatedAt: new Date().toISOString()
+    };
+}
+
+function applyTombstones(tasks) {
+    // FIXED: Filter out deleted tasks completely instead of preserving them
+    return tasks.filter(task => !task.isDeleted || !task.deletedAt);
+}
+
+// ===== INITIALIZATION =====
+function initializeSyncV207() {
+    if (!window.currentUser?.user?.id) {
+        console.log('⏭️ SYNC v2.0.7: No user logged in - skipping sync initialization');
+        return;
+    }
+    
+    console.log('🚀 SYNC v2.0.7: Starting enhanced sync system');
+    console.log('🆔 Device ID:', getDeviceId());
+    console.log('🆔 Session ID:', getSessionId());
+    console.log('🔑 Storage Key:', SYNC_CONFIG.unifiedStorageKey);
+    
+    // FIXED: Migrate from old storage key to unified key
+    migrateStorageKeys();
+    
+    // FIXED: Load tasks from localStorage immediately
+    if (typeof tasks !== 'undefined') {
+        const sectionedData = JSON.parse(localStorage.getItem(SYNC_CONFIG.unifiedStorageKey) || '{}');
+        console.log('📥 SYNC v2.0.7: Loaded sectioned data from localStorage:', Object.keys(sectionedData).length, 'sections');
+        console.log('📥 Sectioned data:', sectionedData);
+        
+        // FIXED: Convert sectioned data to flat array that main app expects
+        const flatTasks = [];
+        Object.keys(sectionedData).forEach(section => {
+            const sectionTasks = sectionedData[section];
+            console.log(`📥 Section '${section}':`, sectionTasks.length, 'tasks');
+            if (sectionTasks.length > 0) {
+                console.log(`📥 First task in '${section}':`, sectionTasks[0]);
+                // Add section property to each task and flatten
+                sectionTasks.forEach(task => {
+                    flatTasks.push({
+                        ...task,
+                        section: section
+                    });
+                });
+            }
+        });
+        
+        // Set the global tasks variable to the flat array
+        tasks = flatTasks;
+        console.log('📥 SYNC v2.0.7: Converted to flat array:', tasks.length, 'tasks');
+        
+        // FIXED: Debug task sections
+        const taskSections = {};
+        tasks.forEach(task => {
+            const section = task.section || 'unknown';
+            if (!taskSections[section]) taskSections[section] = [];
+            taskSections[section].push(task.title);
+        });
+        console.log('📥 SYNC v2.0.7: Tasks by section:', taskSections);
+        
+        // FIXED: Refresh UI to show loaded tasks
+        if (typeof renderTodayView === 'function') {
+            renderTodayView();
+            console.log('📥 SYNC v2.0.7: Refreshed Today view');
+        } else if (typeof renderCurrentView === 'function') {
+            renderCurrentView();
+            console.log('📥 SYNC v2.0.7: Refreshed current view');
+        }
+        
+        // FIXED: Switch to inbox view to show the tasks
+        if (typeof switchView === 'function') {
+            switchView('inbox');
+            console.log('📥 SYNC v2.0.7: Switched to inbox view to show tasks');
+        } else if (typeof currentView !== 'undefined') {
+            // Fallback: manually set currentView and render
+            currentView = 'inbox';
+            if (typeof renderCurrentView === 'function') {
+                renderCurrentView();
+                console.log('📥 SYNC v2.0.7: Manually switched to inbox view');
+            }
+        }
+    }
+    
+    // FIXED: Download first to get fresh data, then upload only if there are local changes
+    downloadAllTasksV207().then(() => {
+        // After download, check if we have local changes that need to be uploaded
+        const hyperFilerTasks = JSON.parse(localStorage.getItem(SYNC_CONFIG.unifiedStorageKey) || '{}');
+        const hasLocalChanges = checkForLocalChanges(hyperFilerTasks);
+        
+        if (hasLocalChanges) {
+            console.log('📤 SYNC v2.0.7: Local changes detected, uploading after download');
+            uploadAllTasksV207().catch(err => console.log('⚠️ Follow-up upload failed:', err));
+        } else {
+            console.log('📤 SYNC v2.0.7: No local changes, skipping upload');
+        }
+    }).catch(err => console.log('⚠️ Initial download failed:', err));
+    
+    // Enhanced download: poll every 5 seconds with staleness check
+    setInterval(async () => {
+        if (window.currentUser && navigator.onLine) {
+            await downloadAllTasksV207();
+        }
+    }, SYNC_CONFIG.syncInterval);
+    
+    console.log('✅ SYNC v2.0.7: Enhanced sync system initialized');
+}
+
+// FIXED: Add migration function to handle storage key transition
+function migrateStorageKeys() {
+    const oldKey = 'gtdTasks';
+    const newKey = SYNC_CONFIG.unifiedStorageKey;
+    
+    console.log('🔄 SYNC v2.0.7: Checking for storage migration...');
+    console.log('🔄 Old key:', oldKey);
+    console.log('🔄 New key:', newKey);
+    
+    // Check if old data exists
+    const oldData = localStorage.getItem(oldKey);
+    const newData = localStorage.getItem(newKey);
+    
+    console.log('🔄 Old data exists:', !!oldData);
+    console.log('🔄 New data exists:', !!newData);
+    
+    if (oldData) {
+        console.log('🔄 SYNC v2.0.7: Migrating from old storage key to unified key');
+        
+        try {
+            // Parse old data
+            const parsedOldData = JSON.parse(oldData);
+            console.log('🔄 Old data type:', typeof parsedOldData);
+            console.log('🔄 Old data length:', Array.isArray(parsedOldData) ? parsedOldData.length : 'not array');
+            
+            // Check if new key already has data
+            if (newData) {
+                console.log('⚠️ SYNC v2.0.7: Both old and new storage keys have data, merging...');
+                const parsedNewData = JSON.parse(newData);
+                console.log('🔄 New data type:', typeof parsedNewData);
+                
+                // FIXED: Intelligent merge - avoid creating numbered indexes
+                let mergedData = {};
+                
+                // If old data is an array (v2.0.6 format), convert to sectioned format
+                if (Array.isArray(parsedOldData)) {
+                    console.log('🔄 Converting old array format to sectioned format');
+                    mergedData = { inbox: [] };
+                    parsedOldData.forEach(task => {
+                        const section = task.section || 'inbox';
+                        if (!mergedData[section]) {
+                            mergedData[section] = [];
+                        }
+                        mergedData[section].push(task);
+                    });
+                } else if (typeof parsedOldData === 'object') {
+                    // Filter out numbered indexes (corruption)
+                    Object.keys(parsedOldData).forEach(key => {
+                        if (!/^\d+$/.test(key) && Array.isArray(parsedOldData[key])) {
+                            mergedData[key] = parsedOldData[key];
+                        }
+                    });
+                }
+                
+                // Merge with new data (prefer newer data)
+                if (typeof parsedNewData === 'object' && !Array.isArray(parsedNewData)) {
+                    Object.keys(parsedNewData).forEach(key => {
+                        if (!/^\d+$/.test(key) && Array.isArray(parsedNewData[key])) {
+                            mergedData[key] = parsedNewData[key];
+                        }
+                    });
+                }
+                
+                localStorage.setItem(newKey, JSON.stringify(mergedData));
+                console.log('🔄 Intelligently merged data saved, filtered out corruption');
+            } else {
+                // Process and clean old data before copying
+                let cleanData = {};
+                
+                if (Array.isArray(parsedOldData)) {
+                    // Convert array to sectioned format
+                    cleanData = { inbox: [] };
+                    parsedOldData.forEach(task => {
+                        const section = task.section || 'inbox';
+                        if (!cleanData[section]) {
+                            cleanData[section] = [];
+                        }
+                        cleanData[section].push(task);
+                    });
+                } else if (typeof parsedOldData === 'object') {
+                    // Filter out numbered indexes
+                    Object.keys(parsedOldData).forEach(key => {
+                        if (!/^\d+$/.test(key) && Array.isArray(parsedOldData[key])) {
+                            cleanData[key] = parsedOldData[key];
+                        }
+                    });
+                }
+                
+                localStorage.setItem(newKey, JSON.stringify(cleanData));
+                console.log('🔄 Cleaned old data copied to new key');
+            }
+            
+            // Remove old data
+            localStorage.removeItem(oldKey);
+            console.log('✅ SYNC v2.0.7: Storage migration completed with corruption filtering');
+            
+        } catch (error) {
+            console.error('❌ SYNC v2.0.7: Storage migration failed:', error);
+        }
+    } else {
+        console.log('🔄 SYNC v2.0.7: No old data to migrate');
+    }
+    
+    // Debug: Show current storage state
+    const finalData = localStorage.getItem(newKey);
+    console.log('🔄 Final data in new key:', !!finalData);
+    if (finalData) {
+        try {
+            const parsed = JSON.parse(finalData);
+            console.log('🔄 Final data type:', typeof parsed);
+            console.log('🔄 Final data keys:', Object.keys(parsed));
+        } catch (e) {
+            console.log('🔄 Final data is not valid JSON');
+        }
+    }
+}
+
+// ===== ENHANCED UPLOAD =====
+async function uploadAllTasksV207() {
+    if (!window.currentUser?.user?.id) return;
+    
+    // FIXED: Add backoff protection to uploads too
+    if (shouldSkipSync()) {
+        return;
+    }
+    
+    try {
+        console.log('📤 SYNC v2.0.7: Starting enhanced upload');
+        
+        // Load from unified storage key
+        const hyperFilerTasks = JSON.parse(localStorage.getItem(SYNC_CONFIG.unifiedStorageKey) || '{}');
+        const syncTasks = convertHyperFilerToSyncFormat(hyperFilerTasks);
+        
+        // Get server timestamp first for staleness check
+        const serverInfo = await getServerInfo();
+        if (isUploadStale(syncTasks, serverInfo?.latestTimestamp)) {
+            console.log('🚫 SYNC v2.0.7: Upload rejected due to stale data');
+            showSyncWarning('Your local data appears to be outdated. Please refresh to get latest data.');
+            return;
+        }
+        
+        const authToken = localStorage.getItem('authToken');
+        
+        const response = await fetch(`${API_BASE}/tasks/sync`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+                'X-Sync-Version': SYNC_CONFIG.version,
+                'X-Device-Id': getDeviceId(),
+                'X-Session-Id': getSessionId()
+            },
+            body: JSON.stringify({
+                userId: window.currentUser.user.id,
+                tasks: syncTasks,
+                syncVersion: SYNC_CONFIG.version,
+                deviceId: getDeviceId(),
+                sessionId: getSessionId(),
+                timestamp: new Date().toISOString()
+            })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ SYNC v2.0.7: Upload successful -', result.synced, 'tasks');
+            
+            // FIXED: Update last save timestamp after successful upload
+            localStorage.setItem('hyperfiler-last-save', Date.now().toString());
+            recordSyncAttempt(true);
+        } else {
+            console.error('❌ SYNC v2.0.7: Upload failed:', response.status);
+            recordSyncAttempt(false);
+        }
+    } catch (error) {
+        console.error('❌ SYNC v2.0.7: Upload error:', error);
+        recordSyncAttempt(false);
+    }
+}
+
+// ===== SYNC BACKOFF MANAGEMENT =====
+window.syncBackoff = window.syncBackoff || {
+    attempts: 0,
+    lastAttempt: 0,
+    baseDelay: 1000, // 1 second
+    maxDelay: 60000, // 1 minute
+    factor: 2
+};
+
+function shouldSkipSync() {
+    const now = Date.now();
+    const backoff = window.syncBackoff;
+    
+    // Reset attempts if enough time has passed
+    if (now - backoff.lastAttempt > backoff.maxDelay * 2) {
+        backoff.attempts = 0;
+    }
+    
+    // Calculate required delay
+    const requiredDelay = Math.min(
+        backoff.baseDelay * Math.pow(backoff.factor, backoff.attempts),
+        backoff.maxDelay
+    );
+    
+    // Check if we need to wait
+    if (now - backoff.lastAttempt < requiredDelay) {
+        const waitTime = Math.round((requiredDelay - (now - backoff.lastAttempt)) / 1000);
+        console.log(`⏳ SYNC v2.0.7: Backing off for ${waitTime}s (attempt ${backoff.attempts})`);
+        return true;
+    }
+    
+    return false;
+}
+
+function recordSyncAttempt(success = false) {
+    const backoff = window.syncBackoff;
+    backoff.lastAttempt = Date.now();
+    
+    if (success) {
+        backoff.attempts = 0;
+        console.log('✅ SYNC v2.0.7: Backoff reset after success');
+    } else {
+        backoff.attempts++;
+        console.log(`📈 SYNC v2.0.7: Backoff attempt ${backoff.attempts}`);
+    }
+}
+
+// ===== ENHANCED DOWNLOAD =====
+async function downloadAllTasksV207() {
+    if (!window.currentUser?.user?.id) return;
+    
+    // FIXED: Enhanced sync protection with exponential backoff
+    if (window.syncInProgress) {
+        console.log('📥 SYNC v2.0.7: Sync already in progress, skipping');
+        return;
+    }
+    
+    if (shouldSkipSync()) {
+        return; // Skip this sync due to backoff
+    }
+    
+    // Don't download if we just moved tasks to prevent overwriting
+    if (window.justMovedTasks) {
+        console.log('📥 SYNC v2.0.7: Skipping download - just moved tasks');
+        return;
+    }
+    
+    try {
+        window.syncInProgress = true;
+        const authToken = localStorage.getItem('authToken');
+        
+        const response = await fetch(`${API_BASE}/tasks/${window.currentUser.user.id}`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'X-Sync-Version': SYNC_CONFIG.version,
+                'X-Device-Id': getDeviceId(),
+                'X-Session-Id': getSessionId()
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const serverTasks = data.tasks || [];
+            
+            // Apply tombstone filtering
+            const filteredTasks = applyTombstones(serverTasks);
+            
+            // Convert to HyperFiler format
+            const serverHyperFilerFormat = convertSyncToHyperFilerFormat(filteredTasks);
+            const currentHyperFilerFormat = JSON.parse(localStorage.getItem(SYNC_CONFIG.unifiedStorageKey) || '{}');
+            
+            // FIXED: Enhanced comparison with better change detection and conflict resolution
+            const hasChanges = JSON.stringify(serverHyperFilerFormat) !== JSON.stringify(currentHyperFilerFormat);
+            
+            if (hasChanges) {
+                console.log('📥 SYNC v2.0.7: Server has different data, updating local');
+                
+                // FIXED: Check for potential conflicts before overwriting
+                const hasLocalChanges = checkForLocalChanges(currentHyperFilerFormat);
+                
+                if (hasLocalChanges) {
+                    console.log('⚠️ SYNC v2.0.7: Local changes detected, merging carefully');
+                    
+                    // FIXED: Implement proper conflict resolution based on timestamps
+                    const mergedData = smartMergeConflicts(currentHyperFilerFormat, serverHyperFilerFormat);
+                    serverHyperFilerFormat = mergedData;
+                    console.log('🔧 SYNC v2.0.7: Applied smart conflict resolution');
+                }
+                
+                localStorage.setItem(SYNC_CONFIG.unifiedStorageKey, JSON.stringify(serverHyperFilerFormat));
+                
+                // FIXED: Update global tasks variable and refresh UI
+                if (window.taskManager) {
+                    window.taskManager.tasks = serverHyperFilerFormat;
+                    window.taskManager.renderTasks();
+                    window.taskManager.updateSectionInfo();
+                    window.taskManager.updateTaskCounts();
+                } else if (typeof renderCurrentView === 'function') {
+                    renderCurrentView();
+                } else if (typeof tasks !== 'undefined') {
+                    // Update global tasks variable if it exists
+                    window.tasks = serverHyperFilerFormat;
+                    console.log('📥 SYNC v2.0.7: Updated global tasks variable');
+                    
+                    // FIXED: Refresh the UI to show the updated tasks
+                    if (typeof renderTodayView === 'function') {
+                        renderTodayView();
+                    } else if (typeof renderCurrentView === 'function') {
+                        renderCurrentView();
+                    }
+                }
+                
+                console.log('📥 SYNC v2.0.7: Local data updated from server');
+            } else {
+                console.log('📥 SYNC v2.0.7: Data already in sync');
+            }
+            
+            // Record successful sync
+            recordSyncAttempt(true);
+            
+        } else {
+            console.log('📥 SYNC v2.0.7: Download failed:', response.status);
+            recordSyncAttempt(false);
+        }
+    } catch (error) {
+        console.log('📥 SYNC v2.0.7: Download error:', error);
+        recordSyncAttempt(false);
+    } finally {
+        window.syncInProgress = false;
+    }
+}
+
+// FIXED: Add function to check for local changes
+function checkForLocalChanges(currentData) {
+    // Check if user has made recent changes (within last 5 minutes)
+    const lastSaveTime = localStorage.getItem('hyperfiler-last-save');
+    if (lastSaveTime) {
+        const timeSinceLastSave = Date.now() - parseInt(lastSaveTime);
+        if (timeSinceLastSave < 5 * 60 * 1000) { // 5 minutes
+            console.log('⚠️ SYNC v2.0.7: Recent local changes detected');
+            return true;
+        }
+    }
+    
+    // Also check if we have tasks that were created locally (not from server)
+    const hasLocalTasks = Object.values(currentData).some(section => 
+        Array.isArray(section) && section.length > 0
+    );
+    
+    if (hasLocalTasks) {
+        console.log('📝 SYNC v2.0.7: Local tasks detected, will upload');
+        return true;
+    }
+    
+    return false;
+}
+
+// ===== HELPER FUNCTIONS =====
+function hasExplicitDeletionMarker(taskId, clientTasks) {
+    // Check if client explicitly marked this task as deleted
+    const clientTask = clientTasks.find(t => t.id === taskId);
+    return clientTask && (clientTask.isDeleted || clientTask.is_deleted) && clientTask.deletedAt;
+}
+
+async function getServerInfo() {
+    try {
+        const authToken = localStorage.getItem('authToken');
+        const response = await fetch(`${API_BASE}/sync/info/${window.currentUser.user.id}`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'X-Sync-Version': SYNC_CONFIG.version
+            }
+        });
+        
+        if (response.ok) {
+            return await response.json();
+        }
+    } catch (error) {
+        console.log('⚠️ Failed to get server info:', error);
+    }
+    return null;
+}
+
+function showSyncWarning(message) {
+    // Simple warning for now - can be enhanced with better UI
+    if (typeof showNotification === 'function') {
+        showNotification(message, 'warning');
+    } else {
+        console.warn('🚨 SYNC WARNING:', message);
+        // Could show a banner or modal here
+    }
+}
+
+// ===== LEGACY COMPATIBILITY =====
+// Provide aliases for existing code
+window.uploadAllTasks = uploadAllTasksV207;
+window.downloadAllTasks = downloadAllTasksV207;
+window.initializeSimpleSync = initializeSyncV207;
+
+// ===== EXPORT =====
+window.SyncV207 = {
+    initialize: initializeSyncV207,
+    upload: uploadAllTasksV207,
+    download: downloadAllTasksV207,
+    config: SYNC_CONFIG,
+    getDeviceId,
+    getSessionId
+};
+
+console.log('📦 SYNC v2.0.7: Module loaded successfully');

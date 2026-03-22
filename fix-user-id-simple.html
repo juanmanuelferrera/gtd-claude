@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix User ID - Simple</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .log { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        input, button { margin: 5px; padding: 10px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        .step { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Fix User ID - Simple</h1>
+    
+    <div class="step">
+        <h3>Current Issue:</h3>
+        <p>Your account has the stale user ID: <strong>56c2c350-3645-4729-a0cd-5b8d01a110a1</strong></p>
+        <p>This is causing login loops and 410 errors.</p>
+    </div>
+    
+    <div class="step">
+        <h3>Fix Your User ID:</h3>
+        <p>Enter your current credentials to fix the user ID:</p>
+        <input type="email" id="email" placeholder="Email" value="joanmanelferrera@gmail.com">
+        <input type="password" id="password" placeholder="Current Password" value="">
+        <button onclick="fixUserId()">Fix User ID</button>
+    </div>
+    
+    <div class="step">
+        <h3>After Fix:</h3>
+        <button onclick="testLogin()" id="testBtn" disabled>Test New Login</button>
+        <button onclick="goToMain()" id="mainBtn" disabled>Go to Main App</button>
+    </div>
+    
+    <div id="logs"></div>
+    
+    <script>
+        const API_BASE = 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
+        
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            logs.appendChild(div);
+        }
+        
+        function logJSON(title, data) {
+            const logs = document.getElementById('logs');
+            const div = document.createElement('div');
+            div.className = 'log info';
+            div.innerHTML = `<strong>${title}:</strong><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            logs.appendChild(div);
+        }
+        
+        async function fixUserId() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                log('Please enter email and password', 'error');
+                return;
+            }
+            
+            log('🔧 Fixing user ID...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/fix-stale-user-id`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const result = await response.json();
+                logJSON('Fix Response', result);
+                
+                if (response.ok) {
+                    log('✅ User ID fixed successfully!', 'success');
+                    log(`✅ New user ID: ${result.new_id}`, 'success');
+                    log('🔐 You can now login normally', 'success');
+                    
+                    // Enable test buttons
+                    document.getElementById('testBtn').disabled = false;
+                    document.getElementById('mainBtn').disabled = false;
+                } else {
+                    log(`❌ Fix failed: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Fix error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                log('Please enter email and password', 'error');
+                return;
+            }
+            
+            log('🔐 Testing login with fixed user ID...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const result = await response.json();
+                logJSON('Login Response', result);
+                
+                if (response.ok && result.user) {
+                    log('✅ Login successful!', 'success');
+                    log(`✅ User ID: ${result.user.id}`, 'success');
+                    
+                    if (result.user.id === '56c2c350-3645-4729-a0cd-5b8d01a110a1') {
+                        log('🚫 WARNING: Still has stale user ID!', 'error');
+                    } else {
+                        log('✅ User has fresh user ID!', 'success');
+                    }
+                } else {
+                    log(`❌ Login failed: ${result.message || result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Login error: ${error.message}`, 'error');
+            }
+        }
+        
+        function goToMain() {
+            log('🚀 Redirecting to main app...', 'info');
+            setTimeout(() => {
+                window.location.href = '/hyperfiler-pro.html';
+            }, 1000);
+        }
+        
+        // Auto-focus on password
+        window.addEventListener('load', () => {
+            log('📱 Fix tool loaded - ready to fix user ID', 'info');
+            document.getElementById('password').focus();
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Fix User</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .log { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        input, button { margin: 5px; padding: 10px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        .step { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Admin Fix User</h1>
+    
+    <div class="step">
+        <h3>Step 1: Admin Login</h3>
+        <input type="password" id="adminPassword" placeholder="Admin Password" value="">
+        <button onclick="loginAdmin()">Login as Admin</button>
+    </div>
+    
+    <div class="step">
+        <h3>Step 2: Delete Stale User</h3>
+        <p>Email: <strong>joanmanelferrera@gmail.com</strong></p>
+        <p>Stale User ID: <strong>56c2c350-3645-4729-a0cd-5b8d01a110a1</strong></p>
+        <button onclick="deleteUser()" id="deleteBtn" disabled>Delete User</button>
+    </div>
+    
+    <div class="step">
+        <h3>Step 3: Create New User</h3>
+        <input type="email" id="newEmail" placeholder="Email" value="joanmanelferrera@gmail.com">
+        <input type="password" id="newPassword" placeholder="New Password" value="">
+        <button onclick="createUser()" id="createBtn" disabled>Create New User</button>
+    </div>
+    
+    <div class="step">
+        <h3>Step 4: Test Login</h3>
+        <button onclick="testNewLogin()" id="testBtn" disabled>Test New Login</button>
+    </div>
+    
+    <div id="logs"></div>
+    
+    <script>
+        const API_BASE = 'https://hyperfiler-api.joanmanelferrera-400.workers.dev';
+        let adminToken = null;
+        
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            logs.appendChild(div);
+        }
+        
+        function logJSON(title, data) {
+            const logs = document.getElementById('logs');
+            const div = document.createElement('div');
+            div.className = 'log info';
+            div.innerHTML = `<strong>${title}:</strong><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            logs.appendChild(div);
+        }
+        
+        async function loginAdmin() {
+            const password = document.getElementById('adminPassword').value;
+            if (!password) {
+                log('Please enter admin password', 'error');
+                return;
+            }
+            
+            log('🔐 Logging in as admin...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const result = await response.json();
+                logJSON('Admin Login Response', result);
+                
+                if (response.ok && result.token) {
+                    adminToken = result.token;
+                    log('✅ Admin login successful!', 'success');
+                    document.getElementById('deleteBtn').disabled = false;
+                    document.getElementById('createBtn').disabled = false;
+                    document.getElementById('testBtn').disabled = false;
+                } else {
+                    log(`❌ Admin login failed: ${result.message || result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Admin login error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function deleteUser() {
+            if (!adminToken) {
+                log('❌ Please login as admin first', 'error');
+                return;
+            }
+            
+            const email = 'joanmanelferrera@gmail.com';
+            log(`🗑️ Deleting user: ${email}`, 'warning');
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin/users/${encodeURIComponent(email)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                logJSON('Delete User Response', result);
+                
+                if (response.ok) {
+                    log('✅ User deleted successfully!', 'success');
+                } else {
+                    log(`❌ Delete failed: ${result.message || result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Delete error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function createUser() {
+            if (!adminToken) {
+                log('❌ Please login as admin first', 'error');
+                return;
+            }
+            
+            const email = document.getElementById('newEmail').value;
+            const password = document.getElementById('newPassword').value;
+            
+            if (!email || !password) {
+                log('Please enter email and password', 'error');
+                return;
+            }
+            
+            log(`🆕 Creating new user: ${email}`, 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin/users`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        plan: 'pro'
+                    })
+                });
+                
+                const result = await response.json();
+                logJSON('Create User Response', result);
+                
+                if (response.ok) {
+                    log('✅ New user created successfully!', 'success');
+                    log('🔐 You can now login with the new password', 'success');
+                } else {
+                    log(`❌ Create failed: ${result.message || result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Create error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testNewLogin() {
+            const email = document.getElementById('newEmail').value;
+            const password = document.getElementById('newPassword').value;
+            
+            if (!email || !password) {
+                log('Please enter email and password', 'error');
+                return;
+            }
+            
+            log('🔐 Testing new login...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const result = await response.json();
+                logJSON('Test Login Response', result);
+                
+                if (response.ok && result.user) {
+                    log('✅ New login successful!', 'success');
+                    log(`✅ New user ID: ${result.user.id}`, 'success');
+                    
+                    if (result.user.id === '56c2c350-3645-4729-a0cd-5b8d01a110a1') {
+                        log('🚫 WARNING: Still has stale user ID!', 'error');
+                    } else {
+                        log('✅ User has fresh user ID!', 'success');
+                    }
+                } else {
+                    log(`❌ Test login failed: ${result.message || result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Test login error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-focus on admin password
+        window.addEventListener('load', () => {
+            log('📱 Admin tool loaded - ready to fix user', 'info');
+            document.getElementById('adminPassword').focus();
+        });
+    </script>
+</body>
+</html> 

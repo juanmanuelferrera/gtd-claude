@@ -1,0 +1,3 @@
+# Reddit Subreddit Draft: r/OriginalBooks
+
+Subreddit plan for educating young devotees about changes to Prabhupada's books. Scholarly, evidence-based approach. Rules emphasize evidence first, respectful tone, stay on topic, no conspiracy theories. Post flairs: Verse Comparison, Prabhupada's Words, Discussion, Resources, New Here, Scholarly, Video, Translation. First 10 seed posts planned. Growth strategy includes cross-posting to r/HareKrishna, multilingual content (Spanish), Telegram/Instagram integration.

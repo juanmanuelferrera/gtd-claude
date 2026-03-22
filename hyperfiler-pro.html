@@ -1,28 +1,21 @@
 <!DOCTYPE html>
-<!-- Deploy: 20260207-v4.14.9-stable -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>⚡ HyperFiler Pro 🚀 - v4.14.9 Stable</title>
-    <style>
-    /* Task selected via keyboard navigation */
-    .task-selected,
-    .task-card.task-selected,
-    .task-item.task-selected {
-        outline: 3px solid #2E5BFF !important;
-        outline-offset: -2px;
-        background-color: rgba(46, 91, 255, 0.08) !important;
-    }
-    </style>
-    
+    <title>⚡ HyperFiler Pro 🚀 - v4.5.2 deep-debug</title>
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#ff6b35">
-    
+
     <script>
+    console.log('🚀 HYPERFILER v4.5.2 - Deep debug script loading [Deploy-20251102-deep-debug] [' + new Date().toISOString() + ']');
+    console.log('🖥️ Viewport Width: ' + window.innerWidth + 'px | Height: ' + window.innerHeight + 'px');
+    console.log('📱 Device Type: ' + (window.innerWidth > 768 ? 'DESKTOP' : 'MOBILE') + ' (breakpoint: 769px)');
+    
     // Register Service Worker for offline support
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -39,7 +32,7 @@
     // Diagnostic: Check branding visibility after DOM loads
     window.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
-            const branding = document.getElementById('hyperfiler-branding-v4141');
+            const branding = document.getElementById('hyperfiler-branding-v442');
             if (branding) {
                 const styles = window.getComputedStyle(branding);
                 console.log('✅ Branding element found:', branding);
@@ -112,24 +105,9 @@
     });
     </script>
 
-    <link rel="stylesheet" href="css/styles.css?v=20260130-compact-help">
-    <script>
-    // Gate all console output behind debug flag (before any JS files load)
-    window.HYPERFILER_DEBUG = false;
-    (function() {
-        var methods = ['log', 'table', 'warn'];
-        var originals = {};
-        methods.forEach(function(m) {
-            originals[m] = console[m];
-            console[m] = function() {
-                if (window.HYPERFILER_DEBUG) originals[m].apply(console, arguments);
-            };
-        });
-        window._originalConsoleLog = originals.log;
-    })();
-    </script>
+    <link rel="stylesheet" href="css/styles.css?v=20251101-phase1-v441">
     <script src="js/dark-mode.js?v=20250901-lightmode"></script>
-
+    <script src="js/aria-enhancements.js?v=20250101-aria-v1"></script>
 </head>
 <body>
     <!-- Modern Mobile App Header with Gradient & Glass Morphism -->
@@ -221,7 +199,7 @@
         </button>
         <button class="mobile-more-item" onclick="provideFeedback(this); switchToMobileView('recent-actions'); hideMobileMoreMenu();">
             <div class="mobile-more-icon">⏮️</div>
-            <div>Registry</div>
+            <div>Undo</div>
         </button>
         <div style="border-top: 1px solid #e0e0e0; margin: 8px 0; padding-top: 8px;">
             <div style="text-align: center; font-size: 12px; color: #666; margin-bottom: 8px;">Language / Idioma</div>
@@ -238,7 +216,7 @@
         <!-- Sidebar Navigation -->
         <div class="desktop-sidebar desktop-only">
             <!-- Sidebar Branded Header v4.3.17 ABSOLUTE TOP -->
-            <div id="hyperfiler-branding-v4141" data-version="4.14.1" style="
+            <div id="hyperfiler-branding-v452" data-version="4.5.2" style="
                 padding: 4px 6px;
                 border-bottom: 1px solid rgba(0, 122, 255, 0.2);
                 background: linear-gradient(135deg, rgba(0, 122, 255, 0.08) 0%, rgba(0, 122, 255, 0.03) 100%) !important;
@@ -271,7 +249,7 @@
                     letter-spacing: 0.5px;
                     text-align: center;
                 ">
-                    v4.14.9
+                    v4.5.2
                 </div>
                 <div id="sidebarUserInfo" style="
                     font-size: 13px;
@@ -285,32 +263,28 @@
             </div>
             
             <div class="main-nav">
-            <button class="nav-btn active" onclick="window.showView&&showView('today')" id="nav-today" tabindex="1">
-                📋 Today <span style="opacity: 0.7; font-size: 11px; color: #666;">T</span>
+            <button class="nav-btn active" onclick="showView('today')" id="nav-today" tabindex="1">
+                📋 Today <span style="opacity: 0.7; font-size: 11px; color: #666;">D</span>
             </button>
-            <button class="nav-btn" onclick="window.showView&&showView('week')" id="nav-week" tabindex="2" data-translate="Week">
+            <button class="nav-btn" onclick="showView('week')" id="nav-week" tabindex="2" data-translate="Week">
                 📊 Week <span style="opacity: 0.7; font-size: 11px; color: #666;">W</span>
             </button>
-            <button class="nav-btn" onclick="window.showView&&showView('calendar')" id="nav-calendar" tabindex="3" data-translate="Month">
+            <button class="nav-btn" onclick="showView('calendar')" id="nav-calendar" tabindex="3" data-translate="Month">
                 📆 Month <span style="opacity: 0.7; font-size: 11px; color: #666;">M</span>
             </button>
-            <button class="nav-btn" onclick="window.showView&&showView('events')" id="nav-events" tabindex="4" style="position: relative; overflow: visible;">
-                🗓️ Events <span style="opacity: 0.7; font-size: 11px; color: #666;">E</span>
-                <span id="pastEventsBadge" style="display: none; margin-left: 6px; background: #dc3545; color: white; font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 10px; min-width: 18px; text-align: center; animation: pulse 2s infinite; box-shadow: 0 2px 4px rgba(220,53,69,0.4); vertical-align: middle;"></span>
-            </button>
-            <button class="nav-btn" onclick="window.showView&&showView('all'); setTimeout(() => { const searchInput = document.getElementById('allTasksSearchInput'); if (searchInput) searchInput.focus(); }, 100);" id="nav-all" tabindex="5">
+            <button class="nav-btn" onclick="showView('all'); setTimeout(() => { const searchInput = document.getElementById('allTasksSearchInput'); if (searchInput) searchInput.focus(); }, 100);" id="nav-all" tabindex="4">
                 🔍 Search <span style="opacity: 0.7; font-size: 11px; color: #666;">S</span>
             </button>
-            <button class="nav-btn" onclick="window.showView&&showView('lists')" id="nav-lists" tabindex="6">
+            <button class="nav-btn" onclick="showView('lists')" id="nav-lists" tabindex="5">
                 📂 Lists <span style="opacity: 0.7; font-size: 11px; color: #666;">L</span>
             </button>
-            <button class="nav-btn" onclick="window.showView&&showView('repeat')" id="nav-repeat" tabindex="7">
+            <button class="nav-btn" onclick="showView('repeat')" id="nav-repeat" tabindex="6">
                 🔄 Repeat <span style="opacity: 0.7; font-size: 11px; color: #666;">R</span>
             </button>
-            <button class="nav-btn" onclick="window.showView&&showView('recent-actions')" id="nav-recent-actions" tabindex="8">
-                📋 Registry <span style="opacity: 0.7; font-size: 11px; color: #666;">U</span>
+            <button class="nav-btn" onclick="showView('recent-actions')" id="nav-recent-actions" tabindex="7">
+                ⏮️ Undo <span style="opacity: 0.7; font-size: 11px; color: #666;">U</span>
             </button>
-            <button class="nav-btn" onclick="window.showView&&showView('settings')" id="nav-settings" tabindex="9">
+            <button class="nav-btn" onclick="showView('settings')" id="nav-settings" tabindex="9">
                 ⚙️ Settings <span style="opacity: 0.7; font-size: 11px; color: #666;">X</span>
             </button>
             </div>
@@ -334,7 +308,7 @@
                         transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
                     " onmouseover="this.style.background='linear-gradient(to right, rgba(255, 214, 10, 0.15), transparent)'" 
                        onmouseout="this.style.background='linear-gradient(to right, rgba(255, 214, 10, 0.1), transparent)'">
-                        💾 Quick Backup <span style="opacity: 0.7; font-size: 11px; color: #666;">Q</span>
+                        💾 Quick Backup
                     </button>
                     <button onclick="document.getElementById('jsonImportFile2').click()" class="action-btn" style="
                         all: unset;
@@ -351,9 +325,26 @@
                         transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
                     " onmouseover="this.style.background='linear-gradient(to right, rgba(46, 91, 255, 0.15), transparent)'" 
                        onmouseout="this.style.background='linear-gradient(to right, rgba(46, 91, 255, 0.1), transparent)'">
-                        📥 Import JSON <span style="opacity: 0.7; font-size: 11px; color: #666;">I</span>
+                        📥 Import JSON
                     </button>
                     <input type="file" id="jsonImportFile2" accept=".json" style="display: none;" onchange="importJSONBackup(this)">
+                    <button onclick="exportAllTasks()" class="action-btn" style="
+                        all: unset;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        padding: 10px 14px;
+                        background: linear-gradient(to right, rgba(52, 199, 89, 0.1), transparent);
+                        border-left: 3px solid #34C759;
+                        border-radius: 6px;
+                        color: var(--things-text-secondary);
+                        cursor: pointer;
+                        font-size: 14px;
+                        transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                    " onmouseover="this.style.background='linear-gradient(to right, rgba(52, 199, 89, 0.15), transparent)'" 
+                       onmouseout="this.style.background='linear-gradient(to right, rgba(52, 199, 89, 0.1), transparent)'">
+                        📤 Export All
+                    </button>
                 </div>
                 
                 <!-- Backup Status -->
@@ -363,7 +354,8 @@
                 
                 <!-- Language Switcher -->
                 <div style="display: flex; gap: 8px; justify-content: center;">
-                    <button onclick="toggleSidebarLanguage()" style="background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;" id="sidebarLangToggle">🇪🇸 ES</button>
+                    <button onclick="switchLanguage('en')" style="background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">EN</button>
+                    <button onclick="switchLanguage('es')" style="background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">ES</button>
                 </div>
             </div>
         </div>
@@ -417,7 +409,7 @@
                         <button class="btn btn-small" onclick="previousDay()" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;">← Prev</button>
                         <button class="btn btn-primary btn-small" onclick="goToToday()" style="background: #dc3545; border-color: #dc3545; padding: 8px 14px; font-size: 12px; flex-shrink: 0; border-radius: 6px; font-weight: 600;">🔥 Today</button>
                         <button class="btn btn-small" onclick="nextDay()" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; border-radius: 6px;">Next →</button>
-                        <button id="nowOrganizeBtn" class="move-current-time-btn" onclick="handleNowOrganizeClick()" title="Move all today's tasks to current time block" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">🕐 Now</button>
+                        <button class="move-current-time-btn" onclick="moveAllTasksToCurrentTime()" title="Move all today's tasks to current time block" style="padding: 8px 12px; font-size: 12px; flex-shrink: 0; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">🕐 Now</button>
                     </div>
                 </div>
                 
@@ -634,8 +626,8 @@
                         <button class="btn btn-secondary btn-small" onclick="printSearchResults()" id="printSearchBtn" style="background: #17a2b8; color: white; border-color: #17a2b8; font-size: 11px; padding: 8px 6px;">
                             🖨️ Print
                         </button>
-                        <button class="btn btn-secondary btn-small" onclick="window.showView&&showView('recent-actions')" id="recentActionsBtn" style="background: #6f42c1; color: white; border-color: #6f42c1; font-weight: 600; font-size: 11px; padding: 8px 6px;">
-                            📋 Registry
+                        <button class="btn btn-secondary btn-small" onclick="showView('recent-actions')" id="recentActionsBtn" style="background: #6f42c1; color: white; border-color: #6f42c1; font-weight: 600; font-size: 11px; padding: 8px 6px;">
+                            ⏮️ Undo
                         </button>
                         <span id="selectedCount" class="selected-count" style="display: none; font-size: 11px;">0 selected</span>
                     </div>
@@ -756,105 +748,10 @@
                         <button class="btn btn-secondary" onclick="exportTasks()" style="padding: 10px 20px; background: #28a745; border-color: #28a745; color: white;">📤 Export Data</button>
                         <button class="btn btn-secondary" onclick="importTasks()" style="padding: 10px 20px; background: #007bff; border-color: #007bff; color: white;">📥 Import Data</button>
                         <button class="btn btn-secondary" onclick="console.log('🔍 BUTTON CLICKED!'); clearAllTasks()" style="padding: 10px 20px; background: #dc3545; border-color: #dc3545; color: white;">Clear All</button>
-                        <button class="btn btn-secondary" onclick="performUndo()" style="padding: 10px 20px; background: #ffc107; border-color: #ffc107; color: #212529;">↶ Revert Last</button>
+                        <button class="btn btn-secondary" onclick="performUndo()" style="padding: 10px 20px; background: #ffc107; border-color: #ffc107; color: #212529;">↶ Undo Last</button>
                     </div>
                 </div>
                 
-                <!-- Automatic Task Organization -->
-                <div style="margin-top: 30px; background: #f0f7ff; padding: 20px; border-radius: 8px; border: 1px solid #bee3f8;">
-                    <h4 style="color: #1E4FE6; margin-bottom: 15px;">🌙 Automatic Task Organization</h4>
-                    <div style="margin-bottom: 12px; color: #495057; font-size: 13px; background: white; padding: 12px; border-radius: 6px; border-left: 3px solid #1E4FE6;">
-                        <strong>Every night at 1 am:</strong>
-                        <div style="margin-top: 6px; display: grid; gap: 4px;">
-                            <span>1️⃣ Unfinished tasks → move to today</span>
-                            <span>2️⃣ Tasks get time slots assigned</span>
-                            <span>3️⃣ If too many → overflow to next days</span>
-                        </div>
-                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #666;">
-                            📅 <strong>Events</strong> are fixed and never moved automatically
-                        </div>
-                    </div>
-                    <div style="margin-top: 12px;">
-                        <label style="display: block; font-weight: 500; margin-bottom: 6px; color: #4a5568;">Select your city to enable:</label>
-                        <select id="timezoneSelectOverview" onchange="updateTimezoneFromOverview()" style="padding: 10px 14px; border: 2px solid #bee3f8; border-radius: 6px; font-size: 14px; width: 100%; max-width: 300px; background: white;">
-                            <option value="">-- Disabled --</option>
-                            <optgroup label="🌍 Europe">
-                                <option value="Europe/London">London (UK)</option>
-                                <option value="Europe/Madrid">Madrid (Spain)</option>
-                                <option value="Europe/Paris">Paris (France)</option>
-                                <option value="Europe/Berlin">Berlin (Germany)</option>
-                                <option value="Europe/Rome">Rome (Italy)</option>
-                                <option value="Europe/Amsterdam">Amsterdam (Netherlands)</option>
-                                <option value="Europe/Brussels">Brussels (Belgium)</option>
-                                <option value="Europe/Vienna">Vienna (Austria)</option>
-                                <option value="Europe/Stockholm">Stockholm (Sweden)</option>
-                                <option value="Europe/Warsaw">Warsaw (Poland)</option>
-                                <option value="Europe/Zurich">Zurich (Switzerland)</option>
-                                <option value="Europe/Athens">Athens (Greece)</option>
-                                <option value="Europe/Helsinki">Helsinki (Finland)</option>
-                                <option value="Europe/Istanbul">Istanbul (Turkey)</option>
-                                <option value="Europe/Moscow">Moscow (Russia)</option>
-                            </optgroup>
-                            <optgroup label="🌏 Asia">
-                                <option value="Asia/Jerusalem">Tel Aviv (Israel)</option>
-                                <option value="Asia/Riyadh">Riyadh (Saudi Arabia)</option>
-                                <option value="Asia/Dubai">Dubai (UAE)</option>
-                                <option value="Asia/Karachi">Karachi (Pakistan)</option>
-                                <option value="Asia/Kolkata">Mumbai / Delhi (India)</option>
-                                <option value="Asia/Dhaka">Dhaka (Bangladesh)</option>
-                                <option value="Asia/Bangkok">Bangkok (Thailand)</option>
-                                <option value="Asia/Jakarta">Jakarta (Indonesia)</option>
-                                <option value="Asia/Ho_Chi_Minh">Ho Chi Minh (Vietnam)</option>
-                                <option value="Asia/Singapore">Singapore</option>
-                                <option value="Asia/Kuala_Lumpur">Kuala Lumpur (Malaysia)</option>
-                                <option value="Asia/Hong_Kong">Hong Kong</option>
-                                <option value="Asia/Shanghai">Shanghai (China)</option>
-                                <option value="Asia/Taipei">Taipei (Taiwan)</option>
-                                <option value="Asia/Manila">Manila (Philippines)</option>
-                                <option value="Asia/Tokyo">Tokyo (Japan)</option>
-                                <option value="Asia/Seoul">Seoul (Korea)</option>
-                            </optgroup>
-                            <optgroup label="🌎 Americas">
-                                <option value="America/New_York">New York (USA East)</option>
-                                <option value="America/Toronto">Toronto (Canada)</option>
-                                <option value="America/Chicago">Chicago (USA Central)</option>
-                                <option value="America/Denver">Denver (USA Mountain)</option>
-                                <option value="America/Phoenix">Phoenix (Arizona)</option>
-                                <option value="America/Los_Angeles">Los Angeles (USA West)</option>
-                                <option value="America/Vancouver">Vancouver (Canada)</option>
-                                <option value="America/Anchorage">Anchorage (Alaska)</option>
-                                <option value="Pacific/Honolulu">Honolulu (Hawaii)</option>
-                                <option value="America/Mexico_City">Mexico City (Mexico)</option>
-                                <option value="America/Bogota">Bogotá (Colombia)</option>
-                                <option value="America/Lima">Lima (Peru)</option>
-                                <option value="America/Caracas">Caracas (Venezuela)</option>
-                                <option value="America/Santiago">Santiago (Chile)</option>
-                                <option value="America/Sao_Paulo">São Paulo (Brazil)</option>
-                                <option value="America/Buenos_Aires">Buenos Aires (Argentina)</option>
-                            </optgroup>
-                            <optgroup label="🌍 Africa">
-                                <option value="Africa/Casablanca">Casablanca (Morocco)</option>
-                                <option value="Africa/Lagos">Lagos (Nigeria)</option>
-                                <option value="Africa/Cairo">Cairo (Egypt)</option>
-                                <option value="Africa/Johannesburg">Johannesburg (South Africa)</option>
-                                <option value="Africa/Nairobi">Nairobi (Kenya)</option>
-                            </optgroup>
-                            <optgroup label="🌏 Oceania">
-                                <option value="Australia/Perth">Perth (Australia)</option>
-                                <option value="Australia/Brisbane">Brisbane (Australia)</option>
-                                <option value="Australia/Sydney">Sydney (Australia)</option>
-                                <option value="Australia/Melbourne">Melbourne (Australia)</option>
-                                <option value="Pacific/Fiji">Fiji</option>
-                                <option value="Pacific/Auckland">Auckland (New Zealand)</option>
-                            </optgroup>
-                        </select>
-                        <div id="timezoneStatusOverview" style="margin-top: 8px; color: #6c757d; font-size: 12px;"></div>
-                        <div style="font-size: 11px; color: #718096; margin-top: 4px;">
-                            ⚡ "Disabled" = no automatic processing. Select a city to activate.
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Danger Zone -->
                 <div style="margin-top: 40px; padding: 20px; background: #fff5f5; border: 2px solid #feb2b2; border-radius: 8px;">
                     <h4 style="color: #e53e3e; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
@@ -1006,103 +903,6 @@
                     </div>
                 </div>
                 
-                <!-- Automatic Task Organization -->
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                    <h5 style="margin: 0 0 10px 0; color: #495057;">🌙 Automatic Task Organization</h5>
-                    <div style="font-size: 14px; line-height: 1.5;">
-                        <div style="margin-bottom: 12px; color: #495057; font-size: 13px; background: #e8f4fd; padding: 12px; border-radius: 6px; border-left: 3px solid #1E4FE6;">
-                            <strong>Every night at 1 am:</strong>
-                            <div style="margin-top: 6px; display: grid; gap: 4px;">
-                                <span>1️⃣ Unfinished tasks → move to today</span>
-                                <span>2️⃣ Tasks get time slots assigned</span>
-                                <span>3️⃣ If too many → overflow to next days</span>
-                            </div>
-                            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #c9dff7; font-size: 12px; color: #666;">
-                                📅 <strong>Events</strong> are fixed and never moved automatically
-                            </div>
-                        </div>
-                        <div style="margin-bottom: 10px;">
-                            <label style="display: block; font-weight: 500; margin-bottom: 4px;">Select your city to enable:</label>
-                            <select id="timezoneSelect" onchange="updateTimezone()" style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; font-size: 14px; width: 100%; max-width: 300px;">
-                                <option value="">-- Disabled --</option>
-                                <optgroup label="🌍 Europe">
-                                    <option value="Europe/London">London (UK)</option>
-                                    <option value="Europe/Madrid">Madrid (Spain)</option>
-                                    <option value="Europe/Paris">Paris (France)</option>
-                                    <option value="Europe/Berlin">Berlin (Germany)</option>
-                                    <option value="Europe/Rome">Rome (Italy)</option>
-                                    <option value="Europe/Amsterdam">Amsterdam (Netherlands)</option>
-                                    <option value="Europe/Brussels">Brussels (Belgium)</option>
-                                    <option value="Europe/Vienna">Vienna (Austria)</option>
-                                    <option value="Europe/Stockholm">Stockholm (Sweden)</option>
-                                    <option value="Europe/Warsaw">Warsaw (Poland)</option>
-                                    <option value="Europe/Zurich">Zurich (Switzerland)</option>
-                                    <option value="Europe/Athens">Athens (Greece)</option>
-                                    <option value="Europe/Helsinki">Helsinki (Finland)</option>
-                                    <option value="Europe/Istanbul">Istanbul (Turkey)</option>
-                                    <option value="Europe/Moscow">Moscow (Russia)</option>
-                                </optgroup>
-                                <optgroup label="🌏 Asia">
-                                    <option value="Asia/Jerusalem">Tel Aviv (Israel)</option>
-                                    <option value="Asia/Riyadh">Riyadh (Saudi Arabia)</option>
-                                    <option value="Asia/Dubai">Dubai (UAE)</option>
-                                    <option value="Asia/Karachi">Karachi (Pakistan)</option>
-                                    <option value="Asia/Kolkata">Mumbai / Delhi (India)</option>
-                                    <option value="Asia/Dhaka">Dhaka (Bangladesh)</option>
-                                    <option value="Asia/Bangkok">Bangkok (Thailand)</option>
-                                    <option value="Asia/Jakarta">Jakarta (Indonesia)</option>
-                                    <option value="Asia/Ho_Chi_Minh">Ho Chi Minh (Vietnam)</option>
-                                    <option value="Asia/Singapore">Singapore</option>
-                                    <option value="Asia/Kuala_Lumpur">Kuala Lumpur (Malaysia)</option>
-                                    <option value="Asia/Hong_Kong">Hong Kong</option>
-                                    <option value="Asia/Shanghai">Shanghai (China)</option>
-                                    <option value="Asia/Taipei">Taipei (Taiwan)</option>
-                                    <option value="Asia/Manila">Manila (Philippines)</option>
-                                    <option value="Asia/Tokyo">Tokyo (Japan)</option>
-                                    <option value="Asia/Seoul">Seoul (Korea)</option>
-                                </optgroup>
-                                <optgroup label="🌎 Americas">
-                                    <option value="America/New_York">New York (USA East)</option>
-                                    <option value="America/Toronto">Toronto (Canada)</option>
-                                    <option value="America/Chicago">Chicago (USA Central)</option>
-                                    <option value="America/Denver">Denver (USA Mountain)</option>
-                                    <option value="America/Phoenix">Phoenix (Arizona)</option>
-                                    <option value="America/Los_Angeles">Los Angeles (USA West)</option>
-                                    <option value="America/Vancouver">Vancouver (Canada)</option>
-                                    <option value="America/Anchorage">Anchorage (Alaska)</option>
-                                    <option value="Pacific/Honolulu">Honolulu (Hawaii)</option>
-                                    <option value="America/Mexico_City">Mexico City (Mexico)</option>
-                                    <option value="America/Bogota">Bogotá (Colombia)</option>
-                                    <option value="America/Lima">Lima (Peru)</option>
-                                    <option value="America/Caracas">Caracas (Venezuela)</option>
-                                    <option value="America/Santiago">Santiago (Chile)</option>
-                                    <option value="America/Sao_Paulo">São Paulo (Brazil)</option>
-                                    <option value="America/Buenos_Aires">Buenos Aires (Argentina)</option>
-                                </optgroup>
-                                <optgroup label="🌍 Africa">
-                                    <option value="Africa/Casablanca">Casablanca (Morocco)</option>
-                                    <option value="Africa/Lagos">Lagos (Nigeria)</option>
-                                    <option value="Africa/Cairo">Cairo (Egypt)</option>
-                                    <option value="Africa/Johannesburg">Johannesburg (South Africa)</option>
-                                    <option value="Africa/Nairobi">Nairobi (Kenya)</option>
-                                </optgroup>
-                                <optgroup label="🌏 Oceania">
-                                    <option value="Australia/Perth">Perth (Australia)</option>
-                                    <option value="Australia/Brisbane">Brisbane (Australia)</option>
-                                    <option value="Australia/Sydney">Sydney (Australia)</option>
-                                    <option value="Australia/Melbourne">Melbourne (Australia)</option>
-                                    <option value="Pacific/Fiji">Fiji</option>
-                                    <option value="Pacific/Auckland">Auckland (New Zealand)</option>
-                                </optgroup>
-                            </select>
-                        </div>
-                        <div id="timezoneStatus" style="color: #6c757d; font-size: 12px;"></div>
-                        <div style="font-size: 11px; color: #718096; margin-top: 4px;">
-                            ⚡ "Disabled" = no automatic processing. Select a city to activate.
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Account Info -->
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
                     <h5 style="margin: 0 0 10px 0; color: #495057;">👤 Account Information</h5>
@@ -1167,7 +967,7 @@
     <!-- Undo View -->
     <div id="undo-view" class="tasks-section hidden">
         <div class="section-header">
-            <h3>📋 Action Registry</h3>
+            <h3>↶ Undo Management</h3>
             <div class="view-controls">
                 <input type="text" id="undoSearchInput" placeholder="🔍 Search actions..." style="padding: 6px 12px; border: 2px solid #e1e5e9; border-radius: 4px; font-size: 11px; width: 200px; margin-right: 8px;" oninput="searchUndoHistory()">
                 <button class="btn btn-secondary btn-small" onclick="refreshUndoView()" style="background: #6c757d; border-color: #6c757d;">🔄 Refresh</button>
@@ -1304,7 +1104,7 @@
     <!-- Custom Date/Time Picker Modal -->
     <div id="dateTimeModal" class="modal" onclick="closeDateTimeModal(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
         <!-- Unified Responsive Date/Time Modal -->
-        <div class="modal-content" onclick="event.stopPropagation()" style="width: 90%; max-width: 460px; height: auto; max-height: 75vh; position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); padding: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, sans-serif; display: flex; flex-direction: column;">
+        <div class="modal-content" onclick="event.stopPropagation()" style="width: 90%; max-width: 460px; height: auto; max-height: 85vh; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); padding: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
             
             <!-- Modal Header -->
             <div style="background: linear-gradient(135deg, #2E5BFF 0%, #5856D6 100%); color: white; padding: 20px; text-align: center; border-radius: 16px 16px 0 0;">
@@ -1312,7 +1112,7 @@
             </div>
 
             <!-- Main Content -->
-            <div style="padding: 24px; overflow-y: auto; flex: 1; min-height: 0;">
+            <div style="padding: 24px; overflow-y: auto; max-height: calc(85vh - 140px);">
                 
                 <!-- Calendar Section -->
                 <div style="margin-bottom: 24px;">
@@ -1392,7 +1192,7 @@
             </div>
 
             <!-- Footer Actions -->
-            <div style="background: #f8f9fa; padding: 16px 24px; border-radius: 0 0 16px 16px; border-top: 1px solid #e9ecef; flex-shrink: 0;">
+            <div style="background: #f8f9fa; padding: 16px 24px; border-radius: 0 0 16px 16px; border-top: 1px solid #e9ecef;">
                 <div style="display: flex; gap: 12px;">
                     <button onclick="closeDateTimeModal()" style="flex: 1; background: white; color: #6c757d; border: 1px solid #e9ecef; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">Cancel</button>
                     <button onclick="applyDateTime()" style="flex: 1; background: #2E5BFF; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">Apply</button>
@@ -1489,6 +1289,10 @@
                             <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff3cd; border-radius: 6px;">
                                 <span style="font-weight: 500; font-size: 13px;" data-translate="Create Manual Backup">Create Manual Backup</span>
                                 <kbd style="background: #ffeaa7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + B</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff3cd; border-radius: 6px;">
+                                <span style="font-weight: 500; font-size: 13px;">Toggle Keyboard-Only Mode</span>
+                                <kbd style="background: #ffeaa7; padding: 3px 6px; border-radius: 3px; font-family: monospace; font-size: 11px;">Ctrl + K</kbd>
                             </div>
                         </div>
                     </div>
@@ -1637,187 +1441,168 @@
     <!-- Settings View -->
     <div id="settings-view" class="tasks-section hidden">
         <div class="section-header">
-            <h3>Settings</h3>
+            <h3>⚙️ Settings</h3>
         </div>
-        <div class="settings-content" style="padding: 20px;">
-            <!-- Settings content will be loaded here -->
-            <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">📊 GTD Reviews</h4>
-                <p style="color: #718096; font-size: 14px; margin-bottom: 15px;">Generate task reviews following Getting Things Done methodology</p>
+        <div class="settings-content" style="padding: 20px; max-width: 1200px; margin: 0 auto;">
 
+            <!-- 1. LANGUAGE -->
+            <div class="settings-section" style="padding: 24px; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <span style="font-size: 24px;">🌐</span>
+                    <h4 style="margin: 0; color: #1E4FE6; font-size: 18px; font-weight: 600;" data-translate="Language / Idioma">Language / Idioma</h4>
+                </div>
+                <p style="color: #718096; font-size: 13px; margin: 0 0 16px 0;" data-translate="Choose your preferred language">Choose your preferred language</p>
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button onclick="openReviewFormatModal('daily')"
-                            style="background: linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%); color: white; border: none; font-size: 14px; cursor: pointer; padding: 12px 20px; border-radius: 8px; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
-                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'"
-                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
-                        ☀️ Daily Review
+                    <button onclick="switchLanguage('en')"
+                            style="background: white; border: 2px solid #ddd; font-size: 15px; cursor: pointer; padding: 12px 24px; border-radius: 8px; transition: all 0.2s; font-weight: 500;"
+                            onmouseover="this.style.borderColor='#1E4FE6'; this.style.background='#f0f4ff';"
+                            onmouseout="this.style.borderColor='#ddd'; this.style.background='white';"
+                            id="lang-en-btn">
+                        🇬🇧 English
                     </button>
-                    <button onclick="openReviewFormatModal('weekly')"
-                            style="background: linear-gradient(135deg, #2E5BFF 0%, #1E4FE6 100%); color: white; border: none; font-size: 14px; cursor: pointer; padding: 12px 20px; border-radius: 8px; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
-                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'"
-                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
-                        📊 Weekly Review
+                    <button onclick="switchLanguage('es')"
+                            style="background: white; border: 2px solid #ddd; font-size: 15px; cursor: pointer; padding: 12px 24px; border-radius: 8px; transition: all 0.2s; font-weight: 500;"
+                            onmouseover="this.style.borderColor='#1E4FE6'; this.style.background='#f0f4ff';"
+                            onmouseout="this.style.borderColor='#ddd'; this.style.background='white';"
+                            id="lang-es-btn">
+                        🇪🇸 Español
                     </button>
-                    <button onclick="openReviewFormatModal('projects')"
-                            style="background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%); color: white; border: none; font-size: 14px; cursor: pointer; padding: 12px 20px; border-radius: 8px; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
-                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'"
-                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
-                        📁 Projects
-                    </button>
-                </div>
-                <div style="margin-top: 10px; font-size: 12px; color: #a0aec0;">
-                    Choose export formats in the popup
                 </div>
             </div>
 
-            <!-- Automatic Task Organization -->
-            <div class="settings-section" style="padding: 20px; border: 2px solid #bee3f8; border-radius: 8px; margin-bottom: 20px; background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);">
-                <h4 style="margin: 0 0 15px 0; color: #1E4FE6; font-size: 16px;">🌙 Automatic Task Organization</h4>
-                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid #1E4FE6; margin-bottom: 15px;">
-                    <strong style="color: #2d3748;">Every night at 1 am:</strong>
-                    <div style="margin-top: 8px; display: grid; gap: 4px; color: #4a5568; font-size: 14px;">
-                        <span>1️⃣ Unfinished tasks → move to today</span>
-                        <span>2️⃣ Tasks get time slots assigned</span>
-                        <span>3️⃣ If too many → overflow to next days</span>
-                    </div>
-                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 13px; color: #718096;">
-                        📅 <strong>Events</strong> are fixed and never moved automatically
-                    </div>
+            <!-- 2. APPEARANCE & DISPLAY -->
+            <div class="settings-section" style="padding: 24px; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <span style="font-size: 24px;">🎨</span>
+                    <h4 style="margin: 0; color: #1E4FE6; font-size: 18px; font-weight: 600;" data-translate="Appearance & Display">Appearance & Display</h4>
                 </div>
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                    <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #4a5568; cursor: pointer;">
-                        <input type="checkbox" id="autoOrganizeEnabledMain" onchange="toggleAutoOrganize(this.checked)" style="width: 18px; height: 18px; cursor: pointer;">
-                        Enable automatic task organization
-                    </label>
-                    <span id="timezoneStatusMain" style="font-size: 13px; color: #48bb78; font-weight: 500;"></span>
-                </div>
-                <div style="font-size: 12px; color: #718096; margin-bottom: 12px; padding-left: 26px;">
-                    ⚡ Check the box AND select your city to activate. Nothing happens until both are set.
-                </div>
-                <div id="timezoneSelectContainerMain" style="display: none; margin-top: 12px;">
-                    <label style="font-size: 14px; color: #4a5568; font-weight: 500; display: block; margin-bottom: 6px;">Select the city nearest you:</label>
-                    <select id="timezoneSelectMain" onchange="updateTimezoneFromMain()" style="padding: 10px 14px; border: 2px solid #bee3f8; border-radius: 6px; font-size: 14px; min-width: 280px; background: white;">
-                        <option value="">-- Select city --</option>
-                        <optgroup label="🌍 Europe">
-                            <option value="Europe/London">London (UK)</option>
-                            <option value="Europe/Madrid">Madrid (Spain)</option>
-                            <option value="Europe/Paris">Paris (France)</option>
-                            <option value="Europe/Berlin">Berlin (Germany)</option>
-                            <option value="Europe/Rome">Rome (Italy)</option>
-                            <option value="Europe/Amsterdam">Amsterdam (Netherlands)</option>
-                            <option value="Europe/Brussels">Brussels (Belgium)</option>
-                            <option value="Europe/Vienna">Vienna (Austria)</option>
-                            <option value="Europe/Stockholm">Stockholm (Sweden)</option>
-                            <option value="Europe/Warsaw">Warsaw (Poland)</option>
-                            <option value="Europe/Zurich">Zurich (Switzerland)</option>
-                            <option value="Europe/Athens">Athens (Greece)</option>
-                            <option value="Europe/Helsinki">Helsinki (Finland)</option>
-                            <option value="Europe/Istanbul">Istanbul (Turkey)</option>
-                            <option value="Europe/Moscow">Moscow (Russia)</option>
-                        </optgroup>
-                        <optgroup label="🌏 Asia">
-                            <option value="Asia/Jerusalem">Tel Aviv (Israel)</option>
-                            <option value="Asia/Riyadh">Riyadh (Saudi Arabia)</option>
-                            <option value="Asia/Dubai">Dubai (UAE)</option>
-                            <option value="Asia/Karachi">Karachi (Pakistan)</option>
-                            <option value="Asia/Kolkata">Mumbai / Delhi (India)</option>
-                            <option value="Asia/Dhaka">Dhaka (Bangladesh)</option>
-                            <option value="Asia/Bangkok">Bangkok (Thailand)</option>
-                            <option value="Asia/Jakarta">Jakarta (Indonesia)</option>
-                            <option value="Asia/Ho_Chi_Minh">Ho Chi Minh (Vietnam)</option>
-                            <option value="Asia/Singapore">Singapore</option>
-                            <option value="Asia/Kuala_Lumpur">Kuala Lumpur (Malaysia)</option>
-                            <option value="Asia/Hong_Kong">Hong Kong</option>
-                            <option value="Asia/Shanghai">Shanghai (China)</option>
-                            <option value="Asia/Taipei">Taipei (Taiwan)</option>
-                            <option value="Asia/Manila">Manila (Philippines)</option>
-                            <option value="Asia/Tokyo">Tokyo (Japan)</option>
-                            <option value="Asia/Seoul">Seoul (Korea)</option>
-                        </optgroup>
-                        <optgroup label="🌎 Americas">
-                            <option value="America/New_York">New York (USA East)</option>
-                            <option value="America/Toronto">Toronto (Canada)</option>
-                            <option value="America/Chicago">Chicago (USA Central)</option>
-                            <option value="America/Denver">Denver (USA Mountain)</option>
-                            <option value="America/Phoenix">Phoenix (Arizona)</option>
-                            <option value="America/Los_Angeles">Los Angeles (USA West)</option>
-                            <option value="America/Vancouver">Vancouver (Canada)</option>
-                            <option value="America/Anchorage">Anchorage (Alaska)</option>
-                            <option value="Pacific/Honolulu">Honolulu (Hawaii)</option>
-                            <option value="America/Mexico_City">Mexico City (Mexico)</option>
-                            <option value="America/Bogota">Bogotá (Colombia)</option>
-                            <option value="America/Lima">Lima (Peru)</option>
-                            <option value="America/Caracas">Caracas (Venezuela)</option>
-                            <option value="America/Santiago">Santiago (Chile)</option>
-                            <option value="America/Sao_Paulo">São Paulo (Brazil)</option>
-                            <option value="America/Buenos_Aires">Buenos Aires (Argentina)</option>
-                        </optgroup>
-                        <optgroup label="🌍 Africa">
-                            <option value="Africa/Casablanca">Casablanca (Morocco)</option>
-                            <option value="Africa/Lagos">Lagos (Nigeria)</option>
-                            <option value="Africa/Cairo">Cairo (Egypt)</option>
-                            <option value="Africa/Johannesburg">Johannesburg (South Africa)</option>
-                            <option value="Africa/Nairobi">Nairobi (Kenya)</option>
-                        </optgroup>
-                        <optgroup label="🌏 Oceania">
-                            <option value="Australia/Perth">Perth (Australia)</option>
-                            <option value="Australia/Brisbane">Brisbane (Australia)</option>
-                            <option value="Australia/Sydney">Sydney (Australia)</option>
-                            <option value="Australia/Melbourne">Melbourne (Australia)</option>
-                            <option value="Pacific/Fiji">Fiji</option>
-                            <option value="Pacific/Auckland">Auckland (New Zealand)</option>
-                        </optgroup>
-                    </select>
-                </div>
+                <p style="color: #718096; font-size: 13px; margin: 0 0 16px 0;" data-translate="Customize how dates, times, and interface elements appear">Customize how dates, times, and interface elements appear</p>
 
-                <!-- Time Blocks Configuration -->
-                <div id="timeBlocksContainer" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
-                    <!-- Populated by loadTimeBlocksUI() -->
-                </div>
-            </div>
-
-            <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">Display Options</h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                    <div>
-                        <label style="font-size: 14px; color: #4a5568; font-weight: 500; margin-bottom: 5px; display: block;">Date Format:</label>
-                        <select id="dateFormatSelect" onchange="saveDateFormat()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                    <div style="background: white; padding: 14px; border-radius: 8px; border: 1px solid #e8ecf0;">
+                        <label style="font-size: 13px; color: #4a5568; font-weight: 600; margin-bottom: 8px; display: block;">📅 Date Format</label>
+                        <select id="dateFormatSelect" onchange="saveDateFormat()" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px; cursor: pointer;">
                             <option value="YYYY-MM-DD">YYYY-MM-DD</option>
                             <option value="MM/DD/YYYY">MM/DD/YYYY</option>
                             <option value="DD/MM/YYYY">DD/MM/YYYY</option>
                         </select>
                     </div>
-                    <div>
-                        <label style="font-size: 14px; color: #4a5568; font-weight: 500; margin-bottom: 5px; display: block;">Time Format:</label>
-                        <select id="timeFormatSelect" onchange="saveTimeFormat()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
+                    <div style="background: white; padding: 14px; border-radius: 8px; border: 1px solid #e8ecf0;">
+                        <label style="font-size: 13px; color: #4a5568; font-weight: 600; margin-bottom: 8px; display: block;">🕐 Time Format</label>
+                        <select id="timeFormatSelect" onchange="saveTimeFormat()" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px; cursor: pointer;">
                             <option value="default">Default</option>
                             <option value="12hour">12-hour (AM/PM)</option>
                             <option value="24hour">24-hour</option>
                         </select>
                     </div>
-                    <div>
-                        <label style="font-size: 14px; color: #4a5568; font-weight: 500; margin-bottom: 5px; display: block;">Week Starts On:</label>
-                        <select id="weekStartSelect" onchange="saveWeekStart()" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px;">
+                    <div style="background: white; padding: 14px; border-radius: 8px; border: 1px solid #e8ecf0;">
+                        <label style="font-size: 13px; color: #4a5568; font-weight: 600; margin-bottom: 8px; display: block;">📆 Week Starts On</label>
+                        <select id="weekStartSelect" onchange="saveWeekStart()" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; font-size: 14px; cursor: pointer;">
                             <option value="0">Sunday</option>
                             <option value="1">Monday</option>
                         </select>
                     </div>
                 </div>
-            </div>
-            
 
-            <!-- IndexedDB Auto-Backup Section -->
-            <div class="settings-section" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="margin: 0 0 15px 0; color: #2d3748; font-size: 16px;">💾 Local Auto-Backups</h4>
-                <p style="color: #718096; font-size: 14px; margin-bottom: 15px;">Automatic snapshots: hourly (24), daily (7), weekly (4) + rolling every 5 min</p>
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
-                    <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #4a5568;">
-                        <input type="checkbox" id="autoBackupToggleMain" onchange="setAutoBackupEnabled(this.checked); renderBackupListMain()">
-                        Enable auto-backup
-                    </label>
+                <!-- Keyboard-Only Mode -->
+                <div style="padding: 16px; background: #fff8f0; border-radius: 8px; border-left: 4px solid #fd7e14;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <span style="font-size: 14px; font-weight: 600; color: #495057;">⌨️ Keyboard-Only Mode</span>
+                            <div style="font-size: 12px; color: #6c757d; margin-top: 4px;">Hide mouse buttons, show only keyboard shortcuts</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <kbd style="background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 11px; color: #495057; font-weight: 600;">Ctrl+K</kbd>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="keyboardOnlyMode" onchange="toggleKeyboardOnlyMode()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
-                <div id="indexeddb-backup-list-main" style="margin-top: 10px;">
-                    <p style="color: #718096; text-align: center;">Loading backups...</p>
+            </div>
+
+            <!-- 3. PRODUCTIVITY TOOLS -->
+            <div class="settings-section" style="padding: 24px; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <span style="font-size: 24px;">🚀</span>
+                    <h4 style="margin: 0; color: #1E4FE6; font-size: 18px; font-weight: 600;" data-translate="Productivity Tools">Productivity Tools</h4>
+                </div>
+                <p style="color: #718096; font-size: 13px; margin: 0 0 16px 0;" data-translate="Tools to enhance your GTD workflow">Tools to enhance your GTD workflow</p>
+
+                <div style="background: white; padding: 18px; border-radius: 8px; border: 1px solid #e8ecf0;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span style="font-size: 20px;">📊</span>
+                        <h5 style="margin: 0; color: #2d3748; font-size: 16px; font-weight: 600;">GTD Weekly Review</h5>
+                    </div>
+                    <p style="color: #718096; font-size: 13px; margin: 0 0 14px 0;">Generate comprehensive task reviews following Getting Things Done methodology</p>
+                    <button onclick="openReviewFormatModal()"
+                            style="background: linear-gradient(135deg, #2E5BFF 0%, #1E4FE6 100%); color: white; border: none; font-size: 14px; cursor: pointer; padding: 12px 24px; border-radius: 8px; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-weight: 600;"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+                        📊 Generate Weekly Review
+                    </button>
+                    <div style="margin-top: 10px; font-size: 11px; color: #a0aec0;">
+                        Choose export formats in the popup • Perfect for weekly planning sessions
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. DATA MANAGEMENT -->
+            <div class="settings-section" style="padding: 24px; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <span style="font-size: 24px;">💾</span>
+                    <h4 style="margin: 0; color: #1E4FE6; font-size: 18px; font-weight: 600;" data-translate="Data">Data Management</h4>
+                </div>
+                <p style="color: #718096; font-size: 13px; margin: 0 0 16px 0;" data-translate="Import, export, and backup your tasks">Import, export, and backup your tasks</p>
+
+                <!-- Import/Export Row -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                    <button onclick="importTasks()" style="background: #007bff; color: white; border: none; padding: 14px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='#0056b3'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#007bff'; this.style.transform='translateY(0)'">
+                        <span>📥</span> <span data-translate="Import Tasks">Import Tasks</span>
+                    </button>
+                    <button onclick="exportTasks()" style="background: #28a745; color: white; border: none; padding: 14px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='#218838'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#28a745'; this.style.transform='translateY(0)'">
+                        <span>📤</span> <span data-translate="Export Tasks">Export Tasks</span>
+                    </button>
+                    <button onclick="saveBackupSettings()" style="background: #17a2b8; color: white; border: none; padding: 14px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='#138496'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#17a2b8'; this.style.transform='translateY(0)'">
+                        <span>💾</span> <span data-translate="Save Backup">Save Backup</span>
+                    </button>
+                </div>
+
+                <!-- HTML Export Section -->
+                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; border: 1px solid #e8ecf0;">
+                    <h5 style="margin: 0 0 12px 0; color: #495057; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                        <span>📄</span> <span data-translate="HTML Exports">HTML Exports</span>
+                    </h5>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
+                        <button onclick="exportTodayFiltered()" style="background: white; color: #6f42c1; border: 2px solid #6f42c1; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#6f42c1'; this.style.color='white'" onmouseout="this.style.background='white'; this.style.color='#6f42c1'">
+                            🌅 Today
+                        </button>
+                        <button onclick="exportWeekHtml()" style="background: white; color: #fd7e14; border: 2px solid #fd7e14; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#fd7e14'; this.style.color='white'" onmouseout="this.style.background='white'; this.style.color='#fd7e14'">
+                            📅 Week
+                        </button>
+                        <button onclick="exportMonthHtml()" style="background: white; color: #dc3545; border: 2px solid #dc3545; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#dc3545'; this.style.color='white'" onmouseout="this.style.background='white'; this.style.color='#dc3545'">
+                            🗓️ Month
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. ADVANCED -->
+            <div class="settings-section" style="padding: 24px; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 24px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <span style="font-size: 24px;">⚙️</span>
+                    <h4 style="margin: 0; color: #1E4FE6; font-size: 18px; font-weight: 600;" data-translate="Advanced">Advanced</h4>
+                </div>
+                <p style="color: #718096; font-size: 13px; margin: 0 0 16px 0;" data-translate="Power user features and bulk operations">Power user features and bulk operations</p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                    <button onclick="importTasksFromTextarea()" style="background: #6c757d; color: white; border: none; padding: 14px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='#5a6268'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#6c757d'; this.style.transform='translateY(0)'">
+                        <span>📋</span> <span data-translate="Bulk Import">Bulk Import</span>
+                    </button>
+                    <button onclick="toggleMobileUIVersion()" style="background: #17a2b8; color: white; border: none; padding: 14px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='#138496'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#17a2b8'; this.style.transform='translateY(0)'">
+                        <span>📱</span> <span data-translate="Mobile UI">Mobile UI</span>
+                    </button>
                 </div>
             </div>
 
@@ -1894,97 +1679,6 @@
                     </div>
                 </div>
 
-                <!-- Automatic Task Organization Section -->
-                <div class="settings-section" style="padding: 15px 20px; border-bottom: 1px solid #e0e0e0; background: #f0f7ff;">
-                    <h4 style="margin: 0 0 12px 0; color: #1E4FE6; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                        🌙 Automatic Task Organization
-                    </h4>
-                    <div style="font-size: 13px; color: #495057; background: white; padding: 10px; border-radius: 6px; border-left: 3px solid #1E4FE6; margin-bottom: 12px;">
-                        <strong>Every night at 1 am:</strong>
-                        <div style="margin-top: 4px;">1️⃣ Unfinished → today · 2️⃣ Time slots assigned · 3️⃣ Overflow → next days</div>
-                        <div style="margin-top: 6px; font-size: 11px; color: #666;">📅 Events are fixed and never moved</div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
-                        <label style="font-size: 14px; color: #495057; font-weight: 600;">Your city:</label>
-                        <select id="timezoneSelectGeneral" onchange="updateTimezoneFromGeneral()" style="padding: 8px 12px; border: 2px solid #bee3f8; border-radius: 6px; font-size: 14px; min-width: 200px; background: white;">
-                            <option value="">-- Disabled --</option>
-                            <optgroup label="🌍 Europe">
-                                <option value="Europe/London">London (UK)</option>
-                                <option value="Europe/Madrid">Madrid (Spain)</option>
-                                <option value="Europe/Paris">Paris (France)</option>
-                                <option value="Europe/Berlin">Berlin (Germany)</option>
-                                <option value="Europe/Rome">Rome (Italy)</option>
-                                <option value="Europe/Amsterdam">Amsterdam (Netherlands)</option>
-                                <option value="Europe/Brussels">Brussels (Belgium)</option>
-                                <option value="Europe/Vienna">Vienna (Austria)</option>
-                                <option value="Europe/Stockholm">Stockholm (Sweden)</option>
-                                <option value="Europe/Warsaw">Warsaw (Poland)</option>
-                                <option value="Europe/Zurich">Zurich (Switzerland)</option>
-                                <option value="Europe/Athens">Athens (Greece)</option>
-                                <option value="Europe/Helsinki">Helsinki (Finland)</option>
-                                <option value="Europe/Istanbul">Istanbul (Turkey)</option>
-                                <option value="Europe/Moscow">Moscow (Russia)</option>
-                            </optgroup>
-                            <optgroup label="🌏 Asia">
-                                <option value="Asia/Jerusalem">Tel Aviv (Israel)</option>
-                                <option value="Asia/Riyadh">Riyadh (Saudi Arabia)</option>
-                                <option value="Asia/Dubai">Dubai (UAE)</option>
-                                <option value="Asia/Karachi">Karachi (Pakistan)</option>
-                                <option value="Asia/Kolkata">Mumbai / Delhi (India)</option>
-                                <option value="Asia/Dhaka">Dhaka (Bangladesh)</option>
-                                <option value="Asia/Bangkok">Bangkok (Thailand)</option>
-                                <option value="Asia/Jakarta">Jakarta (Indonesia)</option>
-                                <option value="Asia/Ho_Chi_Minh">Ho Chi Minh (Vietnam)</option>
-                                <option value="Asia/Singapore">Singapore</option>
-                                <option value="Asia/Kuala_Lumpur">Kuala Lumpur (Malaysia)</option>
-                                <option value="Asia/Hong_Kong">Hong Kong</option>
-                                <option value="Asia/Shanghai">Shanghai (China)</option>
-                                <option value="Asia/Taipei">Taipei (Taiwan)</option>
-                                <option value="Asia/Manila">Manila (Philippines)</option>
-                                <option value="Asia/Tokyo">Tokyo (Japan)</option>
-                                <option value="Asia/Seoul">Seoul (Korea)</option>
-                            </optgroup>
-                            <optgroup label="🌎 Americas">
-                                <option value="America/New_York">New York (USA East)</option>
-                                <option value="America/Toronto">Toronto (Canada)</option>
-                                <option value="America/Chicago">Chicago (USA Central)</option>
-                                <option value="America/Denver">Denver (USA Mountain)</option>
-                                <option value="America/Phoenix">Phoenix (Arizona)</option>
-                                <option value="America/Los_Angeles">Los Angeles (USA West)</option>
-                                <option value="America/Vancouver">Vancouver (Canada)</option>
-                                <option value="America/Anchorage">Anchorage (Alaska)</option>
-                                <option value="Pacific/Honolulu">Honolulu (Hawaii)</option>
-                                <option value="America/Mexico_City">Mexico City (Mexico)</option>
-                                <option value="America/Bogota">Bogotá (Colombia)</option>
-                                <option value="America/Lima">Lima (Peru)</option>
-                                <option value="America/Caracas">Caracas (Venezuela)</option>
-                                <option value="America/Santiago">Santiago (Chile)</option>
-                                <option value="America/Sao_Paulo">São Paulo (Brazil)</option>
-                                <option value="America/Buenos_Aires">Buenos Aires (Argentina)</option>
-                            </optgroup>
-                            <optgroup label="🌍 Africa">
-                                <option value="Africa/Casablanca">Casablanca (Morocco)</option>
-                                <option value="Africa/Lagos">Lagos (Nigeria)</option>
-                                <option value="Africa/Cairo">Cairo (Egypt)</option>
-                                <option value="Africa/Johannesburg">Johannesburg (South Africa)</option>
-                                <option value="Africa/Nairobi">Nairobi (Kenya)</option>
-                            </optgroup>
-                            <optgroup label="🌏 Oceania">
-                                <option value="Australia/Perth">Perth (Australia)</option>
-                                <option value="Australia/Brisbane">Brisbane (Australia)</option>
-                                <option value="Australia/Sydney">Sydney (Australia)</option>
-                                <option value="Australia/Melbourne">Melbourne (Australia)</option>
-                                <option value="Pacific/Fiji">Fiji</option>
-                                <option value="Pacific/Auckland">Auckland (New Zealand)</option>
-                            </optgroup>
-                        </select>
-                        <span id="timezoneStatusGeneral" style="font-size: 12px; color: #6c757d;"></span>
-                    </div>
-                    <div style="font-size: 11px; color: #718096; margin-top: 4px;">
-                        ⚡ Select a city to activate. "Disabled" = no automatic processing.
-                    </div>
-                </div>
-
                 <!-- Display Options Section -->
                 <div class="settings-section" style="padding: 15px 20px; border-bottom: 1px solid #e0e0e0;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
@@ -2039,6 +1733,26 @@
                     </div>
                 </div>
 
+                <!-- Keyboard-Only Mode Section -->
+                <div class="settings-section" style="padding: 15px 20px; border-bottom: 1px solid #e0e0e0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h4 style="margin: 0; color: #1E4FE6; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                                ⌨️ <span data-translate="Keyboard-Only Mode">Keyboard-Only Mode</span>
+                            </h4>
+                            <p style="margin: 5px 0 0 0; font-size: 12px; color: #666; max-width: 300px;">
+                                <span data-translate="Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation">Hide buttons that have keyboard shortcuts, forcing keyboard-only navigation</span>
+                            </p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="keyboardOnlyMode" onchange="toggleKeyboardOnlyMode()" style="transform: scale(1.2);">
+                            <label for="keyboardOnlyMode" style="font-size: 14px; color: #495057; font-weight: 600; cursor: pointer;">
+                                <span data-translate="Enable">Enable</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                </div>
 
 
                 <!-- Auto-Print Settings Section -->
@@ -2183,36 +1897,6 @@
 
                 <!-- Backup Tab -->
                 <div id="settings-tab-backup" class="settings-tab-content" style="display: none; padding: 0;">
-
-                <!-- IndexedDB Auto-Backup Section -->
-                <div class="settings-section" style="padding: 20px; border-bottom: 1px solid #e9ecef;">
-                    <h4 style="margin: 0 0 15px 0; color: #1E4FE6; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                        💾 Local Auto-Backups (IndexedDB)
-                    </h4>
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
-                        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #495057;">
-                            <input type="checkbox" id="autoBackupIndexedDBToggle" onchange="setAutoBackupEnabled(this.checked); renderBackupSnapshotList()">
-                            Enable auto-backup (every 5 min)
-                        </label>
-                    </div>
-                    <div id="indexeddb-backup-list" style="margin-top: 10px;">
-                        <p style="color: #6c757d; text-align: center;">Loading backups...</p>
-                    </div>
-                    <script>
-                        // Initialize toggle state and render list when backup tab is shown
-                        (function(){
-                            const orig = window.switchSettingsTab;
-                            window.switchSettingsTab = function(tab) {
-                                if (orig) orig(tab);
-                                if (tab === 'backup') {
-                                    const toggle = document.getElementById('autoBackupIndexedDBToggle');
-                                    if (toggle) toggle.checked = isAutoBackupEnabled();
-                                    renderBackupSnapshotList();
-                                }
-                            };
-                        })();
-                    </script>
-                </div>
 
                 <!-- Backup Settings Section -->
                 <div class="settings-section" style="padding: 20px;">
@@ -2421,6 +2105,23 @@
                         </div>
                     </div>
                     
+                    <!-- Keyboard-Only Mode -->
+                    <div style="margin-top: 20px; background: #f8f9fa; padding: 16px; border-radius: 8px; border-left: 4px solid #dc3545;">
+                        <h5 style="margin: 0 0 12px 0; color: #dc3545; font-size: 14px; font-weight: 600;">⌨️ Keyboard-Only Mode</h5>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="font-size: 13px; color: #495057;">Hide mouse buttons, show only keyboard shortcuts</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <kbd style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #495057;">Ctrl+K</kbd>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="keyboardOnlyMode" onchange="toggleKeyboardOnlyMode()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <p style="margin: 0; font-size: 12px; color: #6c757d; line-height: 1.4;">
+                            When enabled, only keyboard shortcuts and essential navigation will be visible. Perfect for power users who prefer keyboard-driven workflows.
+                        </p>
+                    </div>
 
                     <!-- Pro Tips -->
                     <div style="margin-top: 20px; background: linear-gradient(135deg, #2E5BFF 0%, #1E4FE6 100%); color: white; padding: 16px; border-radius: 8px;">
@@ -2428,6 +2129,7 @@
                         <ul style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.5;">
                             <li>Use <kbd style="background: rgba(255,255,255,0.2); padding: 1px 4px; border-radius: 2px;">@</kbd> followed by project names for quick templates</li>
                             <li>Combine <kbd style="background: rgba(255,255,255,0.2); padding: 1px 4px; border-radius: 2px;">N</kbd> + natural language for smart task entry</li>
+                            <li>Use <kbd style="background: rgba(255,255,255,0.2); padding: 1px 4px; border-radius: 2px;">Enter</kbd> on navigation buttons for keyboard-only workflow</li>
                         </ul>
                     </div>
                 </div>
@@ -2623,40 +2325,33 @@
     <input type="file" id="importTxtInput" accept=".txt,.org,text/*" onchange="handleTextImportFile(event)" style="display: none;">
     <!-- External JavaScript Files -->
     <!-- Core modules (load first) -->
-    <script src="js/core/DateUtils.js?v=20260203-v2"></script>
-    <script src="js/core/TaskUtils.js?v=20260203-v2"></script>
-    <script src="js/core/TemplateProcessor.js?v=20260203-v2"></script>
-
+    <script src="js/core/DateUtils.js?v=20250108-2"></script>
+    <script src="js/core/TaskUtils.js?v=20250108-2"></script>
+    <script src="js/core/TemplateProcessor.js?v=20250112-3"></script>
+    
     <!-- Original modules -->
-    <script src="js/globals.js?v=20260203-v2"></script>
-    <script src="js/utils.js?v=20260203-v2"></script>
-
-    <script src="js/keyboard-shortcuts.js?v=20260203-v2"></script>
-    <script src="js/auth.js?v=20260203-v2"></script>
-    <script src="js/tasks.js?v=20260204-no-backlog"></script>
-    <script src="js/ui.js?v=20260217-fix-global"></script>
-    <script src="js/sync.js?v=20260203-v2"></script>
-    <script src="js/offline-sync.js?v=20260130-fix-delete"></script>
+    <script src="js/globals.js?v=20250106-ULTRA-DEBUG"></script>
+    <script src="js/utils.js?v=1757614969"></script>
+    <script src="js/toast.js?v=20250101-toast-system"></script>
+    <script src="js/keyboard-shortcuts.js?v=20250101-shortcuts-help"></script>
+    <script src="js/auth.js?v=1736363000"></script>
+    <script src="js/tasks.js?v=20251102-HOTFIX-isNewTask"></script>
+    <script src="js/ui.js?v=20250921-today-fixed"></script>
+    <script src="js/sync.js?v=20250106-ULTRA-DEBUG"></script>
+    <script src="js/offline-sync.js?v=20250915-step3"></script>
     <script src="js/network-status.js?v=20250918-no-world-emoji"></script>
     <script src="js/offline-ui.js?v=20250917-icon-only"></script>
     <script src="js/natural-language.js?v=1736363000"></script>
-    <script src="js/patches.js?v=20260201-persist-view"></script>
-
-    <script src="js/date-time-picker.js?v=20260131-split"></script>
-    <script src="js/list-ops.js?v=20260131-split"></script>
-    <script src="js/search-filter.js?v=20260203-consistent"></script>
-    <script src="js/task-bulk-ops.js?v=20260204-no-auto-event"></script>
-    <script src="js/backup-import.js?v=20260203-bugfix"></script>
-    <script src="js/settings-ui.js?v=20260205-fix-sync"></script>
-    <script src="js/auto-backup.js?v=20260131-backup"></script>
-    <script src="js/missing-functions.js?v=20260131-split"></script>
+    <script src="js/patches.js?v=1736363000"></script>
+    <script src="extracted_js.js?v=20251114-desktop-event-toggle"></script>
+    <script src="js/missing-functions.js?v=20251102-remove-duplicate"></script>
     
     <!-- Tawk.to Live Chat Integration with automatic language detection -->
 
     <!-- N KEY & ENTER KEY HANDLERS -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚨 HTML KEYBOARD HANDLERS LOADED [20260207-v4.14.9-stable]');
+        console.log('🚨 HTML KEYBOARD HANDLERS LOADED [Deploy-20251114-desktop-event-toggle]');
         
         // N Key handler
         document.addEventListener('keydown', function(event) {
@@ -3495,7 +3190,7 @@
         <div class="modal-content" style="background: white; margin: 10% auto; padding: 0; border-radius: 15px; width: 90%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalSlideIn 0.3s ease-out;">
             <div class="modal-header" style="background: linear-gradient(135deg, #2E5BFF 0%, #1E4FE6 100%); color: white; padding: 25px 30px; text-align: center; border-radius: 15px 15px 0 0; position: relative;">
                 <span class="close" onclick="closeReviewFormatModal()" style="position: absolute; right: 20px; top: 20px; color: white; font-size: 28px; font-weight: bold; cursor: pointer; opacity: 0.8; transition: opacity 0.3s;">&times;</span>
-                <h2 id="reviewModalTitle" style="margin: 0; font-size: 1.8em; font-weight: 700;">📊 GTD Review</h2>
+                <h2 style="margin: 0; font-size: 1.8em; font-weight: 700;">📊 GTD Weekly Review</h2>
                 <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 14px;">Choose your preferred export formats</p>
             </div>
             <div class="modal-body" style="padding: 30px;">

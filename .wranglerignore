@@ -1,0 +1,7 @@
+models/
+node_modules/
+.wrangler/
+.git/
+.claude/
+jsons/
+lancedb/

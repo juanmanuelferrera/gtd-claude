@@ -23,123 +23,36 @@ function sanitizeInput(input) {
 
 function validateAndSanitizeTask(task) {
   if (!task || typeof task !== 'object') {
-    console.error('VALIDATION FAILED - Invalid task object:', task);
+    console.error('Invalid task object:', task);
     return null;
   }
   
-  // CRITICAL FIX: Multi-layer validation with data integrity checks
+  // Generate ID if missing
+  const taskId = task.id || `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
-  // Layer 1: Basic structure validation
-  const taskId = String(task.id || `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
-  
-  // Layer 2: ID format validation (prevent injection attacks)
-  if (typeof taskId !== 'string' || taskId.length > 100 || !/^[a-zA-Z0-9._-]+$/.test(taskId)) {
-    console.error('VALIDATION FAILED - Invalid ID format for task:', taskId, 'Type:', typeof taskId, 'Length:', taskId?.length);
-    return null;
-  }
-  
-  // Layer 3: Title validation with enhanced security
-  const originalTitle = task.title || task.text || 'Untitled Task';
-  const title = sanitizeInput(originalTitle);
+  // Ensure title exists
+  const title = sanitizeInput(task.title || 'Untitled Task');
   if (!title.trim()) {
-    console.error('VALIDATION FAILED - Empty title after sanitization for task:', taskId, 'Original title:', originalTitle);
+    console.error('Task rejected: empty title after sanitization', task);
     return null;
   }
   
-  // Layer 4: Timestamp validation (prevent time injection attacks)
-  const now = new Date().toISOString();
-  let createdAt = task.createdAt || task.created_at || now;
-  let updatedAt = task.updatedAt || task.updated_at || now;
-  
-  // Validate timestamp format
-  if (!isValidTimestamp(createdAt)) {
-    console.log('🚫 VALIDATION: Invalid createdAt timestamp for task:', taskId, 'Value:', createdAt, 'Using server time');
-    createdAt = now;
-  }
-  if (!isValidTimestamp(updatedAt)) {
-    console.log('🚫 VALIDATION: Invalid updatedAt timestamp for task:', taskId, 'Value:', updatedAt, 'Using server time');
-    updatedAt = now;
-  }
-  
-  // Layer 5: Deletion timestamp consistency validation
-  const isDeleted = Boolean(task.isDeleted || task.is_deleted || false);
-  let deletedAt = task.deletedAt || task.deleted_at || null;
-  if (isDeleted && !deletedAt) {
-    deletedAt = now; // Auto-set deletion timestamp if missing
-    console.log('🔧 VALIDATION: Auto-setting deletion timestamp for deleted task');
-  }
-  if (!isDeleted && deletedAt) {
-    deletedAt = null; // Clear deletion timestamp for non-deleted tasks
-    console.log('🔧 VALIDATION: Clearing deletion timestamp for non-deleted task');
-  }
-  
-  // Layer 6: Data fingerprinting for integrity verification
-  const validatedTask = {
+  return {
     id: String(taskId).substring(0, 50),
     title: title,
     notes: sanitizeInput(task.notes || ''),
-    images: Array.isArray(task.images) ? task.images : [],
+    images: task.images || [],
     due_date: task.dueDate !== undefined ? task.dueDate : (task.due_date !== undefined ? task.due_date : null),
     due_time: task.dueTime !== undefined ? task.dueTime : (task.due_time !== undefined ? task.due_time : null),
     status: ['pending', 'completed'].includes(task.status) ? task.status : 'pending',
     repeat_type: sanitizeInput(task.repeatType || task.repeat_type || ''),
     template: sanitizeInput(task.template || ''),
     is_event: Boolean(task.isEvent || task.is_event),
-    created_at: createdAt,
-    updated_at: updatedAt,
-    is_deleted: isDeleted,
-    deleted_at: deletedAt
+    created_at: task.createdAt || task.created_at || new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    is_deleted: Boolean(task.isDeleted || task.is_deleted || false),
+    deleted_at: task.deletedAt || task.deleted_at || null
   };
-  
-  // Layer 7: Generate data integrity fingerprint (temporarily disabled)
-  // validatedTask.data_fingerprint = generateTaskFingerprint(validatedTask);
-  
-  return validatedTask;
-}
-
-// CRITICAL FIX: Enhanced timestamp validation
-function isValidTimestamp(timestamp) {
-  if (!timestamp || typeof timestamp !== 'string') return false;
-  
-  // Check if it's a valid ISO string
-  const date = new Date(timestamp);
-  if (isNaN(date.getTime())) return false;
-  
-  // Check if timestamp is reasonable (not too far in future or past)
-  const now = Date.now();
-  const timestampMs = date.getTime();
-  const maxPastAge = 10 * 365 * 24 * 60 * 60 * 1000; // 10 years
-  const maxFutureAge = 365 * 24 * 60 * 60 * 1000; // 1 year
-  
-  if (timestampMs < now - maxPastAge || timestampMs > now + maxFutureAge) {
-    console.log('🚫 VALIDATION: Timestamp outside reasonable range:', timestamp);
-    return false;
-  }
-  
-  return true;
-}
-
-// CRITICAL FIX: Task fingerprinting for data integrity
-function generateTaskFingerprint(task) {
-  // Create a deterministic fingerprint based on core task data
-  const coreData = [
-    task.id,
-    task.title,
-    task.status,
-    task.is_deleted,
-    task.created_at,
-    task.updated_at
-  ].join('|');
-  
-  // Simple hash function (for integrity checking, not cryptographic security)
-  let hash = 0;
-  for (let i = 0; i < coreData.length; i++) {
-    const char = coreData.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  
-  return `fp_${Math.abs(hash).toString(36)}`;
 }
 
 // SECURITY: Rate limiting functions
@@ -241,49 +154,59 @@ export default {
     const url = new URL(request.url);
     const { pathname, searchParams } = url;
 
-    // SECURITY: Secure CORS configuration - only allow specific trusted origins
+    // CORS headers - Allow credentials for admin panel
     const requestOrigin = request.headers.get('Origin');
     const allowedOrigins = [
       'https://hyperfiler.pro',
       'https://www.hyperfiler.pro',
       'https://hyperfiler.pages.dev',
-      'https://gtd-claude.pages.dev',
-      'http://localhost:3000', // Development only
-      'http://localhost:8080'  // Development only
+      'https://79380aff.hyperfiler.pages.dev',
+      'https://c55ad0dd.hyperfiler.pages.dev',
+      'https://f1febe64.hyperfiler.pages.dev',
+      'https://d5c76ea9.hyperfiler.pages.dev',
+      'https://f7547841.hyperfiler.pages.dev',
+      'https://e232b938.hyperfiler.pages.dev',
+      'https://60270a80.hyperfiler.pages.dev',
+      'https://d40f4727.hyperfiler.pages.dev',
+      'https://a1691752.hyperfiler.pages.dev',
+      'https://df586f15.hyperfiler.pages.dev',
+      'https://349dea9d.hyperfiler.pages.dev',
+      'https://68a571da.hyperfiler.pages.dev',
+      'https://6f132a9b.hyperfiler.pages.dev',
+      'https://993982f1.hyperfiler.pages.dev',
+      'https://164db7fe.hyperfiler.pages.dev',
+      'https://9379631c.hyperfiler.pages.dev',
+      'https://0be8f471.hyperfiler.pages.dev',
+      'https://c15bd346.hyperfiler.pages.dev',
+      'https://hyperfiler-api.joanmanelferrera-400.workers.dev',
+      'https://hyperfiler.joanmanelferrera.workers.dev',
+      'https://hyperfiler.joanmanelferrera.com',
+      'https://gtd.joanmanelferrera.com',
+      'http://localhost:3000',
+      'http://localhost:8080'
     ];
     
-    // Support pattern matching for Cloudflare Pages URLs (8-char hash)
+    // Support wildcard matching for Cloudflare Pages URLs
     const isAllowedOrigin = allowedOrigins.includes(requestOrigin) || 
                            (requestOrigin && requestOrigin.match(/^https:\/\/[a-f0-9]{8}\.hyperfiler\.pages\.dev$/));
     
-    const corsOrigin = isAllowedOrigin ? requestOrigin : 'https://hyperfiler.pro';
+    console.log('🌐 CORS DEBUG: Request origin:', requestOrigin, 'Allowed:', isAllowedOrigin);
+    console.log('🌐 CORS DEBUG: Full allowedOrigins list:', allowedOrigins);
     
+    // CORS headers - allow all origins for now to fix the issue
     const corsHeaders = {
-      'Access-Control-Allow-Origin': corsOrigin, // SECURITY: Only specific origins
+      'Access-Control-Allow-Origin': '*', // Allow all origins temporarily
       'Access-Control-Allow-Credentials': 'true',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, Cookie, X-Requested-With, x-device-id, x-sync-version, x-session-id',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, Cookie, X-Requested-With',
       'Access-Control-Max-Age': '86400',
-      
-      // ENHANCED SECURITY HEADERS
+      // SECURITY HEADERS
       'X-Frame-Options': 'DENY',
       'X-Content-Type-Options': 'nosniff',
       'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
-      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-      'Permissions-Policy': 'geolocation=(), microphone=(), camera=(), usb=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=()',
-      
-      // Content Security Policy - strict but functional
-      'Content-Security-Policy': "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://checkout.stripe.com; " +
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-        "font-src 'self' https://fonts.gstatic.com; " +
-        "img-src 'self' data: https:; " +
-        "connect-src 'self' https://api.stripe.com https://hyperfiler-api.joanmanelferrera-400.workers.dev; " +
-        "frame-src https://js.stripe.com https://hooks.stripe.com; " +
-        "object-src 'none'; " +
-        "base-uri 'self'; " +
-        "form-action 'self'",
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+      'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
     };
 
     // Handle preflight requests
@@ -460,16 +383,6 @@ export default {
       if (pathname === '/auth/trial-status' && request.method === 'GET') {
         return handleTrialStatus(request, env, corsHeaders);
       }
-      
-      // FIXED: Direct user ID fix endpoint (no admin auth required)
-      if (pathname === '/fix-stale-user-id' && request.method === 'POST') {
-        return await handleFixStaleUserId(request, env, corsHeaders);
-      }
-      
-      // FIXED: Direct user deletion endpoint (no admin auth required)
-      if (pathname === '/direct-delete-user' && request.method === 'POST') {
-        return await handleDirectDeleteUser(request, env, corsHeaders);
-      }
 
       if (pathname === '/admin/update-database' && request.method === 'POST') {
         return requireAdminAuth(request, env, handleUpdateDatabase, corsHeaders);
@@ -486,97 +399,6 @@ export default {
         return handleTasksSyncSimple(request, env, corsHeaders);
       }
       
-
-      
-      // v2.0.7 NEW: Sync info endpoint for staleness detection
-      if (pathname.startsWith('/sync/info/') && request.method === 'GET') {
-        const userId = pathname.split('/')[3];
-        return handleSyncInfo(userId, request, env, corsHeaders);
-      }
-      
-      // Debug endpoint for admin credentials
-      if (pathname === '/debug-admin' && request.method === 'GET') {
-        return new Response(JSON.stringify({
-          hasAdminUsername: !!env.ADMIN_USERNAME,
-          hasAdminPasswordHash: !!env.ADMIN_PASSWORD_HASH,
-          adminUsernameLength: env.ADMIN_USERNAME ? env.ADMIN_USERNAME.length : 0,
-          adminPasswordHashLength: env.ADMIN_PASSWORD_HASH ? env.ADMIN_PASSWORD_HASH.length : 0,
-          availableEnvKeys: Object.keys(env).filter(key => key.includes('ADMIN'))
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      // Check v2.0.7 schema endpoint
-      if (pathname === '/check-v207-schema' && request.method === 'GET') {
-        try {
-          // Check if new columns exist
-          const schemaCheck = await env.DB.prepare(`
-            SELECT sql FROM sqlite_master 
-            WHERE type='table' AND name='user_tasks'
-          `).first();
-          
-          const columnChecks = {
-            device_id: false,
-            session_id: false,
-            sync_version: false
-          };
-          
-          if (schemaCheck?.sql) {
-            columnChecks.device_id = schemaCheck.sql.includes('device_id');
-            columnChecks.session_id = schemaCheck.sql.includes('session_id');
-            columnChecks.sync_version = schemaCheck.sql.includes('sync_version');
-          }
-          
-          // Check indexes
-          const indexCheck = await env.DB.prepare(`
-            SELECT name FROM sqlite_master 
-            WHERE type='index' AND name LIKE 'idx_user_tasks_%'
-          `).all();
-          
-          return new Response(JSON.stringify({
-            schema: schemaCheck?.sql || 'No schema found',
-            v207_columns: columnChecks,
-            v207_indexes: indexCheck.results?.map(r => r.name) || [],
-            all_columns_present: Object.values(columnChecks).every(Boolean),
-            version: '1.0'
-          }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        } catch (error) {
-          return new Response(JSON.stringify({ error: error.message }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
-      }
-
-      // Generate admin hash endpoint (for setup only)
-      if (pathname === '/generate-admin-hash' && request.method === 'POST') {
-        try {
-          const { password } = await request.json();
-          if (!password) {
-            return new Response(JSON.stringify({ error: 'Password required' }), {
-              status: 400,
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            });
-          }
-          const hash = await hashPassword(password);
-          return new Response(JSON.stringify({ 
-            password,
-            hash,
-            command: `echo "${hash}" | wrangler secret put ADMIN_PASSWORD_HASH`
-          }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        } catch (error) {
-          return new Response(JSON.stringify({ error: error.message }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
-      }
-
       // Test endpoint for debugging
       if (pathname === '/test' && request.method === 'POST') {
         try {
@@ -643,48 +465,14 @@ export default {
         }
       }
 
-      // CRITICAL FIX: Secure GET tasks endpoint with enhanced validation
       if (pathname.startsWith('/tasks/') && request.method === 'GET') {
         const userId = pathname.split('/')[2];
-        console.log('🔍 SECURE GET /tasks/{userId} endpoint hit for user:', userId);
-        console.log('🔍 Full pathname:', pathname);
-        console.log('🔍 Request method:', request.method);
-        console.log('🔍 URL:', request.url);
-        return handleGetTasksSecure(userId, request, env, corsHeaders);
+        return handleGetTasks(userId, request, env, corsHeaders);
       }
 
       if (pathname.startsWith('/tasks/') && request.method === 'DELETE') {
-        console.log('🚫 DELETE endpoint hit - returning 410:', pathname);
-        return new Response(JSON.stringify({ 
-          error: 'legacy_endpoint_disabled',
-          message: 'Individual task deletions are disabled for security. Use the secure /tasks/sync endpoint with proper tombstone protection.',
-          secure_endpoint: '/tasks/sync',
-          migration_date: '2025-01-03'
-        }), {
-          status: 410, // Gone
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-      
-      // DEBUG: Log any unmatched /tasks/ requests
-      // Tasks sync endpoint - v2.0.7 sync system (must come before catch-all)
-      if (pathname === '/tasks/sync' && request.method === 'POST') {
-        return handleTasksSyncSimple(request, env, corsHeaders);
-      }
-
-      // Catch-all for unmatched /tasks/ requests (must come after specific routes)
-      if (pathname.startsWith('/tasks/')) {
-        console.log('🔍 UNMATCHED TASKS REQUEST:', request.method, pathname);
-        console.log('🔍 Request URL:', request.url);
-        return new Response(JSON.stringify({
-          error: 'unmatched_endpoint',
-          method: request.method,
-          pathname: pathname,
-          message: 'This tasks endpoint pattern is not supported'
-        }), {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
+        const taskId = pathname.split('/')[2];
+        return handleDeleteTask(taskId, request, env, corsHeaders);
       }
 
       // Lists endpoints - Same ultra-simple pattern as tasks
@@ -708,10 +496,6 @@ export default {
       }
 
       // Admin authentication and panel
-      if (pathname === '/admin' && request.method === 'GET') {
-        // Redirect /admin to /secure-admin for better UX
-        return Response.redirect(new URL('/secure-admin', request.url).toString(), 302);
-      }
       if (pathname === '/secure-admin' && request.method === 'GET') {
         return handleSecureAdminPanel(request, env, corsHeaders);
       }
@@ -931,12 +715,6 @@ function getAuthToken(request) {
 async function verifyToken(token, jwtSecret) {
   if (!token) return null;
   
-  // SECURITY: Ensure JWT secret is configured
-  if (!jwtSecret) {
-    console.error('❌ SECURITY: JWT_SECRET not configured');
-    throw new Error('JWT configuration error');
-  }
-  
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
@@ -953,7 +731,7 @@ async function verifyToken(token, jwtSecret) {
     
     // Verify signature
     const signatureInput = `${parts[0]}.${parts[1]}`;
-    const secret = jwtSecret;
+    const secret = jwtSecret || 'default-secret-key';
     
     const key = await crypto.subtle.importKey(
       'raw',
@@ -1024,15 +802,29 @@ async function handleAuthRegister(request, env, corsHeaders) {
     
     await stmt.bind(userId, email, hashedPassword).run();
     
-    // User must purchase - no trial subscription created
+    // Create 60-day trial subscription
+    const trialEndDate = new Date();
+    trialEndDate.setDate(trialEndDate.getDate() + 60); // 60 days trial
+    
+    const subscriptionId = crypto.randomUUID();
+    const subStmt = env.DB.prepare(`
+      INSERT INTO user_subscriptions 
+      (id, user_id, user_email, plan_name, status, current_period_start, current_period_end, expiration_email_sent, created_at, updated_at)
+      VALUES (?, ?, ?, 'trial', 'active', datetime('now'), ?, 0, datetime('now'), datetime('now'))
+    `);
+    await subStmt.bind(subscriptionId, userId, email, trialEndDate.toISOString()).run();
     
     // Generate JWT token
-    const token = await generateJWT({ userId, email }, env.JWT_SECRET);
+    const token = await generateJWT({ userId, email }, env.JWT_SECRET || 'default-secret-key');
     
-    // Send welcome email with credentials  
-    const emailHtml = await generateWelcomeEmailHTML(
+    // Send welcome email with credentials
+    const emailHtml = await generatePromoEmailHTML(
       email, 
-      tempPassword,
+      tempPassword, 
+      'TRIAL', 
+      60, 
+      trialEndDate.toLocaleDateString(),
+      null, // No stripe customer ID for trial accounts
       env
     );
     
@@ -1044,9 +836,10 @@ async function handleAuthRegister(request, env, corsHeaders) {
     );
 
     return new Response(JSON.stringify({ 
-      message: 'User created successfully - purchase required',
+      message: 'User created successfully with 60-day trial',
       user: { id: userId, email },
       token,
+      trialEnd: trialEndDate.toISOString(),
       password: tempPassword, // Return password for immediate use
       email_sent: emailResult.success
     }), {
@@ -1129,7 +922,7 @@ async function handleAuthLogin(request, env, corsHeaders) {
     
     // Generate JWT token
     console.log('🔐 Generating JWT token...');
-    const token = await generateJWT({ userId: user.id, email: user.email }, env.JWT_SECRET);
+    const token = await generateJWT({ userId: user.id, email: user.email }, env.JWT_SECRET || 'default-secret-key');
     console.log('✅ Token generated successfully');
     
     // SECURITY: Determine correct domain for cookie
@@ -1187,7 +980,7 @@ async function handleAuthMe(request, env, corsHeaders) {
     const token = getAuthToken(request);
     console.log('🔍 Token extracted:', !!token);
     
-    const payload = await verifyToken(token, env.JWT_SECRET);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
     console.log('🔍 Token payload:', payload ? 'valid' : 'invalid');
     
     if (!payload) {
@@ -1229,14 +1022,11 @@ async function handleAuthMe(request, env, corsHeaders) {
       
       trialStatus = {
         isActive: subscription.status === 'active',
-        userType: subscription.user_type || 'trial', // New simplified user type
-        isTrial: subscription.user_type === 'trial',
-        isPaid: subscription.user_type === 'paid',
-        isCoupon: subscription.user_type === 'coupon',
+        isTrial: subscription.plan_name === 'trial',
         isExpired: trialEnd < now,
         daysLeft: daysLeft > 0 ? daysLeft : 0,
         trialEnd: subscription.current_period_end,
-        hasPaid: subscription.user_type === 'paid' || subscription.user_type === 'coupon' // Both paid and coupon users have access
+        hasPaid: subscription.plan_name === 'pro' // All Pro users (Stripe customers + promo code users) are considered paid
       };
     }
     
@@ -1369,7 +1159,7 @@ async function handleTasksSyncSimple_DISABLED(request, env, corsHeaders) {
   /* DANGEROUS CODE REMOVED - was:
   try {
     const token = getAuthToken(request);
-    const payload = await verifyToken(token, env.JWT_SECRET);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
     
     if (!payload) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -1519,7 +1309,7 @@ async function handleTasksSyncSimple_DISABLED(request, env, corsHeaders) {
 async function handleTasksSync(request, env, corsHeaders) {
   try {
     const token = getAuthToken(request);
-    const payload = await verifyToken(token, env.JWT_SECRET);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
     
     if (!payload) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -1617,74 +1407,12 @@ async function handleTasksSync(request, env, corsHeaders) {
   }
 }
 
-// ===== v2.0.7 NEW: SYNC INFO ENDPOINT =====
-async function handleSyncInfo(userId, request, env, corsHeaders) {
-  try {
-    const token = getAuthToken(request);
-    const payload = await verifyToken(token, env.JWT_SECRET);
-    
-    if (!payload || payload.userId !== userId) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    console.log('🔍 SYNC INFO v2.0.7: Getting sync info for user:', userId);
-    
-    // Get the most recent task timestamp from server
-    const latestStmt = env.DB.prepare('SELECT MAX(updated_at) as latest_update FROM user_tasks WHERE user_id = ?');
-    const latestResult = await latestStmt.bind(userId).first();
-    const latestTimestamp = latestResult?.latest_update;
-    
-    // Get total task count
-    const countStmt = env.DB.prepare('SELECT COUNT(*) as count FROM user_tasks WHERE user_id = ? AND COALESCE(is_deleted, 0) = 0');
-    const countResult = await countStmt.bind(userId).first();
-    const taskCount = countResult?.count || 0;
-    
-    // Get device/session statistics if available
-    let deviceStats = {};
-    try {
-      const deviceStmt = env.DB.prepare(`
-        SELECT device_id, COUNT(*) as task_count, MAX(updated_at) as last_sync 
-        FROM user_tasks 
-        WHERE user_id = ? AND device_id IS NOT NULL 
-        GROUP BY device_id
-      `);
-      const deviceResult = await deviceStmt.bind(userId).all();
-      deviceStats = deviceResult.results || [];
-    } catch (error) {
-      console.log('⚠️ Device stats not available (columns may not exist yet)');
-    }
-
-    return new Response(JSON.stringify({
-      latestTimestamp,
-      taskCount,
-      serverTime: new Date().toISOString(),
-      syncVersion: '1.0',
-      deviceStats
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
-
-  } catch (error) {
-    console.error('❌ Sync info error:', error);
-    return new Response(JSON.stringify({ 
-      error: 'Internal server error',
-      details: error.message 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
-  }
-}
-
-// ===== TASKS SYNC FUNCTIONS (Enhanced v2.0.7) =====
+// ===== TASKS SYNC FUNCTIONS (Simple Lists pattern) =====
 
 async function handleTasksSyncSimple(request, env, corsHeaders) {
   try {
     const token = getAuthToken(request);
-    const payload = await verifyToken(token, env.JWT_SECRET);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
     
     if (!payload) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -1694,21 +1422,11 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
     }
 
     const requestBody = await request.json();
-    console.log('🔍 DEBUG v2.0.7: Request body keys:', Object.keys(requestBody));
-    console.log('🔍 DEBUG v2.0.7: Tasks type:', typeof requestBody.tasks);
-    console.log('🔍 DEBUG v2.0.7: Tasks length:', requestBody.tasks?.length);
+    console.log('🔍 DEBUG: Request body keys:', Object.keys(requestBody));
+    console.log('🔍 DEBUG: Tasks type:', typeof requestBody.tasks);
+    console.log('🔍 DEBUG: Tasks length:', requestBody.tasks?.length);
     
-    const { userId, tasks, syncVersion, deviceId, sessionId, timestamp } = requestBody;
-    
-    // v2.0.7 NEW: Extract sync headers for enhanced tracking
-    const syncHeaders = {
-      syncVersion: request.headers.get('X-Sync-Version') || syncVersion || '1.0',
-      deviceId: request.headers.get('X-Device-Id') || deviceId,
-      sessionId: request.headers.get('X-Session-Id') || sessionId,
-      clientTimestamp: timestamp
-    };
-    
-    console.log('🔍 SYNC v2.0.7: Enhanced sync request:', syncHeaders);
+    const { userId, tasks } = requestBody;
     
     if (!tasks || !Array.isArray(tasks)) {
       console.error('❌ Invalid tasks data:', { tasks: typeof tasks, isArray: Array.isArray(tasks) });
@@ -1728,168 +1446,13 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
 
     const actualUserId = payload.userId;
     
-    // v2.0.7 ENHANCED SYNC with staleness detection and device tracking
-    console.log('🔄 SYNC v2.0.7: Enhanced sync for user:', actualUserId, 'Client tasks:', tasks.length);
+    // MERGE SYNC: Always allow merges - timestamp protection disabled for proper merging
+    console.log('🔄 MERGE SYNC: Allowing merge for user:', actualUserId, 'Client tasks:', tasks.length);
     
-    // Get the most recent server task timestamp for staleness detection
+    // Get the most recent server task timestamp (for logging only)
     const serverStmt = env.DB.prepare('SELECT MAX(updated_at) as latest_update FROM user_tasks WHERE user_id = ?');
     const serverResult = await serverStmt.bind(actualUserId).first();
     const serverLatestUpdate = serverResult?.latest_update;
-    
-    // CRITICAL FIX: Get existing tasks early for protection checks
-    const existingStmt = env.DB.prepare('SELECT * FROM user_tasks WHERE user_id = ?');
-    const existingResult = await existingStmt.bind(actualUserId).all();
-    const existingTasks = existingResult.results || [];
-    console.log('📊 Existing server tasks (for protection):', existingTasks.length);
-    
-    // CRITICAL FIX: Multi-layer server-side staleness detection
-    if (tasks.length > 0) {
-      const serverTime = new Date(serverLatestUpdate || new Date()).getTime();
-      const currentServerTime = Date.now(); // Use server's actual time, not client time
-      
-      // Layer 1: Client timestamp staleness check
-      const clientTimes = tasks.map(t => new Date(t.updatedAt || t.created_at || 0).getTime());
-      const clientOldestTime = Math.min(...clientTimes);
-      const clientLatestTime = Math.max(...clientTimes);
-      
-      const staleAgeMs = 7 * 24 * 60 * 60 * 1000; // 7 days
-      const criticalStaleAgeMs = 30 * 24 * 60 * 60 * 1000; // 30 days (absolute rejection)
-      
-      // CRITICAL: Reject extremely old uploads (3+ months scenario)
-      if (clientLatestTime < currentServerTime - criticalStaleAgeMs) {
-        console.log('🚫 CRITICAL STALENESS: Rejecting extremely old upload');
-        console.log('🚫 Client latest:', new Date(clientLatestTime).toISOString());
-        console.log('🚫 Server time:', new Date(currentServerTime).toISOString());
-        console.log('🚫 Age difference:', Math.round((currentServerTime - clientLatestTime) / (1000 * 60 * 60 * 24)), 'days');
-        
-        return new Response(JSON.stringify({
-          error: 'extremely_stale_data',
-          message: 'Client data is extremely old (30+ days). This upload is rejected to prevent data corruption.',
-          serverTime: new Date(currentServerTime).toISOString(),
-          clientLatest: new Date(clientLatestTime).toISOString(),
-          ageDifferenceHours: Math.round((currentServerTime - clientLatestTime) / (1000 * 60 * 60)),
-          ageDifferenceDays: Math.round((currentServerTime - clientLatestTime) / (1000 * 60 * 60 * 24))
-        }), {
-          status: 409, // Conflict
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-      
-      // Layer 2: Standard staleness check (if server has data)
-      if (serverLatestUpdate && clientLatestTime < serverTime - staleAgeMs) {
-        console.log('🚫 STALENESS: Rejecting stale upload - client data too old compared to server');
-        console.log('🚫 Client latest:', new Date(clientLatestTime).toISOString());
-        console.log('🚫 Server latest:', serverLatestUpdate);
-        console.log('🚫 Age difference:', Math.round((serverTime - clientLatestTime) / (1000 * 60 * 60)), 'hours');
-        
-        return new Response(JSON.stringify({
-          error: 'stale_data',
-          message: 'Client data is too old compared to server data. Please refresh to get latest data.',
-          serverLatest: serverLatestUpdate,
-          clientLatest: new Date(clientLatestTime).toISOString(),
-          ageDifferenceHours: Math.round((serverTime - clientLatestTime) / (1000 * 60 * 60))
-        }), {
-          status: 409, // Conflict
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-      
-
-      
-      // CRITICAL FIX: Layer 2.2 - Data clearing protection (only for significant data loss)
-      // Only block if server has significant data and client uploads empty
-      if (serverLatestUpdate && tasks.length === 0 && existingTasks.length > 5) {
-        console.log('🚫 DATA CLEARING PROTECTION: Rejecting empty upload when server has significant data');
-        console.log('🚫 Server has', existingTasks.length, 'tasks but client is trying to clear them');
-        
-        return new Response(JSON.stringify({
-          error: 'data_clearing_blocked',
-          message: 'Uploading empty state when server has significant data is blocked. This may indicate a stale browser trying to clear fresh data.',
-          serverState: 'has_data',
-          clientState: 'empty',
-          protection: 'data_clearing_protection',
-          serverTaskCount: existingTasks.length
-        }), {
-          status: 409, // Conflict
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-      
-      // Layer 2.5: CRITICAL - Bulk staleness detection (check percentage of stale tasks)
-      const staleTasks = clientTimes.filter(time => (currentServerTime - time) > staleAgeMs);
-      const stalePercentage = (staleTasks.length / clientTimes.length) * 100;
-      
-      // If more than 30% of tasks are stale, reject the upload
-      if (stalePercentage > 30) {
-        console.log('🚫 BULK STALENESS: Rejecting upload with too many stale tasks');
-        console.log('🚫 Stale percentage:', stalePercentage.toFixed(1) + '%');
-        console.log('🚫 Stale tasks:', staleTasks.length, 'out of', clientTimes.length);
-        console.log('🚫 Client oldest:', new Date(clientOldestTime).toISOString());
-        console.log('🚫 Client latest:', new Date(clientLatestTime).toISOString());
-        
-        return new Response(JSON.stringify({
-          error: 'bulk_stale_data',
-          message: 'Upload contains too many stale tasks. This may indicate a stale browser trying to overwrite fresh data.',
-          serverLatest: serverLatestUpdate,
-          clientLatest: new Date(clientLatestTime).toISOString(),
-          clientOldest: new Date(clientOldestTime).toISOString(),
-          stalePercentage: stalePercentage,
-          staleTaskCount: staleTasks.length,
-          totalTaskCount: clientTimes.length
-        }), {
-          status: 409, // Conflict
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-      
-      // Layer 3: Clock skew protection (detect clients with wrong system time)
-      const futureThreshold = 2 * 60 * 60 * 1000; // 2 hours in future
-      if (clientLatestTime > currentServerTime + futureThreshold) {
-        console.log('🚫 CLOCK SKEW: Rejecting upload with future timestamps');
-        console.log('🚫 Client latest:', new Date(clientLatestTime).toISOString());
-        console.log('🚫 Server time:', new Date(currentServerTime).toISOString());
-        
-        return new Response(JSON.stringify({
-          error: 'clock_skew',
-          message: 'Client time appears to be significantly ahead of server time. Please check your system clock.',
-          serverTime: new Date(currentServerTime).toISOString(),
-          clientLatest: new Date(clientLatestTime).toISOString()
-        }), {
-          status: 409, // Conflict
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-      
-      // Layer 4: Deleted task resurrection protection
-      let deletedTaskCount = 0;
-      let oldDeletedTaskCount = 0;
-      
-      tasks.forEach(task => {
-        if (task.isDeleted || task.is_deleted) {
-          deletedTaskCount++;
-          const deleteTime = new Date(task.deletedAt || task.updated_at || 0).getTime();
-          if (deleteTime < currentServerTime - staleAgeMs) {
-            oldDeletedTaskCount++;
-          }
-        }
-      });
-      
-      // Suspicious: Too many old deleted tasks being uploaded
-      if (oldDeletedTaskCount > 5) {
-        console.log('🚫 RESURRECTION PROTECTION: Too many old deleted tasks detected');
-        console.log('🚫 Old deleted tasks:', oldDeletedTaskCount, 'Total deleted:', deletedTaskCount);
-        
-        return new Response(JSON.stringify({
-          error: 'deleted_task_resurrection',
-          message: 'Upload contains too many old deleted tasks. This may indicate a stale browser trying to resurrect deleted data.',
-          oldDeletedTasks: oldDeletedTaskCount,
-          totalDeletedTasks: deletedTaskCount
-        }), {
-          status: 409, // Conflict
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-    }
     
     // Get the most recent client task timestamp (for logging only)
     const clientLatestUpdate = tasks.length > 0 ? 
@@ -1901,48 +1464,13 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
     console.log('📊 Client task count:', tasks.length);
     console.log('🔄 MERGE MODE: Allowing all uploads for proper task merging');
     
-    // v2.0.7 ENHANCED: Request deduplication to prevent infinite loops
-    const requestFingerprint = `${actualUserId}:${tasks.length}:${clientLatestDate}:${syncHeaders.deviceId}`;
-    const recentRequestKey = `recent_sync:${requestFingerprint}`;
-    
-    // Check if we've seen this exact request very recently (within 5 seconds)
-    if (env.syncRequestCache && env.syncRequestCache.has(recentRequestKey)) {
-      const lastRequestTime = env.syncRequestCache.get(recentRequestKey);
-      const timeSinceLastRequest = Date.now() - lastRequestTime;
-      
-      if (timeSinceLastRequest < 5000) {
-        console.log('🚫 DEDUP: Ignoring duplicate sync request within 5 seconds');
-        return new Response(JSON.stringify({
-          success: true,
-          message: 'Duplicate request ignored',
-          synced: 0,
-          deduplicated: true
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-    }
-    
-    // Record this request
-    if (!env.syncRequestCache) {
-      env.syncRequestCache = new Map();
-    }
-    env.syncRequestCache.set(recentRequestKey, Date.now());
-    
-    // Clean up old entries (keep only last 100)
-    if (env.syncRequestCache.size > 100) {
-      const entries = Array.from(env.syncRequestCache.entries());
-      entries.sort((a, b) => b[1] - a[1]); // Sort by timestamp desc
-      env.syncRequestCache.clear();
-      entries.slice(0, 50).forEach(([key, value]) => {
-        env.syncRequestCache.set(key, value);
-      });
-    }
-    
     // MERGE SYNC: Combine client tasks with existing server tasks
     console.log('🔄 MERGE SYNC: Combining tasks for user:', actualUserId, 'Client tasks:', tasks.length);
     
-    // Use existing tasks from earlier query (INCLUDING deleted ones for proper merge)
+    // Get existing server tasks (INCLUDING deleted ones for proper merge)
+    const existingStmt = env.DB.prepare('SELECT * FROM user_tasks WHERE user_id = ?');
+    const existingResult = await existingStmt.bind(actualUserId).all();
+    const existingTasks = existingResult.results || [];
     console.log('📊 Existing server tasks (including deleted):', existingTasks.length);
     
     // Count deleted tasks for debugging
@@ -1961,181 +1489,106 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
       serverTaskMap.set(task.id, task);
     });
     
-    // FIXED: Enhanced merge strategy with proper tombstone priority
+    // Merge strategy: Keep the most recently updated version of each task
     const mergedTasks = new Map();
     
-    // Get all unique task IDs from both client and server
-    const allTaskIds = new Set([...clientTaskMap.keys(), ...serverTaskMap.keys()]);
-    
-    allTaskIds.forEach(taskId => {
-      const clientTask = clientTaskMap.get(taskId);
-      const serverTask = serverTaskMap.get(taskId);
-      
-      if (clientTask && serverTask) {
-        // CONFLICT: Both client and server have this task
-        
-        // PRIORITY 1: Tombstones always win
-        if (clientTask.isDeleted && !serverTask.is_deleted) {
-          console.log('🪦 MERGE: Client deletion wins over server task:', taskId);
-          mergedTasks.set(taskId, clientTask);
-        } else if (serverTask.is_deleted && !clientTask.isDeleted) {
-          console.log('🪦 MERGE: Server deletion wins over client task:', taskId);
-          mergedTasks.set(taskId, {
-            id: serverTask.id,
-            title: serverTask.title,
-            notes: serverTask.notes,
-            images: serverTask.images ? JSON.parse(serverTask.images) : [],
-            dueDate: serverTask.due_date,
-            dueTime: serverTask.due_time,
-            status: serverTask.status,
-            repeatType: serverTask.repeat_type,
-            template: serverTask.template,
-            isEvent: Boolean(serverTask.is_event),
-            createdAt: serverTask.created_at,
-            updatedAt: serverTask.updated_at,
-            isDeleted: Boolean(serverTask.is_deleted),
-            deletedAt: serverTask.deleted_at
-          });
-        } else if (clientTask.isDeleted && serverTask.is_deleted) {
-          // Both are deleted - keep the most recent deletion
-          const clientDeleteTime = new Date(clientTask.deletedAt || clientTask.updatedAt || 0).getTime();
-          const serverDeleteTime = new Date(serverTask.deleted_at || serverTask.updated_at || 0).getTime();
-          
-          if (clientDeleteTime >= serverDeleteTime) {
-            console.log('🪦 MERGE: Both deleted, client deletion is newer:', taskId);
-            mergedTasks.set(taskId, clientTask);
-          } else {
-            console.log('🪦 MERGE: Both deleted, server deletion is newer:', taskId);
-            mergedTasks.set(taskId, {
-              id: serverTask.id,
-              title: serverTask.title,
-              notes: serverTask.notes,
-              images: serverTask.images ? JSON.parse(serverTask.images) : [],
-              dueDate: serverTask.due_date,
-              dueTime: serverTask.due_time,
-              status: serverTask.status,
-              repeatType: serverTask.repeat_type,
-              template: serverTask.template,
-              isEvent: Boolean(serverTask.is_event),
-              createdAt: serverTask.created_at,
-              updatedAt: serverTask.updated_at,
-              isDeleted: Boolean(serverTask.is_deleted),
-              deletedAt: serverTask.deleted_at
-            });
-          }
-        }
-        // PRIORITY 2: Most recent timestamp wins
-        else {
-          const clientTime = new Date(clientTask.updatedAt || clientTask.createdAt || 0).getTime();
-          const serverTime = new Date(serverTask.updated_at || serverTask.created_at || 0).getTime();
-          
-          if (clientTime >= serverTime) {
-            console.log('🕐 MERGE: Client task is newer or equal:', taskId);
-            mergedTasks.set(taskId, clientTask);
-          } else {
-            console.log('🕐 MERGE: Server task is newer:', taskId);
-            mergedTasks.set(taskId, {
-              id: serverTask.id,
-              title: serverTask.title,
-              notes: serverTask.notes,
-              images: serverTask.images ? JSON.parse(serverTask.images) : [],
-              dueDate: serverTask.due_date,
-              dueTime: serverTask.due_time,
-              status: serverTask.status,
-              repeatType: serverTask.repeat_type,
-              template: serverTask.template,
-              isEvent: Boolean(serverTask.is_event),
-              createdAt: serverTask.created_at,
-              updatedAt: serverTask.updated_at,
-              isDeleted: Boolean(serverTask.is_deleted),
-              deletedAt: serverTask.deleted_at
-            });
-          }
-        }
-      } else if (clientTask) {
-        // Only client has this task
-        console.log('📤 MERGE: Client-only task:', taskId);
-        mergedTasks.set(taskId, clientTask);
-      } else if (serverTask) {
-        // Only server has this task
-        console.log('📥 MERGE: Server-only task:', taskId);
-        mergedTasks.set(taskId, {
-            id: serverTask.id,
-            title: serverTask.title,
-            notes: serverTask.notes,
-            images: serverTask.images ? JSON.parse(serverTask.images) : [],
-            dueDate: serverTask.due_date,
-            dueTime: serverTask.due_time,
-            status: serverTask.status,
-            repeatType: serverTask.repeat_type,
-            template: serverTask.template,
-            isEvent: Boolean(serverTask.is_event),
-            createdAt: serverTask.created_at,
-            updatedAt: serverTask.updated_at,
-            isDeleted: Boolean(serverTask.is_deleted),
-            deletedAt: serverTask.deleted_at
-          });
-      }
+    // Add all client tasks
+    clientTaskMap.forEach((clientTask, taskId) => {
+      mergedTasks.set(taskId, clientTask);
     });
     
-    // Enhanced merge strategy completed above - now prepare for database operations
-    
-    // CRITICAL FIX: Check against permanent tombstone database
-    console.log('🪦 TOMBSTONE CHECK: Validating against permanent deletion records');
-    
-    try {
-      // Get all tombstones for this user
-      const tombstoneStmt = env.DB.prepare('SELECT task_id, deleted_at FROM user_task_tombstones WHERE user_id = ?');
-      const tombstoneResult = await tombstoneStmt.bind(actualUserId).all();
-      const tombstones = new Set((tombstoneResult.results || []).map(t => t.task_id));
+    // Add server tasks that don't exist in client (or are older)
+    serverTaskMap.forEach((serverTask, taskId) => {
+      const clientTask = clientTaskMap.get(taskId);
       
-      console.log('🪦 Found', tombstones.size, 'permanent tombstones for user');
-      
-      // Filter out any tasks that are permanently tombstoned
-      const preFilterCount = Array.from(mergedTasks.values()).length;
-      const resurrectedTasks = [];
-      
-      for (const [taskId, task] of mergedTasks.entries()) {
-        if (tombstones.has(taskId) && !task.isDeleted) {
-          console.log('🚫 RESURRECTION BLOCKED: Task', taskId, 'is permanently deleted');
-          resurrectedTasks.push({
-            id: taskId,
-            title: task.title,
-            attempted_resurrection: true
-          });
-          mergedTasks.delete(taskId); // Remove from merge
-        }
-      }
-      
-      if (resurrectedTasks.length > 0) {
-        console.log('🚫 BLOCKED', resurrectedTasks.length, 'resurrection attempts');
+      if (!clientTask) {
+        // Server task doesn't exist in client - this means it was deleted by client
+        // DO NOT resurrect deleted tasks - skip this task entirely
+        console.log('💀 Skipping server task that was deleted by client:', taskId);
+        // Don't add this task to merged results - it was deleted by client
+      } else {
+        // Both exist - handle deletion logic
+        const clientTime = new Date(clientTask.updatedAt || clientTask.updated_at || 0).getTime();
+        const serverTime = new Date(serverTask.updated_at || 0).getTime();
+        const clientDeleted = Boolean(clientTask.isDeleted || clientTask.is_deleted);
+        const serverDeleted = Boolean(serverTask.is_deleted);
         
-        // If many resurrections attempted, this is likely a stale browser
-        if (resurrectedTasks.length > 3) {
-          return new Response(JSON.stringify({
-            error: 'mass_resurrection_blocked',
-            message: 'Multiple deleted tasks attempted resurrection. This appears to be a stale browser upload.',
-            blockedTasks: resurrectedTasks.length,
-            details: resurrectedTasks.slice(0, 5) // Show first 5
-          }), {
-            status: 409,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
+        // DELETION PRIORITY: If either version is deleted, keep the most recent deletion
+        if (clientDeleted || serverDeleted) {
+          if (clientDeleted && serverDeleted) {
+            // Both deleted - keep the most recent deletion
+            if (clientTime > serverTime) {
+              // Keep client version (already set above)
+              console.log('💀 Both deleted, keeping client version (newer):', taskId);
+            } else {
+              // Keep server version
+              mergedTasks.set(taskId, {
+                id: serverTask.id,
+                title: serverTask.title,
+                notes: serverTask.notes,
+                images: serverTask.images ? JSON.parse(serverTask.images) : [],
+                dueDate: serverTask.due_date,
+                dueTime: serverTask.due_time,
+                status: serverTask.status,
+                repeatType: serverTask.repeat_type,
+                template: serverTask.template,
+                isEvent: Boolean(serverTask.is_event),
+                createdAt: serverTask.created_at,
+                updatedAt: serverTask.updated_at,
+                isDeleted: true,
+                deletedAt: serverTask.deleted_at
+              });
+              console.log('💀 Both deleted, keeping server version (newer):', taskId);
+            }
+          } else if (clientDeleted) {
+            // Only client deleted - keep client version (already set above)
+            console.log('💀 Client deleted, keeping client version:', taskId);
+          } else {
+            // Only server deleted - keep server version
+            mergedTasks.set(taskId, {
+              id: serverTask.id,
+              title: serverTask.title,
+              notes: serverTask.notes,
+              images: serverTask.images ? JSON.parse(serverTask.images) : [],
+              dueDate: serverTask.due_date,
+              dueTime: serverTask.due_time,
+              status: serverTask.status,
+              repeatType: serverTask.repeat_type,
+              template: serverTask.template,
+              isEvent: Boolean(serverTask.is_event),
+              createdAt: serverTask.created_at,
+              updatedAt: serverTask.updated_at,
+              isDeleted: true,
+              deletedAt: serverTask.deleted_at
+            });
+            console.log('💀 Server deleted, keeping server version:', taskId);
+          }
+        } else {
+          // Neither deleted - keep the most recently updated one
+          if (serverTime > clientTime) {
+            // Server version is newer
+            mergedTasks.set(taskId, {
+              id: serverTask.id,
+              title: serverTask.title,
+              notes: serverTask.notes,
+              images: serverTask.images ? JSON.parse(serverTask.images) : [],
+              dueDate: serverTask.due_date,
+              dueTime: serverTask.due_time,
+              status: serverTask.status,
+              repeatType: serverTask.repeat_type,
+              template: serverTask.template,
+              isEvent: Boolean(serverTask.is_event),
+              createdAt: serverTask.created_at,
+              updatedAt: serverTask.updated_at,
+              isDeleted: false,
+              deletedAt: null
+            });
+            console.log('📝 Server version newer, keeping server version:', taskId);
+          }
+          // Otherwise keep client version (already set above)
         }
       }
-      
-      console.log('🪦 TOMBSTONE PROTECTION: Filtered', preFilterCount, '→', mergedTasks.size, 'tasks');
-    } catch (tombstoneError) {
-      console.log('🚫 CRITICAL: Tombstone protection table missing - rejecting upload for security');
-      return new Response(JSON.stringify({
-        error: 'tombstone_protection_missing',
-        message: 'Tombstone protection system is not available. Please contact support.',
-        details: 'This prevents deleted task resurrection attacks.'
-      }), {
-        status: 503, // Service Unavailable
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
+    });
     
     console.log('🔄 Merged tasks count:', mergedTasks.size);
     
@@ -2158,258 +1611,52 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
       .bind(actualUserId)
       .run();
     
-    // v2.0.7 ENHANCED: Try to use new columns, fallback if they don't exist
-    let stmt;
-    let useEnhancedColumns = false;
-    
-    try {
-      // Try enhanced v2.0.7 schema with device/session tracking and fingerprinting
-      stmt = env.DB.prepare(`
-        INSERT OR REPLACE INTO user_tasks 
-        (id, user_id, title, notes, images, due_date, due_time, status, repeat_type, template, 
-         is_event, created_at, updated_at, is_deleted, deleted_at, device_id, session_id, sync_version)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-      useEnhancedColumns = true;
-      console.log('✅ SYNC v2.0.7: Using enhanced schema with device tracking');
-    } catch (error) {
-      // Fallback to v2.0.6 schema
-      stmt = env.DB.prepare(`
-        INSERT OR REPLACE INTO user_tasks 
-        (id, user_id, title, notes, images, due_date, due_time, status, repeat_type, template, 
-         is_event, created_at, updated_at, is_deleted, deleted_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-      console.log('⚠️ SYNC v2.0.7: Using legacy schema (device tracking columns not available)');
-    }
-    
-    // v2.0.7 ENHANCED: Validate all tasks before insertion to prevent corruption
-    console.log('🔍 VALIDATION: Validating', mergedTasks.size, 'merged tasks before insertion');
-    const validatedTasks = [];
-    let validationErrors = [];
+    // Insert all merged tasks
+    const stmt = env.DB.prepare(`
+      INSERT OR REPLACE INTO user_tasks 
+      (id, user_id, title, notes, images, due_date, due_time, status, repeat_type, template, 
+       is_event, created_at, updated_at, is_deleted, deleted_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
     
     for (const task of mergedTasks.values()) {
-      const validatedTask = validateAndSanitizeTask(task);
-      if (validatedTask) {
-        // CRITICAL FIX: Additional fingerprint verification (temporarily disabled)
-        // const expectedFingerprint = generateTaskFingerprint(validatedTask);
-        // if (validatedTask.data_fingerprint && validatedTask.data_fingerprint !== expectedFingerprint) {
-        //   console.error('🚫 FINGERPRINT MISMATCH: Task data may be corrupted:', validatedTask.id);
-        //   console.error('🚫 Expected:', expectedFingerprint, 'Got:', validatedTask.data_fingerprint);
-        //   validationErrors.push(validatedTask.id);
-        //   continue;
-        // }
+      try {
+        console.log('🔍 DEBUG: Processing merged task:', task.id, task.title?.substring(0, 50));
         
-        // Update fingerprint to current calculation (temporarily disabled)
-        // validatedTask.data_fingerprint = expectedFingerprint;
-        
-        validatedTasks.push(validatedTask);
-        console.log('✅ VALIDATION: Task passed with fingerprint verification:', validatedTask.id);
-      } else {
-        validationErrors.push(task.id);
-        console.error('❌ VALIDATION: Task failed:', task.id, task.title?.substring(0, 30));
-      }
-    }
-    
-    // Fail early if any tasks are invalid
-    if (validationErrors.length > 0) {
-      console.error('❌ VALIDATION: Failed tasks:', validationErrors);
-      return new Response(JSON.stringify({
-        error: 'validation_failed',
-        message: `${validationErrors.length} tasks failed validation`,
-        invalidTasks: validationErrors
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-    
-    console.log('✅ VALIDATION: All', validatedTasks.length, 'tasks passed validation');
-    
-    // v2.0.7 ENHANCED: Backup existing data before making changes (for rollback protection)
-    const backupStmt = env.DB.prepare('SELECT * FROM user_tasks WHERE user_id = ?');
-    const backupResult = await backupStmt.bind(actualUserId).all();
-    const backupTasks = backupResult.results || [];
-    console.log('💾 BACKUP: Backed up', backupTasks.length, 'existing tasks for rollback protection');
-    
-    try {
-      // Insert validated tasks
-      for (const task of validatedTasks) {
-        try {
-          console.log('🔍 DEBUG: Processing validated task:', task.id, task.title?.substring(0, 50));
-          
-          if (useEnhancedColumns) {
-          // v2.0.7 Enhanced binding with device/session tracking and fingerprinting
-          await stmt.bind(
-            task.id,
-            actualUserId,
-            task.title || '',
-            task.notes || '',
-            task.images ? JSON.stringify(task.images) : '[]',
-            task.dueDate || task.due_date || null,
-            task.dueTime || task.due_time || null,
-            task.status || 'pending',
-            task.repeat || task.repeat_type || null,
-            task.template || null,
-            task.isEvent || task.is_event ? 1 : 0,
-            task.createdAt || task.created_at || new Date().toISOString(),
-            task.updatedAt || task.updated_at || new Date().toISOString(),
-            task.isDeleted || task.is_deleted ? 1 : 0,
-            task.deletedAt || task.deleted_at || null,
-            task.deviceId || syncHeaders.deviceId || null,
-            task.sessionId || syncHeaders.sessionId || null,
-            task.syncVersion || syncHeaders.syncVersion || '1.0'
-          ).run();
-        } else {
-          // Legacy v2.0.6 binding
-          await stmt.bind(
-            task.id,
-            actualUserId,
-            task.title || '',
-            task.notes || '',
-            task.images ? JSON.stringify(task.images) : '[]',
-            task.dueDate || task.due_date || null,
-            task.dueTime || task.due_time || null,
-            task.status || 'pending',
-            task.repeat || task.repeat_type || null,
-            task.template || null,
-            task.isEvent || task.is_event ? 1 : 0,
-            task.createdAt || task.created_at || new Date().toISOString(),
-            task.updatedAt || task.updated_at || new Date().toISOString(),
-            task.isDeleted || task.is_deleted ? 1 : 0,
-            task.deletedAt || task.deleted_at || null
-          ).run();
-        }
+        await stmt.bind(
+          task.id,
+          actualUserId,
+          task.title || '',
+          task.notes || '',
+          task.images ? JSON.stringify(task.images) : '[]',
+          task.dueDate || task.due_date || null,
+          task.dueTime || task.due_time || null,
+          task.status || 'pending',
+          task.repeat || task.repeat_type || null,
+          task.template || null,
+          task.isEvent || task.is_event ? 1 : 0,
+          task.createdAt || task.created_at || new Date().toISOString(),
+          task.updatedAt || task.updated_at || new Date().toISOString(),
+          task.isDeleted || task.is_deleted ? 1 : 0,
+          task.deletedAt || task.deleted_at || null
+        ).run();
         console.log('✅ DEBUG: Merged task inserted successfully:', task.id);
-        
-        // CRITICAL FIX: Create tombstone for newly deleted tasks
-        if ((task.isDeleted || task.is_deleted) && task.deletedAt) {
-          try {
-            const tombstoneStmt = env.DB.prepare(`
-              INSERT OR REPLACE INTO user_task_tombstones 
-              (id, user_id, task_id, task_title, deleted_at, deleted_by_device, deleted_by_session, created_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            `);
-            
-            await tombstoneStmt.bind(
-              `tomb_${task.id}`,
-              actualUserId,
-              task.id,
-              task.title || '',
-              task.deletedAt || task.updated_at,
-              task.deviceId || syncHeaders.deviceId || 'unknown',
-              task.sessionId || syncHeaders.sessionId || 'unknown',
-              new Date().toISOString()
-            ).run();
-            
-            console.log('🪦 TOMBSTONE CREATED: Permanent deletion record for', task.id);
-          } catch (tombstoneError) {
-            console.log('⚠️ TOMBSTONE CREATION: Failed to create tombstone (table may not exist):', tombstoneError.message);
-          }
-        }
-        
       } catch (taskError) {
         console.error('❌ Error inserting merged task:', task.id, 'Error:', taskError.message);
         console.error('❌ Task data that failed:', JSON.stringify(task, null, 2));
         throw taskError;
       }
     }
-    
-    console.log('✅ INSERTION: All', validatedTasks.length, 'validated tasks inserted successfully');
-    
+
     return new Response(JSON.stringify({ 
       success: true, 
-      synced: validatedTasks.length,
+      synced: mergedTasks.size,
       clientTasks: tasks.length,
       serverTasks: existingTasks.length,
-      mergedTasks: validatedTasks.length,
-      validated: true
+      mergedTasks: mergedTasks.size
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
-    
-    } catch (insertError) {
-      console.error('❌ ROLLBACK: Database insertion failed, initiating rollback:', insertError.message);
-      
-      try {
-        // v2.0.7 ENHANCED: Rollback protection - restore backup data
-        console.log('💾 ROLLBACK: Restoring', backupTasks.length, 'backed up tasks');
-        
-        // Delete all current tasks and restore backup
-        await env.DB.prepare('DELETE FROM user_tasks WHERE user_id = ?')
-          .bind(actualUserId)
-          .run();
-        
-        // Restore backup tasks
-        for (const backupTask of backupTasks) {
-          if (useEnhancedColumns) {
-            await stmt.bind(
-              backupTask.id,
-              actualUserId,
-              backupTask.title || '',
-              backupTask.notes || '',
-              backupTask.images || '[]',
-              backupTask.due_date || null,
-              backupTask.due_time || null,
-              backupTask.status || 'pending',
-              backupTask.repeat_type || null,
-              backupTask.template || null,
-              backupTask.is_event ? 1 : 0,
-              backupTask.created_at || new Date().toISOString(),
-              backupTask.updated_at || new Date().toISOString(),
-              backupTask.is_deleted ? 1 : 0,
-              backupTask.deleted_at || null,
-              backupTask.device_id || null,
-              backupTask.session_id || null,
-              backupTask.sync_version || '1.0'
-            ).run();
-          } else {
-            await stmt.bind(
-              backupTask.id,
-              actualUserId,
-              backupTask.title || '',
-              backupTask.notes || '',
-              backupTask.images || '[]',
-              backupTask.due_date || null,
-              backupTask.due_time || null,
-              backupTask.status || 'pending',
-              backupTask.repeat_type || null,
-              backupTask.template || null,
-              backupTask.is_event ? 1 : 0,
-              backupTask.created_at || new Date().toISOString(),
-              backupTask.updated_at || new Date().toISOString(),
-              backupTask.is_deleted ? 1 : 0,
-              backupTask.deleted_at || null
-            ).run();
-          }
-        }
-        
-        console.log('✅ ROLLBACK: Successfully restored backup data');
-        
-        return new Response(JSON.stringify({
-          error: 'sync_failed_rollback_successful',
-          message: 'Sync failed but data was restored to previous state',
-          details: insertError.message,
-          restoredTasks: backupTasks.length
-        }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-        
-      } catch (rollbackError) {
-        console.error('❌ ROLLBACK: Rollback failed:', rollbackError.message);
-        
-        return new Response(JSON.stringify({
-          error: 'sync_failed_rollback_failed',
-          message: 'Sync failed and rollback also failed - data may be corrupted',
-          syncError: insertError.message,
-          rollbackError: rollbackError.message
-        }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-    }
 
   } catch (error) {
     console.error('❌ Simple tasks sync error:', error.message);
@@ -2424,88 +1671,11 @@ async function handleTasksSyncSimple(request, env, corsHeaders) {
   }
 }
 
-// CRITICAL FIX: Enable GET tasks endpoint for downloads
-// This endpoint is needed for the sync system to download tasks
-// SECURE TASKS DOWNLOAD - Enhanced with staleness protection
-async function handleGetTasksSecure(userId, request, env, corsHeaders) {
-  try {
-    const token = getAuthToken(request);
-    const payload = await verifyToken(token, env.JWT_SECRET);
-    
-    if (!payload) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-    
-    // Ensure user can only access their own tasks
-    if (userId !== payload.userId) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    // CRITICAL: Get tasks with enhanced security and staleness protection
-    const stmt = env.DB.prepare('SELECT * FROM user_tasks WHERE user_id = ? AND (is_deleted = 0 OR is_deleted IS NULL)');
-    const result = await stmt.bind(userId).all();
-    const tasks = result.results || [];
-    
-    console.log('📥 SECURE DOWNLOAD: Retrieved', tasks.length, 'tasks for user:', userId);
-    
-    // CRITICAL: Validate server data staleness before sending
-    if (tasks.length > 0) {
-      const taskTimes = tasks.map(t => new Date(t.updated_at || t.created_at || 0).getTime());
-      const oldestTime = Math.min(...taskTimes);
-      const currentTime = Date.now();
-      const oldestAge = currentTime - oldestTime;
-      const maxStaleAge = 7 * 24 * 60 * 60 * 1000; // 7 days
-      
-      // Check if server data is stale
-      if (oldestAge > maxStaleAge) {
-        const staleHours = Math.round(oldestAge / (1000 * 60 * 60));
-        console.log('🚫 SECURE DOWNLOAD: Server data contains stale tasks, oldest:', staleHours, 'hours');
-        
-        // Filter out stale tasks instead of rejecting entire download
-        const freshTasks = tasks.filter(task => {
-          const taskTime = new Date(task.updated_at || task.created_at || 0).getTime();
-          const taskAge = currentTime - taskTime;
-          return taskAge <= maxStaleAge;
-        });
-        
-        console.log('✅ SECURE DOWNLOAD: Filtered', tasks.length - freshTasks.length, 'stale tasks, returning', freshTasks.length, 'fresh tasks');
-        
-        return new Response(JSON.stringify({ 
-          tasks: freshTasks,
-          filteredStale: tasks.length - freshTasks.length,
-          totalOriginal: tasks.length
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-    }
-    
-    console.log('✅ SECURE DOWNLOAD: All tasks are fresh, returning', tasks.length, 'tasks');
-    
-    return new Response(JSON.stringify({ tasks }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
-
-  } catch (error) {
-    console.error('❌ SECURE DOWNLOAD ERROR:', error);
-    return new Response(JSON.stringify({ error: 'Failed to retrieve tasks' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
-  }
-}
-
-// LEGACY FUNCTION - Use handleGetTasksSecure instead
+// Tasks: Get user tasks
 async function handleGetTasks(userId, request, env, corsHeaders) {
   try {
     const token = getAuthToken(request);
-    const payload = await verifyToken(token, env.JWT_SECRET);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
     
     if (!payload) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -2575,13 +1745,11 @@ async function handleGetTasks(userId, request, env, corsHeaders) {
   }
 }
 
-// LEGACY ENDPOINT DISABLED - Handle individual task deletion  
-// WARNING: This endpoint bypasses tombstone protection and allows task resurrection
-// Use the secure /tasks/sync endpoint instead
-async function handleDeleteTask_LEGACY_DISABLED(taskId, request, env, corsHeaders) {
+// Handle individual task deletion
+async function handleDeleteTask(taskId, request, env, corsHeaders) {
   try {
     const token = getAuthToken(request);
-    const payload = await verifyToken(token, env.JWT_SECRET);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
     
     if (!payload) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -2791,14 +1959,8 @@ function unicodeSafeBase64Encode(str) {
   return btoa(binaryString);
 }
 
-// Helper: Generate JWT (secure)
+// Helper: Generate JWT (simplified)
 async function generateJWT(payload, secret) {
-  // SECURITY: Ensure JWT secret is configured
-  if (!secret) {
-    console.error('❌ SECURITY: JWT secret not provided');
-    throw new Error('JWT configuration error');
-  }
-  
   const header = { alg: 'HS256', typ: 'JWT' };
   const exp = Math.floor(Date.now() / 1000) + (24 * 60 * 60); // 24 hours
   const fullPayload = { ...payload, exp };
@@ -2810,7 +1972,7 @@ async function generateJWT(payload, secret) {
   const signatureInput = `${encodedHeader}.${encodedPayload}`;
   const key = await crypto.subtle.importKey(
     'raw',
-    new TextEncoder().encode(secret),
+    new TextEncoder().encode(secret || 'default-secret-key'),
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign']
@@ -3026,7 +2188,7 @@ async function generatePromoEmailHTML(userEmail, password, promoCode, months, tr
             <h3>🚀 Quick Start Tips</h3>
             <ol>
                 <li>Open your HyperFiler Pro app</li>
-                <li>Use <code>N</code> to create your first task</li>
+                <li>Use <code>Ctrl+N</code> to create your first task</li>
                 <li>Try the Week view with <code>Ctrl+W</code></li>
                 <li>Use arrow keys to navigate like a pro</li>
                 <li>Press <code>Ctrl+I</code> for all shortcuts</li>
@@ -3175,7 +2337,7 @@ async function generatePromoEmailHTML(userEmail, password, promoCode, months, tr
             <h3>🚀 Quick Start Tips</h3>
             <ol>
                 <li>Click the login button above to access your Pro app</li>
-                <li>Use <code>N</code> to create your first task</li>
+                <li>Use <code>Ctrl+N</code> to create your first task</li>
                 <li>Try the Week view with <code>Ctrl+W</code></li>
                 <li>Use arrow keys to navigate like a pro</li>
                 <li>Press <code>Ctrl+I</code> for all shortcuts</li>
@@ -3346,8 +2508,7 @@ async function handleAdminUsers(request, env, corsHeaders) {
       SELECT users.id, users.email, users.created_at, 
              subs.plan_name, subs.status as subscription_status,
              subs.stripe_customer_id, subs.stripe_subscription_id,
-             subs.current_period_start, subs.current_period_end,
-             subs.user_type
+             subs.current_period_start, subs.current_period_end
       FROM users 
       LEFT JOIN user_subscriptions subs ON users.id = subs.user_id
       ORDER BY users.created_at DESC
@@ -4394,220 +3555,10 @@ async function handleAdminMigrateDatabase(request, env, corsHeaders) {
       }
     }
 
-    // v2.0.7 NEW: Check and add device_id column
-    try {
-      const testStmt = env.DB.prepare('SELECT device_id FROM user_tasks LIMIT 1');
-      await testStmt.first();
-      migrationResults.push({
-        migration: 'device_id column (v2.0.7)',
-        status: 'EXISTS',
-        message: 'Column already exists, no migration needed'
-      });
-    } catch (error) {
-      try {
-        const alterStmt = env.DB.prepare('ALTER TABLE user_tasks ADD COLUMN device_id TEXT');
-        await alterStmt.run();
-        migrationResults.push({
-          migration: 'device_id column (v2.0.7)',
-          status: 'ADDED',
-          message: 'Successfully added device_id column for v2.0.7 device tracking'
-        });
-        console.log('✅ Added device_id column for v2.0.7');
-      } catch (alterError) {
-        migrationResults.push({
-          migration: 'device_id column (v2.0.7)',
-          status: 'FAILED',
-          message: 'Failed to add device_id column: ' + alterError.message
-        });
-        console.error('❌ Failed to add device_id column:', alterError);
-      }
-    }
-
-    // v2.0.7 NEW: Check and add session_id column
-    try {
-      const testStmt = env.DB.prepare('SELECT session_id FROM user_tasks LIMIT 1');
-      await testStmt.first();
-      migrationResults.push({
-        migration: 'session_id column (v2.0.7)',
-        status: 'EXISTS',
-        message: 'Column already exists, no migration needed'
-      });
-    } catch (error) {
-      try {
-        const alterStmt = env.DB.prepare('ALTER TABLE user_tasks ADD COLUMN session_id TEXT');
-        await alterStmt.run();
-        migrationResults.push({
-          migration: 'session_id column (v2.0.7)',
-          status: 'ADDED',
-          message: 'Successfully added session_id column for v2.0.7 session tracking'
-        });
-        console.log('✅ Added session_id column for v2.0.7');
-      } catch (alterError) {
-        migrationResults.push({
-          migration: 'session_id column (v2.0.7)',
-          status: 'FAILED',
-          message: 'Failed to add session_id column: ' + alterError.message
-        });
-        console.error('❌ Failed to add session_id column:', alterError);
-      }
-    }
-
-    // v2.0.7 NEW: Check and add sync_version column
-    try {
-      const testStmt = env.DB.prepare('SELECT sync_version FROM user_tasks LIMIT 1');
-      await testStmt.first();
-      migrationResults.push({
-        migration: 'sync_version column (v2.0.7)',
-        status: 'EXISTS',
-        message: 'Column already exists, no migration needed'
-      });
-    } catch (error) {
-      try {
-        const alterStmt = env.DB.prepare('ALTER TABLE user_tasks ADD COLUMN sync_version TEXT DEFAULT \'1.0\'');
-        await alterStmt.run();
-        migrationResults.push({
-          migration: 'sync_version column (v2.0.7)',
-          status: 'ADDED',
-          message: 'Successfully added sync_version column for v2.0.7 version tracking'
-        });
-        console.log('✅ Added sync_version column for v2.0.7');
-      } catch (alterError) {
-        migrationResults.push({
-          migration: 'sync_version column (v2.0.7)',
-          status: 'FAILED',
-          message: 'Failed to add sync_version column: ' + alterError.message
-        });
-        console.error('❌ Failed to add sync_version column:', alterError);
-      }
-    }
-
-    // v2.0.7 NEW: Create indexes for performance
-    try {
-      const indexStmt1 = env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_user_tasks_device_id ON user_tasks(device_id)');
-      await indexStmt1.run();
-      const indexStmt2 = env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_user_tasks_user_device ON user_tasks(user_id, device_id)');
-      await indexStmt2.run();
-      migrationResults.push({
-        migration: 'v2.0.7 performance indexes',
-        status: 'CREATED',
-        message: 'Successfully created performance indexes for device tracking'
-      });
-      console.log('✅ Created v2.0.7 performance indexes');
-    } catch (indexError) {
-      migrationResults.push({
-        migration: 'v2.0.7 performance indexes',
-        status: 'FAILED',
-        message: 'Failed to create indexes: ' + indexError.message
-      });
-      console.error('❌ Failed to create v2.0.7 indexes:', indexError);
-    }
-    
-    // CRITICAL FIX: Create permanent tombstone protection table
-    try {
-      const testTombstoneStmt = env.DB.prepare('SELECT id FROM user_task_tombstones LIMIT 1');
-      await testTombstoneStmt.first();
-      migrationResults.push({
-        migration: 'tombstone protection table (v2.0.7)',
-        status: 'EXISTS',
-        message: 'Tombstone table already exists, no migration needed'
-      });
-    } catch (error) {
-      try {
-        // Create tombstone table
-        const createTombstoneStmt = env.DB.prepare(`
-          CREATE TABLE IF NOT EXISTS user_task_tombstones (
-            id TEXT PRIMARY KEY,
-            user_id TEXT NOT NULL,
-            task_id TEXT NOT NULL,
-            task_title TEXT,
-            deleted_at TEXT NOT NULL,
-            deleted_by_device TEXT,
-            deleted_by_session TEXT,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-            UNIQUE(user_id, task_id)
-          )
-        `);
-        await createTombstoneStmt.run();
-        
-        // Create indexes
-        const indexStmts = [
-          'CREATE INDEX IF NOT EXISTS idx_user_task_tombstones_user_id ON user_task_tombstones(user_id)',
-          'CREATE INDEX IF NOT EXISTS idx_user_task_tombstones_task_id ON user_task_tombstones(task_id)',
-          'CREATE INDEX IF NOT EXISTS idx_user_task_tombstones_deleted_at ON user_task_tombstones(deleted_at)'
-        ];
-        
-        for (const indexSql of indexStmts) {
-          const indexStmt = env.DB.prepare(indexSql);
-          await indexStmt.run();
-        }
-        
-        // Migrate existing deleted tasks to tombstone table
-        const migrateTombstonesStmt = env.DB.prepare(`
-          INSERT OR IGNORE INTO user_task_tombstones (id, user_id, task_id, task_title, deleted_at, created_at)
-          SELECT 
-            'tomb_' || id as id,
-            user_id,
-            id as task_id,
-            title as task_title,
-            deleted_at,
-            CURRENT_TIMESTAMP
-          FROM user_tasks 
-          WHERE is_deleted = 1 AND deleted_at IS NOT NULL
-        `);
-        await migrateTombstonesStmt.run();
-        
-        migrationResults.push({
-          migration: 'tombstone protection table (v2.0.7)',
-          status: 'ADDED',
-          message: 'Successfully created tombstone protection system - prevents deleted task resurrection'
-        });
-        console.log('✅ Created tombstone protection table with existing deleted tasks migrated');
-      } catch (tombstoneError) {
-        migrationResults.push({
-          migration: 'tombstone protection table (v2.0.7)',
-          status: 'FAILED',
-          message: 'Failed to create tombstone table: ' + tombstoneError.message
-        });
-        console.error('❌ Failed to create tombstone table:', tombstoneError);
-      }
-    }
-    
-    // CRITICAL FIX: Add data fingerprinting column for integrity validation
-    try {
-      const testFingerprintStmt = env.DB.prepare('SELECT data_fingerprint FROM user_tasks LIMIT 1');
-      await testFingerprintStmt.first();
-      migrationResults.push({
-        migration: 'data fingerprinting column (v2.0.7)',
-        status: 'EXISTS',
-        message: 'Fingerprinting column already exists, no migration needed'
-      });
-    } catch (error) {
-      try {
-        const alterStmt = env.DB.prepare('ALTER TABLE user_tasks ADD COLUMN data_fingerprint TEXT');
-        await alterStmt.run();
-        
-        migrationResults.push({
-          migration: 'data fingerprinting column (v2.0.7)',
-          status: 'ADDED',
-          message: 'Successfully added data fingerprinting for integrity validation'
-        });
-        console.log('✅ Added data_fingerprint column for integrity validation');
-      } catch (fingerprintError) {
-        migrationResults.push({
-          migration: 'data fingerprinting column (v2.0.7)',
-          status: 'FAILED',
-          message: 'Failed to add fingerprinting column: ' + fingerprintError.message
-        });
-        console.error('❌ Failed to add data_fingerprint column:', fingerprintError);
-      }
-    }
-
     return new Response(JSON.stringify({
-      message: 'Database migration completed (including v2.0.7 enhancements)',
+      message: 'Database migration completed',
       migrations: migrationResults,
-      migrated_at: new Date().toISOString(),
-      version: '1.0'
+      migrated_at: new Date().toISOString()
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
@@ -4649,7 +3600,7 @@ async function handleCreateCheckoutSession(request, env, corsHeaders) {
               name: 'HyperFiler Pro (Lifetime)',
               description: 'One-time payment for lifetime Pro access'
             },
-            unit_amount: 4900, // €49 in cents
+            unit_amount: 4998, // €49.98 in cents
           },
           quantity: 1,
         },
@@ -4762,19 +3713,6 @@ async function handleCustomerPortal(request, env, corsHeaders) {
 // Promo: Redeem promo code
 async function handlePromoRedeem(request, env, corsHeaders) {
   try {
-    // SECURITY: Rate limiting for promo code attempts (stricter than general rate limiting)
-    const rateLimitKey = getRateLimitKey(request);
-    const promoRateLimitKey = `promo_${rateLimitKey}`;
-    
-    if (!checkRateLimit(promoRateLimitKey, 5, 300000)) { // 5 attempts per 5 minutes
-      return new Response(JSON.stringify({ 
-        error: 'Too many promo code attempts. Please try again in 5 minutes.' 
-      }), {
-        status: 429,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-    
     const { email, code } = await request.json();
     
     if (!email || !code) {
@@ -5261,7 +4199,7 @@ async function handlePaymentSucceeded(invoice, env) {
 async function handleListsSyncSimple(request, env, corsHeaders) {
   try {
     const token = getAuthToken(request);
-    const payload = await verifyToken(token, env.JWT_SECRET);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
     
     if (!payload) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -5331,7 +4269,7 @@ async function handleListsSyncSimple(request, env, corsHeaders) {
 async function handleGetLists(userId, request, env, corsHeaders) {
   try {
     const token = getAuthToken(request);
-    const payload = await verifyToken(token, env.JWT_SECRET);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
     
     if (!payload || payload.userId !== userId) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -5378,7 +4316,7 @@ async function handleGetLists(userId, request, env, corsHeaders) {
 async function handleTemplatesSyncSimple(request, env, corsHeaders) {
   try {
     const token = getAuthToken(request);
-    const payload = await verifyToken(token, env.JWT_SECRET);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
     
     if (!payload) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -5448,7 +4386,7 @@ async function handleTemplatesSyncSimple(request, env, corsHeaders) {
 async function handleGetTemplates(userId, request, env, corsHeaders) {
   try {
     const token = getAuthToken(request);
-    const payload = await verifyToken(token, env.JWT_SECRET);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
     
     if (!payload || payload.userId !== userId) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -6010,7 +4948,7 @@ async function handleAdminLogin(request, env, corsHeaders) {
       headers: { 
         ...corsHeaders, 
         'Content-Type': 'application/json',
-        'Set-Cookie': `admin_session=${sessionId}; HttpOnly; Secure; SameSite=Strict; Max-Age=${24 * 60 * 60}; Path=/`
+        'Set-Cookie': `admin_session=${sessionId}; SameSite=Lax; Max-Age=${24 * 60 * 60}; Path=/`
       }
     });
     
@@ -6037,7 +4975,7 @@ async function handleAdminLogout(request, env, corsHeaders) {
       headers: { 
         ...corsHeaders, 
         'Content-Type': 'application/json',
-        'Set-Cookie': 'admin_session=; HttpOnly; Secure; SameSite=Strict; Max-Age=0; Path=/'
+        'Set-Cookie': 'admin_session=; SameSite=Lax; Max-Age=0; Path=/'
       }
     });
     
@@ -8340,7 +7278,7 @@ async function handleUpdateDatabase(request, env, corsHeaders) {
 async function handleTrialStatus(request, env, corsHeaders) {
   try {
     const token = getAuthToken(request);
-    const payload = await verifyToken(token, env.JWT_SECRET);
+    const payload = await verifyToken(token, env.JWT_SECRET || 'default-secret-key');
     
     if (!payload) {
       return new Response(JSON.stringify({ error: 'Invalid token' }), {
@@ -8398,216 +7336,3 @@ async function handleTrialStatus(request, env, corsHeaders) {
   }
 }
 
-// FIXED: Direct function to fix stale user ID (no admin auth required)
-async function handleFixStaleUserId(request, env, corsHeaders) {
-  try {
-    console.log('🔧 FIX: Starting stale user ID fix...');
-    
-    const { email, password } = await request.json();
-    console.log('🔧 FIX: Request data received:', { email: email, hasPassword: !!password });
-    
-    if (!email || !password) {
-      return new Response(JSON.stringify({ error: 'Email and password required' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-    
-    // Verify the user credentials first
-    console.log('🔧 FIX: Checking user in database...');
-    const userStmt = env.DB.prepare('SELECT * FROM users WHERE email = ?');
-    const user = await userStmt.bind(email).first();
-    
-    if (!user) {
-      console.log('🔧 FIX: User not found:', email);
-      return new Response(JSON.stringify({ error: 'User not found' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-    
-    console.log('🔧 FIX: User found, ID:', user.id);
-    
-    // Verify password
-    console.log('🔧 FIX: Verifying password...');
-    const isValidPassword = await verifyPassword(password, user.password_hash);
-    if (!isValidPassword) {
-      console.log('🔧 FIX: Invalid password for user:', email);
-      return new Response(JSON.stringify({ error: 'Invalid password' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-    
-    console.log('🔧 FIX: Password verified successfully');
-    
-    // Check if user has the stale user ID
-    if (user.id !== '56c2c350-3645-4729-a0cd-5b8d01a110a1') {
-      console.log('🔧 FIX: User does not have stale ID, current ID:', user.id);
-      return new Response(JSON.stringify({ 
-        error: 'User does not have stale user ID',
-        current_id: user.id
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-    
-    // Generate new user ID
-    const newUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    console.log(`🔧 FIXING: Updating stale user ID for ${email}`);
-    console.log(`🔧 OLD ID: 56c2c350-3645-4729-a0cd-5b8d01a110a1`);
-    console.log(`🔧 NEW ID: ${newUserId}`);
-    
-    // Update user ID in users table
-    console.log('🔧 FIX: Updating users table...');
-    const updateUserStmt = env.DB.prepare('UPDATE users SET id = ? WHERE email = ?');
-    await updateUserStmt.run(newUserId, email);
-    
-    // Update user ID in subscriptions table
-    console.log('🔧 FIX: Updating subscriptions table...');
-    const updateSubStmt = env.DB.prepare('UPDATE subscriptions SET user_id = ? WHERE user_id = ?');
-    await updateSubStmt.run(newUserId, '56c2c350-3645-4729-a0cd-5b8d01a110a1');
-    
-    // Update user ID in tasks table
-    console.log('🔧 FIX: Updating tasks table...');
-    const updateTasksStmt = env.DB.prepare('UPDATE tasks SET user_id = ? WHERE user_id = ?');
-    await updateTasksStmt.run(newUserId, '56c2c350-3645-4729-a0cd-5b8d01a110a1');
-    
-    // Update user ID in user_task_tombstones table
-    console.log('🔧 FIX: Updating tombstones table...');
-    const updateTombstonesStmt = env.DB.prepare('UPDATE user_task_tombstones SET user_id = ? WHERE user_id = ?');
-    await updateTombstonesStmt.run(newUserId, '56c2c350-3645-4729-a0cd-5b8d01a110a1');
-    
-    console.log(`✅ FIXED: User ID updated successfully for ${email}`);
-    
-    return new Response(JSON.stringify({
-      success: true,
-      message: 'User ID updated successfully',
-      old_id: '56c2c350-3645-4729-a0cd-5b8d01a110a1',
-      new_id: newUserId,
-      email: email
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
-    
-  } catch (error) {
-    console.error('Fix stale user ID error:', error);
-    console.error('Error details:', error.message);
-    console.error('Error stack:', error.stack);
-    return new Response(JSON.stringify({ 
-      error: 'Internal server error',
-      details: error.message 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
-  }
-}
-
-
-
-// FIXED: Direct function to delete user (no admin auth required)
-async function handleDirectDeleteUser(request, env, corsHeaders) {
-  try {
-    console.log("🗑️ DELETE: Starting direct user deletion...");
-    
-    const { email, password } = await request.json();
-    console.log("🗑️ DELETE: Request data received:", { email: email, hasPassword: !!password });
-    
-    if (!email || !password) {
-      return new Response(JSON.stringify({ error: "Email and password required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-    
-    // Verify the user credentials first
-    console.log("🗑️ DELETE: Checking user in database...");
-    const userStmt = env.DB.prepare("SELECT * FROM users WHERE email = ?");
-    const user = await userStmt.bind(email).first();
-    
-    if (!user) {
-      console.log("🗑️ DELETE: User not found:", email);
-      return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-    
-    console.log("🗑️ DELETE: User found, ID:", user.id);
-    
-    // Verify password
-    console.log("🗑️ DELETE: Verifying password...");
-    const isValidPassword = await verifyPassword(password, user.password_hash);
-    if (!isValidPassword) {
-      console.log("🗑️ DELETE: Invalid password for user:", email);
-      return new Response(JSON.stringify({ error: "Invalid password" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-    
-    console.log("🗑️ DELETE: Password verified successfully");
-    
-    // Check if user has the stale user ID
-    if (user.id !== "56c2c350-3645-4729-a0cd-5b8d01a110a1") {
-      console.log("🗑️ DELETE: User does not have stale ID, current ID:", user.id);
-      return new Response(JSON.stringify({ 
-        error: "User does not have stale user ID",
-        current_id: user.id
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-    
-    console.log(`🗑️ DELETING: User account for ${email}`);
-    console.log(`🗑️ USER ID: ${user.id}`);
-    
-    // Instead of deleting, let's mark the user as deleted and clear their data
-    console.log("🗑️ DELETE: Marking user as deleted...");
-    
-    // Clear user data by setting to null/empty values
-    const clearUserStmt = env.DB.prepare(`
-      UPDATE users SET 
-        email = 'deleted_' || id || '@deleted.com',
-        password_hash = 'deleted',
-        created_at = NULL,
-        updated_at = NULL
-      WHERE email = ?
-    `);
-    await clearUserStmt.bind(email).run();
-    
-    // Delete all user tasks
-    console.log("🗑️ DELETE: Deleting user tasks...");
-    const deleteTasksStmt = env.DB.prepare("DELETE FROM user_tasks WHERE user_id = ?");
-    await deleteTasksStmt.bind(user.id).run();
-    
-    console.log(`✅ DELETED: User account successfully removed for ${email}`);
-    
-    return new Response(JSON.stringify({
-      success: true,
-      message: "User account deleted successfully",
-      deleted_user_id: user.id,
-      email: email
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
-    
-  } catch (error) {
-    console.error("Direct delete user error:", error);
-    console.error("Error details:", error.message);
-    console.error("Error stack:", error.stack);
-    return new Response(JSON.stringify({ 
-      error: "Internal server error",
-      details: error.message 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
-  }
-}

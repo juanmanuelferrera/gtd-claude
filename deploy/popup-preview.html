@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyperFiler Pro - Popup Preview</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .demo-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        
+        .demo-content h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .demo-content p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .show-popup-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .show-popup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-content">
+        <h1>⚡ HyperFiler Pro Demo</h1>
+        <p>Click the button below to see the popup reminder that appears every 10 days for trial users.</p>
+        <button class="show-popup-btn" onclick="showPopup()">🎉 Show Popup Reminder</button>
+    </div>
+
+    <!-- Weekly Support Reminder Pop-up -->
+    <div id="supportReminder" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; backdrop-filter: blur(2px);">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; padding: 40px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); text-align: center;">
+            <div style="font-size: 3em; margin-bottom: 20px;">🎉</div>
+            <h2 style="color: #333; margin-bottom: 15px; font-size: 1.8em;">Loving HyperFiler Pro?</h2>
+            <p style="color: #666; margin-bottom: 30px; line-height: 1.6; font-size: 1.1em;">
+                You've been using HyperFiler Pro in <strong>trial mode</strong>. Purchase your license for €49.98 to continue using all features without reminders.
+            </p>
+            
+            <div style="margin-bottom: 20px;">
+                <button onclick="closePopup()" style="background: linear-gradient(45deg, #28a745, #20c997); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1.1em; font-weight: 700; margin: 10px; cursor: pointer; transition: all 0.3s ease;">
+                    💳 Purchase License
+                </button>
+            </div>
+            
+            <div>
+                <button onclick="closePopup()" style="background: none; color: #666; border: 2px solid #ddd; padding: 12px 25px; border-radius: 50px; font-size: 1em; margin: 5px; cursor: pointer; transition: all 0.3s ease;">
+                    Maybe Later (10 days)
+                </button>
+                <button onclick="closePopup()" style="background: none; color: #999; border: 1px solid #eee; padding: 10px 20px; border-radius: 25px; font-size: 0.9em; margin: 5px; cursor: pointer;">
+                    Hide for a Month
+                </button>
+            </div>
+            
+            <p style="color: #999; font-size: 0.85em; margin-top: 20px;">
+                💡 <strong>HYPERFILER IS NOT FREE.</strong> This is a paid software product. If you use it more than 60 days you are required to purchase a license. This reminder appears every 10 days. You can continue using HyperFiler Pro in <strong>trial mode</strong> as long as you need.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function showPopup() {
+            document.getElementById('supportReminder').style.display = 'block';
+        }
+        
+        function closePopup() {
+            document.getElementById('supportReminder').style.display = 'none';
+        }
+        
+        // Close popup when clicking outside
+        document.getElementById('supportReminder').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePopup();
+            }
+        });
+        
+        // Close popup with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePopup();
+            }
+        });
+    </script>
+</body>
+</html> 
