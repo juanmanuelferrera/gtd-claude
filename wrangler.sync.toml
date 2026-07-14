@@ -1,0 +1,23 @@
+# wrangler.sync.toml — config para el Worker backend con el UserSyncDO.
+# Fusiona esto con la config real de tu Worker (worker.js). Ajusta name,
+# main, y el database_id de D1 a los tuyos.
+
+name = "hyperfiler-backend"
+main = "worker.js"                 # el Worker que hace `export { UserSyncDO }`
+compatibility_date = "2026-07-01"
+
+# --- D1 (capa global existente: cuentas, auth, Stripe) ---
+[[d1_databases]]
+binding = "DB"
+database_name = "hyperfiler"       # <-- tu nombre real
+database_id = "REEMPLAZAR_CON_TU_D1_ID"
+
+# --- Durable Object: un objeto por usuario ---
+[[durable_objects.bindings]]
+name = "USER_SYNC"                 # se usa como env.USER_SYNC en el Worker
+class_name = "UserSyncDO"
+
+# --- Migración: DO con SQLite integrado (necesario para storage.sql) ---
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["UserSyncDO"]

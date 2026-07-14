@@ -3,21 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cancel Subscription - ⚡ HyperFiler Pro 🚀</title>
+    <title>⚡ HyperFiler Pro 🚀 - Digital GTD System</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            padding-top: 90px;
-            margin: 0;
+            color: white;
+            line-height: 1.6;
         }
-        
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 20px 40px;
+            text-align: center;
+        }
+
         /* Header Navigation */
         .nav-header {
             position: fixed;
@@ -28,7 +36,7 @@
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(37, 99, 235, 0.1);
             z-index: 1000;
-            padding: 15px 0;
+            padding: 20px 0;
         }
 
         .nav-container {
@@ -38,6 +46,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
+            height: 60px;
         }
 
         .nav-logo {
@@ -81,198 +90,252 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
-        
-        /* Full-Width Footer */
-        .footer {
-            text-align: center;
-            padding: 60px 0;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(30, 64, 175, 0.2) 100%);
-            margin-top: 100px;
-            width: 100vw;
-            position: relative;
-            left: 50%;
-            right: 50%;
-            margin-left: -50vw;
-            margin-right: -50vw;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+
+        .login-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            color: #2563eb;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            font-size: 0.95em;
         }
 
-        .footer-content {
+        .login-btn:hover {
+            background: rgba(37, 99, 235, 0.1);
+            border-color: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        /* Language Flag in Navigation - Proper Specificity Approach */
+        .nav-container .nav-links .language-flag {
+            background: transparent;
+            border: none;
+            padding: 8px 12px;
+            font-size: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s ease, opacity 0.1s ease;
+            text-decoration: none;
+            opacity: 0.9;
+            will-change: transform, opacity;
+            contain: layout style paint;
+        }
+
+        .nav-container .nav-links .language-flag:hover {
+            transform: translateY(-2px);
+            opacity: 1;
+            background: transparent;
+        }
+        
+        .nav-container .nav-links .language-flag:active {
+            transform: translateY(0);
+            transition: none;
+        }
+
+        /* Award-Winning Hero Section */
+        .hero-premium {
+            position: relative;
+            padding: 140px 0 40px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .floating-particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: advancedFloat 12s ease-in-out infinite;
+            filter: blur(0.5px);
+        }
+
+        .floating-particle:nth-child(1) { 
+            width: 6px; height: 6px; 
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(179, 229, 252, 0.6) 50%, transparent 100%);
+            top: 15%; left: 8%; animation-delay: 0s; 
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        .floating-particle:nth-child(2) { 
+            width: 4px; height: 4px; 
+            background: radial-gradient(circle, rgba(224, 242, 254, 0.8) 0%, rgba(255,255,255,0.4) 70%, transparent 100%);
+            top: 65%; left: 85%; animation-delay: 2s; 
+            box-shadow: 0 0 15px rgba(179, 229, 252, 0.4);
+        }
+        .floating-particle:nth-child(3) { 
+            width: 5px; height: 5px; 
+            background: radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(179, 229, 252, 0.5) 60%, transparent 100%);
+            top: 35%; left: 15%; animation-delay: 4s; 
+            box-shadow: 0 0 18px rgba(255, 255, 255, 0.25);
+        }
+        .floating-particle:nth-child(4) { 
+            width: 3px; height: 3px; 
+            background: radial-gradient(circle, rgba(224, 242, 254, 0.9) 0%, transparent 70%);
+            top: 75%; left: 75%; animation-delay: 6s; 
+            box-shadow: 0 0 12px rgba(179, 229, 252, 0.3);
+        }
+        .floating-particle:nth-child(5) { 
+            width: 7px; height: 7px; 
+            background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(179, 229, 252, 0.4) 40%, transparent 80%);
+            top: 25%; left: 70%; animation-delay: 3s; 
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+        }
+        .floating-particle:nth-child(6) { 
+            width: 4px; height: 4px; 
+            background: radial-gradient(circle, rgba(224, 242, 254, 0.7) 0%, rgba(255,255,255,0.3) 60%, transparent 90%);
+            top: 55%; left: 25%; animation-delay: 5s; 
+            box-shadow: 0 0 16px rgba(179, 229, 252, 0.35);
+        }
+
+        @keyframes advancedFloat {
+            0%, 100% { 
+                transform: translateY(0) translateX(0) scale(1) rotate(0deg); 
+                opacity: 0.6; 
+            }
+            25% { 
+                transform: translateY(-15px) translateX(5px) scale(1.3) rotate(90deg); 
+                opacity: 1; 
+            }
+            50% { 
+                transform: translateY(-25px) translateX(10px) scale(1.1) rotate(180deg); 
+                opacity: 0.8; 
+            }
+            75% { 
+                transform: translateY(-10px) translateX(-5px) scale(1.2) rotate(270deg); 
+                opacity: 0.9; 
+            }
+        }
+
+        .hero-gradient-orb {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, 
+                rgba(179, 229, 252, 0.15) 0%, 
+                rgba(224, 242, 254, 0.1) 30%,
+                rgba(14, 165, 233, 0.08) 50%,
+                rgba(255, 255, 255, 0.05) 70%,
+                transparent 85%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: advancedOrbPulse 8s ease-in-out infinite;
+            filter: blur(1px);
+            mix-blend-mode: screen;
+        }
+
+        @keyframes advancedOrbPulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1) rotate(0deg); 
+                filter: blur(1px) brightness(1);
+            }
+            33% { 
+                transform: translate(-50%, -50%) scale(1.15) rotate(120deg); 
+                filter: blur(0.5px) brightness(1.1);
+            }
+            66% { 
+                transform: translate(-50%, -50%) scale(0.95) rotate(240deg); 
+                filter: blur(1.5px) brightness(0.9);
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
         }
 
-        .footer h3 {
-            font-size: 1.8em;
-            font-weight: 700;
-            margin-bottom: 20px;
+        .brand-lockup {
+            position: relative;
+            margin-bottom: 60px;
         }
 
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 30px 0;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: opacity 0.3s ease;
-        }
-
-        .footer-links a:hover {
-            opacity: 0.8;
-        }
-
-        .footer p {
-            opacity: 0.7;
-            margin-top: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            text-align: center;
+        .hero-title .title-line-1,
+        .hero-title .title-line-3 {
             position: relative;
         }
 
-        /* Language Switcher */
-        .language-switcher {
+        .hero-title .title-line-1 {
+            animation: subtleGlow 4s ease-in-out infinite alternate;
+        }
+
+        .hero-title .title-line-3 {
+            animation: subtleGlow 5s ease-in-out infinite alternate;
+        }
+
+
+        .hero-title {
+            font-size: clamp(3.5em, 8vw, 7.5em);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin: 0 auto 50px;
+            max-width: 1000px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        
+        /* Tactical Emoji Positioning */
+        .emoji-overlay {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            font-size: 0.8em;
             z-index: 10;
+            animation: emojiFloat 4s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            transform-style: preserve-3d;
         }
-
-        .language-flag {
-            background: rgba(37, 99, 235, 0.1);
-            border: 2px solid rgba(37, 99, 235, 0.3);
-            border-radius: 8px;
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            color: #2563eb;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
+        
+        .emoji-overlay.thunderbolt {
+            top: -0.1em;
+            left: 7.8em; /* Closer to "task" in "The only task manager where" */
+            color: #FFD700;
+            animation-delay: 0s;
         }
-
-        .language-flag:hover {
-            background: rgba(37, 99, 235, 0.2);
-            border-color: rgba(37, 99, 235, 0.5);
-            transform: translateY(-2px);
-            color: #2563eb;
+        
+        .emoji-overlay.rocket {
+            top: 2.15em;
+            right: -0.8em; /* After "productivity" */
+            color: #FF6B35;
+            animation-delay: 1s;
         }
-        h1 {
-            color: #2563eb;
-            margin-bottom: 30px;
-        }
-        .cancel-form {
-            margin: 30px 0;
-        }
-        .form-group {
-            margin: 20px 0;
-            text-align: left;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        .btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 10px;
-        }
-        .btn:hover {
-            background: #c82333;
-        }
-        .btn.secondary {
-            background: #6c757d;
-        }
-        .btn.secondary:hover {
-            background: #545b62;
-        }
-        .reasons {
-            text-align: left;
-            margin: 20px 0;
-        }
-        .reasons label {
-            font-weight: normal;
-            display: flex;
-            align-items: center;
-            margin: 10px 0;
-        }
-        .reasons input[type="radio"] {
-            width: auto;
-            margin-right: 10px;
-        }
-        .feedback {
-            margin: 20px 0;
-        }
-        .feedback textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            resize: vertical;
-            min-height: 80px;
-        }
-        .status {
-            text-align: center;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-            display: none;
-        }
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .retention-offer {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-            display: none;
-        }
-        .retention-offer h3 {
-            color: #856404;
-            margin-bottom: 15px;
+        
+        @keyframes emojiFloat {
+            0%, 100% {
+                transform: translateY(0) scale(1) rotate(0deg);
+                text-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3);
+            }
+            25% {
+                transform: translateY(-8px) scale(1.1) rotate(5deg);
+                text-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 215, 0, 0.4);
+            }
+            50% {
+                transform: translateY(-12px) scale(1.05) rotate(-3deg);
+                text-shadow: 0 0 30px rgba(255, 215, 0, 0.7), 0 0 60px rgba(255, 215, 0, 0.35);
+            }
+            75% {
+                transform: translateY(-5px) scale(1.08) rotate(2deg);
+                text-shadow: 0 0 22px rgba(255, 215, 0, 0.9), 0 0 45px rgba(255, 215, 0, 0.45);
+            }
         }
 
         /* Custom Chat Button - Enhanced Visibility */
@@ -341,177 +404,1256 @@
                 font-size: 24px;
             }
         }
+
+        .title-line-1 {
+            font-weight: 600;
+            font-size: 0.65em;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            background: linear-gradient(90deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.7) 100%);
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmerText 3s ease-in-out infinite;
+            position: relative;
+            transform: translateZ(20px);
+        }
+
+        @keyframes shimmerText {
+            0%, 100% { background-position: -200% 0; }
+            50% { background-position: 200% 0; }
+        }
+
+        .title-line-2 {
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 25%, #b3e5fc 50%, rgba(255,255,255,0.9) 75%, rgba(255,255,255,0.6) 100%);
+            background-size: 400% 400%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -moz-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            -moz-text-fill-color: transparent;
+            color: transparent;
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+            animation: gradientShift 4s ease-in-out infinite;
+            position: relative;
+            transform: translateZ(30px);
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .title-line-3 {
+            font-weight: 700;
+            font-size: 0.8em;
+            background: linear-gradient(45deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.9) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -moz-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            -moz-text-fill-color: transparent;
+            color: transparent;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateZ(15px);
+            animation: subtleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes subtleGlow {
+            0% { filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2)); }
+            100% { filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.4)); }
+        }
+
+        .flows-emphasis {
+            font-style: italic;
+            font-weight: 800;
+            background: linear-gradient(135deg, 
+                #ffffff 0%, 
+                rgba(224, 242, 254, 0.95) 15%,
+                rgba(179, 229, 252, 0.9) 30%,
+                rgba(255,255,255,0.8) 50%,
+                rgba(255,255,255,0.6) 70%,
+                rgba(255,255,255,0.3) 85%,
+                rgba(255,255,255,0.1) 100%);
+            background-size: 300% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -moz-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            -moz-text-fill-color: transparent;
+            color: transparent;
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4)) 
+                    drop-shadow(0 0 30px rgba(179, 229, 252, 0.3))
+                    drop-shadow(0 0 60px rgba(255, 255, 255, 0.2));
+            animation: flowAnimation 5s ease-in-out infinite;
+            position: relative;
+            transform: translateZ(40px) rotateX(5deg);
+        }
+        
+        /* Cross-browser compatibility fixes */
+        
+        /* Firefox fallbacks for gradient text effects */
+        @-moz-document url-prefix() {
+            .title-line-2 {
+                background: none;
+                color: rgba(255, 255, 255, 0.95);
+                text-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.3);
+                -webkit-text-fill-color: unset;
+                -moz-text-fill-color: unset;
+            }
+            
+            .title-line-3 {
+                background: none;
+                color: rgba(255, 255, 255, 0.9);
+                text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                -webkit-text-fill-color: unset;
+                -moz-text-fill-color: unset;
+            }
+            
+            .flows-emphasis {
+                background: none;
+                color: rgba(255, 255, 255, 0.95);
+                text-shadow: 0 0 30px rgba(179, 229, 252, 0.8), 0 4px 8px rgba(0, 0, 0, 0.4);
+                -webkit-text-fill-color: unset;
+                -moz-text-fill-color: unset;
+            }
+            
+            .natural-emphasis {
+                background: none;
+                color: rgba(255, 255, 255, 0.95);
+                text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 255, 255, 0.4);
+                -webkit-text-fill-color: unset;
+                -moz-text-fill-color: unset;
+            }
+        }
+        
+        /* Edge legacy fallback for backdrop-filter */
+        @supports not (backdrop-filter: blur(10px)) {
+            .custom-chat-button,
+            .navigation,
+            .social-btn,
+            .cta-container,
+            .testimonial-card,
+            .comparison-table-container {
+                backdrop-filter: none;
+                background: rgba(255, 255, 255, 0.95);
+            }
+            
+            .hero-gradient-orb {
+                mix-blend-mode: normal;
+                opacity: 0.3;
+            }
+        }
+        
+        /* Ensure consistent transform behavior across browsers */
+        .hero-title {
+            -webkit-perspective: 1000px;
+            -moz-perspective: 1000px;
+            perspective: 1000px;
+        }
+        
+        .emoji-overlay {
+            -webkit-transform-style: preserve-3d;
+            -moz-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+        }
+        
+        /* Enhanced text rendering for all browsers */
+        .hero-title,
+        .flows-emphasis,
+        .natural-emphasis {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        @keyframes flowAnimation {
+            0%, 100% { 
+                background-position: 0% 0%;
+                transform: translateZ(40px) rotateX(5deg) scale(1);
+            }
+            33% { 
+                background-position: 50% 0%;
+                transform: translateZ(45px) rotateX(3deg) scale(1.02);
+            }
+            66% { 
+                background-position: 100% 0%;
+                transform: translateZ(35px) rotateX(7deg) scale(0.98);
+            }
+        }
+
+        .natural-emphasis {
+            font-weight: 900;
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,1) 0%, 
+                rgba(255,255,255,0.95) 30%,
+                rgba(224, 242, 254, 0.9) 50%,
+                rgba(255,255,255,0.95) 70%,
+                rgba(255,255,255,1) 100%);
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -moz-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            -moz-text-fill-color: transparent;
+            color: transparent;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
+            animation: naturalPulse 4s ease-in-out infinite;
+            position: relative;
+            transform: translateZ(25px);
+        }
+
+        @keyframes naturalPulse {
+            0%, 100% { 
+                background-position: 0% 50%;
+                filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
+            }
+            50% { 
+                background-position: 100% 50%;
+                filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.6));
+            }
+        }
+
+        .hero-subtitle {
+            font-size: 1.4em;
+            font-weight: 400;
+            line-height: 1.6;
+            margin: 0 auto 60px;
+            max-width: 600px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.8) 100%);
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: subtleShimmer 6s ease-in-out infinite;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+            position: relative;
+            transform: translateZ(10px);
+        }
+
+        @keyframes subtleShimmer {
+            0%, 100% { background-position: -100% 0; }
+            50% { background-position: 200% 0; }
+        }
+
+        /* Social Share Buttons */
+        .social-share {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            text-decoration: none;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .social-btn.twitter { color: #1DA1F2; }
+        .social-btn.linkedin { color: #0077B5; }
+        .social-btn.facebook { color: #1877F2; }
+
+        /* Clean CTA Section */
+        .cta-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 60px 40px;
+            margin: 0 auto 80px;
+            max-width: 800px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .cta-headline {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 30px;
+            line-height: 1.2;
+        }
+
+        .cta-description {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #2563eb;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Features Grid */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 80px;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .feature h3 {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .feature p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* Testimonials Section */
+        .testimonials-section {
+            margin: 80px 0;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .testimonials-title {
+            font-size: 2.5em;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 50px;
+            background: linear-gradient(45deg, #ffffff, #e0f2fe);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .testimonial-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #2563eb, #1e40af, #2563eb);
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: -200% 0; }
+            50% { background-position: 200% 0; }
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .testimonial-quote {
+            font-size: 1.1em;
+            font-style: italic;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.95);
+            position: relative;
+            text-align: left;
+        }
+
+        .testimonial-quote:before {
+            content: '"';
+            font-size: 3em;
+            color: rgba(37, 99, 235, 0.3);
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            font-family: Georgia, serif;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2em;
+            color: white;
+        }
+
+        .author-info {
+            text-align: left;
+        }
+
+        .author-name {
+            font-weight: 700;
+            font-size: 1.1em;
+            color: white;
+            margin-bottom: 2px;
+        }
+
+        .author-title {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Comparison Table Styles */
+        .comparison-section {
+            margin: 80px 0;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .comparison-title {
+            font-size: 2.5em;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ffffff, #e0f2fe);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .comparison-subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .comparison-table-container {
+            overflow-x: auto;
+            margin: 0 20px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .comparison-table {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 0 auto;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 140px repeat(10, 1fr);
+            background: rgba(255, 255, 255, 0.15);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            font-weight: 700;
+            font-size: 0.85em;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 140px repeat(10, 1fr);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .table-row:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .feature-col, .app-col, .feature-name, .feature-value {
+            padding: 12px 6px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85em;
+        }
+
+        .feature-col, .app-col {
+            font-weight: 700;
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-col, .feature-name {
+            text-align: left;
+            justify-content: flex-start;
+            padding-left: 15px;
+            font-weight: 600;
+        }
+
+        .hyperfiler-col, .hyperfiler-value {
+            background: rgba(37, 99, 235, 0.15);
+            border-left: 3px solid #2563eb;
+            border-right: 3px solid #2563eb;
+            font-weight: 700;
+            color: white;
+        }
+
+        .feature-value {
+            font-size: 0.9em;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        @media (max-width: 768px) {
+            .comparison-table-container {
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .comparison-table {
+                border-radius: 0;
+                font-size: 0.75em;
+            }
+
+            .table-header, .table-row {
+                grid-template-columns: 100px repeat(10, minmax(50px, 1fr));
+            }
+
+            .feature-col, .app-col, .feature-name, .feature-value {
+                padding: 8px 3px;
+                font-size: 0.8em;
+            }
+        }
+
+        /* Full-Width Footer */
+        .footer {
+            text-align: center;
+            padding: 60px 0;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(30, 64, 175, 0.2) 100%);
+            margin-top: 100px;
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer h3 {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            opacity: 0.8;
+        }
+
+        .footer p {
+            opacity: 0.7;
+            margin-top: 20px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 15px;
+            }
+            
+            .nav-links {
+                gap: 10px;
+            }
+            
+            .nav-links a {
+                padding: 6px 12px;
+                font-size: 0.9em;
+            }
+
+            .hero-title {
+                text-align: center;
+                font-size: clamp(2.5em, 8vw, 4em);
+            }
+
+            .brand-rocket {
+                display: none;
+            }
+
+            .cta-container {
+                padding: 40px 20px;
+                margin: 0 20px 60px;
+            }
+
+            .cta-headline {
+                font-size: 2em;
+            }
+
+            .social-share {
+                gap: 10px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .testimonials-title {
+                font-size: 2em;
+            }
+
+            .testimonial-card {
+                padding: 25px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Navigation -->
     <nav class="nav-header">
         <div class="nav-container">
             <a href="./index.html" class="nav-logo">
                 <span>⚡</span> HyperFiler Pro <span>🚀</span>
             </a>
             <div class="nav-links">
-                <a href="./login.html">🔐 Login</a>
-                <a href="./upgrade-compare.html">💎 Pricing</a>
-                <a href="./upgrade-compare.html" class="nav-cta">Start Free Trial</a>
+                <a href="readme.html">📚 User Guide</a>
+                <a href="upgrade-compare.html">💎 Pricing</a>
+                <button id="loginBtn" class="login-btn">🔐 Login</button>
+                <a href="register.html" class="nav-cta">Purchase License</a>
+                <a href="index-es.html" class="language-flag" title="Ver en Español">🇪🇸</a>
             </div>
         </div>
     </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-premium">
+        
+        <div class="hero-background">
+            <div class="floating-particle"></div>
+            <div class="floating-particle"></div>
+            <div class="floating-particle"></div>
+            <div class="floating-particle"></div>
+            <div class="floating-particle"></div>
+            <div class="floating-particle"></div>
+            <div class="hero-gradient-orb"></div>
+        </div>
+
+        <div class="hero-content">
+            <div class="brand-lockup">
+                <h1 class="hero-title">
+                    <div class="title-line-1">The only task manager where</div>
+                    <div class="title-line-2">every task <em class="flows-emphasis">flows like your thoughts</em></div>
+                    <div class="title-line-3">No rigid schedules, just <strong class="natural-emphasis">natural productivity</strong></div>
+                    
+                    <!-- Tactical Emoji Overlays -->
+                    <div class="emoji-overlay thunderbolt">⚡</div>
+                    <div class="emoji-overlay rocket">🚀</div>
+                </h1>
+            </div>
+
+
+        </div>
+    </div>
+
     <div class="container">
-        <h1>✨ HyperFiler Pro Access</h1>
-        
-        <div class="cancel-form">
-            <div class="form-group">
-                <label for="email">Email Address:</label>
-                <input type="email" id="email" placeholder="Enter your email to check Pro access" required>
+        <!-- Features Section -->
+        <div class="features">
+            <div class="feature">
+                <span class="feature-icon">🧠</span>
+                <h3>Smart GTD System</h3>
+                <p>Advanced Getting Things Done methodology with natural language processing for effortless task capture and organization.</p>
             </div>
-            
-            <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #155724; margin-bottom: 15px;">🎉 You Have Lifetime Pro Access!</h3>
-                <p style="color: #155724; margin: 0;">Your one-time payment of €49 gives you permanent access to all Pro features. No subscriptions, no monthly charges!</p>
+
+            <div class="feature">
+                <span class="feature-icon">🚀</span>
+                <h3>@project Methodology</h3>
+                <p>Revolutionary project management with @project tags that automatically organize and prioritize your work streams.</p>
             </div>
-            
-            <div class="feedback">
-                <label for="feedback-text"><strong>Any feedback? (Optional)</strong></label>
-                <textarea id="feedback-text" placeholder="Help us improve HyperFiler..."></textarea>
+
+            <div class="feature">
+                <span class="feature-icon">☁️</span>
+                <h3>Enterprise Cloud Sync</h3>
+                <p>Seamless synchronization across all devices with enterprise-grade security and offline-first architecture.</p>
             </div>
+
+            <div class="feature">
+                <span class="feature-icon">📋</span>
+                <h3>Templates & Workflows</h3>
+                <p>Pre-built templates and customizable workflows for common project types, enabling rapid setup and consistent execution.</p>
+            </div>
+
+            <div class="feature">
+                <span class="feature-icon">🎯</span>
+                <h3>Context Switching</h3>
+                <p>Intelligent context awareness that helps you focus on the right tasks at the right time and location.</p>
+            </div>
+
+            <div class="feature">
+                <span class="feature-icon">⚡</span>
+                <h3>Lightning Fast</h3>
+                <p>Blazing-fast performance with instant search, real-time updates, and responsive interface design.</p>
+            </div>
+        </div>
+
+        <!-- Testimonials Section -->
+        <div class="testimonials-section">
+            <h2 class="testimonials-title">Professionals Love HyperFiler Pro</h2>
             
-            <button class="btn secondary" onclick="window.close()">Close Window</button>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-quote">
+                        HyperFiler Pro's @project methodology revolutionized how I manage complex workflows. The natural language processing saves me hours every week.
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">SC</div>
+                        <div class="author-info">
+                            <div class="author-name">Sarah Chen</div>
+                            <div class="author-title">Senior Product Manager</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-quote">
+                        Finally, a task manager that thinks like I do. The 'flows like your thoughts' approach is exactly what I needed to escape the rigid structure of traditional tools.
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">MR</div>
+                        <div class="author-info">
+                            <div class="author-name">Michael Rodriguez</div>
+                            <div class="author-title">Creative Director</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-quote">
+                        Switched from Todoist after using it for 5 years. HyperFiler's GTD implementation is superior and the one-time payment model is refreshing in a subscription-heavy world.
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">AJ</div>
+                        <div class="author-info">
+                            <div class="author-name">Amanda Johnson</div>
+                            <div class="author-title">Project Manager</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Section -->
+        <div class="comparison-section">
+            <h2 class="comparison-title">Why HyperFiler Pro Wins</h2>
+            <p class="comparison-subtitle">See how we compare to the most popular task management apps</p>
+            
+            <div class="comparison-table-container">
+                <div class="comparison-table">
+                    <div class="table-header">
+                        <div class="feature-col">Feature</div>
+                        <div class="app-col hyperfiler-col">HyperFiler</div>
+                        <div class="app-col">Todoist</div>
+                        <div class="app-col">Asana</div>
+                        <div class="app-col">Notion</div>
+                        <div class="app-col">Trello</div>
+                        <div class="app-col">OmniFocus</div>
+                        <div class="app-col">Evernote</div>
+                        <div class="app-col">Microsoft TD</div>
+                        <div class="app-col">Google Tasks</div>
+                        <div class="app-col">Things</div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="feature-name">📅 Visual Planning</div>
+                        <div class="feature-value hyperfiler-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="feature-name">⏰ Time Blocking</div>
+                        <div class="feature-value hyperfiler-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="feature-name">🧠 GTD</div>
+                        <div class="feature-value hyperfiler-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">✅</div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="feature-name">🖱️ Drag & Drop</div>
+                        <div class="feature-value hyperfiler-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="feature-name">⚡ Shortcuts</div>
+                        <div class="feature-value hyperfiler-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="feature-name">💾 Backup</div>
+                        <div class="feature-value hyperfiler-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="feature-name">📤 Export</div>
+                        <div class="feature-value hyperfiler-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="feature-name">🗣️ Natural Lang.</div>
+                        <div class="feature-value hyperfiler-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">❌</div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="feature-name">🌐 Multiplatform</div>
+                        <div class="feature-value hyperfiler-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">❌</div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="feature-name">🌍 Web based</div>
+                        <div class="feature-value hyperfiler-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">❌</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">✅</div>
+                        <div class="feature-value">❌</div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="feature-name">💰 Price</div>
+                        <div class="feature-value hyperfiler-value">One time</div>
+                        <div class="feature-value">Subscription</div>
+                        <div class="feature-value">Subscription</div>
+                        <div class="feature-value">Subscription</div>
+                        <div class="feature-value">Subscription</div>
+                        <div class="feature-value">Both</div>
+                        <div class="feature-value">Subscription</div>
+                        <div class="feature-value">Free</div>
+                        <div class="feature-value">Free</div>
+                        <div class="feature-value">One time</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final CTA Section -->
+        <div class="cta-container" style="margin: 80px auto;">
+            <h2 class="cta-headline">The last task manager you'll ever need to try.</h2>
+            <p class="cta-description">
+                Ready to transform your productivity?
+            </p>
+            <a href="register.html" class="cta-button">Purchase License Now</a>
+        </div>
+
         </div>
         
-        <div class="status" id="status"></div>
-        
-        <p style="color: #666; font-size: 14px; margin-top: 30px;">
-            <strong>Lifetime Access:</strong> Your one-time €49 payment gives you permanent Pro features. 
-            No recurring charges, no expiration date.
-        </p>
-    </div>
-
-    <script>
-        const cancelBtn = document.getElementById('cancel-btn');
-        const emailInput = document.getElementById('email');
-        const status = document.getElementById('status');
-        const retentionOffer = document.getElementById('retention-offer');
-        const acceptOfferBtn = document.getElementById('accept-offer');
-        const declineOfferBtn = document.getElementById('decline-offer');
-        
-        let showedRetentionOffer = false;
-        
-        cancelBtn.addEventListener('click', async () => {
-            const email = emailInput.value.trim();
-            
-            if (!email) {
-                showStatus('error', 'Please enter your email address');
-                return;
-            }
-            
-            // Show retention offer first time
-            if (!showedRetentionOffer) {
-                retentionOffer.style.display = 'block';
-                cancelBtn.textContent = 'I Still Want to Cancel';
-                showedRetentionOffer = true;
-                return;
-            }
-            
-            // Actually cancel
-            await processCancellation();
-        });
-        
-        acceptOfferBtn.addEventListener('click', async () => {
-            try {
-                const response = await fetch('/apply-discount', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: emailInput.value,
-                        discount: '50_percent_3_months'
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showStatus('success', '🎉 Discount applied! You\'ll pay just $1/month for the next 3 months.');
-                    setTimeout(() => window.close(), 3000);
-                } else {
-                    showStatus('error', 'Error applying discount. Please contact support.');
-                }
-            } catch (error) {
-                showStatus('error', 'Error applying discount. Please contact support.');
-            }
-        });
-        
-        declineOfferBtn.addEventListener('click', () => {
-            processCancellation();
-        });
-        
-        async function processCancellation() {
-            try {
-                cancelBtn.disabled = true;
-                cancelBtn.textContent = 'Processing...';
-                
-                const response = await fetch('/cancel-subscription', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: emailInput.value,
-                        reason: document.querySelector('input[name="reason"]:checked')?.value,
-                        feedback: document.getElementById('feedback-text').value
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showStatus('success', '✅ Subscription canceled successfully. You\'ll have access until ' + result.periodEnd);
-                } else {
-                    showStatus('error', result.error || 'Error canceling subscription');
-                }
-                
-            } catch (error) {
-                showStatus('error', 'Error processing cancellation. Please contact support.');
-            } finally {
-                cancelBtn.disabled = false;
-                cancelBtn.textContent = 'Cancel My Subscription';
-            }
-        }
-        
-        function showStatus(type, message) {
-            status.className = `status ${type}`;
-            status.textContent = message;
-            status.style.display = 'block';
-        }
-    </script>
-    
-    <!-- Full-Width Footer -->
-    <div class="footer">
-        <div class="footer-content">
-            <h3>⚡ HyperFiler Pro 🚀</h3>
-            <p>Transform your productivity today</p>
-            <div class="footer-links">
-                <a href="readme.html">📚 User Guide</a>
-                <a href="upgrade-compare.html">💎 Pricing</a>
-                <a href="mailto:support@hyperfiler.pro">📧 Support</a>
-                <a href="register.html">🚀 Start Trial</a>
+        <!-- Full-Width Footer -->
+        <div class="footer">
+            <div class="footer-content">
+                <h3>⚡ HyperFiler Pro 🚀</h3>
+                <p>Transform your productivity today</p>
+                <div class="footer-links">
+                    <a href="readme.html">📚 User Guide</a>
+                    <a href="upgrade-compare.html">💎 Pricing</a>
+                    <a href="mailto:support@hyperfiler.pro">📧 Support</a>
+                    <a href="register.html">🚀 Purchase License</a>
+                </div>
+                <p>© 2025 HyperFiler Pro. Professional productivity software.</p>
             </div>
-            <p>© 2025 HyperFiler Pro. Professional productivity software.</p>
         </div>
-    </div>
 
-    <!-- Custom Chat Button -->
-    <button class="custom-chat-button" onclick="Tawk_API.toggle();" title="Chat with support">
-        💬
-    </button>
+        <!-- Custom Chat Button -->
+        <button class="custom-chat-button" onclick="Tawk_API.toggle();" title="Chat with support">
+            💬
+        </button>
 
-    <!-- Tawk.to Chat Widget -->
-    <script type="text/javascript">
+        <!-- Login Modal -->
+        <div id="loginModal" class="login-modal" style="display: none;">
+            <div class="login-modal-content">
+                <span class="login-close">&times;</span>
+                <h2>🔐 Login to HyperFiler Pro</h2>
+                <p>Access your tasks and projects</p>
+                <div class="login-options">
+                    <button class="login-option-btn" onclick="openApp()">
+                        🚀 Launch HyperFiler Pro
+                    </button>
+                    <div class="divider">or</div>
+                    <form class="login-form">
+                        <input type="email" placeholder="Email address" required>
+                        <input type="password" placeholder="Password" required>
+                        <button type="submit" class="login-submit">Sign In</button>
+                    </form>
+                </div>
+                <div class="login-footer">
+                    <p>Don't have an account? <a href="register.html">Purchase License</a></p>
+                </div>
+            </div>
+        </div>
+
+        <style>
+        .login-modal {
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .login-modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 40px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 420px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .login-close {
+            color: #666;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            cursor: pointer;
+        }
+
+        .login-close:hover {
+            color: #333;
+        }
+
+        .login-modal-content h2 {
+            color: #2563eb;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        .login-modal-content p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .login-options {
+            margin-bottom: 30px;
+        }
+
+        .login-option-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .login-option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        .divider {
+            color: #999;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .login-form input {
+            padding: 12px 16px;
+            border: 2px solid #e5e5e7;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .login-submit {
+            padding: 12px;
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+            border: 2px solid #2563eb;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-submit:hover {
+            background: #2563eb;
+            color: white;
+        }
+
+        .login-footer {
+            border-top: 1px solid #e5e5e7;
+            padding-top: 20px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .login-footer a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+        </style>
+
+        <script>
+        // Login Modal Functionality
+        const loginBtn = document.getElementById('loginBtn');
+        const loginModal = document.getElementById('loginModal');
+        const loginClose = document.getElementsByClassName('login-close')[0];
+
+        loginBtn.onclick = function() {
+            loginModal.style.display = 'block';
+        }
+
+        loginClose.onclick = function() {
+            loginModal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target === loginModal) {
+                loginModal.style.display = 'none';
+            }
+        }
+
+        function openApp() {
+            window.location.href = '/hyperfiler-pro.html';
+        }
+
+        // Handle login form submission
+        document.querySelector('.login-form').onsubmit = function(e) {
+            e.preventDefault();
+            // For now, just open the app
+            openApp();
+            loginModal.style.display = 'none';
+        }
+        </script>
+
+        <!-- Tawk.to Chat Widget -->
+        <script type="text/javascript">
 <script src="tawk-integration.js"></script>
-
-    // Hide default Tawk.to widget and use custom button
-    Tawk_API = Tawk_API || {};
-    Tawk_API.onLoad = function(){
-        // Hide the default widget
-        Tawk_API.hideWidget();
-    };
-    </script>
+        
+        // Hide default Tawk.to widget and use custom button
+        Tawk_API = Tawk_API || {};
+        Tawk_API.onLoad = function(){
+            // Hide the default widget
+            Tawk_API.hideWidget();
+        };
+        </script>
 </body>
 </html>

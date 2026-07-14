@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { UserSyncDO } from './user-sync-do.js';
 
 // SECURITY: Input sanitization functions
 function sanitizeInput(input) {
@@ -235,6 +236,9 @@ async function executeSecureQuery(env, baseQuery, userId, additionalParams = [])
   }
 }
 
+// Durable Object para el sync perfecto multi-dispositivo (uno por usuario).
+export { UserSyncDO };
+
 export default {
   async fetch(request, env, ctx) {
     console.log("Worker environment bindings:", Object.keys(env || {}));
@@ -290,10 +294,46 @@ export default {
     if (request.method === 'OPTIONS') {
       console.log('🌐 OPTIONS request for:', pathname);
       console.log('🌐 CORS headers being sent:', JSON.stringify(corsHeaders, null, 2));
-      return new Response(null, { 
+      return new Response(null, {
         status: 200,
-        headers: corsHeaders 
+        headers: corsHeaders
       });
+    }
+
+    // ── SYNC: enruta al Durable Object por usuario (perfect sync) ──────────
+    // Todos los dispositivos de una cuenta pasan por el MISMO objeto → sin
+    // carreras, una sola verdad, empuje en vivo por WebSocket.
+    if (pathname.startsWith('/sync/')) {
+      if (!env.USER_SYNC) {
+        return new Response(JSON.stringify({ error: 'Sync backend not configured (USER_SYNC binding missing)' }), {
+          status: 503,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      // Auth: el userId sale del JWT verificado, NUNCA del cliente.
+      const token = getAuthToken(request);
+      const payload = await verifyToken(token, env.JWT_SECRET);
+      if (!payload || !payload.userId) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      // Un objeto por cuenta.
+      const doId = env.USER_SYNC.idFromName(String(payload.userId));
+      const stub = env.USER_SYNC.get(doId);
+      // Reenvía con el userId inyectado (para la migración perezosa D1→DO).
+      const fwd = new Request(request, { headers: new Headers(request.headers) });
+      fwd.headers.set('X-User-Id', String(payload.userId));
+      // WebSocket: pasa el Upgrade tal cual (no se le añade CORS ni body).
+      if (request.headers.get('Upgrade') === 'websocket') {
+        return stub.fetch(fwd);
+      }
+      // HTTP (push/pull): reenvía y añade CORS a la respuesta.
+      const doRes = await stub.fetch(fwd);
+      const out = new Response(doRes.body, doRes);
+      for (const [k, v] of Object.entries(corsHeaders)) out.headers.set(k, v);
+      return out;
     }
 
     // SECURITY: Rate limiting check
@@ -923,7 +963,14 @@ function getAuthToken(request) {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     return authHeader.substring(7);
   }
-  
+
+  // Fallback para WebSocket (no puede enviar cabecera Authorization):
+  // token por query string, p. ej. /sync/ws?token=...
+  try {
+    const t = new URL(request.url).searchParams.get('token');
+    if (t) return t;
+  } catch (e) { /* url inválida */ }
+
   return null;
 }
 

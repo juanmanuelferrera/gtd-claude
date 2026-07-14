@@ -176,7 +176,12 @@ function cleanTaskForStorage(task) {
 function saveTasksToLocalStorage() {
     try {
         const cleanedTasks = tasks.map(task => cleanTaskForStorage(task));
-        localStorage.setItem('gtdTasks', JSON.stringify(cleanedTasks));
+        // Persistencia vía LocalStore (misma clave `gtdTasks`); fallback directo.
+        if (typeof LocalStore !== 'undefined') {
+            LocalStore.writeCollectionSync(LocalStore.COLLECTIONS.TASKS, cleanedTasks);
+        } else {
+            localStorage.setItem('gtdTasks', JSON.stringify(cleanedTasks));
+        }
     } catch (error) {
         console.error('Error saving tasks to localStorage:', error);
         // Fallback: try to save with replacer to handle circular references
@@ -209,10 +214,11 @@ function animateTaskCompletion(taskElement) {
  */
 function loadTasksFromLocalStorage() {
     try {
-        const savedTasks = localStorage.getItem('gtdTasks');
-        if (savedTasks) {
-            const parsedTasks = JSON.parse(savedTasks);
-            
+        // Lectura vía LocalStore (activos, sin tombstones); fallback directo.
+        const parsedTasks = (typeof LocalStore !== 'undefined')
+            ? LocalStore.readActiveSync(LocalStore.COLLECTIONS.TASKS)
+            : JSON.parse(localStorage.getItem('gtdTasks') || 'null');
+        if (parsedTasks && parsedTasks.length > 0) {
             // Validate each task and filter out invalid ones
             tasks = parsedTasks
                 .map(task => validateTaskData(task))
@@ -587,8 +593,8 @@ async function deleteTaskFromModal() {
 
         recordAction('delete', taskToDelete.id, taskToDelete.title, {...taskToDelete}, null);
         
-        // Save to localStorage immediately
-        localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+        // Save vía writeCollectionSync (preserva metadata de sync y marca el borrado como dirty)
+        saveTasksToLocalStorage();
         
         // Direct upload like Lists
         window.justModifiedTasks = true;

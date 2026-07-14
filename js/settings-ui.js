@@ -6,7 +6,12 @@ console.log('✅ settings-ui.js v20260205-fix-sync LOADED');
 // Missing core functions
 function saveTasks() {
     if (window.tasks) {
-        localStorage.setItem('gtdTasks', JSON.stringify(window.tasks));
+        // Enruta por writeCollectionSync (preserva metadata de sync) si está disponible.
+        if (typeof saveTasksToLocalStorage === 'function') {
+            saveTasksToLocalStorage();
+        } else {
+            localStorage.setItem('gtdTasks', JSON.stringify(window.tasks));
+        }
         console.log('💾 Tasks saved to localStorage');
     }
 }

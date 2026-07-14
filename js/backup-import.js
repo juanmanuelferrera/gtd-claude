@@ -1101,9 +1101,14 @@ function importJSONBackup(input) {
             }
             
             if (confirm(`Import ${backup.tasks.length} tasks from backup?\nThis will replace your current data!`)) {
-                // Import tasks
+                // Import tasks — enruta por writeCollectionSync para que se marquen
+                // dirty y se suban al DO (antes se escribían sin metadata → no sincronizaban).
                 tasks = backup.tasks || [];
-                localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                if (typeof saveTasksToLocalStorage === 'function') {
+                    saveTasksToLocalStorage();
+                } else {
+                    localStorage.setItem('gtdTasks', JSON.stringify(tasks));
+                }
                 
                 // Import templates
                 if (backup.customTemplates) {

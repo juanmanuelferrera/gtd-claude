@@ -49,3 +49,4 @@ jsons/
 auto-backup*.json
 gtd-tasks-backup*.json
 /jsons
+mcp-server/__pycache__/

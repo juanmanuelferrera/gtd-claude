@@ -1,0 +1,70 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     ACTIVACIÓN DEL SYNC (pegar en hyperfiler-pro.html de PRODUCCIÓN)
+     Backend ya desplegado y verificado: hyperfiler-sync (Durable Objects).
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- ── BLOQUE 1 ──────────────────────────────────────────────────────────────
+     Pega estas 2 líneas JUNTO a los demás <script src="js/core/*.js">,
+     y ANTES de <script src="js/tasks.js"> (tasks.js usa LocalStore).       -->
+<script src="js/core/LocalStore.js?v=20260714-sync"></script>
+<script src="js/core/SyncEngine.js?v=20260714-sync"></script>
+
+
+<!-- ── BLOQUE 2 ──────────────────────────────────────────────────────────────
+     Pega este bloque UNA vez, cerca del cierre de </body>.
+     Se auto-inicia al cargar si ya hay sesión; expone window.startSync()/
+     window.stopSync() para engancharlos a tu login/logout.                 -->
+<script>
+(function () {
+  // Worker de sync (Durable Object) desplegado en producción:
+  var SYNC_BASE = 'https://hyperfiler-sync.joanmanelferrera-400.workers.dev/sync';
+
+  function boot() {
+    if (typeof LocalStore === 'undefined' || typeof SyncEngine === 'undefined') {
+      console.warn('[sync] LocalStore/SyncEngine no cargados — revisa el BLOQUE 1');
+      return;
+    }
+
+    // IMPORTANTE: mismo almacén que tasks.js (localStorage 'gtdTasks'), NO IndexedDB.
+    var store = new LocalStore.LocalStorageAdapter();
+    var engine = null;
+    function token() { return localStorage.getItem('authToken'); }
+
+    window.startSync = function () {
+      if (engine || !token()) return;
+      engine = new SyncEngine({
+        store: store,
+        baseUrl: SYNC_BASE,
+        getToken: token,
+        collections: ['tasks'],   // añade 'lists' cuando enrutes las listas por LocalStore
+      });
+      engine.start();
+      console.log('🔄 SyncEngine iniciado');
+    };
+
+    window.stopSync = function () {
+      if (engine) { engine.stop(); engine = null; console.log('⏹️ SyncEngine parado'); }
+    };
+
+    // Cambio llegado de OTRO dispositivo → refresca la UI.
+    LocalStore.subscribe(function (evt) {
+      if (evt.source === 'sync' && evt.collection === 'tasks') {
+        if (typeof loadTasksFromLocalStorage === 'function') loadTasksFromLocalStorage();
+        if (typeof renderCurrentView === 'function') renderCurrentView();
+      }
+    });
+
+    // Arranca si ya hay sesión.
+    if (token()) window.startSync();
+  }
+
+  if (document.readyState === 'complete') boot();
+  else window.addEventListener('load', boot);
+})();
+</script>
+
+<!-- ── ENGANCHES (recomendado) ────────────────────────────────────────────────
+     · Tras un LOGIN exitoso:  window.startSync();
+     · En LOGOUT:              window.stopSync();
+     (Si el usuario ya estaba logueado, el BLOQUE 2 arranca solo al cargar.)
+     Recuerda subir el ?v= de los JS al desplegar (cache-busting).           -->
