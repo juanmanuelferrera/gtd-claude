@@ -1,6 +1,13 @@
 name = "hyperfiler-sync"
 main = "sync-worker.mjs"
 compatibility_date = "2026-02-12"
+workers_dev = true
+
+# Mismo-origen que la app → el WebSocket deja de ser cross-site (Safari ITP) → instantáneo.
+routes = [
+  { pattern = "hyperfiler.pro/sync/*", zone_name = "hyperfiler.pro" },
+  { pattern = "www.hyperfiler.pro/sync/*", zone_name = "hyperfiler.pro" }
+]
 
 # D1 de producción (para la migración perezosa desde user_tasks)
 [[d1_databases]]

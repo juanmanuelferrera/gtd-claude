@@ -3534,7 +3534,11 @@
     <!-- SYNC: activación del motor de sincronización -->
     <script>
     (function () {
-      var SYNC_BASE = 'https://hyperfiler-sync.joanmanelferrera-400.workers.dev/sync';
+      // Mismo-origen en hyperfiler.pro/www (route del worker) → WebSocket NO cross-site → instantáneo.
+      // Fallback al workers.dev en otros orígenes (p. ej. pages.dev).
+      var SYNC_BASE = /(^|\.)hyperfiler\.pro$/.test(location.hostname)
+        ? location.origin + '/sync'
+        : 'https://hyperfiler-sync.joanmanelferrera-400.workers.dev/sync';
       function boot() {
         if (typeof LocalStore === 'undefined' || typeof SyncEngine === 'undefined') { console.warn('[sync] módulos no cargados'); return; }
         var store = new LocalStore.LocalStorageAdapter();
@@ -3557,7 +3561,7 @@
         window._uploadAllTasksInternal = function () { return Promise.resolve(); };
         window._downloadAllTasksInternal = function () { return Promise.resolve(); };
         window.pullLatestFromCloud = function () { return Promise.resolve(); };
-        console.log('🔀 Sync viejo de tareas desactivado — DO SyncEngine activo [cutover-20260714]');
+        console.log('🔀 Sync viejo de tareas desactivado — DO SyncEngine activo [cutover-20260715-sameorigin]');
         if (token()) window.startSync();
       }
       if (document.readyState === 'complete') boot(); else window.addEventListener('load', boot);
