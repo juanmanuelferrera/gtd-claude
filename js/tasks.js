@@ -222,7 +222,7 @@ function loadTasksFromLocalStorage() {
             // Validate each task and filter out invalid ones
             tasks = parsedTasks
                 .map(task => validateTaskData(task))
-                .filter(task => task !== null);
+                .filter(task => task !== null && task.title !== 'JSON_TASKS_DATA');
             
             console.log(`📥 Loaded ${tasks.length} tasks from localStorage`);
             

@@ -70,12 +70,13 @@
         });
       }
 
-      // Pull periódico (fallback robusto si el WebSocket no entrega en vivo):
-      // reconcilia con el DO cada 10s → el cross-device funciona aunque el WS falle.
+      // Pull periódico de RESERVA (cada 30s). El WebSocket es la vía instantánea;
+      // esto solo cubre el caso de que el WS caiga. Además hay focus-pull (al enfocar
+      // la pestaña sincroniza al momento), así que 30s de reserva es de sobra.
       if (this._pollTimer) clearInterval(this._pollTimer);
       this._pollTimer = setInterval(function () {
         if (self._started && self._online) self.syncNow();
-      }, 10000);
+      }, 30000);
 
       // Arranque: pull + push de cada colección, luego WebSocket.
       return this.syncNow().then(function () { self._connectWS(); });

@@ -185,6 +185,7 @@ export class UserSyncDO {
 
     for (const change of changes || []) {
       if (!change || !change.id) continue;
+      if (change.title === 'JSON_TASKS_DATA') continue; // fila-envoltorio del blob: nunca es una tarea
       const current = this._getItem(change.id);
       if (!this._incomingWins(current, change)) continue;
 
