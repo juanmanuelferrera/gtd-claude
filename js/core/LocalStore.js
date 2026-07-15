@@ -126,8 +126,10 @@
     var c = Object.assign({}, item);
     delete c.dirty; delete c.seq; delete c.updatedAt; delete c.deleted; delete c.collection;
     try {
-      var keys = Object.keys(c).sort();
-      return JSON.stringify(c, keys);
+      // JSON.stringify(c, keys) usaría `keys` como ALLOWLIST a todos los niveles
+      // y descartaría el contenido anidado (name/text/completed de las listas).
+      // Comparamos el contenido COMPLETO para detectar cambios anidados.
+      return JSON.stringify(c);
     } catch (e) { return String(Math.random()); }
   }
 
