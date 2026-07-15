@@ -1029,19 +1029,9 @@ async function handleAuthRegister(request, env, corsHeaders) {
     // Generate JWT token
     const token = await generateJWT({ userId, email }, env.JWT_SECRET);
     
-    // Send welcome email with credentials  
-    const emailHtml = await generateWelcomeEmailHTML(
-      email, 
-      tempPassword,
-      env
-    );
-    
-    const emailResult = await sendEmail(
-      env, 
-      email, 
-      `👑 Welcome to HyperFiler Pro - Professional Productivity Software`, 
-      emailHtml
-    );
+    // Send welcome email with credentials (helper builds HTML + sends, and
+    // catches its own errors so a mail failure never fails registration)
+    const emailResult = await sendWelcomeEmail(email, tempPassword, null, env);
 
     return new Response(JSON.stringify({ 
       message: 'User created successfully - purchase required',
