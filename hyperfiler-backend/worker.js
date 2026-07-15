@@ -1023,9 +1023,21 @@ async function handleAuthRegister(request, env, corsHeaders) {
     `);
     
     await stmt.bind(userId, email, hashedPassword).run();
-    
-    // User must purchase - no trial subscription created
-    
+
+    // Free Trial: grant a 14-day active trial subscription so the new user can
+    // access the app immediately (the app blocks users without an active
+    // subscription). No Stripe involved — trials are direct DB rows; Stripe is
+    // only for paid purchases. Wrapped so a failure here never fails signup.
+    try {
+      await env.DB.prepare(`
+        INSERT INTO user_subscriptions
+          (id, user_id, plan_name, status, current_period_start, current_period_end, user_type, created_at, updated_at)
+        VALUES (?, ?, 'pro', 'active', datetime('now'), datetime('now', '+14 days'), 'trial', datetime('now'), datetime('now'))
+      `).bind(crypto.randomUUID(), userId).run();
+    } catch (trialError) {
+      console.error('Failed to create trial subscription for', email, trialError);
+    }
+
     // Generate JWT token
     const token = await generateJWT({ userId, email }, env.JWT_SECRET);
     
@@ -1034,7 +1046,7 @@ async function handleAuthRegister(request, env, corsHeaders) {
     const emailResult = await sendWelcomeEmail(email, tempPassword, null, env);
 
     return new Response(JSON.stringify({ 
-      message: 'User created successfully - purchase required',
+      message: 'User created successfully - 14-day free trial started',
       user: { id: userId, email },
       token,
       password: tempPassword, // Return password for immediate use
