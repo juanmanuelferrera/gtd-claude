@@ -65,10 +65,35 @@ function clearAuthData() {
 }
 
 /**
+ * Clear this browser's cached TASK/LIST/TEMPLATE data (localStorage + IndexedDB).
+ *
+ * Task data is stored under GLOBAL keys (not namespaced per user), so switching
+ * accounts on the same browser would otherwise show the previous user's tasks.
+ * This is called on explicit logout and on account-switch at login — NOT from
+ * clearAuthData(), which also fires on transient token expiry where we must keep
+ * local (possibly unsynced) data.
+ */
+window.clearLocalUserData = function() {
+    var keys = [
+        'gtdTasks', 'gtd_list_sections', 'gtdTemplates', 'gtd_event_registry',
+        'ls_tasks', 'ls_lists', 'ls_templates',
+        'ls_synced_tasks', 'ls_synced_lists', 'ls_synced_templates',
+        '__localstore_meta__', 'tasks_with_tombstones', 'lastSyncTime'
+    ];
+    keys.forEach(function(k) {
+        try { localStorage.removeItem(k); } catch (e) {}
+        try { sessionStorage.removeItem(k); } catch (e) {}
+    });
+    try { if (window.indexedDB) indexedDB.deleteDatabase('hyperfiler_sync'); } catch (e) {}
+    console.log('🧹 Cleared local task/list/template cache (localStorage + IndexedDB)');
+};
+
+/**
  * Force logout and reload (for troubleshooting)
  */
 window.forceLogout = function() {
     clearAuthData();
+    if (window.clearLocalUserData) window.clearLocalUserData();
     window.currentUser = null;
     window.location.reload();
 };
@@ -473,7 +498,46 @@ async function logout() {
 
     // SECURITY: Clear all authentication data
     clearAuthData();
+    // Clear cached tasks/lists/templates so the next account starts clean
+    // (task data uses global keys, not namespaced per user).
+    if (window.clearLocalUserData) window.clearLocalUserData();
     window.location.href = '/login';
+}
+window.logout = logout;
+
+/**
+ * Fill the logged-in email into any account UI elements. Safe to call anytime.
+ */
+window.updateUserBadge = function() {
+    var email = '';
+    try {
+        email = localStorage.getItem('userEmail') || '';
+        if (!email) {
+            var cu = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            email = (cu && cu.user && cu.user.email) || '';
+        }
+    } catch (e) {}
+    if (!email) return;
+
+    var span = document.getElementById('userEmail');
+    if (span) span.textContent = email;
+
+    var sidebar = document.getElementById('sidebarUserInfo');
+    if (sidebar) {
+        sidebar.textContent = '👤 ' + email;
+        sidebar.style.display = 'block';
+    }
+
+    var badgeEmail = document.getElementById('accountBadgeEmail');
+    if (badgeEmail) badgeEmail.textContent = email;
+    var badge = document.getElementById('accountBadge');
+    if (badge) badge.style.display = 'flex';
+};
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', function() {
+        try { window.updateUserBadge(); } catch (e) {}
+    });
 }
 
 /**

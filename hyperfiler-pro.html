@@ -132,6 +132,13 @@
 
 </head>
 <body>
+    <!-- Always-visible account badge: logged-in email + logout -->
+    <div id="accountBadge" style="display:none; position:fixed; top:10px; right:12px; z-index:100000; align-items:center; gap:8px; background:rgba(255,255,255,0.95); border:1px solid #e2e8f0; border-radius:999px; padding:5px 6px 5px 12px; box-shadow:0 2px 8px rgba(0,0,0,0.12); font-size:13px; max-width:min(78vw,360px);">
+        <span aria-hidden="true">👤</span>
+        <span id="accountBadgeEmail" style="color:#334155; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Logged-in account"></span>
+        <button onclick="(window.logout?window.logout():(window.location.href='/login'))" title="Log out" style="flex:0 0 auto; background:#dc3545; color:#fff; border:none; border-radius:999px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer;">🚪 Logout</button>
+    </div>
+
     <!-- Modern Mobile App Header with Gradient & Glass Morphism -->
     <div class="modern-app-header mobile-only" id="modernAppHeader">
         <!-- Gradient Background -->
@@ -1113,7 +1120,7 @@
                         <div style="margin-bottom: 10px;">
                             <strong>Plan:</strong> <span style="color: #007bff;">HyperFiler Pro</span>
                         </div>
-                        <button class="btn btn-secondary" onclick="window.location.href='/login'" style="padding: 8px 16px; background: #dc3545; border-color: #dc3545; color: white; margin-top: 10px;">🚪 Logout</button>
+                        <button class="btn btn-secondary" onclick="(window.logout?window.logout():(window.location.href='/login'))" style="padding: 8px 16px; background: #dc3545; border-color: #dc3545; color: white; margin-top: 10px;">🚪 Logout</button>
                     </div>
                 </div>
                 
@@ -2635,7 +2642,7 @@
     <script src="js/utils.js?v=20260203-v2"></script>
 
     <script src="js/keyboard-shortcuts.js?v=20260203-v2"></script>
-    <script src="js/auth.js?v=20260203-v2"></script>
+    <script src="js/auth.js?v=20260715-logout-badge"></script>
     <script src="js/tasks.js?v=20260715-polish"></script>
     <script src="js/ui.js?v=20260217-fix-global"></script>
     <script src="js/sync.js?v=20260203-v2"></script>

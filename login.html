@@ -707,6 +707,26 @@
                 console.log('📦 Response body:', result);
 
                 if (response.ok && result.user) {
+                    // ACCOUNT SWITCH: task data is stored under global keys (not
+                    // namespaced per user). If a different account was used on this
+                    // browser, wipe cached tasks/lists/templates so the new user does
+                    // NOT see the previous user's data (and it can't be pushed to the
+                    // wrong account on sync).
+                    try {
+                        const prevUserId = localStorage.getItem('userId');
+                        if (prevUserId && prevUserId !== result.user.id) {
+                            const taskKeys = [
+                                'gtdTasks', 'gtd_list_sections', 'gtdTemplates', 'gtd_event_registry',
+                                'ls_tasks', 'ls_lists', 'ls_templates',
+                                'ls_synced_tasks', 'ls_synced_lists', 'ls_synced_templates',
+                                '__localstore_meta__', 'tasks_with_tombstones', 'lastSyncTime'
+                            ];
+                            taskKeys.forEach(k => { try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (e) {} });
+                            try { if (window.indexedDB) indexedDB.deleteDatabase('hyperfiler_sync'); } catch (e) {}
+                            console.log('🧹 Account switch detected — cleared previous user\'s local task cache');
+                        }
+                    } catch (e) { console.warn('account-switch cleanup failed:', e); }
+
                     // SECURITY: Store token as fallback for cross-domain compatibility
                     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
                     console.log('🔍 Device detection:', { 
