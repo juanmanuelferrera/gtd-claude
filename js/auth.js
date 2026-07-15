@@ -522,16 +522,11 @@ window.updateUserBadge = function() {
     var span = document.getElementById('userEmail');
     if (span) span.textContent = email;
 
+    // Sidebar (left column, under the title): show email + logout button
+    var sidebarEmail = document.getElementById('sidebarUserEmail');
+    if (sidebarEmail) sidebarEmail.textContent = '👤 ' + email;
     var sidebar = document.getElementById('sidebarUserInfo');
-    if (sidebar) {
-        sidebar.textContent = '👤 ' + email;
-        sidebar.style.display = 'block';
-    }
-
-    var badgeEmail = document.getElementById('accountBadgeEmail');
-    if (badgeEmail) badgeEmail.textContent = email;
-    var badge = document.getElementById('accountBadge');
-    if (badge) badge.style.display = 'flex';
+    if (sidebar) sidebar.style.display = 'block';
 };
 
 if (typeof document !== 'undefined') {
