@@ -1,82 +1,71 @@
-# Integración del UserSyncDO en el Worker
+# Sync en tiempo real con Durable Objects (estado final)
 
-Archivos nuevos:
-- `user-sync-do.js` — la clase Durable Object (SQLite + push/pull + WebSocket).
-- `wrangler.sync.toml` — binding `USER_SYNC` + migración SQLite (fusionar con tu config real).
-- `js/core/LocalStore.js` — capa cliente (ya creada; se conecta en la fase de cliente).
+Sync multi-dispositivo **instantáneo** para tareas, listas y plantillas, mediante
+un Durable Object por usuario. Reemplaza al sync viejo por polling (blob a
+`/tasks|lists|templates/sync` en `hyperfiler-api`), que queda **neutralizado** en
+el frontend.
 
-## 1. Exportar el DO desde el Worker (2 líneas en `worker.js`)
+## Arquitectura
 
-Al principio de `worker.js`:
+- **Worker aislado `hyperfiler-sync`** (`sync-worker.mjs`) — NO se integró en el
+  worker principal `hyperfiler-api` (para no arriesgar auth/Stripe). Hospeda el DO
+  y enruta `/sync/*` al DO de cada usuario.
+- **`UserSyncDO`** (`user-sync-do.js`) — un objeto por cuenta
+  (`env.USER_SYNC.idFromName(userId)`). Almacén SQLite integrado:
+  `items(id, collection, updated_at, deleted, seq, payload)`. LWW por `updatedAt`,
+  `seq` monótono, y **broadcast por WebSocket** a los dispositivos abiertos.
+- **Auth por delegación (Service Binding)** — el worker de sync NO comparte el
+  `JWT_SECRET`. Valida el token llamando internamente (`env.API`) a
+  `hyperfiler-api` (`GET /tasks/{userId}` → 200 = token válido). Caché de 60s.
+- **Mismo origen** — routes `hyperfiler.pro/sync/*` y `www.hyperfiler.pro/sync/*`
+  apuntan al worker `hyperfiler-sync`. Así el WebSocket **no es cross-site**
+  (evita el bloqueo de Safari/ITP) → conecta y entrega al instante. El frontend
+  usa `SYNC_BASE = location.origin + '/sync'`.
 
-```js
-import { UserSyncDO } from './user-sync-do.js';
-```
+## Protocolo (`/sync/*`)
 
-Y junto al `export default { ... }`, re-exporta la clase:
+- `POST /push  { collection, since, changes:[{id,updatedAt,deleted,...}] }` → `{applied, remote, serverSeq}`
+- `GET  /pull?collection=&since=<seq>` → `{items, serverSeq}`
+- `WS   /ws?token=...` → empuje en vivo `{type:'changes', items}`
+- `POST /reset`  → borra el almacén del DO y re-migra desde D1 (¡pierde cambios no reflejados en D1!).
+- `POST /reseed` → limpia solo el flag `migrated` y re-siembra colecciones nuevas SIN borrar lo existente.
 
-```js
-export { UserSyncDO };
-export default { /* ...tu fetch handler actual... */ };
-```
+## Cliente (`js/core/`)
 
-## 2. Enrutar las peticiones de sync al DO del usuario
+- **`LocalStore.js`** — almacén local-first. `items` con metadatos de sync
+  (`dirty`, `seq`). Registro `synced` **separado** del objeto tarea, para que los
+  writers directos de la app (que escriben `gtdTasks`/`gtd_list_sections`/
+  `gtdTemplates` sin metadata) no rompan el push. `getPending` = `dirty` o
+  `seq==null && !synced`. `_cmpKey` compara el contenido COMPLETO (JSON).
+- **`SyncEngine.js`** — pull+push por colección, WebSocket para live, pull de
+  reserva (30s) + `focus`/`visibilitychange` (sincroniza al enfocar la pestaña).
 
-Dentro de tu `fetch(request, env)`, antes o donde despachas rutas:
+## Colecciones
 
-```js
-if (url.pathname.startsWith('/sync/')) {
-  // 1) Autenticación: saca el userId del JWT (ya lo haces con env.JWT_SECRET)
-  const userId = await getUserIdFromJWT(request, env);   // tu helper existente
-  if (!userId) return new Response('Unauthorized', { status: 401 });
+- **`tasks`** — un item por tarea (formato camelCase de la app), LWW por-tarea.
+- **`lists`** / **`templates`** — no encajan en el modelo plano (listas = árbol de
+  secciones; plantillas = array de strings), así que se sincronizan como **un
+  item-blob** por colección (`__lists__` / `__templates__`) que envuelve todo el
+  bloque; LWW sobre el bloque entero. Un **bridge** en `hyperfiler-pro.html`
+  reconcilia el localStorage de la app (`gtd_list_sections`/`gtdTemplates`, que la
+  app escribe directo) con esos item-blob: sondeo de 2.5s para subir + subscribe
+  `'sync'` para bajar y re-renderizar.
 
-  // 2) Enruta al Durable Object de ESA cuenta (mismo objeto para todos sus
-  //    dispositivos, en cualquier equipo del mundo)
-  const id = env.USER_SYNC.idFromName(userId);
-  const stub = env.USER_SYNC.get(id);
+## Migración
 
-  // 3) Reenvía la petición tal cual (incluye Upgrade de WebSocket)
-  return stub.fetch(request);
-}
-```
+`UserSyncDO.seedFromD1` (primera vez) siembra el SQLite del DO desde D1:
+- tareas: desde el blob `user_tasks.task_data` (fila `JSON_TASKS_DATA`), expandido
+  a items individuales.
+- listas/plantillas: desde `user_lists.list_data` / `user_templates.templates_data`
+  como item-blob.
 
-Clave de seguridad: el `userId` sale del **JWT verificado en el Worker**, nunca del
-cliente. Así un usuario solo puede tocar su propio DO.
-
-## 3. Protocolo (cliente ↔ DO)
-
-- `POST /sync/push`  body `{ collection, since, changes:[{id,updatedAt,deleted,...}] }`
-  → `{ applied:[{id,seq}], remote:[items], serverSeq }`
-- `GET  /sync/pull?collection=tasks&since=<seq>`
-  → `{ items:[...], serverSeq }`
-- `GET  /sync/ws`  (Upgrade: websocket)
-  - enviar `{type:'push', collection, since, changes}` → recibe `{type:'ack',...}` y
-    los demás dispositivos reciben `{type:'changes', items}` en vivo.
-  - enviar `{type:'pull', collection, since}` → recibe `{type:'pull', items, serverSeq}`.
-
-El cliente guarda `serverSeq` como cursor y avanza con cada respuesta. Conflictos:
-LWW por `updatedAt` (la serialización del DO ya elimina las carreras).
-
-## 4. Migración D1 → DO (perezosa, más adelante)
-
-La primera vez que un usuario sincroniza, el Worker puede sembrar el SQLite de su
-DO desde `user_tasks` de D1 (endpoint interno tipo `/sync/seed`) y marcarlo migrado.
-No hace falta big-bang; se hace usuario a usuario.
-
-## 5. Desplegar
-
-El DO vive en el Worker (no en Pages). Deploy del Worker con la config fusionada:
+## Deploy
 
 ```bash
-wrangler deploy --config wrangler.sync.toml
+wrangler deploy --config wrangler.sync-worker.toml         # worker hyperfiler-sync + routes
+wrangler pages deploy . --project-name=hyperfiler --branch=master   # frontend
 ```
 
-La primera vez aplica la migración `v1` (crea la clase SQLite `UserSyncDO`).
-
-## Estado
-
-- [x] `UserSyncDO` (SQLite, push/pull, cursor seq, LWW, WebSocket + hibernación).
-- [x] `wrangler.sync.toml` (binding + migración).
-- [ ] Exportar/enrutar en `worker.js` (pasos 1-2 arriba).
-- [ ] Cliente: `IndexedDBAdapter` + motor de sync que hable este protocolo.
-- [ ] Migración perezosa D1 → DO.
+Los secrets del sync-worker: ninguno propio (usa el Service Binding a
+`hyperfiler-api`). Tras cualquier deploy del frontend → **hard-refresh** en cada
+navegador (cachea el JS).
