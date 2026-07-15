@@ -134,6 +134,32 @@ export class UserSyncDO {
             String(t.id), updatedAt, deleted, seq, JSON.stringify(payload)
           );
         }
+        // Listas y plantillas: cada colección se sincroniza como UN item-blob
+        // (id fijo) que envuelve todo el bloque. LWW sobre el bloque entero.
+        const blobs = [['lists', 'user_lists', 'list_data'], ['templates', 'user_templates', 'templates_data']];
+        for (const [coll, table, col] of blobs) {
+          const itemId = '__' + coll + '__';
+          if (self._getItem(itemId)) continue;
+          try {
+            const r2 = await self.env.DB
+              .prepare('SELECT ' + col + ' AS d, updated_at AS u FROM ' + table + ' WHERE user_id = ? ORDER BY updated_at DESC LIMIT 1')
+              .bind(uid).first();
+            if (r2 && r2.d != null) {
+              const data = _safeParse(r2.d, null);
+              if (data != null) {
+                const updatedAt = r2.u || new Date().toISOString();
+                seq += 1;
+                self.sql.exec(
+                  `INSERT INTO items (id, collection, updated_at, deleted, seq, payload)
+                   VALUES (?, ?, ?, 0, ?, ?) ON CONFLICT(id) DO NOTHING`,
+                  itemId, coll, updatedAt, seq,
+                  JSON.stringify({ id: itemId, data: data, updatedAt: updatedAt, deleted: false })
+                );
+              }
+            }
+          } catch (e) { console.error('UserSyncDO seed ' + coll + ' error:', e); }
+        }
+
         self._setSeq(seq);
         self.sql.exec(
           `INSERT INTO sync_meta (k, v) VALUES ('migrated', '1') ON CONFLICT(k) DO UPDATE SET v='1'`
@@ -279,6 +305,16 @@ export class UserSyncDO {
       const pair = new WebSocketPair();
       this.ctx.acceptWebSocket(pair[1]);
       return new Response(null, { status: 101, webSocket: pair[0] });
+    }
+
+    // Reseed SIN borrar: limpia solo el flag 'migrated' y re-corre la migración,
+    // que SALTA los items ya presentes (tareas) y siembra los nuevos (listas/plantillas).
+    // Así no se pierden las tareas del DO (el blob de D1 está obsoleto tras el corte).
+    if (url.pathname.endsWith('/sync/reseed')) {
+      this.sql.exec(`DELETE FROM sync_meta WHERE k = 'migrated'`);
+      this._migPromise = null;
+      await this._ensureMigrated();
+      return Response.json({ ok: true, reseeded: true, serverSeq: this._getSeq() });
     }
 
     // Reseed: limpia el almacén del DO y re-migra desde D1 (ya autenticado por el Worker).

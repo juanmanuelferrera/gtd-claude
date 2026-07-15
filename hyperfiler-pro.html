@@ -2627,7 +2627,7 @@
     <script src="js/core/TaskUtils.js?v=20260203-v2"></script>
     <script src="js/core/TemplateProcessor.js?v=20260203-v2"></script>
     <!-- SYNC: módulos de sincronización multi-dispositivo -->
-    <script src="js/core/LocalStore.js?v=20260715-noloop"></script>
+    <script src="js/core/LocalStore.js?v=20260715-blob"></script>
     <script src="js/core/SyncEngine.js?v=20260715-polish"></script>
 
     <!-- Original modules -->
@@ -3546,22 +3546,64 @@
         function token() { return localStorage.getItem('authToken'); }
         window.startSync = function () {
           if (engine || !token()) return;
-          engine = new SyncEngine({ store: store, baseUrl: SYNC_BASE, getToken: token, collections: ['tasks'] });
+          engine = new SyncEngine({ store: store, baseUrl: SYNC_BASE, getToken: token, collections: ['tasks', 'lists', 'templates'] });
           engine.start(); console.log('\ud83d\udd04 SyncEngine iniciado');
         };
         window.stopSync = function () { if (engine) { engine.stop(); engine = null; console.log('\u23f9\ufe0f SyncEngine parado'); } };
+        // ── Bridge de blob para LISTAS y PLANTILLAS ──────────────────────────
+        // No encajan en el modelo item-por-fila (listas = árbol; plantillas =
+        // array de strings), así que cada colección se sincroniza como UN
+        // item-blob que envuelve todo el bloque (LWW sobre el bloque entero).
+        // El bridge reconcilia el localStorage de la app (que la app escribe
+        // directo) con ese item-blob del DO.
+        var BLOBS = [
+          { coll: 'lists', key: 'gtd_list_sections', apply: function () {
+              if (typeof loadListSections === 'function') loadListSections();
+              if (typeof renderListsView === 'function') renderListsView();
+              if (typeof renderCurrentView === 'function') renderCurrentView();
+            } },
+          { coll: 'templates', key: 'gtdTemplates', apply: function () {
+              if (typeof loadTemplates === 'function') loadTemplates();
+            } }
+        ];
+        var _blobSeen = {};
+        BLOBS.forEach(function (b) { _blobSeen[b.coll] = localStorage.getItem(b.key); });
+        function blobPush(b) {
+          var raw = localStorage.getItem(b.key);
+          if (raw == null || raw === _blobSeen[b.coll]) return;
+          var data; try { data = JSON.parse(raw); } catch (e) { return; }
+          _blobSeen[b.coll] = raw;
+          store.upsert(b.coll, { id: '__' + b.coll + '__', data: data, updatedAt: new Date().toISOString() });
+        }
+        // Empuje: la app escribe el key directo, así que detectamos cambios cada 2.5s.
+        setInterval(function () { if (token()) BLOBS.forEach(blobPush); }, 2500);
+
         LocalStore.subscribe(function (evt) {
-          if (evt.source === 'sync' && evt.collection === 'tasks') {
+          if (evt.source !== 'sync') return;
+          if (evt.collection === 'tasks') {
             if (typeof loadTasksFromLocalStorage === 'function') loadTasksFromLocalStorage();
             if (typeof renderCurrentView === 'function') renderCurrentView();
+            return;
           }
+          var b = BLOBS.filter(function (x) { return x.coll === evt.collection; })[0];
+          if (!b) return;
+          store.get(b.coll, '__' + b.coll + '__').then(function (item) {
+            if (!item || item.data == null) return;
+            var raw = JSON.stringify(item.data);
+            localStorage.setItem(b.key, raw);
+            _blobSeen[b.coll] = raw; // no re-empujar lo que acabamos de recibir del DO
+            try { b.apply(); } catch (e) { console.warn('[sync] blob apply', b.coll, e); }
+          });
         });
-        // Corte DO: el SyncEngine es el ÚNICO sync de TAREAS. Neutraliza el sync
-        // viejo de tareas (blob) para que no pise al DO. Listas/plantillas siguen igual.
-        window._uploadAllTasksInternal = function () { return Promise.resolve(); };
-        window._downloadAllTasksInternal = function () { return Promise.resolve(); };
-        window.pullLatestFromCloud = function () { return Promise.resolve(); };
-        console.log('🔀 Sync viejo de tareas desactivado — DO SyncEngine activo [cutover-20260715-sameorigin]');
+
+        // Corte DO: el SyncEngine es el ÚNICO sync (tareas + listas + plantillas).
+        // Neutraliza el sync viejo (blob a /tasks|lists|templates/sync).
+        var noop = function () { return Promise.resolve(); };
+        window._uploadAllTasksInternal = noop;     window._downloadAllTasksInternal = noop;
+        window._uploadAllListsInternal = noop;     window._downloadAllListsInternal = noop;
+        window._uploadAllTemplatesInternal = noop; window._downloadAllTemplatesInternal = noop;
+        window.pullLatestFromCloud = noop;
+        console.log('🔀 Sync viejo desactivado (tareas+listas+plantillas) — DO SyncEngine activo [cutover-20260715-all]');
         if (token()) window.startSync();
       }
       if (document.readyState === 'complete') boot(); else window.addEventListener('load', boot);

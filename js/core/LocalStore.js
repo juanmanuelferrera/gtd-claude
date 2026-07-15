@@ -27,12 +27,14 @@
   'use strict';
 
   /** Colecciones sincronizables (las prefs del dispositivo NO van aquí). */
-  var COLLECTIONS = Object.freeze({ TASKS: 'tasks', LISTS: 'lists' });
+  var COLLECTIONS = Object.freeze({ TASKS: 'tasks', LISTS: 'lists', TEMPLATES: 'templates' });
 
   /** Claves heredadas en localStorage (compatibilidad total). */
   var LEGACY_KEY = {
     tasks: 'gtdTasks',
-    lists: 'gtd_list_sections',
+    // 'lists' y 'templates' se sincronizan como blob-item (via bridge) bajo las
+    // claves propias de LocalStore (ls_lists/ls_templates), separadas del árbol
+    // gtd_list_sections y del array gtdTemplates que usa la app directamente.
   };
 
   var META_KEY = '__localstore_meta__';
