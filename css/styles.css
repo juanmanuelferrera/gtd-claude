@@ -5319,11 +5319,15 @@
             
             
             /* Add body padding for fixed mobile navigation - MOBILE ONLY */
-            body {
+            /* NOTE: this block sits in global scope due to an earlier stray brace,
+               so it must gate itself to mobile or the 64px top padding leaks to desktop. */
+            @media (max-width: 768px) {
+              body {
                 padding-top: calc(64px + env(safe-area-inset-top, 0px)) !important; /* Height of mobile header with safe area */
                 padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important; /* Height of mobile bottom nav with safe area */
                 padding-left: env(safe-area-inset-left, 0px) !important; /* Safe area for left edge (landscape) */
                 padding-right: env(safe-area-inset-right, 0px) !important; /* Safe area for right edge (landscape) */
+              }
             }
             
             .container {
