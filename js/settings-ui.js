@@ -1221,7 +1221,7 @@ function renderRecentActionsView(searchTerm) {
             '<h3>No Actions Recorded</h3>' +
             '<p style="color:#999;">Actions will appear here as you create, edit, delete, or delay tasks.</p></div>';
     } else {
-        html += '<div style="display:grid;gap:8px;">';
+        html += '<div style="display:grid;gap:8px;grid-template-columns:minmax(0,1fr);">';
         actions.forEach(function(action) {
             var icon = ACTION_ICONS[action.type] || '📝';
             var label = ACTION_LABELS[action.type] || action.type;
@@ -1231,10 +1231,10 @@ function renderRecentActionsView(searchTerm) {
 
             html += '<div style="background:#fff;border:1px solid #e9ecef;border-left:4px solid ' + color + ';border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">' +
                 '<div style="flex:1;min-width:0;">' +
-                '<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">' +
-                '<span style="font-size:16px;">' + icon + '</span>' +
-                '<span style="font-weight:600;font-size:13px;color:' + color + ';">' + label + '</span>' +
-                '<span style="font-size:13px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (action.taskTitle || '') + '</span>' +
+                '<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;min-width:0;overflow:hidden;">' +
+                '<span style="font-size:16px;flex-shrink:0;">' + icon + '</span>' +
+                '<span style="font-weight:600;font-size:13px;color:' + color + ';flex-shrink:0;">' + label + '</span>' +
+                '<span style="font-size:13px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;">' + (action.taskTitle || '') + '</span>' +
                 '</div>' +
                 '<div style="font-size:11px;color:#999;">' + timeStr + '</div>' +
                 '</div>' +
