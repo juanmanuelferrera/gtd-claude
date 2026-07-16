@@ -637,8 +637,9 @@
         /* Dark mode toggle button styling - with glass morphism */
         .dark-mode-toggle {
             position: fixed;
-            top: 12px;
-            right: 120px;
+            /* Sits just to the LEFT of the blue quick-add FAB (bottom-right) */
+            bottom: 40px;
+            right: 98px;
             z-index: 9998;
             padding: 6px 12px;
 
@@ -667,8 +668,8 @@
 
         @media (max-width: 768px) {
             .dark-mode-toggle {
-                top: 50px;
-                right: 50px;
+                bottom: 160px;
+                right: 84px;
                 font-size: 20px;
                 padding: 8px;
                 border-radius: var(--radius-full);
