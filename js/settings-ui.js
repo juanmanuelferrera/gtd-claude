@@ -1208,6 +1208,7 @@ function renderRecentActionsView(searchTerm) {
 
     var html = '<div class="section-header"><h3>📋 Registry</h3><div class="view-controls">' +
         '<input type="text" id="recentActionsSearchInput" placeholder="Search actions..." value="' + (searchTerm || '') + '" style="padding:6px 12px;border:2px solid #e1e5e9;border-radius:4px;font-size:11px;width:200px;margin-right:8px;" oninput="searchRecentActions()">' +
+        (actions.length ? '<button onclick="clearActionRegistry()" style="background:#dc3545;color:white;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;">🗑️ Clear all</button>' : '') +
         '</div></div>';
 
     html += '<div style="padding:16px 20px;background:linear-gradient(135deg,#6f42c1,#563d7c);color:white;border-radius:12px;margin-bottom:16px;">' +
@@ -1237,7 +1238,10 @@ function renderRecentActionsView(searchTerm) {
                 '</div>' +
                 '<div style="font-size:11px;color:#999;">' + timeStr + '</div>' +
                 '</div>' +
-                '<button onclick="revertAction(\'' + action.id + '\')" style="background:' + color + ';color:white;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;margin-left:8px;">Revert</button>' +
+                '<div style="display:flex;gap:6px;margin-left:8px;flex-shrink:0;">' +
+                '<button onclick="revertAction(\'' + action.id + '\')" title="Undo this action" style="background:' + color + ';color:white;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;">↩ Undo</button>' +
+                '<button onclick="deleteActionEntry(\'' + action.id + '\')" title="Remove this entry from the registry" style="background:transparent;color:#999;border:1px solid #e1e5e9;padding:6px 10px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;">🗑️</button>' +
+                '</div>' +
                 '</div>';
         });
         html += '</div>';
@@ -1251,6 +1255,29 @@ function renderRecentActionsView(searchTerm) {
         if (si) { si.focus(); si.setSelectionRange(si.value.length, si.value.length); }
     }
 }
+
+// Remove a single entry from the registry WITHOUT reverting the underlying task change
+function deleteActionEntry(actionId) {
+    var registry = window.actionRegistry || JSON.parse(localStorage.getItem('actionRegistry') || '[]');
+    var idx = registry.findIndex(function(a) { return a.id === actionId; });
+    if (idx === -1) return;
+    registry.splice(idx, 1);
+    window.actionRegistry = registry;
+    localStorage.setItem('actionRegistry', JSON.stringify(registry));
+    renderRecentActionsView();
+    if (typeof uploadAllTasks === 'function') uploadAllTasks();
+}
+window.deleteActionEntry = deleteActionEntry;
+
+// Clear the entire registry (does not revert any task changes)
+function clearActionRegistry() {
+    if (!confirm('Clear the entire action registry? This only clears the history and does not undo any changes.')) return;
+    window.actionRegistry = [];
+    localStorage.setItem('actionRegistry', JSON.stringify([]));
+    renderRecentActionsView();
+    if (typeof uploadAllTasks === 'function') uploadAllTasks();
+}
+window.clearActionRegistry = clearActionRegistry;
 
 function restoreAllTasksUI() {
     // No longer needed - All Tasks view renders complete HTML structure
