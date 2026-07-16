@@ -1186,7 +1186,7 @@ const ACTION_COLORS = {
 
 function renderRecentActionsView(searchTerm) {
     console.log('📋 Rendering action registry view...');
-    var tasksView = document.getElementById('tasks-view');
+    var tasksView = document.getElementById('recent-actions-view');
     if (!tasksView) return;
 
     var registry = window.actionRegistry || JSON.parse(localStorage.getItem('actionRegistry') || '[]');
@@ -3085,7 +3085,7 @@ window.eventsWeekOffset = window.eventsWeekOffset || 0;
 
 function renderEventsView() {
     console.log('🎯 renderEventsView CALLED');
-    const container = document.getElementById('tasks-view');
+    const container = document.getElementById('events-view');
     if (!container) {
         console.log('❌ No container found');
         return;

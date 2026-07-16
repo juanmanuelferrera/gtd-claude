@@ -607,6 +607,12 @@
             </div>
         </div>
 
+        <!-- Events Section (own container so it never overwrites the Search/All Tasks view) -->
+        <div id="events-view" class="tasks-section hidden"></div>
+
+        <!-- Registry / Undo Section (own container so it never overwrites the Search/All Tasks view) -->
+        <div id="recent-actions-view" class="tasks-section hidden"></div>
+
         <!-- Tasks Section -->
         <div id="tasks-view" class="tasks-section hidden">
             <div class="section-header">
@@ -2659,7 +2665,7 @@
     <script src="js/keyboard-shortcuts.js?v=20260203-v2"></script>
     <script src="js/auth.js?v=20260715-sidebar-account"></script>
     <script src="js/tasks.js?v=20260715-polish"></script>
-    <script src="js/ui.js?v=20260217-fix-global"></script>
+    <script src="js/ui.js?v=20260716-view-containers"></script>
     <script src="js/sync.js?v=20260203-v2"></script>
     <script src="js/offline-sync.js?v=20260130-fix-delete"></script>
     <script src="js/network-status.js?v=20250918-no-world-emoji"></script>
@@ -2672,7 +2678,7 @@
     <script src="js/search-filter.js?v=20260203-consistent"></script>
     <script src="js/task-bulk-ops.js?v=20260204-no-auto-event"></script>
     <script src="js/backup-import.js?v=20260715-refactor"></script>
-    <script src="js/settings-ui.js?v=20260716-manual-tz"></script>
+    <script src="js/settings-ui.js?v=20260716-view-containers"></script>
     <script src="js/auto-backup.js?v=20260131-backup"></script>
     <script src="js/missing-functions.js?v=20260131-split"></script>
     

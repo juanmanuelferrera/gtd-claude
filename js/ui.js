@@ -110,7 +110,7 @@ function showView(viewName, preserveDate = false) {
     // Update container background to match active tab
     const container = document.querySelector('.container');
     if (container) {
-        container.classList.remove('today-active', 'week-active', 'calendar-active', 'all-active', 'lists-active', 'repeat-active', 'undo-active', 'stats-active', 'settings-active', 'recent-actions-active');
+        container.classList.remove('today-active', 'week-active', 'calendar-active', 'all-active', 'lists-active', 'repeat-active', 'undo-active', 'stats-active', 'settings-active', 'recent-actions-active', 'events-active');
         container.classList.add(`${viewName}-active`);
     }
     
@@ -119,7 +119,9 @@ function showView(viewName, preserveDate = false) {
         'today-view': viewName === 'today',
         'calendar-view': viewName === 'calendar',
         'week-view': viewName === 'week',
-        'tasks-view': viewName === 'all' || viewName === 'recent-actions' || viewName === 'events',
+        'tasks-view': viewName === 'all',
+        'events-view': viewName === 'events',
+        'recent-actions-view': viewName === 'recent-actions',
         'stats-view': viewName === 'stats',
         'lists-view': viewName === 'lists',
         'repeat-view': viewName === 'repeat',
