@@ -90,8 +90,17 @@ function makeLinksClickable(text) {
     if (typeof TaskUtils !== 'undefined' && TaskUtils.makeLinksClickable) {
         return TaskUtils.makeLinksClickable(text);
     }
-    const urlRegex = /((?:https?|kavya):\/\/[^\s]+)/g;
-    return text.replace(urlRegex, '<a href="$1" target="_blank" onclick="event.stopPropagation()">$1</a>');
+    if (!text) return text;
+    // Detecta http(s)://…, kavya://… y enlaces sin esquema tipo www.google.com
+    const urlRegex = /((?:https?|kavya):\/\/[^\s]+|www\.[^\s]+)/gi;
+    return text.replace(urlRegex, (match) => {
+        // Separa la puntuación final (. , ) ! ? …) para no meterla dentro del enlace
+        const trail = match.match(/[.,;:!?)\]]+$/);
+        let url = match, tail = '';
+        if (trail) { url = match.slice(0, -trail[0].length); tail = trail[0]; }
+        const href = /^(?:https?|kavya):\/\//i.test(url) ? url : 'https://' + url;
+        return `<a href="${href}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${url}</a>${tail}`;
+    });
 }
 
 function extractTagsAndCleanText(text) {
