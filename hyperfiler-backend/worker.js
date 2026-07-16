@@ -460,7 +460,15 @@ export default {
       if (pathname === '/auth/trial-status' && request.method === 'GET') {
         return handleTrialStatus(request, env, corsHeaders);
       }
-      
+
+      // Automatic task organization: per-user timezone/city
+      if (pathname === '/auth/timezone' && request.method === 'GET') {
+        return handleGetTimezone(request, env, corsHeaders);
+      }
+      if (pathname === '/auth/timezone' && request.method === 'POST') {
+        return handleUpdateTimezone(request, env, corsHeaders);
+      }
+
       // FIXED: Direct user ID fix endpoint (no admin auth required)
       if (pathname === '/fix-stale-user-id' && request.method === 'POST') {
         return await handleFixStaleUserId(request, env, corsHeaders);
@@ -985,6 +993,116 @@ async function verifyToken(token, jwtSecret) {
   } catch (error) {
     console.error('Token verification error:', error);
     return null;
+  }
+}
+
+// Cities offered for automatic task organization (city label + IANA timezone)
+const TIMEZONE_CITIES = [
+  { city: 'Madrid', timezone: 'Europe/Madrid' },
+  { city: 'Barcelona', timezone: 'Europe/Madrid' },
+  { city: 'Lisboa', timezone: 'Europe/Lisbon' },
+  { city: 'Londres', timezone: 'Europe/London' },
+  { city: 'París', timezone: 'Europe/Paris' },
+  { city: 'Berlín', timezone: 'Europe/Berlin' },
+  { city: 'Roma', timezone: 'Europe/Rome' },
+  { city: 'Ámsterdam', timezone: 'Europe/Amsterdam' },
+  { city: 'Atenas', timezone: 'Europe/Athens' },
+  { city: 'Moscú', timezone: 'Europe/Moscow' },
+  { city: 'Estambul', timezone: 'Europe/Istanbul' },
+  { city: 'Dubái', timezone: 'Asia/Dubai' },
+  { city: 'Nueva Delhi', timezone: 'Asia/Kolkata' },
+  { city: 'Bangkok', timezone: 'Asia/Bangkok' },
+  { city: 'Singapur', timezone: 'Asia/Singapore' },
+  { city: 'Hong Kong', timezone: 'Asia/Hong_Kong' },
+  { city: 'Shanghái', timezone: 'Asia/Shanghai' },
+  { city: 'Tokio', timezone: 'Asia/Tokyo' },
+  { city: 'Sídney', timezone: 'Australia/Sydney' },
+  { city: 'Auckland', timezone: 'Pacific/Auckland' },
+  { city: 'Nueva York', timezone: 'America/New_York' },
+  { city: 'Chicago', timezone: 'America/Chicago' },
+  { city: 'Denver', timezone: 'America/Denver' },
+  { city: 'Los Ángeles', timezone: 'America/Los_Angeles' },
+  { city: 'Ciudad de México', timezone: 'America/Mexico_City' },
+  { city: 'Bogotá', timezone: 'America/Bogota' },
+  { city: 'Lima', timezone: 'America/Lima' },
+  { city: 'Santiago', timezone: 'America/Santiago' },
+  { city: 'Buenos Aires', timezone: 'America/Argentina/Buenos_Aires' },
+  { city: 'São Paulo', timezone: 'America/Sao_Paulo' },
+  { city: 'Caracas', timezone: 'America/Caracas' },
+  { city: 'San Juan', timezone: 'America/Puerto_Rico' },
+  { city: 'Honolulu', timezone: 'Pacific/Honolulu' },
+  { city: 'Johannesburgo', timezone: 'Africa/Johannesburg' },
+  { city: 'El Cairo', timezone: 'Africa/Cairo' },
+  { city: 'Lagos', timezone: 'Africa/Lagos' }
+];
+
+// Auth: get the user's automatic-organization timezone/city + the option list
+async function handleGetTimezone(request, env, corsHeaders) {
+  try {
+    const payload = await verifyToken(getAuthToken(request), env.JWT_SECRET);
+    if (!payload) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const row = await env.DB.prepare('SELECT timezone FROM users WHERE id = ?')
+      .bind(payload.userId).first();
+
+    // Empty string counts as disabled; a NULL column also means disabled.
+    const timezone = (row && row.timezone) ? row.timezone : null;
+    const match = timezone ? TIMEZONE_CITIES.find(c => c.timezone === timezone) : null;
+
+    return new Response(JSON.stringify({
+      timezone: timezone,
+      city: match ? match.city : (timezone || ''),
+      isEnabled: !!timezone,
+      options: TIMEZONE_CITIES
+    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  } catch (error) {
+    console.error('Get timezone error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to load timezone' }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// Auth: save the user's automatic-organization timezone (null/'' disables it)
+async function handleUpdateTimezone(request, env, corsHeaders) {
+  try {
+    const payload = await verifyToken(getAuthToken(request), env.JWT_SECRET);
+    if (!payload) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const body = await request.json().catch(() => ({}));
+    let timezone = body.timezone;
+    // Normalize: treat empty/whitespace as disable (NULL)
+    if (timezone == null || String(timezone).trim() === '') {
+      timezone = null;
+    } else {
+      timezone = String(timezone).trim();
+    }
+
+    await env.DB.prepare("UPDATE users SET timezone = ?, updated_at = datetime('now') WHERE id = ?")
+      .bind(timezone, payload.userId).run();
+
+    const match = timezone ? TIMEZONE_CITIES.find(c => c.timezone === timezone) : null;
+    return new Response(JSON.stringify({
+      message: timezone
+        ? `Automatic organization enabled (${match ? match.city : timezone})`
+        : 'Automatic organization disabled',
+      timezone: timezone,
+      city: match ? match.city : (timezone || ''),
+      isEnabled: !!timezone
+    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  } catch (error) {
+    console.error('Update timezone error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to update timezone' }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 }
 
