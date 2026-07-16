@@ -130,8 +130,17 @@ function createToggleButton() {
 
     updateToggleButton();
 
-    document.body.appendChild(toggleButton);
-    console.log('🌙 Toggle button created');
+    // On desktop, dock the toggle into the sidebar next to the language switch.
+    // On mobile the sidebar is hidden, so keep the toggle as a floating button.
+    const slot = document.getElementById('sidebarDarkToggleSlot');
+    if (slot && window.innerWidth >= 769) {
+        toggleButton.classList.add('in-sidebar');
+        slot.appendChild(toggleButton);
+        console.log('🌙 Toggle button docked in sidebar');
+    } else {
+        document.body.appendChild(toggleButton);
+        console.log('🌙 Toggle button created (floating)');
+    }
 }
 
 /**

@@ -666,6 +666,29 @@
             transform: translateY(-2px);
         }
 
+        /* Docked inside the sidebar, next to the language switch */
+        .dark-mode-toggle.in-sidebar {
+            position: static;
+            bottom: auto;
+            right: auto;
+            z-index: auto;
+            padding: 8px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            border: 1px solid var(--things-border);
+            box-shadow: none;
+            color: var(--things-text);
+        }
+
+        .dark-mode-toggle.in-sidebar:hover {
+            background: var(--glass-bg-light);
+            box-shadow: none;
+            transform: none;
+        }
+
         @media (max-width: 768px) {
             .dark-mode-toggle {
                 bottom: 160px;
@@ -1304,6 +1327,7 @@
             
             .desktop-sidebar {
                 width: 180px;
+                box-sizing: border-box;
 
                 /* Glassmorphism for modern sidebar */
                 background: linear-gradient(180deg, rgba(250, 250, 250, 0.8) 0%, rgba(245, 245, 245, 0.8) 100%) !important;
@@ -1313,11 +1337,44 @@
                 border-right: var(--glass-border-light) !important;
                 padding: 6px 0;
                 position: fixed;
+                top: 0;
+                left: 0;
                 height: 100vh;
-                overflow-y: auto;
-                overflow-x: hidden;
+                /* Fixed column: fit everything on one screen, no scrolling */
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
                 z-index: 100;
                 box-shadow: var(--glass-shadow-md) !important;
+            }
+
+            /* Nav takes the middle; footer (language + dark) sticks to the bottom.
+               Nav can shrink & scroll only on very short screens as a graceful fallback. */
+            .desktop-sidebar .main-nav {
+                flex: 1 1 auto;
+                min-height: 0;
+                overflow-y: auto;
+                overflow-x: hidden;
+                gap: 3px;
+                padding: 6px 12px;
+            }
+
+            /* Tighter nav buttons so the whole column fits one screen */
+            .desktop-sidebar .nav-btn {
+                padding: 8px 14px;
+                gap: 10px;
+            }
+
+            .desktop-sidebar .sidebar-footer {
+                flex: 0 0 auto;
+                margin-top: auto;
+                padding: 8px 10px !important;
+            }
+
+            /* Trim the action buttons block inside the footer */
+            .desktop-sidebar .sidebar-footer .action-btn {
+                padding: 8px 14px !important;
+                font-size: 13px !important;
             }
             
             .desktop-content {
@@ -5051,7 +5108,8 @@
 
             /* CRITICAL: Force show desktop sidebar on all desktop screens */
             .desktop-sidebar.desktop-only {
-                display: block !important;
+                display: flex !important;
+                flex-direction: column !important;
                 padding-top: 18px !important;
             }
 

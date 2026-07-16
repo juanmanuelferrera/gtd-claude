@@ -118,7 +118,7 @@
     });
     </script>
 
-    <link rel="stylesheet" href="css/styles.css?v=20260716-breathe">
+    <link rel="stylesheet" href="css/styles.css?v=20260716-fixedsidebar">
     <script>
     // Gate all console output behind debug flag (before any JS files load)
     window.HYPERFILER_DEBUG = false;
@@ -134,7 +134,7 @@
         window._originalConsoleLog = originals.log;
     })();
     </script>
-    <script src="js/dark-mode.js?v=20250901-lightmode"></script>
+    <script src="js/dark-mode.js?v=20260716-sidebar-dark"></script>
 
 </head>
 <body>
@@ -337,7 +337,7 @@
             </div>
             
             <!-- Sidebar Action Buttons -->
-            <div style="padding: 10px; border-top: 1px solid var(--things-border); margin-top: 16px;">
+            <div class="sidebar-footer" style="padding: 10px; border-top: 1px solid var(--things-border); margin-top: auto;">
                 <!-- Action Buttons -->
                 <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
                     <button onclick="quickBackupJSON()" class="action-btn" style="
@@ -382,9 +382,10 @@
                     💾 Auto Backup ON
                 </div>
                 
-                <!-- Language Switcher -->
-                <div style="display: flex; gap: 8px; justify-content: center;">
+                <!-- Language Switcher + Dark Mode -->
+                <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
                     <button onclick="toggleSidebarLanguage()" style="background: transparent; border: 1px solid var(--things-border); color: var(--things-text); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;" id="sidebarLangToggle">🇪🇸 ES</button>
+                    <span id="sidebarDarkToggleSlot" style="display: inline-flex;"></span>
                 </div>
             </div>
         </div>
