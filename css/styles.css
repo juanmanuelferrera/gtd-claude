@@ -2717,6 +2717,21 @@
             -webkit-box-orient: vertical;
         }
 
+        /* Enlaces en título y notas de las tareas: visibles como enlace y clicables por encima de la tarjeta */
+        .task-title a,
+        .task-notes a {
+            color: #2E5BFF;
+            text-decoration: underline;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+            pointer-events: auto;
+        }
+        .task-title a:hover,
+        .task-notes a:hover { opacity: 0.85; }
+        .dark-mode .task-title a,
+        .dark-mode .task-notes a { color: #6ea8ff; }
+
         .task-actions {
             display: flex;
             gap: 8px;
