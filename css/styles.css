@@ -1323,7 +1323,7 @@
             .desktop-content {
                 margin-left: 180px;
                 flex: 1;
-                padding: 6px 20px 20px 20px;
+                padding: 18px 20px 20px 20px;
                 overflow-x: hidden;
                 width: calc(100% - 180px);
                 min-height: 100vh;
@@ -5052,7 +5052,7 @@
             /* CRITICAL: Force show desktop sidebar on all desktop screens */
             .desktop-sidebar.desktop-only {
                 display: block !important;
-                padding-top: 0 !important;
+                padding-top: 18px !important;
             }
 
             /* CRITICAL: Always show Hyperfiler branding on desktop screens */
