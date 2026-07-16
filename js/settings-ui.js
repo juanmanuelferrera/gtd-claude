@@ -1590,7 +1590,7 @@ async function loadTimezoneOptions() {
         // Update status
         if (statusDiv) {
             if (data.isEnabled) {
-                statusDiv.innerHTML = `<span style="color: #28a745;">✅ Enabled - Tasks organized daily at 1am ${data.city}</span>`;
+                statusDiv.innerHTML = `<span style="color: #28a745;">✅ Enabled - Organize with the 🔄 button ·${data.city}</span>`;
             } else {
                 statusDiv.innerHTML = `<span style="color: #6c757d;">⏸️ Disabled - Select your city to enable</span>`;
             }
@@ -1641,7 +1641,7 @@ async function updateTimezone() {
         // Update status
         if (statusDiv) {
             if (timezone) {
-                statusDiv.innerHTML = `<span style="color: #28a745;">✅ Enabled - Tasks organized daily at 1am ${cityName}</span>`;
+                statusDiv.innerHTML = `<span style="color: #28a745;">✅ Enabled - Organize with the 🔄 button ·${cityName}</span>`;
             } else {
                 statusDiv.innerHTML = `<span style="color: #6c757d;">⏸️ Disabled - Automatic organization turned off</span>`;
             }
@@ -1697,7 +1697,7 @@ async function loadTimezoneOptionsOverview() {
 
         if (statusDiv) {
             statusDiv.innerHTML = data.isEnabled
-                ? `<span style="color: #28a745;">✅ Enabled - Tasks organized at 1am ${data.city}</span>`
+                ? `<span style="color: #28a745;">✅ Enabled - Organize with the 🔄 button ·${data.city}</span>`
                 : `<span style="color: #6c757d;">⏸️ Disabled</span>`;
         }
     } catch (error) {
@@ -1739,7 +1739,7 @@ async function updateTimezoneFromOverview() {
 
         if (statusDiv) {
             statusDiv.innerHTML = timezone
-                ? `<span style="color: #28a745;">✅ Enabled - Tasks organized at 1am ${cityName}</span>`
+                ? `<span style="color: #28a745;">✅ Enabled - Organize with the 🔄 button ·${cityName}</span>`
                 : `<span style="color: #6c757d;">⏸️ Disabled</span>`;
         }
 

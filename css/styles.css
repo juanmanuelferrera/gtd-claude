@@ -1311,7 +1311,7 @@
                 -webkit-backdrop-filter: var(--glass-blur-md) !important;
 
                 border-right: var(--glass-border-light) !important;
-                padding: 16px 0;
+                padding: 6px 0;
                 position: fixed;
                 height: 100vh;
                 overflow-y: auto;
@@ -1323,7 +1323,7 @@
             .desktop-content {
                 margin-left: 180px;
                 flex: 1;
-                padding: 20px;
+                padding: 6px 20px 20px 20px;
                 overflow-x: hidden;
                 width: calc(100% - 180px);
                 min-height: 100vh;
