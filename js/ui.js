@@ -1059,7 +1059,7 @@ function renderTaskCard(task, isAllTasksView = false) {
                     ${makeLinksClickable(extractTagsAndCleanText(task.title).cleanText)}
                     ${hasTaskTags(task) ? ` <span style="color: #999; font-size: 14px;">🏷️</span>` : ''}
                     ${isOverdue && !isEvent ? ' <span style="color: #dc3545; font-weight: bold;">OVERDUE</span>' : ''}
-                    ${task.notes ? ` <span style="color: #666; font-size: 12px; margin-left: 8px;" title="${task.notes}">📝</span>` : ''}
+                    ${task.notes ? `<div class="task-notes" style="color: #666; font-size: 12px; margin-top: 3px; line-height: 1.35; white-space: normal; word-break: break-word;">📝 ${makeLinksClickable(task.notes)}</div>` : ''}
                 </div>
             </div>
             <div class="action-buttons" style="display: flex; gap: 4px; align-items: center;">
@@ -1315,7 +1315,7 @@ function generateSimpleTasksReview(mode) {
                     <li style="margin: 6px 0; padding: 8px; background: white; border-radius: 3px;">
                         🎉 ${event.title || 'Untitled Event'}
                         ${event.dueTime ? `<span style="color: #666; font-size: 12px; margin-left: 6px;">${event.dueTime}</span>` : ''}
-                        ${event.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${event.notes}</div>` : ''}
+                        ${event.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${makeLinksClickable(event.notes)}</div>` : ''}
                     </li>
                 `;
             });
@@ -1368,7 +1368,7 @@ function generateSimpleTasksReview(mode) {
             reportHTML += `
                 <li style="margin: 6px 0; padding: 8px; background: white; border-radius: 3px;">
                     📋 ${task.title || 'Untitled'}
-                    ${task.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${task.notes}</div>` : ''}
+                    ${task.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${makeLinksClickable(task.notes)}</div>` : ''}
                 </li>
             `;
         });
@@ -1404,7 +1404,7 @@ function generateSimpleTasksReview(mode) {
             reportHTML += `
                 <li style="margin: 6px 0; padding: 8px; background: white; border-radius: 3px;">
                     ${task.dueTime ? `<span style="color: #007AFF; font-size: 12px; font-weight: 600; margin-right: 6px;">${task.dueTime}</span> ` : ''}${isDaily ? (extractTagsAndCleanText(task.title || 'Untitled').cleanText) : (task.title || 'Untitled')}
-                    ${task.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${task.notes}</div>` : ''}
+                    ${task.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${makeLinksClickable(task.notes)}</div>` : ''}
                 </li>
             `;
         });
@@ -1465,7 +1465,7 @@ function generateSimpleTasksReview(mode) {
                     <li style="margin: 8px 0; padding: 10px; ${taskStyle} border-radius: 3px;">
                         ${isPast ? '🚨' : isToday ? '⚡' : '📋'} ${task.title || 'Untitled'}
                         ${task.dueDate ? `<span style="color: #666; margin-left: 8px; font-size: 12px;">${task.dueDate}</span>` : ''}
-                        ${task.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${task.notes}</div>` : ''}
+                        ${task.notes ? `<div style="margin-top: 4px; color: #666; font-size: 13px;">${makeLinksClickable(task.notes)}</div>` : ''}
                     </li>
                 `;
             });
