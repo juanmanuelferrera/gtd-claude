@@ -125,36 +125,51 @@ function hasTaskTags(task) {
 let currentFilteredTasks = [];
 let activeAllTasksTemplateFilter = null;
 // ============================================================================
-// Enlaces clicables dentro de tarjetas arrastrables (draggable="true").
-// El arrastre nativo se "come" el clic del enlace. Solución robusta: en cuanto
-// se PULSA sobre un enlace, desactivamos el draggable del ancestro (en fase de
-// captura, antes de que el navegador decida iniciar el arrastre) y lo
-// restauramos al soltar. Funciona en ratón y táctil.
+// Enlaces clicables dentro de tarjetas arrastrables.
+// El arrastre nativo se "come" el clic si mueves aunque sea 1-2px, así que el
+// enlace parece no clicable. Solución definitiva: abrimos el enlace nosotros en
+// "pointerup" (un toque real, sin apenas movimiento), saltándonos el clic
+// nativo y el arrastre. Solo para enlaces dentro de tarjetas/notas de tareas.
 // ============================================================================
-(function setupDraggableCardLinks() {
+(function setupTaskLinkClicks() {
+    var LINK_SCOPE = 'a[href]';
+    var CARD_SCOPE = '.task-title, .task-notes, .task-card, .time-slot-task, [draggable]';
     function draggableAncestor(el) {
-        let node = el.parentElement;
+        var node = el.parentElement;
         while (node) {
             if (node.getAttribute && node.getAttribute('draggable') !== null) return node;
             node = node.parentElement;
         }
         return null;
     }
+    var downLink = null, downX = 0, downY = 0, restoreCard = null;
     document.addEventListener('pointerdown', function (e) {
-        const a = e.target && e.target.closest && e.target.closest('a[href]');
-        if (!a) return;
-        const card = draggableAncestor(a);
-        if (!card) return;
-        const prev = card.getAttribute('draggable');
-        card.setAttribute('draggable', 'false');
-        const restore = function () {
-            if (prev === null) card.removeAttribute('draggable');
-            else card.setAttribute('draggable', prev);
-            document.removeEventListener('pointerup', restore, true);
-            document.removeEventListener('pointercancel', restore, true);
-        };
-        document.addEventListener('pointerup', restore, true);
-        document.addEventListener('pointercancel', restore, true);
+        downLink = null; restoreCard = null;
+        var a = e.target && e.target.closest && e.target.closest(LINK_SCOPE);
+        if (!a || !a.closest(CARD_SCOPE)) return;
+        downLink = a; downX = e.clientX; downY = e.clientY;
+        // Desactiva el arrastre de la tarjeta mientras se pulsa el enlace (evita el "fantasma").
+        var card = draggableAncestor(a);
+        if (card) {
+            var prev = card.getAttribute('draggable');
+            card.setAttribute('draggable', 'false');
+            restoreCard = function () { if (prev === null) card.removeAttribute('draggable'); else card.setAttribute('draggable', prev); };
+        }
     }, true);
-    console.log('🔗 Draggable-card link click guard installed');
+    document.addEventListener('pointerup', function (e) {
+        if (restoreCard) { var r = restoreCard; setTimeout(r, 0); restoreCard = null; }
+        if (!downLink) return;
+        var a = e.target && e.target.closest && e.target.closest(LINK_SCOPE);
+        var moved = Math.sqrt(Math.pow(e.clientX - downX, 2) + Math.pow(e.clientY - downY, 2));
+        if (a && a === downLink && moved < 8) {
+            e.preventDefault();
+            e.stopPropagation();
+            var href = a.getAttribute('href');
+            var target = a.getAttribute('target') || '_self';
+            if (href) window.open(href, target, 'noopener');
+        }
+        downLink = null;
+    }, true);
+    document.addEventListener('pointercancel', function () { if (restoreCard) { restoreCard(); restoreCard = null; } downLink = null; }, true);
+    console.log('🔗 Task link click handler installed');
 })();
