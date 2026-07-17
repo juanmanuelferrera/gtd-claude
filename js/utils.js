@@ -99,14 +99,8 @@ function makeLinksClickable(text) {
         let url = match, tail = '';
         if (trail) { url = match.slice(0, -trail[0].length); tail = trail[0]; }
         const href = /^(?:https?|kavya):\/\//i.test(url) ? url : 'https://' + url;
-        // Las tarjetas son draggable="true" y el arrastre nativo se come el clic del enlace.
-        // Solución: al pasar el ratón/tocar el enlace, desactivamos el arrastre de la tarjeta;
-        // lo reactivamos al salir. Así el clic del enlace funciona y el resto de la tarjeta sigue arrastrable.
-        // Buscar la tarjeta desde el PADRE: el propio <a> tiene draggable="false",
-        // así que this.closest('[draggable]') se encontraría a sí mismo en vez de la tarjeta.
-        const off = `var c=this.parentElement&&this.parentElement.closest('[draggable]');if(c)c.setAttribute('draggable','false')`;
-        const on = `var c=this.parentElement&&this.parentElement.closest('[draggable]');if(c)c.setAttribute('draggable','true')`;
-        return `<a href="${href}" target="_blank" rel="noopener" draggable="false" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation();${off}" onmouseenter="${off}" onmouseleave="${on}" onblur="${on}">${url}</a>${tail}`;
+        // El arrastre de la tarjeta se maneja globalmente (ver setup al final del archivo).
+        return `<a href="${href}" target="_blank" rel="noopener" draggable="false" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">${url}</a>${tail}`;
     });
 }
 
@@ -130,3 +124,37 @@ function hasTaskTags(task) {
 // Global variables needed for module communication
 let currentFilteredTasks = [];
 let activeAllTasksTemplateFilter = null;
+// ============================================================================
+// Enlaces clicables dentro de tarjetas arrastrables (draggable="true").
+// El arrastre nativo se "come" el clic del enlace. Solución robusta: en cuanto
+// se PULSA sobre un enlace, desactivamos el draggable del ancestro (en fase de
+// captura, antes de que el navegador decida iniciar el arrastre) y lo
+// restauramos al soltar. Funciona en ratón y táctil.
+// ============================================================================
+(function setupDraggableCardLinks() {
+    function draggableAncestor(el) {
+        let node = el.parentElement;
+        while (node) {
+            if (node.getAttribute && node.getAttribute('draggable') !== null) return node;
+            node = node.parentElement;
+        }
+        return null;
+    }
+    document.addEventListener('pointerdown', function (e) {
+        const a = e.target && e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        const card = draggableAncestor(a);
+        if (!card) return;
+        const prev = card.getAttribute('draggable');
+        card.setAttribute('draggable', 'false');
+        const restore = function () {
+            if (prev === null) card.removeAttribute('draggable');
+            else card.setAttribute('draggable', prev);
+            document.removeEventListener('pointerup', restore, true);
+            document.removeEventListener('pointercancel', restore, true);
+        };
+        document.addEventListener('pointerup', restore, true);
+        document.addEventListener('pointercancel', restore, true);
+    }, true);
+    console.log('🔗 Draggable-card link click guard installed');
+})();
