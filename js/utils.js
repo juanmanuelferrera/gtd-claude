@@ -102,8 +102,10 @@ function makeLinksClickable(text) {
         // Las tarjetas son draggable="true" y el arrastre nativo se come el clic del enlace.
         // Solución: al pasar el ratón/tocar el enlace, desactivamos el arrastre de la tarjeta;
         // lo reactivamos al salir. Así el clic del enlace funciona y el resto de la tarjeta sigue arrastrable.
-        const off = `var c=this.closest('[draggable]');if(c)c.setAttribute('draggable','false')`;
-        const on = `var c=this.closest('[draggable]');if(c)c.setAttribute('draggable','true')`;
+        // Buscar la tarjeta desde el PADRE: el propio <a> tiene draggable="false",
+        // así que this.closest('[draggable]') se encontraría a sí mismo en vez de la tarjeta.
+        const off = `var c=this.parentElement&&this.parentElement.closest('[draggable]');if(c)c.setAttribute('draggable','false')`;
+        const on = `var c=this.parentElement&&this.parentElement.closest('[draggable]');if(c)c.setAttribute('draggable','true')`;
         return `<a href="${href}" target="_blank" rel="noopener" draggable="false" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation();${off}" onmouseenter="${off}" onmouseleave="${on}" onblur="${on}">${url}</a>${tail}`;
     });
 }
