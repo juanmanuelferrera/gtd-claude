@@ -99,7 +99,12 @@ function makeLinksClickable(text) {
         let url = match, tail = '';
         if (trail) { url = match.slice(0, -trail[0].length); tail = trail[0]; }
         const href = /^(?:https?|kavya):\/\//i.test(url) ? url : 'https://' + url;
-        return `<a href="${href}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${url}</a>${tail}`;
+        // Las tarjetas son draggable="true" y el arrastre nativo se come el clic del enlace.
+        // Solución: al pasar el ratón/tocar el enlace, desactivamos el arrastre de la tarjeta;
+        // lo reactivamos al salir. Así el clic del enlace funciona y el resto de la tarjeta sigue arrastrable.
+        const off = `var c=this.closest('[draggable]');if(c)c.setAttribute('draggable','false')`;
+        const on = `var c=this.closest('[draggable]');if(c)c.setAttribute('draggable','true')`;
+        return `<a href="${href}" target="_blank" rel="noopener" draggable="false" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation();${off}" onmouseenter="${off}" onmouseleave="${on}" onblur="${on}">${url}</a>${tail}`;
     });
 }
 
